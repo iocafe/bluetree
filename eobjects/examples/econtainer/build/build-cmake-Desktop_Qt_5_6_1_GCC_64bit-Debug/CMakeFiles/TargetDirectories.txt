@@ -1,3 +1,0 @@
-/coderoot/borromean/eobjects/examples/econtainer/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Debug/CMakeFiles/edit_cache.dir
-/coderoot/borromean/eobjects/examples/econtainer/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Debug/CMakeFiles/rebuild_cache.dir
-/coderoot/borromean/eobjects/examples/econtainer/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Debug/CMakeFiles/econtainerd.dir

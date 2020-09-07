@@ -1,1 +1,0 @@
-/usr/bin/g++      CMakeFiles/econtainer.dir/coderoot/borromean/eobjects/examples/econtainer/code/eobjects_container_example.cpp.o  -o /coderoot/borromean/bin/mint18/econtainer  -L/coderoot/borromean/lib/mint18_gcc -rdynamic -leobjects -leosal -lpthread -Wl,-rpath,/coderoot/borromean/lib/mint18_gcc 
