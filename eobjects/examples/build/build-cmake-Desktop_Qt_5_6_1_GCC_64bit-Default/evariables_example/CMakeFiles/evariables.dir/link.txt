@@ -1,0 +1,1 @@
+/usr/bin/g++      CMakeFiles/evariables.dir/coderoot/borromean/eobjects/examples/evariables/code/eobjects_variable_example.cpp.o  -o /coderoot/borromean/bin/mint18/evariables  -L/coderoot/borromean/lib/mint18_gcc -rdynamic /coderoot/borromean/lib/mint18_gcc/libeobjects.a /coderoot/borromean/lib/mint18_gcc/libeosal.a -lpthread -Wl,-rpath,/coderoot/borromean/lib/mint18_gcc 

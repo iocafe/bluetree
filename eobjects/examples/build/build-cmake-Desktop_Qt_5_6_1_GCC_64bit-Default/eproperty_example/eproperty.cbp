@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+   <FileVersion major="1" minor="6" />
+   <Project>
+      <Option title="eproperty" />
+      <Option makefile_is_custom="1" />
+      <Option compiler="gcc" />
+      <Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\econnection\;CMake Files\..\..\econnection\build\;CMake Files\..\..\econnection\build\cmake\;CMake Files\..\..\..\;CMake Files\..\..\..\build\;CMake Files\..\..\..\build\cmake\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\eosal\;CMake Files\..\..\..\..\eosal\build\;CMake Files\..\..\..\..\eosal\build\cmake\;CMake Files\..\..\econtainer\;CMake Files\..\..\econtainer\build\;CMake Files\..\..\econtainer\build\cmake\;CMake Files\..\..\eendpoint\;CMake Files\..\..\eendpoint\build\;CMake Files\..\..\eendpoint\build\cmake\;CMake Files\..\..\enames\;CMake Files\..\..\enames\build\;CMake Files\..\..\enames\build\cmake\;CMake Files\..\..\evariables\;CMake Files\..\..\evariables\build\;CMake Files\..\..\evariables\build\cmake\;CMake Files\..\..\ethread\;CMake Files\..\..\ethread\build\;CMake Files\..\..\ethread\build\cmake\;CMake Files\..\..\eproperty\;CMake Files\..\..\eproperty\build\;CMake Files\..\..\eproperty\build\cmake\;" />
+      <Build>
+      <Target title="all">
+         <Option working_dir="/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 all" />
+            <CompileFile command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="eproperty">
+         <Option output="/coderoot/borromean/bin/mint18/eproperty" prefix_auto="0" extension_auto="0" />
+         <Option working_dir="/coderoot/borromean/bin/mint18" />
+         <Option object_output="./" />
+         <Option type="1" />
+         <Option compiler="gcc" />
+         <Compiler>
+            <Add directory="/coderoot/borromean" />
+            <Add directory="/usr/include" />
+            <Add directory="/usr/include/c++/5" />
+            <Add directory="/usr/include/c++/5/backward" />
+            <Add directory="/usr/include/x86_64-linux-gnu" />
+            <Add directory="/usr/include/x86_64-linux-gnu/c++/5" />
+            <Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include" />
+            <Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed" />
+            <Add directory="/usr/local/include" />
+         </Compiler>
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 eproperty" />
+            <CompileFile command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="eproperty/fast">
+         <Option output="/coderoot/borromean/bin/mint18/eproperty" prefix_auto="0" extension_auto="0" />
+         <Option working_dir="/coderoot/borromean/bin/mint18" />
+         <Option object_output="./" />
+         <Option type="1" />
+         <Option compiler="gcc" />
+         <Compiler>
+            <Add directory="/coderoot/borromean" />
+            <Add directory="/usr/include" />
+            <Add directory="/usr/include/c++/5" />
+            <Add directory="/usr/include/c++/5/backward" />
+            <Add directory="/usr/include/x86_64-linux-gnu" />
+            <Add directory="/usr/include/x86_64-linux-gnu/c++/5" />
+            <Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include" />
+            <Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed" />
+            <Add directory="/usr/local/include" />
+         </Compiler>
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 eproperty/fast" />
+            <CompileFile command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/coderoot/borromean/eobjects/examples/build/build-cmake-Desktop_Qt_5_6_1_GCC_64bit-Default/eproperty_example/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      </Build>
+      <Unit filename="/coderoot/borromean/eobjects/examples/eproperty/code/eobjects_property_example.cpp">
+         <Option target="eproperty"/>
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/eproperty/code/eobjects_property_example.h">
+         <Option target="eproperty"/>
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/eproperty/code/eobjects_property_example1.cpp">
+         <Option target="eproperty"/>
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/eproperty/code/eobjects_property_example2.cpp">
+         <Option target="eproperty"/>
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/eproperty/code/eobjects_property_example3.cpp">
+         <Option target="eproperty"/>
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/eproperty/code/eobjects_property_example4.cpp">
+         <Option target="eproperty"/>
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../econnection/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\econnection\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../econnection/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\econnection\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../build/cmake/eobjects-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../../eosal/build/cmake/eosal-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\..\eosal\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../../eosal/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\..\..\eosal\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../../eosal/build/cmake/eosal-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\..\eosal\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../../eosal/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\..\..\eosal\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../../../eosal/build/cmake/eosal-defs.txt">
+          <Option virtualFolder="CMake Files\..\..\..\..\eosal\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../econtainer/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\econtainer\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../econtainer/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\econtainer\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../eendpoint/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\eendpoint\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../eendpoint/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\eendpoint\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../enames/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\enames\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../enames/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\enames\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../evariables/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\evariables\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../evariables/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\evariables\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../ethread/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\ethread\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../ethread/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\ethread\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../eproperty/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\eproperty\build\cmake\" />
+      </Unit>
+      <Unit filename="/coderoot/borromean/eobjects/examples/build/cmake/../../eproperty/build/cmake/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\..\..\eproperty\build\cmake\" />
+      </Unit>
+   </Project>
+</CodeBlocks_project_file>
