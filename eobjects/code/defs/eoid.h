@@ -4,7 +4,7 @@
   @brief   Enumeration of object identifiers.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   This header file defines object identifiers used by eobjects library.
 

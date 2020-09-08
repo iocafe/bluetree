@@ -4,7 +4,7 @@
   @brief   Object handle base class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   The eHandle is base class for all objects. 
   

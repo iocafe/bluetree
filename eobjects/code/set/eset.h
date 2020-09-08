@@ -4,7 +4,7 @@
   @brief   Simple set.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   The set stores enumerated collection of values.
 

@@ -4,7 +4,7 @@
   @brief   Where clause interprenter.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   Where clause interpenter.
   The where clause here is simplified SQL where clause.
@@ -70,7 +70,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 /** Enumeration of operators in where clause. Operators are stored in m_code as they are.
  */

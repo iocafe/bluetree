@@ -4,7 +4,7 @@
   @brief   Example code about using eobjects container class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   This example demonstrates how to use containers to hold multiple objects.
 
@@ -15,7 +15,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 /* Generate entry code for console application.
  */

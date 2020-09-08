@@ -4,7 +4,7 @@
   @brief   Global handle manager object.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   The handle root keeps track of handle tables and global free handles in them. Handles
   can be reserved by thread or an another root object. Handle root state is stored in 
@@ -17,7 +17,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 
 /**

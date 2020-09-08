@@ -15,7 +15,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 #include "eobjects_property_example.h"
 
 /* Generate entry code for console application.

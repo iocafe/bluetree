@@ -4,7 +4,7 @@
   @brief   Main egui library header file.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   This egui library base main header file. If further includes rest of egui headers. 
 
@@ -27,7 +27,7 @@
 
 /* Include objects headers.
  */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 /* Initialize the egui library for use.
  */

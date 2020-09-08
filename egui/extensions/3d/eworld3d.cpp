@@ -4,7 +4,7 @@
   @brief   3D world.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2016
+  @date    8.9.2016
 
   Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,

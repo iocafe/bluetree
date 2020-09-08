@@ -15,7 +15,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 #include "eobjects/extensions/socket/esocket.h"
 #include "eobjects_endpoint_example.h"
 #include <stdio.h>

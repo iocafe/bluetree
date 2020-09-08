@@ -15,7 +15,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 #include "eobjects_thread_example.h"
 
 /* Purpose of a message is specified by 32 bit command. Negative command identifiers are

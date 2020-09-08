@@ -9,14 +9,14 @@
   This base class serves derived classes for property, selection to table and file to handle
   bindings.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 
 /**
@@ -24,15 +24,15 @@
 
   @brief Binding base class constructor.
 
-  Clear member variables. 
+  Clear member variables.
   @return  None.
 
 ****************************************************************************************************
 */
 eBinding::eBinding(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eObject(parent, id, flags)
 {
     /* Clear member variables.
@@ -68,7 +68,7 @@ eBinding::~eBinding()
 
   @brief Clone object
 
-  The eBinding::clone function clones and object including object's children. 
+  The eBinding::clone function clones and object including object's children.
   Names will be left detached in clone.
 
   @param  parent Parent for the clone.
@@ -79,12 +79,12 @@ eBinding::~eBinding()
 ****************************************************************************************************
 */
 eObject *eBinding::clone(
-    eObject *parent, 
+    eObject *parent,
     e_oid id,
     os_int aflags)
 {
 return OS_NULL;
-/* 
+/*
     eObject
         *clonedobj,
         *child;
@@ -109,9 +109,9 @@ return OS_NULL;
 
   @brief Write binding content to stream.
 
-  The eBinding::writer() function serializes the binding to stream. This writes only the 
+  The eBinding::writer() function serializes the binding to stream. This writes only the
   content, use eObject::write() to save also class information, attachements, etc.
-  
+
   @param  stream The stream to write to.
   @param  flags Serialization flags.
 
@@ -122,8 +122,8 @@ return OS_NULL;
 ****************************************************************************************************
 */
 eStatus eBinding::writer(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Increment if new serialized items are added to the object,
        and check for new version's items in read() function.
@@ -131,7 +131,7 @@ eStatus eBinding::writer(
     const os_int version = 0;
     eObject *child;
 
-	/* Begin the object and write version number.
+    /* Begin the object and write version number.
      */
     if (stream->write_begin_block(version)) goto failed;
 
@@ -146,7 +146,7 @@ eStatus eBinding::writer(
         child->write(stream, flags);
     }
 
-	/* End the object.
+    /* End the object.
      */
     if (stream->write_end_block()) goto failed;
 
@@ -166,10 +166,10 @@ failed:
 
   @brief Read binding content from stream.
 
-  The eBinding::reader() function reads serialized binding from stream. This function 
-  reads only the object content. To read whole object including attachments, names, etc, 
+  The eBinding::reader() function reads serialized binding from stream. This function
+  reads only the object content. To read whole object including attachments, names, etc,
   use eObject::read().
-  
+
   @param  stream The stream to read from.
   @param  flags Serialization flags.
 
@@ -180,15 +180,15 @@ failed:
 ****************************************************************************************************
 */
 eStatus eBinding::reader(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Used to check which versions item's are in serialized data.
      */
     os_int version;
     os_long count;
 
-	/* Read object start mark and version number.
+    /* Read object start mark and version number.
      */
     if (stream->read_begin_block(&version)) goto failed;
 
@@ -203,7 +203,7 @@ eStatus eBinding::reader(
         read(stream, flags);
     }
 
-	/* End the object.
+    /* End the object.
      */
     if (stream->read_end_block()) goto failed;
 
@@ -250,7 +250,7 @@ void eBinding::bind_base(
 
     /* Send ECMD_BIND message to object to bind to.
      */
-    message(ECMD_BIND, m_objpath, OS_NULL, parameters, 
+    message(ECMD_BIND, m_objpath, OS_NULL, parameters,
         EMSG_DEL_CONTENT /* EMSG_NO_ERROR_MSGS */);
 
     /* Set that we are binding now
@@ -265,7 +265,7 @@ void eBinding::bind_base(
   @brief Complete server end of binding.
 
   The srvbind function...
-  
+
   @return None.
 
 ****************************************************************************************************
@@ -275,15 +275,15 @@ void eBinding::srvbind_base(
     eObject *reply)
 {
     /* Save path from which the message was received.
-     */           
+     */
     set_bindpath(envelope->source());
 
     /* Send ECMD_BIND_REPLY message to back to client binding.
      */
-    message(ECMD_BIND_REPLY, m_bindpath, OS_NULL, reply, 
+    message(ECMD_BIND_REPLY, m_bindpath, OS_NULL, reply,
         EMSG_DEL_CONTENT /* EMSG_NO_ERROR_MSGS */);
 
-    /* Set binding state ok. 
+    /* Set binding state ok.
      */
     m_state = E_BINDING_OK;
 }
@@ -296,7 +296,7 @@ void eBinding::srvbind_base(
 
   The cbindok function is called when client end of binding receives ECMD_BIND_REPLY message from
   server end of binding.
-  
+
   @param  envelope Message envelope from server binding.
   @return None.
 
@@ -306,7 +306,7 @@ void eBinding::cbindok_base(
     eEnvelope *envelope)
 {
     /* Save path from which the message was received.
-     */           
+     */
     set_bindpath(envelope->source());
 
     /* If envelope has not been moved from thread to another.
@@ -316,7 +316,7 @@ void eBinding::cbindok_base(
         m_bflags |= EBIND_INTERTHREAD;
     }
 
-    /* Set binding state ok. 
+    /* Set binding state ok.
      */
     m_state = E_BINDING_OK;
 
@@ -340,7 +340,7 @@ void eBinding::cbindok_base(
   @brief Send acknowledge.
 
   The sendack function.
-  
+
   @param  envelope Message envelope from server binding.
   @return None.
 
@@ -364,7 +364,7 @@ void eBinding::sendack_base(
   @brief Acknowledge received.
 
   The ack function decrements acknowledge wait count and tries to send again.
-  
+
   @param  envelope Message envelope from server binding.
   @return None.
 
@@ -447,7 +447,7 @@ void eBinding::set_bindpath(
 
   @brief Disconnect the binding and release allocated memory.
 
-  The eBinding::disconnects() disconnects and clears allocated memory. 
+  The eBinding::disconnects() disconnects and clears allocated memory.
 
   @param  keep_objpath If set, parth to remote object is not changed. This preserved path may be
           is used for reactivating bindings later.
@@ -469,7 +469,7 @@ void eBinding::disconnect(
             message(ECMD_UNBIND,
                  m_objpath, OS_NULL, OS_NULL, EMSG_NO_ERRORS);
             break;
-        
+
         case E_BINDING_OK:
             message((m_bflags & EBIND_CLIENT) ? ECMD_UNBIND : ECMD_SRV_UNBIND,
                  m_bindpath, OS_NULL, OS_NULL, EMSG_NO_ERRORS|EMSG_NO_RESOLVE);

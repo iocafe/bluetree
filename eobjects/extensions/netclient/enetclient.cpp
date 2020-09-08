@@ -4,7 +4,7 @@
   @brief   enet client implementation.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -13,7 +13,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 #include "eobjects/extensions/netclient/enetclient.h"
 
 
@@ -29,12 +29,12 @@
 ****************************************************************************************************
 */
 eNetClient::eNetClient(
-	eObject *parent,
-	e_oid oid,
-	os_int flags)
+    eObject *parent,
+    e_oid oid,
+    os_int flags)
     : eThread(parent, oid, flags)
 {
-	initproperties();
+    initproperties();
 }
 
 
@@ -70,7 +70,7 @@ eNetClient::~eNetClient()
 ****************************************************************************************************
 */
 eObject *eNetClient::clone(
-    eObject *parent, 
+    eObject *parent,
     e_oid id,
     os_int aflags)
 {
@@ -87,7 +87,7 @@ eObject *eNetClient::clone(
   @brief Add the class to class list and class'es properties to it's property set.
 
   The eVariable::setupclass function adds the class to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier, 
+  it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 

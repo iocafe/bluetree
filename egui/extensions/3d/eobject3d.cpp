@@ -4,7 +4,7 @@
   @brief   3D object base class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2016
+  @date    8.9.2016
 
   Base class for objects in 3D object tree. Like "car" could be child of world and "car door" 
   child of car. 

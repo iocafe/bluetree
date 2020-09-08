@@ -4,7 +4,7 @@
   @brief   Handle table
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   The handle table contains always EHANDLE_HANDLE_MAX+1 handles. Each handles is either in
   linked list of global friee handles, or reserved by thread.

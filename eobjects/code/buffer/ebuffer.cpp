@@ -15,7 +15,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 /** Default queue block size.
  */
@@ -35,9 +35,9 @@
 ****************************************************************************************************
 */
 eBuffer::eBuffer(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eStream(parent, id, flags)
 {
     m_ptr = OS_NULL;
@@ -65,7 +65,7 @@ eBuffer::~eBuffer()
   @brief Add the class to class list and class'es properties to it's property set.
 
   The eVariable::setupclass function adds the class to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier, 
+  it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
@@ -290,8 +290,8 @@ failed:
 ****************************************************************************************************
 */
 eStatus eBuffer::open(
-	os_char *parameters,
-    os_int flags) 
+    os_char *parameters,
+    os_int flags)
 {
     m_pos = 0;
     return ESTATUS_SUCCESS;
@@ -331,8 +331,8 @@ eStatus eBuffer::close()
 ****************************************************************************************************
 */
 eStatus eBuffer::write(
-    const os_char *buf, 
-    os_memsz buf_sz, 
+    const os_char *buf,
+    os_memsz buf_sz,
     os_memsz *nwritten)
 {
     /* If new data does not fit into current buffer allocation, allocate more space.
@@ -350,7 +350,7 @@ eStatus eBuffer::write(
 
     /* Return number of bytes written and success code.
      */
-    if (nwritten != OS_NULL) *nwritten = buf_sz; 
+    if (nwritten != OS_NULL) *nwritten = buf_sz;
     return ESTATUS_SUCCESS;
 }
 
@@ -365,8 +365,8 @@ eStatus eBuffer::write(
   @param  buf Pointer to buffer into which to read data.
   @param  buf_sz Size of buffer in bytes.
   @param  nread Pointer to integer where to store number of bytes read from queue. This may be
-          less than buffer size if the function runs out of data in queue. Can be set to 
-          OS_NULL, if not needed. 
+          less than buffer size if the function runs out of data in queue. Can be set to
+          OS_NULL, if not needed.
   @param  flags Ignored.
 
   @return If successfull, the function returns ESTATUS_SUCCESS. Other if no more data is
@@ -375,8 +375,8 @@ eStatus eBuffer::write(
 ****************************************************************************************************
 */
 eStatus eBuffer::read(
-    os_char *buf, 
-    os_memsz buf_sz, 
+    os_char *buf,
+    os_memsz buf_sz,
     os_memsz *nread,
     os_int flags)
 {

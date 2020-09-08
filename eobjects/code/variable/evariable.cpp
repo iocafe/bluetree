@@ -4,7 +4,7 @@
   @brief   Dynamically typed variables.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   Dynamically typed variables...
 
@@ -15,7 +15,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 
 /* Variable property names.

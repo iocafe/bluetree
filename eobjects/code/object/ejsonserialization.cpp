@@ -4,7 +4,7 @@
   @brief   Object base class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   Object serialization in json format. 
   
@@ -15,7 +15,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 #if E_SUPPROT_JSON
 
 

@@ -4,7 +4,7 @@
   @brief   Object base class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   The eObject is base class for all objects. 
   
@@ -29,7 +29,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 /* Name space identifiers as static strings. eobj_this_ns is default
    for ns_first and ns_firstv functions()

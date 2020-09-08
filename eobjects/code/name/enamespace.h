@@ -4,7 +4,7 @@
   @brief   Name space class implementation.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   This file implements eNameSpace class to which indexed variables of eName can map to.
 

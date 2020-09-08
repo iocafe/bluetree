@@ -1,13 +1,13 @@
 /**
 
-  @file    eglobal.cpp
-  @brief   Global structure.
+  @file    eobjects.h
+  @brief   Main eobject library header file.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    17.5.2016
+  @date    8.9.2020
 
-  All global variables are placed in global structure, so it is eanough to pass to eglobal pointer 
-  to Windows DLL to share eccess to globals.
+  This eobject library base main header file. If further includes rest of eobjects base 
+  headers. 
 
   Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -16,12 +16,4 @@
 
 ****************************************************************************************************
 */
-#include "eobjects.h"
 
-/* Static structure for global variables.
- */
-static eGlobal eglobal_buf;
-
-/* Public pointer to global variable structure.
- */
-eGlobal *eglobal = &eglobal_buf;

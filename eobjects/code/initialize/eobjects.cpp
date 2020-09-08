@@ -4,7 +4,7 @@
   @brief   Main eobject library C file.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.11.2011
+  @date    8.9.2020
 
   This eobject library base main header file. If further includes rest of eobjects base 
   headers.
@@ -16,7 +16,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 
 /**

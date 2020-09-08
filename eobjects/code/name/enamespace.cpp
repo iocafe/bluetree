@@ -4,7 +4,7 @@
   @brief   Name space class implementation.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    9.10.2011
+  @date    9.10.2020
 
   This file implements eNameSpace class to which indexed variables of eName can map to.
 
@@ -59,7 +59,7 @@
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 
 /**

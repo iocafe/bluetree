@@ -8,14 +8,14 @@
 
   The eEndPoint is socket end point listening to specific TCP port for new connections.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#include "eobjects/eobjects.h"
+#include "eobjects.h"
 
 /* End point property names.
  */
@@ -37,9 +37,9 @@ os_char
 ****************************************************************************************************
 */
 eEndPoint::eEndPoint(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eThread(parent, id, flags)
 {
     /** Clear member variables and allocate eVariable for IP address.
@@ -74,7 +74,7 @@ eEndPoint::~eEndPoint()
   @brief Add eEndPoint to class list and class'es properties to it's property set.
 
   The eEndPoint::setupclass function adds eEndPoint to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier, 
+  it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization functions. The property set stores static list of
   class'es properties and metadata for those.
 
@@ -89,11 +89,11 @@ void eEndPoint::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eEndPoint");
-    addproperty(cls, EENDPP_CLASSID, eendpp_classid, 
+    addproperty(cls, EENDPP_CLASSID, eendpp_classid,
         EPRO_PERSISTENT|EPRO_SIMPLE, "class ID");
-    addproperty(cls, EENDPP_IPADDR, eendpp_ipaddr, 
+    addproperty(cls, EENDPP_IPADDR, eendpp_ipaddr,
         EPRO_PERSISTENT|EPRO_SIMPLE, "IP");
-    p = addpropertyl(cls, EENDPP_ISOPEN, eendpp_isopen, 
+    p = addpropertyl(cls, EENDPP_ISOPEN, eendpp_isopen,
         EPRO_NOONPRCH, "is open", OS_FALSE);
     p->setpropertys(EVARP_ATTR, "rdonly;chkbox");
     os_unlock();
@@ -106,7 +106,7 @@ void eEndPoint::setupclass()
   @brief Called to inform the class about property value change (override).
 
   The onpropertychange() function is called when class'es property changes, unless the
-  property is flagged with EPRO_NOONPRCH. 
+  property is flagged with EPRO_NOONPRCH.
   If property is flagged as EPRO_SIMPLE, this function shuold save the property value
   in class members and and return it when simpleproperty() is called.
 
@@ -122,8 +122,8 @@ void eEndPoint::setupclass()
 ****************************************************************************************************
 */
 void eEndPoint::onpropertychange(
-    os_int propertynr, 
-    eVariable *x, 
+    os_int propertynr,
+    eVariable *x,
     os_int flags)
 {
     switch (propertynr)
@@ -166,7 +166,7 @@ void eEndPoint::onpropertychange(
 ****************************************************************************************************
 */
 eStatus eEndPoint::simpleproperty(
-    os_int propertynr, 
+    os_int propertynr,
     eVariable *x)
 {
     switch (propertynr)
@@ -178,7 +178,7 @@ eStatus eEndPoint::simpleproperty(
         case EENDPP_IPADDR:
             x->setv(m_ipaddr);
             break;
-   
+
         default:
             return eThread::simpleproperty(propertynr, x);
     }
@@ -230,7 +230,7 @@ void eEndPoint::run()
 
     while (!exitnow())
     {
-        /* If we have listening socket, wait for socket or thread event. 
+        /* If we have listening socket, wait for socket or thread event.
            Call alive() to process thread events.
          */
         if (m_stream)
@@ -241,7 +241,7 @@ void eEndPoint::run()
 
             if (selectdata.errorcode)
             {
-	            osal_console_write("osal_stream_select failed\n");
+                osal_console_write("osal_stream_select failed\n");
             }
 
             else if (selectdata.eventflags & OSAL_STREAM_ACCEPT_EVENT)
@@ -251,20 +251,20 @@ void eEndPoint::run()
                 /* New by class ID.
                  */
                 newstream = (eStream*)newchild(m_stream_classid);
-            
-            	s = m_stream->accept(newstream, OSAL_STREAM_DEFAULT);
+
+                s = m_stream->accept(newstream, OSAL_STREAM_DEFAULT);
 
                 if (s == ESTATUS_SUCCESS)
                 {
                     c = new eConnection();
-	                c->addname("//connection");
+                    c->addname("//connection");
                     c->accepted(newstream);
                     c->start(); /* After this c pointer is useless */
                 }
                 else
                 {
                     delete newstream;
-	                osal_console_write("osal_stream_accept failed\n");
+                    osal_console_write("osal_stream_accept failed\n");
                 }
             }
         }
@@ -305,7 +305,7 @@ void eEndPoint::open()
     s = m_stream->open(m_ipaddr->gets(), OSAL_STREAM_LISTEN|OSAL_STREAM_SELECT);
     if (s)
     {
-	    osal_console_write("osal_stream_open failed\n");
+        osal_console_write("osal_stream_open failed\n");
         delete m_stream;
         m_stream = OS_NULL;
     }
