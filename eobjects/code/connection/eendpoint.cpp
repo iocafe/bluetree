@@ -46,7 +46,7 @@ eEndPoint::eEndPoint(
      */
     m_stream = OS_NULL;
     m_initialized = OS_FALSE;
-    m_stream_classid = ECLASSID_SOCKET;
+    m_stream_classid = ECLASSID_OSSTREAM;
     m_ipaddr = new eVariable(this);
 }
 
@@ -223,7 +223,7 @@ void eEndPoint::initialize(
 */
 void eEndPoint::run()
 {
-    eStatus s;
+//    eStatus s;
     osalSelectData selectdata;
     eStream *newstream;
     eConnection *c;
@@ -239,22 +239,15 @@ void eEndPoint::run()
 
             alive(EALIVE_RETURN_IMMEDIATELY);
 
-            if (selectdata.errorcode)
-            {
-                osal_console_write("osal_stream_select failed\n");
-            }
-
-            else if (selectdata.eventflags & OSAL_STREAM_ACCEPT_EVENT)
+//            else if (selectdata.eventflags & OSAL_STREAM_ACCEPT_EVENT)
             {
                 osal_console_write("accept event\n");
 
                 /* New by class ID.
                  */
-                newstream = (eStream*)newchild(m_stream_classid);
+                newstream = OS_NULL; // m_stream->accept(newstream, OSAL_STREAM_DEFAULT);
 
-                s = m_stream->accept(newstream, OSAL_STREAM_DEFAULT);
-
-                if (s == ESTATUS_SUCCESS)
+                if (newstream)
                 {
                     c = new eConnection();
                     c->addname("//connection");

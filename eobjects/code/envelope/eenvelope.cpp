@@ -9,9 +9,9 @@
   Messages are sent as envelope objects. The eEnvelope contains recipient and senders's addresses,
   command, message content and other data.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -46,7 +46,7 @@ void eenvelope_prepend_name(
      */
     if (name_sz > path->str_pos)
     {
-	    newstr = os_malloc(path->str_alloc + name_sz - path->str_pos + 14, &sz);
+        newstr = os_malloc(path->str_alloc + name_sz - path->str_pos + 14, &sz);
         newpos = (os_int)(sz - (path->str_alloc - path->str_pos) - name_sz);
         p = newstr + newpos;
         os_memcpy(p, name, name_sz);
@@ -82,7 +82,7 @@ void eenvelope_prepend_name(
 void eenvelope_clear_path(
     eEnvelopePath *path)
 {
-    if (path->str) 
+    if (path->str)
     {
         os_free(path->str, path->str_alloc);
         path->str = OS_NULL;
@@ -105,9 +105,9 @@ void eenvelope_clear_path(
 ****************************************************************************************************
 */
 eEnvelope::eEnvelope(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eObject(parent, id, flags)
 {
     /** Clear member variables.
@@ -152,18 +152,18 @@ eEnvelope::~eEnvelope()
 
   @brief Clone object
 
-  The clone function clones and object including object's children. 
+  The clone function clones and object including object's children.
   Names will be left detached in clone if EOBJ_NO_MAP flag is given.
 
   @param  parent Parent for the clone.
   @param  oid Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names. 
+  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
   @return Pointer to the clone.
 
 ****************************************************************************************************
 */
 eObject *eEnvelope::clone(
-    eObject *parent, 
+    eObject *parent,
     e_oid id,
     os_int aflags)
 {
@@ -174,7 +174,7 @@ eObject *eEnvelope::clone(
     osal_debug_assert(parent);
 
     clonedobj = new eEnvelope(parent, id == EOID_CHILD ? oid() : id, flags());
-  
+
     /** Clone envelope specific stuff.
      */
     clonedobj->m_command = m_command;
@@ -195,7 +195,7 @@ eObject *eEnvelope::clone(
   @brief Add the class to class list and class'es properties to it's property set.
 
   The eVariable::setupclass function adds the class to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier, 
+  it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
@@ -225,7 +225,7 @@ void eEnvelope::setupclass()
   @brief Called to inform the class about property value change (override).
 
   The onpropertychange() function is called when class'es property changes, unless the
-  property is flagged with EPRO_NOONPRCH. 
+  property is flagged with EPRO_NOONPRCH.
   If property is flagged as EPRO_SIMPLE, this function shuold save the property value
   in class members and and return it when simpleproperty() is called.
 
@@ -241,8 +241,8 @@ void eEnvelope::setupclass()
 ****************************************************************************************************
 */
 void eEnvelope::onpropertychange(
-    os_int propertynr, 
-    eVariable *x, 
+    os_int propertynr,
+    eVariable *x,
     os_int flags)
 {
     eObject *obj;
@@ -315,7 +315,7 @@ void eEnvelope::onpropertychange(
 ****************************************************************************************************
 */
 eStatus eEnvelope::simpleproperty(
-    os_int propertynr, 
+    os_int propertynr,
     eVariable *x)
 {
     eObject *obj;
@@ -343,7 +343,7 @@ eStatus eEnvelope::simpleproperty(
             obj = context();
             x->seto(obj);
             break;
-   
+
         default:
             x->clear();
             /* return eObject::simpleproperty(propertynr, x); */
@@ -360,7 +360,7 @@ eStatus eEnvelope::simpleproperty(
 
   The eEnvelope::writer() function serializes envelope to stream. This writes only envelope
   specific content, use eObject::write() to save also class information, attachements, etc.
-  
+
   @param  stream The stream to write to.
   @param  flags Serialization flags.
 
@@ -371,8 +371,8 @@ eStatus eEnvelope::simpleproperty(
 ****************************************************************************************************
 */
 eStatus eEnvelope::writer(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Increment if new serialized items are to the object,
        and check for new version's items in read() function.
@@ -383,7 +383,7 @@ eStatus eEnvelope::writer(
     os_memsz nmoved;
     eObject *ctnt, *ctxt;
 
-	/* Begin the object and write version number.
+    /* Begin the object and write version number.
      */
     if (stream->write_begin_block(version)) goto failed;
 
@@ -411,7 +411,7 @@ eStatus eEnvelope::writer(
         n = 0;
     }
     if (stream->putl(n)) goto failed;
-    if (n>0) 
+    if (n>0)
     {
         stream->write(m_target.str + m_target.str_pos, n, &nmoved);
         if (nmoved != n) goto failed;
@@ -430,7 +430,7 @@ eStatus eEnvelope::writer(
             n = 0;
         }
         if (stream->putl(n)) goto failed;
-        if (n>0) 
+        if (n>0)
         {
             stream->write(m_source.str + m_source.str_pos, n, &nmoved);
             if (nmoved != n) goto failed;
@@ -439,19 +439,19 @@ eStatus eEnvelope::writer(
 
     /* Write content.
      */
-    if (ctnt) 
+    if (ctnt)
     {
         if (ctnt->write(stream, flags)) goto failed;
     }
 
     /* Write context.
      */
-    if (ctxt) 
+    if (ctxt)
     {
         if (ctxt->write(stream, flags)) goto failed;
     }
 
-	/* End the object.
+    /* End the object.
      */
     if (stream->write_end_block()) goto failed;
 
@@ -471,10 +471,10 @@ failed:
 
   @brief Read envelope from stream.
 
-  The eEnvelope::reader() function reads serialized envelope from stream. This function reads 
-  only the object content. To read whole object including attachments, names, etc, 
+  The eEnvelope::reader() function reads serialized envelope from stream. This function reads
+  only the object content. To read whole object including attachments, names, etc,
   use eObject::read().
-  
+
   @param  stream The stream to read from.
   @param  flags Serialization flags.
 
@@ -485,8 +485,8 @@ failed:
 ****************************************************************************************************
 */
 eStatus eEnvelope::reader(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Used to check which versions item's are in serialized data.
      */
@@ -495,19 +495,19 @@ eStatus eEnvelope::reader(
     os_memsz sz;
     os_int c;
 
-	/* Read object start mark and version number.
+    /* Read object start mark and version number.
        Special case, check if we received invisible flush count character which changed
-       the flush count to zero (no more whole objects buffered in stream). If so, 
+       the flush count to zero (no more whole objects buffered in stream). If so,
        return ESTATUS_NO_WHOLE_MESSAGES_TO_READ.
      */
     c = stream->readchar();
     if (c == E_STREAM_FLUSH)
-    {        
+    {
         if (stream->flushcount() <= 0)
         {
             return ESTATUS_NO_WHOLE_MESSAGES_TO_READ;
         }
-            
+
         c = stream->readchar();
     }
     version = (c & E_STREAM_COUNT_MASK);
@@ -528,7 +528,7 @@ eStatus eEnvelope::reader(
     if (stream->getl(&l)) goto failed;
     if (l > 0)
     {
-	    m_target.str = os_malloc(l + 1 + 14, &sz);
+        m_target.str = os_malloc(l + 1 + 14, &sz);
         m_target.str_alloc = (os_short)sz;
         m_target.str_pos = (os_short)(sz - l - 1);
         stream->read(m_target.str + m_target.str_pos, l, &sz);
@@ -543,7 +543,7 @@ eStatus eEnvelope::reader(
         if (stream->getl(&l)) goto failed;
         if (l > 0)
         {
-	        m_source.str = os_malloc(l + 1 + 14, &sz);
+            m_source.str = os_malloc(l + 1 + 14, &sz);
             m_source.str_alloc = (os_short)sz;
             m_source.str_pos = (os_short)(sz - l - 1);
             stream->read(m_source.str + m_source.str_pos, l, &sz);
@@ -554,19 +554,19 @@ eStatus eEnvelope::reader(
 
     /* Read content.
      */
-    if (mflags & EMSG_HAS_CONTENT) 
+    if (mflags & EMSG_HAS_CONTENT)
     {
         if (read(stream, flags) == OS_NULL) goto failed;
     }
 
     /* Read context.
      */
-    if (mflags & EMSG_HAS_CONTEXT) 
+    if (mflags & EMSG_HAS_CONTEXT)
     {
         if (read(stream, flags) == OS_NULL) goto failed;
     }
 
-	/* End the object.
+    /* End the object.
      */
     if (stream->read_end_block()) goto failed;
 
@@ -586,7 +586,7 @@ failed:
 
   @brief Set destination for the envelope.
 
-  The eEnvelope::settarget() function. 
+  The eEnvelope::settarget() function.
 
   @return  None.
 
@@ -600,7 +600,7 @@ void eEnvelope::settarget(
 
     os_memsz
         len;
-  
+
     p = target->gets(&len);
     settarget(p);
 }
@@ -611,7 +611,7 @@ void eEnvelope::settarget(
 
   @brief Set content object.
 
-  The eEnvelope::setcontent() function. 
+  The eEnvelope::setcontent() function.
 
   @param dlags Bit EMSG_DEL_CONTENT to adopt content, ptherwise it is copied.
   @return  None.
@@ -649,7 +649,7 @@ void eEnvelope::setcontent(
 
   @brief Set context object.
 
-  The eEnvelope::setcontext() function. 
+  The eEnvelope::setcontext() function.
 
   @param dlags Bit EMSG_DEL_CONTEXT to adopt content, ptherwise it is copied.
   @return  None.
@@ -727,7 +727,7 @@ void eEnvelope::nexttarget(
 void eEnvelope::prependsourceoix(
     eObject *o)
 {
-    os_char 
+    os_char
         buf[E_OIXSTR_BUF_SZ];
 
     /** Get oix and ucnt as string.

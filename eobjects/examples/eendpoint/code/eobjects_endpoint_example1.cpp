@@ -8,9 +8,9 @@
 
   This demonstrates creating an end point which listens for socket connections.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -49,9 +49,9 @@ public:
     /* Constructor.
      */
     eMyClass1(
-		eObject *parent = OS_NULL,
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
         : eThread(parent, id, flags)
     {
         initproperties();
@@ -75,19 +75,19 @@ public:
     static eMyClass1 *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new eMyClass1(parent, id, flags);
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return MY_CLASS_ID_1;
     }
 
-    /* Process incoming messages. 
+    /* Process incoming messages.
      */
     virtual void onmessage(
         eEnvelope *envelope)
@@ -113,8 +113,8 @@ public:
     /* This gets called when property value changes
      */
     virtual void onpropertychange(
-        os_int propertynr, 
-        eVariable *x, 
+        os_int propertynr,
+        eVariable *x,
         os_int flags)
     {
         switch (propertynr)
@@ -150,25 +150,23 @@ void endpoint_example_1()
 
     /* Set up eSocket and my own classes for use.
      */
-    eSocket::setupclass(); 
-    eMyClass1::setupclass(); 
+    eSocket::setupclass();
+    eMyClass1::setupclass();
 
     /* Create and start class eMyClass1 as thread named "myclass1".
      */
     t = new eMyClass1();
-	t->addname("myclass1", ENAME_PROCESS_NS);
+    t->addname("myclass1", ENAME_PROCESS_NS);
 t->setpropertys(EMYCLASS1P_A, "Nasse");
     t->timer(4500);
     t->timer(20);
-// t->json_write(&econsole);
     t->start(&thandle1); /* After this t pointer is useless */
 
     /* Create and start end point thread to listen for incoming socket connections,
        name it "myendpoint".
      */
     t = new eEndPoint();
-	t->addname("//myendpoint");
-// t->json_write(&econsole);
+    t->addname("//myendpoint");
     t->start(&endpointthreadhandle); /* After this t pointer is useless */
     c.setpropertys_msg(endpointthreadhandle.uniquename(),
          ":" IOC_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr);

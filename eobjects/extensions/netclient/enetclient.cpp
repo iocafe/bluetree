@@ -14,7 +14,7 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "eobjects/extensions/netclient/enetclient.h"
+#include "extensions/netclient/enetclient.h"
 
 
 /**

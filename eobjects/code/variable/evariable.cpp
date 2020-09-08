@@ -8,9 +8,9 @@
 
   Dynamically typed variables...
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -49,14 +49,14 @@ os_char
 ****************************************************************************************************
 */
 eVariable::eVariable(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eObject(parent, id, flags)
 {
     /* No type, number 2 digits after decimal point for doubles.
      */
-	m_vflags = OS_UNDEFINED_TYPE|(2 << EVAR_DDIGS_SHIFT);
+    m_vflags = OS_UNDEFINED_TYPE|(2 << EVAR_DDIGS_SHIFT);
     m_value.valbuf.tmpstr = OS_NULL;
 }
 
@@ -85,29 +85,29 @@ eVariable::~eVariable()
 
   @brief Clone object
 
-  The clone function clones the variable and clonable attachments. Names will be left detached 
+  The clone function clones the variable and clonable attachments. Names will be left detached
   in clone if EOBJ_NO_MAP flag is given.
 
   @param  parent Parent for the clone.
   @param  id Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names. 
+  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
   @return Pointer to the clone.
 
 ****************************************************************************************************
 */
 eObject *eVariable::clone(
-    eObject *parent, 
+    eObject *parent,
     e_oid id,
     os_int aflags)
 {
     eVariable *clonedobj;
     clonedobj = new eVariable(parent, id == EOID_CHILD ? oid() : id, flags());
-  
-    /** Copy variable value. 
+
+    /** Copy variable value.
      */
     clonedobj->setv(this);
     clonedobj->setdigs(digs());
-    
+
     /* Copy clonable attachments.
      */
     clonegeneric(clonedobj, aflags);
@@ -121,7 +121,7 @@ eObject *eVariable::clone(
   @brief Add eVariable to class list and class'es properties to it's property set.
 
   The eVariable::setupclass function adds eVariable to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier, 
+  it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
@@ -158,8 +158,8 @@ void eVariable::setupproperties(
 {
     eVariable *p;
 
-    /* Order of these addproperty() calls is important, since eVariable itself is used to 
-       describe the properties in property set. The property to set must be added to 
+    /* Order of these addproperty() calls is important, since eVariable itself is used to
+       describe the properties in property set. The property to set must be added to
        property set before setting value for it. There is trick with p to set text type
        after adding property type. This effects only eVariable class.
      */
@@ -178,7 +178,7 @@ void eVariable::setupproperties(
     addpropertyd(cls, EVARP_OFFSET, evarp_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
     addproperty (cls, EVARP_QUALITY, evarp_quality, EPRO_METADATA|EPRO_NOONPRCH, "quality");
     addproperty (cls, EVARP_TIMESTAMP, evarp_timestamp, EPRO_METADATA|EPRO_NOONPRCH, "timestamp");
-    addproperty (cls, EVARP_CONF, evarp_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf"); 
+    addproperty (cls, EVARP_CONF, evarp_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
 
 }
 
@@ -191,10 +191,10 @@ void eVariable::setupproperties(
   The eVariable::nextv() function returns pointer to the next child object of this object.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
-		   which are not flagged as an attachment. Value EOID_ALL specifies to get count all 
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
            child objects, regardless wether these are attachment or not. Other values
-		   specify object identifier, only children with that specified object identifier 
-           are searched for. 
+           specify object identifier, only children with that specified object identifier
+           are searched for.
 
   @return  Pointer to the first child variable, or OS_NULL if none found.
 
@@ -203,11 +203,11 @@ void eVariable::setupproperties(
 eVariable *eVariable::nextv(
     e_oid id)
 {
-	if (mm_handle == OS_NULL) return OS_NULL;
+    if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->next(id);
     while (h)
     {
-        if (h->object()->classid() == ECLASSID_VARIABLE) 
+        if (h->object()->classid() == ECLASSID_VARIABLE)
             return eVariable::cast(h->object());
 
         h = h->next(id);
@@ -222,7 +222,7 @@ eVariable *eVariable::nextv(
   @brief Called to inform the class about property value change (override).
 
   The onpropertychange() function is called when class'es property changes, unless the
-  property is flagged with EPRO_NOONPRCH. 
+  property is flagged with EPRO_NOONPRCH.
   If property is flagged as EPRO_SIMPLE, this function shuold save the property value
   in class members and and return it when simpleproperty() is called.
 
@@ -238,8 +238,8 @@ eVariable *eVariable::nextv(
 ****************************************************************************************************
 */
 void eVariable::onpropertychange(
-    os_int propertynr, 
-    eVariable *x, 
+    os_int propertynr,
+    eVariable *x,
     os_int flags)
 {
     switch (propertynr)
@@ -268,14 +268,14 @@ void eVariable::onpropertychange(
 
   @param   propertynr Property number to get.
   @param   x Variable into which to store the property value.
-  @return  If property with property number was stored in x, the function returns 
+  @return  If property with property number was stored in x, the function returns
            ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
            given number was not among simple properties.
 
 ****************************************************************************************************
 */
 eStatus eVariable::simpleproperty(
-    os_int propertynr, 
+    os_int propertynr,
     eVariable *x)
 {
     switch (propertynr)
@@ -287,7 +287,7 @@ eStatus eVariable::simpleproperty(
         case EVARP_DIGS:
             x->setl(digs());
             break;
-    
+
         default:
             x->clear();
             /* return eObject::simpleproperty(propertynr, x); */
@@ -357,16 +357,16 @@ void eVariable::clear()
         default:
             if (m_value.valbuf.tmpstr)
             {
-                os_free(m_value.valbuf.tmpstr, 
+                os_free(m_value.valbuf.tmpstr,
                     m_value.valbuf.tmpstr_sz);
             }
             break;
     }
 
-    /* Mark that variable contains no data. Mark that string buffer has not 
+    /* Mark that variable contains no data. Mark that string buffer has not
        been allocated.
      */
-	settype(OS_UNDEFINED_TYPE);
+    settype(OS_UNDEFINED_TYPE);
     m_value.valbuf.tmpstr = OS_NULL;
     m_vflags &= ~EVAR_STRBUF_ALLOCATED;
 }
@@ -385,7 +385,7 @@ void eVariable::clear()
 ****************************************************************************************************
 */
 void eVariable::setl(
-	const os_long x)
+    const os_long x)
 {
     /* Release any allocated memory.
      */
@@ -397,7 +397,7 @@ void eVariable::setl(
 
     /* Set data type.
      */
-	settype(OS_LONG);
+    settype(OS_LONG);
 }
 
 
@@ -406,7 +406,7 @@ void eVariable::setl(
 
   @brief Set double value to variable.
 
-  The setd() function sets a double precision floating point value to variable. 
+  The setd() function sets a double precision floating point value to variable.
 
   @param   x Value to set.
   @return  None.
@@ -414,7 +414,7 @@ void eVariable::setl(
 ****************************************************************************************************
 */
 void eVariable::setd(
-	const os_double x)
+    const os_double x)
 {
     /* Release any allocated memory.
      */
@@ -426,7 +426,7 @@ void eVariable::setd(
 
     /* Set data type.
      */
-	settype(OS_DOUBLE);
+    settype(OS_DOUBLE);
 }
 
 
@@ -435,7 +435,7 @@ void eVariable::setd(
 
   @brief Set string value to variable.
 
-  The sets() function sets a string value to variable. 
+  The sets() function sets a string value to variable.
 
   @param   x Value to set. OS_NULL is same as empty string.
   @param   max_chars Maximum number of characters to store excluding terminating NULL character.
@@ -445,7 +445,7 @@ void eVariable::setd(
 ****************************************************************************************************
 */
 void eVariable::sets(
-	const os_char *x,
+    const os_char *x,
     os_memsz max_chars)
 {
     os_memsz
@@ -484,7 +484,7 @@ void eVariable::sets(
 
     /* If string fits into small buffer, copy it and save used size.
      */
-    if (n <= EVARIABLE_STRBUF_SZ)
+    if (n <= (os_memsz)EVARIABLE_STRBUF_SZ)
     {
         os_memcpy(m_value.strbuf.buf, x, n);
         if (max_chars >= 0) m_value.strbuf.buf[max_chars] = '\0';
@@ -506,11 +506,11 @@ void eVariable::sets(
 
     /* Set data type.
      */
-	settype(OS_STR);
+    settype(OS_STR);
 
     /* Release temporary string buffer.
      */
-    if (tmpstr) 
+    if (tmpstr)
     {
         os_free(tmpstr, tmpstr_sz);
     }
@@ -522,18 +522,18 @@ void eVariable::sets(
 
   @brief Copy or move variable value from another variable.
 
-  The setv() function sets a double precision floating point value to variable. 
+  The setv() function sets a double precision floating point value to variable.
 
   @param  x Value to set.
   @param  move_value If OS_FALSE, the value of x is copied to this variable. If OS_TRUE and
           x contains allocated string or object, the value is moved from x to this variable
-		  and X will be empty after this call.
+          and X will be empty after this call.
   @return None.
 
 ****************************************************************************************************
 */
 void eVariable::setv(
-	eVariable *x,
+    eVariable *x,
     os_boolean move_value)
 {
     osalTypeId
@@ -574,13 +574,13 @@ void eVariable::setv(
 
                     /* Source variable has no value.
                      */
-	                x->settype(OS_UNDEFINED_TYPE);
+                    x->settype(OS_UNDEFINED_TYPE);
                     x->m_vflags &= ~EVAR_STRBUF_ALLOCATED;
                 }
                 else
                 {
                     n = x->m_value.strptr.used;
-                    m_value.strptr.ptr = os_malloc(n, 
+                    m_value.strptr.ptr = os_malloc(n,
                         &m_value.strptr.allocated);
                     os_memcpy(m_value.strptr.ptr, x->m_value.strptr.ptr, n);
                     m_value.strptr.used = n;
@@ -617,7 +617,7 @@ void eVariable::setv(
 
     /* Set data type.
      */
-	settype(srctype);
+    settype(srctype);
 }
 
 
@@ -626,18 +626,18 @@ void eVariable::setv(
 
   @brief Set object as variable value.
 
-  The seto() function sets an object as variable value. 
+  The seto() function sets an object as variable value.
 
   @param  x Value to set.
   @param  adopt_x If OS_FALSE, the object x is copied to be value of this variable. If OS_TRUE,
-		  the object x is adopted as value of the variable.
+          the object x is adopted as value of the variable.
 
   @return None.
 
 ****************************************************************************************************
 */
 void eVariable::seto(
-	eObject *x,
+    eObject *x,
     os_boolean adopt_x)
 {
     /* Release any allocated memory.
@@ -646,28 +646,28 @@ void eVariable::seto(
 
     if (x == OS_NULL) return;
 
-	if (adopt_x)
-	{
-		m_value.valbuf.v.o = x;
-		adopt(x, EOID_ITEM /* OID value */);
-	}
-	else
-	{
-		m_value.valbuf.v.o = x->clone(this, EOID_ITEM /* OID value */);
-	}
+    if (adopt_x)
+    {
+        m_value.valbuf.v.o = x;
+        adopt(x, EOID_ITEM /* OID value */);
+    }
+    else
+    {
+        m_value.valbuf.v.o = x->clone(this, EOID_ITEM /* OID value */);
+    }
 
     /* Set data type.
      */
-	settype(OS_OBJECT);
+    settype(OS_OBJECT);
 }
 
-  
+
 /**
 ****************************************************************************************************
 
   @brief Set pointer as a value to variable.
 
-  The setd() function sets apointer value to variable. 
+  The setd() function sets apointer value to variable.
 
   @param   x Value to set.
   @return  None.
@@ -687,7 +687,7 @@ void eVariable::setp(
 
     /* Set data type.
      */
-	settype(OS_POINTER);
+    settype(OS_POINTER);
 }
 
 
@@ -704,28 +704,28 @@ void eVariable::setp(
 */
 os_boolean eVariable::isempty()
 {
-	os_char
-		c;
+    os_char
+        c;
 
-	switch (type())
-	{
-		case OS_UNDEFINED_TYPE: 
-			return OS_TRUE;
+    switch (type())
+    {
+        case OS_UNDEFINED_TYPE:
+            return OS_TRUE;
 
-		case OS_STR: 
+        case OS_STR:
             if (m_vflags & EVAR_STRBUF_ALLOCATED)
-			{
-				c = *m_value.strptr.ptr;
-			}
-			else
-			{
-				c = m_value.strbuf.buf[0];
-			}
-			return (c == '\0') ? OS_TRUE : OS_FALSE;
+            {
+                c = *m_value.strptr.ptr;
+            }
+            else
+            {
+                c = m_value.strbuf.buf[0];
+            }
+            return (c == '\0') ? OS_TRUE : OS_FALSE;
 
-		default:
-			return OS_FALSE;
-	}
+        default:
+            return OS_FALSE;
+    }
 }
 
 
@@ -736,15 +736,15 @@ os_boolean eVariable::isempty()
 
   The getl() function returns variable value as long integer os_long.
 
-  @return Variable value as long integer. If variable has no value, or value cannot be converted 
-		  to long integer, the function returns 0.
+  @return Variable value as long integer. If variable has no value, or value cannot be converted
+          to long integer, the function returns 0.
 
 ****************************************************************************************************
 */
 os_long eVariable::getl()
 {
-	os_long 
-		x;
+    os_long
+        x;
 
     /* Convert value to long integer.
      */
@@ -766,16 +766,16 @@ os_long eVariable::getl()
             break;
 
         case OS_STR:
-			x = osal_str_to_int(
-				(m_vflags & EVAR_STRBUF_ALLOCATED) 
-				? m_value.strptr.ptr 
-				: m_value.strbuf.buf, 
-				OS_NULL);
+            x = osal_str_to_int(
+                (m_vflags & EVAR_STRBUF_ALLOCATED)
+                ? m_value.strptr.ptr
+                : m_value.strbuf.buf,
+                OS_NULL);
             break;
 
         default:
             x = 0;
-			break;
+            break;
     }
 
     /* Return the value.
@@ -791,14 +791,14 @@ os_long eVariable::getl()
   The getd() function returns variable value as double precision floating point number.
 
   @return  Variable value. If variable has no value, or value cannot be converted to double, the
-		   function returns 0.0.
+           function returns 0.0.
 
 ****************************************************************************************************
 */
 os_double eVariable::getd()
 {
-	os_double
-		x;
+    os_double
+        x;
 
     /* Convert value to double.
      */
@@ -814,18 +814,18 @@ os_double eVariable::getd()
 
         case OS_STR:
             if (m_vflags & EVAR_STRBUF_ALLOCATED)
-			{
-                x = osal_string_to_double(m_value.strptr.ptr, OS_NULL);
-			}
-			else
-			{
-                x = osal_string_to_double(m_value.strbuf.buf, OS_NULL);
-			}
+            {
+                x = osal_str_to_double(m_value.strptr.ptr, OS_NULL);
+            }
+            else
+            {
+                x = osal_str_to_double(m_value.strbuf.buf, OS_NULL);
+            }
             break;
 
         default:
             x = 0;
-			break;
+            break;
     }
 
     /* Return the value.
@@ -841,10 +841,10 @@ os_double eVariable::getd()
 
   The gets() function gets variable value as string. Integers, and floating point numbers
   are converted to string stored within temporary buffer allocated within variable.
-  Temporary buffer will exists as long as variale object exit, and variable value is 
+  Temporary buffer will exists as long as variale object exit, and variable value is
   not modified.
 
-  @param   sz Pointer where to store number of bytes in string (including terminating null 
+  @param   sz Pointer where to store number of bytes in string (including terminating null
            character), OS_NULL if not needed.
 
   @return  Pointer to value as string. This function always returns some string, returned
@@ -853,7 +853,7 @@ os_double eVariable::getd()
 ****************************************************************************************************
 */
 os_char *eVariable::gets(
-    os_memsz *sz) 
+    os_memsz *sz)
 {
     os_char
         *str,
@@ -870,7 +870,7 @@ os_char *eVariable::gets(
             str = (os_char*)"";
             vsz = 1;
             goto getout;
-        
+
         /* If this is string, just return pointer to the string.
          */
         case OS_STR:
@@ -908,12 +908,12 @@ os_char *eVariable::gets(
     switch (type())
     {
         case OS_LONG:
-            vsz = osal_int_to_string(buf, sizeof(buf), m_value.valbuf.v.l);
+            vsz = osal_int_to_str(buf, sizeof(buf), m_value.valbuf.v.l);
             break;
 
         case OS_DOUBLE:
-            vsz = osal_double_to_string(buf, sizeof(buf), 
-				m_value.valbuf.v.d, digs(), OSAL_FLOAT_DEFAULT);
+            vsz = osal_double_to_str(buf, sizeof(buf),
+                m_value.valbuf.v.d, digs(), OSAL_FLOAT_DEFAULT);
             break;
 
         case OS_OBJECT:
@@ -950,9 +950,9 @@ getout:
 
   @brief Release memory allocated for temporary buffer by gets() function.
 
-  The gets_free() function frees temporary string conversion buffer, if one is allocated. 
-  If gets() function needs to convert for example integer or double value to string, it 
-  allocates temprary buffer for the returned string. This buffer will be deleted when the 
+  The gets_free() function frees temporary string conversion buffer, if one is allocated.
+  If gets() function needs to convert for example integer or double value to string, it
+  allocates temprary buffer for the returned string. This buffer will be deleted when the
   variable value is modified or variable is deleted. This function may be called to release
   the temporary buffer immediately, altough this should not normally be needed.
 
@@ -964,7 +964,7 @@ void eVariable::gets_free()
 {
     if (type() != OS_STR && m_value.valbuf.tmpstr)
     {
-        os_free(m_value.valbuf.tmpstr, 
+        os_free(m_value.valbuf.tmpstr,
             m_value.valbuf.tmpstr_sz);
 
         m_value.valbuf.tmpstr = OS_NULL;
@@ -984,14 +984,14 @@ void eVariable::gets_free()
 
 ****************************************************************************************************
 */
-eObject *eVariable::geto() 
+eObject *eVariable::geto()
 {
-	if (type() == OS_OBJECT)
-	{
-		return m_value.valbuf.v.o;
-	}
+    if (type() == OS_OBJECT)
+    {
+        return m_value.valbuf.v.o;
+    }
 
-	return OS_NULL;
+    return OS_NULL;
 }
 
 /**
@@ -999,21 +999,21 @@ eObject *eVariable::geto()
 
   @brief Get pointer value of variable.
 
-  The getp() function returns pointer which was stored as variable value, if value type 
+  The getp() function returns pointer which was stored as variable value, if value type
   is OS_POINTER.
 
   @return  Pointer value, or OS_NULL if variable value is pointer or is NULL pointer.
 
 ****************************************************************************************************
 */
-os_pointer eVariable::getp() 
+os_pointer eVariable::getp()
 {
-	if (type() == OS_POINTER)
-	{
-		return m_value.valbuf.v.p;
-	}
+    if (type() == OS_POINTER)
+    {
+        return m_value.valbuf.v.p;
+    }
 
-	return OS_NULL;
+    return OS_NULL;
 }
 
 /**
@@ -1030,7 +1030,7 @@ os_pointer eVariable::getp()
 ****************************************************************************************************
 */
 void eVariable::appends(
-	const os_char *x)
+    const os_char *x)
 {
     if (x == OS_NULL) x = "";
 
@@ -1052,18 +1052,18 @@ void eVariable::appends(
 ****************************************************************************************************
 */
 void eVariable::appendv(
-	eVariable *x)
+    eVariable *x)
 {
     os_char
         *str;
 
-    os_memsz 
+    os_memsz
         sz;
 
     os_boolean
         del_tmpstr;
 
-    if (x == OS_NULL) 
+    if (x == OS_NULL)
     {
         appends(OS_NULL);
         return;
@@ -1092,8 +1092,8 @@ void eVariable::appendv(
 ****************************************************************************************************
 */
 os_int eVariable::compare(
-	eVariable *x,
-	os_int flags)
+    eVariable *x,
+    os_int flags)
 {
     eVariable
         *y,
@@ -1113,7 +1113,7 @@ os_int eVariable::compare(
 
     os_char
         nbuf[32];
-    
+
     /* Arrange by type id enum, so that type number of x is smaller than y's.
      */
     y = this;
@@ -1160,7 +1160,7 @@ os_int eVariable::compare(
                     }
                     else
                     {
-                        osal_int_to_string(nbuf, sizeof(nbuf), x->m_value.valbuf.v.l);
+                        osal_int_to_str(nbuf, sizeof(nbuf), x->m_value.valbuf.v.l);
                         rval = os_strcmp(nbuf, y->gets());
                     }
                     break;
@@ -1220,7 +1220,7 @@ os_int eVariable::compare(
                 case OS_STR:
                     rval = os_strcmp(x->gets(), y->gets());
                     break;
-    
+
                 case OS_OBJECT:
                     rval = -1;
                     break;
@@ -1246,6 +1246,7 @@ os_int eVariable::compare(
             }
             break;
 
+        default:
         case OS_UNDEFINED_TYPE:
             rval = !y->isempty();
             break;
@@ -1263,33 +1264,33 @@ os_int eVariable::compare(
   defined integer or floating point number. If so, the autotype function converts variable
   to one.
 
-  @param   modify_value value is set by default. If modify_value is set to OS_TRUE, this function 
-		   will only check if variable can be automatically typed, but doesn't modify it's value.
+  @param   modify_value value is set by default. If modify_value is set to OS_TRUE, this function
+           will only check if variable can be automatically typed, but doesn't modify it's value.
 
   @return  The function returns OS_TRUE is variable value was or can be automatically typed.
 
 ****************************************************************************************************
 */
 os_boolean eVariable::autotype(
-	os_boolean modify_value)
+    os_boolean modify_value)
 {
-	os_char
-		*p,
-		*q,
-		c;
+    os_char
+        *p,
+        *q,
+        c;
 
-	os_double
-		d;
+    os_double
+        d;
 
-	os_long
-		l;
+    os_long
+        l;
 
     os_memsz
         count;
 
-	os_boolean
-		digit_found,
-		dot_found;
+    os_boolean
+        digit_found,
+        dot_found;
 
     /* If this variable isn't a string, do nothing.
      */
@@ -1297,85 +1298,85 @@ os_boolean eVariable::autotype(
 
     /* Pointer to string content.
      */
-	p = (m_vflags & EVAR_STRBUF_ALLOCATED) ? m_value.strptr.ptr : m_value.strbuf.buf;
+    p = (m_vflags & EVAR_STRBUF_ALLOCATED) ? m_value.strptr.ptr : m_value.strbuf.buf;
 
-	/* Skip spaces in beginning
-	 */
-	while (osal_char_isspace(*p)) p++;
+    /* Skip spaces in beginning
+     */
+    while (osal_char_isspace(*p)) p++;
 
-	/* If optional + or minus sign, save value start pointer, skip sign and following empty space.
-	 */
-	q = p;
-	if (*p == '+' || *p == '-') 
-	{
-		p++;
-		while (osal_char_isspace(*p)) p++;
-	}
-
-	/* Check the number part.
-	 */
-	digit_found = dot_found = OS_FALSE;
-	while (OS_TRUE)
-	{
-		c = *p;
-
-		/* If this is decimal digit ?
-		 */
-		if (osal_char_isdigit(c))
-		{
-			digit_found = OS_TRUE;
-		}
-
-		/* If this is dot ?
-		 */
-		else if (c == '.')
-		{
-			/* If second dot, like in date, then do not convert.
-			 */
-			if (dot_found) return OS_FALSE;
-			dot_found = OS_TRUE;
-		}
-
-		/* If this 'e' or 'E' for exponent ?
-		 */
-		/* else if (c == 'e' || c == 'E')
-		{
-		} */
-
-		/* Otherwise end of data. This may contain only blanks
-		 */
-		else
-		{
-			while (*p)
-			{
-				if (!osal_char_isspace(*p)) return OS_FALSE;
-				p++;
-			}
-			break;
-		}
+    /* If optional + or minus sign, save value start pointer, skip sign and following empty space.
+     */
+    q = p;
+    if (*p == '+' || *p == '-')
+    {
         p++;
-	}
+        while (osal_char_isspace(*p)) p++;
+    }
 
-	if (!digit_found) return OS_FALSE;
-	if (dot_found) 
-	{
-        d = osal_string_to_double(q, &count);
+    /* Check the number part.
+     */
+    digit_found = dot_found = OS_FALSE;
+    while (OS_TRUE)
+    {
+        c = *p;
+
+        /* If this is decimal digit ?
+         */
+        if (osal_char_isdigit(c))
+        {
+            digit_found = OS_TRUE;
+        }
+
+        /* If this is dot ?
+         */
+        else if (c == '.')
+        {
+            /* If second dot, like in date, then do not convert.
+             */
+            if (dot_found) return OS_FALSE;
+            dot_found = OS_TRUE;
+        }
+
+        /* If this 'e' or 'E' for exponent ?
+         */
+        /* else if (c == 'e' || c == 'E')
+        {
+        } */
+
+        /* Otherwise end of data. This may contain only blanks
+         */
+        else
+        {
+            while (*p)
+            {
+                if (!osal_char_isspace(*p)) return OS_FALSE;
+                p++;
+            }
+            break;
+        }
+        p++;
+    }
+
+    if (!digit_found) return OS_FALSE;
+    if (dot_found)
+    {
+        d = osal_str_to_double(q, &count);
         if (count)
-		{
-			if (modify_value) setd(d);
-			return OS_TRUE;
-		}
-	}
-	else
-	{
+        {
+            if (modify_value) setd(d);
+            return OS_TRUE;
+        }
+    }
+    else
+    {
         l = osal_str_to_int(q, &count);
-		if (count)
-		{
-			if (modify_value) setl(l);
-			return OS_TRUE;
-		}
-	}
-	return OS_FALSE;
+        if (count)
+        {
+            if (modify_value) setl(l);
+            return OS_TRUE;
+        }
+    }
+    return OS_FALSE;
 }
 
 
@@ -1384,8 +1385,8 @@ os_boolean eVariable::autotype(
 
   @brief Convert variable value to string and get string pointer.
 
-  The eVariable::tostring() function converts variable value to string (modifies variable value, 
-  if not already string) and returns pointer to string value. 
+  The eVariable::tostring() function converts variable value to string (modifies variable value,
+  if not already string) and returns pointer to string value.
 
   @return  Pointer to string variable value. Never OS_NULL.
 
@@ -1413,7 +1414,7 @@ os_char *eVariable::tostring()
 
   The eVariable::writer() function serialized variable to stream. This writes only variable
   specific content, use eObject::write() to save also class information, attachements, etc.
-  
+
   @param  stream The stream to write to.
   @param  flags Serialization flags.
 
@@ -1424,15 +1425,15 @@ os_char *eVariable::tostring()
 ****************************************************************************************************
 */
 eStatus eVariable::writer(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Increment if new serialized items are to the object,
        and check for new version's items in read() function.
      */
     const os_int version = 0;
 
-	/* Begin the object and write version number.
+    /* Begin the object and write version number.
      */
     if (stream->write_begin_block(version)) goto failed;
 
@@ -1454,15 +1455,15 @@ eStatus eVariable::writer(
 
         case OS_STR:
             if (m_vflags & EVAR_STRBUF_ALLOCATED)
-			{
+            {
                 if (*stream << m_value.strptr.used - 1) goto failed;
                 if (stream->write(m_value.strptr.ptr, m_value.strptr.used - 1)) goto failed;
-			}
-			else
-			{
+            }
+            else
+            {
                 if (*stream << m_value.strbuf.used - 1) goto failed;
                 if (stream->write(m_value.strbuf.buf, m_value.strbuf.used - 1)) goto failed;
-			}
+            }
             break;
 
         case OS_OBJECT:
@@ -1470,10 +1471,10 @@ eStatus eVariable::writer(
             break;
 
         default:
-			break;
+            break;
     }
 
-	/* End the object.
+    /* End the object.
      */
     if (stream->write_end_block()) goto failed;
 
@@ -1496,7 +1497,7 @@ failed:
   The eVariable::reader() function reads serialized variable from stream.
   This function reads only object content. To read whole object including attachments, names,
   etc, use eObject::read().
-  
+
   @param  stream The stream to read from.
   @param  flags Serialization flags.
 
@@ -1507,8 +1508,8 @@ failed:
 ****************************************************************************************************
 */
 eStatus eVariable::reader(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Used to check which versions item's are in serialized data.
      */
@@ -1522,7 +1523,7 @@ eStatus eVariable::reader(
      */
     clear();
 
-	/* Read object start mark and version number.
+    /* Read object start mark and version number.
      */
     if (stream->read_begin_block(&version)) goto failed;
 
@@ -1575,7 +1576,7 @@ eStatus eVariable::reader(
             break;
 
         default:
-			break;
+            break;
     }
 
     /* Store data type and decimal digits.
@@ -1583,7 +1584,7 @@ eStatus eVariable::reader(
     m_vflags &= ~EVAR_SERIALIZATION_MASK;
     m_vflags |= (vflags & EVAR_SERIALIZATION_MASK);
 
-	/* End the object.
+    /* End the object.
      */
     if (stream->read_end_block()) goto failed;
 
@@ -1609,7 +1610,7 @@ failed:
   @param   str Pointer to the string to append. If str is NULL, the function just allocates
            nchars more space for string.
   @param   nchars Number of characters to append. This should not include terminating null
-		   character.
+           character.
   @return  None.
 
 ****************************************************************************************************
@@ -1622,7 +1623,7 @@ void eVariable::appends_internal(
         *val,
         *newval;
 
-    os_memsz 
+    os_memsz
         used,
         n,
         allocated;
@@ -1644,7 +1645,7 @@ void eVariable::appends_internal(
 
         /* If all can fit into contained buffer, append and return.
          */
-        if (n <= EVARIABLE_STRBUF_SZ) 
+        if (n <= EVARIABLE_STRBUF_SZ)
         {
             if (str) os_memcpy(val + (used - 1), str, nchars);
             val[n-1] = '\0';
@@ -1704,10 +1705,10 @@ void eVariable::appends_internal(
   Returned pointer is pointer to string with quaranteed space for nchars characters followed
   by NULL character placed in advance.
 
-  Retuenrd string is uninitialized and may contain garbage. 
+  Retuenrd string is uninitialized and may contain garbage.
 
-  @param   nchars Number of characters to allocate space for. This should not include terminating 
-           NULL character. 
+  @param   nchars Number of characters to allocate space for. This should not include terminating
+           NULL character.
   @return  Pointer to buffer which can be modified, size nchars + 1 (NULL char).
 
 ****************************************************************************************************

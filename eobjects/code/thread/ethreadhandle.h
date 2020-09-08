@@ -8,9 +8,9 @@
 
   Thread handle is used for controlling threads from another thread.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -46,24 +46,24 @@ public:
     /*@{*/
 
     /* Constructor.
-	 */
-	eThreadHandle(
-		eObject *parent = OS_NULL,
+     */
+    eThreadHandle(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
- 	 */
-	virtual ~eThreadHandle();
+    /* Virtual destructor.
+     */
+    virtual ~eThreadHandle();
 
     /* Casting eObject pointer to eThreadHandle pointer.
      */
-	inline static eThreadHandle *cast(
-		eObject *o) 
-	{ 
+    inline static eThreadHandle *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_THREAD_HANDLE)
-		return (eThreadHandle*)o;
-	}
+        return (eThreadHandle*)o;
+    }
 
     /* Get class identifier.
      */
@@ -74,23 +74,23 @@ public:
     /* static eThreadHandle *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new eThreadHandle(parent, oid, flags);
     } */
 
     /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name X...
+      @name X...
 
-	  X... 
+      X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     /* Request to terminate a thread.
      */
@@ -100,7 +100,7 @@ public:
      */
     void join();
 
-    inline os_char *uniquename() 
+    inline os_char *uniquename()
     {
         return m_unique_thread_name;
     }
@@ -109,7 +109,7 @@ public:
 
 private:
     inline void set_osal_handle(
-        osalThreadHandle *h) 
+        osalThread *h)
     {
         m_osal_handle = h;
     }
@@ -117,7 +117,7 @@ private:
     void save_unique_thread_name(
         eThread *thread);
 
-	osalThreadHandle *m_osal_handle;
+    osalThread *m_osal_handle;
 
     os_char m_unique_thread_name[E_OIXSTR_BUF_SZ];
 };

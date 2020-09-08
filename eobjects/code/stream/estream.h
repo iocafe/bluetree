@@ -8,9 +8,9 @@
 
   Stream base class sets up general way to interace with different types of streams.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -25,7 +25,7 @@
   @name Stream Control Character Codes
   @anchor eStreamCtrlChars
 
-  For control character codes. 5 least significant bits must be zero, reserved for 
+  For control character codes. 5 least significant bits must be zero, reserved for
   character repeat count or for version number.
 
 ****************************************************************************************************
@@ -50,11 +50,11 @@
  */
 #define E_STREAM_CTRLCH_IN_DATA 0x60
 
-/** Stream has been disconnected. 
+/** Stream has been disconnected.
  */
 #define E_STREAM_CTRLCH_DISCONNECT 0x80
 
-/** Stream flushed, contains whole objects. 
+/** Stream flushed, contains whole objects.
  */
 #define E_STREAM_CTRLCH_FLUSH 0xA0
 
@@ -78,7 +78,7 @@
   @name Control codes for writechar() and readchar() functions.
 
   These are much the same as control characted codes, but above 8 bit data range. So these
-  can be given as argument to writechar() function or returned by readchar() function (if 
+  can be given as argument to writechar() function or returned by readchar() function (if
   the underlying stream supports control codes).
 
 ****************************************************************************************************
@@ -101,7 +101,7 @@
  */
 #define E_STREAM_DISCONNECT (E_STREAM_CTRL_BASE + E_STREAM_CTRLCH_DISCONNECT)
 
-/** Stream flushed, contains whole objects. 
+/** Stream flushed, contains whole objects.
  */
 #define E_STREAM_FLUSH (E_STREAM_CTRL_BASE + E_STREAM_CTRLCH_FLUSH)
 
@@ -142,7 +142,7 @@
  */
 #define OSAL_STREAM_DECODE_ON_READ 0x0200000
 
-/** eQueue specific flag: Maintain flush contfol count within queue when reading input 
+/** eQueue specific flag: Maintain flush control count within queue when reading input
     from socket, etc.
  */
 #define OSAL_FLUSH_CTRL_COUNT 0x0400000
@@ -150,25 +150,6 @@
 
 /*@}*/
 
-
-/**
-****************************************************************************************************
-
-  @name Flags for eStream read() Functions.
-  @anchor eStreamReadFlags
-
-  X...
-
-****************************************************************************************************
-*/
-/*@{*/
-
-/** eQueue specific flag: Read data from queue without actually removing it from queue.
- */
-#define OSAL_STREAM_PEEK 0x01
-
-
-/*@}*/
 
 
 /**
@@ -198,67 +179,67 @@ public:
 
     /* Constructor.
      */
-	eStream(
-		eObject *parent = OS_NULL,
+    eStream(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
+    /* Virtual destructor.
      */
-	virtual ~eStream();
+    virtual ~eStream();
 
     /* Casting eObject pointer to eStream pointer.
      */
-	inline static eStream *cast(
-		eObject *o) 
-	{ 
+    inline static eStream *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_STREAM)
-		return (eStream*)o;
-	}
+        return (eStream*)o;
+    }
 
-	/* Get class identifier.
-	*/
-	virtual os_int classid()
+    /* Get class identifier.
+    */
+    virtual os_int classid()
     {
         return ECLASSID_STREAM;
     }
 
-	/* Static constructor function.
-	*/
-	static eStream *newobj(
-		eObject *parent,
+    /* Static constructor function.
+    */
+    static eStream *newobj(
+        eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
-	{
+        os_int flags = EOBJ_DEFAULT)
+    {
         return new eStream(parent, id, flags);
-	}
+    }
 
     /*@}*/
 
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Functions for writing to and reading from stream.
+      @name Functions for writing to and reading from stream.
 
-	  X...
+      X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     /* Open the stream.
      */
     virtual eStatus open(
-	    os_char *parameters,
-        os_int flags=0) 
+        os_char *parameters,
+        os_int flags=0)
     {
         return ESTATUS_SUCCESS;
     }
 
     /* Close the stream.
      */
-    virtual eStatus close() 
+    virtual eStatus close()
     {
         return ESTATUS_SUCCESS;
     }
@@ -266,7 +247,7 @@ public:
     /* Flush written data to stream.
      */
     virtual eStatus flush(
-        os_int flags = 0) 
+        os_int flags = 0)
     {
         return ESTATUS_SUCCESS;
     }
@@ -274,23 +255,23 @@ public:
     /* Write data to stream.
      */
     virtual eStatus write(
-        const os_char *buf, 
-        os_memsz buf_sz, 
+        const os_char *buf,
+        os_memsz buf_sz,
         os_memsz *nwritten = OS_NULL)
     {
-        if (nwritten != OS_NULL) *nwritten = 0; 
+        if (nwritten != OS_NULL) *nwritten = 0;
         return ESTATUS_SUCCESS;
     }
 
     /* Read data from stream.
      */
     virtual eStatus read(
-        os_char *buf, 
-        os_memsz buf_sz, 
+        os_char *buf,
+        os_memsz buf_sz,
         os_memsz *nread = OS_NULL,
         os_int flags = 0)
     {
-        if (nread != OS_NULL) *nread = 0; 
+        if (nread != OS_NULL) *nread = 0;
         return ESTATUS_SUCCESS;
     }
 
@@ -300,12 +281,12 @@ public:
         os_int c);
 
     /* Read character or control code.
-     */    
+     */
     virtual os_int readchar();
 
-    /** Number of incoming flush controls in queue at the moment. 
+    /** Number of incoming flush controls in queue at the moment.
      */
-    virtual os_int flushcount() 
+    virtual os_int flushcount()
     {
         return -1;
     }
@@ -313,38 +294,41 @@ public:
     /* Wait for stream or thread event.
      */
     virtual void select(
-		eStream **streams,
+        eStream **streams,
         os_int nstreams,
-		osalEvent evnt,
-		osalSelectData *selectdata,
-		os_int flags)
+        osalEvent evnt,
+        osalSelectData *selectdata,
+        os_int flags)
     {
     }
 
     /* Accept incoming connection.
      */
-	virtual eStatus accept(
-        eStream *newstream,
-        os_int flags)
+    virtual eStream *accept(
+        os_int flags,
+        eStatus *s = OS_NULL,
+        eObject *parent = OS_NULL,
+        e_oid id = EOID_ITEM)
     {
-        return ESTATUS_FAILED;
+        if (s) *s = ESTATUS_FAILED;
+        return OS_NULL;
     }
 
-	/** Begin an object, etc. block. This is for versioning, data may be added or changed later.
+    /** Begin an object, etc. block. This is for versioning, data may be added or changed later.
      */
     inline eStatus write_begin_block(
-        os_int version) 
+        os_int version)
     {
 #if OSAL_DEBUG
-        if ((os_uint)version >= 32) 
+        if ((os_uint)version >= 32)
             osal_debug_error("write_begin_block(): version must be 0...31");
 #endif
         return writechar(E_STREAM_BEGIN | version);
     }
 
-	/** End an object, etc. block. This skips data added by later versions of object.
+    /** End an object, etc. block. This skips data added by later versions of object.
      */
-    inline eStatus write_end_block() 
+    inline eStatus write_end_block()
     {
         return writechar(E_STREAM_END);
     }
@@ -360,51 +344,51 @@ public:
              ? ESTATUS_SUCCESS : ESTATUS_FAILED;
     }
 
-	/** End an object, etc. block. This skips data added by later versions of object.
+    /** End an object, etc. block. This skips data added by later versions of object.
      */
     eStatus read_end_block();
 
-	/* Write long integer value to stream.
+    /* Write long integer value to stream.
      */
-	eStatus putl(
+    eStatus putl(
         os_long x);
 
     /* Write float value to stream.
      */
     eStatus putf(
-	    os_float x);
+        os_float x);
 
     /* Write double precision floating point value to stream.
      */
     eStatus putd(
-	    os_double x);
+        os_double x);
 
     /* Write string to stream.
      */
     eStatus puts(
-	    const os_char *x);
+        const os_char *x);
 
     /* Write string from variable to stream.
      */
     eStatus puts(
-	    eVariable *x);
+        eVariable *x);
 
-	/* Get long integer value from stream.
+    /* Get long integer value from stream.
      */
-	eStatus getl(
+    eStatus getl(
         os_long *x);
 
-	/* Get float value from stream.
+    /* Get float value from stream.
      */
-	eStatus getf(
+    eStatus getf(
         os_float *x);
 
-	/* Get double value from stream.
+    /* Get double value from stream.
      */
-	eStatus getd(
+    eStatus getd(
         os_double *x);
 
-	/* Get string value from stream into variable.
+    /* Get string value from stream into variable.
      */
     eStatus gets(
         eVariable *x);
@@ -412,18 +396,18 @@ public:
     /*@}*/
 
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Operator overloads
+      @name Operator overloads
 
-	  The operator overloads are implemented for convinience, and map to the member functions. 
-	  Using operator overloads may lead to more readable code, but may also confuse the
-	  reader. 
+      The operator overloads are implemented for convinience, and map to the member functions.
+      Using operator overloads may lead to more readable code, but may also confuse the
+      reader.
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     /** Operator "<<", storing values to stream.
      */

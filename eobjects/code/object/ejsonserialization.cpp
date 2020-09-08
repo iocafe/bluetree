@@ -6,11 +6,11 @@
   @version 1.0
   @date    8.9.2020
 
-  Object serialization in json format. 
-  
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Object serialization in json format.
+
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -25,7 +25,7 @@
   @brief Write object to stream as JSON.
 
   The eObject::json_write() function writes object to stream as JSON.
-  
+
   @param  stream The stream to write to.
   @param  sflags Serialization flags. EOBJ_SERIALIZE_DEFAULT
   @param  indent Indentation depth, 0, 1... Writes 2x this spaces at beginning of a line.
@@ -38,10 +38,10 @@
 ****************************************************************************************************
 */
 eStatus eObject::json_write(
-    eStream *stream, 
+    eStream *stream,
     os_int sflags,
     os_int indent,
-    os_boolean *comma) 
+    os_boolean *comma)
 {
     os_char *str;
     os_int i;
@@ -51,7 +51,7 @@ eStatus eObject::json_write(
     eBinding *b;
     os_boolean comma1 = OS_FALSE, comma2 = OS_FALSE, property_listed;
     os_boolean end_with_nl = OS_FALSE;
-    
+
     if (indent < 0)
     {
         indent = 0;
@@ -60,7 +60,7 @@ eStatus eObject::json_write(
 
     if (comma)
     {
-        if (*comma) 
+        if (*comma)
         {
             if (json_puts(stream, ",")) return ESTATUS_FAILED;
         }
@@ -84,7 +84,7 @@ eStatus eObject::json_write(
         if (json_putqs(stream, str)) goto failed;
     }
 
-    /* Names 
+    /* Names
      */
     list.clear();
     for (name = firstn(EOID_NAME); name; name = name->nextn(EOID_NAME))
@@ -163,7 +163,7 @@ eStatus eObject::json_write(
                 if (json_puts(stream, "\"properties\": {")) goto failed;
                 property_listed = OS_TRUE;
             }
-                
+
             if (json_indent(stream, indent+1, EJSON_NEW_LINE_BEFORE, &comma2)) goto failed;
             if (json_putqs(stream, name->gets())) goto failed;
             if (json_puts(stream, ": ")) goto failed;
@@ -180,14 +180,14 @@ eStatus eObject::json_write(
     /* Write bindings.
      */
     bindings = firstc(EOID_BINDINGS);
-    if (bindings) 
+    if (bindings)
     {
         for (b = eBinding::cast(first()); b; b = eBinding::cast(b->next()))
         {
             b->json_write(stream, sflags, indent);
         }
     }
-    
+
     /* Write content (children, etc)
      */
     if (json_writer(stream, sflags, indent)) goto failed;
@@ -197,7 +197,7 @@ eStatus eObject::json_write(
     if (json_indent(stream, --indent)) goto failed;
     if (json_puts(stream, "}")) goto failed;
     if (comma || end_with_nl) if (json_indent(stream, 0, EJSON_NEW_LINE_ONLY)) goto failed;
-    
+
     /* Object succesfully written.
      */
     return ESTATUS_SUCCESS;
@@ -214,19 +214,19 @@ failed:
 
   @brief Read object from stream.
 
-  The eObject::read() function reads class information, etc from the stream, creates new 
+  The eObject::read() function reads class information, etc from the stream, creates new
   child object and reads child object content and attachments.
-  
+
   @param  stream The stream to write to.
   @param  sflags Serialization flags. EOBJ_SERIALIZE_DEFAULT
 
-  @return If successfull the function returns pointer to te new child object. 
-          If reading object from stream fails, value OS_NULL is returned. 
+  @return If successfull the function returns pointer to te new child object.
+          If reading object from stream fails, value OS_NULL is returned.
 
 ****************************************************************************************************
 */
 eObject *eObject::json_read(
-    eStream *stream, 
+    eStream *stream,
     os_int sflags)
 {
     os_int cid, oid, oflags;
@@ -249,7 +249,7 @@ eObject *eObject::json_read(
     /* Set flags.
      */
     child->setflags(oflags);
-    
+
     /* Read the object content.
      */
     if (child->reader(stream, sflags)) goto failed;
@@ -271,17 +271,17 @@ failed:
     return OS_NULL;
 }
 
-/* 
+/*
   @param  indent Indentation depth, 0, 1... Writes 2x this spaces before the line.
   @param  iflags EJSON_NO_NEW_LINE, EJSON_NEW_LINE_BEFORE, EJSON_NEW_LINE_ONLY
   @return If successfull, the function returns ESTATUS_SUCCESS. Other return
           values indicate an error.
  */
 eStatus eObject::json_indent(
-    eStream *stream, 
+    eStream *stream,
     os_int indent,
     os_int iflags,
-    os_boolean *comma) 
+    os_boolean *comma)
 {
     os_int i;
 
@@ -289,14 +289,14 @@ eStatus eObject::json_indent(
     {
         if (comma)
         {
-            if (*comma) 
+            if (*comma)
             {
                 if (json_puts(stream, ",")) return ESTATUS_FAILED;
             }
             *comma = OS_TRUE;
         }
         if (json_puts(stream, "\n")) return ESTATUS_FAILED;
-    }   
+    }
 
     if ((iflags & EJSON_NEW_LINE_ONLY)==0)
     {
@@ -316,17 +316,17 @@ eStatus eObject::json_indent(
   @brief Write string to JSON output.
 
   The eObject::json_puts() function writes string to JSON stream.
-  
+
   @param  stream The stream to write JSON to.
   @param  str String to write.
 
-  @return If successfull the function returns pointer to te new child object. 
-          If reading object from stream fails, value OS_NULL is returned. 
+  @return If successfull the function returns pointer to te new child object.
+          If reading object from stream fails, value OS_NULL is returned.
 
 ****************************************************************************************************
 */
 eStatus eObject::json_puts(
-    eStream *stream, 
+    eStream *stream,
     const os_char *str)
 {
     os_memsz len;
@@ -342,17 +342,17 @@ eStatus eObject::json_puts(
   @brief Write quoted string to JSON output.
 
   The eObject::json_putqs() function writes quoted string to JSON stream.
-  
+
   @param  stream The stream to write JSON to.
   @param  str String to write.
 
-  @return If successfull the function returns pointer to te new child object. 
-          If reading object from stream fails, value OS_NULL is returned. 
+  @return If successfull the function returns pointer to te new child object.
+          If reading object from stream fails, value OS_NULL is returned.
 
 ****************************************************************************************************
 */
 eStatus eObject::json_putqs(
-    eStream *stream, 
+    eStream *stream,
     const os_char *str)
 {
     if (json_puts(stream, "\"")) return ESTATUS_FAILED;
@@ -366,22 +366,22 @@ eStatus eObject::json_putqs(
   @brief Write long integer to JSON output.
 
   The eObject::json_putl() function writes long integer to JSON stream.
-  
+
   @param  stream The stream to write JSON to.
   @param  x Long integer to write.
 
-  @return If successfull the function returns pointer to te new child object. 
-          If reading object from stream fails, value OS_NULL is returned. 
+  @return If successfull the function returns pointer to te new child object.
+          If reading object from stream fails, value OS_NULL is returned.
 
 ****************************************************************************************************
 */
 eStatus eObject::json_putl(
-    eStream *stream, 
+    eStream *stream,
     os_long x)
 {
     os_char nbuf[OSAL_NBUF_SZ];
 
-    osal_int_to_string(nbuf, sizeof(nbuf), x);
+    osal_int_to_str(nbuf, sizeof(nbuf), x);
     return json_puts(stream, nbuf);
 }
 
@@ -392,33 +392,33 @@ eStatus eObject::json_putl(
   @brief Write variable value to JSON output.
 
   The eObject::json_putv() function writes variable value to JSON stream.
-  
+
   @param  stream The stream to write JSON to.
   @param  p Property in property set.
   @param  value Value to write. May be modified by this function.
   @param  sflags Serialization flags. EOBJ_SERIALIZE_DEFAULT
   @param  indent Indentation depth, 0, 1... Writes 2x this spaces at beginning of a line.
 
-  @return If successfull the function returns pointer to te new child object. 
-          If reading object from stream fails, value OS_NULL is returned. 
+  @return If successfull the function returns pointer to te new child object.
+          If reading object from stream fails, value OS_NULL is returned.
 
 ****************************************************************************************************
 */
 eStatus eObject::json_putv(
-    eStream *stream, 
+    eStream *stream,
     eVariable *p,
     eVariable *value,
     os_int sflags,
-    os_int indent) 
+    os_int indent)
 {
     eObject *obj;
     os_boolean quote;
     os_long typ;
-    
+
     /* If the value contains object, write it
      */
     obj = value->geto();
-    if (obj) 
+    if (obj)
     {
         return obj->json_write(stream, sflags, indent);
     }
@@ -430,7 +430,7 @@ eStatus eObject::json_putv(
     /* Select weather to qute the value
      */
     quote = OS_TRUE;
-    if (p) 
+    if (p)
     {
         typ = p->propertyl(EVARP_TYPE);
     }
@@ -442,7 +442,7 @@ eStatus eObject::json_putv(
     switch (typ)
     {
         default:
-            if (value->isempty()) 
+            if (value->isempty())
             {
                 value->sets("null");
                 quote = OS_FALSE;
@@ -471,7 +471,7 @@ eStatus eObject::json_putv(
 
   The eObject::json_append_list_item() function appends quoted item to variable list, if bit
   is set in flags. If list is not empty appends also separating comma.
-  
+
   @param  list List to append to.
   @param  item Item name without quotes.
   @param  flags Value of flags.
@@ -482,7 +482,7 @@ eStatus eObject::json_putv(
 ****************************************************************************************************
 */
 void eObject::json_append_list_item(
-    eVariable *list, 
+    eVariable *list,
     const os_char *item,
     os_int flags,
     os_int bit)

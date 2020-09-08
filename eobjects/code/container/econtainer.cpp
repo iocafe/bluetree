@@ -8,9 +8,9 @@
 
   The container object is like a box holding a set of child objects.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -30,9 +30,9 @@
 ****************************************************************************************************
 */
 eContainer::eContainer(
-	eObject *parent,
-	e_oid oid,
-	os_int flags)
+    eObject *parent,
+    e_oid oid,
+    os_int flags)
     : eObject(parent, oid, flags)
 {
 }
@@ -59,7 +59,7 @@ eContainer::~eContainer()
 
   @brief Clone object
 
-  The eContainer::clone function clones and object including object's children. 
+  The eContainer::clone function clones and object including object's children.
   Names will be left detached in clone.
 
   @param  parent Parent for the clone.
@@ -70,7 +70,7 @@ eContainer::~eContainer()
 ****************************************************************************************************
 */
 eObject *eContainer::clone(
-    eObject *parent, 
+    eObject *parent,
     e_oid id,
     os_int aflags)
 {
@@ -87,7 +87,7 @@ eObject *eContainer::clone(
   @brief Add the class to class list and class'es properties to it's property set.
 
   The eVariable::setupclass function adds the class to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier, 
+  it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
@@ -113,10 +113,10 @@ void eContainer::setupclass()
   The eVariable::nextc() function returns pointer to the next child container of this object.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
-		   which are not flagged as an attachment. Value EOID_ALL specifies to get count all 
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
            child objects, regardless wether these are attachment or not. Other values
-		   specify object identifier, only children with that specified object identifier 
-           are searched for. 
+           specify object identifier, only children with that specified object identifier
+           are searched for.
 
   @return  Pointer to the first child container, or OS_NULL if none found.
 
@@ -125,11 +125,11 @@ void eContainer::setupclass()
 eContainer *eContainer::nextc(
     e_oid id)
 {
-	if (mm_handle == OS_NULL) return OS_NULL;
+    if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->next(id);
     while (h)
     {
-        if (h->object()->classid() == ECLASSID_CONTAINER) 
+        if (h->object()->classid() == ECLASSID_CONTAINER)
             return eContainer::cast(h->object());
 
         h = h->next(id);
@@ -143,9 +143,9 @@ eContainer *eContainer::nextc(
 
   @brief Write container content to stream.
 
-  The eContainer::writer() function serializes the container to stream. This writes only the 
+  The eContainer::writer() function serializes the container to stream. This writes only the
   content, use eObject::write() to save also class information, attachements, etc.
-  
+
   @param  stream The stream to write to.
   @param  flags Serialization flags.
 
@@ -156,8 +156,8 @@ eContainer *eContainer::nextc(
 ****************************************************************************************************
 */
 eStatus eContainer::writer(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Increment if new serialized items are added to the object,
        and check for new version's items in read() function.
@@ -165,7 +165,7 @@ eStatus eContainer::writer(
     const os_int version = 0;
     eObject *child;
 
-	/* Begin the object and write version number.
+    /* Begin the object and write version number.
      */
     if (stream->write_begin_block(version)) goto failed;
 
@@ -180,7 +180,7 @@ eStatus eContainer::writer(
         child->write(stream, flags);
     }
 
-	/* End the object.
+    /* End the object.
      */
     if (stream->write_end_block()) goto failed;
 
@@ -200,10 +200,10 @@ failed:
 
   @brief Read container content from stream.
 
-  The eContainer::reader() function reads serialized container from stream. This function 
-  reads only the object content. To read whole object including attachments, names, etc, 
+  The eContainer::reader() function reads serialized container from stream. This function
+  reads only the object content. To read whole object including attachments, names, etc,
   use eObject::read().
-  
+
   @param  stream The stream to read from.
   @param  flags Serialization flags.
 
@@ -214,15 +214,15 @@ failed:
 ****************************************************************************************************
 */
 eStatus eContainer::reader(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Used to check which versions item's are in serialized data.
      */
     os_int version;
     os_long count;
 
-	/* Read object start mark and version number.
+    /* Read object start mark and version number.
      */
     if (stream->read_begin_block(&version)) goto failed;
 
@@ -237,7 +237,7 @@ eStatus eContainer::reader(
         read(stream, flags);
     }
 
-	/* End the object.
+    /* End the object.
      */
     if (stream->read_end_block()) goto failed;
 
@@ -259,7 +259,7 @@ failed:
   @brief Write container specific content to stream as JSON.
 
   The eContainer::json_writer() function writes class specific object content to stream as JSON.
-  
+
   @param  stream The stream to write to.
   @param  sflags Serialization flags. Typically EOBJ_SERIALIZE_DEFAULT.
   @param  indent Indentation depth, 0, 1... Writes 2x this spaces at beginning of a line.
@@ -271,7 +271,7 @@ failed:
 ****************************************************************************************************
 */
 eStatus eContainer::json_writer(
-    eStream *stream, 
+    eStream *stream,
     os_int sflags,
     os_int indent)
 {
@@ -320,7 +320,7 @@ void eContainer::clear()
 {
     eObject *o;
 
-    while (o = first())
+    while ((o = first()))
     {
         delete(o);
     }

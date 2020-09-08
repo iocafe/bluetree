@@ -8,9 +8,9 @@
 
   The thread object is the root of thread's object tree.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -25,8 +25,8 @@ typedef struct
      */
     eThread *thread;
 
-	/** Parameters for new thread.
-	 */
+    /** Parameters for new thread.
+     */
     eContainer *params;
 }
 eThreadParameters;
@@ -36,7 +36,7 @@ eThreadParameters;
  */
 static void ethread_func(
     void *prm,
-	osalEvent done);
+    osalEvent done);
 
 
 
@@ -52,12 +52,12 @@ static void ethread_func(
 ****************************************************************************************************
 */
 eThread::eThread(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eObject(parent, id, flags)
 {
-    /* Create thread triggger. 
+    /* Create thread triggger.
      */
     m_trigger = osal_event_create();
 
@@ -100,7 +100,7 @@ eThread::~eThread()
   @brief Add eVariable to class list and class'es properties to it's property set.
 
   The eVariable::setupclass function adds eVariable to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier, 
+  it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
@@ -121,13 +121,13 @@ void eThread::setupclass()
 /**
 ****************************************************************************************************
 
-  @brief Function to process incoming messages. 
+  @brief Function to process incoming messages.
 
   The eObject::onmessage function handles messages received by object.
-  
+
   @param   envelope Message envelope. Contains command, target and source paths and
            message content, etc.
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
@@ -168,11 +168,11 @@ void eThread::start(
     eThreadHandle *thandle,
     eContainer *params)
 {
-    eThreadParameters 
-		prmstruct;
+    eThreadParameters
+        prmstruct;
 
-	osalThreadHandle
-		*handle;
+    osalThread
+        *handle;
 
     /* Save unique name into handle for controlling thread trough handle.
      */
@@ -187,15 +187,15 @@ void eThread::start(
     {
         prmstruct.params = eContainer::cast(params->clone(this, EOID_INTERNAL));
     }
-    
-    handle = osal_thread_create(ethread_func, &prmstruct, OSAL_THREAD_ATTACHED, 0, "threadnamehere");
+
     if (thandle)
     {
+        handle = osal_thread_create(ethread_func, &prmstruct, OS_NULL, OSAL_THREAD_ATTACHED);
         thandle->set_osal_handle(handle);
     }
     else
     {
-        osal_thread_release_handle(handle);
+        osal_thread_create(ethread_func, &prmstruct, OS_NULL, OSAL_THREAD_DETACHED);
     }
 }
 
@@ -209,7 +209,7 @@ void eThread::start(
 
   @param   prm Pointer to parameters for new thread. This pointer must can be used only
            before "done" event is set. This can be OS_NULL if no parameters are needed.
-  @param   done Event to set when parameters have been copied to entry point 
+  @param   done Event to set when parameters have been copied to entry point
            functions own memory.
 
   @return  None.
@@ -218,7 +218,7 @@ void eThread::start(
 */
 static void ethread_func(
     void *prm,
-	osalEvent done)
+    osalEvent done)
 {
     eThreadParameters
         prmstruct;
@@ -242,7 +242,7 @@ static void ethread_func(
     /* Finish with thread
      */
     prmstruct.thread->finish();
-    
+
     /* Delete the thread object.
      */
     delete prmstruct.thread;
@@ -255,7 +255,7 @@ void eThread::run()
     {
         alive();
     }
-} 
+}
 
 
 /**
@@ -332,9 +332,9 @@ void eThread::alive(
     {
         /* Synchronize and get message (envelope) from queue.
          */
-	    os_lock();
+        os_lock();
         envelope = eEnvelope::cast(m_message_queue->first());
-        if (envelope) 
+        if (envelope)
         {
             adopt(envelope, EOID_CHILD, EOBJ_NO_MAP);
 
@@ -342,7 +342,7 @@ void eThread::alive(
              */
             envelope->addmflags(EMSG_INTERTHREAD);
         }
-	    os_unlock();
+        os_unlock();
 
         /* If no message, do nothing more.
          */
@@ -355,5 +355,5 @@ void eThread::alive(
         /* Finished with envelope.
          */
         delete envelope;
-    }           
-} 
+    }
+}

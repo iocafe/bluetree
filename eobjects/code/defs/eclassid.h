@@ -8,9 +8,9 @@
 
   This header file defines class identifiers used by eobjects library.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -24,7 +24,7 @@
 
   @name Class identifiers used by eobjects library.
 
-  Each serializable eobjects library class has it's own class identifier. These may not be 
+  Each serializable eobjects library class has it's own class identifier. These may not be
   modified, would break serialization.
 
 ****************************************************************************************************
@@ -48,9 +48,10 @@
 #define ECLASSID_THREAD 23
 #define ECLASSID_THREAD_HANDLE 24
 #define ECLASSID_STREAM 25
+#define ECLASSID_OSSTREAM 50
 #define ECLASSID_QUEUE 27
-#define ECLASSID_FILE 29
-#define ECLASSID_CONSOLE 29
+// #define ECLASSID_FILE 28
+// #define ECLASSID_CONSOLE 29
 #define ECLASSID_CONNECTION 30
 #define ECLASSID_ENDPOINT 31
 #define ECLASSID_TIMER 32
@@ -59,7 +60,6 @@
 #define ECLASSID_BINDING 35
 
 
-#define ECLASSID_SOCKET 50
 #define ECLASSID_NETSERVICE 51
 #define ECLASSID_NETCLIENT 52
 

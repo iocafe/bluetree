@@ -6,12 +6,12 @@
   @version 1.0
   @date    17.5.2016
 
-  All global variables are placed in global structure, so it is eanough to pass to eglobal pointer 
+  All global variables are placed in global structure, so it is eanough to pass to eglobal pointer
   to Windows DLL to share eccess to globals.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -87,7 +87,7 @@ typedef struct eGlobal
 
     /** Console stream for debug output.
      */
-    eConsole *console;
+    // eConsole *console;
 
     /** Name of the process, like "grumpy".
      */
@@ -132,7 +132,7 @@ eGlobal;
  */
 extern eGlobal *eglobal;
 
-inline eNameSpace *eglobal_process_ns() 
+inline eNameSpace *eglobal_process_ns()
 {
     osal_debug_assert(eglobal->process_ns);
     return eglobal->process_ns;
@@ -145,10 +145,6 @@ inline eHandle *eget_handle(
 {
     return eglobal->hroot.m_table[oix >> EHANDLE_HANDLE_BITS]->m_handle + (oix & EHANDLE_TABLE_MAX);
 }
-
-/* Nicer name for console stream as debug output
- */
-#define econsole (*(eglobal->console))
 
 
 #endif

@@ -14,7 +14,7 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "eobjects/extensions/netservice/enetservice.h"
+#include "extensions/netservice/enetservice.h"
 
 
 /**
@@ -29,12 +29,12 @@
 ****************************************************************************************************
 */
 eNetService::eNetService(
-	eObject *parent,
-	e_oid oid,
-	os_int flags)
+    eObject *parent,
+    e_oid oid,
+    os_int flags)
     : eThread(parent, oid, flags)
 {
-	initproperties();
+    initproperties();
 }
 
 
@@ -70,7 +70,7 @@ eNetService::~eNetService()
 ****************************************************************************************************
 */
 eObject *eNetService::clone(
-    eObject *parent, 
+    eObject *parent,
     e_oid id,
     os_int aflags)
 {
@@ -87,7 +87,7 @@ eObject *eNetService::clone(
   @brief Add the class to class list and class'es properties to it's property set.
 
   The eVariable::setupclass function adds the class to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier, 
+  it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 

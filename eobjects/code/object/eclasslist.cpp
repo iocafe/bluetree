@@ -8,9 +8,9 @@
 
   Maintain list of classes which can be created dynamically by class ID.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -32,7 +32,7 @@
 ****************************************************************************************************
 */
 void eclasslist_add(
-    os_int cid, 
+    os_int cid,
     eNewObjFunc nfunc,
     const os_char *classname)
 {
@@ -91,7 +91,7 @@ eNewObjFunc eclasslist_newobj(
     {
         nfunc = (eNewObjFunc)pointer->getp();
     }
-    else 
+    else
     {
         osal_debug_error("eclasslist_newobj: Class not found");
     }
@@ -126,7 +126,7 @@ os_char *eclasslist_classname(
         name = pointer->firstn(EOID_NAME);
         if (name) namestr = name->gets();
     }
-    else 
+    else
     {
         osal_debug_error("eclasslist_newobj: Class not found");
     }
@@ -150,29 +150,29 @@ void eclasslist_initialize()
     eglobal->root = new eContainer();
     eglobal->classlist = new eContainer(eglobal->root);
     eglobal->classlist->ns_create();
-    
+
     eglobal->propertysets = new eContainer(eglobal->root);
     eglobal->empty = new eVariable();
 
-    /* eVariable should be first to add to class list followed by then eSet and eContainer. 
+    /* eVariable should be first to add to class list followed by then eSet and eContainer.
        Reason is that these same classes are used to store description of classes, including
        themselves.
      */
-    eVariable::setupclass(); 
-    eSet::setupclass(); 
-    eContainer::setupclass(); 
-    eConsole::setupclass();
-    eName::setupclass(); 
-    eEnvelope::setupclass(); 
+    eVariable::setupclass();
+    eSet::setupclass();
+    eContainer::setupclass();
+    eName::setupclass();
+    eEnvelope::setupclass();
     ePropertyBinding::setupclass();
-    eTimer::setupclass(); 
-    eQueue::setupclass(); 
+    eTimer::setupclass();
+    eQueue::setupclass();
     eBuffer::setupclass();
     eTable::setupclass();
     eMatrix::setupclass();
     eConnection::setupclass();
-    eEndPoint::setupclass(); 
+    eEndPoint::setupclass();
     eThread::setupclass();
+    eOsStream::setupclass();
 }
 
 
@@ -181,7 +181,7 @@ void eclasslist_initialize()
 
   @brief Free memory allocated for class list, property sets, etc.
 
-  The eclasslist_release function should be called when all thread except current one have 
+  The eclasslist_release function should be called when all thread except current one have
   been terminated.
 
 ****************************************************************************************************

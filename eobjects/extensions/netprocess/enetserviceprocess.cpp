@@ -6,16 +6,15 @@
   @version 1.0
   @date    8.9.2020
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "eobjects/extensions/netprocess/enetprocess.h"
-#include "eobjects/extensions/socket/esocket.h"
+#include "extensions/netprocess/enetprocess.h"
 
 /**
 ****************************************************************************************************
@@ -48,10 +47,6 @@ void enet_start_service_process(
      */
     process_id = argc >= 2 ? argv[1] : "0";
     enet_service_ip_address = argc >= 3 ? argv[2] : OS_NULL;
-
-    /* Setup optional classes needed by this application.
-     */
-    eSocket::setupclass();
 
     /* Initialize this as enet process. First argument is process name and second argument
        is process identification number.

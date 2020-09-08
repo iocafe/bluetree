@@ -109,9 +109,9 @@ eWhereOp;
 ****************************************************************************************************
 */
 eWhere::eWhere(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eObject(parent, id, flags)
 {
     /* Create container for variables and enable name space for it.
@@ -611,7 +611,7 @@ os_boolean eWhere::number_or_column_name()
         }
         else
         {
-             d = osal_string_to_double(m_pos, &nbytes);
+             d = osal_str_to_double(m_pos, &nbytes);
         }
         if (nbytes == 0)
         {
@@ -1234,6 +1234,9 @@ skipconv:
             }
             break;
 
+        default:
+            osal_debug_error("Unsupported data type");
+            break;
     }
 
     return ESTATUS_SUCCESS;
@@ -1272,6 +1275,9 @@ void eWhere::changedatatype(
                 case OS_DOUBLE:
                     item->value.l = eround_double_to_long(item->value.d);
                     break;
+
+                default:
+                    break;
             }
             break;
 
@@ -1279,11 +1285,14 @@ void eWhere::changedatatype(
             switch (item->datatype)
             {
                 case OS_STR:
-                    item->value.d = osal_string_to_double(item->value.s, OS_NULL);
+                    item->value.d = osal_str_to_double(item->value.s, OS_NULL);
                     break;
 
                 case OS_LONG:
                     item->value.d = (os_double)item->value.l;
+                    break;
+
+                default:
                     break;
             }
             break;
@@ -1302,7 +1311,14 @@ void eWhere::changedatatype(
                     tmp->setl(item->value.l);
                     item->value.s = tmp->gets();
                     break;
+
+                default:
+                    break;
             }
+            break;
+
+        default:
+            osal_debug_error("Unsupported data type");
             break;
     }
     item->datatype = datatype;

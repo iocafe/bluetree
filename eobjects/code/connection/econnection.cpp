@@ -4,7 +4,7 @@
   @brief   Connection base class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    17.5.2016
+  @date    17.5.2020
 
   The eConnection class is part of message envelope transport from process to another, either
   within computer or in network. For a process to listen for connections from an another process
@@ -52,7 +52,7 @@ eConnection::eConnection(
     os_int flags)
     : eThread(parent, id, flags)
 {
-    m_stream_classid = ECLASSID_SOCKET;
+    m_stream_classid = ECLASSID_OSSTREAM;
     m_ipaddr = new eVariable(this);
     m_stream = OS_NULL;
     m_initbuffer = new eContainer(this);
@@ -291,7 +291,7 @@ void eConnection::onmessage(
          */
         if (m_connected)
         {
-            if (os_elapsed(&m_last_send, 20000))
+            if (os_has_elapsed(&m_last_send, 20000))
             {
                 if (m_stream->writechar(E_STREAM_KEEPALIVE))
                 {
@@ -391,16 +391,11 @@ void eConnection::run()
              */
             m_stream->select(&m_stream, 1, trigger(), &selectdata, OSAL_STREAM_DEFAULT);
 
-            if (selectdata.errorcode)
-            {
-                close();
-                continue;
-            }
 
             /* Handle thread events. If thread's message queue is becomes empty, we
                flush the socket writes.
              */
-            if (selectdata.eventflags & OSAL_STREAM_CUSTOM_EVENT)
+   //         if (selectdata.eventflags & OSAL_STREAM_CUSTOM_EVENT)
             {
                 /* Call alive() to process messages.
                  */
@@ -427,7 +422,7 @@ void eConnection::run()
 
             /* Stream connected.
              */
-            if (selectdata.eventflags & OSAL_STREAM_CONNECT_EVENT)
+ //           if (selectdata.eventflags & OSAL_STREAM_CONNECT_EVENT)
             {
                 if (connected())
                 {
@@ -439,7 +434,7 @@ void eConnection::run()
             /* Data received, send objects though messaging once full message is received
                (see flush count).
              */
-            if (selectdata.eventflags & OSAL_STREAM_READ_EVENT)
+//            if (selectdata.eventflags & OSAL_STREAM_READ_EVENT)
             {
                 /* Read objects, as long we have whole objects to read.
                  */

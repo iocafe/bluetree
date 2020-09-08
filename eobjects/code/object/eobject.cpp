@@ -6,24 +6,24 @@
   @version 1.0
   @date    8.9.2020
 
-  The eObject is base class for all objects. 
-  
+  The eObject is base class for all objects.
+
   - Functions to manage object hierarchy and idenfify objects.
-  
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+
+  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
 
-/** 
+/**
 ****************************************************************************************************
 
-  A red-black tree is a type of self-balancing binary search tree typically used to implement 
-  associative arrays. It has O(log n) worst-case time for each operation and is quite efficient 
-  in practice. Unfortunately, it's also quite complex to implement, requiring a number of subtle 
+  A red-black tree is a type of self-balancing binary search tree typically used to implement
+  associative arrays. It has O(log n) worst-case time for each operation and is quite efficient
+  in practice. Unfortunately, it's also quite complex to implement, requiring a number of subtle
   cases for both insertion and deletion.
 
 
@@ -51,9 +51,9 @@ os_char eobj_this_ns[] = E_THIS_NS;
   @param   parent Pointer to parent object, or OS_NULL if the object is an orphan. If parent
            object is specified, the object will be deleted when parent is deleted.
   @param   id Object identifier for new object. If not specified, defauls to EOID_ITEM (-1),
-		   which is generic list item. 
-  
-  @param   flags 
+           which is generic list item.
+
+  @param   flags
 
   @return  None.
 
@@ -62,7 +62,7 @@ os_char eobj_this_ns[] = E_THIS_NS;
 eObject::eObject(
     eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
 {
     eRoot *root;
 
@@ -71,25 +71,25 @@ eObject::eObject(
 
     mm_parent = parent;
 
-	/* If this if not primitive object? 
-	 */
+    /* If this if not primitive object?
+     */
     if (id != EOID_ITEM || parent != OS_NULL)
-	{
-		/* No parent, allocate root object?
-		 */
-		if (parent == OS_NULL)
-		{
-			/* Allocate root helper object hand two handles. 
-			 */
+    {
+        /* No parent, allocate root object?
+         */
+        if (parent == OS_NULL)
+        {
+            /* Allocate root helper object hand two handles.
+             */
             makeroot(id, flags);
-		}
+        }
 
-		/* If not root object constructor?
-		   Otherwise normal child object.  Copy parent's root object pointer
-		   and allocate handle for the new child object object.
-		*/
+        /* If not root object constructor?
+           Otherwise normal child object.  Copy parent's root object pointer
+           and allocate handle for the new child object object.
+        */
         else if (id != EOID_ROOT_HELPER)
-		{
+        {
             /* If parent has no root helper object, create one
              */
             if (parent->mm_handle == OS_NULL)
@@ -97,10 +97,10 @@ eObject::eObject(
                 parent->makeroot(EOID_ITEM, EOBJ_DEFAULT);
             }
 
-			root = parent->mm_handle->m_root;
+            root = parent->mm_handle->m_root;
             root->newhandle(this, parent, id, flags);
-		}
-	}
+        }
+    }
 }
 
 
@@ -111,30 +111,30 @@ eObject::eObject(
 
   The eObject::makeroot() function...
   This object is pointer to tree root (not helper).
- 
+
   @return  None.
 
 ****************************************************************************************************
 */
 void eObject::makeroot(
     e_oid id,
-	os_int flags)
+    os_int flags)
 {
     eRoot *root;
 
-	/* Allocate root helper object. 
-	*/
-	root = new eRoot(this, EOID_ROOT_HELPER,
-		EOBJ_IS_ATTACHMENT | EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
+    /* Allocate root helper object.
+    */
+    root = new eRoot(this, EOID_ROOT_HELPER,
+        EOBJ_IS_ATTACHMENT | EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
 
-	/* Allocate handle for this object
-	 */
+    /* Allocate handle for this object
+     */
     root->newhandle(this, OS_NULL, id, flags);
 
-	/* Allocate handle for the root helper object.
-	 */
-	root->newhandle(root, this, EOID_ROOT_HELPER, 
-		EOBJ_IS_ATTACHMENT | EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
+    /* Allocate handle for the root helper object.
+     */
+    root->newhandle(root, this, EOID_ROOT_HELPER,
+        EOBJ_IS_ATTACHMENT | EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
 }
 
 
@@ -155,11 +155,11 @@ eObject::~eObject()
     /* if (m_parent)
     {
         m_parent->onchilddetach();
-	} */
+    } */
 
     /* Delete child objects.
      */
-	if (mm_handle) 
+    if (mm_handle)
     {
         os_lock();
 
@@ -177,7 +177,7 @@ eObject::~eObject()
              */
             /* if (mm_handle->m_parent)
             {
-			    mm_handle->m_parent->rbtree_remove(mm_handle);
+                mm_handle->m_parent->rbtree_remove(mm_handle);
             } */
             if (mm_parent)
             {
@@ -205,11 +205,11 @@ eObject::~eObject()
 ****************************************************************************************************
 */
 eObject *eObject::clone(
-    eObject *parent, 
+    eObject *parent,
     e_oid id,
     os_int aflags)
 {
-	osal_debug_error("clone() not supported for the class");
+    osal_debug_error("clone() not supported for the class");
     return OS_NULL;
 }
 
@@ -245,7 +245,7 @@ void eObject::clonegeneric(
          handle;
          handle = handle->next())
     {
-        if (((handle->m_oflags & EOBJ_IS_ATTACHMENT) || 
+        if (((handle->m_oflags & EOBJ_IS_ATTACHMENT) ||
              (aflags & EOBJ_CLONE_ALL_CHILDREN)) &&
              (handle->m_oflags & EOBJ_NOT_CLONABLE) == 0)
         {
@@ -267,7 +267,7 @@ void eObject::clonegeneric(
 
   @brief Allocate new object of any listed class.
 
-  The eObject::newobject function looks from global class list by class identifier. If static 
+  The eObject::newobject function looks from global class list by class identifier. If static
   constructor member function corresponding to classid given as argument is found, then an
   object of that class is created as child object if this object.
 
@@ -281,7 +281,7 @@ eObject *eObject::newobject(
     eObject *parent,
     os_int cid,
     e_oid id,
-	os_int flags) 
+    os_int flags)
 {
     eNewObjFunc func;
 
@@ -310,16 +310,16 @@ eObject *eObject::newobject(
 ****************************************************************************************************
 */
 void *eObject::operator new(
-	size_t size)
+    size_t size)
 {
-	os_char *buf;
-		
-	size += sizeof(os_memsz);
-	buf = os_malloc((os_memsz)size, OS_NULL);
+    os_char *buf;
 
-	*(os_memsz*)buf = (os_memsz)size;
+    size += sizeof(os_memsz);
+    buf = os_malloc((os_memsz)size, OS_NULL);
 
-	return buf + sizeof(os_memsz);
+    *(os_memsz*)buf = (os_memsz)size;
+
+    return buf + sizeof(os_memsz);
 }
 #endif
 
@@ -337,13 +337,13 @@ void *eObject::operator new(
 ****************************************************************************************************
 */
 void eObject::operator delete(
-	void *buf)
+    void *buf)
 {
-	if (buf)
-	{
-		buf = (os_char*)buf - sizeof(os_memsz);
-		os_free(buf, *(os_memsz*)buf);
-	}
+    if (buf)
+    {
+        buf = (os_char*)buf - sizeof(os_memsz);
+        os_free(buf, *(os_memsz*)buf);
+    }
 }
 #endif
 
@@ -356,22 +356,22 @@ void eObject::operator delete(
   The eObject::childcount() function returns pointer number of children. Argument oid specified
   wether to count attachment in or to count children only with specific id.
 
-  @param   oid Object idenfifier. Default value EOID_CHILD specifies to count a child objects, 
-		   which are not flagged as an attachment. Value EOID_ALL specifies to get count all 
+  @param   oid Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
            child objects, regardless wether these are attachment or not. Other values
-		   specify object identifier, only children with that specified object identifier 
+           specify object identifier, only children with that specified object identifier
            are counted.
 
   @return  Number of child objects.
 
 ****************************************************************************************************
 */
-	/* os_long childcount(
+    /* os_long childcount(
         e_oid id = EOID_CHILD)
-	{
-		if (mm_handle) return mm_handle->childcount(oid);
-		return 0;
-	} */
+    {
+        if (mm_handle) return mm_handle->childcount(oid);
+        return 0;
+    } */
 
 
 /**
@@ -387,12 +387,12 @@ void eObject::operator delete(
   - "@15" oix=15, ucnt = 0
 
   @param  buf Buffer for resulting string. Recommended size is E_OIXSTR_BUF_SZ.
-  @return Size of buffer in bytes. 
+  @return Size of buffer in bytes.
 
 ****************************************************************************************************
 */
 void eObject::oixstr(
-    os_char *buf, 
+    os_char *buf,
     os_memsz bufsz)
 {
     os_int pos, ucnt;
@@ -401,14 +401,14 @@ void eObject::oixstr(
 
     pos = 0;
     buf[pos++] = '@';
-    pos += (os_int)osal_int_to_string(buf+pos, bufsz-pos, mm_handle->oix()) - 1;
-    if (pos < sizeof(buf)-1) 
+    pos += (os_int)osal_int_to_str(buf+pos, bufsz-pos, mm_handle->oix()) - 1;
+    if (pos < sizeof(buf)-1)
     {
         ucnt = mm_handle->ucnt();
         if (ucnt)
         {
             buf[pos++] = '_';
-            pos += (os_int)osal_int_to_string(buf+pos, bufsz-pos, mm_handle->ucnt()) - 1;
+            pos += (os_int)osal_int_to_str(buf+pos, bufsz-pos, mm_handle->ucnt()) - 1;
         }
     }
 }
@@ -419,10 +419,10 @@ void eObject::oixstr(
 
   @brief Parse oix and ucnt to string.
 
-  The eObject::oixparse function parses object index and use counter from string. See 
+  The eObject::oixparse function parses object index and use counter from string. See
   eObject::oixstr() function.
 
-  @param  str Pointer to string to parse. 
+  @param  str Pointer to string to parse.
    buf Buffer for resulting string. Recommended size is E_OIXSTR_BUF_SZ.
   @return Number of characters parsed to skip over. Zero if the function failed.
 
@@ -430,7 +430,7 @@ void eObject::oixstr(
 */
 os_short eObject::oixparse(
     os_char *str,
-    e_oix *oix, 
+    e_oix *oix,
     os_int *ucnt)
 {
     os_memsz count;
@@ -443,7 +443,7 @@ os_short eObject::oixparse(
     *oix = (e_oix)osal_str_to_int(p, &count);
     if (count == 0) goto failed;
     p += count;
-    if (*p != '_') 
+    if (*p != '_')
     {
         *ucnt = 0;
         return (os_short)(p - str);
@@ -474,18 +474,18 @@ failed:
 
 ****************************************************************************************************
 */
-eThread *eObject::thread() 
+eThread *eObject::thread()
 {
-	if (mm_handle) 
+    if (mm_handle)
     {
         eObject *o = mm_handle->m_root->parent();
         osal_debug_assert(o);
-        
+
         /* If this is thread, return pointer.
          */
         if (o->isthread()) return (eThread*)o;
     }
-	return OS_NULL;
+    return OS_NULL;
 }
 
 /**
@@ -496,9 +496,9 @@ eThread *eObject::thread()
   The eObject::first() function returns pointer to the first child object of this object.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
-		   which are not flagged as an attachment. Value EOID_ALL specifies to get count all 
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
            child objects, regardless wether these are attachment or not. Other values
-		   specify object identifier, only children with that specified object identifier 
+           specify object identifier, only children with that specified object identifier
            are searched for.
 
   @return  Pointer to the first child object, or OS_NULL if none found.
@@ -508,10 +508,10 @@ eThread *eObject::thread()
 eObject *eObject::first(
     e_oid id)
 {
-	if (mm_handle == OS_NULL) return OS_NULL;
+    if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->first(id);
-	if (h == OS_NULL) return OS_NULL;
-	return h->m_object;
+    if (h == OS_NULL) return OS_NULL;
+    return h->m_object;
 }
 
 
@@ -523,9 +523,9 @@ eObject *eObject::first(
   The eObject::firstv() function returns pointer to the first child variable of this object.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
-		   which are not flagged as an attachment. Value EOID_ALL specifies to get count all 
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
            child objects, regardless wether these are attachment or not. Other values
-		   specify object identifier, only children with that specified object identifier 
+           specify object identifier, only children with that specified object identifier
            are searched for.
 
   @return  Pointer to the first child variable. Or OS_NULL if none found.
@@ -535,11 +535,11 @@ eObject *eObject::first(
 eVariable *eObject::firstv(
     e_oid id)
 {
-	if (mm_handle == OS_NULL) return OS_NULL;
+    if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->first(id);
     while (h)
     {
-        if (h->m_object->classid() == ECLASSID_VARIABLE) 
+        if (h->m_object->classid() == ECLASSID_VARIABLE)
             return eVariable::cast(h->m_object);
 
         h = h->next(id);
@@ -556,9 +556,9 @@ eVariable *eObject::firstv(
   The eObject::firstc() function returns pointer to the first child container of this object.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
-		   which are not flagged as an attachment. Value EOID_ALL specifies to get count all 
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
            child objects, regardless wether these are attachment or not. Other values
-		   specify object identifier, only children with that specified object identifier 
+           specify object identifier, only children with that specified object identifier
            are searched for.
 
   @return  Pointer to the first child container. Or OS_NULL if none found.
@@ -568,11 +568,11 @@ eVariable *eObject::firstv(
 eContainer *eObject::firstc(
     e_oid id)
 {
-	if (mm_handle == OS_NULL) return OS_NULL;
+    if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->first(id);
     while (h)
     {
-        if (h->object()->classid() == ECLASSID_CONTAINER) 
+        if (h->object()->classid() == ECLASSID_CONTAINER)
             return eContainer::cast(h->m_object);
 
         h = h->next(id);
@@ -589,9 +589,9 @@ eContainer *eObject::firstc(
   The eObject::firstn() function returns pointer to the first child name of this object.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
-		   which are not flagged as an attachment. Value EOID_ALL specifies to get count all 
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
            child objects, regardless wether these are attachment or not. Other values
-		   specify object identifier, only children with that specified object identifier 
+           specify object identifier, only children with that specified object identifier
            are searched for.
 
   @return  Pointer to the first child name. Or OS_NULL if none found.
@@ -601,11 +601,11 @@ eContainer *eObject::firstc(
 eName *eObject::firstn(
     e_oid id)
 {
-	if (mm_handle == OS_NULL) return OS_NULL;
+    if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->first(id);
     while (h)
     {
-        if (h->object()->classid() == ECLASSID_NAME) 
+        if (h->object()->classid() == ECLASSID_NAME)
             return eName::cast(h->m_object);
 
         h = h->next(id);
@@ -619,10 +619,10 @@ eName *eObject::firstn(
 eObject *eObject::last(
     e_oid id)
 {
-	if (mm_handle == OS_NULL) return OS_NULL;
+    if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->last(id);
-	if (h == OS_NULL) return OS_NULL;
-	return h->m_object;
+    if (h == OS_NULL) return OS_NULL;
+    return h->m_object;
 }
 
 
@@ -634,9 +634,9 @@ eObject *eObject::last(
   The eObject::next() function returns pointer to the next child object of this object.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
-		   which are not flagged as an attachment. Value EOID_ALL specifies to get count all 
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
            child objects, regardless wether these are attachment or not. Other values
-		   specify object identifier, only children with that specified object identifier 
+           specify object identifier, only children with that specified object identifier
            are searched for.
 
   @return  Pointer to the first child object, or OS_NULL if none found.
@@ -646,10 +646,10 @@ eObject *eObject::last(
 eObject *eObject::next(
     e_oid id)
 {
-	if (mm_handle == OS_NULL) return OS_NULL;
+    if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->next(id);
-	if (h == OS_NULL) return OS_NULL;
-	return h->m_object;
+    if (h == OS_NULL) return OS_NULL;
+    return h->m_object;
 }
 
 
@@ -658,10 +658,10 @@ eObject *eObject::next(
 eObject *eObject::prev(
     e_oid id)
 {
-	if (mm_handle == OS_NULL) return OS_NULL;
+    if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->prev(id);
-	if (h == OS_NULL) return OS_NULL;
-	return h->m_object;
+    if (h == OS_NULL) return OS_NULL;
+    return h->m_object;
 }
 
 
@@ -671,8 +671,8 @@ eObject *eObject::prev(
   @brief Adopt obeject as child.
 
   The eObject::adopt() function moves on object from it's position in tree structure to
-  an another. 
-  
+  an another.
+
   @param   id EOID_CHILD object identifier unchanged.
   @param   aflags EOBJ_BEFORE_THIS Adopt before this object. EOBJ_NO_MAP not to map names.
   @return  None.
@@ -680,7 +680,7 @@ eObject *eObject::prev(
 ****************************************************************************************************
 */
 void eObject::adopt(
-    eObject *child, 
+    eObject *child,
     e_oid id,
     os_int aflags)
 {
@@ -690,12 +690,12 @@ void eObject::adopt(
 
     /* Make sure that parent object is already part of tree structure.
      */
-	if (mm_handle == OS_NULL) 
+    if (mm_handle == OS_NULL)
     {
         osal_debug_error("adopt(): parent object is not part of tree");
-		return;
+        return;
     }
-    
+
     if (child->mm_handle == OS_NULL)
     {
         sync = OS_FALSE; // || m_root->is_process ???????????????????????????????????????????????????????????????????????
@@ -720,19 +720,19 @@ void eObject::adopt(
          */
         sync = (mm_handle->m_root != childh->m_root);
 
-        if (sync) 
+        if (sync)
         {
             os_lock();
         }
 
-        /* Detach names of child object and it's childen from name spaces 
+        /* Detach names of child object and it's childen from name spaces
            above this object in tree structure.
          */
         child->map(E_DETACH_FROM_NAMESPACES_ABOVE);
 
         /* if (childh->m_parent)
         {
-		    childh->m_parent->rbtree_remove(childh);
+            childh->m_parent->rbtree_remove(childh);
         } */
         if (child->mm_parent)
         {
@@ -743,19 +743,19 @@ void eObject::adopt(
         child->mm_parent = this;
 
         if (id != EOID_CHILD) childh->m_oid = id;
-		childh->m_oflags |= EOBJ_IS_RED;
-		childh->m_left = childh->m_right = childh->m_up = OS_NULL;
-		mm_handle->rbtree_insert(childh);
+        childh->m_oflags |= EOBJ_IS_RED;
+        childh->m_left = childh->m_right = childh->m_up = OS_NULL;
+        mm_handle->rbtree_insert(childh);
         /* childh->m_parent = mm_handle; */
 
-        /* Map names back: If not disabled by user flag EOBJ_NO_MAP, then attach all names of 
-           child object (this) and it's childen to name spaces. If a name is already mapped, 
+        /* Map names back: If not disabled by user flag EOBJ_NO_MAP, then attach all names of
+           child object (this) and it's childen to name spaces. If a name is already mapped,
            it is not remapped.
-           If we are adoprion from a=one tree structure to another (sync is on), we need to set 
+           If we are adoprion from a=one tree structure to another (sync is on), we need to set
            m_root pointer (pointer to eRoot of a tree structure)to all child objects.
          */
         mapflags = sync ? E_SET_ROOT_POINTER : 0;
-        if ((aflags & EOBJ_NO_MAP) == 0) 
+        if ((aflags & EOBJ_NO_MAP) == 0)
         {
             mapflags |= E_ATTACH_NAMES;
         }
@@ -768,7 +768,7 @@ void eObject::adopt(
 
 // mm_root->mm_handle->verify_whole_tree();
 
-    
+
         if (sync) os_unlock();
     }
 }
@@ -781,7 +781,7 @@ void eObject::adopt(
 
   The eObject::ns_create() function creates a name space for object. If object already
   has name space...
-  
+
   @param   namespace_id Identifier for the name space.
   @return  None.
 
@@ -790,41 +790,41 @@ void eObject::adopt(
 void eObject::ns_create(
     const os_char *namespace_id)
 {
-	eNameSpace *ns;
+    eNameSpace *ns;
 
-	/* If object has already name space.
-	 */
-	ns = eNameSpace::cast(first(EOID_NAMESPACE));
-	if (ns)
-	{
-		/* If namespace identifier matches, just return.
-		 */
+    /* If object has already name space.
+     */
+    ns = eNameSpace::cast(first(EOID_NAMESPACE));
+    if (ns)
+    {
+        /* If namespace identifier matches, just return.
+         */
         if (ns->namespaceid())
         {
             if (!os_strcmp(namespace_id, ns->namespaceid()->gets()))
                 return;
         }
 
-		/* Delete old name space.
+        /* Delete old name space.
            We should keep ot if we want to have multiple name spaces???
-		 */
-		delete ns;
+         */
+        delete ns;
         ns->setnamespaceid(OS_NULL);
-	}
+    }
 
-	/* Create name space.
-	 */
-	// ns = eNameSpace::newobj(this, EOID_NAMESPACE);
-	ns = new eNameSpace(this, EOID_NAMESPACE);
+    /* Create name space.
+     */
+    // ns = eNameSpace::newobj(this, EOID_NAMESPACE);
+    ns = new eNameSpace(this, EOID_NAMESPACE);
     if (namespace_id)
     {
         ns->setnamespaceid(new eVariable(ns));
         ns->namespaceid()->sets(namespace_id);
     }
 
-	/* Remap names in child objects ??? Do we need this. In practise name space is created 
-	   before placing children in?
-	 */
+    /* Remap names in child objects ??? Do we need this. In practise name space is created
+       before placing children in?
+     */
 }
 
 
@@ -834,14 +834,14 @@ void eObject::ns_create(
   @brief Delete name space of this object.
 
   The eObject::ns_delete() function deletes name space of this object.
-  
+
   @return  None.
 
 ****************************************************************************************************
 */
 void eObject::ns_delete()
 {
-	delete first(EOID_NAMESPACE);
+    delete first(EOID_NAMESPACE);
 }
 
 
@@ -852,9 +852,9 @@ void eObject::ns_delete()
 
   The eObject::ns_first() function finds the first eName object matching to name. If name
   is OS_NULL, the function returns the first name in namespace (if any).
-  Name may contain name space identifier, for example "myid/myname" in which case the name 
+  Name may contain name space identifier, for example "myid/myname" in which case the name
   space identifier given as argumenr is ignored.
-  
+
   @param   name Pointer to eVariable or eName, holding name to search for. Name can be prefixed
            by name space identifier. If OS_NULL, then pointer to first name in name space
            is returned.
@@ -887,10 +887,10 @@ eName *eObject::ns_first(
 
   The eObject::ns_firstv() function finds the first eName object matching to name. If name
   is OS_NULL, the function returns the first name in namespace (if any).
-  Name may contain name space identifier, for example "myid/myname" in which case the name 
+  Name may contain name space identifier, for example "myid/myname" in which case the name
   space identifier given as argumenr is ignored.
-  
-  @param   name String name to search for. Name can be prefixed by name space identifier. 
+
+  @param   name String name to search for. Name can be prefixed by name space identifier.
            If OS_NULL, then pointer to first name in name space is returned.
   @param   Name space identifier string. OS_NULL to specify name space of this object.
   @return  Pointer to name. OS_NULL if none found.
@@ -910,7 +910,7 @@ eName *eObject::ns_firstv(
 
     /* String type may contain name space prefix, check for it.
      */
-    if (name) if (name->type() == OS_STR) 
+    if (name) if (name->type() == OS_STR)
     {
         p = name->gets();
         q = os_strechr(p, '/');
@@ -927,7 +927,7 @@ eName *eObject::ns_firstv(
     }
 
     /* Find name space.
-     */    
+     */
     ns = findnamespace(namespace_id);
     if (ns == OS_NULL) return OS_NULL;
 
@@ -937,7 +937,7 @@ eName *eObject::ns_firstv(
 
     /* Cleanup and return.
      */
-    if (tmp_name) 
+    if (tmp_name)
     {
         delete tmp_name;
         delete tmp_id;
@@ -951,11 +951,11 @@ eName *eObject::ns_firstv(
 
   @brief Find object by name.
 
-  The eObject::ns_get() function finds the first named object matching to name in speficied 
+  The eObject::ns_get() function finds the first named object matching to name in speficied
   namespace. If name is OS_NULL, the function returns the first name in namespace
-  (if any).  Name may contain name space identifier, for example "myid/myname" in which case 
+  (if any).  Name may contain name space identifier, for example "myid/myname" in which case
   the name space identifier given as argumenr is ignored.
-  
+
   @param   name Pointer to eVariable or eName, holding name to search for. Name can be prefixed
            by name space identifier. If OS_NULL, then pointer to first name in name space
            is returned.
@@ -1007,16 +1007,16 @@ eContainer *eObject::ns_getc(
 
   The eObject::findnamespace() function adds name to this object and maps it to name space.
 
-  - When looking for parent namespace with "..", the function returns next namespace ABOVE this 
+  - When looking for parent namespace with "..", the function returns next namespace ABOVE this
     object. If this object has name space, it will not be returned.
   - When searching by name space identifier, the first name with matching identifier is returned.
     This can be object's (this) own name space.
 
   @param  namespace_id Identifier for the name space. OS_NULL refers to first parent name space,
           regardless of name space identifier.
-  @param  info Pointer where to set information bits. OS_NULL if not needed. 
-          E_INFO_PROCES_NS bit indicates that the name space is process namespace. 
-          E_INFO_ABOVE_CHECKPOINT bit indicates that name space is above check point in tree 
+  @param  info Pointer where to set information bits. OS_NULL if not needed.
+          E_INFO_PROCES_NS bit indicates that the name space is process namespace.
+          E_INFO_ABOVE_CHECKPOINT bit indicates that name space is above check point in tree
           structure.
   @param  checkpoint Pointer to object in tree structure to check if name space is above this one.
           OS_NULL if not needed.
@@ -1029,7 +1029,7 @@ eNameSpace *eObject::findnamespace(
     os_int *info,
     eObject *checkpoint)
 {
-	eNameSpace *ns;
+    eNameSpace *ns;
     eHandle *h, *ns_h;
     os_boolean getparent;
 
@@ -1037,8 +1037,8 @@ eNameSpace *eObject::findnamespace(
      */
     if (info) *info = 0;
 
-	/* If name space id NULL, it is same as parent name space.
-	 */
+    /* If name space id NULL, it is same as parent name space.
+     */
     if (namespace_id == OS_NULL)
     {
         namespace_id = E_PARENT_NS;
@@ -1046,14 +1046,14 @@ eNameSpace *eObject::findnamespace(
 
     switch (*namespace_id)
     {
-	    /* If name space id refers to process name space, just return pointer to it.
-	     */
+        /* If name space id refers to process name space, just return pointer to it.
+         */
         case '/':
             if (info) *info = E_INFO_PROCES_NS|E_INFO_ABOVE_CHECKPOINT;
             return eglobal->process_ns;
 
-	    /* If thread name space, just return pointer to the name space.
-	     */
+        /* If thread name space, just return pointer to the name space.
+         */
         case '\0':
             if (info) *info = E_INFO_ABOVE_CHECKPOINT;
             return eNameSpace::cast(mm_handle->m_root->first(EOID_NAMESPACE));
@@ -1064,7 +1064,7 @@ eNameSpace *eObject::findnamespace(
                 if ((flags() & EOBJ_HAS_NAMESPACE) == 0) return OS_NULL;
                 return eNameSpace::cast(first(EOID_NAMESPACE));
             }
-            else 
+            else
             {
                 getparent = (os_boolean)!os_strcmp(namespace_id, "..");
             }
@@ -1108,7 +1108,7 @@ eNameSpace *eObject::findnamespace(
         h = h->m_object->mm_parent->mm_handle;
     }
 
-	return OS_NULL;
+    return OS_NULL;
 }
 
 
@@ -1118,13 +1118,13 @@ eNameSpace *eObject::findnamespace(
   @brief Name this object.
 
   The eObject::addname() function adds name to this object and maps it to name space.
-  
+
   @param   name Name for this object. Name may start with name space identifier separated with
            slash from actual name. If name space is identified as part of name, the namespace_id
-		   argument will be ignored.
+           argument will be ignored.
   @param   namespace_id Identifier for the name space. OS_NULL is first parent's name space.
-  @param   flags 
-  @return  Pointer to newly created name, eName class. 
+  @param   flags
+  @return  Pointer to newly created name, eName class.
 
 ****************************************************************************************************
 */
@@ -1133,11 +1133,11 @@ eName *eObject::addname(
     os_int flags,
     const os_char *namespace_id)
 {
-	eName *n;
+    eName *n;
 
-	/* Create name object.
-	 */
-	n = new eName(this, EOID_NAME);
+    /* Create name object.
+     */
+    n = new eName(this, EOID_NAME);
 
     /* Set flags for name, like persistancy.
      */
@@ -1145,7 +1145,7 @@ eName *eObject::addname(
     {
         n->setflags(EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
     }
-  
+
     /* If name space is not given as argument, decide by flags.
      */
     if (namespace_id == OS_NULL)
@@ -1172,7 +1172,7 @@ eName *eObject::addname(
          */
         else if (name)
         {
-            if (name[0] == '/') 
+            if (name[0] == '/')
             {
                 if (name[1] == '/')
                 {
@@ -1185,14 +1185,14 @@ eName *eObject::addname(
                     name++;
                 }
             }
-            else if (name[0] == '.') 
+            else if (name[0] == '.')
             {
-                if (name[1] == '/') 
+                if (name[1] == '/')
                 {
                     namespace_id = eobj_this_ns;
                     name += 2;
                 }
-                else if (name[1] == '.') if (name[2] == '/') 
+                else if (name[1] == '.') if (name[2] == '/')
                 {
                     namespace_id = eobj_parent_ns;
                     name += 3;
@@ -1201,24 +1201,24 @@ eName *eObject::addname(
         }
     }
 
-	/* Set name string, if any.
-	 */
-	if (name) n->sets(name);
+    /* Set name string, if any.
+     */
+    if (name) n->sets(name);
 
     /* Set name space identifier.
      */
     n->setnamespaceid(namespace_id);
-	
-	/* Map name to namespace, unless disabled for now.
-	 */
-	if ((flags & ENAME_NO_MAP) == 0) 
+
+    /* Map name to namespace, unless disabled for now.
+     */
+    if ((flags & ENAME_NO_MAP) == 0)
     {
         n->mapname();
     }
 
-	/* Return pointer to name.
-	 */
-	return n;
+    /* Return pointer to name.
+     */
+    return n;
 }
 
 
@@ -1229,20 +1229,20 @@ eName *eObject::addname(
 
   The eObject::map() function is attaches/detaches names from name spaces, and sets used
   eRoot object pointer for child objects. The functionality is controlled by flags.
-  This is function is mostly used to remap names when an object (tree structure) is adopted 
+  This is function is mostly used to remap names when an object (tree structure) is adopted
   from one thread to another. And when queuing messages for threads and outgoing connections.
-  
+
   @param   flags
-           - E_ATTACH_NAMES: Attach all names of child object (this) and it's childen to 
+           - E_ATTACH_NAMES: Attach all names of child object (this) and it's childen to
              name spaces. If a name is already mapped, it is not remapped.
 
            - E_SET_ROOT_POINTER: Copy m_root pointer (pointer to eRoot of a tree structure)
              from child object (this) to all child objects of it.
 
-           - E_DETACH_FROM_NAMESPACES_ABOVE: Detach names of child object (this) and it's 
+           - E_DETACH_FROM_NAMESPACES_ABOVE: Detach names of child object (this) and it's
              childen from name spaces above this object in tree structure.
 
-  @return  None 
+  @return  None
 
 ****************************************************************************************************
 */
@@ -1253,7 +1253,7 @@ void eObject::map(
 
     /* Handle special case when this is name
      */
-    if (mm_handle->oid() == EOID_NAME && 
+    if (mm_handle->oid() == EOID_NAME &&
        (mflags & (E_ATTACH_NAMES|E_DETACH_FROM_NAMESPACES_ABOVE)))
     {
         mapone(mm_handle, mflags);
@@ -1282,7 +1282,7 @@ void eObject::map2(
 
         /* If this is name which needs to be attached or detached, do it.
          */
-        if (childh->oid() == EOID_NAME && 
+        if (childh->oid() == EOID_NAME &&
            (mflags & (E_ATTACH_NAMES|E_DETACH_FROM_NAMESPACES_ABOVE)))
         {
             mapone(childh, mflags);
@@ -1290,7 +1290,7 @@ void eObject::map2(
 
         /* If this has children, process those.
          */
-        if (childh->m_children) 
+        if (childh->m_children)
         {
             map2(childh, mflags);
         }
@@ -1305,12 +1305,12 @@ void eObject::map2(
 
   The eObject::mapone() function attaches or detaches a name to/from name space.
 
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
 void eObject::mapone(
-    eHandle *handle, 
+    eHandle *handle,
     os_int mflags)
 {
     eName *name;
@@ -1344,7 +1344,7 @@ void eObject::mapone(
 
   The eObject::message() function looks for name in this object's name space.
 
-  @param  name Name to look for.  
+  @param  name Name to look for.
   @return If name is found, returns pointer to namef object. Otherwise the function returns OS_NULL.
 
 ****************************************************************************************************
@@ -1355,7 +1355,7 @@ eObject *eObject::byname(
     eVariable namev;
     eName *nobj;
     eNameSpace *nspace;
-    
+
     nspace = eNameSpace::cast(first(EOID_NAMESPACE));
     if (nspace)
     {
@@ -1372,21 +1372,21 @@ eObject *eObject::byname(
 
   @brief Send message.
 
-  The eObject::message() function sends message. The message will be recieved as onmessage call 
+  The eObject::message() function sends message. The message will be recieved as onmessage call
   by another object.
-  
+
   @param   command
   @param   target
   @param   source
   @param   content
-  @param   mflags 
+  @param   mflags
   @param   context
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
 void eObject::message(
-    os_int command, 
+    os_int command,
     const os_char *target,
     const os_char *source,
     eObject *content,
@@ -1399,7 +1399,7 @@ void eObject::message(
     /* We use eRoot as pasent, in case object receiving message gets deleted.
        parent = this is just fallback mechanim.
      */
-	if (mm_handle) 
+    if (mm_handle)
     {
         parent = mm_handle->m_root;
     }
@@ -1424,12 +1424,12 @@ void eObject::message(
 
   @brief Send message.
 
-  The eObject::message() function sends message. The message will be recieved as onmessage call 
+  The eObject::message() function sends message. The message will be recieved as onmessage call
   by another object.
-  
+
   @param   envelope Message envelope to send. Contains command, target and source paths and
            message content, etc.
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
@@ -1463,15 +1463,15 @@ void eObject::message(
       case '/':
         /* If process name space.
          */
-        if (target[1] == '/') 
+        if (target[1] == '/')
         {
             envelope->move_target_pos(2);
             message_process_ns(envelope);
-        } 
+        }
 
         /* Otherwise thread name space.
          */
-        else 
+        else
         {
             envelope->move_target_pos(1);
             message_within_thread(envelope, E_THREAD_NS);
@@ -1483,22 +1483,22 @@ void eObject::message(
       case '@':
         message_oix(envelope);
         return;
-            
+
       /* Parent or this object's name space
        */
-      case '.':  
+      case '.':
         /* If this object's name space.
          */
-        if (target[1] == '/' || target[1] == '\0') 
+        if (target[1] == '/' || target[1] == '\0')
         {
             envelope->move_target_over_objname(1);
             message_within_thread(envelope, eobj_this_ns);
             return;
-        } 
+        }
 
         /* Otherwise parent name space.
          */
-        else if (target[1] == '.') 
+        else if (target[1] == '.')
              if (target[2] == '/' || target[2] == '\0')
         {
             envelope->move_target_over_objname(2);
@@ -1527,10 +1527,10 @@ void eObject::message(
   The eObject::message_process_ns is helper function for eObject::message() to send message
   trough process name space. It finds to which thread's object tree the message target belongs
   to and places message to that thread's message queue.
-  
+
   @param   envelope Message envelope to send. Contains command, target and source paths and
            message content, etc.
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
@@ -1538,7 +1538,7 @@ void eObject::message_within_thread(
     eEnvelope *envelope,
     const os_char *namespace_id)
 {
-	eNameSpace *nspace;
+    eNameSpace *nspace;
     eVariable objname;
     eName *name;
     os_memsz sz;
@@ -1546,7 +1546,7 @@ void eObject::message_within_thread(
     nspace = findnamespace(namespace_id);
     if (nspace == OS_NULL) goto getout;
 
-    /* Get next object name in target path. 
+    /* Get next object name in target path.
         Remember length of object name.
      */
     envelope->nexttarget(&objname);
@@ -1570,15 +1570,15 @@ getout:
      */
     if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
     {
-        message (ECMD_NO_TARGET, envelope->source(), 
-            envelope->target(), OS_NULL, 
-            EMSG_DEL_CONTEXT, 
+        message (ECMD_NO_TARGET, envelope->source(),
+            envelope->target(), OS_NULL,
+            EMSG_DEL_CONTEXT,
             envelope->context());
     }
 
 #if OSAL_DEBUG
     /* Report "no target: error
-     */    
+     */
     if ((envelope->mflags() & EMSG_NO_ERRORS) == 0)
     {
         osal_debug_error("message() failed: Name or namespace not found within thread");
@@ -1586,7 +1586,7 @@ getout:
 #endif
 
     delete envelope;
-}    
+}
 
 
 /**
@@ -1597,10 +1597,10 @@ getout:
   The eObject::message_process_ns is helper function for eObject::message() to send message
   trough process name space. It finds to which thread's object tree the message target belongs
   to and places message to that thread's message queue.
-  
+
   @param   envelope Message envelope to send. Contains command, target and source paths and
            message content, etc.
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
@@ -1634,7 +1634,7 @@ void eObject::message_process_ns(
          */
         os_lock();
 
-        if (eglobal->process == OS_NULL) 
+        if (eglobal->process == OS_NULL)
         {
             os_unlock();
 #if OSAL_DEBUG
@@ -1657,7 +1657,7 @@ void eObject::message_process_ns(
     {
         eVariable objname;
 
-        /* Get next object name in target path. 
+        /* Get next object name in target path.
            Remember length of object name.
          */
         envelope->nexttarget(&objname);
@@ -1680,7 +1680,7 @@ void eObject::message_process_ns(
 #if OSAL_DEBUG
             if ((envelope->flags() & EMSG_NO_ERRORS) == 0)
             {
-                osal_debug_error("message() failed: Name not found in process NS");   
+                osal_debug_error("message() failed: Name not found in process NS");
                 osal_debug_error(objname.gets());
             }
 #endif
@@ -1707,7 +1707,7 @@ void eObject::message_process_ns(
         multiplethreads = OS_FALSE;
         for (nextname = name->ns_next(); nextname; nextname = nextname->ns_next())
         {
-            if (nextname->thread() != thread) 
+            if (nextname->thread() != thread)
             {
                 multiplethreads = OS_TRUE;
                 break;
@@ -1720,7 +1720,7 @@ void eObject::message_process_ns(
         {
             /* If this is not message to thread itself.
              */
-            if (thread != name->parent()) 
+            if (thread != name->parent())
             {
                 /* If object name is not already oix, convert to one.
                  */
@@ -1758,17 +1758,17 @@ void eObject::message_process_ns(
             {
                 nextname = name->ns_next();
 
-                /* Get thread object pointer. 
+                /* Get thread object pointer.
                  */
                 thread = name->thread();
-                
+
                 /* If message is not to thread itself.
-                   Here we do replace the name with oix string, even 
-                   if it is already that. We do this simply because 
+                   Here we do replace the name with oix string, even
+                   if it is already that. We do this simply because
                    this is unusual case where efficiency doesn not
                    matter much.
                  */
-                if (thread != name->parent()) 
+                if (thread != name->parent())
                 {
                     name->parent()->oixstr(buf, sizeof(buf));
                     mytarget.sets(buf);
@@ -1781,7 +1781,7 @@ void eObject::message_process_ns(
                     envelope->settarget(savedtarget.gets());
                 }
 
-                /* Queue the envelope and move on. If this is last target for 
+                /* Queue the envelope and move on. If this is last target for
                    the envelope, allow adopting the envelope.
                  */
                 thread->queue(envelope, nextname == OS_NULL);
@@ -1801,7 +1801,7 @@ getout:
      */
     if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
     {
-        message (ECMD_NO_TARGET, envelope->source(), 
+        message (ECMD_NO_TARGET, envelope->source(),
             envelope->target(), OS_NULL, EMSG_DEL_CONTEXT, envelope->context());
     }
 
@@ -1815,14 +1815,14 @@ getout:
   @brief Send message.
 
   The eObject::message_oix is helper function for eObject::message() to send message
-  using object index string, like "@11_1". It finds to which thread's object tree the message 
+  using object index string, like "@11_1". It finds to which thread's object tree the message
   target belongs to. If this is in same object tree as the sender of the message message,
   then object's onmessage function is called directly. If target belongs to different object
   three from sender, the function places message to target thread's message queue.
-  
+
   @param   envelope Message envelope to send. Contains command, target and source paths and
            message content, etc.
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
@@ -1884,7 +1884,7 @@ void eObject::message_oix(
     osal_debug_assert(handle->m_root);
     thread = eThread::cast(handle->m_root->parent());
     if (thread == handle->m_object) envelope->move_target_over_objname(count);
-   
+
     /* Place the envelope in thread's message queue.
      */
     if (thread)
@@ -1906,7 +1906,7 @@ getout:
      */
     if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
     {
-        message (ECMD_NO_TARGET, envelope->source(), 
+        message (ECMD_NO_TARGET, envelope->source(),
             envelope->target(), OS_NULL, EMSG_DEL_CONTEXT, envelope->context());
     }
 
@@ -1917,13 +1917,13 @@ getout:
 /**
 ****************************************************************************************************
 
-  @brief Function to process incoming messages. 
+  @brief Function to process incoming messages.
 
-  The eObject::onmessage function handles messages received by object. 
-  
+  The eObject::onmessage function handles messages received by object.
+
   @param   envelope Message envelope. Contains command, target and source paths and
            message content, etc.
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
@@ -1947,7 +1947,7 @@ void eObject::onmessage(
             onmessage_oix(envelope);
             break;
 
-        /* Message to this object. 
+        /* Message to this object.
          */
         case '\0':
             command = envelope->command();
@@ -1986,11 +1986,11 @@ void eObject::onmessage(
                         return;
                     }
                 }
-            }                       
+            }
 
             /* continues...
              */
-    
+
         /* Messages to named child objects.
          */
         default:
@@ -2002,15 +2002,15 @@ void eObject::onmessage(
             if (nspace == OS_NULL) goto getout;
             name = nspace->findname(&objname);
             if (name == OS_NULL) goto getout;
-           
+
             do
             {
                 nextname = name->ns_next();
                 name->parent()->onmessage(envelope);
                 name = nextname;
-            } 
+            }
             while (name);
-                
+
             break;
     }
 
@@ -2021,7 +2021,7 @@ getout:
      */
     if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
     {
-        message (ECMD_NO_TARGET, envelope->source(), 
+        message (ECMD_NO_TARGET, envelope->source(),
             envelope->target(), OS_NULL, EMSG_KEEP_CONTENT, envelope->context());
     }
 
@@ -2041,12 +2041,12 @@ getout:
 
   @brief Forward message by object index within thread's object tree.
 
-  The eObject::onmessage_oix forwards message using object index string, like "@11_1". 
+  The eObject::onmessage_oix forwards message using object index string, like "@11_1".
   This function works only within thread.
-  
+
   @param   envelope Message envelope to send. Contains command, target and source paths and
            message content, etc.
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
@@ -2103,7 +2103,7 @@ getout:
      */
     if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
     {
-        message (ECMD_NO_TARGET, envelope->source(), 
+        message (ECMD_NO_TARGET, envelope->source(),
             envelope->target(), OS_NULL, EMSG_DEL_CONTEXT, envelope->context());
     }
 }
@@ -2176,21 +2176,21 @@ void eObject::setpropertys_msg(
 
   @brief Add property to property set (any type).
 
-  The addproperty function adds a property to class'es global property set. 
-  
+  The addproperty function adds a property to class'es global property set.
+
   @param  classid Specifies to which classes property set the property is being added.
-  @param  propertynr Property number, class specific. 
+  @param  propertynr Property number, class specific.
   @param  propertyname Property name, class specific.
   @param  pflags Bit fields, combination of:
           - EPRO_DEFAULT (0): No options
           - EPRO_PERSISTENT: Property value is persistant is when saving classes properties.
           - EPRO_METADATA: Much like EPRO_PERSISTENT, but property value is saved only if
             also metadata is to be saved.
-          - EPRO_SIMPLE: Do not keep copy of non default property in variable. Class implementation 
+          - EPRO_SIMPLE: Do not keep copy of non default property in variable. Class implementation
             takes care about this.
-          - EPRO_NOONPRCH: Do not call onpropertychange when value changes. 
+          - EPRO_NOONPRCH: Do not call onpropertychange when value changes.
           - EPRO_NOPACK: Do not pack this property value within property set.
-  @param  text Name of the property displayed to user. 
+  @param  text Name of the property displayed to user.
 
   @return Pointer to eVariable in property set defining the property. Additional attributes for
           property can be added trough this returned pointer.
@@ -2198,8 +2198,8 @@ void eObject::setpropertys_msg(
 ****************************************************************************************************
 */
 eVariable *eObject::addproperty(
-    os_int cid, 
-    os_int propertynr, 
+    os_int cid,
+    os_int propertynr,
     const os_char *propertyname,
     os_int pflags,
     const os_char *text)
@@ -2213,13 +2213,13 @@ eVariable *eObject::addproperty(
     propertyset = eglobal->propertysets->firstc(cid);
     if (propertyset == OS_NULL)
     {
-	    propertyset = new eContainer(eglobal->propertysets, cid, EOBJ_IS_ATTACHMENT);
+        propertyset = new eContainer(eglobal->propertysets, cid, EOBJ_IS_ATTACHMENT);
         propertyset->ns_create();
     }
 
     /* Add variable for this property in property set and name it.
      */
-    p = new eVariable(propertyset, propertynr, pflags); 
+    p = new eVariable(propertyset, propertynr, pflags);
     p->addname(propertyname);
 
     /* Set name of the property to display to user.
@@ -2236,7 +2236,7 @@ eVariable *eObject::addproperty(
   @brief Property set for class done, complete it.
 
   The propertysetdone function lists attributes (subproperties) for each base property.
-  
+
   @param  classid Specifies to which classes property set the property is being added.
   @return None.
 
@@ -2265,7 +2265,7 @@ void eObject::propertysetdone(
         /* If this is subproperty, like "x.min", add to main propertie's list of subproperties.
          */
         e = os_strchr((os_char*)propertyname, '.');
-        if (e) 
+        if (e)
         {
             eVariable v;
             v.sets(propertyname, e - propertyname);
@@ -2288,15 +2288,15 @@ void eObject::propertysetdone(
 
   The addpropertyl function adds property typed as integer to property set, and optionally
   sets default value for it. See addproperty() for more information.
-  
+
   @param  x Default value.
   @return Pointer to eVariable in property set.
 
 ****************************************************************************************************
 */
 eVariable *eObject::addpropertyl(
-    os_int cid, 
-    os_int propertynr, 
+    os_int cid,
+    os_int propertynr,
     const os_char *propertyname,
     os_int pflags,
     const os_char *text,
@@ -2316,17 +2316,17 @@ eVariable *eObject::addpropertyl(
 
   @brief Add double property to property set.
 
-  The addpropertyd function adds property typed as double precision float to property set, and 
+  The addpropertyd function adds property typed as double precision float to property set, and
   optionally sets default value for it. See addproperty() for more information.
-  
+
   @param  x Default value.
   @return Pointer to eVariable in property set.
 
 ****************************************************************************************************
 */
 eVariable *eObject::addpropertyd(
-    os_int cid, 
-    os_int propertynr, 
+    os_int cid,
+    os_int propertynr,
     const os_char *propertyname,
     os_int pflags,
     const os_char *text,
@@ -2350,14 +2350,14 @@ eVariable *eObject::addpropertyd(
 
   The addpropertys function adds property typed as string to property set, and optionally sets
   default value for it. See addproperty() for more information.
-  
+
   @param  x Default value.
   @return Pointer to eVariable in property set.
 
 ****************************************************************************************************
 */
 eVariable *eObject::addpropertys(
-    os_int cid, 
+    os_int cid,
     os_int propertynr,
     const os_char *propertyname,
     os_int pflags,
@@ -2380,10 +2380,10 @@ eVariable *eObject::addpropertys(
 
   @brief Initialize properties to default values.
 
-  The initproperties function can be called from class'es constructor, if classes properties need 
-  to be initialized to default values. Properties with EPRO_SIMPLE or EPRO_NOONPRCH flag will not 
+  The initproperties function can be called from class'es constructor, if classes properties need
+  to be initialized to default values. Properties with EPRO_SIMPLE or EPRO_NOONPRCH flag will not
   be initialized.
-  
+
 
 ****************************************************************************************************
 */
@@ -2425,7 +2425,7 @@ void eObject::initproperties()
   @brief Get property number by property name.
 
   The propertynr() function gets property number for this class by property name.
-  
+
   @param  propertyname Name of the property numnr
   @return Property number, -1 if failed.
 
@@ -2443,7 +2443,7 @@ os_int eObject::propertynr(
     /* Synchronize.
      */
     os_lock();
- 
+
     /* Get pointer to class'es property set. If not found, create one. Property set always
        has name space
      */
@@ -2476,7 +2476,7 @@ notfound:
   @brief Get property name by property number.
 
   The propertynr() function gets property number for this class by property name.
-  
+
   @param  propertyname Name of the property numnr
   @return Property number, OS_NULL if failed.
 
@@ -2493,7 +2493,7 @@ os_char *eObject::propertyname(
     /* Synchronize.
      */
     os_lock();
- 
+
     /* Get pointer to class'es property set. If not found, create one. Property set always
        has name space
      */
@@ -2527,7 +2527,7 @@ notfound:
   @brief Set property value.
 
   The setproperty function sets property value from eVariable.
-  
+
   @param  propertynr
   @param  x
   @param  source
@@ -2538,9 +2538,9 @@ notfound:
 ****************************************************************************************************
 */
 void eObject::setpropertyv(
-    os_int propertynr, 
-    eVariable *x, 
-    eObject *source, 
+    os_int propertynr,
+    eVariable *x,
+    eObject *source,
     os_int flags)
 {
     eContainer *propertyset;
@@ -2578,10 +2578,10 @@ void eObject::setpropertyv(
      */
     os_unlock();
 
-    /* Empty x and x as null pointer are thes ame thing, handle these in 
-       the same way. 
+    /* Empty x and x as null pointer are thes ame thing, handle these in
+       the same way.
      */
-    if (x == OS_NULL) 
+    if (x == OS_NULL)
     {
         x = eglobal->empty;
     }
@@ -2628,14 +2628,14 @@ void eObject::setpropertyv(
         }
 
         /* If x matches to default value, then remove the
-           value from eSet. 
+           value from eSet.
          */
-        if (!p->compare(x)) 
+        if (!p->compare(x))
         {
             properties->set(propertynr, OS_NULL);
         }
 
-        /* No match. Store x in eSet. 
+        /* No match. Store x in eSet.
          */
         else
         {
@@ -2655,7 +2655,7 @@ void eObject::setpropertyv(
   @brief Forward property change trough bindings.
 
   The forwardproperty function...
-  
+
   @param  propertynr
   @param  x
   @param  source
@@ -2666,9 +2666,9 @@ void eObject::setpropertyv(
 ****************************************************************************************************
 */
 void eObject::forwardproperty(
-    os_int propertynr, 
-    eVariable *x, 
-    eObject *source, 
+    os_int propertynr,
+    eVariable *x,
+    eObject *source,
     os_int flags)
 {
     eContainer *bindings;
@@ -2693,7 +2693,7 @@ void eObject::forwardproperty(
 /* Set property value as integer.
  */
 void eObject::setpropertyl(
-    os_int propertynr, 
+    os_int propertynr,
     os_long x)
 {
     eVariable v;
@@ -2704,7 +2704,7 @@ void eObject::setpropertyl(
 /* Set property value as double.
     */
 void eObject::setpropertyd(
-    os_int propertynr, 
+    os_int propertynr,
     os_double x)
 {
     eVariable v;
@@ -2715,7 +2715,7 @@ void eObject::setpropertyd(
 /* Set property value as string.
     */
 void eObject::setpropertys(
-    os_int propertynr, 
+    os_int propertynr,
     const os_char *x)
 {
     eVariable v;
@@ -2726,15 +2726,15 @@ void eObject::setpropertys(
 /* Get property value.
  */
 void eObject::propertyv(
-    os_int propertynr, 
-    eVariable *x, 
+    os_int propertynr,
+    eVariable *x,
     os_int flags)
 {
     eSet *properties;
     eContainer *propertyset;
     eVariable *p;
-    
-    /* Look for eSet holding stored property values. If found, check for 
+
+    /* Look for eSet holding stored property values. If found, check for
        property number.
      */
     properties = eSet::cast(first(EOID_PROPERTIES));
@@ -2744,7 +2744,7 @@ void eObject::propertyv(
          */
         if (properties->get(propertynr, x)) return;
     }
-    
+
     /* Check for simple property
      */
     if (simpleproperty(propertynr, x) == ESTATUS_SUCCESS) return;
@@ -2809,15 +2809,15 @@ os_double eObject::propertyd(
 
   The eObject::bind() function creates binding to remote property. When two variables are bound
   together, they have the same value. When the other changes, so does the another. Bindings
-  work over messaging, thus binding work as well between objects in same thread or objects in 
+  work over messaging, thus binding work as well between objects in same thread or objects in
   different computers.
-  
+
   @param  localpropertyno This object's propery number to bind.
   @param  remotepath Path to remote object to bind to.
   @param  remoteproperty Name of remote property to bind. If OS_NULL variable value
           is assumed.
   @param  bflags Combination of EBIND_DEFAULT (0), EBIND_CLIENTINIT, EBIND_NOFLOWCLT
-          EBIND_METADATA and EBIND_TEMPORARY. 
+          EBIND_METADATA and EBIND_TEMPORARY.
           - EBIND_DEFAULT:  bind without special options.
           - EBIND_CLIENTINIT: Local property value is used as initial value. Normally
             remote end's value is used as initial value.
@@ -2825,7 +2825,7 @@ os_double eObject::propertyd(
             faster than it can be transferred, some values are skipped. If EBIND_NOFLOWCLT
             flag is given, it disables flow control and every value is transferred without
             any limit to buffered memory use.
-          - EBIND_METADATA: If meta data, like text, unit, attributes, etc exists, it is 
+          - EBIND_METADATA: If meta data, like text, unit, attributes, etc exists, it is
             also transferred from remote object to local object.
           - EBIND_TEMPORARY: Binding is temporary and will not be cloned nor serialized.
   @param  envelope Used for server binding only. OS_NULL for clint binding.
@@ -2851,7 +2851,7 @@ void eObject::bind(
     }
 
     /* Verify that same binding dows not already exist ?? How to modify bindings ????
-     *?
+     */
 
     /* Create binding
      */
@@ -2869,8 +2869,8 @@ void eObject::bind(
 
   @brief Create server end of property binding.
 
-  The eObject::srvbind() function 
-  
+  The eObject::srvbind() function
+
   @param  envelope Message envelope, COMMAND ECMD_BIND.
   @return None.
 
@@ -2891,18 +2891,17 @@ void eObject::srvbind(
     }
 
     /* Verify that same binding dows not already exist ?? How to modify bindings ????
-     *?
+     */
 
     /* Create binding
      */
-    binding = new ePropertyBinding(bindings, EOID_ITEM, 
+    binding = new ePropertyBinding(bindings, EOID_ITEM,
          EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
 
     /* Bind properties.
      */
-    if (binding) 
+    if (binding)
     {
-// envelope->json_write(&econsole); // ??????????????????????????????????????????????????????????????????????????????????????
         binding->srvbind(this,  envelope);
     }
 }
@@ -2913,7 +2912,7 @@ void eObject::srvbind(
 
   @brief Bind this object's property to remote property.
 
-  See bind() function above, this almost the same but remote path may contain also property 
+  See bind() function above, this almost the same but remote path may contain also property
   name, separated from path by "/_p/". If "/_p/" is not found, the "x" is used as default.
 
 ****************************************************************************************************
@@ -2929,7 +2928,7 @@ void eObject::bind(
     v.sets(remotepath);
     p = v.gets();
     e = os_strstr(p, "/_p/", OSAL_STRING_DEFAULT);
-    if (e) 
+    if (e)
     {
         *e = '\0';
         e += 4;
@@ -2940,7 +2939,7 @@ void eObject::bind(
     }
 
     bind(localpropertynr, p, e, bflags);
-} 
+}
 
 
 /**
@@ -2950,7 +2949,7 @@ void eObject::bind(
 
   The eObject::write() function writes object with class information, attachments, etc to
   the stream.
-  
+
   @param  stream The stream to write to.
   @param  sflags Serialization flags. EOBJ_SERIALIZE_DEFAULT
 
@@ -2961,8 +2960,8 @@ void eObject::bind(
 ****************************************************************************************************
 */
 eStatus eObject::write(
-    eStream *stream, 
-    os_int sflags) 
+    eStream *stream,
+    os_int sflags)
 {
     eObject *child;
     os_long n_attachements;
@@ -2982,7 +2981,7 @@ eStatus eObject::write(
         if (child->isserattachment()) n_attachements++;
     }
     if (*stream << n_attachements) goto failed;
-    
+
     /* Write the object content.
      */
     if (writer(stream, sflags)) goto failed;
@@ -2992,12 +2991,12 @@ eStatus eObject::write(
      */
     for (child = first(EOID_ALL); child; child = child->next(EOID_ALL))
     {
-        if (child->isserattachment()) 
+        if (child->isserattachment())
         {
             if (child->write(stream, sflags)) goto failed;
         }
     }
-    
+
     /* Object succesfully written.
      */
     return ESTATUS_SUCCESS;
@@ -3014,19 +3013,19 @@ failed:
 
   @brief Read object from stream.
 
-  The eObject::read() function reads class information, etc from the stream, creates new 
+  The eObject::read() function reads class information, etc from the stream, creates new
   child object and reads child object content and attachments.
-  
+
   @param  stream The stream to write to.
   @param  sflags Serialization flags. EOBJ_SERIALIZE_DEFAULT
 
-  @return If successfull the function returns pointer to te new child object. 
-          If reading object from stream fails, value OS_NULL is returned. 
+  @return If successfull the function returns pointer to te new child object.
+          If reading object from stream fails, value OS_NULL is returned.
 
 ****************************************************************************************************
 */
 eObject *eObject::read(
-    eStream *stream, 
+    eStream *stream,
     os_int sflags)
 {
     os_int cid, oid, oflags;
@@ -3049,7 +3048,7 @@ eObject *eObject::read(
     /* Set flags.
      */
     child->setflags(oflags);
-    
+
     /* Read the object content.
      */
     if (child->reader(stream, sflags)) goto failed;

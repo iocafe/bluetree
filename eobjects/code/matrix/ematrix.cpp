@@ -42,9 +42,9 @@ eMatrixObj;
 ****************************************************************************************************
 */
 eMatrix::eMatrix(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eObject(parent, id, flags)
 {
     /** Default data type is OS_OBJECT.
@@ -927,7 +927,7 @@ void eMatrix::sets(
         case OS_DOUBLE:
             /* Convert string to float.
              */
-            setd(row, column, osal_string_to_double(x, OS_NULL));
+            setd(row, column, osal_str_to_double(x, OS_NULL));
             break;
 
         default:
@@ -1292,7 +1292,7 @@ os_double eMatrix::getd(
                     break;
 
                 case OS_STR:
-                    d = osal_string_to_double(mo->s, OS_NULL);
+                    d = osal_str_to_double(mo->s, OS_NULL);
                     break;
 
                 default:
@@ -1658,6 +1658,9 @@ void eMatrix::emptyobject(
         case OS_DOUBLE:
             *(os_double*)dataptr = OS_DOUBLE_MAX;
             break;
+
+        default:
+            break;
     }
 }
 
@@ -1668,5 +1671,5 @@ os_short eMatrix::typesz(
     osalTypeId datatype)
 {
     if (datatype == OS_OBJECT) return sizeof(eMatrixObj);
-    return (os_short)osal_typeid_size(datatype);
+    return (os_short)osal_type_size(datatype);
 }

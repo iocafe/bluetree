@@ -593,7 +593,7 @@ eStatus eSet::json_writer(
         if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma)) goto failed;
 
         if (json_puts(stream, "\"i")) goto failed;
-        osal_int_to_string(nbuf, sizeof(nbuf), iid);
+        osal_int_to_str(nbuf, sizeof(nbuf), iid);
         if (json_puts(stream, nbuf)) goto failed;
         if (json_puts(stream, "\": ")) goto failed;
 
@@ -609,7 +609,7 @@ eStatus eSet::json_writer(
         if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma)) goto failed;
 
         if (json_puts(stream, "\"v")) goto failed;
-        osal_int_to_string(nbuf, sizeof(nbuf), v->oid());
+        osal_int_to_str(nbuf, sizeof(nbuf), v->oid());
         if (json_puts(stream, nbuf)) goto failed;
         if (json_puts(stream, "\": ")) goto failed;
         if (json_putv(stream, OS_NULL, v, sflags, indent + 1)) goto failed;
