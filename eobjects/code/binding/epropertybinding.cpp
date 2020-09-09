@@ -8,9 +8,9 @@
 
   The propertybinding object is like a box holding a set of child objects.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -23,15 +23,15 @@
 
   @brief Property binding class constructor.
 
-  Clear member variables. 
+  Clear member variables.
   @return  None.
 
 ****************************************************************************************************
 */
 ePropertyBinding::ePropertyBinding(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eBinding(parent, id, flags)
 {
     /* Clear member variables.
@@ -62,7 +62,7 @@ ePropertyBinding::~ePropertyBinding()
 
   @brief Clone object
 
-  The ePropertyBinding::clone function clones and object including object's children. 
+  The ePropertyBinding::clone function clones and object including object's children.
   Names will be left detached in clone.
 
   @param  parent Parent for the clone.
@@ -73,7 +73,7 @@ ePropertyBinding::~ePropertyBinding()
 ****************************************************************************************************
 */
 eObject *ePropertyBinding::clone(
-    eObject *parent, 
+    eObject *parent,
     e_oid id,
     os_int aflags)
 {
@@ -101,7 +101,7 @@ eObject *ePropertyBinding::clone(
   @brief Add the class to class list and class'es properties to it's property set.
 
   The eVariable::setupclass function adds the class to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier, 
+  it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
@@ -126,7 +126,7 @@ void ePropertyBinding::setupclass()
 
   The ePropertyBinding::writer() function serializes the property binding to stream. This writes
   only the content, use eObject::write() to save also class information, attachements, etc.
-  
+
   @param  stream The stream to write to.
   @param  flags Serialization flags.
 
@@ -137,8 +137,8 @@ void ePropertyBinding::setupclass()
 ****************************************************************************************************
 */
 eStatus ePropertyBinding::writer(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Increment if new serialized items are added to the object,
        and check for new version's items in read() function.
@@ -146,7 +146,7 @@ eStatus ePropertyBinding::writer(
     const os_int version = 0;
     eObject *child;
 
-	/* Begin the object and write version number.
+    /* Begin the object and write version number.
      */
     if (stream->write_begin_block(version)) goto failed;
 
@@ -161,7 +161,7 @@ eStatus ePropertyBinding::writer(
         child->write(stream, flags);
     }
 
-	/* End the object.
+    /* End the object.
      */
     if (stream->write_end_block()) goto failed;
 
@@ -181,10 +181,10 @@ failed:
 
   @brief Read property binding content from stream.
 
-  The ePropertyBinding::reader() function reads serialized propertybinding from stream. 
-  This function reads only the object content. To read whole object including attachments, 
+  The ePropertyBinding::reader() function reads serialized propertybinding from stream.
+  This function reads only the object content. To read whole object including attachments,
   names, etc, use eObject::read().
-  
+
   @param  stream The stream to read from.
   @param  flags Serialization flags.
 
@@ -195,15 +195,15 @@ failed:
 ****************************************************************************************************
 */
 eStatus ePropertyBinding::reader(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Used to check which versions item's are in serialized data.
      */
     os_int version;
     os_long count;
 
-	/* Read object start mark and version number.
+    /* Read object start mark and version number.
      */
     if (stream->read_begin_block(&version)) goto failed;
 
@@ -218,7 +218,7 @@ eStatus ePropertyBinding::reader(
         read(stream, flags);
     }
 
-	/* End the object.
+    /* End the object.
      */
     if (stream->read_end_block()) goto failed;
 
@@ -236,19 +236,19 @@ failed:
 /**
 ****************************************************************************************************
 
-  @brief Function to process incoming messages. 
+  @brief Function to process incoming messages.
 
   The ePropertyBinding::onmessage function handles messages received by object. If this function
   doesn't process message, it calls parent class'es onmessage function.
-  
+
   @param   envelope Message envelope. Contains command, target and source paths and
            message content, etc.
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
 void ePropertyBinding::onmessage(
-    eEnvelope *envelope) 
+    eEnvelope *envelope)
 {
     /* If at final destination for the message.
      */
@@ -276,7 +276,7 @@ void ePropertyBinding::onmessage(
             case ECMD_FWRD:
                 update(envelope);
                 return;
-    
+
             case ECMD_ACK:
                 ack(envelope);
                 return;
@@ -287,7 +287,7 @@ void ePropertyBinding::onmessage(
         }
     }
 
-    /* Call parent class'es onmessage. 
+    /* Call parent class'es onmessage.
      */
     eBinding::onmessage(envelope);
 }
@@ -300,15 +300,15 @@ void ePropertyBinding::onmessage(
 
   The eObject::bind() function creates binding to remote property. When two variables are bound
   together, they have the same value. When the other changes, so does the another. Bindings
-  work over messaging, thus binding work as well between objects in same thread or objects in 
+  work over messaging, thus binding work as well between objects in same thread or objects in
   different computers.
-  
+
   @param  localpropertyno This object's propery number to bind.
   @param  remotepath Path to remote object to bind to.
   @param  remoteproperty Name of remote property to bind. If OS_NULL variable value
           is assumed.
   @param  bflags Combination of EBIND_DEFAULT (0), EBIND_CLIENTINIT, EBIND_NOFLOWCLT
-          and EBIND_METADATA. 
+          and EBIND_METADATA.
           - EBIND_DEFAULT:  bind without special options.
           - EBIND_CLIENTINIT: Local property value is used as initial value. Normally
             remote end's value is used as initial value.
@@ -316,7 +316,7 @@ void ePropertyBinding::onmessage(
             faster than it can be transferred, some values are skipped. If EBIND_NOFLOWCLT
             flag is given, it disables flow control and every value is transferred without
             any limit to buffered memory use.
-          - EBIND_METADATA: If meta data, like text, unit, attributes, etc exists, it is 
+          - EBIND_METADATA: If meta data, like text, unit, attributes, etc exists, it is
             also transferred from remote object to local object.
           - EBIND_ATTR: Bind also attributes (subproperties like "x.min").
   @return None.
@@ -410,9 +410,9 @@ void ePropertyBinding::srvbind(
         goto notarget;
     }
 
-    /* Get property name. 
+    /* Get property name.
      */
-    if (!parameters->get(E_BINDPRM_PROPERTYNAME, &v)) 
+    if (!parameters->get(E_BINDPRM_PROPERTYNAME, &v))
     {
 #if OSAL_DEBUG
         osal_debug_error("srvbind() failed: Property name missing");
@@ -446,7 +446,7 @@ void ePropertyBinding::srvbind(
     reply = new eSet(this);
     /* if (m_flags & ATTR)
     {
-        
+
 xxxx
 
     } */
@@ -464,7 +464,7 @@ xxxx
         binding_setproperty(&v);
     }
 
-    /* Complete the server end of binding and return.  
+    /* Complete the server end of binding and return.
      */
     srvbind_base(envelope, reply);
     return;
@@ -474,7 +474,7 @@ notarget:
      */
     if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
     {
-        message (ECMD_NO_TARGET, envelope->source(), 
+        message (ECMD_NO_TARGET, envelope->source(),
             envelope->target(), OS_NULL, EMSG_DEFAULT);
     }
 }
@@ -513,7 +513,7 @@ void ePropertyBinding::cbindok(
      */
     if ((m_bflags & EBIND_CLIENTINIT) == 0)
     {
-        parameters->get(E_BINDPRM_VALUE, &v);    
+        parameters->get(E_BINDPRM_VALUE, &v);
         binding_setproperty(&v);
     }
 
@@ -531,13 +531,13 @@ notarget:
   @brief Mark property value changed.
 
   The ePropertyBinding::changed function marks a property value changed, so that it needs
-  to forwarded. The function forwards the property value immediately, if flow control allows. 
+  to forwarded. The function forwards the property value immediately, if flow control allows.
   Otherwise the property just remain marked to be forwarded.
   If property number given as argument is not for this binding, do nothing.
 
   @param propertynr Property number of the changed property.
   @param x Optional property value, used to save requerying it in common case.
-  
+
   @return None.
 
 ****************************************************************************************************
@@ -564,8 +564,8 @@ void ePropertyBinding::changed(
 
   @brief Forward property value trough binding.
 
-  The forward function sends value of a property if flow control allows. 
-  
+  The forward function sends value of a property if flow control allows.
+
   @param  x Variable containing value, if available.
   @param  delete_x Flag weather value should be deleted.
   @return None.
@@ -586,14 +586,14 @@ void ePropertyBinding::forward(
             tmp = new eVariable;
             binding_getproperty(tmp);
 
-            message(ECMD_FWRD, m_bindpath, OS_NULL, tmp, 
+            message(ECMD_FWRD, m_bindpath, OS_NULL, tmp,
                 EMSG_DEL_CONTENT /* EMSG_NO_ERROR_MSGS */);
         }
         else
         {
             /* Send data as ECMD_FWRD message.
              */
-            message(ECMD_FWRD, m_bindpath, OS_NULL, x, 
+            message(ECMD_FWRD, m_bindpath, OS_NULL, x,
                 delete_x ? EMSG_DEL_CONTENT : EMSG_DEFAULT  /* EMSG_NO_ERROR_MSGS */);
             x = OS_NULL;
         }
@@ -603,7 +603,7 @@ void ePropertyBinding::forward(
         forwarddone();
     }
 
-    if (delete_x && x) 
+    if (delete_x && x)
     {
         delete x;
     }
@@ -637,7 +637,7 @@ void ePropertyBinding::update(
   @brief Send acknowledge.
 
   The sendack function.
-  
+
   @param  envelope Message envelope from server binding.
   @return None.
 
@@ -663,7 +663,7 @@ void ePropertyBinding::sendack(
   @brief Acknowledge received.
 
   The ack function decrements acknowledge wait count and tries to send again.
-  
+
   @param  envelope Message envelope from server binding.
   @return None.
 
@@ -681,7 +681,7 @@ void ePropertyBinding::ack(
 
   @brief Save remote property name.
 
-  The ePropertyBinding::set_propertyname() releases current m_propertyname and stores 
+  The ePropertyBinding::set_propertyname() releases current m_propertyname and stores
   propertyname given as argument. If propertyname is OS_NULL, memory is just freeed.
 
   @param  propertyname Pointer to object path.
@@ -727,7 +727,7 @@ os_boolean ePropertyBinding::binding_setproperty(
 
     obj = grandparent();
     if (obj == OS_NULL) return OS_FALSE;
-    
+
     /* Set property value.
      */
     obj->setpropertyv(m_localpropertynr, x, this);
@@ -755,7 +755,7 @@ os_boolean ePropertyBinding::binding_getproperty(
 
     obj = grandparent();
     if (obj == OS_NULL) return OS_FALSE;
-    
+
     /* Set property value.
      */
     obj->propertyv(m_localpropertynr, x);

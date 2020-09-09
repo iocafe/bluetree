@@ -8,25 +8,27 @@
 
   Maintain list of classes which can be created dynamically by class ID.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ECLASSLIST_INCLUDED
-#define ECLASSLIST_INCLUDED
+#pragma once
+#ifndef ECLASSLIST_H_
+#define ECLASSLIST_H_
+#include "eobjects.h"
 
 typedef eObject *(*eNewObjFunc)(
     eObject *parent,
     e_oid id,
-	os_int flags);
+    os_int flags);
 
 /* Add class to class list.
  */
 void eclasslist_add(
-    os_int cid, 
+    os_int cid,
     eNewObjFunc nfunc,
     const os_char *classname);
 

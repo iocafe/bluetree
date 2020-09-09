@@ -6,16 +6,17 @@
   @version 1.0
   @date    8.9.2020
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ETABLE_INCLUDED
-#define ETABLE_INCLUDED
-
+#pragma once
+#ifndef ETABLE_H_
+#define ETABLE_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************
@@ -43,24 +44,24 @@ public:
     /*@{*/
 
     /* Constructor.
-	 */
+     */
     eTable(
-		eObject *parent = OS_NULL,
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
- 	 */
+    /* Virtual destructor.
+     */
     virtual ~eTable();
 
     /* Casting eObject pointer to eTable pointer.
      */
     inline static eTable *cast(
-		eObject *o) 
-	{ 
+        eObject *o)
+    {
         /* e_assert_type(o, ECLASSID_TABLE) */
         return (eTable*)o;
-	}
+    }
 
     /* Get class identifier.
      */
@@ -78,23 +79,23 @@ public:
     static eTable *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new eTable(parent, id, flags);
     }
 
     /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
       @name Table functions.
 
       X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     /* Configure the table.
      */

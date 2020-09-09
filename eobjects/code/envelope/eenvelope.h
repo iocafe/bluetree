@@ -9,15 +9,17 @@
   Messages are sent as envelope objects. The eEnvelope contains recipient and senders's addresses,
   command, message content and other data.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EENVELOPE_INCLUDED
-#define EENVELOPE_INCLUDED
+#pragma once
+#ifndef EENVELOPE_H_
+#define EENVELOPE_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************
@@ -26,9 +28,9 @@
 
   Commend identifiers used in envelopes and in by message(), onmessage(), etc. functions.
   All command identifiers used by eobjects library are negative, range -1 ... -999 is reserved
-  for these. Application may use positive command identifiers or negative command identifiers 
+  for these. Application may use positive command identifiers or negative command identifiers
   smaller than -999.
- 
+
 ****************************************************************************************************
 */
 /*@{*/
@@ -41,7 +43,7 @@
  */
 #define ECMD_SETPROPERTY -19
 
-/* Binding related commands. 
+/* Binding related commands.
  */
 #define ECMD_BIND -20
 #define ECMD_BIND_REPLY -21
@@ -83,7 +85,7 @@ extern os_char
 
 /* Source and target string presentations
  */
-typedef struct 
+typedef struct
 {
     os_char *str;
     os_short str_pos;
@@ -128,31 +130,31 @@ class eEnvelope : public eObject
     /*@{*/
 public:
     /* Constructor.
-	 */
-	eEnvelope(
-		eObject *parent = OS_NULL,
+     */
+    eEnvelope(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
- 	 */
-	virtual ~eEnvelope();
+    /* Virtual destructor.
+     */
+    virtual ~eEnvelope();
 
     /* Clone object.
      */
     virtual eObject *clone(
-        eObject *parent, 
+        eObject *parent,
         e_oid id = EOID_CHILD,
-		os_int aflags = 0);
+        os_int aflags = 0);
 
     /* Casting eObject pointer to eEnvelope pointer.
         */
-	inline static eEnvelope *cast(
-		eObject *o) 
-	{ 
+    inline static eEnvelope *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_ENVELOPE)
-		return (eEnvelope*)o;
-	}
+        return (eEnvelope*)o;
+    }
 
     /* Get class identifier.
      */
@@ -167,7 +169,7 @@ public:
     static eEnvelope *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new eEnvelope(parent, id, flags);
     }
@@ -175,45 +177,45 @@ public:
     /* Called when property value changes.
      */
     virtual void onpropertychange(
-        os_int propertynr, 
-        eVariable *x, 
+        os_int propertynr,
+        eVariable *x,
         os_int flags);
 
     /* Get value of simple property.
      */
     virtual eStatus simpleproperty(
-        os_int propertynr, 
+        os_int propertynr,
         eVariable *x);
 
     /* Write envelope to stream.
      */
     virtual eStatus writer(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /* Read envelope from stream.
      */
     virtual eStatus reader(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Envelope functions
+      @name Envelope functions
 
-	  X... 
+      X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
 /* COMMAND AND FLAGS ***************************************************************************** */
 
     inline void setcommand(
-        os_int command) 
+        os_int command)
     {
         m_command = command;
     }
@@ -226,7 +228,7 @@ public:
     /** Set message flags.
      */
     inline void setmflags(
-        os_int mflags) 
+        os_int mflags)
     {
         m_mflags = mflags;
     }
@@ -234,7 +236,7 @@ public:
     /** Set specified message flags.
      */
     inline void addmflags(
-		os_int mflags)
+        os_int mflags)
     {
         m_mflags |= mflags;
     }
@@ -242,14 +244,14 @@ public:
     /** Clear specified message flags.
      */
     inline void clearmflags(
-		os_int mflags)
+        os_int mflags)
     {
         m_mflags &= ~mflags;
     }
 
     /** Get message flags.
      */
-    inline os_int mflags() 
+    inline os_int mflags()
     {
         return m_mflags;
     }
@@ -283,15 +285,15 @@ public:
         eVariable *x);
 
     inline void move_target_pos(
-        os_short nchars) 
+        os_short nchars)
     {
         m_target.str_pos += nchars;
     }
 
     inline void move_target_over_objname(
-        os_short objname_nchars) 
+        os_short objname_nchars)
     {
-        m_target.str_pos += objname_nchars; 
+        m_target.str_pos += objname_nchars;
         if (m_target.str) if (m_target.str[m_target.str_pos] == '/') m_target.str_pos++;
     }
 
@@ -336,7 +338,7 @@ public:
         return e ? e + 1 : p;
     } */
 
- 
+
 /* CONTENT AND CONTEXT ************************************************************************** */
 
     void setcontent(
@@ -347,12 +349,12 @@ public:
         eObject *o,
         os_int mflags);
 
-    inline eObject *content() 
+    inline eObject *content()
     {
         return first(EOID_CONTENT);
     }
 
-    inline eObject *context() 
+    inline eObject *context()
     {
         return first(EOID_CONTEXT);
     }
@@ -364,7 +366,7 @@ private:
      */
     os_int m_command;
 
-    /* Combination of bits EMSG_KEEP_CONTENT (0), EMGS_NO_REPLIES, EMSG_NO_RESOLVE, 
+    /* Combination of bits EMSG_KEEP_CONTENT (0), EMGS_NO_REPLIES, EMSG_NO_RESOLVE,
        EMSG_NO_NEW_SOURCE_OIX, EMSG_NO_ERROR_MSGS and EMSG_INTERTHREAD.
     */
     os_short m_mflags;

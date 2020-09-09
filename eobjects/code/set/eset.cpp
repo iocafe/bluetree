@@ -8,9 +8,9 @@
 
   The set stores enumerated collection of values.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -30,9 +30,9 @@
 ****************************************************************************************************
 */
 eSet::eSet(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eObject(parent, id, flags)
 {
     m_items = OS_NULL;
@@ -56,9 +56,9 @@ eSet::~eSet()
     /* Clear the set to release all allocated memory.
      */
     clear();
-    
+
     /* Release items buffer
-     */    
+     */
     os_free(m_items, m_alloc);
 }
 
@@ -68,7 +68,7 @@ eSet::~eSet()
 
   @brief Add eSet to class list.
 
-  The eSet::setupclass function adds newobj function pointer to class list. This enables creating 
+  The eSet::setupclass function adds newobj function pointer to class list. This enables creating
   new objects dynamically by class identifier, which is used for serialization reader()
   functions.
 
@@ -91,7 +91,7 @@ void eSet::setupclass()
 
   @brief Clone object
 
-  The eSet::clone function clones and object including object's children. 
+  The eSet::clone function clones and object including object's children.
 
   @param  parent Parent for the clone.
   @param  id Object identifier for the clone.
@@ -101,7 +101,7 @@ void eSet::setupclass()
 ****************************************************************************************************
 */
 eObject *eSet::clone(
-    eObject *parent, 
+    eObject *parent,
     e_oid id,
     os_int aflags)
 {
@@ -153,10 +153,10 @@ eObject *eSet::clone(
                         *(eObject**)p = objptr->clone(clonedobj, EOID_CHILD, EOBJ_NO_MAP);
                         break;
                 }
-            
-                p += ibytes;       
+
+                p += ibytes;
             }
-        }        
+        }
     }
 
 //    clonegeneric(clonedobj, aflags);
@@ -199,7 +199,7 @@ eObject *eSet::clone(
 
   The eSet::writer() function serializes the eSet to stream. This writes only the
   content, use eObject::write() to save also class information, attachements, etc.
-  
+
   @param  stream The stream to write to.
   @param  flags Serialization flags.
 
@@ -210,8 +210,8 @@ eObject *eSet::clone(
 ****************************************************************************************************
 */
 eStatus eSet::writer(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Increment if new serialized items are added to the object,
        and check for new version's items in read() function.
@@ -225,13 +225,13 @@ eStatus eSet::writer(
     os_schar itype;
     eHandle *handle;
 
-	/* Begin the object and write version number.
+    /* Begin the object and write version number.
      */
     if (stream->write_begin_block(version)) goto failed;
 
     /* Save properties stored as variable.
      */
-    if (mm_handle) 
+    if (mm_handle)
     {
         /* Save count.
          */
@@ -304,12 +304,12 @@ eStatus eSet::writer(
                     if (nwritten != ibytes) goto failed;
                     break;
             }
-            
-            p += ibytes;       
-        }
-    }        
 
-	/* End the object.
+            p += ibytes;
+        }
+    }
+
+    /* End the object.
      */
     if (stream->write_end_block()) goto failed;
 
@@ -329,10 +329,10 @@ failed:
 
   @brief Read set content from stream.
 
-  The eSet::reader() function reads serialized set from stream. This function 
-  reads only the object content. To read whole object including attachments, names, etc, 
+  The eSet::reader() function reads serialized set from stream. This function
+  reads only the object content. To read whole object including attachments, names, etc,
   use eObject::read().
-  
+
   @param  stream The stream to read from.
   @param  flags Serialization flags.
 
@@ -343,8 +343,8 @@ failed:
 ****************************************************************************************************
 */
 eStatus eSet::reader(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
     /* Version number. Used to check which versions item's are in serialized data.
      */
@@ -368,13 +368,13 @@ eStatus eSet::reader(
     }
     while ((objptr = first())) delete objptr; */
 
-	/* Read object start mark and version number.
+    /* Read object start mark and version number.
      */
     if (stream->read_begin_block(&version)) goto failed;
 
     /* Save properties stored as variable.
      */
-    if (mm_handle) 
+    if (mm_handle)
     {
         /* Read count.
          */
@@ -417,7 +417,7 @@ eStatus eSet::reader(
         iid = (os_uchar)lval;
         if (stream->getl(&lval)) goto failed;
         ibytes = (os_uchar)lval;
-        
+
         *(os_uchar*)(p++) = iid;
         *(os_uchar*)(p++) = ibytes;
 
@@ -451,14 +451,14 @@ eStatus eSet::reader(
                     if (nread != ibytes) goto failed;
                     break;
             }
-            
-            p += ibytes;       
+
+            p += ibytes;
         }
-    }        
+    }
 
 
 skipit:
-	/* End the object.
+    /* End the object.
      */
     if (stream->read_end_block()) goto failed;
 
@@ -484,7 +484,7 @@ failed:
   @brief Write set to stream as JSON.
 
   The eSet::json_writer() function writes class specific object content to stream as JSON.
-  
+
   @param  stream The stream to write to.
   @param  sflags Serialization flags. Typically EOBJ_SERIALIZE_DEFAULT.
   @param  indent Indentation depth, 0, 1... Writes 2x this spaces at beginning of a line.
@@ -496,7 +496,7 @@ failed:
 ****************************************************************************************************
 */
 eStatus eSet::json_writer(
-    eStream *stream, 
+    eStream *stream,
     os_int sflags,
     os_int indent)
 {
@@ -605,7 +605,7 @@ eStatus eSet::json_writer(
     for (v = firstv(); v; v = v->nextv())
     {
         if (v->oid() < 0) continue;
-    
+
         if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma)) goto failed;
 
         if (json_puts(stream, "\"v")) goto failed;
@@ -613,7 +613,7 @@ eStatus eSet::json_writer(
         if (json_puts(stream, nbuf)) goto failed;
         if (json_puts(stream, "\": ")) goto failed;
         if (json_putv(stream, OS_NULL, v, sflags, indent + 1)) goto failed;
-    }        
+    }
 
     return ESTATUS_SUCCESS;
 
@@ -628,8 +628,8 @@ failed:
 
   @brief Store value into set.
 
-  The eSet::set function 
-  
+  The eSet::set function
+
   @param  id Identification number (for example property number) for value to store.
   @param  x Variable containing value to store.
           - x = OS_NULL -> delete value
@@ -663,16 +663,16 @@ void eSet::set(
     /* If we have variable with this id, use it.
      */
     v = firstv(id);
-    if (v) 
+    if (v)
     {
         if (x == OS_NULL) delete v;
         else v->setv(x);
         return;
     }
-    
-    /* If this id cannot be presented as uchar, use variable. 
+
+    /* If this id cannot be presented as uchar, use variable.
      */
-    if (id < 0 || id > 255) 
+    if (id < 0 || id > 255)
     {
         goto store_as_var;
     }
@@ -701,14 +701,14 @@ void eSet::set(
                 s = (os_short)l;
                 iptr = &s;
             }
-            else if (l >= -2147483647 && l <= 0x7FFFFFFF) 
+            else if (l >= -2147483647 && l <= 0x7FFFFFFF)
             {
                 itype = OS_INT;
                 ibytes = sizeof(os_int);
                 i = (os_int)l;
                 iptr = &i;
             }
-            else 
+            else
             {
                 itype = OS_LONG;
                 ibytes = sizeof(os_long);
@@ -729,7 +729,7 @@ void eSet::set(
                     if (d >= 0) c = (os_char)(d+0.5);
                     else c = -(os_char)(-d+0.5);
                     iptr = &c;
-                }   
+                }
             }
             break;
 
@@ -750,7 +750,7 @@ void eSet::set(
                 ibytes = 0;
                 iptr = OS_NULL;
             }
-            else if (sz > 64) 
+            else if (sz > 64)
             {
                 itype = -OS_STR;
                 ibytes = sizeof(os_char*) + sizeof(os_int);
@@ -792,11 +792,11 @@ void eSet::set(
         {
             /* Release memory allocated for previous value.
              */
-            if (jtype == OS_OBJECT) 
+            if (jtype == OS_OBJECT)
             {
                 delete *(eObject**)p;
             }
-            else if (jtype == -OS_STR) 
+            else if (jtype == -OS_STR)
             {
                 os_free(*(void**)p, *(os_int*)(p + sizeof(os_char*)));
             }
@@ -823,9 +823,9 @@ void eSet::set(
             /* Different length, remove this entry form m_items buffer.
              */
             p += jbytes;
-            if (e != p) 
+            if (e != p)
             {
-                os_memmove(start, p, e - p); 
+                os_memmove(start, p, e - p);
             }
             m_used -= (os_int)(p - start);
             break;
@@ -886,16 +886,16 @@ store_as_var:
 
   @brief Get value from set.
 
-  The eSet::get function 
-  
+  The eSet::get function
+
   @param  id Identification number (for example property number) for value to store.
   @param  x Variable containing value to store.
           - x = OS_NULL -> delete value
           - x = empty var -> store empty mark;
   @param  flags Reserved for future, set 0 for now.
 
-  @return Return value can be used between empty value and unset value. This is needed for 
-          properties. OS_TRUE if value was found, even empty one. OS_FALSE if no value for 
+  @return Return value can be used between empty value and unset value. This is needed for
+          properties. OS_TRUE if value was found, even empty one. OS_FALSE if no value for
           the ID was found.
 
 ****************************************************************************************************
@@ -987,12 +987,12 @@ os_boolean eSet::get(
                     x->clear();
                     break;
             }
-                
+
             return OS_TRUE;
         }
 
         if (ibytes) p += ibytes + 1;
-    }        
+    }
 
     /* comtinues ...
      */
@@ -1008,8 +1008,8 @@ getout:
 
   The eSet::clear function ...
 
-  @return Return value can be used between empty value and unset value. This is needed for 
-          properties. OS_TRUE if value was found, even empty one. OS_FALSE if no value for 
+  @return Return value can be used between empty value and unset value. This is needed for
+          properties. OS_TRUE if value was found, even empty one. OS_FALSE if no value for
           the ID was found.
 
 ****************************************************************************************************
@@ -1051,10 +1051,10 @@ void eSet::clear()
                     delete objptr;
                     break;
             }
-            
-            p += ibytes;       
+
+            p += ibytes;
         }
-    }        
+    }
 
     m_used = 0;
 }

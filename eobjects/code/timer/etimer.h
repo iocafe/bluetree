@@ -7,20 +7,21 @@
   @date    8.9.2020
 
   Object can enable or disable receiving ECMD_TIMER by calling base class'es eObject::timer()
-  function. Timer base precision is 40ms, which is intended to be cast enough for animating 
+  function. Timer base precision is 40ms, which is intended to be cast enough for animating
   user interface objects at rate of 25Hz. When more precise timing is needed, it should be
-  implemented by other means (for example by using loop containing os_sleep and alive() calls). 
-  
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  implemented by other means (for example by using loop containing os_sleep and alive() calls).
+
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ETIMER_INCLUDED
-#define ETIMER_INCLUDED
-
+#pragma once
+#ifndef ETIMER_H_
+#define ETIMER_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************
@@ -44,48 +45,48 @@ public:
     ************************************************************************************************
     */
 
-	/* Constructor.
+    /* Constructor.
      */
-	eTimer(
-		eObject *parent = OS_NULL,
+    eTimer(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
+    /* Virtual destructor.
      */
-	virtual ~eTimer();
+    virtual ~eTimer();
 
     /* Casting eObject pointer to eTimer pointer.
      */
-	inline static eTimer *cast(
-		eObject *o) 
-	{ 
+    inline static eTimer *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_TIMER)
-		return (eTimer*)o;
-	}
+        return (eTimer*)o;
+    }
 
-	/* Get class identifier.
-	 */
-	virtual os_int classid() 
-    { 
-        return ECLASSID_TIMER; 
+    /* Get class identifier.
+     */
+    virtual os_int classid()
+    {
+        return ECLASSID_TIMER;
     }
 
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
 
-	/* Static constructor function.
-	*/
-	static eTimer *newobj(
-		eObject *parent,
+    /* Static constructor function.
+    */
+    static eTimer *newobj(
+        eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
-	{
+        os_int flags = EOBJ_DEFAULT)
+    {
         return new eTimer(parent, id, flags);
-	}
+    }
 
-    /* Function to process incoming messages. 
+    /* Function to process incoming messages.
      */
     void onmessage(
         eEnvelope *envelope);

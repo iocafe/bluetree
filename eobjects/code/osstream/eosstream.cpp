@@ -9,7 +9,7 @@
   TCP socket class eOsStream encodes and buffers data and calls OSAL's stream functions to
   read/write the socket. This class is used by eConnection and eEndPoint classes.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
   or distribute this file you indicate that you have read the license and understand and accept
   it fully.
@@ -458,7 +458,7 @@ void eOsStream::select(
   @param  newstrem Pointer to newly allocated eOsStream to set up for this accepted connection.
   @param  flags Reserved, set 0 for now.
   @return ESTATUS_SUCCESS indicates that connection has succesfully been accepted.
-          ESTATUS_NO_NEW_CONNECTION indicates that there were no new connections.
+          OSAL_NO_NEW_CONNECTION indicates that there were no new connections.
           Other return values indicate an error.
 
 ****************************************************************************************************
@@ -491,7 +491,7 @@ eStream *eOsStream::accept(
     }
 
     if (s) {
-        *s = (osal_s == OSAL_NO_NEW_CONNECTION ? ESTATUS_NO_NEW_CONNECTION : ESTATUS_FAILED);
+        *s = ESTATUS_FROM_OSAL_STATUS(osal_s);
     }
 
     return OS_NULL;

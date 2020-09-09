@@ -8,21 +8,23 @@
 
   This file implements eNameSpace class to which indexed variables of eName can map to.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ENAMESPACE_INCLUDED
-#define ENAMESPACE_INCLUDED
+#pragma once
+#ifndef ENAMESPACE_H_
+#define ENAMESPACE_H_
+#include "eobjects.h"
 
 /* Set to 1 to debug red/black tree for the name space.
  */
 #define EINDEX_DBTREE_DEBUG 0
 
-/* Name space identifiers. These are followed by '/', thus for example path to thread looks like 
+/* Name space identifiers. These are followed by '/', thus for example path to thread looks like
    "/myobject..." or process "//myobject".
  */
 #define E_PROCESS_NS "/"
@@ -42,7 +44,7 @@
 */
 class eNameSpace : public eObject
 {
-	friend class eName;
+    friend class eName;
 
     /**
     ************************************************************************************************
@@ -60,7 +62,7 @@ public:
     eNameSpace(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
     /* Delete eObject, virtual destructor.
      */
@@ -69,22 +71,22 @@ public:
     /* Clone name space
      */
     virtual eObject *clone(
-        eObject *parent, 
+        eObject *parent,
         e_oid id,
         os_int aflags);
 
-    /* Cast eObject pointer to eNameSpace pointer. 
+    /* Cast eObject pointer to eNameSpace pointer.
      */
-	inline static eNameSpace *cast(
-		eObject *o) 
-	{ 
+    inline static eNameSpace *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_NAMESPACE)
-		return (eNameSpace*)o;
-	}
+        return (eNameSpace*)o;
+    }
 
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return ECLASSID_NAMESPACE;
     }
@@ -94,7 +96,7 @@ public:
     /* static eNameSpace *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new eNameSpace(parent, oid, flags);
     } */
@@ -102,7 +104,7 @@ public:
     /*@}*/
 
 
-    /** 
+    /**
     ************************************************************************************************
 
       @name Name space specific functions
@@ -115,7 +117,7 @@ public:
 
     /* Get name space id, OS_NULL if none.
      */
-    inline eVariable *namespaceid() 
+    inline eVariable *namespaceid()
     {
         return m_namespace_id;
     }
@@ -123,12 +125,12 @@ public:
     /* Set name space id.
      */
     inline void setnamespaceid(
-        eVariable *nsid) 
+        eVariable *nsid)
     {
         m_namespace_id = nsid;
     }
 
-	/* Get first child object with specific name.
+    /* Get first child object with specific name.
      */
     eName *findname(
         eVariable *x = OS_NULL);
@@ -137,12 +139,12 @@ public:
     /*@}*/
 
 protected:
-	/** Pointer to root object of indexed variables.
+    /** Pointer to root object of indexed variables.
      */
     eName *m_ixroot;
 
-	/** Check if object is "red". The function checks if the object n is tagged as "red"
-		in red/black tree.
+    /** Check if object is "red". The function checks if the object n is tagged as "red"
+        in red/black tree.
      */
     inline os_int ixisred(
         eName *n)
@@ -151,8 +153,8 @@ protected:
         return n->m_vflags & EVAR_IS_RED;
     }
 
-	/** Check if object is "black". The function checks if the object n is tagged as 
-		"black" in red/black tree.
+    /** Check if object is "black". The function checks if the object n is tagged as
+        "black" in red/black tree.
      */
     inline os_int ixisblack(
         eName *n)
@@ -163,46 +165,46 @@ protected:
 
 
 #if EINDEX_DBTREE_DEBUG
-	/* Red/Black tree: Get grandparent.
+    /* Red/Black tree: Get grandparent.
      */
     eName *ixgrandparent(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Get sibling.
+    /* Red/Black tree: Get sibling.
      */
     eName *ixsibling(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Get uncle.
+    /* Red/Black tree: Get uncle.
      */
     eName *ixuncle(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Verify tree integrity.
+    /* Red/Black tree: Verify tree integrity.
      */
-    void ixverify_properties(); 
+    void ixverify_properties();
 
-	/* Red/Black tree: Verify that root node is black.
+    /* Red/Black tree: Verify that root node is black.
      */
-    void ixverify_property_2(); 
+    void ixverify_property_2();
 
-	/* Red/Black tree: Verify that every red node has two black children.
+    /* Red/Black tree: Verify that every red node has two black children.
      */
     void ixverify_property_4(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Verify that number of black nodes on match.
+    /* Red/Black tree: Verify that number of black nodes on match.
      */
-    void ixverify_property_5(); 
+    void ixverify_property_5();
 
-	/* Red/Black tree: Helper function for verify_property_5().
+    /* Red/Black tree: Helper function for verify_property_5().
      */
     void ixverify_property_5_helper(
-        eName *n, 
-        int black_count, 
-        int *path_black_count); 
+        eName *n,
+        int black_count,
+        int *path_black_count);
 #else
-	/** Red/Black tree: Get grand parent.
+    /** Red/Black tree: Get grand parent.
      */
     inline eName *ixgrandparent(
         eName *n)
@@ -210,17 +212,17 @@ protected:
         return n->m_iup->m_iup;
     }
 
-	/** Red/Black tree: Get sibling.
+    /** Red/Black tree: Get sibling.
      */
     inline eName *ixsibling(
         eName *n)
     {
-        return (n == n->m_iup->m_ileft) 
-            ? n->m_iup->m_iright 
+        return (n == n->m_iup->m_ileft)
+            ? n->m_iup->m_iright
             : n->m_iup->m_ileft;
     }
 
-	/** Red/Black tree: Get uncle.
+    /** Red/Black tree: Get uncle.
      */
     inline eName *ixuncle(
         eName *n)
@@ -229,65 +231,65 @@ protected:
     }
 
 #endif
-	/* Delete all child objects.
+    /* Delete all child objects.
      */
     void unmap_all();
 
-	/* Red/Black tree: Rotate tree left.
+    /* Red/Black tree: Rotate tree left.
      */
     void ixrotate_left(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Rotate tree right.
+    /* Red/Black tree: Rotate tree right.
      */
     void ixrotate_right(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Replace a node by another node.
+    /* Red/Black tree: Replace a node by another node.
      */
     void ixreplace_node(
-        eName *oldn, 
-        eName *newn); 
+        eName *oldn,
+        eName *newn);
 
-	/* Red/Black tree: Insert a node to red black tree.
+    /* Red/Black tree: Insert a node to red black tree.
      */
     void ixrbtree_insert(
-        eName *inserted_node); 
+        eName *inserted_node);
 
-	/* Red/Black tree: Balance red/black tree after inserting node.
+    /* Red/Black tree: Balance red/black tree after inserting node.
      */
     void ixinsert_case1(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Balance red/black tree after inserting node.
+    /* Red/Black tree: Balance red/black tree after inserting node.
      */
     void ixinsert_case4(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Remove node from red/black.
+    /* Red/Black tree: Remove node from red/black.
      */
     void ixrbtree_remove(
         eName *n);
 
-	/* Red/Black tree: Balance red/black tree after removing node.
+    /* Red/Black tree: Balance red/black tree after removing node.
      */
     void ixdelete_case2(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Balance red/black tree after removing node.
+    /* Red/Black tree: Balance red/black tree after removing node.
      */
     void ixdelete_case4(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Balance red/black tree after removing node.
+    /* Red/Black tree: Balance red/black tree after removing node.
      */
     void ixdelete_case5(
-        eName *n); 
+        eName *n);
 
-	/* Red/Black tree: Balance red/black tree after removing node.
+    /* Red/Black tree: Balance red/black tree after removing node.
      */
     void ixdelete_case6(
-        eName *n); 
+        eName *n);
 
     eVariable *m_namespace_id;
 };

@@ -8,16 +8,17 @@
 
   This header file defines object identifiers used by eobjects library.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EOID_INCLUDED
-#define EOID_INCLUDED
-
+#pragma once
+#ifndef EOID_H_
+#define EOID_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************
@@ -33,14 +34,14 @@
 /*@{*/
 
 /** This is default object identifier, which specifies object simply as list item.
-    If used without parent object, indicates primitive object, typically eVariable, which 
-    is not part of tree hierarchy. This makes object use less memory 
-	and to be faster to allocate and free, but it cannot be root or child object.
-	This flag is argument for costructore
+    If used without parent object, indicates primitive object, typically eVariable, which
+    is not part of tree hierarchy. This makes object use less memory
+    and to be faster to allocate and free, but it cannot be root or child object.
+    This flag is argument for costructore
  */
 #define EOID_ITEM -1
 
-/** This is default object identifier for containers, threads and also specifies object as 
+/** This is default object identifier for containers, threads and also specifies object as
     list item. But if used without parent object, indicates top of new object tree.
  */
 #define EOID_RITEM -2
@@ -77,15 +78,15 @@
  */
 #define EOID_BINDINGS -35
 
-/** This is special object identifier that can be given as argument to object hierarchy 
-	functions, like first(). The EOID_CHILD specifies to get a child object, 
-	which is not flagged as attachment.
+/** This is special object identifier that can be given as argument to object hierarchy
+    functions, like first(). The EOID_CHILD specifies to get a child object,
+    which is not flagged as attachment.
  */
 #define EOID_CHILD -1000
 
-/** This is special object identifier that can be given as argument to object hierarchy 
-	functions, like first(). The EOID_ALL specifies to get a child object, 
-	including child objects which are flagged as attachments.
+/** This is special object identifier that can be given as argument to object hierarchy
+    functions, like first(). The EOID_ALL specifies to get a child object,
+    including child objects which are flagged as attachments.
  */
 #define EOID_ALL -1001
 

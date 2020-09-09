@@ -8,15 +8,17 @@
 
   Automatic object pointer is a pointer which detects if object pointing to it is deleted.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EPOINTER_INCLUDED
-#define EPOINTER_INCLUDED
+#pragma once
+#ifndef EPOINTER_H_
+#define EPOINTER_H_
+#include "eobjects.h"
 
 /* Undefined pointer or index/use count reference to object.
  */
@@ -28,7 +30,7 @@ typedef union
 
     /** Reference to object. Object index and use count.
      */
-    struct 
+    struct
     {
         e_oix oix;
         os_int ucnt;
@@ -60,60 +62,60 @@ class ePointer : public eObject
     */
     /*@{*/
 public:
-	/* Constructor.
-		*/
-	ePointer(
-		eObject *parent = OS_NULL,
+    /* Constructor.
+        */
+    ePointer(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
-		*/
-	virtual ~ePointer();
+    /* Virtual destructor.
+        */
+    virtual ~ePointer();
 
     /* Casting eObject pointer to ePointer pointer.
      */
-	inline static ePointer *cast(
-		eObject *o) 
-	{ 
+    inline static ePointer *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_POINTER)
-		return (ePointer*)o;
-	}
-
-	/* Get class identifier.
- 		*/
-	virtual os_int classid() 
-    { 
-        return ECLASSID_POINTER; 
+        return (ePointer*)o;
     }
 
-	/* Static constructor function.
-	*/
-	/* static ePointer *newobj(
-		eObject *parent,
+    /* Get class identifier.
+        */
+    virtual os_int classid()
+    {
+        return ECLASSID_POINTER;
+    }
+
+    /* Static constructor function.
+    */
+    /* static ePointer *newobj(
+        eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
-	{
-		return new ePointer(parent, oid, flags);
-	} */
+        os_int flags = EOBJ_DEFAULT)
+    {
+        return new ePointer(parent, oid, flags);
+    } */
 
     /*@}*/
 
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
       @name ePointer specific functions
 
-	  X...
+      X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     /* Set object pointer.
      */
-	void set(eObject *ptr);
+    void set(eObject *ptr);
 
     /* Get object referred to by object pointer.
      */
@@ -121,19 +123,19 @@ public:
 
     /* Set plain pointer.
      */
-	inline void set_undef(
-        void *ptr) 
+    inline void set_undef(
+        void *ptr)
     {
         m_ref.undef = ptr;
     }
 
     /* Get plain pointer.
      */
-	inline void *get_undef()
+    inline void *get_undef()
     {
         return m_ref.undef;
     }
-   
+
     /*@}*/
 
 protected:

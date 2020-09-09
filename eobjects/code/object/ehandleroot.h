@@ -7,18 +7,20 @@
   @date    8.9.2020
 
   The handle root keeps track of handle tables and global free handles in them. Handles
-  can be reserved by thread or an another root object. Handle root state is stored in 
+  can be reserved by thread or an another root object. Handle root state is stored in
   eHandleRoot structure within eglobals.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EHANDLEROOT_INCLUDED
-#define EHANDLEROOT_INCLUDED
+#pragma once
+#ifndef EHANDLEROOT_H_
+#define EHANDLEROOT_H_
+#include "eobjects.h"
 
 class eHandleTable;
 
@@ -59,7 +61,7 @@ eHandleRoot;
 
   @name Handle root functions.
 
-  Function of the handle root is to allocate and manage handle tables, and allow (thread) root 
+  Function of the handle root is to allocate and manage handle tables, and allow (thread) root
   objects to reserve/release handles for use.
 
 ****************************************************************************************************
@@ -82,8 +84,8 @@ eHandle *ehandleroot_reservehandles(
 /* Release handles from thread or another root object.
  */
 eHandle *ehandleroot_releasehandles(
-	eHandle *h,
-	e_oix nro_handles);
+    eHandle *h,
+    e_oix nro_handles);
 
 
 /*@}*/

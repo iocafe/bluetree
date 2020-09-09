@@ -8,15 +8,17 @@
 
   The thread object is the root of thread's object tree.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ETHREAD_INCLUDED
-#define ETHREAD_INCLUDED
+#pragma once
+#ifndef ETHREAD_H_
+#define ETHREAD_H_
+#include "eobjects.h"
 
 /* Flags for alive() function.
  */
@@ -50,32 +52,32 @@ public:
     /*@{*/
 
     /* Constructor.
-	 */
-	eThread(
-		eObject *parent = OS_NULL,
+     */
+    eThread(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
- 	 */
-	virtual ~eThread();
+    /* Virtual destructor.
+     */
+    virtual ~eThread();
 
     /* Casting eObject pointer to eThread pointer.
         */
-	inline static eThread *cast(
-		eObject *o) 
-	{ 
-        if (o) 
+    inline static eThread *cast(
+        eObject *o)
+    {
+        if (o)
         {
             if (o->isthread()) return (eThread*)o;
             osal_debug_assert(0);
         }
         return OS_NULL;
-	}
+    }
 
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return ECLASSID_THREAD;
     }
@@ -85,9 +87,9 @@ public:
     static void setupclass();
 
 
-    /* Return OS_TRUE if object is thread (derived). 
+    /* Return OS_TRUE if object is thread (derived).
      */
-    virtual os_boolean isthread() 
+    virtual os_boolean isthread()
     {
         return OS_TRUE;
     }
@@ -97,10 +99,10 @@ public:
     static eThread *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new eThread(parent, id, flags);
-    } 
+    }
 
     virtual void onmessage(
         eEnvelope *envelope);
@@ -109,18 +111,18 @@ public:
 
     /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Thread message buffer
+      @name Thread message buffer
 
-	  X... 
+      X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
-    /* Create operating system thread and start running 
+    /* Create operating system thread and start running
      */
     void start(
         eThreadHandle *thandle = OS_NULL,
@@ -135,7 +137,7 @@ public:
 
     /* Check if thread exit is requested.
      */
-    inline os_boolean exitnow() 
+    inline os_boolean exitnow()
     {
         return m_exit_requested;
     }
@@ -154,7 +156,7 @@ public:
     /*@}*/
 
 protected:
-    /* Thread triggger. 
+    /* Thread triggger.
      */
     osalEvent m_trigger;
 

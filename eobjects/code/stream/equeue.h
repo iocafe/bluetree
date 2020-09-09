@@ -9,15 +9,17 @@
   Queue buffers data, typically for reading from or writing to stream. See equeue.cpp for more
   information.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EQUEUE_INCLUDED
-#define EQUEUE_INCLUDED
+#pragma once
+#ifndef EQUEUE_H_
+#define EQUEUE_H_
+#include "eobjects.h"
 
 /** Memory is buffered as blocks within queue. Block header structure is:
  */
@@ -42,7 +44,7 @@ typedef struct eQueueBlock
     /** Size of queued block excluting the header.
      */
     os_int sz;
-} 
+}
 eQueueBlock;
 
 
@@ -73,44 +75,44 @@ public:
 
     /* Constructor.
      */
-	eQueue(
-		eObject *parent = OS_NULL,
+    eQueue(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
+    /* Virtual destructor.
      */
-	virtual ~eQueue();
+    virtual ~eQueue();
 
     /* Casting eObject pointer to eQueue pointer.
      */
-	inline static eQueue *cast(
-		eObject *o) 
-	{ 
+    inline static eQueue *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_QUEUE)
-		return (eQueue*)o;
-	}
+        return (eQueue*)o;
+    }
 
-	/* Get class identifier.
-	*/
-	virtual os_int classid() 
-    { 
-        return ECLASSID_QUEUE; 
+    /* Get class identifier.
+    */
+    virtual os_int classid()
+    {
+        return ECLASSID_QUEUE;
     }
 
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
 
-	/* Static constructor function.
-	*/
-	static eQueue *newobj(
-		eObject *parent,
+    /* Static constructor function.
+    */
+    static eQueue *newobj(
+        eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
-	{
+        os_int flags = EOBJ_DEFAULT)
+    {
         return new eQueue(parent, id, flags);
-	}
+    }
 
     /*@}*/
 
@@ -128,7 +130,7 @@ public:
     /* Open the queue.
      */
     virtual eStatus open(
-	    os_char *parameters,
+        os_char *parameters,
         os_int flags = 0);
 
     /* Close the queue.
@@ -138,15 +140,15 @@ public:
     /* Write data to queue.
      */
     virtual eStatus write(
-        const os_char *buf, 
-        os_memsz buf_sz, 
+        const os_char *buf,
+        os_memsz buf_sz,
         os_memsz *nwritten = OS_NULL);
 
     /* Read data from queue.
      */
     virtual eStatus read(
-        os_char *buf, 
-        os_memsz buf_sz, 
+        os_char *buf,
+        os_memsz buf_sz,
         os_memsz *nread = OS_NULL,
         os_int flags = 0);
 
@@ -156,15 +158,15 @@ public:
         os_int c);
 
     /* Read character or control code.
-     */    
+     */
     virtual os_int readchar();
 
     os_memsz bytes();
 
-    /** Number of incoming flush controls in queue at the moment. Requires OSAL_FLUSH_CTRL_COUNT 
+    /** Number of incoming flush controls in queue at the moment. Requires OSAL_FLUSH_CTRL_COUNT
         and OSAL_STREAM_DECODE_ON_READ flags for open().
      */
-    virtual os_int flushcount() 
+    virtual os_int flushcount()
     {
         return m_flush_count;
     }
@@ -191,13 +193,13 @@ private:
     /* Write data to queue, encode while writing.
      */
     void write_encoded(
-        const os_char *buf, 
+        const os_char *buf,
         os_memsz buf_sz);
 
     /* Write data to queue without modification.
      */
     void write_plain(
-        const os_char *buf, 
+        const os_char *buf,
         os_memsz buf_sz);
 
     /** Put character to queue.
@@ -211,7 +213,7 @@ private:
          */
         nexthead = m_newest->head + 1;
         if (nexthead >= m_newest->sz) nexthead = 0;
-    
+
         /* If this block is full, move on to next block
          */
         if (nexthead == m_newest->tail)
@@ -232,15 +234,15 @@ private:
     /* Read and decode data.
      */
     void read_decoded(
-        os_char *buf, 
-        os_memsz buf_sz, 
+        os_char *buf,
+        os_memsz buf_sz,
         os_memsz *nread);
 
     /* Read data as is.
      */
     void read_plain(
-        os_char *buf, 
-        os_memsz buf_sz, 
+        os_char *buf,
+        os_memsz buf_sz,
         os_memsz *nread,
         os_int flags);
 
@@ -318,7 +320,7 @@ private:
      */
     os_int m_rd_prev2c;
 
-    /** Number of incoming flush controls in queue at the moment. 
+    /** Number of incoming flush controls in queue at the moment.
      */
     os_int m_flush_count;
 

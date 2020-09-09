@@ -8,15 +8,17 @@
 
   Where clause interpenter.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EWHERE_INCLUDED
-#define EWHERE_INCLUDED
+#pragma once
+#ifndef EWHERE_H_
+#define EWHERE_H_
+#include "eobjects.h"
 
 class eBuffer;
 
@@ -74,11 +76,11 @@ public:
     /*@{*/
 
     /* Constructor.
-	 */
+     */
     eWhere(
-		eObject *parent = OS_NULL,
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
     /* Get class identifier.
      */
@@ -89,17 +91,17 @@ public:
 
     /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
       @name Evaluating where clause.
 
       First call compile function to generate code and list of needed variables. Then set
       values for variables and call evaluate to see of where clause is true or false.
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     /* Compile where clause. Generates byte code and variables.
      */

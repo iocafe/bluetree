@@ -8,15 +8,17 @@
 
   Thread handle is used for controlling threads from another thread.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
   or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ETHREAD_HANDLE_INCLUDED
-#define ETHREAD_HANDLE_INCLUDED
+#pragma once
+#ifndef ETHREADHANDLE_H_
+#define ETHREADHANDLE_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************

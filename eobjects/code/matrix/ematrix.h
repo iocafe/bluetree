@@ -6,15 +6,17 @@
   @version 1.0
   @date    8.9.2020
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EMATRIX_INCLUDED
-#define EMATRIX_INCLUDED
+#pragma once
+#ifndef EMATRIX_H_
+#define EMATRIX_H_
+#include "eobjects.h"
 
 class eBuffer;
 
@@ -54,31 +56,31 @@ class eMatrix : public eObject
     /*@{*/
 public:
     /* Constructor.
-	 */
+     */
     eMatrix(
-		eObject *parent = OS_NULL,
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
- 	 */
+    /* Virtual destructor.
+     */
     virtual ~eMatrix();
 
     /* Clone object.
      */
     virtual eObject *clone(
-        eObject *parent, 
+        eObject *parent,
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
     /* Casting eObject pointer to eMatrix pointer.
      */
     inline static eMatrix *cast(
-		eObject *o) 
-	{ 
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_MATRIX)
         return (eMatrix*)o;
-	}
+    }
 
     /* Get class identifier.
      */
@@ -96,7 +98,7 @@ public:
     static eMatrix *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new eMatrix(parent, id, flags);
     }
@@ -104,20 +106,20 @@ public:
     /* Write matrix content to stream.
      */
     virtual eStatus writer(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /* Read matrix content from stream.
      */
     virtual eStatus reader(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
 #if E_SUPPROT_JSON
     /* Write set to stream as JSON.
      */
 /*     eStatus json_writer(
-        eStream *stream, 
+        eStream *stream,
         os_int sflags,
         os_int indent);
  */
@@ -125,16 +127,16 @@ public:
 
     /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
       @name Table function overrides.
 
       X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     /* Configure the table.
      */

@@ -6,15 +6,17 @@
   @version 1.0
   @date    8.9.2020
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ENETPROCESS_INCLUDED
-#define ENETPROCESS_INCLUDED
+#pragma once
+#ifndef ENETPROCESS_H_
+#define ENETPROCESS_H_
+#include "eobjects.h"
 
 /* Initialize this as enet process. First argument is process name and second argument
    is process identification number.

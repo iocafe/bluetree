@@ -6,23 +6,25 @@
   @version 1.0
   @date    8.9.2020
 
-  The eObject is base class for all objects. 
-  
+  The eObject is base class for all objects.
+
   - Functions to manage object hierarchy and idenfify objects.
   - Functions to clone objects.
   - Serialization functions.
   - Messaging.
   - Functions to access object properties.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EOBJECT_INCLUDED
-#define EOBJECT_INCLUDED
+#pragma once
+#ifndef EOBJECT_H_
+#define EOBJECT_H_
+#include "eobjects.h"
 
 class eHandle;
 class eRoot;
@@ -58,7 +60,7 @@ class ePointer;
   #define e_assert_type(o,id)
 #else
   #define e_assert_type(o,id) if (o) osal_debug_assert((o)->classid()==(id));
-#endif 
+#endif
 
 /* Flags for addproperty() function.
  */
@@ -84,7 +86,7 @@ class ePointer;
 #if E_SUPPROT_JSON
 #define EJSON_NO_NEW_LINE 0
 #define EJSON_NEW_LINE_BEFORE 1
-#define EJSON_NEW_LINE_ONLY 2 
+#define EJSON_NEW_LINE_ONLY 2
 #endif
 
 
@@ -109,63 +111,44 @@ extern os_char eobj_this_ns[];
 */
 class eObject
 {
-	friend class eHandle;
-	friend class eRoot;
+    friend class eHandle;
+    friend class eRoot;
     friend class ePointer;
 
-    /** 
+    /**
     ************************************************************************************************
 
       @name Constructors and destructor
 
-      When object is constructed it may be placed within thread's. 
+      When object is constructed it may be placed within thread's.
 
     ************************************************************************************************
     */
     /*@{*/
 
 protected:
-	/* Private constructor for new eObject.
+    /* Private constructor for new eObject.
      */
     eObject(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
 private:
-	/* Disable C++ standard copy constructor and assignment operator. Assignment is implemnted
-		class specifically, and copy as clone() function which also positions object in object
-		tree.
+    /* Disable C++ standard copy constructor and assignment operator. Assignment is implemnted
+        class specifically, and copy as clone() function which also positions object in object
+        tree.
      */
-	eObject(eObject const&);
-	eObject& operator=(eObject const&);
- 
+    eObject(eObject const&);
+    eObject& operator=(eObject const&);
+
     /* Create root helper object and handles for root and root helper.
      */
     void makeroot(
         e_oid id,
-	    os_int flags);
+        os_int flags);
 
 public:
-/*     void* operator new(size_t sz)
-    {
-        size_t *p;
-        sz += sizeof(size_t);
-        p = (size_t*)os_malloc(sz, OS_NULL);
-        *p = sz;
-        return p + 1;
-    }
-
-    void operator delete(void *p)
-    {
-        if (p)
-        {
-            size_t *q = (size_t*)p - 1;
-            os_free(q, *q);
-        }
-    }
-*/
-
     /* Delete eObject, virtual destructor.
      */
     virtual ~eObject();
@@ -173,9 +156,9 @@ public:
     /** Cloning, adopting and copying.
      */
     virtual eObject *clone(
-        eObject *parent, 
+        eObject *parent,
         e_oid id = EOID_CHILD,
-		os_int aflags = 0);
+        os_int aflags = 0);
 
     /* Helper function for clone functionality.
      */
@@ -185,24 +168,24 @@ public:
 
     /* Get class identifier
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return ECLASSID_OBJECT;
     }
 
-    /* Return OS_TRUE if object is thread (derived). 
+    /* Return OS_TRUE if object is thread (derived).
      */
-    virtual os_boolean isthread() 
+    virtual os_boolean isthread()
     {
         return OS_FALSE;
     }
 
     /* Allocate new child object by class identifier.
      */
-    inline eObject *newchild( 
+    inline eObject *newchild(
         os_int cid,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return newobject(this, cid, id, flags);
     }
@@ -213,7 +196,7 @@ public:
         eObject *parent,
         os_int cid,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
     inline eHandle *handle()
     {
@@ -229,7 +212,7 @@ public:
 
 
 #if EOVERLOAD_NEW_AND_DELETE
-    /** 
+    /**
     ************************************************************************************************
 
       @name Memory allocation
@@ -249,12 +232,12 @@ public:
     /* Overloaded delete operator calls os_free().
      */
     void operator delete(
-        void *buf); 
+        void *buf);
 
     /*@}*/
 #endif
 
-    /** 
+    /**
     ************************************************************************************************
 
       @name Object flags
@@ -269,54 +252,54 @@ public:
      */
     inline os_int flags()
     {
-		if (mm_handle) return mm_handle->m_oflags;
-		return EOBJ_DEFAULT;
+        if (mm_handle) return mm_handle->m_oflags;
+        return EOBJ_DEFAULT;
     }
 
     /** Set specified object flags.
      */
     inline void setflags(
-		os_int flags)
+        os_int flags)
     {
-		if (mm_handle) mm_handle->setflags(flags);
+        if (mm_handle) mm_handle->setflags(flags);
     }
 
     /** Clear specified object flags.
      */
     inline void clearflags(
-		os_int flags)
+        os_int flags)
     {
-		if (mm_handle) mm_handle->clearflags(flags);
+        if (mm_handle) mm_handle->clearflags(flags);
     }
 
     /** If object can be cloned?
      */
     inline os_boolean isclonable()
     {
-		if (mm_handle) return mm_handle->isclonable();
-		return OS_TRUE;
+        if (mm_handle) return mm_handle->isclonable();
+        return OS_TRUE;
     }
 
     /** Check if object is an attachment. Returns nonzero if object is an attachment.
      */
     inline os_boolean isattachment()
     {
-		if (mm_handle) return mm_handle->isattachment();
-		return OS_FALSE;
+        if (mm_handle) return mm_handle->isattachment();
+        return OS_FALSE;
     }
 
-    /** Check if object is a serializable attachment. 
+    /** Check if object is a serializable attachment.
      */
     inline os_boolean isserattachment()
     {
-		if (mm_handle) return mm_handle->isserattachment();
-		return OS_FALSE;
-    } 
+        if (mm_handle) return mm_handle->isserattachment();
+        return OS_FALSE;
+    }
 
     /*@}*/
 
 
-    /** 
+    /**
     ************************************************************************************************
 
       @name Object hierarcy
@@ -329,10 +312,10 @@ public:
 
     /** Get object identifier.
      */
-    inline os_int oid() 
+    inline os_int oid()
     {
-		if (mm_handle) return mm_handle->oid();
-		return EOID_ITEM;
+        if (mm_handle) return mm_handle->oid();
+        return EOID_ITEM;
     }
 
     /* Recommended size for oixstr() buffer.
@@ -342,29 +325,29 @@ public:
     /** Convert oix and ucnt to string.
      */
     void oixstr(
-        os_char *buf, 
+        os_char *buf,
         os_memsz bufsz);
 
     /** Get oix and ucnt from string.
      */
     os_short oixparse(
         os_char *str,
-        e_oix *oix, 
+        e_oix *oix,
         os_int *ucnt);
 
     /* Get number of childern.
      */
-	inline os_long childcount(
+    inline os_long childcount(
         e_oid id = EOID_CHILD)
-	{
+    {
         if (mm_handle) return mm_handle->childcount(id);
-		return 0;
-	}
+        return 0;
+    }
 
     /** Get parent object of tis object.
      */
-    inline eObject *parent() 
-	{
+    inline eObject *parent()
+    {
         return mm_parent;
         /* if (mm_handle)
         {
@@ -373,17 +356,17 @@ public:
             if (h) return h->m_object;
         }
         return OS_NULL; */
-	}
+    }
 
     /** Get grandparent of this object.
      */
-    inline eObject *grandparent() 
-	{
+    inline eObject *grandparent()
+    {
         if (mm_parent)
         {
             return mm_parent->mm_parent;
         }
-		return OS_NULL;
+        return OS_NULL;
         /* if (mm_handle)
         {
             eHandle *h;
@@ -398,50 +381,50 @@ public:
      */
     eThread *thread();
 
-	/* Get the first child object identified by oid.
+    /* Get the first child object identified by oid.
      */
-	eObject *first(
+    eObject *first(
         e_oid id = EOID_CHILD);
 
-	/* Get the first child variable identified by oid.
+    /* Get the first child variable identified by oid.
      */
     eVariable *firstv(
         e_oid id = EOID_CHILD);
 
-	/* Get the first child container identified by oid.
+    /* Get the first child container identified by oid.
      */
     eContainer *firstc(
         e_oid id = EOID_CHILD);
 
-	/* Get the first child name identified by oid.
+    /* Get the first child name identified by oid.
      */
     eName *firstn(
         e_oid id = EOID_NAME);
 
-	/* Get last child object identified by oid.
+    /* Get last child object identified by oid.
      */
-	eObject *last(
+    eObject *last(
         e_oid id = EOID_CHILD);
 
-	/* Get next object identified by oid.
+    /* Get next object identified by oid.
      */
-	eObject *next(
+    eObject *next(
         e_oid id = EOID_CHILD);
 
-	/* Get previous object identified by oid.
+    /* Get previous object identified by oid.
      */
-	eObject *prev(
+    eObject *prev(
         e_oid id = EOID_CHILD);
 
     /** Adopting object as child of this object.
      */
-	void adopt(
-		eObject *child,
+    void adopt(
+        eObject *child,
         e_oid id = EOID_CHILD,
-		os_int aflags = 0);
+        os_int aflags = 0);
 
     void adoptat(
-        eObject *beforethis, 
+        eObject *beforethis,
         e_oid id = EOID_CHILD);
 
     /* Verify whole object tree.
@@ -454,7 +437,7 @@ public:
     /*@}*/
 
 
-    /** 
+    /**
     ************************************************************************************************
 
       @name Serialization
@@ -470,13 +453,13 @@ public:
     /* Write object to stream.
      */
     eStatus write(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /* Read object from stream as new child object.
      */
     eObject *read(
-        eStream *stream, 
+        eStream *stream,
         os_int sflags);
 
     /* Called by write() to write class specific object content.
@@ -484,8 +467,8 @@ public:
         function for classes which do not need serialization.
      */
     virtual eStatus writer(
-        eStream *stream, 
-        os_int sflags) 
+        eStream *stream,
+        os_int sflags)
     {
         osal_debug_error("serialization failed, writer not implemented");
         return ESTATUS_FAILED;
@@ -496,8 +479,8 @@ public:
         function for classes which do not need serialization.
      */
     virtual eStatus reader(
-        eStream *stream, 
-        os_int sflags) 
+        eStream *stream,
+        os_int sflags)
     {
         osal_debug_error("serialization failed, reader not implemented");
         return ESTATUS_FAILED;
@@ -506,10 +489,10 @@ public:
     /*@}*/
 
 #if E_SUPPROT_JSON
-    /** 
+    /**
     ************************************************************************************************
 
-      @name Sopport JSON format object serialization. 
+      @name Sopport JSON format object serialization.
 
       This includes reading and writing object as from/to stream as JSON. Object can be desccribed
       as valus of it's properties and it's children.
@@ -521,7 +504,7 @@ public:
     /* Write object to stream as JSON.
      */
     eStatus json_write(
-        eStream *stream, 
+        eStream *stream,
         os_int sflags = EOBJ_SERIALIZE_DEFAULT,
         os_int indent = -1,
         os_boolean *comma = OS_NULL);
@@ -529,13 +512,13 @@ public:
     /* Read object from JSON stream.
      */
     eObject *json_read(
-        eStream *stream, 
+        eStream *stream,
         os_int sflags = EOBJ_SERIALIZE_DEFAULT);
 
     /* Class specific part of JSON writer.
      */
     virtual eStatus json_writer(
-        eStream *stream, 
+        eStream *stream,
         os_int sflags = EOBJ_SERIALIZE_DEFAULT,
         os_int indent = 0)
     {
@@ -544,7 +527,7 @@ public:
 
 #endif
 
-    /** 
+    /**
     ************************************************************************************************
 
       @name Names and namespaces.
@@ -557,16 +540,16 @@ public:
 
     /* Create name space for this object.
      */
-	void ns_create(
+    void ns_create(
         const os_char *namespace_id = OS_NULL);
 
-	/* Delete this object's name space.
+    /* Delete this object's name space.
      */
-	void ns_delete();
+    void ns_delete();
 
-	/* Find eName by name and name space.
+    /* Find eName by name and name space.
      */
-	eName *ns_first(
+    eName *ns_first(
         const os_char *name = OS_NULL,
         const os_char *namespace_id = eobj_this_ns);
 
@@ -596,21 +579,21 @@ public:
     #define E_INFO_PROCES_NS 1
     #define E_INFO_ABOVE_CHECKPOINT 2
 
-    /* Find name space by name space ID. 
+    /* Find name space by name space ID.
      */
-	eNameSpace *findnamespace(
+    eNameSpace *findnamespace(
         const os_char *namespace_id = OS_NULL,
         os_int *info = OS_NULL,
         eObject *checkpoint = OS_NULL);
 
-	/* Give name to this object.
+    /* Give name to this object.
      */
-	eName *addname(
+    eName *addname(
         const os_char *name,
         os_int flags = 0,
         const os_char *namespace_id = OS_NULL);
 
-    /* Flags for map() function: Attach all names of child object (this) and it's childen to 
+    /* Flags for map() function: Attach all names of child object (this) and it's childen to
        name spaces. If a name is already mapped, it is not remapped.
     */
     #define E_ATTACH_NAMES 1
@@ -620,7 +603,7 @@ public:
     */
     #define E_SET_ROOT_POINTER 8
 
-    /* Flags for map() function: Detach names of child object (this) and it's childen from name 
+    /* Flags for map() function: Detach names of child object (this) and it's childen from name
        spaces above this object in tree structure.
       */
     #define E_DETACH_FROM_NAMESPACES_ABOVE 16
@@ -631,19 +614,19 @@ public:
 
     /* Get object by name.
      */
-	eObject *byname(
+    eObject *byname(
         const os_char *name);
 
 
     /*@}*/
 
 
-    /** 
+    /**
     ************************************************************************************************
 
       @name Messages
 
-      Any object may send a message to an another object by calling message() function. 
+      Any object may send a message to an another object by calling message() function.
       When an object receives a message, it's onmessage function gets called.
 
     ************************************************************************************************
@@ -658,7 +641,7 @@ public:
     /* Send message.
      */
     void message(
-        os_int command, 
+        os_int command,
         const os_char *target,
         const os_char *source = OS_NULL,
         eObject *content = OS_NULL,
@@ -694,12 +677,12 @@ public:
     /*@}*/
 
 
-    /** 
+    /**
     ************************************************************************************************
 
       @name Object properties
 
-      Any object may send a message to an another object by calling message() function. 
+      Any object may send a message to an another object by calling message() function.
       When an object receives a message, it's onmessage function gets called.
 
     ************************************************************************************************
@@ -709,8 +692,8 @@ public:
     /* Add property to property set (any type).
      */
     static eVariable *addproperty(
-        os_int cid, 
-        os_int propertynr, 
+        os_int cid,
+        os_int propertynr,
         const os_char *propertyname,
         os_int pflags = EPRO_DEFAULT,
         const os_char *text = OS_NULL);
@@ -718,8 +701,8 @@ public:
     /* Add integer property to property set.
      */
     static eVariable *addpropertyl(
-        os_int cid, 
-        os_int propertynr, 
+        os_int cid,
+        os_int propertynr,
         const os_char *propertyname,
         os_int pflags = EPRO_DEFAULT,
         const os_char *text = OS_NULL,
@@ -728,8 +711,8 @@ public:
     /* Add double property to property set.
      */
     static eVariable *addpropertyd(
-        os_int cid, 
-        os_int propertynr, 
+        os_int cid,
+        os_int propertynr,
         const os_char *propertyname,
         os_int pflags = EPRO_DEFAULT,
         const os_char *text = OS_NULL,
@@ -739,8 +722,8 @@ public:
     /* Add string property to property set.
      */
     static eVariable *addpropertys(
-        os_int cid, 
-        os_int propertynr, 
+        os_int cid,
+        os_int propertynr,
         const os_char *propertyname,
         os_int pflags = EPRO_DEFAULT,
         const os_char *text = OS_NULL,
@@ -768,42 +751,42 @@ public:
     /* Set property value.
      */
     void setpropertyv(
-        os_int propertynr, 
-        eVariable *x, 
-        eObject *source = OS_NULL, 
+        os_int propertynr,
+        eVariable *x,
+        eObject *source = OS_NULL,
         os_int flags = 0);
 
     /* Forward property change trough bindings.
      */
     void forwardproperty(
-        os_int propertynr, 
-        eVariable *x, 
-        eObject *source, 
+        os_int propertynr,
+        eVariable *x,
+        eObject *source,
         os_int flags);
 
     /* Set property value as integer.
      */
     void setpropertyl(
-        os_int propertynr, 
+        os_int propertynr,
         os_long x);
 
     /* Set property value as double.
      */
     void setpropertyd(
-        os_int propertynr, 
+        os_int propertynr,
         os_double x);
 
     /* Set property value as string.
      */
     void setpropertys(
-        os_int propertynr, 
+        os_int propertynr,
         const os_char *x);
 
     /* Get property value.
      */
     void propertyv(
-        os_int propertynr, 
-        eVariable *x, 
+        os_int propertynr,
+        eVariable *x,
         os_int flags = 0);
 
     os_long propertyl(
@@ -815,27 +798,27 @@ public:
     /* Called when property value changes.
      */
     virtual void onpropertychange(
-        os_int propertynr, 
-        eVariable *x, 
+        os_int propertynr,
+        eVariable *x,
         os_int flags) {}
 
     /* Get value of simple property.
      */
     virtual eStatus simpleproperty(
-        os_int propertynr, 
-        eVariable *x) 
+        os_int propertynr,
+        eVariable *x)
     {
         return ESTATUS_NO_SIMPLE_PROPERTY_NR;
     }
 
     /*@}*/
 
-    /** 
+    /**
     ************************************************************************************************
 
       @name Binding
 
-      Any object may send a message to an another object by calling message() function. 
+      Any object may send a message to an another object by calling message() function.
       When an object receives a message, it's onmessage function gets called.
 
     ************************************************************************************************
@@ -862,12 +845,12 @@ public:
     void messagetobinding(); */
     /*@}*/
 
-    /** 
+    /**
     ************************************************************************************************
 
       @name Child callback
 
-      Any object may send a message to an another object by calling message() function. 
+      Any object may send a message to an another object by calling message() function.
       When an object receives a message, it's onmessage function gets called.
 
     ************************************************************************************************
@@ -901,7 +884,7 @@ private:
         eEnvelope *envelope);
 
 protected:
-	/* Delete all child objects.
+    /* Delete all child objects.
      */
     void delete_children();
 
@@ -910,15 +893,15 @@ protected:
         os_int mflags);
 
     void mapone(
-        eHandle *handle, 
+        eHandle *handle,
         os_int mflags);
 
 #if E_SUPPROT_JSON
-    /* Write optional comma and new line to terminate the 
+    /* Write optional comma and new line to terminate the
        line and optional intendation for next line to JSON output.
      */
     eStatus json_indent(
-        eStream *stream, 
+        eStream *stream,
         os_int indent,
         os_int iflags = EJSON_NEW_LINE_BEFORE,
         os_boolean *comma = OS_NULL);
@@ -926,25 +909,25 @@ protected:
     /* Write string to JSON output.
      */
     eStatus json_puts(
-        eStream *stream, 
+        eStream *stream,
         const os_char *str);
 
     /* Write quoted string to JSON output.
      */
     eStatus json_putqs(
-        eStream *stream, 
+        eStream *stream,
         const os_char *str);
 
     /* Write long integer to JSON output.
      */
     eStatus json_putl(
-        eStream *stream, 
+        eStream *stream,
         os_long x);
 
     /* Write variable value to JSON output.
      */
     eStatus json_putv(
-        eStream *stream, 
+        eStream *stream,
         eVariable *p,
         eVariable *value,
         os_int sflags,
@@ -953,15 +936,15 @@ protected:
     /* Append list item string to variable if bit is set in flags.
      */
     void json_append_list_item(
-        eVariable *list, 
+        eVariable *list,
         const os_char *item,
         os_int flags,
         os_int bit);
 #endif
 
-	/* Pointer to object's handle.
+    /* Pointer to object's handle.
      */
-	eHandle *mm_handle;
+    eHandle *mm_handle;
 
     /** Pointer to parent object of this object. (THIS SHOULD PERHAPS MOVE TO OBJ)
      */

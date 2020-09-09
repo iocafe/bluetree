@@ -9,15 +9,17 @@
   This base class serves derived classes for property, selection to table and file to handle
   bindings.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EBINDING_INCLUDED
-#define EBINDING_INCLUDED
+#pragma once
+#ifndef EBINDING_H_
+#define EBINDING_H_
+#include "eobjects.h"
 
 /* Binding flags.
  */
@@ -57,7 +59,7 @@
 
   @brief Binding base class.
 
-  The eBinding is base class for different types of bindings, namely property, table/selection 
+  The eBinding is base class for different types of bindings, namely property, table/selection
   and file/handle bindings. It implements functionality mostly common to all three binding
   types.
 
@@ -77,35 +79,35 @@ class eBinding : public eObject
     /*@{*/
 public:
     /* Constructor.
-	 */
-	eBinding(
-		eObject *parent = OS_NULL,
+     */
+    eBinding(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
- 	 */
-	virtual ~eBinding();
+    /* Virtual destructor.
+     */
+    virtual ~eBinding();
 
     /* Clone object.
      */
     virtual eObject *clone(
-        eObject *parent, 
+        eObject *parent,
         e_oid id = EOID_CHILD,
-		os_int aflags = 0);
+        os_int aflags = 0);
 
     /* Casting eObject pointer to eBinding pointer.
      */
-	inline static eBinding *cast(
-		eObject *o) 
-	{ 
+    inline static eBinding *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_BINDING)
-		return (eBinding*)o;
-	}
+        return (eBinding*)o;
+    }
 
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return ECLASSID_BINDING;
     }
@@ -115,7 +117,7 @@ public:
     /* static eBinding *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         osal_debug_error("ebinding, newobj(): Cannot create abstract class");
     } */
@@ -123,29 +125,29 @@ public:
     /* Write binding content to stream.
      */
     virtual eStatus writer(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /* Read binding content from stream.
      */
     virtual eStatus reader(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /*@}*/
 
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Binding related functionality for the class.
+      @name Binding related functionality for the class.
 
-	  These are either implementations of common binding functionality, or virtual fuctions
+      These are either implementations of common binding functionality, or virtual fuctions
       to be overridden by specific binding class.
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 protected:
 
     /* Connect client eBinding to server eBinding.
@@ -167,14 +169,14 @@ protected:
 
     /* Mark property value, etc changed.
      */
-    inline void setchanged() 
+    inline void setchanged()
     {
         m_bflags |= EBIND_CHANGED;
     }
 
     /* Mark property value, has not been changed after forwarding it.
      */
-    inline void forwarddone() 
+    inline void forwarddone()
     {
         m_bflags &= ~EBIND_CHANGED;
         m_ackcount++;
@@ -182,12 +184,12 @@ protected:
 
     /* Check if property value should be fowrarded now?
      */
-    inline os_int forwardnow() 
+    inline os_int forwardnow()
     {
-        return (m_bflags & EBIND_CHANGED) && 
+        return (m_bflags & EBIND_CHANGED) &&
                 m_state == E_BINDING_OK &&
-                (m_ackcount < EBIND_MAX_ACK_COUNT || 
-                 (m_bflags & EBIND_NOFLOWCLT) || 
+                (m_ackcount < EBIND_MAX_ACK_COUNT ||
+                 (m_bflags & EBIND_NOFLOWCLT) ||
                  (m_bflags & EBIND_INTERTHREAD) == 0);
     }
 
@@ -225,23 +227,23 @@ protected:
     /*@}*/
 
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Member variables.
+      @name Member variables.
 
-	  The member variables hold information where to bind (for client binding) and current 
-      binding state. 
+      The member variables hold information where to bind (for client binding) and current
+      binding state.
 
-	************************************************************************************************
-	*/
-	/*@{*/
-    /* Client: Path to object to bind to as given as argument to bind(). 
+    ************************************************************************************************
+    */
+    /*@{*/
+    /* Client: Path to object to bind to as given as argument to bind().
         Server: Always OS_NULL.
      */
     os_char *m_objpath;
 
-    /* Unique path to eBinding which we are bound to. 
+    /* Unique path to eBinding which we are bound to.
      */
     os_char *m_bindpath;
 

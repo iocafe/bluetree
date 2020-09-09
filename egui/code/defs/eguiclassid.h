@@ -8,9 +8,9 @@
 
   This header file defines class identifiers used by egui library.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -24,7 +24,7 @@
 
   @name Class identifiers used by eobjects library.
 
-  Each serializable eobjects library class has it's own class identifier. These may not be 
+  Each serializable eobjects library class has it's own class identifier. These may not be
   modified, would break serialization.
 
 ****************************************************************************************************
@@ -35,12 +35,18 @@
   starting from ECLASSID_APP_BASE can be used by application.
  */
 #define ECLASSID_EGUI_BASE 64
+#define ECLASSID_EGUI_3D_BASE 128
 
-#define EGUICLASSID_OBJECT3D       (ECLASSID_EGUI_BASE + 1)
-#define EGUICLASSID_MOVINGOBJECT3D (ECLASSID_EGUI_BASE + 2)
-#define EGUICLASSID_MESH3D         (ECLASSID_EGUI_BASE + 3)
-#define EGUICLASSID_TERRAIN3D      (ECLASSID_EGUI_BASE + 4)
-#define EGUICLASSID_WORLD3D        (ECLASSID_EGUI_BASE + 5)
+#define EGUICLASSID_COMPONENT       (ECLASSID_EGUI_BASE + 1)
+
+
+/* FOR 3D extension
+#define EGUICLASSID_OBJECT3D       (ECLASSID_EGUI_3D_BASE + 1)
+#define EGUICLASSID_MOVINGOBJECT3D (ECLASSID_EGUI_3D_BASE + 2)
+#define EGUICLASSID_MESH3D         (ECLASSID_EGUI_3D_BASE + 3)
+#define EGUICLASSID_TERRAIN3D      (ECLASSID_EGUI_3D_BASE + 4)
+#define EGUICLASSID_WORLD3D        (ECLASSID_EGUI_3D_BASE + 5)
+*/
 
 /*@}*/
 

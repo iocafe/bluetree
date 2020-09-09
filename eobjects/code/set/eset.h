@@ -8,16 +8,17 @@
 
   The set stores enumerated collection of values.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ESET_INCLUDED
-#define ESET_INCLUDED
-
+#pragma once
+#ifndef ESET_H_
+#define ESET_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************
@@ -44,31 +45,31 @@ class eSet : public eObject
     /*@{*/
 public:
     /* Constructor.
-	 */
-	eSet(
-		eObject *parent = OS_NULL,
+     */
+    eSet(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
- 	 */
-	virtual ~eSet();
+    /* Virtual destructor.
+     */
+    virtual ~eSet();
 
     /* Clone object.
      */
     virtual eObject *clone(
-        eObject *parent, 
+        eObject *parent,
         e_oid id = EOID_CHILD,
-		os_int aflags = 0);
+        os_int aflags = 0);
 
     /* Casting eObject pointer to eSet pointer.
      */
-	inline static eSet *cast(
-		eObject *o) 
-	{ 
+    inline static eSet *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_SET)
-		return (eSet*)o;
-	}
+        return (eSet*)o;
+    }
 
     /* Get class identifier.
      */
@@ -86,7 +87,7 @@ public:
     static eSet *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new eSet(parent, id, flags);
     }
@@ -94,37 +95,37 @@ public:
     /* Write set content to stream.
      */
     virtual eStatus writer(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /* Read set content from stream.
      */
     virtual eStatus reader(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
 #if E_SUPPROT_JSON
     /* Write set to stream as JSON.
      */
     eStatus json_writer(
-        eStream *stream, 
+        eStream *stream,
         os_int sflags,
         os_int indent);
 #endif
 
     /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
       @name Setting and getting item values.
 
-	  A value can be stored into set using set() function. If the value with this id exists,
+      A value can be stored into set using set() function. If the value with this id exists,
       it is overwritten. Values are retrieved by get() function.
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     /* Store value into set.
      */
@@ -136,7 +137,7 @@ public:
     /* Store value into set.
      */
     inline void setl(
-        os_int id, 
+        os_int id,
         os_long x)
     {
         eVariable v;
@@ -147,7 +148,7 @@ public:
     /* Store value into set.
      */
     inline void setd(
-        os_int id, 
+        os_int id,
         os_double x)
     {
         eVariable v;
@@ -158,7 +159,7 @@ public:
     /* Store value into set.
      */
     inline void sets(
-        os_int id, 
+        os_int id,
         const os_char *x)
     {
         eVariable v;

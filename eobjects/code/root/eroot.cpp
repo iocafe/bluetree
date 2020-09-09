@@ -6,9 +6,9 @@
   @version 1.0
   @date    8.9.2020
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -28,17 +28,17 @@
 ****************************************************************************************************
 */
 eRoot::eRoot(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eObject(parent, id, flags)
 {
-	/* No free handles reserved yet. Set number of handles to reserver to zero.
-	   This means that empty default is used.
-	 */
-	m_first_free_handle = OS_NULL;
-	m_free_handle_count = 0;
-	m_reserve_at_once = 1;
+    /* No free handles reserved yet. Set number of handles to reserver to zero.
+       This means that empty default is used.
+     */
+    m_first_free_handle = OS_NULL;
+    m_free_handle_count = 0;
+    m_reserve_at_once = 1;
 }
 
 
@@ -71,56 +71,56 @@ eRoot::~eRoot()
 ****************************************************************************************************
 */
 void eRoot::newhandle(
-	eObject *obj,
-	eObject *parent,
+    eObject *obj,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
 {
-	eHandle
-		*handle;
+    eHandle
+        *handle;
 
-	/* If we have no free handles, allocate more. Incse number of handles to 
-	   allocate at once. 
-	 */
-	if (m_first_free_handle == OS_NULL)
-	{
-		if (m_reserve_at_once < 4)
-		{
-			m_reserve_at_once = 4;
-		}
-		else if (m_reserve_at_once < 16)
-		{
-			m_reserve_at_once = 16;
-		}
-		else if (m_reserve_at_once <= 64)
-		{
-			m_reserve_at_once *= 2;
-		}
-		m_first_free_handle = ehandleroot_reservehandles(m_reserve_at_once);
-		m_free_handle_count += m_reserve_at_once;
-	}
+    /* If we have no free handles, allocate more. Incse number of handles to
+       allocate at once.
+     */
+    if (m_first_free_handle == OS_NULL)
+    {
+        if (m_reserve_at_once < 4)
+        {
+            m_reserve_at_once = 4;
+        }
+        else if (m_reserve_at_once < 16)
+        {
+            m_reserve_at_once = 16;
+        }
+        else if (m_reserve_at_once <= 64)
+        {
+            m_reserve_at_once *= 2;
+        }
+        m_first_free_handle = ehandleroot_reservehandles(m_reserve_at_once);
+        m_free_handle_count += m_reserve_at_once;
+    }
 
-	/* Remove handle to use from chain of free handles.
-	 */
-	handle = m_first_free_handle;
-	m_first_free_handle = handle->right();
+    /* Remove handle to use from chain of free handles.
+     */
+    handle = m_first_free_handle;
+    m_first_free_handle = handle->right();
     m_free_handle_count--;
 
-	/* Save object identifier, clear flags, mark new node as red,
-	   join to tree hierarchy, no children yet.
-	 */
+    /* Save object identifier, clear flags, mark new node as red,
+       join to tree hierarchy, no children yet.
+     */
     handle->clear(obj, id, flags);
     handle->m_root = this;
-	obj->mm_handle = handle;
+    obj->mm_handle = handle;
     if (parent)
     {
         /* handle->m_parent = parent->mm_handle; */
 
-	    /* Save parent object pointer. If parent object is given, join the new object
-	       to red black tree of parent's children.
-	     */
+        /* Save parent object pointer. If parent object is given, join the new object
+           to red black tree of parent's children.
+         */
         parent->mm_handle->rbtree_insert(handle);
-	}
+    }
 }
 
 
@@ -141,7 +141,7 @@ void eRoot::freehandle(
 
     if (m_free_handle_count > 2*m_reserve_at_once)
     {
-		m_first_free_handle = ehandleroot_releasehandles(m_first_free_handle, m_reserve_at_once);
+        m_first_free_handle = ehandleroot_releasehandles(m_first_free_handle, m_reserve_at_once);
         m_free_handle_count -= m_reserve_at_once;
     }
 }

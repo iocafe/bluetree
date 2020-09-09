@@ -9,15 +9,17 @@
   The names map to name space. These are used to represent tree structure of named objects.
   The eName class is derived from eVariable class.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ENAME_INCLUDED
-#define ENAME_INCLUDED
+#pragma once
+#ifndef ENAME_H_
+#define ENAME_H_
+#include "eobjects.h"
 
 /* Flags for addname()
  */
@@ -38,8 +40,8 @@ typedef enum
    E_THREAD_NS_TYPE,
    E_THIS_NS_TYPE,
    E_SPECIFIED_NS_TYPE
-} 
-eNameSpaceTypeEnum; 
+}
+eNameSpaceTypeEnum;
 
 
 /**
@@ -47,13 +49,13 @@ eNameSpaceTypeEnum;
 
   @brief eName class.
 
-  The eName is a class derived from eVariable. It adds capanility to map to eNameSpace. 
+  The eName is a class derived from eVariable. It adds capanility to map to eNameSpace.
 
 ****************************************************************************************************
 */
 class eName : public eVariable
 {
-	friend class eNameSpace;
+    friend class eNameSpace;
 
     /**
     ************************************************************************************************
@@ -66,25 +68,25 @@ class eName : public eVariable
     */
     /*@{*/
 public:
-	/* Constructor.
+    /* Constructor.
      */
-	eName(
-		eObject *parent = OS_NULL,
+    eName(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
+    /* Virtual destructor.
      */
-	virtual ~eName();
+    virtual ~eName();
 
-    /* Cast eObject pointer to eName pointer. 
+    /* Cast eObject pointer to eName pointer.
      */
-	inline static eName *cast(
-		eObject *o) 
-	{ 
+    inline static eName *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_NAME)
-		return (eName*)o;
-	}
+        return (eName*)o;
+    }
 
     /* Get class identifier.
      */
@@ -99,7 +101,7 @@ public:
     static eName *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new eName(parent, id, flags);
     }
@@ -109,43 +111,43 @@ public:
     eName *nextn(
         e_oid id = EOID_NAME);
 
-	/* Get next name in namespace.
+    /* Get next name in namespace.
      */
-	eName *ns_next(
-		os_boolean name_match = OS_TRUE);
+    eName *ns_next(
+        os_boolean name_match = OS_TRUE);
 
     /** Get name space to which this name is mapped to.
      */
-    inline eNameSpace *nspace() 
-	{
-		return m_namespace;
-	}
+    inline eNameSpace *nspace()
+    {
+        return m_namespace;
+    }
 
     /* Write name to stream.
      */
     virtual eStatus writer(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /* Read name from stream.
      */
     virtual eStatus reader(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /*@}*/
 
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
       @name Name specific fuunctions
 
-	  X... 
+      X...
 
-	************************************************************************************************
-	*/
-    
+    ************************************************************************************************
+    */
+
     /* Get name space identifier, if any, for the name.
      */
     os_char *namespaceid();
@@ -172,14 +174,14 @@ public:
 protected:
     void clear_members();
 
-	/** Tag this object as "red".
+    /** Tag this object as "red".
      */
     inline void ixsetred()
     {
         m_vflags |= EVAR_IS_RED;
     }
 
-	/** Tag this object as "black".
+    /** Tag this object as "black".
      */
     inline void ixsetblack()
     {
@@ -199,19 +201,19 @@ protected:
      */
     eVariable *m_namespace_id;
 
-	/** Pointer to left child in index'es red/black tree.
+    /** Pointer to left child in index'es red/black tree.
      */
     eName *m_ileft;
 
-	/** Pointer to right child in index'es red/black tree.
+    /** Pointer to right child in index'es red/black tree.
      */
     eName *m_iright;
 
-	/** Pointer to parent in index'es red/black tree.
+    /** Pointer to parent in index'es red/black tree.
      */
     eName *m_iup;
 
-	/** Pointer to index.
+    /** Pointer to index.
      */
     eNameSpace *m_namespace;
 };

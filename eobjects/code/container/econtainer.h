@@ -8,15 +8,18 @@
 
   The container object is like a box holding a set of child objects.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ECONTAINER_INCLUDED
-#define ECONTAINER_INCLUDED
+#pragma once
+#ifndef ECONTAINER_H_
+#define ECONTAINER_H_
+#include "eobjects.h"
+
 
 /**
 ****************************************************************************************************
@@ -33,35 +36,35 @@ class eContainer : public eObject
 {
 public:
     /* Constructor.
-	 */
-	eContainer(
-		eObject *parent = OS_NULL,
+     */
+    eContainer(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
- 	 */
-	virtual ~eContainer();
+    /* Virtual destructor.
+     */
+    virtual ~eContainer();
 
     /* Clone object.
      */
     virtual eObject *clone(
-        eObject *parent, 
+        eObject *parent,
         e_oid id = EOID_CHILD,
-		os_int aflags = 0);
+        os_int aflags = 0);
 
     /* Casting eObject pointer to eContainer pointer.
      */
-	inline static eContainer *cast(
-		eObject *o) 
-	{ 
+    inline static eContainer *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_CONTAINER)
-		return (eContainer*)o;
-	}
+        return (eContainer*)o;
+    }
 
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return ECLASSID_CONTAINER;
     }
@@ -75,7 +78,7 @@ public:
     static eContainer *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new eContainer(parent, id, flags);
     }
@@ -88,20 +91,20 @@ public:
     /* Write container content to stream.
      */
     virtual eStatus writer(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /* Read container content from stream.
      */
     virtual eStatus reader(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
 #if E_SUPPROT_JSON
     /* Write container specific content to stream as JSON.
      */
     virtual eStatus json_writer(
-        eStream *stream, 
+        eStream *stream,
         os_int sflags,
         os_int indent);
 #endif

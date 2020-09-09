@@ -8,16 +8,18 @@
 
   This file implements osal_main() function, which intializes eobject library and calls emain()
   function to start the application.
-  
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EMAIN_INCLUDED
-#define EMAIN_INCLUDED
+#pragma once
+#ifndef EMAIN_H_
+#define EMAIN_H_
+#include "eobjects.h"
 
 /* If C++ compilation, all functions, etc. from this point on in this header file are
    plain C and must be left undecorated.
@@ -41,7 +43,7 @@ OSAL_C_HEADER_ENDS
   @brief Call eobjects application entry point.
   @anchor osal_main
 
-  Macro implementation of osal_main() function is part of entry sequence to eobjects console 
+  Macro implementation of osal_main() function is part of entry sequence to eobjects console
   application. It is not used when eobject is used as library nor propably with GUI applications.
 
   @param   argc Number of command line arguments.

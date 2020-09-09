@@ -8,15 +8,17 @@
 
   The propertybinding object is like a box holding a set of child objects.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EPROPERTYBINDING_INCLUDED
-#define EPROPERTYBINDING_INCLUDED
+#pragma once
+#ifndef EPROPERTYBINDING_H_
+#define EPROPERTYBINDING_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************
@@ -43,35 +45,35 @@ class ePropertyBinding : public eBinding
     /*@{*/
 public:
     /* Constructor.
-	 */
-	ePropertyBinding(
-		eObject *parent = OS_NULL,
+     */
+    ePropertyBinding(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
- 	 */
-	virtual ~ePropertyBinding();
+    /* Virtual destructor.
+     */
+    virtual ~ePropertyBinding();
 
     /* Clone object.
      */
     virtual eObject *clone(
-        eObject *parent, 
+        eObject *parent,
         e_oid id = EOID_CHILD,
-		os_int aflags = 0);
+        os_int aflags = 0);
 
     /* Casting eObject pointer to ePropertyBinding pointer.
      */
-	inline static ePropertyBinding *cast(
-		eObject *o) 
-	{ 
+    inline static ePropertyBinding *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_PROPERTY_BINDING)
-		return (ePropertyBinding*)o;
-	}
+        return (ePropertyBinding*)o;
+    }
 
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return ECLASSID_PROPERTY_BINDING;
     }
@@ -85,7 +87,7 @@ public:
     static ePropertyBinding *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
     {
         return new ePropertyBinding(parent, id, flags);
     }
@@ -93,13 +95,13 @@ public:
     /* Write propertybinding content to stream.
      */
     virtual eStatus writer(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /* Read propertybinding content from stream.
      */
     virtual eStatus reader(
-        eStream *stream, 
+        eStream *stream,
         os_int flags);
 
     /* Process received messages
@@ -110,16 +112,16 @@ public:
     /*@}*/
 
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Property binding functions
+      @name Property binding functions
 
-	  These functions implement property finding functionality.
+      These functions implement property finding functionality.
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     /* Bind property.
      */
@@ -194,17 +196,17 @@ protected:
 
     /*@}*/
 
-    /** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Member variables.
+      @name Member variables.
 
-	  The member variables hold information where to bind (for client binding) and current 
-      binding state. 
+      The member variables hold information where to bind (for client binding) and current
+      binding state.
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     /** Client: Path to peropery name on remote object to bind to.
         Server: Always OS_NULL.
@@ -219,7 +221,7 @@ protected:
      */
     os_int m_localpropertynr;
 
-    
+
     /*@}*/
 
 };

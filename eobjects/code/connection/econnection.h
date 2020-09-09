@@ -9,16 +9,17 @@
   eConnection class, related to message envelope transport betweeen processes. See econnection.cpp
   for more information.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ECONNECTION_INCLUDED
-#define ECONNECTION_INCLUDED
-
+#pragma once
+#ifndef ECONNECTION_H_
+#define ECONNECTION_H_
+#include "eobjects.h"
 
 /* Enumeration of connection's properties.
  */
@@ -48,59 +49,59 @@ class eConnection : public eThread
 public:
     /* Constructor.
      */
-	eConnection(
-		eObject *parent = OS_NULL,
+    eConnection(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
+    /* Virtual destructor.
      */
-	virtual ~eConnection();
+    virtual ~eConnection();
 
     /* Casting eObject pointer to eConnection pointer.
      */
-	inline static eConnection *cast(
-		eObject *o) 
-	{ 
+    inline static eConnection *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_CONNECTION)
-		return (eConnection*)o;
-	}
+        return (eConnection*)o;
+    }
 
-	/* Get class identifier.
-	*/
-	virtual os_int classid() 
-    { 
-        return ECLASSID_CONNECTION; 
+    /* Get class identifier.
+    */
+    virtual os_int classid()
+    {
+        return ECLASSID_CONNECTION;
     }
 
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
 
-	/* Static constructor function.
-	*/
-	static eConnection *newobj(
-		eObject *parent,
+    /* Static constructor function.
+    */
+    static eConnection *newobj(
+        eObject *parent,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT)
-	{
+        os_int flags = EOBJ_DEFAULT)
+    {
         return new eConnection(parent, id, flags);
-	}
+    }
 
     /* Called when property value changes.
      */
     virtual void onpropertychange(
-        os_int propertynr, 
-        eVariable *x, 
+        os_int propertynr,
+        eVariable *x,
         os_int flags);
 
     /* Get value of simple property.
      */
     virtual eStatus simpleproperty(
-        os_int propertynr, 
+        os_int propertynr,
         eVariable *x);
 
-    /* Function to process messages to this object. 
+    /* Function to process messages to this object.
      */
     virtual void onmessage(
         eEnvelope *envelope);
@@ -115,8 +116,8 @@ public:
     virtual void run();
 
     /*  virtual eStatus open(
-        os_char *path, 
-        os_int flags=0) 
+        os_char *path,
+        os_int flags=0)
     {
         return ESTATUS_SUCCESS;
     } */

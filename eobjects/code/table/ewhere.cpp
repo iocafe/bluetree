@@ -63,7 +63,7 @@
   - eWhere is intended for tables, but it could be used to implement other definable conditions.
     For example it could be useful for setting up show/hide conditions of GUI components.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
   or distribute this file you indicate that you have read the license and understand and accept
   it fully.

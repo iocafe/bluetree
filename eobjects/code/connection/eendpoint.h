@@ -8,15 +8,17 @@
 
   The eEndPoint is socket end point listening to specific TCP port for new connections.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EENDPOINT_INCLUDED
-#define EENDPOINT_INCLUDED
+#pragma once
+#ifndef EENDPOINT_H_
+#define EENDPOINT_H_
+#include "eobjects.h"
 
 /* Enumeration of end point properties.
  */
@@ -46,56 +48,56 @@ class eEndPoint : public eThread
 public:
     /* Constructor.
      */
-	eEndPoint(
-		eObject *parent = OS_NULL,
+    eEndPoint(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
+    /* Virtual destructor.
      */
-	virtual ~eEndPoint();
+    virtual ~eEndPoint();
 
     /* Casting eObject pointer to eEndPoint pointer.
      */
-	inline static eEndPoint *cast(
-		eObject *o) 
-	{ 
+    inline static eEndPoint *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_ENDPOINT)
-		return (eEndPoint*)o;
-	}
+        return (eEndPoint*)o;
+    }
 
-	/* Get class identifier.
-	 */
-	virtual os_int classid() 
-    { 
-        return ECLASSID_ENDPOINT; 
+    /* Get class identifier.
+     */
+    virtual os_int classid()
+    {
+        return ECLASSID_ENDPOINT;
     }
 
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
 
-	/* Static constructor function.
-	*/
-	static eEndPoint *newobj(
-		eObject *parent,
+    /* Static constructor function.
+    */
+    static eEndPoint *newobj(
+        eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
-	{
+        os_int flags = EOBJ_DEFAULT)
+    {
         return new eEndPoint(parent, id, flags);
-	}
+    }
 
     /* Called when property value changes.
      */
     virtual void onpropertychange(
-        os_int propertynr, 
-        eVariable *x, 
+        os_int propertynr,
+        eVariable *x,
         os_int flags);
 
     /* Get value of simple property.
      */
     virtual eStatus simpleproperty(
-        os_int propertynr, 
+        os_int propertynr,
         eVariable *x);
 
     /* Initialize the object.
@@ -115,12 +117,12 @@ protected:
      */
     os_int m_stream_classid;
 
-    /** IP address of the interface and port number to listen to. 
+    /** IP address of the interface and port number to listen to.
         IP address can be empty to listen for any interface.
      */
     eVariable *m_ipaddr;
 
-    /** Listening stream handle. OS_NULL if listening socket 
+    /** Listening stream handle. OS_NULL if listening socket
         is not open.
      */
     eStream *m_stream;

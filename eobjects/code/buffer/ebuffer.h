@@ -8,16 +8,17 @@
 
   Flat memory buffer, can be used as a stream.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EBUFFER_INCLUDED
-#define EBUFFER_INCLUDED
-
+#pragma once
+#ifndef EBUFFER_H_
+#define EBUFFER_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************
@@ -45,11 +46,11 @@ public:
     /* Constructor.
      */
     eBuffer(
-		eObject *parent = OS_NULL,
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
+    /* Virtual destructor.
      */
     virtual ~eBuffer();
 
@@ -63,16 +64,16 @@ public:
     /* Casting eObject pointer to eBuffer pointer.
      */
     inline static eBuffer *cast(
-		eObject *o) 
-	{ 
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_BUFFER)
         return (eBuffer*)o;
-	}
+    }
 
-	/* Get class identifier.
-	*/
-	virtual os_int classid() 
-    { 
+    /* Get class identifier.
+    */
+    virtual os_int classid()
+    {
         return ECLASSID_BUFFER;
     }
 
@@ -80,15 +81,15 @@ public:
      */
     static void setupclass();
 
-	/* Static constructor function.
-	*/
+    /* Static constructor function.
+    */
     static eBuffer *newobj(
-		eObject *parent,
+        eObject *parent,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
-	{
+        os_int flags = EOBJ_DEFAULT)
+    {
         return new eBuffer(parent, id, flags);
-	}
+    }
 
     /* Write set content to stream.
      */
@@ -127,7 +128,7 @@ public:
     /* Open the queue.
      */
     virtual eStatus open(
-	    os_char *parameters,
+        os_char *parameters,
         os_int flags = 0);
 
     /* Close the queue.
@@ -137,15 +138,15 @@ public:
     /* Write data to queue.
      */
     virtual eStatus write(
-        const os_char *buf, 
-        os_memsz buf_sz, 
+        const os_char *buf,
+        os_memsz buf_sz,
         os_memsz *nwritten = OS_NULL);
 
     /* Read data from queue.
      */
     virtual eStatus read(
-        os_char *buf, 
-        os_memsz buf_sz, 
+        os_char *buf,
+        os_memsz buf_sz,
         os_memsz *nread = OS_NULL,
         os_int flags = 0);
 
@@ -155,7 +156,7 @@ public:
         os_int c);
 
     /* Read character or control code.
-     */    
+     */
     virtual os_int readchar();
 
 

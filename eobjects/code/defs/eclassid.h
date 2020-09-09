@@ -8,16 +8,17 @@
 
   This header file defines class identifiers used by eobjects library.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
   or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef ECLASSID_INCLUDED
-#define ECLASSID_INCLUDED
-
+#pragma once
+#ifndef ECLASSID_H_
+#define ECLASSID_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************
@@ -50,8 +51,6 @@
 #define ECLASSID_STREAM 25
 #define ECLASSID_OSSTREAM 50
 #define ECLASSID_QUEUE 27
-// #define ECLASSID_FILE 28
-// #define ECLASSID_CONSOLE 29
 #define ECLASSID_CONNECTION 30
 #define ECLASSID_ENDPOINT 31
 #define ECLASSID_TIMER 32

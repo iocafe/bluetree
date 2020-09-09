@@ -6,15 +6,17 @@
   @version 1.0
   @date    8.9.2020
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EDEFS_INCLUDED
-#define EDEFS_INCLUDED
+#pragma once
+#ifndef EDEFS_H_
+#define EDEFS_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************
@@ -29,11 +31,11 @@
 /*@{*/
 
 /** Object index.
-	*/
+    */
 typedef os_uint e_oix;
 
 /** Object identifier.
-	*/
+    */
 typedef os_int e_oid;
 
 
@@ -46,7 +48,7 @@ typedef os_int e_oid;
   be changed for yupir build in global makefile, etc. For initial cmake build this place would
   be build/cmake/e-build-defs.txt, for other build tools the file to edit will be different.
 
-  These defines must be the same for compiling whole eobjects library and any software which 
+  These defines must be the same for compiling whole eobjects library and any software which
   makes use of the eobjects library.
 
 ****************************************************************************************************

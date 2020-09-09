@@ -8,15 +8,17 @@
 
   The process object is like a box holding a set of child objects.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#ifndef EPROCESS_INCLUDED
-#define EPROCESS_INCLUDED
+#pragma once
+#ifndef EPROCESS_H_
+#define EPROCESS_H_
+#include "eobjects.h"
 
 /**
 ****************************************************************************************************
@@ -43,24 +45,24 @@ class eProcess : public eThread
     /*@{*/
 public:
     /* Constructor.
-	 */
-	eProcess(
-		eObject *parent = OS_NULL,
+     */
+    eProcess(
+        eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
-		os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_DEFAULT);
 
-	/* Virtual destructor.
- 	 */
-	virtual ~eProcess();
+    /* Virtual destructor.
+     */
+    virtual ~eProcess();
 
     /* Casting eObject pointer to eProcess pointer.
      */
-	inline static eProcess *cast(
-		eObject *o) 
-	{ 
+    inline static eProcess *cast(
+        eObject *o)
+    {
         e_assert_type(o, ECLASSID_PROCESS)
-		return (eProcess*)o;
-	}
+        return (eProcess*)o;
+    }
 
     /* Get class identifier.
      */
@@ -68,16 +70,16 @@ public:
 
     /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Thread functionality
+      @name Thread functionality
 
-	  X... 
+      X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
+    /*@{*/
 
     virtual void initialize(
         eContainer *params = OS_NULL);

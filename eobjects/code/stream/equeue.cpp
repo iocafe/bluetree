@@ -9,13 +9,13 @@
   Queue buffers data, typically for reading from or writing to stream.
 
   When eQueue is used within eSocket class, the queu has a few functions: 1. To buffer incoming and
-  outgoing data from/to OS socket. 2. To encode stream in such way, that control codes for 
+  outgoing data from/to OS socket. 2. To encode stream in such way, that control codes for
   begin/end object and disconnect can be embedded within data stream. 3. To do run length
   encoding for data.
 
-  Copyright 2012 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -40,9 +40,9 @@
 ****************************************************************************************************
 */
 eQueue::eQueue(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eStream(parent, id, flags)
 {
     m_oldest = m_newest = OS_NULL;
@@ -82,7 +82,7 @@ eQueue::~eQueue()
   @brief Add the class to class list and class'es properties to it's property set.
 
   The eVariable::setupclass function adds the class to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier, 
+  it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
@@ -110,26 +110,26 @@ void eQueue::setupclass()
 
   @param  parameters Ignored by eQueue.
   @param  flags for eQueue, bit fields:
-          - OSAL_STREAM_ENCODE_ON_WRITE: Encode data when writing into queue. 
+          - OSAL_STREAM_ENCODE_ON_WRITE: Encode data when writing into queue.
             If flag not set, data is written to queue as is.
-          - OSAL_STREAM_DECODE_ON_READ: Decode data when reading from queue. 
+          - OSAL_STREAM_DECODE_ON_READ: Decode data when reading from queue.
             If not set, data is read from queue as is.
 
   @return  If successfull, the function returns ESTATUS_SUCCESS. Other return values
-           indicate an error. eQueue class cannot fail, so return value is always 
-           ESTATUS_SUCCESS. 
+           indicate an error. eQueue class cannot fail, so return value is always
+           ESTATUS_SUCCESS.
 
 ****************************************************************************************************
 */
 eStatus eQueue::open(
-	os_char *parameters,
-    os_int flags) 
+    os_char *parameters,
+    os_int flags)
 {
     /* Call close() to make sure that queue is empty and all member variables initialized.
      */
     close();
 
-    /* Save flags which indicate weather to 
+    /* Save flags which indicate weather to
      */
     m_flags = flags;
 
@@ -145,8 +145,8 @@ eStatus eQueue::open(
   The close() function releases all memory blocks but one and marks queue empty.
 
   @return  If successfull, the function returns ESTATUS_SUCCESS. Other return values
-           indicate an error. eQueue class cannot fail, so return value is always 
-           ESTATUS_SUCCESS. 
+           indicate an error. eQueue class cannot fail, so return value is always
+           ESTATUS_SUCCESS.
 
 ****************************************************************************************************
 */
@@ -267,14 +267,14 @@ void eQueue::delblock()
           always same as byte_sz. Can be set to OS_NULL, if not needed.
 
   @return  If successfull, the function returns ESTATUS_SUCCESS. Other return values
-           indicate an error. eQueue class cannot fail, so return value is always 
-           ESTATUS_SUCCESS. 
+           indicate an error. eQueue class cannot fail, so return value is always
+           ESTATUS_SUCCESS.
 
 ****************************************************************************************************
 */
 eStatus eQueue::write(
-    const os_char *buf, 
-    os_memsz buf_sz, 
+    const os_char *buf,
+    os_memsz buf_sz,
     os_memsz *nwritten)
 {
     /* Make sure that we have at least one block.
@@ -287,12 +287,12 @@ eStatus eQueue::write(
     {
         write_encoded(buf, buf_sz);
     }
-    else 
+    else
     {
         write_plain(buf, buf_sz);
     }
 
-    if (nwritten != OS_NULL) *nwritten = buf_sz; 
+    if (nwritten != OS_NULL) *nwritten = buf_sz;
     return ESTATUS_SUCCESS;
 }
 
@@ -315,7 +315,7 @@ eStatus eQueue::write(
 ****************************************************************************************************
 */
 void eQueue::write_encoded(
-    const os_char *buf, 
+    const os_char *buf,
     os_memsz buf_sz)
 {
     os_char c;
@@ -354,7 +354,7 @@ void eQueue::write_encoded(
              */
             if (c == E_STREAM_CTRL_CHAR)
             {
-                /* If data countains control character, save as control character followed 
+                /* If data countains control character, save as control character followed
                    by ctrl in data mark.
                  */
                 putcharacter(E_STREAM_CTRL_CHAR);
@@ -390,7 +390,7 @@ void eQueue::write_encoded(
 ****************************************************************************************************
 */
 void eQueue::write_plain(
-    const os_char *buf, 
+    const os_char *buf,
     os_memsz buf_sz)
 {
     os_int n;
@@ -437,7 +437,7 @@ void eQueue::write_plain(
         {
             newblock();
         }
-        
+
         /* Write to end part of current block as much as we can.
          */
         if (m_newest->head >= m_newest->tail)
@@ -475,8 +475,8 @@ void eQueue::write_plain(
   @brief Finish with writes so that all data is in queue buffers.
 
   When data is beeing written to queue, last character and it's repeat count are not necessarily
-  moved immediately to queue buffer. This is done to allow run length encoding on the 
-  fly. This function completes last write, so after this call all data is in buffer blocks. 
+  moved immediately to queue buffer. This is done to allow run length encoding on the
+  fly. This function completes last write, so after this call all data is in buffer blocks.
 
 ****************************************************************************************************
 */
@@ -525,34 +525,34 @@ void eQueue::complete_last_write()
           when reading plain data (no OSAL_STREAM_DECODE_ON_READ flag)
   @param  buf_sz Size of buffer in bytes.
   @param  nread Pointer to integer where to store number of bytes read from queue. This may be
-          less than buffer size if the function runs out of data in queue. Can be set to 
-          OS_NULL, if not needed. 
+          less than buffer size if the function runs out of data in queue. Can be set to
+          OS_NULL, if not needed.
   @param  Zero for default operation. Flag OSAL_STREAM_PEEK causes data to be read, but not removed
-          from queue. This flag works only when reading plain data as is (no 
+          from queue. This flag works only when reading plain data as is (no
           OSAL_STREAM_DECODE_ON_READ flag given to open() or accept).
 
   @return If successfull, the function returns ESTATUS_SUCCESS. Other return values
-          indicate an error. eQueue class cannot fail, so return value is always 
-          ESTATUS_SUCCESS. 
+          indicate an error. eQueue class cannot fail, so return value is always
+          ESTATUS_SUCCESS.
 
 ****************************************************************************************************
 */
 eStatus eQueue::read(
-    os_char *buf, 
-    os_memsz buf_sz, 
+    os_char *buf,
+    os_memsz buf_sz,
     os_memsz *nread,
     os_int flags)
 {
     /* Make sure that all data including last character are in buffer.
      */
-    if (m_wr_prevc != EQUEUE_NO_PREVIOUS_CHAR) 
+    if (m_wr_prevc != EQUEUE_NO_PREVIOUS_CHAR)
     {
         complete_last_write();
     }
 
     /* If no buffer.
      */
-    if (m_oldest == OS_NULL) 
+    if (m_oldest == OS_NULL)
     {
         if (nread) *nread = 0;
         return ESTATUS_SUCCESS;
@@ -592,8 +592,8 @@ eStatus eQueue::read(
 ****************************************************************************************************
 */
 void eQueue::read_decoded(
-    os_char *buf, 
-    os_memsz buf_sz, 
+    os_char *buf,
+    os_memsz buf_sz,
     os_memsz *nread)
 {
     os_uchar c, cc;
@@ -634,7 +634,7 @@ void eQueue::read_decoded(
             continue;
         }
 
-        if (m_rd_prevc == E_STREAM_CTRL_CHAR) 
+        if (m_rd_prevc == E_STREAM_CTRL_CHAR)
         {
             /* If this is single control char
              */
@@ -672,7 +672,7 @@ void eQueue::read_decoded(
         if (n >= buf_sz) break;
     }
 
-    if (nread != OS_NULL) *nread = n; 
+    if (nread != OS_NULL) *nread = n;
 }
 
 
@@ -696,8 +696,8 @@ void eQueue::read_decoded(
 ****************************************************************************************************
 */
 void eQueue::read_plain(
-    os_char *buf, 
-    os_memsz buf_sz, 
+    os_char *buf,
+    os_memsz buf_sz,
     os_memsz *nread,
     os_int flags)
 {
@@ -722,7 +722,7 @@ void eQueue::read_plain(
         {
             n = newest->sz - tail;
             if (n > buf_sz) n = (os_int)buf_sz;
-            if (buf) 
+            if (buf)
             {
                 os_memcpy(buf, ((os_char*)oldest) + sizeof(eQueueBlock) + tail, n);
                 buf += n;
@@ -739,7 +739,7 @@ void eQueue::read_plain(
             n = head - tail;
 
             if (n > buf_sz) n = (os_int)buf_sz;
-            if (buf) 
+            if (buf)
             {
                 os_memcpy(buf, ((os_char*)oldest) + sizeof(eQueueBlock) + tail, n);
                 buf += n;
@@ -752,7 +752,7 @@ void eQueue::read_plain(
          */
         if ((flags & OSAL_STREAM_PEEK) == 0)
         {
-            if (head == tail) 
+            if (head == tail)
             {
                 delblock();
             }
@@ -765,7 +765,7 @@ void eQueue::read_plain(
         oldest = oldest2;
     }
 
-    if (nread != OS_NULL) *nread = buf_sz0 - buf_sz; 
+    if (nread != OS_NULL) *nread = buf_sz0 - buf_sz;
     if ((flags & OSAL_STREAM_PEEK) == 0) m_bytes -= buf_sz0 - buf_sz;
 }
 
@@ -778,15 +778,15 @@ void eQueue::read_plain(
   The writechar function writes character or more oftentypically control code to stream.
   Control codes E_STREAM_BEGIN and E_STREAM_END mark beginning and end of object or other block.
   This begin/end marks are needed for versioning and implementing "eUnknown" objects.
-  Control character E_STREAM_DISCONNECT indicates that stream (typically socket) is 
+  Control character E_STREAM_DISCONNECT indicates that stream (typically socket) is
   just about to be disconnected.
 
-  @param  c Byte of data or control code to write. Possible control codes are E_STREAM_BEGIN, 
+  @param  c Byte of data or control code to write. Possible control codes are E_STREAM_BEGIN,
           E_STREAM_END or OSAL_STREAM_DISCONNECT.
 
   @return If successfull, the function returns ESTATUS_SUCCESS. Other return values
-          indicate an error. eQueue class cannot fail, so return value is always 
-          ESTATUS_SUCCESS. 
+          indicate an error. eQueue class cannot fail, so return value is always
+          ESTATUS_SUCCESS.
 
 ****************************************************************************************************
 */
@@ -799,7 +799,7 @@ eStatus eQueue::writechar(
 
     /* If writing without encoding, just write the character.
      */
-    if ((m_flags & OSAL_STREAM_ENCODE_ON_WRITE) == 0) 
+    if ((m_flags & OSAL_STREAM_ENCODE_ON_WRITE) == 0)
     {
         putcharacter(c);
         m_bytes++;
@@ -808,7 +808,7 @@ eStatus eQueue::writechar(
 
     /* Make sure that everything written is in buffer.
      */
-    if (m_wr_prevc != EQUEUE_NO_PREVIOUS_CHAR) 
+    if (m_wr_prevc != EQUEUE_NO_PREVIOUS_CHAR)
     {
         complete_last_write();
     }
@@ -840,7 +840,7 @@ eStatus eQueue::writechar(
             m_bytes++;
             return ESTATUS_SUCCESS;
     }
-    
+
     putcharacter(E_STREAM_CTRL_CHAR);
     putcharacter(c);
     m_bytes += 2;
@@ -855,8 +855,8 @@ eStatus eQueue::writechar(
 
   The readchar function reads either one byte or one control code from queue.
 
-  @return Byte of data or control code. Possible control codes are E_STREAM_BEGIN, 
-          E_STREAM_END, OSAL_STREAM_DISCONNECT or E_STREM_END_OF_DATA. 
+  @return Byte of data or control code. Possible control codes are E_STREAM_BEGIN,
+          E_STREAM_END, OSAL_STREAM_DISCONNECT or E_STREM_END_OF_DATA.
           Version number if returned with E_STREAM_BEGIN, use E_STREAM_CTRL_MASK to
           get only control code.
 
@@ -868,7 +868,7 @@ os_int eQueue::readchar()
 
     /* Make sure that all data including last character are in buffer.
      */
-    if (m_wr_prevc != EQUEUE_NO_PREVIOUS_CHAR) 
+    if (m_wr_prevc != EQUEUE_NO_PREVIOUS_CHAR)
     {
         complete_last_write();
     }
@@ -876,10 +876,10 @@ os_int eQueue::readchar()
     /* If no buffer.
      */
     if (m_oldest == OS_NULL) return E_STREM_END_OF_DATA;
-    
+
     /* If reading without decoding, just read the character.
      */
-    if ((m_flags & OSAL_STREAM_DECODE_ON_READ) == 0) 
+    if ((m_flags & OSAL_STREAM_DECODE_ON_READ) == 0)
     {
         /* If we run out of data.
          */
@@ -917,7 +917,7 @@ os_int eQueue::readchar()
             return c;
         }
 
-        if (m_rd_prevc == E_STREAM_CTRL_CHAR) 
+        if (m_rd_prevc == E_STREAM_CTRL_CHAR)
         {
             /* If this is single control char
              */
@@ -944,7 +944,7 @@ os_int eQueue::readchar()
                      */
                     case E_STREAM_CTRLCH_KEEPALIVE:
                         break;
-        
+
                     /* Beginning/end of object or stream has been disconnected.
                      */
                     default:
@@ -989,7 +989,7 @@ os_int eQueue::readchar()
 os_memsz eQueue::bytes()
 {
     os_int missing;
-    if (m_wr_prevc == EQUEUE_NO_PREVIOUS_CHAR) 
+    if (m_wr_prevc == EQUEUE_NO_PREVIOUS_CHAR)
     {
         missing = 0;
     }
