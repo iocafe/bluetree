@@ -42,6 +42,8 @@ void egui_initialize(
 /* Include egui headers.
  */
 #include "code/defs/eguiclassid.h"
+#include "code/userinput/emouse.h"
+#include "code/userinput/ekeyboard.h"
 #include "code/component/ecomponent.h"
 
 

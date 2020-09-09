@@ -70,6 +70,41 @@ extern os_char
 /*@}*/
 
 
+/* Parameters for layout(). These determine size, position of component and it's subcomponents.
+   Setup Z order for draing.
+ */
+typedef struct eLayoutParams
+{
+    /* Enable component. Disabled components have size 0 and are not dron nor appear in Z order.
+     */
+    os_boolean enable;
+
+    /* Component is visible. Invisible components are not drawn. Component still
+       has size, but it cannot react to mouse or keyboard. Neither it is drawn.
+     */
+    os_boolean visible;
+
+    /* This component can set input focus.
+     */
+    bool can_focus;
+
+    /* This component can react to mouse and get mouse capture.
+     */
+    bool enable_mouse;
+
+    /* This component is in edit mode.
+     */
+    bool edit_mode;
+}
+eLayoutParams;
+
+
+typedef struct eDrawParams
+{
+
+}
+eDrawParams;
+
 
 /**
 ****************************************************************************************************
@@ -212,6 +247,7 @@ public:
     ************************************************************************************************
     */
     /*@{*/
+
     /* Write variable to stream.
      */
     virtual eStatus writer(
@@ -228,12 +264,94 @@ public:
      */
     /* virtual void onmessage(); */
 
+
+    /**
+    ************************************************************************************************
+
+      @name Base class functions to implement component functionality
+
+      CreaSerialization means writing object to stream or reading it from strem.
+
+    ************************************************************************************************
+    */
+    /*@{*/
+
+    /* Determine size, position of component and it's subcomponents. Setup Z order for draing.
+     */
+    virtual eStatus layout(
+        eRect& r,
+        eLayoutParams& prm);
+
+    /* Draw the component.
+     */
+    virtual eStatus draw(
+        eDrawParams& prm,
+        os_int flags);
+
+    /* Pass mouse event to component, returns true if mouse event was processed.
+     */
+    virtual bool onmouse(
+        eMouseMessage& mevent);
+
+    /* Pass keyboard event to component, returns true if keyboard event was processed.
+     */
+    virtual bool onkeyboard(
+        eKeyboardMessage& mevent);
+
+    /*@}*/
+
+    /**
+    ************************************************************************************************
+
+      @name Base class functions to implement component functionality
+
+      CreaSerialization means writing object to stream or reading it from strem.
+
+    ************************************************************************************************
+    */
+    /*@{*/
+
+    /* Set redo layout flag.
+     */
+    void redo_layout();
+
+    /* Invalidate current component rectangle.
+     */
+    void invalidate();
+
+    /* Invalidate specified rectangle.
+     */
+    void invalidate(eRect& r);
+
+    /* Set keyboard input focus to this component.
+     */
+    void focus();
+
+    /* Capture mouse events to this component.
+     */
+    void capture_mouse();
+
     /*@}*/
 
 
-// protected:
+protected:
+    /* Current component rectangle.
+     */
+    eRect m_rect;
 
+    /* Saved layout parameters.
+     */
+    eLayoutParams m_layout_prm;
 
+    /* Minimum and maximum sizes in pixels what component can be drawn in and still looks acceptable.
+     */
+    eSize m_min_sz;
+    eSize m_max_sz;
+
+    /* Natural size for the component.
+     */
+    eSize m_natural_sz;
 };
+
 
 #endif
