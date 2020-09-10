@@ -848,7 +848,7 @@ os_double eVariable::getd()
            character), OS_NULL if not needed.
 
   @return  Pointer to value as string. This function always returns some string, returned
-           pointer is vener OS_NULL.
+           pointer is never OS_NULL.
 
 ****************************************************************************************************
 */

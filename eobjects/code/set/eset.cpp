@@ -744,7 +744,7 @@ void eSet::set(
         default:
         case OS_STR:
             q = x->gets(&sz);
-            if (q == '\0')
+            if (*q == '\0')
             {
                 itype = OS_UNDEFINED_TYPE;
                 ibytes = 0;

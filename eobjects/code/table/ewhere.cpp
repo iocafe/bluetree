@@ -900,7 +900,7 @@ void eWhere::pushconstant(
         case OS_STR:
             stackitem->value.s = v->gets();
             stackitem->datatype = OS_STR;
-            stackitem->is_empty = (os_boolean)(stackitem->value.s == '\0');
+            stackitem->is_empty = (os_boolean)(*stackitem->value.s == '\0');
             break;
 
         default:
@@ -961,7 +961,7 @@ void eWhere::pushvariable(
         case OS_STR:
             stackitem->value.s = v->gets();
             stackitem->datatype = OS_STR;
-            stackitem->is_empty = (os_boolean)(stackitem->value.s == '\0');
+            stackitem->is_empty = (os_boolean)(*stackitem->value.s == '\0');
             break;
 
         default:
