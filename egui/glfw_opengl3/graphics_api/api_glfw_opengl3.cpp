@@ -141,6 +141,16 @@ int duudeli(void)
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+// No round corners
+/*
+ImGui::GetStyle().WindowRounding = 0.0f;// <- Set this on init or use ImGui::PushStyleVar()
+ImGui::GetStyle().ChildRounding = 0.0f;
+ImGui::GetStyle().FrameRounding = 0.0f;
+ImGui::GetStyle().GrabRounding = 0.0f;
+ImGui::GetStyle().PopupRounding = 0.0f;
+ImGui::GetStyle().ScrollbarRounding = 0.0f; */
+
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
