@@ -1,6 +1,6 @@
 /**
 
-  @file    egui.h
+  @file    eguilib.h
   @brief   Main egui library header file.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -16,8 +16,8 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EGUI_H_
-#define EGUI_H_
+#ifndef EGUILIB_H_
+#define EGUILIB_H_
 
 #define EOID_ROOT 9999
 
@@ -45,6 +45,7 @@ void egui_initialize(
 #include "code/userinput/emouse.h"
 #include "code/userinput/ekeyboard.h"
 #include "code/component/ecomponent.h"
+#include "code/gui/egui.h"
 
 
 #endif

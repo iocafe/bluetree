@@ -16,7 +16,7 @@
 #pragma once
 #ifndef EMOUSE_H_
 #define EMOUSE_H_
-#include "egui.h"
+#include "eguilib.h"
 
 
 /**

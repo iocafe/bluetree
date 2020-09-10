@@ -15,8 +15,7 @@
 
 ****************************************************************************************************
 */
-#include "egui.h"
-
+#include "eguilib.h"
 
 /* Variable property names.
  */
@@ -239,7 +238,7 @@ eComponent *eComponent::nextv(
 */
 void eComponent::onpropertychange(
     os_int propertynr,
-    eComponent *x,
+    eVariable *x,
     os_int flags)
 {
     switch (propertynr)
@@ -276,7 +275,7 @@ void eComponent::onpropertychange(
 */
 eStatus eComponent::simpleproperty(
     os_int propertynr,
-    eComponent *x)
+    eVariable *x)
 {
     switch (propertynr)
     {

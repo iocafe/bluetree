@@ -16,6 +16,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $ENV{E_LIBOUT})
 # Set path to source files.
 set(BACKBONE "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code")
 # set(EXTENSIONS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/extensions")
+set(GRAPHICS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/glfw_opengl3")
+
 
 # Add iocom and pins library include paths.
 include_directories("$ENV{E_ROOT}/iocom")
@@ -23,16 +25,18 @@ include_directories("$ENV{E_ROOT}/${E_REPO}/eobjects")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}")
 
 # Add main headers.
-set(MAIN_HEADERS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/${E_PROJECT}.h")
+set(MAIN_HEADERS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/eguilib.h")
 
 message(${MAIN_HEADERS})
 
-# Add source files common to all operating systems.
-file(GLOB BB_CM_SOURCES "${BACKBONE}/*/*.cpp")
-file(GLOB BB_CM_HEADERS "${BACKBONE}/*/*.h")
-# file(GLOB EX_CM_SOURCES "${EXTENSIONS}/*/*.cpp")
-# file(GLOB EX_CM_HEADERS "${EXTENSIONS}/*/*.h")
+# List source and header files to compile into library.
+file(GLOB BB_SOURCES "${BACKBONE}/*/*.cpp")
+file(GLOB BB_HEADERS "${BACKBONE}/*/*.h")
+file(GLOB_RECURSE IM_SOURCES "${GRAPHICS}/*/*.cpp" "${GRAPHICS}/*/*.c")
+file(GLOB_RECURSE IM_HEADERS "${GRAPHICS}/*/*.h")
+# file(GLOB EX_SOURCES "${EXTENSIONS}/*/*.cpp")
+# file(GLOB EX_HEADERS "${EXTENSIONS}/*/*.h")
 
 # Generate the static library
-add_library(${E_PROJECT}${E_POSTFIX} STATIC ${MAIN_HEADERS} ${BB_CM_HEADERS} ${BB_CM_SOURCES})
-# add_library(${E_PROJECT}${E_POSTFIX} STATIC ${MAIN_HEADERS} ${BB_CM_HEADERS} ${EX_CM_HEADERS} ${BB_CM_SOURCES} ${EX_CM_SOURCES})
+add_library(${E_PROJECT}${E_POSTFIX} STATIC ${MAIN_HEADERS} ${BB_HEADERS} ${IM_HEADERS} ${BB_SOURCES} ${IM_SOURCES})
+# add_library(${E_PROJECT}${E_POSTFIX} STATIC ${MAIN_HEADERS} ${BB_HEADERS} ${EX_HEADERS} ${BB_SOURCES} ${EX_SOURCES})

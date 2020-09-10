@@ -18,7 +18,7 @@
 #pragma once
 #ifndef ECOMPONENT_H_
 #define ECOMPONENT_H_
-#include "egui.h"
+#include "eguilib.h"
 
 /**
 ****************************************************************************************************
@@ -191,14 +191,14 @@ public:
      */
     virtual void onpropertychange(
         os_int propertynr,
-        eComponent *x,
+        eVariable *x,
         os_int flags);
 
     /* Get value of simple property.
      */
     virtual eStatus simpleproperty(
         os_int propertynr,
-        eComponent *x);
+        eVariable *x);
 
     /*@}*/
 
@@ -317,7 +317,10 @@ public:
 
     /* Invalidate current component rectangle.
      */
-    void invalidate();
+    inline void invalidate()
+    {
+        invalidate(m_rect);
+    }
 
     /* Invalidate specified rectangle.
      */
