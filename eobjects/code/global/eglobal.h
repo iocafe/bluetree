@@ -87,10 +87,6 @@ typedef struct eGlobal
      */
     eThreadHandle *timerhandle;
 
-    /** Console stream for debug output.
-     */
-    // eConsole *console;
-
     /** Name of the process, like "grumpy".
      */
     os_char process_name[ENET_PROCESS_NAME_SZ];
@@ -127,6 +123,10 @@ typedef struct eGlobal
     /** Composition file name
      */
     os_char composition[ENET_COMPOSITION_NAME_SZ];
+
+    /** Pointer to global structure for egui library.
+     */
+    struct eGuiGlobal *eguiglobal;
 }
 eGlobal;
 

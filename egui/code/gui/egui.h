@@ -1,12 +1,10 @@
 /**
 
-  @file    ecomponent.h
-  @brief   Abstract GUI component.
+  @file    egui.cpp
+  @brief   GUI root object.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
-
-  Base call for all GUI components (widgets)...
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,

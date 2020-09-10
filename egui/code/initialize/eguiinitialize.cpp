@@ -1,7 +1,7 @@
 /**
 
-  @file    eobjects.cpp
-  @brief   Initialize and shut down eobject library.
+  @file    eguiinitialize.cpp
+  @brief   Initialize and shut down egui library.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -13,17 +13,17 @@
 
 ****************************************************************************************************
 */
-#include "eobjects.h"
+#include "eguilib.h"
 
 
 /**
 ****************************************************************************************************
 
-  @brief Initialize eobject library for use.
-  @anchor eobjects_initialize
+  @brief Initialize eguilibrary for use.
+  @anchor egui_initialize
 
-  The eobjects_initialize() function initializes eobjects library for use. This function should
-  be the first eobjects function called. The eobjects_shutdown() function cleans up resources
+  The egui_initialize() function initializes egui library for use. This function should
+  be the first egui function called. The egui_shutdown() function cleans up resources
   used by the library.
 
   @param  reserved For now OS_NULL.
@@ -31,56 +31,47 @@
 
 ****************************************************************************************************
 */
-void eobjects_initialize(
+void egui_initialize(
     void *reserved)
 {
     /* Do nothing if the library has been initialized.
      */
-    if (eglobal->initialized) return;
+    if (eglobal->eguiglobal) return;
 
-    /* Clear the global strcture and mark initialized.
+   /* Clear the global strcture and mark initialized.
      */
-    os_memclear(eglobal, sizeof(eGlobal));
-    eglobal->initialized = OS_TRUE;
-
-    /* Initialize handle tables.
-     */
-    ehandleroot_initialize();
+    eglobal->eguiglobal = (eGuiGlobal*)os_malloc(sizeof(eGuiGlobal), OS_NULL);
+    os_memclear(eglobal->eguiglobal, sizeof(eGuiGlobal));
 
     /* Initialize class list
      */
-    eclasslist_initialize();
+    eguiclasslist_initialize();
 }
 
 
 /**
 ****************************************************************************************************
 
-  @brief Shut down eobjects library.
-  @anchor eobjects_shutdown
+  @brief Shut down egui library.
+  @anchor egui_shutdown
 
-  The eobjects_shutdown() function cleans up resources used by the eobjects library.
+  The egui_shutdown() function cleans up resources used by the egui library.
 
   @return  None.
 
 ****************************************************************************************************
 */
-void eobjects_shutdown()
+void egui_shutdown()
 {
     /* Do nothing if the library has not been initialized.
      */
-    if (!eglobal->initialized) return;
+    if (eglobal->eguiglobal == OS_NULL) return;
 
     /* Release resources allocated for the class list.
      */
-    eclasslist_release();
+    eguiclasslist_release();
 
-    /* Delete handle tables.
-     */
-    ehandleroot_shutdown();
-
-    /* Mark eobjects library uninitialized.
-     */
-    eglobal->initialized = OS_FALSE;
+    os_free(eglobal->eguiglobal, sizeof(eGuiGlobal));
+    eglobal->eguiglobal = OS_NULL;
 }
 

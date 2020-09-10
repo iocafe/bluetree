@@ -37,11 +37,13 @@ void egui_initialize(
 
 /* Shut down the egui library.
 */
-// void egui_shutdown();
+void egui_shutdown();
 
 /* Include egui headers.
  */
 #include "code/defs/eguiclassid.h"
+#include "code/initialize/eguiglobal.h"
+#include "code/initialize/eguiclasslist.h"
 #include "code/userinput/emouse.h"
 #include "code/userinput/ekeyboard.h"
 #include "code/component/ecomponent.h"

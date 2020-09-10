@@ -46,7 +46,7 @@ void eobjects_shutdown();
 #include "code/object/eobject.h"
 #include "code/object/ehandletable.h"
 #include "code/object/ehandleroot.h"
-#include "code/object/eclasslist.h"
+#include "code/initialize/eclasslist.h"
 #include "code/root/eroot.h"
 #include "code/variable/evariable.h"
 #include "code/set/eset.h"

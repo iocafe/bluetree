@@ -54,12 +54,12 @@ OSAL_C_HEADER_ENDS
 ****************************************************************************************************
 */
 #define EMAIN_CONSOLE_ENTRY osalStatus osal_main(os_int argc, os_char *argv[]) { \
-    os_int rval; \
+    osalStatus s; \
     eobjects_initialize(OS_NULL); \
     eprocess_create(); \
-    rval = emain(argc, argv); \
+    s = emain(argc, argv); \
     eprocess_close(); \
     eobjects_shutdown(); \
-    return rval; }
+    return s; }
 
 #endif
