@@ -276,6 +276,8 @@ public:
     */
     /*@{*/
 
+#if 0
+
     /* Determine size, position of component and it's subcomponents. Setup Z order for draing.
      */
     virtual eStatus layout(
@@ -298,6 +300,7 @@ public:
     virtual bool onkeyboard(
         eKeyboardMessage& mevent);
 
+#endif
     /*@}*/
 
     /**

@@ -72,6 +72,5 @@ void eobjects_shutdown();
 #include "code/connection/econnection.h"
 #include "code/connection/eendpoint.h"
 #include "code/main/emain.h"
-/* #include "extensions/socket/esocket.h" */
 
 #endif

@@ -111,6 +111,7 @@ void eRoot::newhandle(
      */
     handle->clear(obj, id, flags);
     handle->m_root = this;
+
     obj->mm_handle = handle;
     if (parent)
     {

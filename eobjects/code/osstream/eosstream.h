@@ -165,7 +165,7 @@ public:
 
     virtual eStatus accept(
         eStream *newstream,
-        os_int flags);
+        os_int flags) {return ESTATUS_FAILED;}
 
     /*@}*/
 

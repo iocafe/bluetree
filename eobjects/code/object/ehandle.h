@@ -272,6 +272,7 @@ public:
         m_oid = id;
         m_oflags = EOBJ_IS_RED | flags;
         m_object = obj;
+        m_left = m_right = m_up = m_children = OS_NULL;
     }
 
     /* Verify whole object tree.

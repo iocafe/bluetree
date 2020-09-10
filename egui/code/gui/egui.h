@@ -184,24 +184,24 @@ public:
 
     /* Determine size, position of component and it's subcomponents. Setup Z order for draing.
      */
-    virtual eStatus layout(
+    eStatus layout(
         eRect& r,
         eLayoutParams& prm);
 
     /* Draw the component.
      */
-    virtual eStatus draw(
+    eStatus draw(
         eDrawParams& prm,
         os_int flags);
 
     /* Pass mouse event to component, returns true if mouse event was processed.
      */
-    virtual bool onmouse(
+    bool onmouse(
         eMouseMessage& mevent);
 
     /* Pass keyboard event to component, returns true if keyboard event was processed.
      */
-    virtual bool onkeyboard(
+    bool onkeyboard(
         eKeyboardMessage& mevent);
 
     /*@}*/
