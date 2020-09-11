@@ -53,8 +53,10 @@ osalStatus emain(
     eGui *gui;
     eStatus s;
 
-    egui_initialize(OS_NULL);
-    s = egui_initialize_imgui();
+    // duudeli(); return OSAL_SUCCESS;
+
+    egui_initialize();
+    s = eimgui_initialize();
     if (s) {
         osal_debug_error("ImGui initialization failed");
         egui_shutdown();
@@ -68,10 +70,8 @@ osalStatus emain(
     gui->setup_desktop_application();
     gui->run();
 
-    // duudeli();
-
     delete thread;
-    egui_shutdown_imgui();
+    eimgui_shutdown();
     egui_shutdown();
 
     return OSAL_SUCCESS;

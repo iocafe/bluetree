@@ -254,6 +254,10 @@ public:
 
 
 protected:
+    /* Viewport, corresponds to operating system window, etc.
+     */
+    eViewPort *m_viewport;
+
     /* Display size.
      */
     eSize m_sz;

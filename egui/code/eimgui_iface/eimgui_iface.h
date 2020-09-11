@@ -1,10 +1,12 @@
 /**
 
-  @file    imgui_iface.h
+  @file    eimgui_iface.h
   @brief   ImGUI library initialization and shut down for egui.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
+
+  API for interfacing with imgui, mouse and keyboard and operating system windows.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -18,12 +20,31 @@
 #define IMGUI_IFACE_H_
 #include "eguilib.h"
 
+
+/* For type checking
+ */
+typedef struct eViewPort
+{
+    int dulle;
+}
+eViewPort;
+
 /* Initialize ImGUI for use.
  */
-eStatus egui_initialize_imgui();
+eStatus eimgui_initialize();
 
 /* Shut down ImGUI.
  */
-void egui_shutdown_imgui();
+void eimgui_shutdown();
+
+
+eViewPort *eimgui_open_viewport();
+void egui_close_viewport(eViewPort *viewport);
+
+
+eStatus eimgui_start_frame(eViewPort *viewport);
+
+void eimgui_finish_frame(eViewPort *viewport);
+
 
 #endif

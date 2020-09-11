@@ -32,8 +32,7 @@
 
 /* Initialize the egui library for use.
  */
-void egui_initialize(
-    void *reserved);
+void egui_initialize();
 
 /* Shut down the egui library.
 */
@@ -49,7 +48,7 @@ void egui_shutdown();
 #include "code/defs/eguioid.h"
 #include "code/initialize/eguiglobal.h"
 #include "code/initialize/eguiclasslist.h"
-#include "code/imgui_iface/imgui_iface.h"
+#include "code/eimgui_iface/eimgui_iface.h"
 #include "code/userinput/emouse.h"
 #include "code/userinput/ekeyboard.h"
 #include "code/component/ecomponent.h"

@@ -26,13 +26,11 @@
   be the first egui function called. The egui_shutdown() function cleans up resources
   used by the library.
 
-  @param  reserved For now OS_NULL.
   @return None.
 
 ****************************************************************************************************
 */
-void egui_initialize(
-    void *reserved)
+void egui_initialize()
 {
     /* Do nothing if the library has been initialized.
      */

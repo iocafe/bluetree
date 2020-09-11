@@ -1,10 +1,12 @@
 /**
 
-  @file    imgui_iface.h
+  @file    eimgui_iface_glfw_opengl3.cpp
   @brief   OpenGL/glfw ImGUI library initialization and shut down for egui.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
+
+  ImGui/OpenGL/GLFW implementation of interface to mouse and keyboard and operating system windows.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -59,26 +61,30 @@ using namespace gl;
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+/* For now support for only one window.
+ */
+static GLFWwindow* window;
+
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-static GLFWwindow* window;
 
 /**
 ****************************************************************************************************
 
   @brief Initialize ImGUI for use.
 
-  The egui_initialize_imgui function initializes graphics driver, windowing and user
+  The eimgui_initialize function initializes graphics driver, windowing and user
   input. This implementation sets OpenGL with GLFW.
 
   @return  ESTATUS_SUCCESS if all fine, other values indicate an error.
 
 ****************************************************************************************************
 */
-eStatus egui_initialize_imgui()
+eStatus eimgui_initialize()
 {
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
@@ -141,8 +147,9 @@ eStatus egui_initialize_imgui()
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
+    // ImGui::StyleColorsDark();
+    // ImGui::StyleColorsClassic();
+    ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -162,6 +169,10 @@ eStatus egui_initialize_imgui()
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
 
     io.Fonts->AddFontFromFileTTF("/coderoot/bluetree/egui/fonts/NotoSans-Medium.ttf", 20.0f);
+
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+
 
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
@@ -184,14 +195,14 @@ eStatus egui_initialize_imgui()
 
   @brief Shut down ImGUI.
 
-  The egui_shutdown_imgui function releases all resources allocated for/by ImGUI
+  The eimgui_shutdown function releases all resources allocated for/by ImGUI
   and closes the application window.
 
   @return  None.
 
 ****************************************************************************************************
 */
-void egui_shutdown_imgui()
+void eimgui_shutdown()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -200,6 +211,81 @@ void egui_shutdown_imgui()
     glfwDestroyWindow(window);
     glfwTerminate();
 }
+
+
+eViewPort *eimgui_open_viewport()
+{
+    /* Only one findow for now
+     * GLFWwindow* window;
+
+    window = glfwCreateWindow(660, 720, "Dulle doo", NULL, NULL);
+    if (window == NULL) {
+        return OS_NULL;
+    }
+    glfwMakeContextCurrent(window);
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true); */
+
+    return (eViewPort*)window;
+}
+
+void egui_close_viewport(eViewPort *viewport)
+{
+    /* Only one findow for now
+    GLFWwindow* window;
+    window = (GLFWwindow*)viewport;
+
+    glfwDestroyWindow(window);
+    */
+}
+
+
+/* Returns ESTATUS_SUCCESS if frame started.
+ */
+eStatus eimgui_start_frame(eViewPort *viewport)
+{
+    GLFWwindow* window;
+    window = (GLFWwindow*)viewport;
+
+    if (glfwWindowShouldClose(window)) {
+        return ESTATUS_STREAM_END;
+    }
+
+    // Poll and handle events (inputs, window resize, etc.)
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+    // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+    glfwPollEvents();
+
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    return ESTATUS_SUCCESS;
+}
+
+
+void eimgui_finish_frame(eViewPort *viewport)
+{
+    GLFWwindow* window;
+    window = (GLFWwindow*)viewport;
+
+    ImVec4 clear_color = ImVec4(0.8f, 0.8f, 0.8f, 1.00f);
+
+    // Rendering
+    ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    glfwSwapBuffers(window);
+}
+
 
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX EXAMPLE
