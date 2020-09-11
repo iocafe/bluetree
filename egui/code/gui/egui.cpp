@@ -295,3 +295,9 @@ eStatus eGui::simpleproperty(
     }
     return ESTATUS_SUCCESS;
 }
+
+
+eStatus eGui::run()
+{
+    return ESTATUS_SUCCESS;
+}

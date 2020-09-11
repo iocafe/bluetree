@@ -182,6 +182,10 @@ public:
     */
     /*@{*/
 
+    /* Run equi.
+     */
+    eStatus run();
+
     /* Determine size, position of component and it's subcomponents. Setup Z order for draing.
      */
     eStatus layout(
@@ -234,6 +238,19 @@ public:
     void capture_mouse();
 
     /*@}*/
+
+
+    /**
+    ************************************************************************************************
+
+      @name Desktop application specific setup and functions.
+
+      These function are for desktop application.
+
+    ************************************************************************************************
+    */
+    /*@{*/
+    void setup_desktop_application();
 
 
 protected:

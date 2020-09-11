@@ -48,16 +48,31 @@ osalStatus emain(
     os_int argc,
     os_char *argv[])
 {
+    eThread *thread;
+    eContainer *gui_container;
+    eGui *gui;
+    eStatus s;
+
     egui_initialize(OS_NULL);
+    s = egui_initialize_imgui();
+    if (s) {
+        osal_debug_error("ImGui initialization failed");
+        egui_shutdown();
+        return OSAL_STATUS_FAILED;
+    }
 
+    thread = new eThread();
+    gui_container = new eContainer(thread, EOID_GUI_CONTAINER);
 
-    // app.start(argc, (const os_char**)argv);
-    // osal_simulated_loop(OS_NULL);
+    gui = new eGui(gui_container);
+    gui->setup_desktop_application();
+    gui->run();
 
-    duudeli();
+    // duudeli();
 
+    delete thread;
+    egui_shutdown_imgui();
     egui_shutdown();
+
     return OSAL_SUCCESS;
 }
-
-

@@ -25,9 +25,9 @@
 
   @name Object identifiers used by eobjects library.
 
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
+  The object identifiers from -99 to -1 are reserved for eobject library. Idenfifiers from
+  -199 to -100 are reserved for egui library. Idenfifiers from -1099 to -1000 are for special
+  use markings.
 
 ****************************************************************************************************
 */

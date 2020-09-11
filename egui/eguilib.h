@@ -39,11 +39,17 @@ void egui_initialize(
 */
 void egui_shutdown();
 
+/* Include Dear ImGUI header.
+ */
+#include "code/imgui/imgui.h"
+
 /* Include egui headers.
  */
 #include "code/defs/eguiclassid.h"
+#include "code/defs/eguioid.h"
 #include "code/initialize/eguiglobal.h"
 #include "code/initialize/eguiclasslist.h"
+#include "code/imgui_iface/imgui_iface.h"
 #include "code/userinput/emouse.h"
 #include "code/userinput/ekeyboard.h"
 #include "code/component/ecomponent.h"

@@ -1,12 +1,10 @@
 /**
 
-  @file    eguisetup.cpp
-  @brief   Abstract GUI component.
+  @file    edesktop.cpp
+  @brief   Desktop application specific setup and functions.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
-
-  Base call for all GUI components (widgets)...
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -23,24 +21,16 @@
 /**
 ****************************************************************************************************
 
-  @brief Clone object
+  @brief Setup egui for desktop application
 
-  The clone function clones the GUI and clonable attachments. Names will be left detached
-  in clone if EOBJ_NO_MAP flag is given.
+  The setup_desktop_application function creates GUI components for desktop application.
 
-  @param  parent Parent for the clone.
-  @param  id Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
-  @return Pointer to the clone.
+  @return None.
 
 ****************************************************************************************************
 */
-/* eObject *eGui::clone(
-    eObject *parent,
-    e_oid id,
-    os_int aflags)
+void eGui::setup_desktop_application()
 {
+
+
 }
-*/
-
-

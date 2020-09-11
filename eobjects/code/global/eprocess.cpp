@@ -8,9 +8,9 @@
 
   The process object is like a box holding a set of child objects.
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -30,9 +30,9 @@
 ****************************************************************************************************
 */
 eProcess::eProcess(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eThread(parent, id, flags)
 {
     eglobal->process_ns = new eNameSpace(this, EOID_NAMESPACE);
@@ -65,7 +65,7 @@ void eProcess::run()
     {
         /* Wait for thread to be trigged.
          */
-        osal_event_wait(trigger(), OSAL_EVENT_INFINITE); 
+        osal_event_wait(trigger(), OSAL_EVENT_INFINITE);
 
         /* Process messages
          */
@@ -76,7 +76,7 @@ void eProcess::run()
 }
 
 void eProcess::onmessage(
-    eEnvelope *envelope) 
+    eEnvelope *envelope)
 {
     eThread::onmessage(envelope);
 }
@@ -96,7 +96,7 @@ void eProcess::onmessage(
 */
 void eprocess_create()
 {
-    eProcess 
+    eProcess
         *process;
 
     eTimer
@@ -108,17 +108,17 @@ void eprocess_create()
 
     if (eglobal->processhandle == OS_NULL)
     {
-        /* Create process object and start thread to run it.
+        /* Create process object and start thread to run it. After this process pointer is useless.
          */
         process = new eProcess();
         processhandle = new eThreadHandle();
-        process->start(processhandle);         /* After this process pointer is useless */
+        process->start(processhandle);
 
-        /* Create thread which runs timers.
+        /* Create thread which runs timers. After this tim pointer is useless.
          */
         tim = new eTimer();
         timerhandle = new eThreadHandle();
-        tim->start(timerhandle); /* After this tim pointer is useless */
+        tim->start(timerhandle);
 
         /* Add as global process only when process has been created.
          */
