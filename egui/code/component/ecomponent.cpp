@@ -141,7 +141,7 @@ void eComponent::setupclass()
 */
 void eComponent::setupproperties(
     os_int cls,
-    oe_int flags)
+    os_int flags)
 {
     eVariable *p;
 

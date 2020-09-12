@@ -53,6 +53,8 @@ eGui::eGui(
     : eObject(parent, id, flags)
 {
     m_viewport = eimgui_open_viewport();
+
+    os_memclear(&m_draw_prm, sizeof(eDrawParams));
 }
 
 
@@ -399,6 +401,8 @@ void ShowExampleAppDockSpace(bool* p_open)
 
 eStatus eGui::run()
 {
+    eObject *o;
+    eComponent *c;
     eStatus s;
 
     bool  openoi = true;
@@ -440,6 +444,15 @@ eStatus eGui::run()
             ImGui::End();
         }
         // TEST END
+
+        ImGui::Begin("Doodleli!");                          // Create a window called "Hello, world!" and append into it.
+        for (o = first(); o; o = o->next())
+        {
+            c = eComponent::cast(o);
+            c->draw(m_draw_prm);
+        }
+        ImGui::End();
+
 
         // TEST BEGIN
         if (show_another_window) {

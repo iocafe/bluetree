@@ -116,34 +116,6 @@ public:
     /**
     ************************************************************************************************
 
-      @name eObject virtual function implementations
-
-      Serialization means writing object to stream or reading it from strem.
-
-    ************************************************************************************************
-    */
-    /*@{*/
-
-    /* Write variable to stream.
-     */
-    virtual eStatus writer(
-        eStream *stream,
-        os_int flags);
-
-    /* Read variable from stream.
-     */
-    virtual eStatus reader(
-        eStream *stream,
-        os_int flags);
-
-    /* Message to or trough this object.
-     */
-    /* virtual void onmessage(); */
-
-
-    /**
-    ************************************************************************************************
-
       @name Base class functions to implement component functionality
 
       CreaSerialization means writing object to stream or reading it from strem.
@@ -152,31 +124,11 @@ public:
     */
     /*@{*/
 
-#if 0
-
-    /* Determine size, position of component and it's subcomponents. Setup Z order for draing.
-     */
-    virtual eStatus layout(
-        eRect& r,
-        eLayoutParams& prm);
-
     /* Draw the component.
      */
-    virtual eStatus draw(
-        eDrawParams& prm,
-        os_int flags);
+    virtual void draw(
+        eDrawParams& prm);
 
-    /* Pass mouse event to component, returns true if mouse event was processed.
-     */
-    virtual bool onmouse(
-        eMouseMessage& mevent);
-
-    /* Pass keyboard event to component, returns true if keyboard event was processed.
-     */
-    virtual bool onkeyboard(
-        eKeyboardMessage& mevent);
-
-#endif
     /*@}*/
 
 

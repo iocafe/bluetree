@@ -52,6 +52,8 @@ void egui_shutdown();
 #include "code/userinput/emouse.h"
 #include "code/userinput/ekeyboard.h"
 #include "code/component/ecomponent.h"
+
+#include "code/ioc_components/eioc_checkbox.h"
 #include "code/gui/egui.h"
 
 

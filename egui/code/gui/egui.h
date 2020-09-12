@@ -258,6 +258,10 @@ protected:
      */
     eViewPort *m_viewport;
 
+    /* Parameters for drawing components
+     */
+    eDrawParams m_draw_prm;
+
     /* Display size.
      */
     eSize m_sz;

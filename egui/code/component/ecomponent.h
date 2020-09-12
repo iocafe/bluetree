@@ -180,7 +180,7 @@ public:
      */
     static void setupproperties(
         os_int cls,
-        oe_int flags);
+        os_int flags);
 
     /* Static constructor function for generating instance by class list.
      */
@@ -293,13 +293,14 @@ public:
     virtual eStatus layout(
         eRect& r,
         eLayoutParams& prm);
+#endif
 
     /* Draw the component.
      */
-    virtual eStatus draw(
-        eDrawParams& prm,
-        os_int flags);
+    virtual void draw(
+        eDrawParams& prm) {}
 
+#if 0
     /* Pass mouse event to component, returns true if mouse event was processed.
      */
     virtual bool onmouse(

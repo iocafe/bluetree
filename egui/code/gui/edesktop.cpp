@@ -31,6 +31,6 @@
 */
 void eGui::setup_desktop_application()
 {
-
+    new eiocCheckbox(this);
 
 }
