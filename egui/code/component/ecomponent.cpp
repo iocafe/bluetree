@@ -219,7 +219,7 @@ eComponent *eComponent::firstcomponent(
         if (cid >= EGUICLASSID_BEGIN_COMPONENTS &&
             cid <= EGUICLASSID_END_COMPONENTS)
         {
-            return eComponent::cast(h->object());
+            return (eComponent*)h->object();
         }
 
         h = h->next(id);
@@ -258,7 +258,7 @@ eComponent *eComponent::nextcomponent(
         if (cid >= EGUICLASSID_BEGIN_COMPONENTS &&
             cid <= EGUICLASSID_END_COMPONENTS)
         {
-            return eComponent::cast(h->object());
+            return (eComponent*)h->object();
         }
 
         h = h->next(id);
