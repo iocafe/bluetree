@@ -8,9 +8,9 @@
 
   This example demonstrates connecting two processes.
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -25,13 +25,13 @@
  */
 #define MY_CLASS_ID_2 (ECLASSID_APP_BASE + 2)
 
-/* Enumeration of eMyClass2 properties. 
+/* Enumeration of eMyClass2 properties.
  */
 #define EMYCLASS2P_X 10
 #define EMYCLASS2P_Y 20
 
-static os_char emyclass2p_x[] = "X";
-static os_char emyclass2p_y[] = "Y";
+static const os_char emyclass2p_x[] = "X";
+static const os_char emyclass2p_y[] = "Y";
 
 
 /**
@@ -49,9 +49,9 @@ public:
     /* Constructor. It is here just to initialize properties to default values.s
      */
     eMyClass2(
-		eObject *parent = OS_NULL,
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
         : eThread(parent, id, flags)
     {
         initproperties();
@@ -71,7 +71,7 @@ public:
 
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return MY_CLASS_ID_2;
     }
@@ -85,7 +85,7 @@ public:
 // setpropertyd(EMYCLASS2P_Y, 4.3);
     }
 
-    /* Process incoming messages. 
+    /* Process incoming messages.
      */
     virtual void onmessage(
         eEnvelope *envelope)
@@ -122,8 +122,8 @@ printf ("ULLE \'%s\'\n", v.gets());
     /* This gets called when property value changes
      */
     virtual void onpropertychange(
-        os_int propertynr, 
-        eVariable *x, 
+        os_int propertynr,
+        eVariable *x,
         os_int flags)
     {
         switch (propertynr)
@@ -159,14 +159,14 @@ void connection_example_1()
 
     /* Set up eSocket and my own classes for use.
      */
-    eSocket::setupclass(); 
-    eMyClass2::setupclass(); 
+    eSocket::setupclass();
+    eMyClass2::setupclass();
 
-    /* Create and start thread to listen for incoming socket connections, 
+    /* Create and start thread to listen for incoming socket connections,
        name it "endpointthread".
      */
     t = new eConnection();
-	t->addname("//myconnection");
+    t->addname("//myconnection");
     t->start(&conthreadhandle); /* After this t pointer is useless */
     c.setpropertys_msg(conthreadhandle.uniquename(), // "//myconnection",
          "localhost", econnp_ipaddr);
@@ -179,7 +179,7 @@ void connection_example_1()
     /* Create and start thread named "thread2".
      */
     t = new eMyClass2();
-	t->addname("thread2", ENAME_PROCESS_NS);
+    t->addname("thread2", ENAME_PROCESS_NS);
 //  t->timer(120);
     t->start(&thandle2); /* After this t pointer is useless */
 
@@ -190,7 +190,7 @@ void connection_example_1()
     /* Wait for the threads to terminate.
      */
     thandle2.terminate();
-    thandle2.join(); 
+    thandle2.join();
     conthreadhandle.terminate();
     conthreadhandle.join();
 }

@@ -29,7 +29,7 @@
 
 /* Connection property names.
  */
-extern os_char
+extern const os_char
     econnp_classid[],
     econnp_ipaddr[],
     econnp_isopen[];

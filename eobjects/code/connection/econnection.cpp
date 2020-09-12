@@ -29,7 +29,7 @@
 
 /* Connection property names.
  */
-os_char
+const os_char
     econnp_classid[] = "classid",
     econnp_ipaddr[] = "ipaddr",
     econnp_isopen[] = "isopen";

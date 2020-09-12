@@ -31,41 +31,50 @@
 */
 /*@{*/
 
-/* Enumeration of GUI component properties.
+/* Enumeration of common GUI component properties. These often match eobject library eVariable
+   property numbers and names, but a specific eComponent may not need to implement all.
+   eComponent has also properties which eVariable doesn't have.
  */
-#define ECOMP_VALUE 1
-#define ECOMP_QUALITY 2
-#define ECOMP_TIMESTAMP 3
-#define ECOMP_DIGS 4
-#define ECOMP_TEXT 6
-#define ECOMP_UNIT 8
-#define ECOMP_MIN 10
-#define ECOMP_MAX 12
-#define ECOMP_TYPE 14
-#define ECOMP_ATTR 16
-#define ECOMP_DEFAULT 18
-#define ECOMP_GAIN 20
-#define ECOMP_OFFSET 22
-#define ECOMP_CONF 24
+#define ECOMP_VALUE EVARP_VALUE
+#define ECOMP_STATE_BITS EVARP_STATE_BITS
+#define ECOMP_TIMESTAMP EVARP_TIMESTAMP
+#define ECOMP_DIGS EVARP_DIGS
+#define ECOMP_TEXT EVARP_TEXT
+#define ECOMP_UNIT EVARP_UNIT
+#define ECOMP_MIN EVARP_MIN
+#define ECOMP_MAX EVARP_MAX
+#define ECOMP_TYPE EVARP_TYPE
+#define ECOMP_ATTR EVARP_ATTR
+#define ECOMP_DEFAULT EVARP_DEFAULT
+#define ECOMP_GAIN EVARP_GAIN
+#define ECOMP_OFFSET EVARP_OFFSET
+#define ECOMP_CONF EVARP_CONF
+#define ECOMP_PATH 30
 
-/* GUI component property names.
+/* Flags for eComponent::setupproperties() to specify which optional properties for
+   the component class.
  */
-extern os_char
-    ecomp_value[],
-    ecomp_digs[],
-    ecomp_text[],
-    ecomp_unit[],
-    ecomp_min[],
-    ecomp_max[],
-    ecomp_type[],
-    ecomp_attr[],
-    ecomp_default[],
-    ecomp_gain[],
-    ecomp_offset[],
-    ecomp_quality[],
-    ecomp_timestamp[],
-    ecomp_conf[];
+#define ECOMP_NO_OPTIONAL_PROPERITES 0
+#define ECOMP_VALUE_PROPERITES 1
+#define ECOMP_CONF_PROPERITES 2 /* Is this really needed? */
 
+/* GUI component property names. Many of these map directly eVariable's property names
+ */
+#define ecomp_value evarp_value
+#define ecomp_digs evarp_digs
+#define ecomp_text evarp_text
+#define ecomp_unit evarp_unit
+#define ecomp_min evarp_min
+#define ecomp_max evarp_max
+#define ecomp_type evarp_type
+#define ecomp_attr evarp_attr
+#define ecomp_default evarp_default
+#define ecomp_gain evarp_gain
+#define ecomp_offset evarp_offset
+#define ecomp_state_bits evarp_state_bits
+#define ecomp_timestamp evarp_timestamp
+#define ecomp_conf evarp_conf
+extern const os_char ecomp_path[];
 
 /*@}*/
 
@@ -170,7 +179,8 @@ public:
     /* Add class'es properties to property set.
      */
     static void setupproperties(
-        os_int cls);
+        os_int cls,
+        oe_int flags);
 
     /* Static constructor function for generating instance by class list.
      */

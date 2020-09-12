@@ -18,7 +18,7 @@
 
 /* GUI property names.
  */
-os_char
+const os_char
     eguip_value[] = "x",
     eguip_digs[] = "x.digs",
     eguip_text[] = "x.text",
@@ -30,7 +30,7 @@ os_char
     eguip_default[] = "x.default",
     eguip_gain[] = "x.gain",
     eguip_offset[] = "x.offset",
-    eguip_quality[] = "x.quality",
+    eguip_state_bits[] = "x.quality",
     eguip_timestamp[] = "x.timestamp",
     eguip_conf[] = "conf"; /* This MUST not start with "x." */
 
@@ -169,7 +169,7 @@ void eGui::setupproperties(
     addpropertyl(cls, EGUIP_ATTR, eguip_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
     addpropertyd(cls, EGUIP_GAIN, eguip_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
     addpropertyd(cls, EGUIP_OFFSET, eguip_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
-    addproperty (cls, EGUIP_QUALITY, eguip_quality, EPRO_METADATA|EPRO_NOONPRCH, "quality");
+    addproperty (cls, EGUIP_STATE_BITS, eguip_state_bits, EPRO_METADATA|EPRO_NOONPRCH, "quality");
     addproperty (cls, EGUIP_TIMESTAMP, eguip_timestamp, EPRO_METADATA|EPRO_NOONPRCH, "timestamp");
     addproperty (cls, EGUIP_CONF, eguip_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
 

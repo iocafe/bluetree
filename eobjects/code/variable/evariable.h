@@ -39,23 +39,23 @@
 /* Enumeration of variable properties.
  */
 #define EVARP_VALUE 1
-#define EVARP_QUALITY 2
+#define EVARP_STATE_BITS 2
 #define EVARP_TIMESTAMP 3
 #define EVARP_DIGS 4
-#define EVARP_TEXT 6
-#define EVARP_UNIT 8
+#define EVARP_TEXT 5
+#define EVARP_UNIT 6
 #define EVARP_MIN 10
-#define EVARP_MAX 12
-#define EVARP_TYPE 14
-#define EVARP_ATTR 16
-#define EVARP_DEFAULT 18
-#define EVARP_GAIN 20
-#define EVARP_OFFSET 22
-#define EVARP_CONF 24
+#define EVARP_MAX 11
+#define EVARP_TYPE 12
+#define EVARP_ATTR 13
+#define EVARP_DEFAULT 14
+#define EVARP_GAIN 15
+#define EVARP_OFFSET 16
+#define EVARP_CONF 18
 
 /* Variable property names.
  */
-extern os_char
+extern const os_char
     evarp_value[],
     evarp_digs[],
     evarp_text[],
@@ -67,7 +67,7 @@ extern os_char
     evarp_default[],
     evarp_gain[],
     evarp_offset[],
-    evarp_quality[],
+    evarp_state_bits[],
     evarp_timestamp[],
     evarp_conf[];
 

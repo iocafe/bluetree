@@ -2924,6 +2924,7 @@ void eObject::bind(
 {
     eVariable v;
     os_char *p, *e;
+    const os_char *ee;
 
     v.sets(remotepath);
     p = v.gets();
@@ -2931,14 +2932,14 @@ void eObject::bind(
     if (e)
     {
         *e = '\0';
-        e += 4;
+        ee = e + 4;
     }
     else
     {
-        e = evarp_value;
+        ee = evarp_value;
     }
 
-    bind(localpropertynr, p, e, bflags);
+    bind(localpropertynr, p, ee, bflags);
 }
 
 

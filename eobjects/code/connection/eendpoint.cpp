@@ -19,7 +19,7 @@
 
 /* End point property names.
  */
-os_char
+const os_char
     eendpp_classid[] = "classid",
     eendpp_ipaddr[] = "ipaddr",
     eendpp_isopen[] = "isopen";

@@ -34,7 +34,7 @@ const os_char
 
 ****************************************************************************************************
 */
-eComponent::eComponent(
+eiocCheckbox::eiocCheckbox(
     eObject *parent,
     e_oid id,
     os_int flags)
@@ -58,7 +58,7 @@ eComponent::eComponent(
 
 ****************************************************************************************************
 */
-eComponent::~eComponent()
+eiocCheckbox::~eiocCheckbox()
 {
     /* Release any allocated memory.
      */
@@ -81,13 +81,13 @@ eComponent::~eComponent()
 
 ****************************************************************************************************
 */
-eObject *eComponent::clone(
+eObject *eiocCheckbox::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
-    eComponent *clonedobj;
-    clonedobj = new eComponent(parent, id == EOID_CHILD ? oid() : id, flags());
+    eiocCheckbox *clonedobj;
+    clonedobj = new eiocCheckbox(parent, id == EOID_CHILD ? oid() : id, flags());
 
     /** Copy variable value.
      */
@@ -104,24 +104,24 @@ eObject *eComponent::clone(
 /**
 ****************************************************************************************************
 
-  @brief Add eComponent to class list and class'es properties to it's property set.
+  @brief Add eiocCheckbox to class list and class'es properties to it's property set.
 
-  The eComponent::setupclass function adds eComponent to class list and class'es properties to
+  The eiocCheckbox::setupclass function adds eiocCheckbox to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
 ****************************************************************************************************
 */
-void eComponent::setupclass()
+void eiocCheckbox::setupclass()
 {
-    const os_int cls = EGUICLASSID_COMPONENT;
+    const os_int cls = EGUICLASSID_IOC_CHECKBOX;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eComponent");
-    setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eiocCheckbox");
+    eComponent::setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
     propertysetdone(cls);
     os_unlock();
 }
@@ -130,61 +130,9 @@ void eComponent::setupclass()
 /**
 ****************************************************************************************************
 
-  @brief Add class'es properties to property set.
-
-  The eComponent::setupproperties is helper function for setupclass, it is called from both
-  eComponent class and derived classes like eName.
-
-  Process mutex must be locked when calling this function.
-
-****************************************************************************************************
-*/
-void eComponent::setupproperties(
-    os_int cls,
-    oe_int flags)
-{
-    eVariable *p;
-
-    /* Order of these addproperty() calls is important, since eComponent itself is used to
-       describe the properties in property set. The property to set must be added to
-       property set before setting value for it. There is trick with p to set text type
-       after adding property type. This effects only eComponent class.
-     */
-    p = addproperty(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
-
-    if (flags & ECOMP_VALUE_PROPERITES) {
-        addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA|EPRO_NOONPRCH, "type");
-        p->setpropertyl(ECOMP_TYPE, OS_STR);
-
-        addproperty (cls, ECOMP_VALUE, ecomp_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
-        addproperty (cls, ECOMP_DEFAULT, ecomp_default, EPRO_METADATA|EPRO_NOONPRCH, "default");
-        addpropertyl(cls, ECOMP_DIGS, ecomp_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
-        addpropertys(cls, ECOMP_UNIT, ecomp_unit, EPRO_METADATA|EPRO_NOONPRCH, "unit");
-        addpropertyd(cls, ECOMP_MIN, ecomp_min, EPRO_METADATA|EPRO_NOONPRCH, "min");
-        addpropertyd(cls, ECOMP_MAX, ecomp_max, EPRO_METADATA|EPRO_NOONPRCH, "max");
-    }
-
-    addpropertyl(cls, ECOMP_ATTR, ecomp_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
-
-    if (flags & ECOMP_VALUE_PROPERITES) {
-        addpropertyd(cls, ECOMP_GAIN, ecomp_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
-        addpropertyd(cls, ECOMP_OFFSET, ecomp_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
-        addproperty (cls, ECOMP_STATE_BITS, ecomp_state_bits, EPRO_METADATA|EPRO_NOONPRCH, "statebits");
-        addproperty (cls, ECOMP_TIMESTAMP, ecomp_timestamp, EPRO_METADATA|EPRO_NOONPRCH, "timestamp");
-    }
-
-    if (flags & ECOMP_CONF_PROPERITES) {
-        addproperty (cls, ECOMP_CONF, ecomp_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
-    }
-}
-
-
-/**
-****************************************************************************************************
-
   @brief Get next child variable identified by oid.
 
-  The eComponent::nextv() function returns pointer to the next child object of this object.
+  The eiocCheckbox::nextv() function returns pointer to the next child object of this object.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
            which are not flagged as an attachment. Value EOID_ALL specifies to get count all
@@ -196,15 +144,15 @@ void eComponent::setupproperties(
 
 ****************************************************************************************************
 */
-eComponent *eComponent::nextv(
+eiocCheckbox *eiocCheckbox::nextv(
     e_oid id)
 {
     if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->next(id);
     while (h)
     {
-        if (h->object()->classid() == EGUICLASSID_COMPONENT)
-            return eComponent::cast(h->object());
+        if (h->object()->classid() == EGUICLASSID_IOC_CHECKBOX)
+            return eiocCheckbox::cast(h->object());
 
         h = h->next(id);
     }
@@ -233,7 +181,7 @@ eComponent *eComponent::nextv(
 
 ****************************************************************************************************
 */
-void eComponent::onpropertychange(
+void eiocCheckbox::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -270,7 +218,7 @@ void eComponent::onpropertychange(
 
 ****************************************************************************************************
 */
-eStatus eComponent::simpleproperty(
+eStatus eiocCheckbox::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
@@ -300,7 +248,7 @@ eStatus eComponent::simpleproperty(
 
   @brief Write variable to stream.
 
-  The eComponent::writer() function serialized variable to stream. This writes only variable
+  The eiocCheckbox::writer() function serialized variable to stream. This writes only variable
   specific content, use eObject::write() to save also class information, attachements, etc.
 
   @param  stream The stream to write to.
@@ -312,7 +260,7 @@ eStatus eComponent::simpleproperty(
 
 ****************************************************************************************************
 */
-eStatus eComponent::writer(
+eStatus eiocCheckbox::writer(
     eStream *stream,
     os_int flags)
 {
@@ -384,7 +332,7 @@ failed:
 
   @brief Read variable from stream.
 
-  The eComponent::reader() function reads serialized variable from stream.
+  The eiocCheckbox::reader() function reads serialized variable from stream.
   This function reads only object content. To read whole object including attachments, names,
   etc, use eObject::read().
 
@@ -397,7 +345,7 @@ failed:
 
 ****************************************************************************************************
 */
-eStatus eComponent::reader(
+eStatus eiocCheckbox::reader(
     eStream *stream,
     os_int flags)
 {

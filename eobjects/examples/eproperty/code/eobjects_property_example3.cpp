@@ -9,9 +9,9 @@
   This example demonstrates setting up a new class with properties, and how to react to property
   value changes.
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -31,9 +31,9 @@
 #define EMYCLASSP_FAHRENHEIT 12
 #define EMYCLASSP_OPINION 14
 
-static os_char emyclassp_celcius[] = "C";
-static os_char emyclassp_fahrenheit[] = "F";
-static os_char emyclassp_opinion[] = "opinion";
+static const os_char emyclassp_celcius[] = "C";
+static const os_char emyclassp_fahrenheit[] = "F";
+static const os_char emyclassp_opinion[] = "opinion";
 
 
 /**
@@ -51,9 +51,9 @@ public:
     /* Constructor.
      */
     eMyClass(
-		eObject *parent = OS_NULL,
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
         : eObject(parent, id, flags)
     {
         initproperties();
@@ -61,7 +61,7 @@ public:
 
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return MY_CLASS_ID;
     }
@@ -76,7 +76,7 @@ public:
         os_lock();
         p = addpropertyd(cls, EMYCLASSP_CELCIUS, emyclassp_celcius, EPRO_PERSISTENT, "value", 20.0);
         p->setpropertys(EVARP_UNIT, "C");
-        
+
         p = addpropertyd(cls, EMYCLASSP_FAHRENHEIT, emyclassp_fahrenheit, EPRO_NOONPRCH, "default");
         p->setpropertys(EVARP_UNIT, "F");
         p->setpropertyl(EVARP_DIGS, 5);
@@ -88,8 +88,8 @@ public:
     /* This gets called when property value changes
      */
     virtual void onpropertychange(
-        os_int propertynr, 
-        eVariable *x, 
+        os_int propertynr,
+        eVariable *x,
         os_int flags)
     {
         os_double c, f;
@@ -129,16 +129,16 @@ void property_example_3()
     eVariable v, u;
     os_double f;
 
-    /* Adds the eMyClass to class list and creates property set for the class. 
+    /* Adds the eMyClass to class list and creates property set for the class.
      */
-    eMyClass::setupclass(); 
+    eMyClass::setupclass();
 
     converter = new eMyClass();
-   
+
     f = converter->propertyd(EMYCLASSP_FAHRENHEIT);
     converter->propertyv(EMYCLASSP_OPINION, &v);
     printf ("initial F = %f, opinion = %s\n", f, v.gets());
-   
+
     converter->setpropertyd(EMYCLASSP_CELCIUS, 40.0);
     f = converter->propertyd(EMYCLASSP_FAHRENHEIT);
     converter->propertyv(EMYCLASSP_OPINION, &v);

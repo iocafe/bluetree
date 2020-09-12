@@ -1,10 +1,12 @@
 /**
 
-  @file    egui.cpp
-  @brief   GUI root object.
+  @file    ecomponent.h
+  @brief   Abstract GUI component.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
+
+  Base call for all GUI components (widgets)...
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -14,8 +16,8 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EGUI_H_
-#define EGUI_H_
+#ifndef EIOC_CHECKBOX_H_
+#define EIOC_CHECKBOX_H_
 #include "eguilib.h"
 
 /**
@@ -29,61 +31,25 @@
 */
 /*@{*/
 
-/* Enumeration of GUI object properties.
- */
-#define EGUIP_VALUE 1
-#define EGUIP_STATE_BITS 2
-#define EGUIP_TIMESTAMP 3
-#define EGUIP_DIGS 4
-#define EGUIP_TEXT 6
-#define EGUIP_UNIT 8
-#define EGUIP_MIN 10
-#define EGUIP_MAX 12
-#define EGUIP_TYPE 14
-#define EGUIP_ATTR 16
-#define EGUIP_DEFAULT 18
-#define EGUIP_GAIN 20
-#define EGUIP_OFFSET 22
-#define EGUIP_CONF 24
-
-/* GUI property names.
- */
-extern const os_char
-    eguip_value[],
-    eguip_digs[],
-    eguip_text[],
-    eguip_unit[],
-    eguip_min[],
-    eguip_max[],
-    eguip_type[],
-    eguip_attr[],
-    eguip_default[],
-    eguip_gain[],
-    eguip_offset[],
-    eguip_state_bits[],
-    eguip_timestamp[],
-    eguip_conf[];
-
-
 /*@}*/
-
 
 
 /**
 ****************************************************************************************************
 
-  @brief eGui class.
+  @brief eiocCheckbox class.
 
-  The eGui is root of graphical user interface display.
+  The eiocCheckbox is dynamically typed variable, which can store integers, floating point values
+  and strings.
 
 ****************************************************************************************************
 */
-class eGui : public eObject
+class eiocCheckbox : public eObject
 {
     /**
     ************************************************************************************************
 
-      @name eGui overrides for eObject base class functions.
+      @name eiocCheckbox overrides for eObject base class functions.
 
       X...
 
@@ -93,14 +59,14 @@ class eGui : public eObject
 public:
     /* Constructor.
      */
-    eGui(
+    eiocCheckbox(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eGui();
+    virtual ~eiocCheckbox();
 
     /* Clone object.
      */
@@ -109,62 +75,66 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to eGui pointer.
+    /* Casting eObject pointer to eiocCheckbox pointer.
      */
-    inline static eGui *cast(
+    inline static eiocCheckbox *cast(
         eObject *o)
     {
-        e_assert_type(o, EGUICLASSID_GUI)
-        return (eGui*)o;
+        e_assert_type(o, EGUICLASSID_IOC_CHECKBOX)
+        return (eiocCheckbox*)o;
     }
 
     /* Get class identifier.
      */
     virtual os_int classid()
     {
-        return EGUICLASSID_GUI;
+        return EGUICLASSID_IOC_CHECKBOX;
     }
 
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
 
-    /* Add class'es properties to property set.
-     */
-    static void setupproperties(
-        os_int cls);
-
     /* Static constructor function for generating instance by class list.
      */
-    static eGui *newobj(
+    static eiocCheckbox *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eGui(parent, id, flags);
+        return new eiocCheckbox(parent, id, flags);
     }
 
     /* Get next object identified by oid.
      */
-    eGui *nextv(
+    eiocCheckbox *nextv(
         e_oid id = EOID_CHILD);
-
-    /* Called when property value changes.
-     */
-    virtual void onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags);
-
-    /* Get value of simple property.
-     */
-    virtual eStatus simpleproperty(
-        os_int propertynr,
-        eVariable *x);
 
     /*@}*/
 
 
+    /**
+    ************************************************************************************************
+
+      @name eObject virtual function implementations
+
+      Serialization means writing object to stream or reading it from strem.
+
+    ************************************************************************************************
+    */
+    /*@{*/
+
+    /* Write variable to stream.
+     */
+    virtual eStatus writer(
+        eStream *stream,
+        os_int flags);
+
+    /* Read variable from stream.
+     */
+    virtual eStatus reader(
+        eStream *stream,
+        os_int flags);
 
     /* Message to or trough this object.
      */
@@ -182,85 +152,35 @@ public:
     */
     /*@{*/
 
-    /* Run equi.
-     */
-    eStatus run();
+#if 0
 
     /* Determine size, position of component and it's subcomponents. Setup Z order for draing.
      */
-    eStatus layout(
+    virtual eStatus layout(
         eRect& r,
         eLayoutParams& prm);
 
     /* Draw the component.
      */
-    eStatus draw(
+    virtual eStatus draw(
         eDrawParams& prm,
         os_int flags);
 
     /* Pass mouse event to component, returns true if mouse event was processed.
      */
-    bool onmouse(
+    virtual bool onmouse(
         eMouseMessage& mevent);
 
     /* Pass keyboard event to component, returns true if keyboard event was processed.
      */
-    bool onkeyboard(
+    virtual bool onkeyboard(
         eKeyboardMessage& mevent);
 
+#endif
     /*@}*/
-
-    /**
-    ************************************************************************************************
-
-      @name Base class functions to implement component functionality
-
-      CreaSerialization means writing object to stream or reading it from strem.
-
-    ************************************************************************************************
-    */
-    /*@{*/
-
-    /* Set redo layout flag.
-     */
-    void redo_layout();
-
-    /* Invalidate specified rectangle.
-     */
-    void invalidate(eRect& r);
-
-    /* Set keyboard input focus to this component.
-     */
-    void focus();
-
-    /* Capture mouse events to this component.
-     */
-    void capture_mouse();
-
-    /*@}*/
-
-
-    /**
-    ************************************************************************************************
-
-      @name Desktop application specific setup and functions.
-
-      These function are for desktop application.
-
-    ************************************************************************************************
-    */
-    /*@{*/
-    void setup_desktop_application();
 
 
 protected:
-    /* Viewport, corresponds to operating system window, etc.
-     */
-    eViewPort *m_viewport;
-
-    /* Display size.
-     */
-    eSize m_sz;
 };
 
 

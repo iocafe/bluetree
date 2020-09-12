@@ -9,9 +9,9 @@
   This example demonstrates setting up a new class with properties, and how to react to property
   value changes.
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -34,13 +34,13 @@
 static os_char emyclass1p_a[] = "A";
 static os_char emyclass1p_b[] = "B";
 
-/* Enumeration of eMyClass2 properties. 
+/* Enumeration of eMyClass2 properties.
  */
 #define EMYCLASS2P_X 10
 #define EMYCLASS2P_Y 20
 
-static os_char emyclass2p_x[] = "X";
-static os_char emyclass2p_y[] = "Y";
+static const os_char emyclass2p_x[] = "X";
+static const os_char emyclass2p_y[] = "Y";
 
 
 /**
@@ -58,9 +58,9 @@ public:
     /* Constructor.
      */
     eMyClass1(
-		eObject *parent = OS_NULL,
+        eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
+        os_int flags = EOBJ_DEFAULT)
         : eThread(parent, id, flags)
     {
         initproperties();
@@ -80,7 +80,7 @@ public:
 
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return MY_CLASS_ID_1;
     }
@@ -88,8 +88,8 @@ public:
     /* This gets called when property value changes
      */
     virtual void onpropertychange(
-        os_int propertynr, 
-        eVariable *x, 
+        os_int propertynr,
+        eVariable *x,
         os_int flags)
     {
         os_double a, b;
@@ -127,10 +127,10 @@ public:
     /* Constructor.
      */
     eMyClass2(
-		eObject *parent = OS_NULL,
-		e_oid oid = EOID_ITEM,
-		os_int flags = EOBJ_DEFAULT)
-	    : eThread(parent, oid, flags)
+        eObject *parent = OS_NULL,
+        e_oid oid = EOID_ITEM,
+        os_int flags = EOBJ_DEFAULT)
+        : eThread(parent, oid, flags)
     {
         initproperties();
     }
@@ -149,7 +149,7 @@ public:
 
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return MY_CLASS_ID_2;
     }
@@ -166,8 +166,8 @@ setpropertyd(EMYCLASS2P_Y, 4.3);
     /* This gets called when property value changes
      */
     virtual void onpropertychange(
-        os_int propertynr, 
-        eVariable *x, 
+        os_int propertynr,
+        eVariable *x,
         os_int flags)
     {
         os_double a, b;
@@ -227,19 +227,19 @@ void property_example_4()
 
     /* Adds the eMyClass1 and eMyClass2 to class list and creates property set for the class.
      */
-    eMyClass1::setupclass(); 
-    eMyClass2::setupclass(); 
+    eMyClass1::setupclass();
+    eMyClass2::setupclass();
 
     /* Create and start thread named "thread1".
      */
     t = new eMyClass1();
-	t->addname("thread1", ENAME_PROCESS_NS);
+    t->addname("thread1", ENAME_PROCESS_NS);
     t->start(&thandle1); /* After this t pointer is useless */
 
     /* Create and start thread named "thread2".
      */
     t = new eMyClass2();
-	t->addname("thread2", ENAME_PROCESS_NS);
+    t->addname("thread2", ENAME_PROCESS_NS);
     t->start(&thandle2); /* After this t pointer is useless */
 
     c.setpropertyd_msg("//thread1/_p/A", 11.5);

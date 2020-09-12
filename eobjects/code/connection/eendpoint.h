@@ -28,7 +28,7 @@
 
 /* End point property names.
  */
-extern os_char
+extern const os_char
     eendpp_classid[],
     eendpp_ipaddr[],
     eendpp_isopen[];

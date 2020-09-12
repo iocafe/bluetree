@@ -18,9 +18,9 @@
 */
 #include "eobjects.h"
 
-/* Variable property names.
+/* Envelope property names.
  */
-os_char
+const os_char
     eenvp_command[] = "command",
     eenvp_target[] = "target",
     eenvp_source[] = "source",

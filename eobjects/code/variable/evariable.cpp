@@ -20,7 +20,7 @@
 
 /* Variable property names.
  */
-os_char
+const os_char
     evarp_value[] = "x",
     evarp_digs[] = "x.digs",
     evarp_text[] = "x.text",
@@ -32,7 +32,7 @@ os_char
     evarp_default[] = "x.default",
     evarp_gain[] = "x.gain",
     evarp_offset[] = "x.offset",
-    evarp_quality[] = "x.quality",
+    evarp_state_bits[] = "x.quality",
     evarp_timestamp[] = "x.timestamp",
     evarp_conf[] = "conf"; /* This MUST not start with "x." */
 
@@ -176,7 +176,7 @@ void eVariable::setupproperties(
     addpropertyl(cls, EVARP_ATTR, evarp_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
     addpropertyd(cls, EVARP_GAIN, evarp_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
     addpropertyd(cls, EVARP_OFFSET, evarp_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
-    addproperty (cls, EVARP_QUALITY, evarp_quality, EPRO_METADATA|EPRO_NOONPRCH, "quality");
+    addproperty (cls, EVARP_STATE_BITS, evarp_state_bits, EPRO_METADATA|EPRO_NOONPRCH, "statebits");
     addproperty (cls, EVARP_TIMESTAMP, evarp_timestamp, EPRO_METADATA|EPRO_NOONPRCH, "timestamp");
     addproperty (cls, EVARP_CONF, evarp_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
 

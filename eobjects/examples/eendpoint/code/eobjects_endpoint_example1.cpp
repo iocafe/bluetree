@@ -30,8 +30,8 @@
 #define EMYCLASS1P_A 10
 #define EMYCLASS1P_B 20
 
-static os_char emyclass1p_a[] = "A";
-static os_char emyclass1p_b[] = "B";
+static const os_char emyclass1p_a[] = "A";
+static const os_char emyclass1p_b[] = "B";
 
 
 /**

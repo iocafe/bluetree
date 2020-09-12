@@ -74,9 +74,9 @@
 #define EENVP_CONTENT 12
 #define EENVP_CONTEXT 14
 
-/* Variable envelope names.
+/* Envelope property names.
  */
-extern os_char
+extern const os_char
     eenvp_command[],
     eenvp_target[],
     eenvp_source[],
