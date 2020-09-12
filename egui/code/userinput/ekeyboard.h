@@ -126,11 +126,6 @@ public:
         return new eKeyboardMessage(parent, id, flags);
     }
 
-    /* Get next object identified by oid.
-     */
-    eKeyboardMessage *nextv(
-        e_oid id = EOID_CHILD);
-
     /*@}*/
 
 

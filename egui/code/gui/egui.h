@@ -144,9 +144,9 @@ public:
         return new eGui(parent, id, flags);
     }
 
-    /* Get next object identified by oid.
+    /* Get the first child component identified by oid.
      */
-    eGui *nextv(
+    eComponent *firstcomponent(
         e_oid id = EOID_CHILD);
 
     /* Called when property value changes.

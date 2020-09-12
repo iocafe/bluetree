@@ -188,7 +188,7 @@ void eVariable::setupproperties(
 
   @brief Get next child variable identified by oid.
 
-  The eVariable::nextv() function returns pointer to the next child object of this object.
+  The eVariable::nextv() function returns pointer to the next object of the same class.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
            which are not flagged as an attachment. Value EOID_ALL specifies to get count all

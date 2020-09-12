@@ -35,10 +35,6 @@ eiocCheckbox::eiocCheckbox(
     os_int flags)
     : eObject(parent, id, flags)
 {
-    /* No type, number 2 digits after decimal point for doubles.
-     */
-    // m_vflags = OS_UNDEFINED_TYPE|(2 << EVAR_DDIGS_SHIFT);
-    // m_value.valbuf.tmpstr = OS_NULL;
 }
 
 
@@ -55,9 +51,6 @@ eiocCheckbox::eiocCheckbox(
 */
 eiocCheckbox::~eiocCheckbox()
 {
-    /* Release any allocated memory.
-     */
-    // clear();
 }
 
 
@@ -83,9 +76,6 @@ eObject *eiocCheckbox::clone(
 {
     eiocCheckbox *clonedobj;
     clonedobj = new eiocCheckbox(parent, id == EOID_CHILD ? oid() : id, flags());
-
-    /* Copy clonable attachments.
-     */
     clonegeneric(clonedobj, aflags);
     return clonedobj;
 }
@@ -107,8 +97,6 @@ void eiocCheckbox::setupclass()
 {
     const os_int cls = EGUICLASSID_IOC_CHECKBOX;
 
-    /* Add the class to class list.
-     */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eiocCheckbox");
     eComponent::setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
@@ -120,38 +108,15 @@ void eiocCheckbox::setupclass()
 /**
 ****************************************************************************************************
 
-  @brief Get next child variable identified by oid.
+  @brief Draw the component.
 
-  The eiocCheckbox::nextv() function returns pointer to the next child object of this object.
+  The eiocCheckbox::draw() function calls ImGui API to render the component.
 
-  @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
-           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
-           child objects, regardless wether these are attachment or not. Other values
-           specify object identifier, only children with that specified object identifier
-           are searched for.
-
-  @return  Pointer to the first child variable, or OS_NULL if none found.
+  @param   Prm Drawing parameters.
+  @return  None.
 
 ****************************************************************************************************
 */
-eiocCheckbox *eiocCheckbox::nextv(
-    e_oid id)
-{
-    if (mm_handle == OS_NULL) return OS_NULL;
-    eHandle *h = mm_handle->next(id);
-    while (h)
-    {
-        if (h->object()->classid() == EGUICLASSID_IOC_CHECKBOX)
-            return eiocCheckbox::cast(h->object());
-
-        h = h->next(id);
-    }
-    return OS_NULL;
-}
-
-
-/* Draw the component.
- */
 void eiocCheckbox::draw(
     eDrawParams& prm)
 {

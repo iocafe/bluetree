@@ -631,7 +631,7 @@ eObject *eObject::last(
 
   @brief Get next child object identified by oid.
 
-  The eObject::next() function returns pointer to the next child object of this object.
+  The eObject::next() function returns pointer to the next object of the same class.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
            which are not flagged as an attachment. Value EOID_ALL specifies to get count all

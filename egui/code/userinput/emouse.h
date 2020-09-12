@@ -127,11 +127,6 @@ public:
         return new eMouseMessage(parent, id, flags);
     }
 
-    /* Get next object identified by oid.
-     */
-    eMouseMessage *nextv(
-        e_oid id = EOID_CHILD);
-
     /*@}*/
 
 

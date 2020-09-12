@@ -182,9 +182,9 @@ void eComponent::setupproperties(
 /**
 ****************************************************************************************************
 
-  @brief Get next child variable identified by oid.
+  @brief Get the first child component identified by oid.
 
-  The eComponent::nextv() function returns pointer to the next child object of this object.
+  The eComponent::firstcomponent() function returns pointer to the next EGUI component.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
            which are not flagged as an attachment. Value EOID_ALL specifies to get count all
@@ -192,19 +192,74 @@ void eComponent::setupproperties(
            specify object identifier, only children with that specified object identifier
            are searched for.
 
-  @return  Pointer to the first child variable, or OS_NULL if none found.
+  @return  Pointer to the first child component, or OS_NULL if none found.
 
 ****************************************************************************************************
 */
-eComponent *eComponent::nextv(
+eComponent *eComponent::firstcomponent(
     e_oid id)
 {
+    eObject *o;
+    os_int cid;
+
+    o = first(id);
+    if (o == OS_NULL) {
+        return OS_NULL;
+    }
+
+    cid = o->classid();
+    if (cid >= EGUICLASSID_BEGIN_COMPONENTS && cid <= EGUICLASSID_END_COMPONENTS) {
+        return (eComponent*)o;
+    }
+
+    eHandle *h = o->handle()->next(id);
+    while (h)
+    {
+        cid = h->object()->classid();
+        if (cid >= EGUICLASSID_BEGIN_COMPONENTS &&
+            cid <= EGUICLASSID_END_COMPONENTS)
+        {
+            return eComponent::cast(h->object());
+        }
+
+        h = h->next(id);
+    }
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get next component identified by oid.
+
+  The eComponent::nextcomponent() function returns pointer to the next EGUI component.
+
+  @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
+           child objects, regardless wether these are attachment or not. Other values
+           specify object identifier, only children with that specified object identifier
+           are searched for.
+
+  @return  Pointer to the next component, or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+eComponent *eComponent::nextcomponent(
+    e_oid id)
+{
+    os_int cid;
+
     if (mm_handle == OS_NULL) return OS_NULL;
     eHandle *h = mm_handle->next(id);
     while (h)
     {
-        if (h->object()->classid() == EGUICLASSID_COMPONENT)
+        cid = h->object()->classid();
+        if (cid >= EGUICLASSID_BEGIN_COMPONENTS &&
+            cid <= EGUICLASSID_END_COMPONENTS)
+        {
             return eComponent::cast(h->object());
+        }
 
         h = h->next(id);
     }

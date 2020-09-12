@@ -192,9 +192,14 @@ public:
         return new eComponent(parent, id, flags);
     }
 
-    /* Get next object identified by oid.
+    /* Get first child component identified by oid.
      */
-    eComponent *nextv(
+    eComponent *firstcomponent(
+        e_oid id = EOID_CHILD);
+
+    /* Get next component identified by oid.
+     */
+    eComponent *nextcomponent(
         e_oid id = EOID_CHILD);
 
     /* Called when property value changes.

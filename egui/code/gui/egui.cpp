@@ -181,9 +181,9 @@ void eGui::setupproperties(
 /**
 ****************************************************************************************************
 
-  @brief Get next child eGui object identified by oid.
+  @brief Get the first child component identified by oid.
 
-  The eGui::nextv() function returns pointer to the next child object of this object.
+  The eComponent::firstcomponent() function returns pointer to the next EGUI component.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
            which are not flagged as an attachment. Value EOID_ALL specifies to get count all
@@ -191,24 +191,41 @@ void eGui::setupproperties(
            specify object identifier, only children with that specified object identifier
            are searched for.
 
-  @return  Pointer to the first child variable, or OS_NULL if none found.
+  @return  Pointer to the first child component, or OS_NULL if none found.
 
 ****************************************************************************************************
 */
-eGui *eGui::nextv(
+eComponent *eGui::firstcomponent(
     e_oid id)
 {
-    if (mm_handle == OS_NULL) return OS_NULL;
-    eHandle *h = mm_handle->next(id);
+    eObject *o;
+    os_int cid;
+
+    o = first(id);
+    if (o == OS_NULL) {
+        return OS_NULL;
+    }
+
+    cid = o->classid();
+    if (cid >= EGUICLASSID_BEGIN_COMPONENTS && cid <= EGUICLASSID_END_COMPONENTS) {
+        return (eComponent*)o;
+    }
+
+    eHandle *h = o->handle()->next(id);
     while (h)
     {
-        if (h->object()->classid() == EGUICLASSID_GUI)
-            return eGui::cast(h->object());
+        cid = h->object()->classid();
+        if (cid >= EGUICLASSID_BEGIN_COMPONENTS &&
+            cid <= EGUICLASSID_END_COMPONENTS)
+        {
+            return eComponent::cast(h->object());
+        }
 
         h = h->next(id);
     }
     return OS_NULL;
 }
+
 
 
 /**
@@ -401,7 +418,6 @@ void ShowExampleAppDockSpace(bool* p_open)
 
 eStatus eGui::run()
 {
-    eObject *o;
     eComponent *c;
     eStatus s;
 
@@ -446,9 +462,8 @@ eStatus eGui::run()
         // TEST END
 
         ImGui::Begin("Doodleli!");                          // Create a window called "Hello, world!" and append into it.
-        for (o = first(); o; o = o->next())
+        for (c = firstcomponent(); c; c = c->nextcomponent())
         {
-            c = eComponent::cast(o);
             c->draw(m_draw_prm);
         }
         ImGui::End();

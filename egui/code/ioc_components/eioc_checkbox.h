@@ -105,11 +105,6 @@ public:
         return new eiocCheckbox(parent, id, flags);
     }
 
-    /* Get next object identified by oid.
-     */
-    eiocCheckbox *nextv(
-        e_oid id = EOID_CHILD);
-
     /*@}*/
 
 
