@@ -84,11 +84,6 @@ eObject *eiocCheckbox::clone(
     eiocCheckbox *clonedobj;
     clonedobj = new eiocCheckbox(parent, id == EOID_CHILD ? oid() : id, flags());
 
-    /** Copy variable value.
-     */
-    // clonedobj->setv(this);
-    // clonedobj->setdigs(digs());
-
     /* Copy clonable attachments.
      */
     clonegeneric(clonedobj, aflags);
