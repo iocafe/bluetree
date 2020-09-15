@@ -291,14 +291,11 @@ public:
     */
     /*@{*/
 
-#if 0
-
     /* Determine size, position of component and it's subcomponents. Setup Z order for draing.
      */
-    virtual eStatus layout(
+    /* virtual eStatus layout(
         eRect& r,
-        eLayoutParams& prm);
-#endif
+        eLayoutParams& prm) {} */
 
     /* Draw the component.
      */

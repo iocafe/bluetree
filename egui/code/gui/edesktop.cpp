@@ -32,5 +32,6 @@
 void eGui::setup_desktop_application()
 {
     new eiocCheckbox(this);
-
+    new eLineEdit(this);
+    new eLineEdit(this);
 }

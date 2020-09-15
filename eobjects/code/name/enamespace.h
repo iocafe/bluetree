@@ -135,7 +135,6 @@ public:
     eName *findname(
         eVariable *x = OS_NULL);
 
-
     /*@}*/
 
 protected:

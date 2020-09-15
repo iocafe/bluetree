@@ -18,6 +18,9 @@ set(BACKBONE "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code")
 
 # Add iocom and pins library include paths.
 include_directories("$ENV{E_ROOT}/iocom")
+include_directories("$ENV{E_ROOT}/iocom/extensions/nodeconf")
+include_directories("$ENV{E_ROOT}/iocom/extensions/lighthouse")
+include_directories("$ENV{E_ROOT}/iocom/extensions/devicedir")
 include_directories("$ENV{E_ROOT}/${E_REPO}/eobjects")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}")
 

@@ -490,7 +490,7 @@ eStatus eEnvelope::reader(
 {
     /* Version number. Used to check which versions item's are in serialized data.
      */
-    os_int version;
+    // os_int version;
     os_long l, mflags;
     os_memsz sz;
     os_int c;
@@ -510,7 +510,7 @@ eStatus eEnvelope::reader(
 
         c = stream->readchar();
     }
-    version = (c & E_STREAM_COUNT_MASK);
+    // version = (c & E_STREAM_COUNT_MASK);
     if ((c & E_STREAM_CTRL_MASK) != E_STREAM_BEGIN) goto failed;
 
     /* Read command.

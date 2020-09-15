@@ -1,10 +1,10 @@
 /**
 
-  @file    eguiglobal.h
-  @brief   Global structure of the egui library.
+  @file    eautolabel.h
+  @brief   Generate hidden Dear ImGui labels by enumeration.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    10.9.2020
+  @date    15.9.2020
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -14,40 +14,38 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EGUIGLOBAL_H_
-#define EGUIGLOBAL_H_
+#ifndef EAUTOLABEL_H_
+#define EAUTOLABEL_H_
 #include "egui.h"
 
-class ecRoot;
+class eComponent;
+
+#define E_AUTOLABEL_SZ 16
 
 /**
 ****************************************************************************************************
 
-  @brief Global structure.
+  @brief eAutoLabel class.
 
-  X...
-
+  The eAutoLabel is automatically generated hidden label for IMGui.
 
 ****************************************************************************************************
 */
-typedef struct eGuiGlobal
+class eAutoLabel
 {
-    /* Main guilib thread object.
+public:
+    /* Constructor and destructor.
      */
-    eThread *guilib_thread;
+    eAutoLabel();
 
-    /* Container for eGui objects (multiple viewports in future?).
+    /* Get pointer to label string.
      */
-    eContainer *gui_container;
+    os_char *get(eComponent *component);
 
-    /* econnect library root object, API to IOCOM communication
-     */
-    ecRoot *econnect;
+protected:
+    os_char m_label[E_AUTOLABEL_SZ];
 
-    /* ImGui autolabel count for generating labels.
-     */
-    os_long autolabel_count;
-}
-eGuiGlobal;
+};
+
 
 #endif

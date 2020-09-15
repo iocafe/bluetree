@@ -4,7 +4,7 @@
   @brief   Main egui library header file.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    15.9.2020
 
   This egui library base main header file. If further includes rest of egui headers.
 
@@ -56,10 +56,12 @@ void egui_shutdown();
 #include "code/defs/eguioid.h"
 #include "code/initialize/eguiglobal.h"
 #include "code/initialize/eguiclasslist.h"
-#include "code/eimgui_iface/eimgui_iface.h"
+#include "code/imgui_iface/eimgui_iface.h"
 #include "code/userinput/emouse.h"
 #include "code/userinput/ekeyboard.h"
-#include "code/component/ecomponent.h"
+#include "code/components/eautolabel.h"
+#include "code/components/ecomponent.h"
+#include "code/components/lineedit/elineedit.h"
 
 #include "code/ioc_components/eioc_checkbox.h"
 #include "code/gui/eguiroot.h"

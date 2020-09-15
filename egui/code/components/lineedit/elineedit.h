@@ -1,10 +1,10 @@
 /**
 
-  @file    ecroot.h
-  @brief   Root object.
+  @file    elineedit.h
+  @brief   Line edit with label and value.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    14.9.2020
+  @date    15.9.2020
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -14,9 +14,9 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef ECROOT_H_
-#define ECROOT_H_
-#include "econnect.h"
+#ifndef ELINEEDIT_H_
+#define ELINEEDIT_H_
+#include "egui.h"
 
 /**
 ****************************************************************************************************
@@ -29,61 +29,25 @@
 */
 /*@{*/
 
-/* Enumeration of GUI object properties.
- */
-#define ECROOTP_VALUE 1
-#define ECROOTP_STATE_BITS 2
-#define ECROOTP_TIMESTAMP 3
-#define ECROOTP_DIGS 4
-#define ECROOTP_TEXT 6
-#define ECROOTP_UNIT 8
-#define ECROOTP_MIN 10
-#define ECROOTP_MAX 12
-#define ECROOTP_TYPE 14
-#define ECROOTP_ATTR 16
-#define ECROOTP_DEFAULT 18
-#define ECROOTP_GAIN 20
-#define ECROOTP_OFFSET 22
-#define ECROOTP_CONF 24
-
-/* GUI property names.
- */
-extern const os_char
-    ecrootp_value[],
-    ecrootp_digs[],
-    ecrootp_text[],
-    ecrootp_unit[],
-    ecrootp_min[],
-    ecrootp_max[],
-    ecrootp_type[],
-    ecrootp_attr[],
-    ecrootp_default[],
-    ecrootp_gain[],
-    ecrootp_offset[],
-    ecrootp_state_bits[],
-    ecrootp_timestamp[],
-    ecrootp_conf[];
-
-
 /*@}*/
-
 
 
 /**
 ****************************************************************************************************
 
-  @brief ecRoot class.
+  @brief eLineEdit class.
 
-  The ecRoot is root of graphical user interface display.
+  The eLineEdit is dynamically typed variable, which can store integers, floating point values
+  and strings.
 
 ****************************************************************************************************
 */
-class ecRoot : public eObject
+class eLineEdit : public eObject
 {
     /**
     ************************************************************************************************
 
-      @name ecRoot overrides for eObject base class functions.
+      @name eLineEdit overrides for eObject base class functions.
 
       X...
 
@@ -93,14 +57,14 @@ class ecRoot : public eObject
 public:
     /* Constructor.
      */
-    ecRoot(
+    eLineEdit(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~ecRoot();
+    virtual ~eLineEdit();
 
     /* Clone object.
      */
@@ -109,70 +73,64 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to ecRoot pointer.
+    /* Casting eObject pointer to eLineEdit pointer.
      */
-    inline static ecRoot *cast(
+    inline static eLineEdit *cast(
         eObject *o)
     {
-        e_assert_type(o, ECONNCLASSID_ROOT)
-        return (ecRoot*)o;
+        e_assert_type(o, EGUICLASSID_LINE_EDIT)
+        return (eLineEdit*)o;
     }
 
     /* Get class identifier.
      */
     virtual os_int classid()
     {
-        return ECONNCLASSID_ROOT;
+        return EGUICLASSID_LINE_EDIT;
     }
 
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
 
-    /* Add class'es properties to property set.
-     */
-    static void setupproperties(
-        os_int cls);
-
     /* Static constructor function for generating instance by class list.
      */
-    static ecRoot *newobj(
+    static eLineEdit *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new ecRoot(parent, id, flags);
+        return new eLineEdit(parent, id, flags);
     }
-
-    /* Called when property value changes.
-     */
-    virtual void onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags);
-
-    /* Get value of simple property.
-     */
-    virtual eStatus simpleproperty(
-        os_int propertynr,
-        eVariable *x);
 
     /*@}*/
 
 
+    /**
+    ************************************************************************************************
 
-    /* Message to or trough this object.
+      @name Base class functions to implement component functionality
+
+      CreaSerialization means writing object to stream or reading it from strem.
+
+    ************************************************************************************************
+    */
+    /*@{*/
+
+    /* Draw the component.
      */
-    /* virtual void onmessage(); */
+    virtual void draw(
+        eDrawParams& prm);
 
-    eStatus initialize(const os_char *device_name);
-    void shutdown();
-
+    /*@}*/
 
 
 protected:
-    iocRoot m_root;
+    bool m_edit_value;
+    bool m_prev_edit_value;
 
+    eAutoLabel m_text_input_label;
+    eAutoLabel m_text_display_label;
 };
 
 

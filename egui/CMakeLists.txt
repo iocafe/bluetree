@@ -27,8 +27,8 @@ include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}")
 set(MAIN_HEADERS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/egui.h")
 
 # List source and header files to compile into library.
-file(GLOB BB_SOURCES "${BACKBONE}/*/*.cpp")
-file(GLOB BB_HEADERS "${BACKBONE}/*/*.h")
+file(GLOB_RECURSE BB_SOURCES "${BACKBONE}/*/*.cpp")
+file(GLOB_RECURSE BB_HEADERS "${BACKBONE}/*/*.h")
 file(GLOB_RECURSE IM_SOURCES "${GRAPHICS}/*/*.cpp" "${GRAPHICS}/*/*.c")
 file(GLOB_RECURSE IM_HEADERS "${GRAPHICS}/*/*.h")
 

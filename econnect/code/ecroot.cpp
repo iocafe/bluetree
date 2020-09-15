@@ -14,6 +14,7 @@
 ****************************************************************************************************
 */
 #include "econnect.h"
+#include "nodeconf.h"
 
 
 /* GUI property names.
@@ -68,8 +69,8 @@ ecRoot::ecRoot(
 */
 ecRoot::~ecRoot()
 {
+    shutdown();
 }
-
 
 /**
 ****************************************************************************************************
@@ -161,9 +162,7 @@ void ecRoot::setupproperties(
     addproperty (cls, ECROOTP_VALUE, ecrootp_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
     addproperty (cls, ECROOTP_DEFAULT, ecrootp_default, EPRO_METADATA|EPRO_NOONPRCH, "default");
     addpropertyl(cls, ECROOTP_DIGS, ecrootp_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
-
 }
-
 
 
 /**
@@ -249,4 +248,87 @@ eStatus ecRoot::simpleproperty(
 }
 
 
+eStatus ecRoot::initialize(const os_char *device_name)
+{
+#if 0
+    osPersistentParams persistentprm;
+    iocDeviceId *device_id;
+    iocConnectionConfig *connconf;
+    osalSecurityConfig *security;
+    iocNetworkInterfaces *nics;
+    iocWifiNetworks *wifis;
+    osalLighthouseInfo lighthouse_info;
 
+    /* Setup error handling. Here we select to keep track of network state. We could also
+       set application specific error handler callback by calling osal_set_error_handler().
+     */
+    osal_initialize_net_state();
+
+    /* Initialize persistent storage
+     */
+    os_memclear(&persistentprm, sizeof(persistentprm));
+    persistentprm.device_name = device_name;
+    os_persistent_initialze(&persistentprm);
+
+    /* Initialize communication root and dymanic structure data root objects.
+     * This demo uses dynamic signal configuration.
+     */
+    ioc_initialize_root(&m_root);
+
+    /* If we are using devicedir for development testing, initialize.
+     */
+    io_initialize_device_console(&ioconsole, &m_root);
+
+    /* Load device/network configuration and device/user account congiguration
+       (persistent storage is typically either file system or micro-controller's flash).
+       Defaults are set in network-defaults.json and in account-defaults.json.
+     */
+    ioc_load_node_config(&app_device_conf, ioapp_network_defaults,
+        sizeof(ioapp_network_defaults), device_name, IOC_LOAD_PBNR_NODE_CONF);
+    device_id = ioc_get_device_id(&app_device_conf);
+    ioc_set_iodevice_id(&m_root, device_name, device_id->device_nr,
+        device_id->password, device_id->network_name);
+
+    ioc_initialize_dynamic_root(&m_root);
+
+    /* Get service TCP port number and transport (IOC_TLS_SOCKET or IOC_TCP_SOCKET).
+     */
+    connconf = ioc_get_connection_conf(&app_device_conf);
+    ioc_get_lighthouse_info(connconf, &lighthouse_info);
+
+    /* Create frank main object
+     */
+    app_root_obj = new AppRoot(device_name, device_id->device_nr, device_id->network_name,
+        device_id->publish);
+
+    /* Set callback function to receive information about new dynamic memory blocks.
+     */
+    ioc_set_root_callback(&m_root, app_root_callback, OS_NULL);
+
+    /* Setup network interface configuration and initialize transport library. This is
+       partyly ignored if network interfaces are managed by operating system
+       (Linux/Windows,etc),
+     */
+    nics = ioc_get_nics(&app_device_conf);
+    wifis = ioc_get_wifis(&app_device_conf);
+    security = ioc_get_security_conf(&app_device_conf);
+    osal_tls_initialize(nics->nic, nics->n_nics, wifis->wifi, wifis->n_wifi, security);
+    osal_serial_initialize();
+
+    /* Connect to network.
+     */
+    ioc_connect_node(&m_root, connconf, IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD);
+
+    /* Initialize light house. Sends periodic UDP broadcards to so that this service
+       can be detected in network.
+     */
+    ioc_initialize_lighthouse_server(&lighthouse, device_id->publish, &lighthouse_info, OS_NULL);
+#endif
+
+    return ESTATUS_SUCCESS;
+}
+
+
+void ecRoot::shutdown()
+{
+}

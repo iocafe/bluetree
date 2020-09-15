@@ -13,7 +13,7 @@ include(../../eosal/osbuild/cmakedefs/eosal-defs.txt)
 set(E_HW "generic")
 
 # Select libraries to link with application.
-set(E_APPLIBS "egui${E_POSTFIX};econnect${E_POSTFIX};eobjects${E_POSTFIX};devicedir${E_POSTFIX};lighthouse${E_POSTFIX};iocom${E_POSTFIX};$ENV{OSAL_TLS_APP_LIBS}")
+set(E_APPLIBS "egui${E_POSTFIX};econnect${E_POSTFIX};eobjects${E_POSTFIX};devicedir${E_POSTFIX};lighthouse${E_POSTFIX};nodeconf${E_POSTFIX};iocom${E_POSTFIX};$ENV{OSAL_TLS_APP_LIBS}")
 # if ($ENV{E_OSVER} MATCHES "pi")
 #   set(E_APPLIBS "${E_APPLIBS};pigpio;raspicam;rt")
 # endif()
@@ -31,6 +31,7 @@ add_subdirectory($ENV{E_ROOT}/${E_REPO}/econnect "${CMAKE_CURRENT_BINARY_DIR}/ec
 add_subdirectory($ENV{E_ROOT}/${E_REPO}/eobjects "${CMAKE_CURRENT_BINARY_DIR}/eobjects")
 add_subdirectory($ENV{E_ROOT}/eosal "${CMAKE_CURRENT_BINARY_DIR}/eosal")
 add_subdirectory($ENV{E_ROOT}/iocom "${CMAKE_CURRENT_BINARY_DIR}/iocom")
+add_subdirectory($ENV{E_ROOT}/iocom/extensions/nodeconf "${CMAKE_CURRENT_BINARY_DIR}/iocom/extensions/nodeconf")
 add_subdirectory($ENV{E_ROOT}/iocom/extensions/lighthouse "${CMAKE_CURRENT_BINARY_DIR}/iocom/extensions/lighthouse")
 add_subdirectory($ENV{E_ROOT}/iocom/extensions/devicedir "${CMAKE_CURRENT_BINARY_DIR}/iocom/extensions/devicedir")
 
