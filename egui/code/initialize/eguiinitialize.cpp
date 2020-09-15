@@ -13,7 +13,7 @@
 
 ****************************************************************************************************
 */
-#include "eguilib.h"
+#include "egui.h"
 
 
 /**
@@ -32,18 +32,30 @@
 */
 void egui_initialize()
 {
+    eGuiGlobal *eguiglobal;
+    eThread *thread;
+
     /* Do nothing if the library has been initialized.
      */
     if (eglobal->eguiglobal) return;
 
    /* Clear the global strcture and mark initialized.
      */
-    eglobal->eguiglobal = (eGuiGlobal*)os_malloc(sizeof(eGuiGlobal), OS_NULL);
-    os_memclear(eglobal->eguiglobal, sizeof(eGuiGlobal));
+    eguiglobal = (eGuiGlobal*)os_malloc(sizeof(eGuiGlobal), OS_NULL);
+    eglobal->eguiglobal = eguiglobal;
+    os_memclear(eguiglobal, sizeof(eGuiGlobal));
+
+    thread = new eThread();
+    eguiglobal->guilib_thread = thread;
+    eguiglobal->gui_container = new eContainer(thread, EOID_GUI_CONTAINER);
 
     /* Initialize class list
      */
     eguiclasslist_initialize();
+
+    /* Create econnect object to access IOCOM.
+     */
+    eguiglobal->econnect = new ecRoot(thread, EOID_GUI_ECONNECT);
 }
 
 
@@ -68,6 +80,11 @@ void egui_shutdown()
     /* Release resources allocated for the class list.
      */
     eguiclasslist_release();
+
+    /* Clean up
+     */
+    delete egui_get_container();
+    delete egui_get_thread();
 
     os_free(eglobal->eguiglobal, sizeof(eGuiGlobal));
     eglobal->eguiglobal = OS_NULL;

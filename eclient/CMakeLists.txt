@@ -1,4 +1,4 @@
-# bluetree/oclient/CmakeLists.txt - Cmake build for eclient.
+# bluetree/eclient/CmakeLists.txt - Cmake build for eclient.
 cmake_minimum_required(VERSION 3.5)
 
 # Set project name (= project root folder name).
@@ -13,7 +13,7 @@ include(../../eosal/osbuild/cmakedefs/eosal-defs.txt)
 set(E_HW "generic")
 
 # Select libraries to link with application.
-set(E_APPLIBS "egui${E_POSTFIX};eobjects${E_POSTFIX};devicedir${E_POSTFIX};lighthouse${E_POSTFIX};iocom${E_POSTFIX};$ENV{OSAL_TLS_APP_LIBS}")
+set(E_APPLIBS "egui${E_POSTFIX};econnect${E_POSTFIX};eobjects${E_POSTFIX};devicedir${E_POSTFIX};lighthouse${E_POSTFIX};iocom${E_POSTFIX};$ENV{OSAL_TLS_APP_LIBS}")
 # if ($ENV{E_OSVER} MATCHES "pi")
 #   set(E_APPLIBS "${E_APPLIBS};pigpio;raspicam;rt")
 # endif()
@@ -27,6 +27,7 @@ set(E_APPLIBS "${E_APPLIBS};GL")
 
 # Build individual library projects.
 add_subdirectory($ENV{E_ROOT}/${E_REPO}/egui "${CMAKE_CURRENT_BINARY_DIR}/egui")
+add_subdirectory($ENV{E_ROOT}/${E_REPO}/econnect "${CMAKE_CURRENT_BINARY_DIR}/econnect")
 add_subdirectory($ENV{E_ROOT}/${E_REPO}/eobjects "${CMAKE_CURRENT_BINARY_DIR}/eobjects")
 add_subdirectory($ENV{E_ROOT}/eosal "${CMAKE_CURRENT_BINARY_DIR}/eosal")
 add_subdirectory($ENV{E_ROOT}/iocom "${CMAKE_CURRENT_BINARY_DIR}/iocom")
@@ -45,6 +46,7 @@ include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}")
 # Add libraries.
 include_directories("$ENV{E_ROOT}/${E_REPO}/egui")
 include_directories("$ENV{E_ROOT}/${E_REPO}/eobjects")
+include_directories("$ENV{E_ROOT}/${E_REPO}/econnect")
 include_directories("$ENV{E_ROOT}/iocom")
 include_directories("$ENV{E_ROOT}/iocom/extensions/lighthouse")
 include_directories("$ENV{E_ROOT}/iocom/extensions/devicedir")

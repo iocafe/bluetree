@@ -4,7 +4,7 @@
   @brief   Enumeration of egui class identifiers.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    17.5.2016
+  @date    14.9.2020
 
   This header file defines class identifiers used by egui library.
 
@@ -15,14 +15,16 @@
 
 ****************************************************************************************************
 */
-#ifndef EGUICLASSID_INCLUDED
-#define EGUICLASSID_INCLUDED
+#pragma once
+#ifndef EGUICLASSID_H_
+#define EGUICLASSID_H_
+#include "egui.h"
 
 
 /**
 ****************************************************************************************************
 
-  @name Class identifiers used by eobjects library.
+  @name Class identifiers used by egui library.
 
   Each serializable eobjects library class has it's own class identifier. These may not be
   modified, would break serialization.
@@ -31,11 +33,7 @@
 */
 /*@{*/
 
-/* First class id referved for application applications. All positive 32 bit integers
-  starting from ECLASSID_APP_BASE can be used by application.
- */
 #define ECLASSID_EGUI_BASE 64
-#define ECLASSID_EGUI_3D_BASE 128
 
 #define EGUICLASSID_MOUSE_MESSAGE       (ECLASSID_EGUI_BASE + 1)
 #define EGUICLASSID_KEYBOARD_MESSAGE    (ECLASSID_EGUI_BASE + 2)
@@ -50,6 +48,7 @@
 
 
 /* FOR 3D extension
+#define ECLASSID_EGUI_3D_BASE 128
 #define EGUICLASSID_OBJECT3D       (ECLASSID_EGUI_3D_BASE + 1)
 #define EGUICLASSID_MOVINGOBJECT3D (ECLASSID_EGUI_3D_BASE + 2)
 #define EGUICLASSID_MESH3D         (ECLASSID_EGUI_3D_BASE + 3)

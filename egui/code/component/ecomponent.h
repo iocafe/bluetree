@@ -18,7 +18,7 @@
 #pragma once
 #ifndef ECOMPONENT_H_
 #define ECOMPONENT_H_
-#include "eguilib.h"
+#include "egui.h"
 
 /**
 ****************************************************************************************************

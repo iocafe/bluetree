@@ -20,7 +20,7 @@
 // If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
 // (GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
 
-#include "eguilib.h"
+#include "egui.h"
 #include "glfw_opengl3/imgui/imgui_impl_glfw.h"
 #include "glfw_opengl3/imgui/imgui_impl_opengl3.h"
 #include <stdio.h>

@@ -18,7 +18,7 @@
 #pragma once
 #ifndef IMGUI_IFACE_H_
 #define IMGUI_IFACE_H_
-#include "eguilib.h"
+#include "egui.h"
 
 
 /* For type checking

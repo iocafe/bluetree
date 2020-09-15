@@ -16,7 +16,7 @@
 #pragma once
 #ifndef ECLIENT_H_
 #define ECLIENT_H_
-#include "eguilib.h"
+#include "egui.h"
 
 /* using IoDevice::AbstractApplication;
 using IoDevice::AbstractCamera;

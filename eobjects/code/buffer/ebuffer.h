@@ -4,7 +4,7 @@
   @brief   Memory buffer.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    17.5.2016
+  @date    14.9.2020
 
   Flat memory buffer, can be used as a stream.
 

@@ -4,7 +4,7 @@
   @brief   Stream base class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    17.5.2016
+  @date    14.9.2020
 
   Stream base class sets up general way to interace with different types of streams.
 

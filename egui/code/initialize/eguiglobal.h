@@ -16,7 +16,9 @@
 #pragma once
 #ifndef EGUIGLOBAL_H_
 #define EGUIGLOBAL_H_
-#include "eguilib.h"
+#include "egui.h"
+
+class ecRoot;
 
 /**
 ****************************************************************************************************
@@ -30,7 +32,17 @@
 */
 typedef struct eGuiGlobal
 {
-    int xxx;
+    /* Main guilib thread object.
+     */
+    eThread *guilib_thread;
+
+    /* Container for eGui objects (multiple viewports in future?).
+     */
+    eContainer *gui_container;
+
+    /* econnect library root object, API to IOCOM communication
+     */
+    ecRoot *econnect;
 }
 eGuiGlobal;
 

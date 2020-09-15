@@ -1,12 +1,12 @@
 /**
 
-  @file    eguioid.h
-  @brief   Enumeration of egui object identifiers.
+  @file    ecclassid.h
+  @brief   Enumeration of econnect class identifiers.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    14.9.2020
 
-  This header file defines object identifiers used by egui library.
+  This header file defines class identifiers used by the econnect library.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -16,30 +16,23 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EGUIOID_H_
-#define EGUIOID_H_
-#include "egui.h"
+#ifndef ECCLASSID_H_
+#define ECCLASSID_H_
+#include "econnect.h"
 
 /**
 ****************************************************************************************************
 
-  @name Object identifiers used by egui library.
-
-  The object identifiers from -99 to -1 are reserved for eobject library. Idenfifiers from
-  -199 to -100 are reserved for egui library. Idenfifiers from -1099 to -1000 are for special
-  use markings.
+  @name Class identifiers used by econnect library.
 
 ****************************************************************************************************
 */
 /*@{*/
 
-/** GUI root object container. The same process can run multiple GUI objects.
- */
-#define EOID_GUI_CONTAINER -100
+#define ECONNCLASSID_BASE 196
 
-/* econnect library root object, provides API to IOCOM library.
- */
-#define EOID_GUI_ECONNECT -101
+#define ECONNCLASSID_ROOT        (ECONNCLASSID_BASE + 1)
+#define ECONNCLASSID_CONNECT     (ECONNCLASSID_BASE + 2)
 
 /*@}*/
 

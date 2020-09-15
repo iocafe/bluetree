@@ -4,7 +4,7 @@
   @brief   TCP socket class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    17.5.2016
+  @date    14.9.2020
 
   TCP socket class eOsStream encodes and buffers data and calls OSAL's stream functions to
   read/write the socket. This class is used by eConnection and eEndPoint classes.

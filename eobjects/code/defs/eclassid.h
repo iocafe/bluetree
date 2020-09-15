@@ -4,7 +4,7 @@
   @brief   Enumeration of class identifiers.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    17.5.2016
+  @date    14.9.2020
 
   This header file defines class identifiers used by eobjects library.
 
@@ -63,8 +63,8 @@
 #define ECLASSID_NETCLIENT 52
 
 
-/* First class id referved for application applications. All positive 32 bit integers
-  starting from ECLASSID_APP_BASE can be used by application.
+/* First class id reserved for applications. All positive 32 bit integers
+   starting from ECLASSID_APP_BASE can be used by application.
  */
 #define ECLASSID_APP_BASE 1000
 

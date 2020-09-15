@@ -48,8 +48,6 @@ osalStatus emain(
     os_int argc,
     os_char *argv[])
 {
-    eThread *thread;
-    eContainer *gui_container;
     eGui *gui;
     eStatus s;
 
@@ -63,16 +61,11 @@ osalStatus emain(
         return OSAL_STATUS_FAILED;
     }
 
-    thread = new eThread();
-    gui_container = new eContainer(thread, EOID_GUI_CONTAINER);
-
-    gui = new eGui(gui_container);
+    gui = new eGui(egui_get_container());
     gui->setup_desktop_application();
     gui->run();
 
-    delete thread;
     eimgui_shutdown();
     egui_shutdown();
-
     return OSAL_SUCCESS;
 }

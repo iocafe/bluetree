@@ -1,9 +1,9 @@
-# bluetree/egui/CmakeLists.txt - Cmake build for egui library.
+# bluetree/econnect/CmakeLists.txt - Cmake build for econnect library.
 cmake_minimum_required(VERSION 3.5)
 
 # Set project name (= project root folder name).
 set(E_REPO "bluetree")
-set(E_PROJECT "egui")
+set(E_PROJECT "econnect")
 project(${E_PROJECT})
 
 # include build information common to all projects.
@@ -15,22 +15,19 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $ENV{E_LIBOUT})
 
 # Set path to source files.
 set(BACKBONE "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code")
-set(GRAPHICS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/glfw_opengl3")
 
 # Add iocom and pins library include paths.
 include_directories("$ENV{E_ROOT}/iocom")
 include_directories("$ENV{E_ROOT}/${E_REPO}/eobjects")
-include_directories("$ENV{E_ROOT}/${E_REPO}/econnect")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}")
 
 # Add main headers.
-set(MAIN_HEADERS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/egui.h")
+set(MAIN_HEADERS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/econnect.h")
 
 # List source and header files to compile into library.
-file(GLOB BB_SOURCES "${BACKBONE}/*/*.cpp")
-file(GLOB BB_HEADERS "${BACKBONE}/*/*.h")
-file(GLOB_RECURSE IM_SOURCES "${GRAPHICS}/*/*.cpp" "${GRAPHICS}/*/*.c")
-file(GLOB_RECURSE IM_HEADERS "${GRAPHICS}/*/*.h")
+file(GLOB BB_SOURCES "${BACKBONE}/*.cpp")
+file(GLOB BB_HEADERS "${BACKBONE}/*.h")
 
 # Generate the static library
-add_library(${E_PROJECT}${E_POSTFIX} STATIC ${MAIN_HEADERS} ${BB_HEADERS} ${IM_HEADERS} ${BB_SOURCES} ${IM_SOURCES})
+add_library(${E_PROJECT}${E_POSTFIX} STATIC ${MAIN_HEADERS} ${BB_HEADERS} ${BB_SOURCES})
+

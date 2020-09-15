@@ -1,6 +1,6 @@
 /**
 
-  @file    eguilib.h
+  @file    egui.h
   @brief   Main egui library header file.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -16,19 +16,15 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EGUILIB_H_
-#define EGUILIB_H_
+#ifndef EGUI_H_
+#define EGUI_H_
 
 #define EOID_ROOT 9999
 
-/* Include freeglut header. Static link.
- */
-// #define FREEGLUT_STATIC
-// #include <GL/freeglut.h>
-
-/* Include objects headers.
+/* Include library headers.
  */
 #include "eobjects.h"
+#include "econnect.h"
 
 /* Initialize the egui library for use.
  */
@@ -37,6 +33,18 @@ void egui_initialize();
 /* Shut down the egui library.
 */
 void egui_shutdown();
+
+/* Get main gui thread object.
+ */
+#define egui_get_thread() (eglobal->eguiglobal->guilib_thread)
+
+/* Get GUI container which holds eGui objects if these are run by same thread.
+ */
+#define egui_get_container() (eglobal->eguiglobal->gui_container)
+
+/* Get econnect object used for IOCOM connections.
+ */
+#define egui_get_econnect() (eglobal->eguiglobal->econnect)
 
 /* Include Dear ImGUI header.
  */
@@ -54,7 +62,7 @@ void egui_shutdown();
 #include "code/component/ecomponent.h"
 
 #include "code/ioc_components/eioc_checkbox.h"
-#include "code/gui/egui.h"
+#include "code/gui/eguiroot.h"
 
 
 #endif

@@ -1,6 +1,6 @@
 /**
 
-  @file    egui.cpp
+  @file    eguiroot.h
   @brief   GUI root object.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -14,9 +14,9 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EGUI_H_
-#define EGUI_H_
-#include "eguilib.h"
+#ifndef EGUIROOT_H_
+#define EGUIROOT_H_
+#include "egui.h"
 
 /**
 ****************************************************************************************************

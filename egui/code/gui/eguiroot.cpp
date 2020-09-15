@@ -1,6 +1,6 @@
 /**
 
-  @file    egui.cpp
+  @file    eguiroot.cpp
   @brief   GUI root object.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -13,7 +13,7 @@
 
 ****************************************************************************************************
 */
-#include "eguilib.h"
+#include "egui.h"
 
 
 /* GUI property names.

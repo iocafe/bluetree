@@ -4,7 +4,7 @@
   @brief   Queue buffer class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    17.5.2016
+  @date    14.9.2020
 
   Queue buffers data, typically for reading from or writing to stream. See equeue.cpp for more
   information.
