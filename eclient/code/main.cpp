@@ -26,6 +26,11 @@
 
 int duudeli(void);
 
+
+/* If needed for the operating system, EOSAL_C_MAIN macro generates the actual C main() function.
+   and macro EMAIN_CONSOLE_ENTRY eobjects specific osal_main() function which calls emain.
+ */
+EOSAL_C_MAIN
 EMAIN_CONSOLE_ENTRY
 
 /**
