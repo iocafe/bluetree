@@ -806,10 +806,7 @@ public:
      */
     virtual eStatus simpleproperty(
         os_int propertynr,
-        eVariable *x)
-    {
-        return ESTATUS_NO_SIMPLE_PROPERTY_NR;
-    }
+        eVariable *x);
 
     /*@}*/
 

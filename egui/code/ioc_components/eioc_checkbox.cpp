@@ -33,7 +33,7 @@ eiocCheckbox::eiocCheckbox(
     eObject *parent,
     e_oid id,
     os_int flags)
-    : eObject(parent, id, flags)
+    : eComponent(parent, id, flags)
 {
 }
 

@@ -31,8 +31,9 @@ eLineEdit::eLineEdit(
     eObject *parent,
     e_oid id,
     os_int flags)
-    : eObject(parent, id, flags)
+    : eComponent(parent, id, flags)
 {
+    m_value = new eVariable(this);
     m_edit_value = false;
     m_prev_edit_value = false;
 }
@@ -51,6 +52,7 @@ eLineEdit::eLineEdit(
 */
 eLineEdit::~eLineEdit()
 {
+    delete m_value;
 }
 
 
@@ -102,6 +104,92 @@ void eLineEdit::setupclass()
     eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES);
     propertysetdone(cls);
     os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Called to inform the class about property value change (override).
+
+  The onpropertychange() function is called when class'es property changes, unless the
+  property is flagged with EPRO_NOONPRCH.
+  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
+  in class members and and return it when simpleproperty() is called.
+
+  Notice for change logging: Previous value is still valid when this function is called.
+  You can get the old value by calling property() function inside onpropertychange()
+  function.
+
+  @param   propertynr Property number of changed property.
+  @param   x Variable containing the new value.
+  @param   flags
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
+           indicate that there was no property with given property number.
+
+****************************************************************************************************
+*/
+eStatus eLineEdit::onpropertychange(
+    os_int propertynr,
+    eVariable *x,
+    os_int flags)
+{
+    /* switch (propertynr)
+    {
+        case E?:
+            m_command = (os_int)x->getl();
+            return ESTATUS_SUCCESS;
+
+        default:
+            break;
+    } */
+
+    if (m_value->onpropertychange(propertynr, x, flags) == ESTATUS_SUCCESS) {
+        // invalidate
+        return ESTATUS_SUCCESS;
+    }
+
+    return eComponent::onpropertychange(propertynr, x, flags);
+}
+
+/**
+****************************************************************************************************
+
+  @brief Get value of simple property (override).
+
+  The simpleproperty() function stores current value of simple property into variable x.
+
+  @param   propertynr Property number to get.
+  @param   x Variable into which to store the property value.
+  @return  If property with property number was stored in x, the function returns
+           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
+           given number was not among simple properties.
+
+****************************************************************************************************
+*/
+eStatus eLineEdit::simpleproperty(
+    os_int propertynr,
+    eVariable *x)
+{
+    /*
+    eObject *obj;
+    switch (propertynr)
+    {
+        case ?:
+            x->setl(m_command);
+            break;
+
+
+        default:
+            break;
+    } */
+
+    if (m_value->simpleproperty(propertynr, x) == ESTATUS_SUCCESS)
+    {
+        return ESTATUS_SUCCESS;
+    }
+
+    return eComponent::simpleproperty(propertynr, x);
 }
 
 

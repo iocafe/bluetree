@@ -42,7 +42,7 @@
 
 ****************************************************************************************************
 */
-class eLineEdit : public eObject
+class eLineEdit : public eComponent
 {
     /**
     ************************************************************************************************
@@ -92,6 +92,19 @@ public:
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
+
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
+    /* Get value of simple property.
+     */
+    virtual eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
 
     /* Static constructor function for generating instance by class list.
      */

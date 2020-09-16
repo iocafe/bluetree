@@ -2805,6 +2805,30 @@ os_double eObject::propertyd(
 /**
 ****************************************************************************************************
 
+  @brief Get value of simple property (override).
+
+  The simpleproperty() function stores current value of simple property into variable x.
+
+  @param   propertynr Property number to get.
+  @param   x Variable into which to store the property value.
+  @return  If property with property number was stored in x, the function returns
+           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
+           given number was not among simple properties.
+
+****************************************************************************************************
+*/
+eStatus eObject::simpleproperty(
+    os_int propertynr,
+    eVariable *x)
+{
+    x->clear();
+    return ESTATUS_NO_SIMPLE_PROPERTY_NR;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Bind this object's property to remote property.
 
   The eObject::bind() function creates binding to remote property. When two variables are bound

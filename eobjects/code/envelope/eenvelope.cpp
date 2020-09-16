@@ -347,9 +347,7 @@ eStatus eEnvelope::simpleproperty(
             break;
 
         default:
-            x->clear();
-            /* return eObject::simpleproperty(propertynr, x); */
-            return ESTATUS_NO_SIMPLE_PROPERTY_NR;
+            return eObject::simpleproperty(propertynr, x);
     }
     return ESTATUS_SUCCESS;
 }
