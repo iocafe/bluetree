@@ -133,11 +133,12 @@ void eConnection::setupclass()
   @param   propertynr Property number of the changed property.
   @param   x eVariable containing the new value.
   @param   flags
-  @return  None.
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
+           indicate that there was no property with given property number.
 
 ****************************************************************************************************
 */
-void eConnection::onpropertychange(
+eStatus eConnection::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -159,9 +160,10 @@ void eConnection::onpropertychange(
             break;
 
         default:
-            eThread::onpropertychange(propertynr, x, flags);
-            break;
+            return eThread::onpropertychange(propertynr, x, flags);
     }
+
+    return ESTATUS_SUCCESS;
 }
 
 

@@ -117,11 +117,12 @@ void eEndPoint::setupclass()
   @param   propertynr Property number of changed property.
   @param   x Variable containing the new value.
   @param   flags
-  @return  None.
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
+           indicate that there was no property with given property number.
 
 ****************************************************************************************************
 */
-void eEndPoint::onpropertychange(
+eStatus eEndPoint::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -144,9 +145,10 @@ void eEndPoint::onpropertychange(
             break;
 
         default:
-            eThread::onpropertychange(propertynr, x, flags);
-            break;
+            return eThread::onpropertychange(propertynr, x, flags);
     }
+
+    return ESTATUS_SUCCESS;
 }
 
 

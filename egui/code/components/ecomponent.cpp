@@ -284,11 +284,12 @@ eComponent *eComponent::nextcomponent(
   @param   propertynr Property number of changed property.
   @param   x Variable containing the new value.
   @param   flags
-  @return  None.
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
+           indicate that there was no property with given property number.
 
 ****************************************************************************************************
 */
-void eComponent::onpropertychange(
+eStatus eComponent::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -304,9 +305,10 @@ void eComponent::onpropertychange(
             break; */
 
         default:
-            /* eObject::onpropertychange(propertynr, x, flags); */
-            break;
+            return eObject::onpropertychange(propertynr, x, flags);
     }
+
+    return ESTATUS_SUCCESS;
 }
 
 

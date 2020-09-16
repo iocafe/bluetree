@@ -126,6 +126,8 @@ public:
 
 
 protected:
+    eVariable *m_value;
+
     bool m_edit_value;
     bool m_prev_edit_value;
 

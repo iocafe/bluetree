@@ -81,6 +81,10 @@ typedef enum
      */
     ESTATUS_NO_SIMPLE_PROPERTY_NR = 530,
 
+    /** Properties, onpropertychange() did not find property.
+     */
+    ESTATUS_UNKNOWN_PROPERTY_NR = 531,
+
     /** Reading float from stream failed
      */
     ESTATUS_STREAM_FLOAT_ERROR = 535,

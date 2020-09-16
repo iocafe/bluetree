@@ -99,7 +99,7 @@ void eLineEdit::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eLineEdit");
-    eComponent::setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
+    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES);
     propertysetdone(cls);
     os_unlock();
 }

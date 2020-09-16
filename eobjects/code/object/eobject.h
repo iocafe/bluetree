@@ -797,10 +797,10 @@ public:
 
     /* Called when property value changes.
      */
-    virtual void onpropertychange(
+    virtual eStatus onpropertychange(
         os_int propertynr,
         eVariable *x,
-        os_int flags) {}
+        os_int flags) {return ESTATUS_UNKNOWN_PROPERTY_NR; }
 
     /* Get value of simple property.
      */
