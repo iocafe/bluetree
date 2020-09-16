@@ -34,6 +34,9 @@ void eguiclasslist_initialize()
      */
     eGui::setupclass();
     eComponent::setupclass();
+    eLineEdit::setupclass();
+
+    eiocCheckbox::setupclass();
 }
 
 /* Release resources allocated for the class list.

@@ -226,6 +226,9 @@ void eLineEdit::draw(
     if (m_edit_value) {
         text_input_label = m_text_input_label.get((eComponent*)this);
 
+os_strncpy(buf, m_value->gets(), sizeof(buf));
+
+
         ImGui::InputText(text_input_label, buf, sizeof(buf), ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue);
         if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
         {
@@ -244,7 +247,7 @@ void eLineEdit::draw(
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
 
         os_char label[256];
-        os_strncpy(label, "Tesuuppa!", sizeof(label));
+        os_strncpy(label, m_value->gets(), sizeof(label));
         os_strncat(label, text_display_label, sizeof(label));
 
         ImGui::Button(label, ImVec2(w, 0));

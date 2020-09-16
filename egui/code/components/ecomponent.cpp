@@ -150,31 +150,31 @@ void eComponent::setupproperties(
        property set before setting value for it. There is trick with p to set text type
        after adding property type. This effects only eComponent class.
      */
-    p = addproperty(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
+    p = addproperty(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA, "text");
 
     if (flags & ECOMP_VALUE_PROPERITES) {
-        addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA|EPRO_NOONPRCH, "type");
+        addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA, "type");
         p->setpropertyl(ECOMP_TYPE, OS_STR);
 
         addproperty (cls, ECOMP_VALUE, ecomp_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
-        addproperty (cls, ECOMP_DEFAULT, ecomp_default, EPRO_METADATA|EPRO_NOONPRCH, "default");
+        addproperty (cls, ECOMP_DEFAULT, ecomp_default, EPRO_METADATA, "default");
         addpropertyl(cls, ECOMP_DIGS, ecomp_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
-        addpropertys(cls, ECOMP_UNIT, ecomp_unit, EPRO_METADATA|EPRO_NOONPRCH, "unit");
-        addpropertyd(cls, ECOMP_MIN, ecomp_min, EPRO_METADATA|EPRO_NOONPRCH, "min");
-        addpropertyd(cls, ECOMP_MAX, ecomp_max, EPRO_METADATA|EPRO_NOONPRCH, "max");
+        addpropertys(cls, ECOMP_UNIT, ecomp_unit, EPRO_METADATA, "unit");
+        addpropertyd(cls, ECOMP_MIN, ecomp_min, EPRO_METADATA, "min");
+        addpropertyd(cls, ECOMP_MAX, ecomp_max, EPRO_METADATA, "max");
     }
 
-    addpropertyl(cls, ECOMP_ATTR, ecomp_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
+    addpropertyl(cls, ECOMP_ATTR, ecomp_attr, EPRO_METADATA, "attr");
 
     if (flags & ECOMP_VALUE_PROPERITES) {
-        addpropertyd(cls, ECOMP_GAIN, ecomp_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
-        addpropertyd(cls, ECOMP_OFFSET, ecomp_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
-        addproperty (cls, ECOMP_STATE_BITS, ecomp_state_bits, EPRO_METADATA|EPRO_NOONPRCH, "statebits");
-        addproperty (cls, ECOMP_TIMESTAMP, ecomp_timestamp, EPRO_METADATA|EPRO_NOONPRCH, "timestamp");
+        addpropertyd(cls, ECOMP_GAIN, ecomp_gain, EPRO_METADATA, "gain");
+        addpropertyd(cls, ECOMP_OFFSET, ecomp_offset, EPRO_METADATA, "offset");
+        addproperty (cls, ECOMP_STATE_BITS, ecomp_state_bits, EPRO_METADATA, "statebits");
+        addproperty (cls, ECOMP_TIMESTAMP, ecomp_timestamp, EPRO_METADATA, "timestamp");
     }
 
     if (flags & ECOMP_CONF_PROPERITES) {
-        addproperty (cls, ECOMP_CONF, ecomp_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
+        addproperty (cls, ECOMP_CONF, ecomp_conf, EPRO_METADATA, "conf");
     }
 }
 
