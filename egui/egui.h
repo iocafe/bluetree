@@ -60,6 +60,7 @@ void egui_shutdown();
 #include "code/userinput/emouse.h"
 #include "code/userinput/ekeyboard.h"
 #include "code/components/eautolabel.h"
+#include "code/components/eeditbuffer.h"
 #include "code/components/ecomponent.h"
 #include "code/components/lineedit/elineedit.h"
 

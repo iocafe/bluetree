@@ -1,7 +1,7 @@
 /**
 
-  @file    eautolabel.h
-  @brief   Generate Dear ImGui labels by enumeration.
+  @file    eeditbuffer.h
+  @brief   Edit buffer for ImGui line edits, etc.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    15.9.2020
@@ -14,52 +14,45 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EAUTOLABEL_H_
-#define EAUTOLABEL_H_
+#ifndef EEDITBUFFER_H_
+#define EEDITBUFFER_H_
 #include "egui.h"
-
-class eComponent;
 
 /**
 ****************************************************************************************************
 
-  @brief eAutoLabel class.
+  @brief eEditBuffer class.
 
-  The eAutoLabel is automatically generated hidden label for IMGui.
+  The eEditBuffer is buffer used for line edits, etc.
 
 ****************************************************************************************************
 */
-class eAutoLabel
+class eEditBuffer
 {
 public:
     /* Constructor and destructor.
      */
-    eAutoLabel();
-    ~eAutoLabel();
+    eEditBuffer();
+    ~eEditBuffer();
 
-    /* Get pointer to label string.
-     */
-    os_char *get(
-        eComponent *component);
-
-    /* Set text to display as label before "##".
-     */
-    void set_text(
-        eComponent *component,
-        const os_char *text = OS_NULL);
-
-    void clear(
-        bool clear_count = false);
-
-    inline bool is_set() {return m_label != OS_NULL; }
-
-protected:
     void allocate(
         os_memsz sz);
 
-    os_char *m_label;
-    os_memsz m_label_sz;
-    os_long m_count;
+    void clear();
+
+    void set(
+        const os_char *text,
+        os_memsz sz);
+
+    inline os_char *ptr()
+        {return m_buf; }
+
+    inline os_memsz sz()
+        {return m_buf_sz; }
+
+protected:
+    os_char *m_buf;
+    os_memsz m_buf_sz;
 };
 
 

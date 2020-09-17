@@ -134,15 +134,19 @@ eStatus eLineEdit::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-    /* switch (propertynr)
+    switch (propertynr)
     {
-        case E?:
+        /* case E?:
             m_command = (os_int)x->getl();
-            return ESTATUS_SUCCESS;
+            return ESTATUS_SUCCESS; */
+
+        case ECOMP_VALUE: /* clear label to display new text and proceed */
+            m_text_display_label.clear();
+            break;
 
         default:
             break;
-    } */
+    }
 
     if (m_value->onpropertychange(propertynr, x, flags) == ESTATUS_SUCCESS) {
         // invalidate
@@ -209,8 +213,7 @@ void eLineEdit::draw(
     eDrawParams& prm)
 {
     int total_w;
-    os_char *text_input_label, *text_display_label;
-    static char buf[256];
+    os_char *label;
 
     ImVec2 c = ImGui::GetContentRegionAvail();
     total_w = c.x;
@@ -224,18 +227,19 @@ void eLineEdit::draw(
     ImGui::SetNextItemWidth(w);
 
     if (m_edit_value) {
-        text_input_label = m_text_input_label.get((eComponent*)this);
 
-os_strncpy(buf, m_value->gets(), sizeof(buf));
+        label = m_text_input_label.get((eComponent*)this);
 
-
-        ImGui::InputText(text_input_label, buf, sizeof(buf), ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue);
+        ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(),
+            ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue);
         if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
         {
             m_edit_value = false;
+            if (os_strcmp(m_edit_buf.ptr(), m_value->gets())) {
+                setpropertys(ECOMP_VALUE, m_edit_buf.ptr());
+            }
         }
-        else
-        {
+        else {
             if (!m_prev_edit_value) {
                 ImGui::SetKeyboardFocusHere(-1);
                 m_prev_edit_value = true;
@@ -243,18 +247,17 @@ os_strncpy(buf, m_value->gets(), sizeof(buf));
         }
     }
     else {
-        text_display_label = m_text_display_label.get((eComponent*)this);
+        if (!m_text_display_label.is_set()) {
+            m_text_display_label.set_text(this, m_value->gets());
+        }
+        label = m_text_display_label.get(this);
+
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
-
-        os_char label[256];
-        os_strncpy(label, m_value->gets(), sizeof(label));
-        os_strncat(label, text_display_label, sizeof(label));
-
         ImGui::Button(label, ImVec2(w, 0));
-        if (ImGui::IsItemActive())
-        {
+        if (ImGui::IsItemActive()) {
             m_prev_edit_value = false;
             m_edit_value = true;
+            m_edit_buf.set(m_value->gets(), 256);
         }
         ImGui::PopStyleVar();
     }

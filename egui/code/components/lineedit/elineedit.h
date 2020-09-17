@@ -141,8 +141,12 @@ public:
 protected:
     eVariable *m_value;
 
+
+
     bool m_edit_value;
     bool m_prev_edit_value;
+
+    eEditBuffer m_edit_buf;
 
     eAutoLabel m_text_input_label;
     eAutoLabel m_text_display_label;

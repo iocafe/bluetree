@@ -31,8 +31,12 @@
 */
 void eGui::setup_desktop_application()
 {
+    eLineEdit *e;
+
     new eiocCheckbox(this);
-    new eLineEdit(this);
-    eLineEdit *e = new eLineEdit(this);
+    e = new eLineEdit(this);
+    e->setpropertys(ECOMP_VALUE, "Jakke ja suutari");
+
+    e = new eLineEdit(this);
     e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
 }

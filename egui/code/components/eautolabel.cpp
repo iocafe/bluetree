@@ -1,12 +1,10 @@
 /**
 
-  @file    eAutoLabel.cpp
-  @brief   Abstract GUI component.
+  @file    eautolabel.cppl
+  @brief   Generate Dear ImGui labels by enumeration.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
-
-  Base call for all GUI components (widgets)...
+  @date    15.9.2020
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -21,13 +19,45 @@
 /**
 ****************************************************************************************************
 
-  @brief Constructor.
+  @brief Constructor and destructor.
 
 ****************************************************************************************************
 */
 eAutoLabel::eAutoLabel()
 {
-    m_label[0] = '\0';
+    m_label = OS_NULL;
+    m_label_sz = 0;
+    m_count = 0;
+}
+
+eAutoLabel::~eAutoLabel()
+{
+    clear();
+}
+
+void eAutoLabel::allocate(
+    os_memsz sz)
+{
+    if (sz > m_label_sz) {
+        if (m_label) {
+            os_free(m_label, m_label_sz);
+        }
+        m_label = os_malloc(sz, &m_label_sz);
+    }
+}
+
+void eAutoLabel::clear(
+    bool clear_count)
+{
+    if (m_label) {
+        os_free(m_label, m_label_sz);
+        m_label = OS_NULL;
+        m_label_sz = 0;
+    }
+
+    if (clear_count) {
+        m_count = 0;
+    }
 }
 
 
@@ -44,27 +74,62 @@ eAutoLabel::eAutoLabel()
 os_char *eAutoLabel::get(
     eComponent *component)
 {
-    os_char nbuf[OSAL_NBUF_SZ];
-    os_long count = -1;
-
-    if (m_label[0] != '\0') {
+    if (m_label) {
         return m_label;
     }
 
-    /* while (component) {
-        if (component->classid() == EGUICLASSID_WINDOW) {
-            count = window->inc_autolabel_count();
-        }
-        component = component->parent();
-    } */
-
-    if (count == -1) {
-        count = eglobal->eguiglobal->autolabel_count++;
-    }
-
-    osal_int_to_str(nbuf, sizeof(nbuf), count);
-
-    os_strncpy(m_label, "##l", sizeof(m_label));
-    os_strncat(m_label, nbuf, sizeof(m_label));
+    set_text(component);
     return m_label;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Store text Get hidden ImGui label reserved for this components.
+
+  The eAutoLabel::set_text function...
+  @return None.
+
+****************************************************************************************************
+*/
+void eAutoLabel::set_text(
+    eComponent *component,
+    const os_char *text)
+{
+    const os_char hide_label_mark[] = "##l";
+    os_char nbuf[OSAL_NBUF_SZ];
+    os_memsz sz;
+
+    /* Make sure that we have count.
+     */
+    if (m_count == 0) {
+        /* while (component) {
+            if (component->classid() == EGUICLASSID_WINDOW) {
+                count = window->inc_autolabel_count();
+            }
+            component = component->parent();
+        } */
+
+        if (m_count == 0) {
+            m_count = ++(eglobal->eguiglobal->autolabel_count);
+        }
+    }
+
+    sz = osal_int_to_str(nbuf, sizeof(nbuf), m_count)
+       + os_strlen(hide_label_mark) - 1;
+
+    if (text) {
+        sz += os_strlen(text) - 1;
+    }
+    else {
+        text = osal_str_empty;
+    }
+
+    allocate(sz);
+    os_strncpy(m_label, text, m_label_sz);
+    os_strncat(m_label, "##l", m_label_sz);
+    os_strncat(m_label, nbuf, m_label_sz);
+}
+
+
