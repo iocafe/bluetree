@@ -488,6 +488,54 @@ eThread *eObject::thread()
     return OS_NULL;
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Get parent object of specific class and/or identified by specific oid.
+
+  The eObject::parent() function returns pointer to the parent object of specific class or
+  object identifier. Either cid, oid, or both, can be used to select the parent.
+
+  @param   cid Class idenfifier. Set ECLASSID_NONE (0) to ignore the class when finding the
+           right parent. For example EGUICLASSID_WINDOW.
+  @param   id Object idenfifier. Default value EOID_ALL causes function to ignore object
+           identifier when finding the parent.
+  @param   check_this If true, the function can also return pointer to this object if it
+           matches the search criteria (not necessarily an ancestor). If false, this object
+           is not checked.
+
+  @return  Pointer to the parent, grandparent, great grandparent... matching to search criteria.
+
+****************************************************************************************************
+*/
+eObject *eObject::parent(
+    os_int cid,
+    e_oid id,
+    bool check_this)
+{
+    eObject *obj;
+
+    if (check_this) {
+        obj = this;
+    }
+    else {
+        obj = parent();
+    }
+
+    while (obj) {
+        if ((obj->classid() == cid || cid == ECLASSID_NONE) &&
+            (obj->oid() == id || id == EOID_ALL))
+        {
+            return obj;
+        }
+        obj = obj->parent();
+    }
+
+    return OS_NULL;
+}
+
+
 /**
 ****************************************************************************************************
 

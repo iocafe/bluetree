@@ -33,7 +33,8 @@ eLineEdit::eLineEdit(
     os_int flags)
     : eComponent(parent, id, flags)
 {
-    m_value = new eVariable(this);
+    m_value = new eVariable(this, EOID_ITEM,
+        EOBJ_IS_ATTACHMENT|EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
     m_edit_value = false;
     m_prev_edit_value = false;
 }

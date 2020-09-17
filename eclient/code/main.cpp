@@ -56,7 +56,7 @@ osalStatus emain(
     eGui *gui;
     eStatus s;
 
-    // duudeli(); return OSAL_SUCCESS;
+//    duudeli(); return OSAL_SUCCESS;
 
     egui_initialize();
     s = eimgui_initialize();

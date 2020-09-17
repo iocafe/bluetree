@@ -100,16 +100,15 @@ void eAutoLabel::set_text(
     const os_char hide_label_mark[] = "##l";
     os_char nbuf[OSAL_NBUF_SZ];
     os_memsz sz;
+    eWindow *window;
 
     /* Make sure that we have count.
      */
     if (m_count == 0) {
-        /* while (component) {
-            if (component->classid() == EGUICLASSID_WINDOW) {
-                count = window->inc_autolabel_count();
-            }
-            component = component->parent();
-        } */
+        window = component->window(true);
+        if (window) {
+            // count = window->inc_autolabel_count();
+        }
 
         if (m_count == 0) {
             m_count = ++(eglobal->eguiglobal->autolabel_count);

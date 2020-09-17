@@ -20,6 +20,8 @@
 #define ECOMPONENT_H_
 #include "egui.h"
 
+class eWindow;
+
 /**
 ****************************************************************************************************
 
@@ -201,6 +203,14 @@ public:
      */
     eComponent *nextcomponent(
         e_oid id = EOID_CHILD);
+
+    /* Get parent window.
+     */
+    inline eWindow *window(
+        bool check_this = false)
+    {
+        return (eWindow*)parent(EGUICLASSID_WINDOW, EOID_ALL, check_this);
+    }
 
     /* Called when property value changes.
      */

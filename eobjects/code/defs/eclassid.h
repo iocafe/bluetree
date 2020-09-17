@@ -32,6 +32,7 @@
 */
 /*@{*/
 
+#define ECLASSID_NONE 0
 #define ECLASSID_CONTAINER 1
 #define ECLASSID_VARIABLE 2
 #define ECLASSID_NAME 3

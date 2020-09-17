@@ -335,7 +335,7 @@ public:
         e_oix *oix,
         os_int *ucnt);
 
-    /* Get number of childern.
+    /** Get number of childern.
      */
     inline os_long childcount(
         e_oid id = EOID_CHILD)
@@ -376,6 +376,13 @@ public:
         return OS_NULL; */
     }
 
+    /** Get parent object of specific class and/or
+        with specific object identifier.
+     */
+    eObject *parent(
+        os_int cid,
+        e_oid id = EOID_ALL,
+        bool check_this = false);
 
     /** Get thread object.
      */
