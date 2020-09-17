@@ -71,7 +71,7 @@ void eAutoLabel::clear(
 
 ****************************************************************************************************
 */
-os_char *eAutoLabel::get(
+const os_char *eAutoLabel::get(
     eComponent *component)
 {
     if (m_label) {

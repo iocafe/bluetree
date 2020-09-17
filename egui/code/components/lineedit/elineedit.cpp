@@ -141,11 +141,24 @@ eStatus eLineEdit::onpropertychange(
             return ESTATUS_SUCCESS; */
 
         case ECOMP_VALUE: /* clear label to display new text and proceed */
-            m_text_display_label.clear();
+            m_label_value.clear();
             break;
 
         case ECOMP_TEXT: /* Save and proceed */
-            m_text.setv(x);
+            m_text.clear();
+            break;
+
+        case ECOMP_UNIT:
+            m_unit.clear();
+            m_attr.clear();
+            break;
+
+        case EVARP_DIGS:
+        case EVARP_MIN:
+        case EVARP_MAX:
+        case EVARP_TYPE:
+        case EVARP_ATTR:
+            m_attr.clear();
             break;
 
         default:
@@ -216,26 +229,44 @@ eStatus eLineEdit::simpleproperty(
 void eLineEdit::draw(
     eDrawParams& prm)
 {
-    int total_w;
-    os_char *label;
+    os_int edit_w, unit_w, total_w, unit_spacer;
+    const os_char *label, *unit;
+    ImGuiInputTextFlags eflags;
+
+    m_attr.for_variable(m_value);
 
     ImVec2 c = ImGui::GetContentRegionAvail();
     total_w = c.x;
-    ImGui::Text(m_text.ptr());
-    // int w = ImGui::CalcItemWidth();
-    // ImGui::SameLine(total_w - w);
-    // int w = total_w - 200;
-    int w = 200;
-    ImGui::SameLine(total_w - w);
 
-    ImGui::SetNextItemWidth(w);
+    ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT));
+
+    // int edit_w = ImGui::CalcItemWidth();
+    // ImGui::SameLine(total_w - edit_w);
+    // edit_w = total_w - 200;
+
+    edit_w = 200;
+    unit_w = 60;
+    unit_spacer = 6;
+
+    ImGui::SameLine(total_w - edit_w - unit_spacer - unit_w);
+    ImGui::SetNextItemWidth(edit_w);
 
     if (m_edit_value) {
+        label = m_label_edit.get((eComponent*)this);
 
-        label = m_text_input_label.get((eComponent*)this);
+        switch (m_attr.showas())
+        {
+            case E_SHOWAS_INTEGER_NUMBER:
+            case E_SHOWAS_FLOAT_NUMBER:
+                eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue;
+                break;
 
-        ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(),
-            ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue);
+            default:
+                eflags = ImGuiInputTextFlags_EnterReturnsTrue;
+                break;
+        }
+
+        ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
         if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
         {
             m_edit_value = false;
@@ -251,19 +282,26 @@ void eLineEdit::draw(
         }
     }
     else {
-        if (!m_text_display_label.is_set()) {
-            m_text_display_label.set_text(this, m_value->gets());
+        if (!m_label_value.is_set()) {
+            m_label_value.set_text(this, m_value->gets());
         }
-        label = m_text_display_label.get(this);
+        label = m_label_value.get(this);
 
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
-        ImGui::Button(label, ImVec2(w, 0));
+        ImGui::Button(label, ImVec2(edit_w, 0));
         if (ImGui::IsItemActive()) {
             m_prev_edit_value = false;
             m_edit_value = true;
             m_edit_buf.set(m_value->gets(), 256);
         }
         ImGui::PopStyleVar();
+    }
+
+    unit = m_unit.get(this, ECOMP_UNIT);
+    if (*unit != '\0') {
+        ImGui::SameLine(total_w - unit_w);
+        ImGui::SetNextItemWidth(unit_w);
+        ImGui::TextUnformatted(unit);
     }
 
 #if 0

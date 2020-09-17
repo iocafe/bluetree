@@ -16,6 +16,8 @@
 #include "egui.h"
 
 
+#define BUF_SZ_EMPTY_STR 1
+
 /**
 ****************************************************************************************************
 
@@ -27,7 +29,6 @@ eStrBuffer::eStrBuffer()
 {
     m_buf = OS_NULL;
     m_buf_sz = 0;
-    // m_translated = false;
 }
 
 eStrBuffer::~eStrBuffer()
@@ -39,7 +40,7 @@ void eStrBuffer::allocate(
     os_memsz sz)
 {
     if (sz > m_buf_sz) {
-        if (m_buf) {
+        if (m_buf_sz > BUF_SZ_EMPTY_STR) {
             os_free(m_buf, m_buf_sz);
         }
         m_buf = os_malloc(sz, &m_buf_sz);
@@ -48,25 +49,12 @@ void eStrBuffer::allocate(
 
 void eStrBuffer::clear()
 {
-    if (m_buf) {
+    if (m_buf_sz > BUF_SZ_EMPTY_STR) {
         os_free(m_buf, m_buf_sz);
         m_buf = OS_NULL;
-        m_buf_sz = 0;
     }
+    m_buf_sz = 0;
 }
-
-
-void eStrBuffer::set(
-    const os_char *text,
-    os_memsz sz)
-{
-    allocate(sz);
-    if (text == OS_NULL) {
-        text = osal_str_empty;
-    }
-    os_strncpy(m_buf, text, m_buf_sz);
-}
-
 
 void eStrBuffer::setv(
     eVariable *value)
@@ -75,6 +63,35 @@ void eStrBuffer::setv(
     os_memsz sz;
 
     ptr = value->gets(&sz);
-    allocate(sz);
-    os_memcpy(m_buf, ptr, sz);
+
+    /* Do not allocate empty strings, these are common, expecially in units.
+     */
+    if (sz <= BUF_SZ_EMPTY_STR) {
+        clear();
+        m_buf_sz = BUF_SZ_EMPTY_STR;
+    }
+
+    else {
+        allocate(sz);
+        os_memcpy(m_buf, ptr, sz);
+    }
+}
+
+/* This function is typically used only when drawing, etc to avoid buffer allocation when
+   inactive in memory. component pointer is used to get context for translation redirects, etc.
+ */
+const os_char *eStrBuffer::get(
+    eComponent *component,
+    os_int propertynr)
+{
+    if (m_buf_sz == 0) {
+        eVariable tmp;
+        component->propertyv(propertynr, &tmp);
+
+        // Here we could do language translation !!!!!!!!!!!!!!!!
+
+        setv(&tmp);
+    }
+
+    return m_buf_sz == BUF_SZ_EMPTY_STR ? osal_str_empty : m_buf;
 }

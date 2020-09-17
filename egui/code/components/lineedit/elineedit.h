@@ -152,9 +152,14 @@ protected:
 
     /* Property values */
     eStrBuffer m_text;
+    eStrBuffer m_unit;
 
-    eAutoLabel m_text_input_label;
-    eAutoLabel m_text_display_label;
+    /* Parsed attrbutes, digits, etc.
+     */
+    eAttrBuffer m_attr;
+
+    eAutoLabel m_label_edit;
+    eAutoLabel m_label_value;
 };
 
 

@@ -39,7 +39,7 @@ public:
 
     /* Get pointer to label string.
      */
-    os_char *get(
+    const os_char *get(
         eComponent *component);
 
     /* Set text to display as label before "##".

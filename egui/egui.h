@@ -62,6 +62,7 @@ void egui_shutdown();
 #include "code/components/eautolabel.h"
 #include "code/components/eeditbuffer.h"
 #include "code/components/estrbuffer.h"
+#include "code/components/eattrbuffer.h"
 #include "code/components/ecomponent.h"
 #include "code/components/lineedit/elineedit.h"
 
