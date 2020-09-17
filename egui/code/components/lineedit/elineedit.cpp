@@ -144,6 +144,10 @@ eStatus eLineEdit::onpropertychange(
             m_text_display_label.clear();
             break;
 
+        case ECOMP_TEXT: /* Save and proceed */
+            m_text.setv(x);
+            break;
+
         default:
             break;
     }
@@ -217,7 +221,7 @@ void eLineEdit::draw(
 
     ImVec2 c = ImGui::GetContentRegionAvail();
     total_w = c.x;
-    ImGui::Text("Duudeling");
+    ImGui::Text(m_text.ptr());
     // int w = ImGui::CalcItemWidth();
     // ImGui::SameLine(total_w - w);
     // int w = total_w - 200;

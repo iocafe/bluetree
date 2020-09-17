@@ -36,7 +36,28 @@ void eGui::setup_desktop_application()
     new eiocCheckbox(this);
     e = new eLineEdit(this);
     e->setpropertys(ECOMP_VALUE, "Jakke ja suutari");
+    e->setpropertys(ECOMP_TEXT, "Editti");
 
     e = new eLineEdit(this);
     e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
+    e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
+
+/*     ECOMP_TYPE
+
+    #define ECOMP_STATE_BITS EVARP_STATE_BITS
+#define ECOMP_TIMESTAMP EVARP_TIMESTAMP
+#define ECOMP_DIGS EVARP_DIGS
+#define ECOMP_TEXT EVARP_TEXT
+#define ECOMP_UNIT EVARP_UNIT
+#define ECOMP_MIN EVARP_MIN
+#define ECOMP_MAX EVARP_MAX
+#define ECOMP_TYPE EVARP_TYPE
+#define ECOMP_ATTR EVARP_ATTR
+#define ECOMP_DEFAULT EVARP_DEFAULT
+#define ECOMP_GAIN EVARP_GAIN
+#define ECOMP_OFFSET EVARP_OFFSET
+#define ECOMP_CONF EVARP_CONF
+#define ECOMP_PATH 30
+*/
+
 }

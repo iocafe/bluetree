@@ -146,7 +146,12 @@ protected:
     bool m_edit_value;
     bool m_prev_edit_value;
 
+    /* Buffer for editing value.
+     */
     eEditBuffer m_edit_buf;
+
+    /* Property values */
+    eStrBuffer m_text;
 
     eAutoLabel m_text_input_label;
     eAutoLabel m_text_display_label;
