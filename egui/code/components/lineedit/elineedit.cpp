@@ -233,7 +233,7 @@ void eLineEdit::draw(
     const os_char *label, *unit;
     ImGuiInputTextFlags eflags;
 
-    m_attr.for_variable(m_value);
+    m_attr.for_variable(this);
 
     ImVec2 c = ImGui::GetContentRegionAvail();
     total_w = c.x;
@@ -252,7 +252,7 @@ void eLineEdit::draw(
     ImGui::SetNextItemWidth(edit_w);
 
     if (m_edit_value) {
-        label = m_label_edit.get((eComponent*)this);
+        label = m_label_edit.get(this);
 
         switch (m_attr.showas())
         {

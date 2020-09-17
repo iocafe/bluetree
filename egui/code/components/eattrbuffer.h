@@ -50,10 +50,11 @@ public:
 
     void clear();
 
-    inline void for_variable(eObject *obj)
+    inline void for_variable(
+        eComponent *component)
     {
         if (!m_initialized) {
-            initialize_for_variable(obj);
+            initialize_for_variable(component);
         }
     }
 
@@ -73,7 +74,7 @@ protected:
         eVariable *value); */
 
     void initialize_for_variable(
-        eObject *obj);
+        eComponent *component);
 
     void initialize(
         eVariable *attr,

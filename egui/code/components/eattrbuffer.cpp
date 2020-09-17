@@ -73,19 +73,19 @@ void eAttrBuffer::clear()
    inactive in memory. component pointer is used to get context for translation redirects, etc.
  */
 void eAttrBuffer::initialize_for_variable(
-    eObject *obj)
+    eComponent *component)
 {
     eVariable attr, unit;
     osalTypeId type;
     os_int digs;
     os_double min, max;
 
-    obj->propertyv(EVARP_ATTR, &attr);
-    type = (osalTypeId)obj->propertyl(EVARP_TYPE);
-    obj->propertyv(EVARP_UNIT, &unit);
-    digs = (os_int)obj->propertyl(EVARP_DIGS);
-    min = obj->propertyd(EVARP_MIN);
-    max = obj->propertyd(EVARP_MAX);
+    component->propertyv(EVARP_ATTR, &attr);
+    type = (osalTypeId)component->propertyl(EVARP_TYPE);
+    component->propertyv(EVARP_UNIT, &unit);
+    digs = (os_int)component->propertyl(EVARP_DIGS);
+    min = component->propertyd(EVARP_MIN);
+    max = component->propertyd(EVARP_MAX);
 
     initialize(&attr, type, &unit, digs, min, max);
 }
