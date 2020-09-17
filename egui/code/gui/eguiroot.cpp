@@ -429,7 +429,12 @@ eStatus eGui::run()
 
         ShowExampleAppDockSpace(&openoi);
 
+        for (c = firstcomponent(); c; c = c->nextcomponent())
+        {
+            c->draw(m_draw_prm);
+        }
 
+#if 0
         // TEST BEGIN
         static bool show_another_window = false;
         {
@@ -492,6 +497,7 @@ eStatus eGui::run()
             ImGui::End();
         }
         // TEST END
+#endif
 
         eimgui_finish_frame(m_viewport);
 

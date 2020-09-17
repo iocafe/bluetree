@@ -31,17 +31,35 @@
 */
 void eGui::setup_desktop_application()
 {
+    eWindow *w;
     eLineEdit *e;
 
-    new eiocCheckbox(this);
-    e = new eLineEdit(this);
+    w = new eWindow(this);
+    w->setpropertys(ECOMP_TEXT, "SIkkkuuna");
+
+    e = new eLineEdit(w);
     e->setpropertys(ECOMP_VALUE, "Jakke ja suutari");
     e->setpropertys(ECOMP_TEXT, "Editti");
     e->setpropertys(ECOMP_UNIT, "%");
 
-    e = new eLineEdit(this);
+    e = new eLineEdit(w);
     e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
     e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
+
+    w = new eWindow(this);
+    w->setpropertys(ECOMP_TEXT, "Ikkkuuna");
+
+    e = new eLineEdit(w);
+    e->setpropertys(ECOMP_VALUE, "Jakke ja suutari");
+    e->setpropertys(ECOMP_TEXT, "Editti");
+    e->setpropertys(ECOMP_UNIT, "%");
+
+    e = new eLineEdit(w);
+    e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
+    e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
+
+
+
 
 /*     ECOMP_TYPE
 

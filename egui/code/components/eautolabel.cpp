@@ -78,7 +78,7 @@ const os_char *eAutoLabel::get(
         return m_label;
     }
 
-    set_text(component);
+    set(component);
     return m_label;
 }
 
@@ -93,7 +93,7 @@ const os_char *eAutoLabel::get(
 
 ****************************************************************************************************
 */
-void eAutoLabel::set_text(
+void eAutoLabel::set(
     eComponent *component,
     const os_char *text)
 {
@@ -131,4 +131,11 @@ void eAutoLabel::set_text(
     os_strncat(m_label, nbuf, m_label_sz);
 }
 
-
+void eAutoLabel::set(
+    eComponent *component,
+    os_int propertynr)
+{
+    eVariable tmp;
+    component->propertyv(propertynr, &tmp);
+    set(component, tmp.gets());
+}

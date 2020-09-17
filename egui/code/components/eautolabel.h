@@ -44,9 +44,13 @@ public:
 
     /* Set text to display as label before "##".
      */
-    void set_text(
+    void set(
         eComponent *component,
         const os_char *text = OS_NULL);
+
+    void set(
+        eComponent *component,
+        os_int propertynr);
 
     void clear(
         bool clear_count = false);

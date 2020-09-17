@@ -34,6 +34,7 @@ void eguiclasslist_initialize()
      */
     eGui::setupclass();
     eComponent::setupclass();
+    eWindow::setupclass();
     eLineEdit::setupclass();
 
     eiocCheckbox::setupclass();

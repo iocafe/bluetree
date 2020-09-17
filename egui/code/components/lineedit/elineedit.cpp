@@ -284,7 +284,7 @@ void eLineEdit::draw(
     }
     else {
         if (!m_label_value.is_set()) {
-            m_label_value.set_text(this, m_value->gets());
+            m_label_value.set(this, m_value->gets());
         }
         label = m_label_value.get(this);
 
