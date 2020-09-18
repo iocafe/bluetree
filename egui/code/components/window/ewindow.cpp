@@ -181,10 +181,7 @@ void eWindow::draw(
     eComponent *c;
     const os_char *label;
 
-    if (!m_label_title.is_set()) {
-        m_label_title.set(this, ECOMP_TEXT);
-    }
-    label = m_label_title.get(this);
+    label = m_label_title.get(this, ECOMP_TEXT);
 
     ImGui::Begin(label);                          // Create a window called "Hello, world!" and append into it.
     for (c = firstcomponent(); c; c = c->nextcomponent())

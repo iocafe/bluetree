@@ -284,11 +284,7 @@ void eLineEdit::draw(
         }
     }
     else {
-        if (!m_label_value.is_set()) {
-            m_label_value.set(this, m_value->gets());
-        }
-        label = m_label_value.get(this);
-
+        label = m_label_value.get(this, ECOMP_VALUE);
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
         ImGui::Button(label, ImVec2(edit_w, 0));
         if (ImGui::IsItemActive()) {

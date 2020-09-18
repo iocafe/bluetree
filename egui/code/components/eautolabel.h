@@ -40,24 +40,23 @@ public:
     /* Get pointer to label string.
      */
     const os_char *get(
-        eComponent *component);
+        eComponent *component,
+        os_int propertynr = 0);
 
+    void clear(
+        bool clear_count = false);
+
+protected:
     /* Set text to display as label before "##".
      */
-    void set(
+    void setstr(
         eComponent *component,
-        const os_char *text = OS_NULL);
+        const os_char *text);
 
     void set(
         eComponent *component,
         os_int propertynr);
 
-    void clear(
-        bool clear_count = false);
-
-    inline bool is_set() {return m_label != OS_NULL; }
-
-protected:
     void allocate(
         os_memsz sz);
 
