@@ -38,8 +38,8 @@ class eWindow;
    eComponent has also properties which eVariable doesn't have.
  */
 #define ECOMP_VALUE EVARP_VALUE
-#define ECOMP_STATE_BITS EVARP_STATE_BITS
-#define ECOMP_TIMESTAMP EVARP_TIMESTAMP
+#define ECOMP_SBITS EVARP_SBITS
+#define ECOMP_TSTAMP EVARP_TSTAMP
 #define ECOMP_DIGS EVARP_DIGS
 #define ECOMP_TEXT EVARP_TEXT
 #define ECOMP_UNIT EVARP_UNIT
@@ -50,6 +50,8 @@ class eWindow;
 #define ECOMP_DEFAULT EVARP_DEFAULT
 #define ECOMP_GAIN EVARP_GAIN
 #define ECOMP_OFFSET EVARP_OFFSET
+#define ECOMP_ABBR EVARP_ABBR
+#define ECOMP_TTIP EVARP_TTIP
 #define ECOMP_CONF EVARP_CONF
 #define ECOMP_PATH 30
 
@@ -58,13 +60,17 @@ class eWindow;
  */
 #define ECOMP_NO_OPTIONAL_PROPERITES 0
 #define ECOMP_VALUE_PROPERITES 1
-#define ECOMP_CONF_PROPERITES 2 /* Is this really needed? */
+#define ECOMP_VALUE_STATE_PROPERITES 2
+#define ECOMP_EXTRA_UI_PROPERITES 4
+#define ECOMP_CONF_PROPERITES 8 /* Is this really needed? */
 
 /* GUI component property names. Many of these map directly eVariable's property names
  */
 #define ecomp_value evarp_value
 #define ecomp_digs evarp_digs
 #define ecomp_text evarp_text
+#define ecomp_abbr evarp_abbr
+#define ecomp_ttip evarp_ttip
 #define ecomp_unit evarp_unit
 #define ecomp_min evarp_min
 #define ecomp_max evarp_max
@@ -73,8 +79,8 @@ class eWindow;
 #define ecomp_default evarp_default
 #define ecomp_gain evarp_gain
 #define ecomp_offset evarp_offset
-#define ecomp_state_bits evarp_state_bits
-#define ecomp_timestamp evarp_timestamp
+#define ecomp_sbits evarp_sbits
+#define ecomp_tstamp evarp_tstamp
 #define ecomp_conf evarp_conf
 extern const os_char ecomp_path[];
 

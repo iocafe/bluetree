@@ -155,7 +155,6 @@ void eComponent::setupproperties(
     if (flags & ECOMP_VALUE_PROPERITES) {
         addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA, "type");
         p->setpropertyl(ECOMP_TYPE, OS_STR);
-
         addproperty (cls, ECOMP_VALUE, ecomp_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
         addproperty (cls, ECOMP_DEFAULT, ecomp_default, EPRO_METADATA, "default");
         addpropertyl(cls, ECOMP_DIGS, ecomp_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
@@ -164,13 +163,21 @@ void eComponent::setupproperties(
         addpropertyd(cls, ECOMP_MAX, ecomp_max, EPRO_METADATA, "max");
     }
 
+    if (flags & ECOMP_EXTRA_UI_PROPERITES) {
+        addproperty(cls, ECOMP_ABBR, ecomp_abbr, EPRO_METADATA, "abbreviation");
+        addproperty(cls, ECOMP_TTIP, ecomp_ttip, EPRO_METADATA, "tooltip");
+    }
+
     addpropertyl(cls, ECOMP_ATTR, ecomp_attr, EPRO_METADATA, "attr");
 
     if (flags & ECOMP_VALUE_PROPERITES) {
         addpropertyd(cls, ECOMP_GAIN, ecomp_gain, EPRO_METADATA, "gain");
         addpropertyd(cls, ECOMP_OFFSET, ecomp_offset, EPRO_METADATA, "offset");
-        addproperty (cls, ECOMP_STATE_BITS, ecomp_state_bits, EPRO_METADATA, "statebits");
-        addproperty (cls, ECOMP_TIMESTAMP, ecomp_timestamp, EPRO_METADATA, "timestamp");
+    }
+
+    if (flags & ECOMP_VALUE_STATE_PROPERITES) {
+        addproperty (cls, ECOMP_SBITS, ecomp_sbits, EPRO_METADATA, "state bits");
+        addproperty (cls, ECOMP_TSTAMP, ecomp_tstamp, EPRO_METADATA, "timestamp");
     }
 
     if (flags & ECOMP_CONF_PROPERITES) {

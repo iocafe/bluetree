@@ -16,8 +16,6 @@
 #include "egui.h"
 
 
-
-
 /**
 ****************************************************************************************************
 
@@ -57,8 +55,6 @@ void eGui::setup_desktop_application()
     e = new eLineEdit(w);
     e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
     e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
-
-
 
 
 /*     ECOMP_TYPE

@@ -24,6 +24,8 @@ const os_char
     evarp_value[] = "x",
     evarp_digs[] = "x.digs",
     evarp_text[] = "x.text",
+    evarp_abbr[] = "x.abbr",
+    evarp_ttip[] = "x.ttip",
     evarp_unit[] = "x.unit",
     evarp_min[] = "x.min",
     evarp_max[] = "x.max",
@@ -32,8 +34,8 @@ const os_char
     evarp_default[] = "x.default",
     evarp_gain[] = "x.gain",
     evarp_offset[] = "x.offset",
-    evarp_state_bits[] = "x.quality",
-    evarp_timestamp[] = "x.timestamp",
+    evarp_sbits[] = "x.sbits",
+    evarp_tstamp[] = "x.tstamp",
     evarp_conf[] = "conf"; /* This MUST not start with "x." */
 
 
@@ -167,6 +169,8 @@ void eVariable::setupproperties(
     addpropertyl (cls, EVARP_TYPE, evarp_type, EPRO_METADATA|EPRO_NOONPRCH, "type");
     p->setpropertyl(EVARP_TYPE, OS_STR);
 
+    addproperty (cls, EVARP_ABBR, evarp_abbr, EPRO_PERSISTENT|EPRO_SIMPLE, "abbreviation");
+    addproperty (cls, EVARP_TTIP, evarp_ttip, EPRO_PERSISTENT|EPRO_SIMPLE, "tooltip");
     addproperty (cls, EVARP_VALUE, evarp_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
     addproperty (cls, EVARP_DEFAULT, evarp_default, EPRO_METADATA|EPRO_NOONPRCH, "default");
     addpropertyl(cls, EVARP_DIGS, evarp_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
@@ -176,8 +180,8 @@ void eVariable::setupproperties(
     addpropertyl(cls, EVARP_ATTR, evarp_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
     addpropertyd(cls, EVARP_GAIN, evarp_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
     addpropertyd(cls, EVARP_OFFSET, evarp_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
-    addproperty (cls, EVARP_STATE_BITS, evarp_state_bits, EPRO_METADATA|EPRO_NOONPRCH, "statebits");
-    addproperty (cls, EVARP_TIMESTAMP, evarp_timestamp, EPRO_METADATA|EPRO_NOONPRCH, "timestamp");
+    addproperty (cls, EVARP_SBITS, evarp_sbits, EPRO_METADATA|EPRO_NOONPRCH, "state bits");
+    addproperty (cls, EVARP_TSTAMP, evarp_tstamp, EPRO_METADATA|EPRO_NOONPRCH, "timestamp");
     addproperty (cls, EVARP_CONF, evarp_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
 
 }
@@ -484,7 +488,7 @@ void eVariable::sets(
 
     /* If string fits into small buffer, copy it and save used size.
      */
-    if (n <= (os_memsz)EVARIABLE_STRBUF_SZ)
+    if (n <= EVARIABLE_STRBUF_SZ)
     {
         os_memcpy(m_value.strbuf.buf, x, n);
         if (max_chars >= 0) m_value.strbuf.buf[max_chars] = '\0';

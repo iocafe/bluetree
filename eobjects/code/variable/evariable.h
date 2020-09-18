@@ -34,13 +34,16 @@
 /** Internal string buffer size. Maximum size of string which can be stored within eVariable
     without separate memory allocation.
  */
-#define EVARIABLE_STRBUF_SZ (sizeof(os_memsz)*2 + sizeof(os_char*) - sizeof(os_uchar))
+#define EVARIABLE_STRBUF_SZ ((os_memsz)(sizeof(os_memsz)*2 + sizeof(os_char*) - sizeof(os_uchar)))
 
 /* Enumeration of variable properties.
+ * SBITS = State bits
+ * TSTAMP = Time stamp
+ * A
  */
 #define EVARP_VALUE 1
-#define EVARP_STATE_BITS 2
-#define EVARP_TIMESTAMP 3
+#define EVARP_SBITS 2
+#define EVARP_TSTAMP 3
 #define EVARP_DIGS 4
 #define EVARP_TEXT 5
 #define EVARP_UNIT 6
@@ -51,7 +54,9 @@
 #define EVARP_DEFAULT 14
 #define EVARP_GAIN 15
 #define EVARP_OFFSET 16
-#define EVARP_CONF 18
+#define EVARP_ABBR 17
+#define EVARP_TTIP 18
+#define EVARP_CONF 19
 
 /* Variable property names.
  */
@@ -59,6 +64,8 @@ extern const os_char
     evarp_value[],
     evarp_digs[],
     evarp_text[],
+    evarp_abbr[],
+    evarp_ttip[],
     evarp_unit[],
     evarp_min[],
     evarp_max[],
@@ -67,8 +74,8 @@ extern const os_char
     evarp_default[],
     evarp_gain[],
     evarp_offset[],
-    evarp_state_bits[],
-    evarp_timestamp[],
+    evarp_sbits[],
+    evarp_tstamp[],
     evarp_conf[];
 
 

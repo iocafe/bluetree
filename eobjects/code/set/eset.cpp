@@ -133,6 +133,7 @@ eObject *eSet::clone(
         while (p < e)
         {
             iid = *(os_uchar*)(p++);
+            OSAL_UNUSED(iid);
             ibytes = *(os_uchar*)(p++);
             if (ibytes)
             {
@@ -837,7 +838,7 @@ void eSet::set(
 
     /* If we need to allocate more memory?
      */
-    if (m_used + ibytes + 3 * sizeof(os_char) > m_alloc)
+    if ((os_memsz)(m_used + ibytes + 3 * sizeof(os_char)) > m_alloc)
     {
         start = os_malloc(3 * sizeof(os_char)
             + ibytes + m_used + m_used/4 + slack, &sz);
@@ -1033,6 +1034,7 @@ void eSet::clear()
     while (p < e)
     {
         iid = *(os_uchar*)(p++);
+        OSAL_UNUSED(iid);
         ibytes = *(os_uchar*)(p++);
         if (ibytes)
         {

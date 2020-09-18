@@ -39,13 +39,13 @@ void enet_start_service_process(
     os_char *argv[])
 {
     const os_char
-        *process_id,
+        // *process_id,
         *enet_service_ip_address;
 
     /* This program can take two optional command line arguments. First is process
        identification and second one is IP address of ewebservice.
      */
-    process_id = argc >= 2 ? argv[1] : "0";
+    // process_id = argc >= 2 ? argv[1] : "0";
     enet_service_ip_address = argc >= 3 ? argv[2] : OS_NULL;
 
     /* Initialize this as enet process. First argument is process name and second argument

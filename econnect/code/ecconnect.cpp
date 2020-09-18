@@ -140,14 +140,14 @@ void ecConnect::setupclass()
 void ecConnect::setupproperties(
     os_int cls)
 {
-    eVariable *p;
+    // eVariable *p;
 
     /* Order of these addproperty() calls is important, since ecConnect itself is used to
        describe the properties in property set. The property to set must be added to
        property set before setting value for it. There is trick with p to set text type
        after adding property type. This effects only ecConnect class.
      */
-    p = addproperty(cls, ECCONP_TEXT, ecconp_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
+    /* p = */ addproperty(cls, ECCONP_TEXT, ecconp_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
 }
 
 
