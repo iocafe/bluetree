@@ -1,6 +1,6 @@
 /**
 
-  @file    etypes.h
+  @file    etypes.cpp
   @brief   Commonly used structures and related functions.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -13,32 +13,19 @@
 
 ****************************************************************************************************
 */
-#pragma once
-#ifndef ETYPES_H_
-#define ETYPES_H_
 #include "eobjects.h"
-
-typedef struct eRect
-{
-    os_int x1, y1, x2, y2;
-}
-eRect;
-
-typedef struct eSize
-{
-    os_int w, h;
-}
-eSize;
-
-typedef struct ePos
-{
-    os_int x, y;
-}
-ePos;
 
 bool erect_is_point_inside(
     eRect *r,
     os_int x,
-    os_int y);
+    os_int y)
+{
+    if (r) {
+        if (x >= r->x1 && x <= r->x2) {
+            return (y >= r->y1 && y <= r->y2);
+        }
+    }
 
-#endif
+    return false;
+}
+

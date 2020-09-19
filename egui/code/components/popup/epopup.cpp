@@ -27,7 +27,7 @@
 
 ****************************************************************************************************
 */
-eWindow::eWindow(
+ePopup::ePopup(
     eObject *parent,
     e_oid id,
     os_int flags)
@@ -47,7 +47,7 @@ eWindow::eWindow(
 
 ****************************************************************************************************
 */
-eWindow::~eWindow()
+ePopup::~ePopup()
 {
 }
 
@@ -67,13 +67,13 @@ eWindow::~eWindow()
 
 ****************************************************************************************************
 */
-eObject *eWindow::clone(
+eObject *ePopup::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
-    eWindow *clonedobj;
-    clonedobj = new eWindow(parent, id == EOID_CHILD ? oid() : id, flags());
+    ePopup *clonedobj;
+    clonedobj = new ePopup(parent, id == EOID_CHILD ? oid() : id, flags());
     clonegeneric(clonedobj, aflags);
     return clonedobj;
 }
@@ -82,21 +82,21 @@ eObject *eWindow::clone(
 /**
 ****************************************************************************************************
 
-  @brief Add eWindow to class list and class'es properties to it's property set.
+  @brief Add ePopup to class list and class'es properties to it's property set.
 
-  The eWindow::setupclass function adds eWindow to class list and class'es properties to
+  The ePopup::setupclass function adds ePopup to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
 ****************************************************************************************************
 */
-void eWindow::setupclass()
+void ePopup::setupclass()
 {
-    const os_int cls = EGUICLASSID_WINDOW;
+    const os_int cls = EGUICLASSID_POPUP;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eWindow");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "ePopup");
     eComponent::setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
     propertysetdone(cls);
     os_unlock();
@@ -125,7 +125,7 @@ void eWindow::setupclass()
 
 ****************************************************************************************************
 */
-eStatus eWindow::onpropertychange(
+eStatus ePopup::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -155,11 +155,18 @@ eStatus eWindow::onpropertychange(
 
 ****************************************************************************************************
 */
-eStatus eWindow::simpleproperty(
+eStatus ePopup::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
     return eComponent::simpleproperty(propertynr, x);
+}
+
+void ePopup::open_popup()
+{
+    const os_char *label;
+    label = m_label_title.get(this);
+    ImGui::OpenPopup(label);
 }
 
 
@@ -168,7 +175,7 @@ eStatus eWindow::simpleproperty(
 
   @brief Draw the component.
 
-  The eWindow::draw() function calls ImGui API to render the component.
+  The ePopup::draw() function calls ImGui API to render the component.
 
   @param   Prm Drawing parameters.
   @return  The function return ESTATUS_SUCCESS if all is fine. Other values indicate that the
@@ -177,27 +184,64 @@ eStatus eWindow::simpleproperty(
 
 ****************************************************************************************************
 */
-eStatus eWindow::draw(
+eStatus ePopup::draw(
     eDrawParams& prm)
 {
-    eDrawParams childprm;
     eComponent *c;
     const os_char *label;
 
-    label = m_label_title.get(this, ECOMP_TEXT);
+    label = m_label_title.get(this);
 
-    ImGui::Begin(label);                          // Create a window called "Hello, world!" and append into it.
-
-    childprm = prm;
-    if (!ImGui::IsWindowHovered()) {
-        childprm.right_click = false;
-    }
-
-    for (c = firstcomponent(EOID_GUI_COMPONENT); c; c = c->nextcomponent(EOID_GUI_COMPONENT))
+    if (ImGui::BeginPopup(label))
     {
-        c->draw(childprm);
+        const char* names[] = { "Bream", "Haddock", "Mackerel", "Pollock", "Tilefish" };
+        static bool toggles[] = { true, false, false, false, false };
+
+        for (int i = 0; i < IM_ARRAYSIZE(names); i++)
+            ImGui::MenuItem(names[i], "", &toggles[i]);
+        if (ImGui::BeginMenu("Sub-menu"))
+        {
+            ImGui::MenuItem("Click me");
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+        ImGui::Text("Tooltip here");
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("I am a tooltip over a popup");
+
+        if (ImGui::Button("Stacked Popup"))
+            ImGui::OpenPopup("another popup");
+        if (ImGui::BeginPopup("another popup"))
+        {
+            for (int i = 0; i < IM_ARRAYSIZE(names); i++)
+                ImGui::MenuItem(names[i], "", &toggles[i]);
+            if (ImGui::BeginMenu("Sub-menu"))
+            {
+                ImGui::MenuItem("Click me");
+                if (ImGui::Button("Stacked Popup"))
+                    ImGui::OpenPopup("another popup");
+                if (ImGui::BeginPopup("another popup"))
+                {
+                    ImGui::Text("I am the last one here.");
+                    ImGui::EndPopup();
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndPopup();
+        }
+
+        for (c = firstcomponent(EOID_GUI_COMPONENT); c; c = c->nextcomponent(EOID_GUI_COMPONENT))
+        {
+            c->draw(prm);
+        }
+        ImGui::EndPopup();
+
+        return ESTATUS_SUCCESS;
     }
-    ImGui::End();
-    return ESTATUS_SUCCESS;
+    else
+    {
+        return ESTATUS_FAILED;
+    }
 }
 

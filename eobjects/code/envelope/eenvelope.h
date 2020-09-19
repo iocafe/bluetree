@@ -62,6 +62,10 @@
 #define ECMD_TIMER -50
 #define ECMD_SETTIMER -51
 
+/* Browsing object tree.
+ */
+#define ECMD_INFO_REQUEST -60
+#define ECMD_INFO_REPLY -61
 
 /*@}*/
 

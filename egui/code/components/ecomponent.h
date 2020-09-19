@@ -20,7 +20,9 @@
 #define ECOMPONENT_H_
 #include "egui.h"
 
+class eGui;
 class eWindow;
+class ePopup;
 
 /**
 ****************************************************************************************************
@@ -62,7 +64,8 @@ class eWindow;
 #define ECOMP_VALUE_PROPERITES 1
 #define ECOMP_VALUE_STATE_PROPERITES 2
 #define ECOMP_EXTRA_UI_PROPERITES 4
-#define ECOMP_CONF_PROPERITES 8 /* Is this really needed? */
+#define ECOMP_CONF_PATH 8
+#define ECOMP_CONF_PROPERITES 16 /* Is this really needed? */
 
 /* GUI component property names. Many of these map directly eVariable's property names
  */
@@ -118,7 +121,9 @@ eLayoutParams;
 
 typedef struct eDrawParams
 {
-
+    eGui *gui;
+    ImGuiIO *io;
+    bool right_click;
 }
 eDrawParams;
 
@@ -150,7 +155,7 @@ public:
      */
     eComponent(
         eObject *parent = OS_NULL,
-        e_oid id = EOID_ITEM,
+        e_oid id = EOID_GUI_COMPONENT,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
@@ -216,6 +221,13 @@ public:
         bool check_this = false)
     {
         return (eWindow*)parent(EGUICLASSID_WINDOW, EOID_ALL, check_this);
+    }
+
+    /* Get parent gui.
+     */
+    inline eGui *gui()
+    {
+        return (eGui*)parent(EGUICLASSID_GUI, EOID_ALL, true);
     }
 
     /* Called when property value changes.
@@ -315,8 +327,12 @@ public:
 
     /* Draw the component.
      */
-    virtual void draw(
-        eDrawParams& prm) {}
+    virtual eStatus draw(
+        eDrawParams& prm);
+
+    virtual ePopup *popup();
+    virtual void close_popup();
+
 
 #if 0
     /* Pass mouse event to component, returns true if mouse event was processed.
@@ -374,6 +390,10 @@ protected:
      */
     eRect m_rect;
 
+    /* Clip rectangle gottent from parent.
+     */
+    // eRect m_parent_clip_rect;
+
     /* Saved layout parameters.
      */
     eLayoutParams m_layout_prm;
@@ -386,6 +406,8 @@ protected:
     /* Natural size for the component.
      */
     eSize m_natural_sz;
+
+    bool m_popup_open;
 };
 
 

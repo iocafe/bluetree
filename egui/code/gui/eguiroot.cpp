@@ -55,6 +55,7 @@ eGui::eGui(
     m_viewport = eimgui_open_viewport();
 
     os_memclear(&m_draw_prm, sizeof(eDrawParams));
+    m_draw_prm.gui = this;
 }
 
 
@@ -424,61 +425,21 @@ eStatus eGui::run()
 
     while (true)
     {
+// TEMP PATCH. THIS NEEDS TO WAIT FOR USER INPUT OR OTHER EVENTS, NOT TO RUN IN CRAZY LOOP
+        eglobal->eguiglobal->guilib_thread->alive(EALIVE_RETURN_IMMEDIATELY);
+
         s = eimgui_start_frame(m_viewport);
         if (s) break;
 
         ShowExampleAppDockSpace(&openoi);
 
-        for (c = firstcomponent(); c; c = c->nextcomponent())
+        m_draw_prm.io = &ImGui::GetIO();
+        m_draw_prm.right_click = ImGui::IsMouseReleased(EIMGUI_RIGHT_MOUSE_BUTTON);
+
+        for (c = firstcomponent(EOID_GUI_WINDOW); c; c = c->nextcomponent(EOID_GUI_WINDOW))
         {
             c->draw(m_draw_prm);
         }
-
-if (ImGui::GetIO().MouseClicked[EIMGUI_RIGHT_MOUSE_BUTTON_NR])
-{
-    ImGui::OpenPopup("my_toggle_popup");
-}
-
-if (ImGui::BeginPopup("my_toggle_popup"))
-{
-        const char* names[] = { "Bream", "Haddock", "Mackerel", "Pollock", "Tilefish" };
-        static bool toggles[] = { true, false, false, false, false };
-
-    for (int i = 0; i < IM_ARRAYSIZE(names); i++)
-        ImGui::MenuItem(names[i], "", &toggles[i]);
-    if (ImGui::BeginMenu("Sub-menu"))
-    {
-        ImGui::MenuItem("Click me");
-        ImGui::EndMenu();
-    }
-
-    ImGui::Separator();
-    ImGui::Text("Tooltip here");
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip("I am a tooltip over a popup");
-
-    if (ImGui::Button("Stacked Popup"))
-        ImGui::OpenPopup("another popup");
-    if (ImGui::BeginPopup("another popup"))
-    {
-        for (int i = 0; i < IM_ARRAYSIZE(names); i++)
-            ImGui::MenuItem(names[i], "", &toggles[i]);
-        if (ImGui::BeginMenu("Sub-menu"))
-        {
-            ImGui::MenuItem("Click me");
-            if (ImGui::Button("Stacked Popup"))
-                ImGui::OpenPopup("another popup");
-            if (ImGui::BeginPopup("another popup"))
-            {
-                ImGui::Text("I am the last one here.");
-                ImGui::EndPopup();
-            }
-            ImGui::EndMenu();
-        }
-        ImGui::EndPopup();
-    }
-    ImGui::EndPopup();
-}
 
 
 #if 0

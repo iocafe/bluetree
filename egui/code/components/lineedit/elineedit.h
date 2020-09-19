@@ -59,7 +59,7 @@ public:
      */
     eLineEdit(
         eObject *parent = OS_NULL,
-        e_oid id = EOID_ITEM,
+        e_oid id = EOID_GUI_COMPONENT,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
@@ -132,7 +132,7 @@ public:
 
     /* Draw the component.
      */
-    virtual void draw(
+    virtual eStatus draw(
         eDrawParams& prm);
 
     /*@}*/

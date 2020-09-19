@@ -80,6 +80,8 @@ extern const os_char
 */
 class eGui : public eObject
 {
+    friend class eComponent;
+
     /**
     ************************************************************************************************
 

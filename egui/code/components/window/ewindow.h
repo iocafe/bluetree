@@ -1,6 +1,6 @@
 /**
 
-  @file    ewindow.cpp
+  @file    ewindow.h
   @brief   GUI window class.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -59,7 +59,7 @@ public:
      */
     eWindow(
         eObject *parent = OS_NULL,
-        e_oid id = EOID_ITEM,
+        e_oid id = EOID_GUI_WINDOW,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
@@ -132,7 +132,7 @@ public:
 
     /* Draw the component.
      */
-    virtual void draw(
+    virtual eStatus draw(
         eDrawParams& prm);
 
     /*@}*/

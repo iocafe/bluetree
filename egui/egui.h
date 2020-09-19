@@ -65,7 +65,9 @@ void egui_shutdown();
 #include "code/components/eattrbuffer.h"
 #include "code/components/ecomponent.h"
 #include "code/components/window/ewindow.h"
+#include "code/components/popup/epopup.h"
 #include "code/components/lineedit/elineedit.h"
+#include "code/components/treenode/etreenode.h"
 
 #include "code/ioc_components/eioc_checkbox.h"
 #include "code/gui/eguiroot.h"

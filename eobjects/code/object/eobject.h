@@ -874,6 +874,11 @@ private:
     void message_process_ns(
         eEnvelope *envelope);
 
+    /* Object information request by tree browser node, etc. Reply to it.
+     */
+    virtual void info_request(
+        eEnvelope *envelope);
+
     void message_oix(
         eEnvelope *envelope);
 

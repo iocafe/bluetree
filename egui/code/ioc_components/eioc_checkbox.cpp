@@ -113,13 +113,17 @@ void eiocCheckbox::setupclass()
   The eiocCheckbox::draw() function calls ImGui API to render the component.
 
   @param   Prm Drawing parameters.
-  @return  None.
+  @return  The function return ESTATUS_SUCCESS if all is fine. Other values indicate that the
+           component is no longer drawable or useful. This could be for example a pop up menu
+           closed implicitely by clicking elsewhere.
 
 ****************************************************************************************************
 */
-void eiocCheckbox::draw(
+eStatus eiocCheckbox::draw(
     eDrawParams& prm)
 {
     ImGui::Text("HERREE.");
+
+    return ESTATUS_SUCCESS;
 }
 

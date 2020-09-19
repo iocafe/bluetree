@@ -30,8 +30,8 @@ typedef struct eViewPort
 eViewPort;
 
 
-#define EIMGUI_LEFT_MOUSE_BUTTON_NR 0
-#define EIMGUI_RIGHT_MOUSE_BUTTON_NR 1
+#define EIMGUI_LEFT_MOUSE_BUTTON ImGuiMouseButton_Left
+#define EIMGUI_RIGHT_MOUSE_BUTTON ImGuiMouseButton_Right
 
 /* Initialize ImGUI for use.
  */

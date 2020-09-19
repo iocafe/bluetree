@@ -1,6 +1,6 @@
 /**
 
-  @file    elineedit.cpp
+  @file    etreenode.cpp
   @brief   Line edit with label and value.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -27,7 +27,7 @@
 
 ****************************************************************************************************
 */
-eLineEdit::eLineEdit(
+eTreeNode::eTreeNode(
     eObject *parent,
     e_oid id,
     os_int flags)
@@ -52,7 +52,7 @@ eLineEdit::eLineEdit(
 
 ****************************************************************************************************
 */
-eLineEdit::~eLineEdit()
+eTreeNode::~eTreeNode()
 {
     delete m_value;
 }
@@ -73,13 +73,13 @@ eLineEdit::~eLineEdit()
 
 ****************************************************************************************************
 */
-eObject *eLineEdit::clone(
+eObject *eTreeNode::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
-    eLineEdit *clonedobj;
-    clonedobj = new eLineEdit(parent, id == EOID_CHILD ? oid() : id, flags());
+    eTreeNode *clonedobj;
+    clonedobj = new eTreeNode(parent, id == EOID_CHILD ? oid() : id, flags());
     clonegeneric(clonedobj, aflags);
     return clonedobj;
 }
@@ -88,25 +88,61 @@ eObject *eLineEdit::clone(
 /**
 ****************************************************************************************************
 
-  @brief Add eLineEdit to class list and class'es properties to it's property set.
+  @brief Add eTreeNode to class list and class'es properties to it's property set.
 
-  The eLineEdit::setupclass function adds eLineEdit to class list and class'es properties to
+  The eTreeNode::setupclass function adds eTreeNode to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
 ****************************************************************************************************
 */
-void eLineEdit::setupclass()
+void eTreeNode::setupclass()
 {
-    const os_int cls = EGUICLASSID_LINE_EDIT;
+    const os_int cls = EGUICLASSID_TREE_NODE;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eLineEdit");
-    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|
-        ECOMP_VALUE_STATE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eTreeNode");
+    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_VALUE_STATE_PROPERITES|
+        ECOMP_EXTRA_UI_PROPERITES|ECOMP_CONF_PATH);
     propertysetdone(cls);
     os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Function to process incoming messages.
+
+  The eeTreeNode::onmessage function handles messages received by object. If this function
+  doesn't process message, it calls parent class'es onmessage function.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eTreeNode::onmessage(
+    eEnvelope *envelope)
+{
+    /* If at final destination for the message.
+     */
+    if (*envelope->target()=='\0')
+    {
+        switch (envelope->command())
+        {
+            case ECMD_INFO_REPLY:
+                int ulle;
+                ulle = 2;
+                return;
+        }
+    }
+
+    /* Call parent class'es onmessage.
+     */
+    eObject::onmessage(envelope);
 }
 
 
@@ -132,7 +168,7 @@ void eLineEdit::setupclass()
 
 ****************************************************************************************************
 */
-eStatus eLineEdit::onpropertychange(
+eStatus eTreeNode::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -188,7 +224,7 @@ eStatus eLineEdit::onpropertychange(
 
 ****************************************************************************************************
 */
-eStatus eLineEdit::simpleproperty(
+eStatus eTreeNode::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
@@ -219,7 +255,7 @@ eStatus eLineEdit::simpleproperty(
 
   @brief Draw the component.
 
-  The eLineEdit::draw() function calls ImGui API to render the component.
+  The eTreeNode::draw() function calls ImGui API to render the component.
 
   @param   Prm Drawing parameters.
   @return  The function return ESTATUS_SUCCESS if all is fine. Other values indicate that the
@@ -228,7 +264,7 @@ eStatus eLineEdit::simpleproperty(
 
 ****************************************************************************************************
 */
-eStatus eLineEdit::draw(
+eStatus eTreeNode::draw(
     eDrawParams& prm)
 {
     os_int edit_w, unit_w, total_w, unit_spacer, total_h, h;
@@ -241,7 +277,7 @@ eStatus eLineEdit::draw(
     total_w = c.x;
 
 
-ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
+    ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
     m_rect.x1 = cpos.x;
     m_rect.y1 = cpos.y;
 
@@ -299,6 +335,7 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
         ImGui::Button(label, ImVec2(edit_w, 0));
         if (ImGui::IsItemActive()) {
+request_object_info();
             m_prev_edit_value = false;
             m_edit_value = true;
             m_edit_buf.set(m_value->gets(), 256);
@@ -323,29 +360,27 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
-
-#if 0
-    ImGuiInputTextFlags_None                = 0,
-    ImGuiInputTextFlags_CharsDecimal        = 1 << 0,   // Allow 0123456789.+-*/
-    ImGuiInputTextFlags_CharsHexadecimal    = 1 << 1,   // Allow 0123456789ABCDEFabcdef
-    ImGuiInputTextFlags_CharsUppercase      = 1 << 2,   // Turn a..z into A..Z
-    ImGuiInputTextFlags_CharsNoBlank        = 1 << 3,   // Filter out spaces, tabs
-    ImGuiInputTextFlags_AutoSelectAll       = 1 << 4,   // Select entire text when first taking mouse focus
-    ImGuiInputTextFlags_EnterReturnsTrue    = 1 << 5,   // Return 'true' when Enter is pressed (as opposed to every time the value was modified). Consider looking at the IsItemDeactivatedAfterEdit() function.
-    ImGuiInputTextFlags_CallbackCompletion  = 1 << 6,   // Callback on pressing TAB (for completion handling)
-    ImGuiInputTextFlags_CallbackHistory     = 1 << 7,   // Callback on pressing Up/Down arrows (for history handling)
-    ImGuiInputTextFlags_CallbackAlways      = 1 << 8,   // Callback on each iteration. User code may query cursor position, modify text buffer.
-    ImGuiInputTextFlags_CallbackCharFilter  = 1 << 9,   // Callback on character inputs to replace or discard them. Modify 'EventChar' to replace or discard, or return 1 in callback to discard.
-    ImGuiInputTextFlags_AllowTabInput       = 1 << 10,  // Pressing TAB input a '\t' character into the text field
-    ImGuiInputTextFlags_CtrlEnterForNewLine = 1 << 11,  // In multi-line mode, unfocus with Enter, add new line with Ctrl+Enter (default is opposite: unfocus with Ctrl+Enter, add line with Enter).
-    ImGuiInputTextFlags_NoHorizontalScroll  = 1 << 12,  // Disable following the cursor horizontally
-    ImGuiInputTextFlags_AlwaysInsertMode    = 1 << 13,  // Insert mode
-    ImGuiInputTextFlags_ReadOnly            = 1 << 14,  // Read-only mode
-    ImGuiInputTextFlags_Password            = 1 << 15,  // Password mode, display all characters as '*'
-    ImGuiInputTextFlags_NoUndoRedo          = 1 << 16,  // Disable undo/redo. Note that input text owns the text data while active, if you want to provide your own undo/redo stack you need e.g. to call ClearActiveID().
-    ImGuiInputTextFlags_CharsScientific     = 1 << 17,  // Allow 0123456789.+-*/eE (Scientific notation input)
-    ImGuiInputTextFlags_CallbackResize      = 1 << 18,  // Callback on buffer capacity changes request (beyond 'buf_size' parameter value), allowing the string to grow. Notify when the string wants to be resized (for string types which hold a cache of their Size). You will be provided a new BufSize in the callback and NEED to honor it. (see misc/cpp/imgui_stdlib.h for an example of using this)
-    ImGuiInputTextFlags_CallbackEdit        = 1 << 19,  // Callback on any edit (note that InputText() already returns true on edit, the callback is useful mainly to manipulate the underlying buffer while focus is active)
-#endif
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Draw the component.
+
+  The eTreeNode::draw() function calls ImGui API to render the component.
+
+  @param   Prm Drawing parameters.
+  @return  The function return ESTATUS_SUCCESS if all is fine. Other values indicate that the
+           component is no longer drawable or useful. This could be for example a pop up menu
+           closed implicitely by clicking elsewhere.
+
+****************************************************************************************************
+*/
+void eTreeNode::request_object_info()
+{
+    eVariable path;
+
+    propertyv(ECOMP_PATH, &path);
+    message(ECMD_INFO_REQUEST, path.gets());
+}

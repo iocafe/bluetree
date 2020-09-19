@@ -155,7 +155,7 @@ void eComponent::setupproperties(
     if (flags & ECOMP_VALUE_PROPERITES) {
         addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA, "type");
         p->setpropertyl(ECOMP_TYPE, OS_STR);
-        addproperty (cls, ECOMP_VALUE, ecomp_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
+        addproperty (cls, ECOMP_VALUE, ecomp_value, EPRO_SIMPLE, "value");
         addproperty (cls, ECOMP_DEFAULT, ecomp_default, EPRO_METADATA, "default");
         addpropertyl(cls, ECOMP_DIGS, ecomp_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
         addpropertys(cls, ECOMP_UNIT, ecomp_unit, EPRO_METADATA, "unit");
@@ -176,12 +176,16 @@ void eComponent::setupproperties(
     }
 
     if (flags & ECOMP_VALUE_STATE_PROPERITES) {
-        addproperty (cls, ECOMP_SBITS, ecomp_sbits, EPRO_METADATA, "state bits");
-        addproperty (cls, ECOMP_TSTAMP, ecomp_tstamp, EPRO_METADATA, "timestamp");
+        addproperty (cls, ECOMP_SBITS, ecomp_sbits, EPRO_DEFAULT, "state bits");
+        addproperty (cls, ECOMP_TSTAMP, ecomp_tstamp, EPRO_DEFAULT, "timestamp");
     }
 
     if (flags & ECOMP_CONF_PROPERITES) {
         addproperty (cls, ECOMP_CONF, ecomp_conf, EPRO_METADATA, "conf");
+    }
+
+    if (flags & ECOMP_CONF_PATH) {
+        addproperty (cls, ECOMP_PATH, ecomp_path, EPRO_METADATA, "path");
     }
 }
 
@@ -215,7 +219,7 @@ eComponent *eComponent::firstcomponent(
     }
 
     cid = o->classid();
-    if (cid >= EGUICLASSID_BEGIN_COMPONENTS && cid <= EGUICLASSID_END_COMPONENTS) {
+    if (EGUICLASSID_IS_COMPONENT(cid)) {
         return (eComponent*)o;
     }
 
@@ -223,8 +227,7 @@ eComponent *eComponent::firstcomponent(
     while (h)
     {
         cid = h->object()->classid();
-        if (cid >= EGUICLASSID_BEGIN_COMPONENTS &&
-            cid <= EGUICLASSID_END_COMPONENTS)
+        if (EGUICLASSID_IS_COMPONENT(cid))
         {
             return (eComponent*)h->object();
         }
@@ -550,4 +553,92 @@ eStatus eComponent::reader(
 failed:
 #endif
     return ESTATUS_READING_OBJ_FAILED;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Base class support for dwaring the component.
+
+  The eComponent::draw() base class function should be called at end of a regular GUI component's
+  draw function, but not from top level components like ePopup and eWindow.
+
+  The function calls ImGui API to implement some generic component functionality,
+  like right clicks, drag and drop in edit mode, etc.
+
+  @param   Prm Drawing parameters.
+  @return  The function return ESTATUS_SUCCESS if all is fine. Other values indicate that the
+           component is no longer drawable or useful. This could be for example a pop up menu
+           closed implicitely by clicking elsewhere.
+
+****************************************************************************************************
+*/
+eStatus eComponent::draw(
+    eDrawParams& prm)
+{
+    eRect visible_rect;
+    eObject *o;
+    bool popup_drawn;
+
+    // Union component rect and parent clip to get visible rect !!!!!!!!!!!!!!!!!!!!!!
+    visible_rect = m_rect;
+
+    // And make sure item is in Z order
+
+    if (prm.right_click) {
+        if (erect_is_point_inside(&visible_rect, prm.io->MousePos.x, prm.io->MousePos.y))
+        {
+            popup();
+        }
+    }
+
+    if (m_popup_open)
+    {
+        popup_drawn = false;
+        for (o = first(EOID_GUI_POPUP); o; o = o->next(EOID_GUI_POPUP))
+        {
+            if (EGUICLASSID_IS_COMPONENT(o->classid())) {
+                if (((eComponent*)o)->draw(prm) == ESTATUS_SUCCESS) {
+                    popup_drawn = true;
+                }
+            }
+        }
+
+        if (!popup_drawn) {
+            close_popup();
+        }
+    }
+
+    return ESTATUS_SUCCESS;
+}
+
+
+ePopup *eComponent::popup()
+{
+    ePopup *p;
+
+    close_popup();
+
+    p = new ePopup(this, EOID_GUI_POPUP,
+        EOBJ_IS_ATTACHMENT|EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
+
+    p->open_popup();
+    m_popup_open = true;
+
+    return p;
+}
+
+
+void eComponent::close_popup()
+{
+    eObject *o;
+
+    if (m_popup_open)
+    {
+        while ((o = first(EOID_GUI_POPUP))) {
+            delete o;
+        }
+        m_popup_open = false;
+    }
 }

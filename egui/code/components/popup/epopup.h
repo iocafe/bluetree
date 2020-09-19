@@ -1,12 +1,10 @@
 /**
 
-  @file    ecomponent.h
-  @brief   Abstract GUI component.
+  @file    epopup.h
+  @brief   GUI popup like drop down menu.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
-
-  Base call for all GUI components (widgets)...
+  @date    15.9.2020
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -16,8 +14,8 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EIOC_CHECKBOX_H_
-#define EIOC_CHECKBOX_H_
+#ifndef EPOPUP_H_
+#define EPOPUP_H_
 #include "egui.h"
 
 /**
@@ -37,19 +35,19 @@
 /**
 ****************************************************************************************************
 
-  @brief eiocCheckbox class.
+  @brief ePopup class.
 
-  The eiocCheckbox is dynamically typed variable, which can store integers, floating point values
+  The ePopup is dynamically typed variable, which can store integers, floating point values
   and strings.
 
 ****************************************************************************************************
 */
-class eiocCheckbox : public eComponent
+class ePopup : public eComponent
 {
     /**
     ************************************************************************************************
 
-      @name eiocCheckbox overrides for eObject base class functions.
+      @name ePopup overrides for eObject base class functions.
 
       X...
 
@@ -59,14 +57,14 @@ class eiocCheckbox : public eComponent
 public:
     /* Constructor.
      */
-    eiocCheckbox(
+    ePopup(
         eObject *parent = OS_NULL,
-        e_oid id = EOID_GUI_COMPONENT,
+        e_oid id = EOID_GUI_POPUP,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eiocCheckbox();
+    virtual ~ePopup();
 
     /* Clone object.
      */
@@ -75,34 +73,47 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to eiocCheckbox pointer.
+    /* Casting eObject pointer to ePopup pointer.
      */
-    inline static eiocCheckbox *cast(
+    inline static ePopup *cast(
         eObject *o)
     {
-        e_assert_type(o, EGUICLASSID_IOC_CHECKBOX)
-        return (eiocCheckbox*)o;
+        e_assert_type(o, EGUICLASSID_POPUP)
+        return (ePopup*)o;
     }
 
     /* Get class identifier.
      */
     virtual os_int classid()
     {
-        return EGUICLASSID_IOC_CHECKBOX;
+        return EGUICLASSID_POPUP;
     }
 
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
 
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
+    /* Get value of simple property.
+     */
+    virtual eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
+
     /* Static constructor function for generating instance by class list.
      */
-    static eiocCheckbox *newobj(
+    static ePopup *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eiocCheckbox(parent, id, flags);
+        return new ePopup(parent, id, flags);
     }
 
     /*@}*/
@@ -126,8 +137,11 @@ public:
 
     /*@}*/
 
+    void open_popup();
 
 protected:
+    eAutoLabel m_label_title;
+
 };
 
 

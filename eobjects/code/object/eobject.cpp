@@ -402,7 +402,7 @@ void eObject::oixstr(
     pos = 0;
     buf[pos++] = '@';
     pos += (os_int)osal_int_to_str(buf+pos, bufsz-pos, mm_handle->oix()) - 1;
-    if (pos < sizeof(buf)-1)
+    if (pos < bufsz - 1)
     {
         ucnt = mm_handle->ucnt();
         if (ucnt)
@@ -1693,7 +1693,7 @@ void eObject::message_process_ns(
 
         eglobal->process->queue(envelope);
 
-        /* Done, finish with synnchronization and return.
+        /* Done, finish with synchronization and return.
          */
         os_unlock();
         return;
@@ -2008,8 +2008,11 @@ void eObject::onmessage(
               case ECMD_UNBIND:
                 /* THIS IS TRICKY: WE NEED TO FIND BINDING BY SOURCE
                     PATH AND FORWARD THIS TO IT */
-                ;
+                break;
 
+              case ECMD_INFO_REQUEST:
+                info_request(envelope);
+                return;
             }
             osal_debug_error("onmessage(): Message not processed");
             break;
@@ -2081,6 +2084,28 @@ getout:
         osal_debug_error("onmessage() failed: target not found");
     }
 #endif
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Object information request by tree browser node, etc. Reply to it.
+
+  The eObject::info_request function is called when the object received ECMD_INFO_REQUEST
+  message. It send object information back with ECMD_INFO_REPLY.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eObject::info_request(
+    eEnvelope *envelope)
+{
+    message (ECMD_INFO_REPLY, envelope->source(),
+        envelope->target(), OS_NULL, EMSG_KEEP_CONTENT, envelope->context());
 }
 
 
@@ -2231,9 +2256,9 @@ void eObject::setpropertys_msg(
   @param  propertyname Property name, class specific.
   @param  pflags Bit fields, combination of:
           - EPRO_DEFAULT (0): No options
-          - EPRO_PERSISTENT: Property value is persistant is when saving classes properties.
-          - EPRO_METADATA: Much like EPRO_PERSISTENT, but property value is saved only if
-            also metadata is to be saved.
+          - EPRO_PERSISTENT: Property value is persistant is when saving.
+          - EPRO_METADATA: Much like EPRO_PERSISTENT, but property value is saved if
+            metadata is to be saved.
           - EPRO_SIMPLE: Do not keep copy of non default property in variable. Class implementation
             takes care about this.
           - EPRO_NOONPRCH: Do not call onpropertychange when value changes.
