@@ -876,7 +876,7 @@ private:
 
     /* Object information request by tree browser node, etc. Reply to it.
      */
-    virtual void info_request(
+    virtual void info(
         eEnvelope *envelope);
 
     void message_oix(
