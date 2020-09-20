@@ -92,6 +92,11 @@ public:
         return new eSet(parent, id, flags);
     }
 
+    /* Get next set identified by oid.
+     */
+    eSet *nexts(
+        e_oid id = EOID_CHILD);
+
     /* Write set content to stream.
      */
     virtual eStatus writer(
@@ -129,7 +134,7 @@ public:
 
     /* Store value into set.
      */
-    /* virtual */ void set(
+    void set(
         os_int id,
         eVariable *x,
         os_int sflags = 0);
@@ -169,7 +174,7 @@ public:
 
     /* Get value from set.
      */
-    /* virtual */ os_boolean get(
+    os_boolean get(
         os_int id,
         eVariable *x);
 

@@ -188,7 +188,7 @@ public:
         return new eVariable(parent, id, flags);
     }
 
-    /* Get next object identified by oid.
+    /* Get next variable identified by oid.
      */
     eVariable *nextv(
         e_oid id = EOID_CHILD);

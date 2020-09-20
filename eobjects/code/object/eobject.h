@@ -29,6 +29,7 @@
 class eHandle;
 class eRoot;
 class eVariable;
+class eSet;
 class eContainer;
 class eNameSpace;
 class eName;
@@ -90,13 +91,21 @@ class ePointer;
 #endif
 
 
+
+/* Browse eSet identifier numbers.
+ */
+#define EBROWSE_IN_NSPACE 1
+
+#define EBROWSE_ITEM_NAME 10
+
+
 /* Name space identifiers as static strings. eobj_this_ns is default
    for ns_first and ns_firstv functions()
  */
-extern os_char eobj_process_ns[];
-extern os_char eobj_thread_ns[];
-extern os_char eobj_parent_ns[];
-extern os_char eobj_this_ns[];
+extern const os_char eobj_process_ns[];
+extern const os_char eobj_thread_ns[];
+extern const os_char eobj_parent_ns[];
+extern const os_char eobj_this_ns[];
 
 
 /**
@@ -393,12 +402,17 @@ public:
     eObject *first(
         e_oid id = EOID_CHILD);
 
-    /* Get the first child variable identified by oid.
+    /* Get the first child eVariable identified by oid.
      */
     eVariable *firstv(
         e_oid id = EOID_CHILD);
 
-    /* Get the first child container identified by oid.
+    /* Get the first child eSet identified by oid.
+     */
+    eSet *firsts(
+        e_oid id = EOID_CHILD);
+
+    /* Get the first child eContainer identified by oid.
      */
     eContainer *firstc(
         e_oid id = EOID_CHILD);
@@ -876,8 +890,11 @@ private:
 
     /* Object information request by tree browser node, etc. Reply to it.
      */
-    virtual void info(
+    virtual void send_browse_info(
         eEnvelope *envelope);
+
+    void browse_list_namespace(
+        eContainer *container);
 
     void message_oix(
         eEnvelope *envelope);

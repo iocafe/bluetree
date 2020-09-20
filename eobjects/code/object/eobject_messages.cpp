@@ -614,7 +614,7 @@ void eObject::onmessage(
                 break;
 
               case ECMD_INFO_REQUEST:
-                info(envelope);
+                send_browse_info(envelope);
                 return;
             }
             osal_debug_error("onmessage(): Message not processed");
@@ -695,7 +695,7 @@ getout:
 
   @brief Object information request by tree browser node, etc. Reply to it.
 
-  The eObject::process_info reply function is called when the object received ECMD_INFO_REQUEST
+  The eObject::send_browse_info function is called when the object received ECMD_INFO_REQUEST
   message. It send object information back with ECMD_INFO_REPLY.
 
   @param   envelope Message envelope. Contains command, target and source paths and
@@ -704,17 +704,39 @@ getout:
 
 ****************************************************************************************************
 */
-void eObject::info(
+void eObject::send_browse_info(
     eEnvelope *envelope)
 {
-    /* information about this object
+    eContainer *content;
 
-    list children
+    /* information about this object */
 
-    list children */
+    /* If this object has name space, list items */
 
-    message (ECMD_INFO_REPLY, envelope->source(),
-        envelope->target(), OS_NULL, EMSG_KEEP_CONTENT, envelope->context());
+    content = new eContainer;
+
+    browse_list_namespace(content);
+
+    message(ECMD_INFO_REPLY, envelope->source(),
+        envelope->target(), content, EMSG_DEL_CONTENT, envelope->context());
+}
+
+
+/* List names in this object's namespace. Used for browsing.
+ */
+void eObject::browse_list_namespace(
+    eContainer *content)
+{
+    eName *n;
+    eSet *item;
+
+    // is_process = (classid() == ECLASSID_PROCESS);
+
+    for (n = eObject::ns_firstv(); n; n = n->ns_next())
+    {
+        item = new eSet(content, EBROWSE_IN_NSPACE);
+        item->set(EBROWSE_ITEM_NAME, n);
+    }
 }
 
 

@@ -150,7 +150,7 @@ public:
 
     /* Get name space identifier, if any, for the name.
      */
-    os_char *namespaceid();
+    const os_char *namespaceid();
 
     /* Set name space identifier, if any, for the name.
      */
@@ -188,16 +188,15 @@ protected:
         m_vflags &= ~EVAR_IS_RED;
     }
 
-
     /** Namespace type.
      */
     eNameSpaceTypeEnum m_ns_type;
 
-    /** True if te name is mapped to process name space.
+    /** True if the name is mapped to the process name space.
      */
     os_boolean m_is_process_ns;
 
-    /* Name space identifier string when m_ns_type is E_SPECIFIED_NS_TYPE.
+    /** Name space identifier string when m_ns_type is E_SPECIFIED_NS_TYPE.
      */
     eVariable *m_namespace_id;
 

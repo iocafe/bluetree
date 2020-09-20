@@ -199,7 +199,7 @@ void eVariable::setupproperties(
            specify object identifier, only children with that specified object identifier
            are searched for.
 
-  @return  Pointer to the first child variable, or OS_NULL if none found.
+  @return  Pointer to the next eVariable, or OS_NULL if none found.
 
 ****************************************************************************************************
 */

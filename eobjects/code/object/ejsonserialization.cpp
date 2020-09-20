@@ -44,6 +44,7 @@ eStatus eObject::json_write(
     os_boolean *comma)
 {
     os_char *str;
+    const os_char *cstr;
     os_int i;
     eVariable list, *p, value;
     eName *name;
@@ -89,10 +90,10 @@ eStatus eObject::json_write(
     list.clear();
     for (name = firstn(EOID_NAME); name; name = name->nextn(EOID_NAME))
     {
-        str = name->namespaceid();
-        if (str)
+        cstr = name->namespaceid();
+        if (cstr)
         {
-            value = str;
+            value = cstr;
             value += "/";
         }
         else

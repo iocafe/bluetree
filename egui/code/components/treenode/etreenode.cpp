@@ -127,6 +127,10 @@ void eTreeNode::setupclass()
 void eTreeNode::onmessage(
     eEnvelope *envelope)
 {
+    eContainer *content;
+    eSet *item;
+    eTreeNode *node;
+
     /* If at final destination for the message.
      */
     if (*envelope->target()=='\0')
@@ -134,8 +138,13 @@ void eTreeNode::onmessage(
         switch (envelope->command())
         {
             case ECMD_INFO_REPLY:
-                int ulle;
-                ulle = 2;
+                content = eContainer::cast(envelope->content());
+
+                for (item = content->firsts(); item; item = item->nexts())
+                {
+                    node = new eTreeNode(this);
+                    node->setpropertys(ECOMP_TEXT, "Nasu");
+                }
                 return;
         }
     }
@@ -267,6 +276,7 @@ eStatus eTreeNode::simpleproperty(
 eStatus eTreeNode::draw(
     eDrawParams& prm)
 {
+    eComponent *child;
     os_int edit_w, unit_w, total_w, unit_spacer, total_h, h;
     const os_char *label, *unit;
     ImGuiInputTextFlags eflags;
@@ -359,7 +369,16 @@ request_object_info();
 
     /* Let base class implementation handle the rest.
      */
-    return eComponent::draw(prm);
+    eComponent::draw(prm);
+
+    for (child = firstcomponent(EOID_GUI_COMPONENT);
+         child;
+         child = child->nextcomponent(EOID_GUI_COMPONENT))
+    {
+        child->draw(prm);
+    }
+
+    return ESTATUS_SUCCESS;
 }
 
 

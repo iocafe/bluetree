@@ -196,6 +196,39 @@ eObject *eSet::clone(
 /**
 ****************************************************************************************************
 
+  @brief Get next child set identified by oid.
+
+  The eSet::nexts() function returns pointer to the next object of the same class.
+
+  @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
+           child objects, regardless wether these are attachment or not. Other values
+           specify object identifier, only children with that specified object identifier
+           are searched for.
+
+  @return  Pointer to the next eSet, or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+eSet *eSet::nexts(
+    e_oid id)
+{
+    if (mm_handle == OS_NULL) return OS_NULL;
+    eHandle *h = mm_handle->next(id);
+    while (h)
+    {
+        if (h->object()->classid() == ECLASSID_SET)
+            return eSet::cast(h->object());
+
+        h = h->next(id);
+    }
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Write set content to stream.
 
   The eSet::writer() function serializes the eSet to stream. This writes only the

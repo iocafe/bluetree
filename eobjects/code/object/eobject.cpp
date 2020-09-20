@@ -33,10 +33,10 @@
 /* Name space identifiers as static strings. eobj_this_ns is default
    for ns_first and ns_firstv functions()
  */
-os_char eobj_process_ns[] = E_PROCESS_NS;
-os_char eobj_thread_ns[] = E_THREAD_NS;
-os_char eobj_parent_ns[] = E_PARENT_NS;
-os_char eobj_this_ns[] = E_THIS_NS;
+const os_char eobj_process_ns[] = E_PROCESS_NS;
+const os_char eobj_thread_ns[] = E_THREAD_NS;
+const os_char eobj_parent_ns[] = E_PARENT_NS;
+const os_char eobj_this_ns[] = E_THIS_NS;
 
 
 /**
@@ -587,6 +587,39 @@ eVariable *eObject::firstv(
     {
         if (h->m_object->classid() == ECLASSID_VARIABLE)
             return eVariable::cast(h->m_object);
+
+        h = h->next(id);
+    }
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get the first child set by oid.
+
+  The eObject::firsts() function returns pointer to the first child set (eSet) of this object.
+
+  @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
+           child objects, regardless wether these are attachment or not. Other values
+           specify object identifier, only children with that specified object identifier
+           are searched for.
+
+  @return  Pointer to the first child eSet. Or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+eSet *eObject::firsts(
+    e_oid id)
+{
+    if (mm_handle == OS_NULL) return OS_NULL;
+    eHandle *h = mm_handle->first(id);
+    while (h)
+    {
+        if (h->m_object->classid() == ECLASSID_SET)
+            return eSet::cast(h->m_object);
 
         h = h->next(id);
     }
