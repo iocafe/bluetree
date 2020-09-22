@@ -72,6 +72,10 @@ class ePointer;
 #define EPRO_NOONPRCH EOBJ_CUST_FLAG4
 #define EPRO_NOPACK EOBJ_CUST_FLAG5
 
+/* Flags for propertyset() and firstp() functions.
+ */
+#define EPRO_NO_ERRORS EMSG_NO_ERRORS
+
 /* Flags for adopt(), clone() and clonegeeric() functions.
  */
 #define EOBJ_BEFORE_THIS 1
@@ -763,12 +767,14 @@ public:
 
     /* Get pointer to class'es property set.
      */
-    eContainer *propertyset();
+    eContainer *propertyset(
+        os_int flags = EPRO_DEFAULT);
 
     /* Get pointer to class'es first static property.
      */
     eVariable *firstp(
-        e_oid id = EOID_CHILD);
+        e_oid id = EOID_CHILD,
+        os_int flags = EPRO_DEFAULT);
 
     /* Initialize properties to default values.
      */

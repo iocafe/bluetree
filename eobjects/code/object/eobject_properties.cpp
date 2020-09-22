@@ -291,12 +291,15 @@ eVariable *eObject::addpropertys(
   The Object::propertyset function gets pointer to class'es property set. Mutex lock is used
   in case new classes are added.
 
-  @return Pointer to class'es property set, or OS_NULL if class has no property set.
+  @param   flags EPRO_NO_ERRORS to disable error reporting if class has no property set.
+           EPRO_DEFAULT for normal operation.
+  @return  Pointer to class'es property set, or OS_NULL if class has no property set.
 
 
 ****************************************************************************************************
 */
-eContainer *eObject::propertyset()
+eContainer *eObject::propertyset(
+    os_int flags)
 {
     eContainer *pset;
 
@@ -304,10 +307,12 @@ eContainer *eObject::propertyset()
     pset = eglobal->propertysets->firstc(classid());
     os_unlock();
 
-    if (pset == OS_NULL) {
+#ifdef OSAL_DEBUG
+    if (pset == OS_NULL && (flags|EMSG_NO_ERRORS) == 0) {
         osal_debug_error("setproperty: Class has no property support "
             "(did you call setupclass for it?)");
     }
+#endif
 
     return pset;
 }
@@ -327,16 +332,19 @@ eContainer *eObject::propertyset()
            specify object identifier, only children with that specified object identifier
            are searched for.
 
+  @param   flags EPRO_NO_ERRORS to disable error reporting if class has no property set.
+           EPRO_DEFAULT for normal operation.
   @return  Pointer to first property, eVariable class. OS_NULL if none found.
 
 ****************************************************************************************************
 */
 eVariable *eObject::firstp(
-    e_oid id)
+    e_oid id,
+    os_int flags)
 {
     eContainer *pset;
 
-    pset = propertyset();
+    pset = propertyset(flags);
 
     if (pset) {
         return pset->firstv(id);

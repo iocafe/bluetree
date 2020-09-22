@@ -803,7 +803,7 @@ void eObject::browse_list_properties(
 
     properties = eSet::cast(first(EOID_PROPERTIES));
 
-    for (p = firstp(); p; p = p->nextp())
+    for (p = firstp(EPRO_NO_ERRORS); p; p = p->nextp())
     {
         item = eVariable::cast(p->clone(content, EBROWSE_PROPERTY, EOBJ_NO_MAP));
 

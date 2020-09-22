@@ -33,6 +33,7 @@ eWindow::eWindow(
     os_int flags)
     : eComponent(parent, id, flags)
 {
+    addname("window", ENAME_TEMPORARY, "gui");
 }
 
 

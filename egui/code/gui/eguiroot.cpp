@@ -58,6 +58,7 @@ eGui::eGui(
     m_draw_prm.gui = this;
 
     addname("//gui");
+    ns_create("gui");
 }
 
 
@@ -177,7 +178,6 @@ void eGui::setupproperties(
     addproperty (cls, EGUIP_STATE_BITS, eguip_state_bits, EPRO_METADATA|EPRO_NOONPRCH, "state bits");
     addproperty (cls, EGUIP_TIMESTAMP, eguip_timestamp, EPRO_METADATA|EPRO_NOONPRCH, "timestamp");
     addproperty (cls, EGUIP_CONF, eguip_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
-
 }
 
 
