@@ -174,8 +174,8 @@ void eVariable::setupproperties(
     addpropertyl (cls, EVARP_TYPE, evarp_type, EPRO_METADATA|EPRO_NOONPRCH, "type");
     p->setpropertyl(EVARP_TYPE, OS_STR);
 
-    addproperty (cls, EVARP_ABBR, evarp_abbr, EPRO_PERSISTENT|EPRO_SIMPLE, "abbreviation");
-    addproperty (cls, EVARP_TTIP, evarp_ttip, EPRO_PERSISTENT|EPRO_SIMPLE, "tooltip");
+    addproperty (cls, EVARP_ABBR, evarp_abbr, EPRO_METADATA|EPRO_NOONPRCH, "abbreviation");
+    addproperty (cls, EVARP_TTIP, evarp_ttip, EPRO_METADATA|EPRO_NOONPRCH, "tooltip");
     addproperty (cls, EVARP_VALUE, evarp_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
     addproperty (cls, EVARP_DEFAULT, evarp_default, EPRO_METADATA|EPRO_NOONPRCH, "default");
     addpropertyl(cls, EVARP_DIGS, evarp_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
@@ -186,7 +186,7 @@ void eVariable::setupproperties(
     addpropertyd(cls, EVARP_GAIN, evarp_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
     addpropertyd(cls, EVARP_OFFSET, evarp_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
     addproperty (cls, EVARP_SBITS, evarp_sbits, EPRO_NOONPRCH, "state bits");
-    addproperty (cls, EVARP_TSTAMP, evarp_tstamp, EPRO_NOONPRCH, "timestamp");
+    addproperty (cls, EVARP_TSTAMP, evarp_tstamp, EPRO_PERSISTENT|EPRO_NOONPRCH, "timestamp");
     addproperty (cls, EVARP_CONF, evarp_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
 }
 

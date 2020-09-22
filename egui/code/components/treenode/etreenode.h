@@ -148,7 +148,10 @@ protected:
 
     eVariable *m_value;
 
+    bool m_autoopen;
     bool m_isopen;
+    bool m_child_data_received;
+    bool m_show_expand_arrow;
 
     bool m_edit_value;
     bool m_prev_edit_value;
@@ -158,8 +161,8 @@ protected:
     eEditBuffer m_edit_buf;
 
     /* Property values */
-    // eStrBuffer m_text;
     eStrBuffer m_unit;
+    eStrBuffer m_path;
 
     /* Parsed attrbutes, digits, etc.
      */

@@ -37,9 +37,12 @@ eTreeNode::eTreeNode(
         EOBJ_IS_ATTACHMENT|EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE); */
     m_value = new eVariable(this);
     m_isopen = false;
+    m_autoopen = true;
+    m_child_data_received = false;
 
     m_edit_value = false;
     m_prev_edit_value = false;
+    m_show_expand_arrow = true;
 }
 
 
@@ -105,7 +108,7 @@ void eTreeNode::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eTreeNode");
-    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_VALUE_STATE_PROPERITES|
+    eComponent::setupproperties(cls, ECOMP_LINCONV_PROPERITES|ECOMP_VALUE_STATE_PROPERITES|
         ECOMP_EXTRA_UI_PROPERITES|ECOMP_CONF_PATH);
     propertysetdone(cls);
     os_unlock();
@@ -130,7 +133,7 @@ void eTreeNode::onmessage(
     eEnvelope *envelope)
 {
     eContainer *content;
-    eSet *item, *properties;
+    eSet *item;
     eTreeNode *node;
     eComponent *child;
     eVariable name, path, value, *pr, *op;
@@ -145,6 +148,7 @@ void eTreeNode::onmessage(
         switch (envelope->command())
         {
             case ECMD_INFO_REPLY:
+                m_child_data_received = true;
 
                 content = eContainer::cast(envelope->content());
 
@@ -156,6 +160,7 @@ void eTreeNode::onmessage(
                 for (item = content->firsts(); item; item = item->nexts())
                 {
                     node = new eTreeNode(this);
+                    node->m_autoopen = false;
 
                     if (!item->get(EBROWSE_ITEM_NAME, &name)) {
                         name.sets("NO NAME");
@@ -168,7 +173,7 @@ void eTreeNode::onmessage(
                         if (p[lastpos] != '/') path += "/";
                     }
                     path += name;
-os_char *uke = path.gets();
+// os_char *uke = path.gets();
                     node->setpropertyv(ECOMP_PATH, &path);
                     node->setpropertyv(ECOMP_TEXT, &name);
                 }
@@ -176,14 +181,15 @@ os_char *uke = path.gets();
                 for (pr = content->firstv(); pr; pr = pr->nextv())
                 {
                     node = new eTreeNode(this);
-                    properties = eSet::cast(pr->first(EOID_PROPERTIES));
+                    node->m_show_expand_arrow = false;
+                    node->m_autoopen = false;
 
                     for (op = pr->firstp(); op; op = op->nextp())
                     {
                         propertynr = op->oid();
                         if (node->firstp(propertynr)) {
                             pr->propertyv(propertynr, &value);
-os_char *duke = value.gets();
+// os_char *duke = value.gets();
                             node->setpropertyv(propertynr, &value);
                         }
                     }
@@ -242,12 +248,16 @@ eStatus eTreeNode::onpropertychange(
             m_attr.clear();
             break;
 
-        case EVARP_DIGS:
-        case EVARP_MIN:
-        case EVARP_MAX:
-        case EVARP_TYPE:
-        case EVARP_ATTR:
+        case ECOMP_DIGS:
+        case ECOMP_MIN:
+        case ECOMP_MAX:
+        case ECOMP_TYPE:
+        case ECOMP_ATTR:
             m_attr.clear();
+            break;
+
+        case ECOMP_PATH:
+            m_path.clear();
             break;
 
         default:
@@ -322,36 +332,38 @@ eStatus eTreeNode::draw(
     eDrawParams& prm)
 {
     eComponent *child;
-    os_int edit_w, unit_w, total_w, unit_spacer, total_h, h;
-    const os_char *label, *unit;
+    os_int edit_w, unit_w, total_w, path_w, unit_spacer, total_h, h;
+    const os_char *label, *unit, *path;
     ImGuiInputTextFlags eflags;
     bool isopen;
 
     m_attr.for_variable(this);
 
-    ImVec2 c = ImGui::GetContentRegionAvail();
-    total_w = c.x;
 
+    total_w = ImGui::GetContentRegionMax().x;
     ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
     m_rect.x1 = cpos.x;
     m_rect.y1 = cpos.y;
 
-// const float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+    // const float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
 
+    if (m_autoopen)
+    {
+        ImGui::SetNextItemOpen(true);
+        m_autoopen = false;
+    }
 
     label = m_label_text.get(this, ECOMP_TEXT);
-    isopen = ImGui::TreeNode(label);
+    isopen = ImGui::TreeNodeEx(label, m_show_expand_arrow ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_Leaf);
 
     /* If we open the component, request information.
      */
     if (isopen != m_isopen) {
-        if (isopen) {
+        if (isopen && m_show_expand_arrow && !m_child_data_received) {
             request_object_info();
         }
         m_isopen = isopen;
     }
-
-    //ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT));
 
     total_h = ImGui::GetItemRectSize().y;
 
@@ -362,10 +374,11 @@ eStatus eTreeNode::draw(
     // edit_w = total_w - 200;
 
     edit_w = 200;
-    unit_w = 60;
     unit_spacer = 6;
+    unit_w = 60;
+    path_w = 250;
 
-    ImGui::SameLine(total_w - edit_w - unit_spacer - unit_w);
+    ImGui::SameLine(total_w - edit_w - unit_spacer - unit_w - path_w);
     ImGui::SetNextItemWidth(edit_w);
 
     if (m_edit_value) {
@@ -414,9 +427,17 @@ eStatus eTreeNode::draw(
 
     unit = m_unit.get(this, ECOMP_UNIT);
     if (*unit != '\0') {
-        ImGui::SameLine(total_w - unit_w);
+        ImGui::SameLine(total_w - unit_w - path_w);
         ImGui::SetNextItemWidth(unit_w);
         ImGui::TextUnformatted(unit);
+        h = ImGui::GetItemRectSize().y;
+        if (h > total_h) total_h = h;
+    }
+    path = m_path.get(this, ECOMP_PATH);
+    if (*path != '\0') {
+        ImGui::SameLine(total_w - path_w);
+        ImGui::SetNextItemWidth(path_w);
+        ImGui::TextUnformatted(path);
         h = ImGui::GetItemRectSize().y;
         if (h > total_h) total_h = h;
     }

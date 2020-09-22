@@ -174,7 +174,7 @@ void eGui::setupproperties(
     addpropertyl(cls, EGUIP_ATTR, eguip_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
     addpropertyd(cls, EGUIP_GAIN, eguip_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
     addpropertyd(cls, EGUIP_OFFSET, eguip_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
-    addproperty (cls, EGUIP_STATE_BITS, eguip_state_bits, EPRO_METADATA|EPRO_NOONPRCH, "quality");
+    addproperty (cls, EGUIP_STATE_BITS, eguip_state_bits, EPRO_METADATA|EPRO_NOONPRCH, "state bits");
     addproperty (cls, EGUIP_TIMESTAMP, eguip_timestamp, EPRO_METADATA|EPRO_NOONPRCH, "timestamp");
     addproperty (cls, EGUIP_CONF, eguip_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
 
