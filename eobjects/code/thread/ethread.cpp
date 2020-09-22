@@ -63,8 +63,7 @@ eThread::eThread(
 
     /* Create message queue for incoming messages. This is not child of the thread object.
      */
-    m_message_queue = new eContainer(OS_NULL, EOID_INTERNAL,
-        EOBJ_IS_ATTACHMENT|EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
+    m_message_queue = new eContainer(OS_NULL, EOID_INTERNAL, EOBJ_TEMPORARY_ATTACHMENT);
 
     m_exit_requested = OS_FALSE;
 }

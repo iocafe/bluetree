@@ -79,6 +79,50 @@ eName::~eName()
 /**
 ****************************************************************************************************
 
+  @brief Clone object
+
+  The clone function clones the variable and clonable attachments. Names will be left detached
+  in clone if EOBJ_NO_MAP flag is given.
+
+  @param  parent Parent for the clone.
+  @param  id Object identifier for the clone.
+  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
+  @return Pointer to the clone.
+
+****************************************************************************************************
+*/
+eObject *eName::clone(
+    eObject *parent,
+    e_oid id,
+    os_int aflags)
+{
+    eName *clonedobj;
+    clonedobj = new eName(parent, id == EOID_CHILD ? oid() : id, flags());
+
+    /* Copy variable value.
+     */
+    clonedobj->setv(this);
+    clonedobj->setdigs(digs());
+
+    /* Copy name space type/identifier.
+     */
+    if (m_namespace_id) {
+        clonedobj->setnamespaceid(namespaceid());
+    }
+    else {
+        clonedobj->m_ns_type = m_ns_type;
+    }
+
+    /* Copy clonable attachments.
+     */
+    clonegeneric(clonedobj, aflags);
+    return clonedobj;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Add eName to class list and class'es properties to it's property set.
 
   The eName::setupclass function adds eName to class list and class'es properties to
@@ -393,7 +437,7 @@ void eName::setnamespaceid(
         else
         {
             m_ns_type = E_SPECIFIED_NS_TYPE;
-            m_namespace_id = new eVariable(this, EOID_CHILD, EOBJ_IS_ATTACHMENT);
+            m_namespace_id = new eVariable(this, EOID_CHILD, EOBJ_TEMPORARY_ATTACHMENT);
             m_namespace_id->sets(namespace_id);
         }
     }

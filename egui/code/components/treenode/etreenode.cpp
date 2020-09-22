@@ -36,6 +36,8 @@ eTreeNode::eTreeNode(
     /* m_value = new eVariable(this, EOID_ITEM,
         EOBJ_IS_ATTACHMENT|EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE); */
     m_value = new eVariable(this);
+    m_isopen = false;
+
     m_edit_value = false;
     m_prev_edit_value = false;
 }
@@ -128,8 +130,13 @@ void eTreeNode::onmessage(
     eEnvelope *envelope)
 {
     eContainer *content;
-    eSet *item;
+    eSet *item, *properties;
     eTreeNode *node;
+    eComponent *child;
+    eVariable name, path, value, *pr, *op;
+    os_char *p;
+    os_int propertynr;
+    os_memsz lastpos;
 
     /* If at final destination for the message.
      */
@@ -138,14 +145,52 @@ void eTreeNode::onmessage(
         switch (envelope->command())
         {
             case ECMD_INFO_REPLY:
+
                 content = eContainer::cast(envelope->content());
+
+                while ((child = firstcomponent(EOID_GUI_COMPONENT)))
+                {
+                    delete child;
+                }
 
                 for (item = content->firsts(); item; item = item->nexts())
                 {
                     node = new eTreeNode(this);
-                    node->setpropertys(ECOMP_TEXT, "Nasu");
+
+                    if (!item->get(EBROWSE_ITEM_NAME, &name)) {
+                        name.sets("NO NAME");
+                    }
+
+                    propertyv(ECOMP_PATH, &path);
+                    p = path.gets();
+                    lastpos = os_strlen(p) - 2;
+                    if (lastpos >= 0) {
+                        if (p[lastpos] != '/') path += "/";
+                    }
+                    path += name;
+os_char *uke = path.gets();
+                    node->setpropertyv(ECOMP_PATH, &path);
+                    node->setpropertyv(ECOMP_TEXT, &name);
                 }
+
+                for (pr = content->firstv(); pr; pr = pr->nextv())
+                {
+                    node = new eTreeNode(this);
+                    properties = eSet::cast(pr->first(EOID_PROPERTIES));
+
+                    for (op = pr->firstp(); op; op = op->nextp())
+                    {
+                        propertynr = op->oid();
+                        if (node->firstp(propertynr)) {
+                            pr->propertyv(propertynr, &value);
+os_char *duke = value.gets();
+                            node->setpropertyv(propertynr, &value);
+                        }
+                    }
+                }
+
                 return;
+
         }
     }
 
@@ -189,7 +234,7 @@ eStatus eTreeNode::onpropertychange(
             break;
 
         case ECOMP_TEXT:
-            m_text.clear();
+            m_label_text.clear();
             break;
 
         case ECOMP_UNIT:
@@ -280,22 +325,37 @@ eStatus eTreeNode::draw(
     os_int edit_w, unit_w, total_w, unit_spacer, total_h, h;
     const os_char *label, *unit;
     ImGuiInputTextFlags eflags;
+    bool isopen;
 
     m_attr.for_variable(this);
 
     ImVec2 c = ImGui::GetContentRegionAvail();
     total_w = c.x;
 
-
     ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
     m_rect.x1 = cpos.x;
     m_rect.y1 = cpos.y;
 
-    ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT));
+// const float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+
+
+    label = m_label_text.get(this, ECOMP_TEXT);
+    isopen = ImGui::TreeNode(label);
+
+    /* If we open the component, request information.
+     */
+    if (isopen != m_isopen) {
+        if (isopen) {
+            request_object_info();
+        }
+        m_isopen = isopen;
+    }
+
+    //ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT));
+
     total_h = ImGui::GetItemRectSize().y;
 
     //    ImGui::GetForegroundDrawList()->AddLine(prm.io->MouseClickedPos[0], prm.io->MousePos, ImGui::GetColorU32(ImGuiCol_Button), 4.0f); // Draw a line between the button and the mouse cursor
-
 
     // int edit_w = ImGui::CalcItemWidth();
     // ImGui::SameLine(total_w - edit_w);
@@ -306,8 +366,6 @@ eStatus eTreeNode::draw(
     unit_spacer = 6;
 
     ImGui::SameLine(total_w - edit_w - unit_spacer - unit_w);
-
-
     ImGui::SetNextItemWidth(edit_w);
 
     if (m_edit_value) {
@@ -345,7 +403,6 @@ eStatus eTreeNode::draw(
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
         ImGui::Button(label, ImVec2(edit_w, 0));
         if (ImGui::IsItemActive()) {
-request_object_info();
             m_prev_edit_value = false;
             m_edit_value = true;
             m_edit_buf.set(m_value->gets(), 256);
@@ -371,11 +428,15 @@ request_object_info();
      */
     eComponent::draw(prm);
 
-    for (child = firstcomponent(EOID_GUI_COMPONENT);
-         child;
-         child = child->nextcomponent(EOID_GUI_COMPONENT))
+    if (isopen)
     {
-        child->draw(prm);
+        for (child = firstcomponent(EOID_GUI_COMPONENT);
+             child;
+             child = child->nextcomponent(EOID_GUI_COMPONENT))
+        {
+            child->draw(prm);
+        }
+        ImGui::TreePop();
     }
 
     return ESTATUS_SUCCESS;

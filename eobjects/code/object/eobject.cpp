@@ -123,8 +123,7 @@ void eObject::makeroot(
 
     /* Allocate root helper object.
     */
-    root = new eRoot(this, EOID_ROOT_HELPER,
-        EOBJ_IS_ATTACHMENT | EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
+    root = new eRoot(this, EOID_ROOT_HELPER, EOBJ_TEMPORARY_ATTACHMENT);
 
     /* Allocate handle for this object
      */
@@ -132,8 +131,7 @@ void eObject::makeroot(
 
     /* Allocate handle for the root helper object.
      */
-    root->newhandle(root, this, EOID_ROOT_HELPER,
-        EOBJ_IS_ATTACHMENT | EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
+    root->newhandle(root, this, EOID_ROOT_HELPER, EOBJ_TEMPORARY_ATTACHMENT);
 }
 
 
@@ -240,9 +238,9 @@ void eObject::clonegeneric(
 
     /* Copy clonable attachments or all clonable object.
      */
-    for (handle = mm_handle->first();
+    for (handle = mm_handle->first(EOID_ALL);
          handle;
-         handle = handle->next())
+         handle = handle->next(EOID_ALL))
     {
         if (((handle->m_oflags & EOBJ_IS_ATTACHMENT) ||
              (aflags & EOBJ_CLONE_ALL_CHILDREN)) &&

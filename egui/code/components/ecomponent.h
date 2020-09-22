@@ -162,13 +162,6 @@ public:
      */
     virtual ~eComponent();
 
-    /* Clone object.
-     */
-    virtual eObject *clone(
-        eObject *parent,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0);
-
     /* Casting eObject pointer to eComponent pointer.
      */
     inline static eComponent *cast(

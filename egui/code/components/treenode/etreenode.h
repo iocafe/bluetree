@@ -146,10 +146,9 @@ public:
 protected:
     void request_object_info();
 
-
     eVariable *m_value;
 
-
+    bool m_isopen;
 
     bool m_edit_value;
     bool m_prev_edit_value;
@@ -159,15 +158,16 @@ protected:
     eEditBuffer m_edit_buf;
 
     /* Property values */
-    eStrBuffer m_text;
+    // eStrBuffer m_text;
     eStrBuffer m_unit;
 
     /* Parsed attrbutes, digits, etc.
      */
     eAttrBuffer m_attr;
 
-    eAutoLabel m_label_edit;
+    eAutoLabel m_label_text;
     eAutoLabel m_label_value;
+    eAutoLabel m_label_edit;
 };
 
 

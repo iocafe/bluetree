@@ -94,10 +94,16 @@ class ePointer;
 
 /* Browse eSet identifier numbers.
  */
-#define EBROWSE_IN_NSPACE 1
+#define EBROWSE_THIS_OBJECT 1
+#define EBROWSE_IN_NSPACE 2
+#define EBROWSE_CHILD 3
+#define EBROWSE_PROPERTY 4
 
 #define EBROWSE_ITEM_NAME 10
+#define EBROWSE_ITEM_NAMESPACE_ID 11
+#define EBROWSE_NAME_IS_MAPPED 12
 
+#define EBROWSE_OBJECT_FLAGS 15
 
 /* Name space identifiers as static strings. eobj_this_ns is default
    for ns_first and ns_firstv functions()
@@ -755,6 +761,15 @@ public:
     static void propertysetdone(
         os_int cid);
 
+    /* Get pointer to class'es property set.
+     */
+    eContainer *propertyset();
+
+    /* Get pointer to class'es first static property.
+     */
+    eVariable *firstp(
+        e_oid id = EOID_CHILD);
+
     /* Initialize properties to default values.
      */
     void initproperties();
@@ -890,11 +905,20 @@ private:
 
     /* Object information request by tree browser node, etc. Reply to it.
      */
-    virtual void send_browse_info(
+    void send_browse_info(
         eEnvelope *envelope);
 
+    virtual void object_info(
+        eSet *item);
+
     void browse_list_namespace(
-        eContainer *container);
+        eContainer *content);
+
+    void browse_list_children(
+        eContainer *content);
+
+    void browse_list_properties(
+        eContainer *content);
 
     void message_oix(
         eEnvelope *envelope);

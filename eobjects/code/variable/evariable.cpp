@@ -103,9 +103,14 @@ eObject *eVariable::clone(
     os_int aflags)
 {
     eVariable *clonedobj;
+
+    /* This must be eVariable, not class derived from it.
+     */
+    e_assert_type(this, ECLASSID_VARIABLE)
+
     clonedobj = new eVariable(parent, id == EOID_CHILD ? oid() : id, flags());
 
-    /** Copy variable value.
+    /* Copy variable value.
      */
     clonedobj->setv(this);
     clonedobj->setdigs(digs());
@@ -1263,9 +1268,8 @@ os_int eVariable::compare(
 
   @brief Automatically type variable value.
 
-  If variable contains a string, the eVariable::tostring() function checks if string is well
-  defined integer or floating point number. If so, the autotype function converts variable
-  to one.
+  If variable contains a string, the function checks if string is well defined integer or floating
+  point number. If so, the autotype function converts variable to one.
 
   @param   modify_value value is set by default. If modify_value is set to OS_TRUE, this function
            will only check if variable can be automatically typed, but doesn't modify it's value.

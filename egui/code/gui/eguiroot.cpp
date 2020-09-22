@@ -56,6 +56,8 @@ eGui::eGui(
 
     os_memclear(&m_draw_prm, sizeof(eDrawParams));
     m_draw_prm.gui = this;
+
+    addname("//gui");
 }
 
 

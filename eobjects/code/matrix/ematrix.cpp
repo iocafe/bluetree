@@ -979,7 +979,7 @@ void eMatrix::seto(
     if (dataptr == OS_NULL) return;
 
     o = x->clone(buffer, EOID_INTERNAL);
-    o->setflags(EOBJ_IS_ATTACHMENT|EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
+    o->setflags(EOBJ_TEMPORARY_ATTACHMENT);
     ((eMatrixObj*)dataptr)->o = o;
     *typeptr = OS_OBJECT;
 }

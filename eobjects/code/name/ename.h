@@ -79,6 +79,13 @@ public:
      */
     virtual ~eName();
 
+    /* Clone the eName.
+     */
+    virtual eObject *clone(
+        eObject *parent,
+        e_oid id = EOID_CHILD,
+        os_int aflags = 0);
+
     /* Cast eObject pointer to eName pointer.
      */
     inline static eName *cast(
@@ -170,6 +177,10 @@ public:
     /* Detach name from name space.
      */
     void detach();
+
+    /* Is name is mapped to name space?
+     */
+    inline bool is_mapped() {return m_namespace != OS_NULL; }
 
 protected:
     void clear_members();

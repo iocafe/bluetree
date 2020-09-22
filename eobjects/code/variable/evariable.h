@@ -146,7 +146,7 @@ public:
      */
     virtual ~eVariable();
 
-    /* Clone object.
+    /* Clone the eVariable.
      */
     virtual eObject *clone(
         eObject *parent,
@@ -192,6 +192,11 @@ public:
      */
     eVariable *nextv(
         e_oid id = EOID_CHILD);
+
+    /* Get next static property identified by oid.
+     */
+    inline eVariable *nextp(
+        e_oid id = EOID_CHILD) {return nextv(id); }
 
     /* Called when property value changes.
      */

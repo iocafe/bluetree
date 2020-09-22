@@ -46,7 +46,6 @@ void eObject::setproperty_msg(
     message (ECMD_SETPROPERTY, remotepath, OS_NULL, x, EMSG_KEEP_CONTENT|EMSG_NO_REPLIES);
 }
 
-
 void eObject::setpropertyl_msg(
     const os_char *remotepath,
     os_long x,
@@ -111,27 +110,29 @@ eVariable *eObject::addproperty(
     os_int pflags,
     const os_char *text)
 {
-    eContainer *propertyset;
+    eContainer *pset;
     eVariable *p;
 
     /* Get pointer to class'es property set. If not found, create one. Property set always
        has name space
      */
-    propertyset = eglobal->propertysets->firstc(cid);
-    if (propertyset == OS_NULL)
+    pset = eglobal->propertysets->firstc(cid);
+    if (pset == OS_NULL)
     {
-        propertyset = new eContainer(eglobal->propertysets, cid, EOBJ_IS_ATTACHMENT);
-        propertyset->ns_create();
+        pset = new eContainer(eglobal->propertysets, cid, EOBJ_IS_ATTACHMENT);
+        pset->ns_create();
     }
 
     /* Add variable for this property in property set and name it.
      */
-    p = new eVariable(propertyset, propertynr, pflags);
+    p = new eVariable(pset, propertynr, pflags);
     p->addname(propertyname);
 
     /* Set name of the property to display to user.
      */
-    if (text) p->setpropertys(EVARP_TEXT, text);
+    if (text) {
+        p->setpropertys(EVARP_TEXT, text);
+    }
 
     return p;
 }
@@ -152,7 +153,7 @@ eVariable *eObject::addproperty(
 void eObject::propertysetdone(
     os_int cid)
 {
-    eContainer *propertyset;
+    eContainer *pset;
     eVariable *p, *mp;
     eName *name;
     os_char *propertyname, *e;
@@ -160,10 +161,10 @@ void eObject::propertysetdone(
     /* Get pointer to class'es property set. If not found, create one. Property set always
        has name space
      */
-    propertyset = eglobal->propertysets->firstc(cid);
-    if (propertyset == OS_NULL) return;
+    pset = eglobal->propertysets->firstc(cid);
+    if (pset == OS_NULL) return;
 
-    for (p = propertyset->firstv(); p; p = p->nextv())
+    for (p = pset->firstv(); p; p = p->nextv())
     {
         name = p->firstn();
         if (name == OS_NULL) continue;
@@ -176,7 +177,7 @@ void eObject::propertysetdone(
         {
             eVariable v;
             v.sets(propertyname, e - propertyname);
-            mp = eVariable::cast(propertyset->byname(v.gets()));
+            mp = eVariable::cast(pset->byname(v.gets()));
             if (mp)
             {
                 p->propertyv(EVARP_CONF, &v);
@@ -285,6 +286,69 @@ eVariable *eObject::addpropertys(
 /**
 ****************************************************************************************************
 
+  @brief Get pointer to class'es property set.
+
+  The Object::propertyset function gets pointer to class'es property set. Mutex lock is used
+  in case new classes are added.
+
+  @return Pointer to class'es property set, or OS_NULL if class has no property set.
+
+
+****************************************************************************************************
+*/
+eContainer *eObject::propertyset()
+{
+    eContainer *pset;
+
+    os_lock();
+    pset = eglobal->propertysets->firstc(classid());
+    os_unlock();
+
+    if (pset == OS_NULL) {
+        osal_debug_error("setproperty: Class has no property support "
+            "(did you call setupclass for it?)");
+    }
+
+    return pset;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get pointer to class'es first static property.
+
+  The Object::firstp function gets pointer to class'first static property in property set.
+  Static properties are global and can be read only.
+
+  @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
+           child objects, regardless wether these are attachment or not. Other values
+           specify object identifier, only children with that specified object identifier
+           are searched for.
+
+  @return  Pointer to first property, eVariable class. OS_NULL if none found.
+
+****************************************************************************************************
+*/
+eVariable *eObject::firstp(
+    e_oid id)
+{
+    eContainer *pset;
+
+    pset = propertyset();
+
+    if (pset) {
+        return pset->firstv(id);
+    }
+
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Initialize properties to default values.
 
   The initproperties function can be called from class'es constructor, if classes properties need
@@ -296,27 +360,11 @@ eVariable *eObject::addpropertys(
 */
 void eObject::initproperties()
 {
-    eContainer *propertyset;
     eVariable *p;
 
-    /* Get global property set for the class.
-       Synchnonize, to get class'es property set, in case someone is adding class at this moment.
-     */
-    os_lock();
-    propertyset = eglobal->propertysets->firstc(classid());
-    os_unlock();
-    if (propertyset == OS_NULL)
-    {
-        osal_debug_error("setproperty: Class has no property support "
-            "(did you call setupclass for it?)");
-        return;
-    }
-
-    /* Get global eVariable describing this property.
-     */
-    for (p = propertyset->firstv();
+    for (p = firstp();
          p;
-         p = p->nextv())
+         p = p->nextp())
     {
         if ((p->flags() & (EPRO_SIMPLE|EPRO_NOONPRCH)) == 0)
         {
@@ -341,25 +389,21 @@ void eObject::initproperties()
 os_int eObject::propertynr(
     const os_char *propertyname)
 {
-    eContainer *propertyset;
+    eContainer *pset;
     eNameSpace *ns;
     eName *name;
     os_int pnr;
     eVariable v;
 
-    /* Synchronize.
-     */
-    os_lock();
-
     /* Get pointer to class'es property set. If not found, create one. Property set always
        has name space
      */
-    propertyset = eglobal->propertysets->firstc(classid());
-    if (propertyset == OS_NULL) goto notfound;
+    pset = propertyset();
+    if (pset == OS_NULL) goto notfound;
 
     /* Get property nr from global variable describing the property by name.
      */
-    ns = eNameSpace::cast(propertyset->first(EOID_NAMESPACE));
+    ns = eNameSpace::cast(pset->first(EOID_NAMESPACE));
     if (ns == OS_NULL) goto notfound;
     v.sets(propertyname);
     name = ns->findname(&v);
@@ -368,11 +412,9 @@ os_int eObject::propertynr(
 
     /* End sync and return.
      */
-    os_unlock();
     return pnr;
 
 notfound:
-    os_unlock();
     return -1;
 }
 
@@ -392,24 +434,13 @@ notfound:
 os_char *eObject::propertyname(
     os_int propertynr)
 {
-    eContainer *propertyset;
     eName *name;
     eVariable *p;
     os_char *namestr;
 
-    /* Synchronize.
-     */
-    os_lock();
-
-    /* Get pointer to class'es property set. If not found, create one. Property set always
-       has name space
-     */
-    propertyset = eglobal->propertysets->firstc(classid());
-    if (propertyset == OS_NULL) goto notfound;
-
     /* Get global variable for this propery.
      */
-    p = propertyset->firstv(propertynr);
+    p = firstp(propertynr);
     if (p == OS_NULL) goto notfound;
 
     /* get first name.
@@ -418,13 +449,9 @@ os_char *eObject::propertyname(
     if (name == OS_NULL) goto notfound;
     namestr = name->gets();
 
-    /* End sync and return.
-     */
-    os_unlock();
     return namestr;
 
 notfound:
-    os_unlock();
     return OS_NULL;
 }
 
@@ -450,40 +477,20 @@ void eObject::setpropertyv(
     eObject *source,
     os_int flags)
 {
-    eContainer *propertyset;
     eSet *properties;
     eVariable *p;
     eVariable v;
     os_int pflags;
 
-    /* Synchronize access to global property set.
-     */
-    os_lock();
-
-    /* Get global property set for the class.
-     */
-    propertyset = eglobal->propertysets->firstc(classid());
-    if (propertyset == OS_NULL)
-    {
-        osal_debug_error("setproperty: Class has no property support");
-        os_unlock();
-        return;
-    }
-
     /* Get global eVariable describing this property.
      */
-    p = propertyset->firstv(propertynr);
+    p = firstp(propertynr);
     if (p == OS_NULL)
     {
         osal_debug_error("setproperty: Property number is not valid for the class");
-        os_unlock();
         return;
     }
     pflags = p->flags();
-
-    /* Finished with synchronization.
-     */
-    os_unlock();
 
     /* Empty x and x as null pointer are thes ame thing, handle these in
        the same way.
@@ -520,6 +527,7 @@ void eObject::setpropertyv(
         if (properties == OS_NULL)
         {
             properties = new eSet(this, EOID_PROPERTIES);
+            properties->setflags(EOBJ_IS_ATTACHMENT);
         }
 
         /* Find stored property value. If matches value to set, do nothing.
@@ -597,7 +605,6 @@ void eObject::propertyv(
     os_int flags)
 {
     eSet *properties;
-    eContainer *propertyset;
     eVariable *p;
 
     /* Look for eSet holding stored property values. If found, check for
@@ -615,41 +622,22 @@ void eObject::propertyv(
      */
     if (simpleproperty(propertynr, x) == ESTATUS_SUCCESS) return;
 
-    /* Look for default value. Start by synchronizing access to global property data.
-     */
-    os_lock();
-
-    /* Get global property set for the class.
-     */
-    propertyset = eglobal->propertysets->firstc(classid());
-    if (propertyset == OS_NULL)
-    {
-        osal_debug_error("setproperty: Class has no property support");
-        goto getout;
-    }
-
     /* Get global eVariable describing this property.
      */
-    p = propertyset->firstv(propertynr);
+    p = firstp(propertynr);
     if (p == OS_NULL)
     {
         osal_debug_error("setproperty: Property number is not valid for the class");
-        goto getout;
+        x->clear();
+        return;
     }
-
-    /* Finished with synchwonization.
-     */
-    os_unlock();
 
     /* Return default value for the property.
      */
     x->setv(p);
     return;
-
-getout:
-    os_unlock();
-    x->clear();
 }
+
 
 os_long eObject::propertyl(
     os_int propertynr)
@@ -690,5 +678,3 @@ eStatus eObject::simpleproperty(
     x->clear();
     return ESTATUS_NO_SIMPLE_PROPERTY_NR;
 }
-
-

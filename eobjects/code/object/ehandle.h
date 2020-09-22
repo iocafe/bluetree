@@ -57,6 +57,9 @@ X...
 #define EOBJ_NOT_CLONABLE  0x00000004
 #define EOBJ_NOT_SERIALIZABLE  0x00000008
 
+#define EOBJ_TEMPORARY_ATTACHMENT  (EOBJ_IS_ATTACHMENT | EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE)
+
+
 #define EOBJ_CUST_FLAG1    0x00000010
 #define EOBJ_CUST_FLAG2    0x00000020
 #define EOBJ_CUST_FLAG3    0x00000040
@@ -85,6 +88,8 @@ the treee structure after deletion. This changes deleting object trees from Nlog
 /** Clone mask, which bits to clone.
  */
 #define EOBJ_CLONE_MASK EOBJ_SERIALIZATION_MASK
+
+
 
 /*@}*/
 
