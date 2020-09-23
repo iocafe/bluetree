@@ -19,20 +19,7 @@
 /* GUI property names.
  */
 const os_char
-    eguip_value[] = "x",
-    eguip_digs[] = "x.digs",
-    eguip_text[] = "x.text",
-    eguip_unit[] = "x.unit",
-    eguip_min[] = "x.min",
-    eguip_max[] = "x.max",
-    eguip_type[] = "x.type",
-    eguip_attr[] = "x.attr",
-    eguip_default[] = "x.default",
-    eguip_gain[] = "x.gain",
-    eguip_offset[] = "x.offset",
-    eguip_state_bits[] = "x.quality",
-    eguip_timestamp[] = "x.timestamp",
-    eguip_conf[] = "conf"; /* This MUST not start with "x." */
+    eguip_text[] = "x";
 
 
 /**
@@ -155,29 +142,7 @@ void eGui::setupclass()
 void eGui::setupproperties(
     os_int cls)
 {
-    eVariable *p;
-
-    /* Order of these addproperty() calls is important, since eGui itself is used to
-       describe the properties in property set. The property to set must be added to
-       property set before setting value for it. There is trick with p to set text type
-       after adding property type. This effects only eGui class.
-     */
-    p = addproperty(cls, EGUIP_TEXT, eguip_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
-    addpropertyl (cls, EGUIP_TYPE, eguip_type, EPRO_METADATA|EPRO_NOONPRCH, "type");
-    p->setpropertyl(EGUIP_TYPE, OS_STR);
-
-    addproperty (cls, EGUIP_VALUE, eguip_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
-    addproperty (cls, EGUIP_DEFAULT, eguip_default, EPRO_METADATA|EPRO_NOONPRCH, "default");
-    addpropertyl(cls, EGUIP_DIGS, eguip_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
-    addpropertys(cls, EGUIP_UNIT, eguip_unit, EPRO_METADATA|EPRO_NOONPRCH, "unit");
-    addpropertyd(cls, EGUIP_MIN, eguip_min, EPRO_METADATA|EPRO_NOONPRCH, "min");
-    addpropertyd(cls, EGUIP_MAX, eguip_max, EPRO_METADATA|EPRO_NOONPRCH, "max");
-    addpropertyl(cls, EGUIP_ATTR, eguip_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
-    addpropertyd(cls, EGUIP_GAIN, eguip_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
-    addpropertyd(cls, EGUIP_OFFSET, eguip_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
-    addproperty (cls, EGUIP_STATE_BITS, eguip_state_bits, EPRO_METADATA|EPRO_NOONPRCH, "state bits");
-    addproperty (cls, EGUIP_TIMESTAMP, eguip_timestamp, EPRO_METADATA|EPRO_NOONPRCH, "timestamp");
-    addproperty (cls, EGUIP_CONF, eguip_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
+    addproperty(cls, EGUIP_TEXT, eguip_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
 }
 
 

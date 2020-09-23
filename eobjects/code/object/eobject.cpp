@@ -916,7 +916,6 @@ void eObject::ns_create(
            We should keep ot if we want to have multiple name spaces???
          */
         delete ns;
-        ns->setnamespaceid(OS_NULL);
     }
 
     /* Create name space.
@@ -925,8 +924,7 @@ void eObject::ns_create(
     ns = new eNameSpace(this, EOID_NAMESPACE);
     if (namespace_id)
     {
-        ns->setnamespaceid(new eVariable(ns));
-        ns->namespaceid()->sets(namespace_id);
+        ns->setnamespaceid(namespace_id);
     }
 
     /* Remap names in child objects ??? Do we need this. In practise name space is created
@@ -1204,7 +1202,7 @@ eNameSpace *eObject::findnamespace(
                     ns = eNameSpace::cast(ns_h->object());
                     if (ns) if (ns->namespaceid())
                     {
-                        if (os_strcmp(namespace_id, ns->namespaceid()->gets()))
+                        if (!os_strcmp(namespace_id, ns->namespaceid()->gets()))
                             return ns;
                     }
                 }

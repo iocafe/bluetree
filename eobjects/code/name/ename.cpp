@@ -49,10 +49,6 @@ eName::eName(
         /* Flag this as attachment.
          */
         setflags(EOBJ_IS_ATTACHMENT);
-
-        /* If we have parent object, flag parent that it has name space.
-         */
-        // if (parent) parent->setflags(EOBJ_HAS_NAMESPACE);
     }
 }
 

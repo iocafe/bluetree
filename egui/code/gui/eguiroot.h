@@ -31,42 +31,14 @@
 
 /* Enumeration of GUI object properties.
  */
-#define EGUIP_VALUE 1
-#define EGUIP_STATE_BITS 2
-#define EGUIP_TIMESTAMP 3
-#define EGUIP_DIGS 4
-#define EGUIP_TEXT 6
-#define EGUIP_UNIT 8
-#define EGUIP_MIN 10
-#define EGUIP_MAX 12
-#define EGUIP_TYPE 14
-#define EGUIP_ATTR 16
-#define EGUIP_DEFAULT 18
-#define EGUIP_GAIN 20
-#define EGUIP_OFFSET 22
-#define EGUIP_CONF 24
+#define EGUIP_TEXT 1
 
 /* GUI property names.
  */
 extern const os_char
-    eguip_value[],
-    eguip_digs[],
-    eguip_text[],
-    eguip_unit[],
-    eguip_min[],
-    eguip_max[],
-    eguip_type[],
-    eguip_attr[],
-    eguip_default[],
-    eguip_gain[],
-    eguip_offset[],
-    eguip_state_bits[],
-    eguip_timestamp[],
-    eguip_conf[];
-
+    eguip_text[];
 
 /*@}*/
-
 
 
 /**

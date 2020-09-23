@@ -586,7 +586,7 @@ ePopup *eComponent::popup()
     close_popup();
 
     p = new ePopup(this, EOID_GUI_POPUP,
-        EOBJ_IS_ATTACHMENT|EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
+        EOBJ_TEMPORARY_ATTACHMENT );
 
     p->open_popup();
     m_popup_open = true;

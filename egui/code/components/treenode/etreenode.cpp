@@ -34,7 +34,7 @@ eTreeNode::eTreeNode(
     : eComponent(parent, id, flags)
 {
     /* m_value = new eVariable(this, EOID_ITEM,
-        EOBJ_IS_ATTACHMENT|EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE); */
+        EOBJ_TEMPORARY_ATTACHMENT ); */
     m_value = new eVariable(this);
     m_isopen = false;
     m_autoopen = true;

@@ -124,11 +124,8 @@ public:
 
     /* Set name space id.
      */
-    inline void setnamespaceid(
-        eVariable *nsid)
-    {
-        m_namespace_id = nsid;
-    }
+    void setnamespaceid(
+        const os_char *nsid);
 
     /* Get first child object with specific name.
      */
