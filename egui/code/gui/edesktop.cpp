@@ -50,6 +50,7 @@ void eGui::setup_desktop_application()
 
     n = new eTreeNode(w);
     n->setpropertys(ECOMP_PATH, "//");
+    n->setpropertys(ECOMP_IPATH, "//");
 
     /* e = new eLineEdit(w);
     e->setpropertys(ECOMP_VALUE, "Jakke ja suutari");

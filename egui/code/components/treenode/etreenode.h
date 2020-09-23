@@ -82,12 +82,10 @@ public:
         return (eTreeNode*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return EGUICLASSID_TREE_NODE;
-    }
+    virtual os_int classid() {return EGUICLASSID_TREE_NODE; }
+    virtual const os_char *classname() {return "treenode";}
 
     /* Static function to add class to propertysets and class list.
      */
@@ -148,6 +146,7 @@ protected:
 
     void setup_node(
         eVariable *item,
+        eVariable& ipath,
         eVariable& path);
 
     eVariable *m_value;
@@ -167,6 +166,7 @@ protected:
     /* Property values */
     eStrBuffer m_unit;
     eStrBuffer m_path;
+    eStrBuffer m_ipath;
 
     /* Parsed attrbutes, digits, etc.
      */

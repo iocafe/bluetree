@@ -715,7 +715,7 @@ void eObject::send_browse_info(
     /* Store information about this object.
      */
     item = new eVariable(content, EBROWSE_THIS_OBJECT);
-    object_info(item);
+    object_info(item, OS_NULL);
 
     /* If this object has name space, list named objects.
      */
@@ -739,9 +739,22 @@ void eObject::send_browse_info(
 /* List names in this object's namespace. Used for browsing.
  */
 void eObject::object_info(
-    eVariable *item)
+    eVariable *item,
+    eName *name)
 {
-    item->setpropertys(EVARP_TEXT, "no object_info");
+    eVariable text;
+
+    if (name) {
+        text = *name;
+        text += " [";
+    }
+    else {
+        text = "[";
+    }
+    text += classname();
+    text += "]";
+
+    item->setpropertyv(EVARP_TEXT, &text);
 }
 
 
@@ -752,7 +765,9 @@ void eObject::browse_list_namespace(
 {
     eName *name;
     eVariable *item;
+    eSet *appendix;
     eObject *obj;
+    os_char buf[E_OIXSTR_BUF_SZ];
     bool is_process;
 
     is_process = (classid() == ECLASSID_PROCESS);
@@ -760,13 +775,25 @@ void eObject::browse_list_namespace(
     for (name = eObject::ns_firstv(); name; name = name->ns_next(OS_FALSE))
     {
         item = new eVariable(content, EBROWSE_IN_NSPACE);
-        item->addname(name->gets(), ENAME_THIS_NS|ENAME_NO_MAP);
+        appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
+        appendix->set(EBROWSE_PATH, name);
+
+        /** Get oix and ucnt as string.
+         */
+        name->parent()->oixstr(buf, sizeof(buf));
+        appendix->sets(EBROWSE_IPATH, buf);
+
+        // item->addname(name->gets(), ENAME_THIS_NS|ENAME_NO_MAP);
+
         // item->sets(EBROWSE_ITEM_NAMESPACE_ID, name->namespaceid());
         // item->setl(EBROWSE_NAME_IS_MAPPED, name->is_mapped());
 
         if (!is_process) {
             obj = name->parent();
-            obj->object_info(item);
+            obj->object_info(item, name);
+        }
+        else {
+            item->setpropertyv(EVARP_TEXT, name);
         }
     }
 }
@@ -779,18 +806,26 @@ void eObject::browse_list_children(
 {
     eObject *child;
     eVariable *item;
+    eSet *appendix;
+    eName *name;
     os_char buf[E_OIXSTR_BUF_SZ];
 
     for (child = first(); child; child = child->next())
     {
         item = new eVariable(content, EBROWSE_CHILD);
+        appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
+
+        name = child->firstname();
+        if (name) {
+            appendix->set(EBROWSE_PATH, name);
+        }
 
         /** Get oix and ucnt as string.
          */
         child->oixstr(buf, sizeof(buf));
-        item->addname(buf, ENAME_THIS_NS|ENAME_NO_MAP);
+        appendix->sets(EBROWSE_IPATH, buf);
 
-        child->object_info(item);
+        child->object_info(item, name);
     }
 }
 
@@ -800,7 +835,8 @@ void eObject::browse_list_properties(
     eContainer *content)
 {
     eVariable *p, *item, value;
-    eSet *properties;
+    eSet *appendix, *properties;
+    eName *name;
 
     properties = eSet::cast(first(EOID_PROPERTIES));
 
@@ -812,6 +848,13 @@ void eObject::browse_list_properties(
             if (properties->get(item->oid(), &value)) {
                 *item = value;
             }
+        }
+
+        appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
+        name = item->firstname();
+        if (name) {
+            appendix->set(EBROWSE_IPATH, name);
+            delete name;
         }
     }
 }

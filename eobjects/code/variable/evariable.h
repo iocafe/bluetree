@@ -162,12 +162,10 @@ public:
         return (eVariable*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return ECLASSID_VARIABLE;
-    }
+    virtual os_int classid() {return ECLASSID_VARIABLE; }
+    virtual const os_char *classname() {return "variable";}
 
     /* Static function to add class to propertysets and class list.
      */

@@ -62,6 +62,10 @@
  */
 #define EOID_PPTR_TARGET -12
 
+/** Attachment: This object is general purpose appendix.
+ */
+#define EOID_APPENDIX -13
+
 /** Content, used for envelopes, etc.
  */
 #define EOID_CONTENT -30
@@ -77,6 +81,7 @@
 /* Object's bindings container.
  */
 #define EOID_BINDINGS -35
+
 
 /** This is special object identifier that can be given as argument to object hierarchy
     functions, like first(). The EOID_CHILD specifies to get a child object,

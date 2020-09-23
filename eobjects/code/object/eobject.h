@@ -78,9 +78,11 @@ class ePointer;
 
 /* Flags for adopt(), clone() and clonegeeric() functions.
  */
+#define EOBJ_NO_AFLAGS 0
 #define EOBJ_BEFORE_THIS 1
 #define EOBJ_NO_MAP 2
 #define EOBJ_CLONE_ALL_CHILDREN 4
+#define EOBJ_NO_CLONED_NAMES 8
 
 /* Serialization flags eObject::write(), eObject::read() and clonegeeric() functions.
  */
@@ -94,12 +96,17 @@ class ePointer;
 #define EJSON_NEW_LINE_ONLY 2
 #endif
 
-/* Browse eSet identifier numbers.
+/* Browse identifier numbers.
  */
 #define EBROWSE_THIS_OBJECT 1
 #define EBROWSE_IN_NSPACE 2
 #define EBROWSE_CHILD 3
 #define EBROWSE_PROPERTY 4
+
+/* Browse appendix indices.
+ */
+#define EBROWSE_PATH 1
+#define EBROWSE_IPATH 2
 
 /* Name space identifiers as static strings. eobj_this_ns is default
    for ns_first and ns_firstv functions()
@@ -177,12 +184,10 @@ public:
         eObject *clonedobj,
         os_int aflags);
 
-    /* Get class identifier
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return ECLASSID_OBJECT;
-    }
+    virtual os_int classid() {return ECLASSID_OBJECT; }
+    virtual const os_char *classname() {return "object";}
 
     /* Return OS_TRUE if object is thread (derived).
      */
@@ -910,7 +915,8 @@ private:
         eEnvelope *envelope);
 
     virtual void object_info(
-        eVariable *item);
+        eVariable *item,
+        eName *name);
 
     void browse_list_namespace(
         eContainer *content);

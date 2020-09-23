@@ -91,9 +91,14 @@ eVariable::~eVariable()
   in clone if EOBJ_NO_MAP flag is given.
 
   @param  parent Parent for the clone.
-  @param  id Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
-  @return Pointer to the clone.
+  @param  id Object identifier for the clone. Set EOID_CHILD to use the same indentifier as the
+          original object.
+  @param  aflags EOBJ_NO_AFLAGS (0) for default operation.
+          - EOBJ_NO_MAP not to map names.
+          - EOBJ_CLONE_ALL_CHILDREN to clone all children, not just attachments.
+          - EOBJ_NO_CLONED_NAMES Do not clone object names.
+
+  @return Pointer to the new clone.
 
 ****************************************************************************************************
 */

@@ -82,12 +82,11 @@ public:
         return (ePopup*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return EGUICLASSID_POPUP;
-    }
+    virtual os_int classid() {return EGUICLASSID_POPUP; }
+    virtual const os_char *classname() {return "popup";}
+
 
     /* Static function to add class to propertysets and class list.
      */

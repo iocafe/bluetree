@@ -20,7 +20,8 @@
 /* Variable property names.
  */
 const os_char
-    ecomp_path[] = "path";
+    ecomp_path[] = "path",
+    ecomp_ipath[] = "ipath";
 
 
 /**
@@ -151,6 +152,9 @@ void eComponent::setupproperties(
 
     if (flags & ECOMP_CONF_PATH) {
         addproperty (cls, ECOMP_PATH, ecomp_path, EPRO_METADATA, "path");
+    }
+    if (flags & ECOMP_CONF_IPATH) {
+        addproperty (cls, ECOMP_IPATH, ecomp_ipath, EPRO_METADATA, "ipath");
     }
 }
 

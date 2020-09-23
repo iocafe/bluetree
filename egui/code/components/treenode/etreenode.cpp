@@ -109,7 +109,7 @@ void eTreeNode::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eTreeNode");
     eComponent::setupproperties(cls, ECOMP_LINCONV_PROPERITES|ECOMP_VALUE_STATE_PROPERITES|
-        ECOMP_EXTRA_UI_PROPERITES|ECOMP_CONF_PATH);
+        ECOMP_EXTRA_UI_PROPERITES|ECOMP_CONF_PATH|ECOMP_CONF_IPATH);
     propertysetdone(cls);
     os_unlock();
 }
@@ -135,7 +135,7 @@ void eTreeNode::onmessage(
     eContainer *content;
     eTreeNode *node, *groupnode;
     eComponent *child;
-    eVariable *item, *first_item, path;
+    eVariable *item, *first_item, path, ipath;
 
     /* If at final destination for the message.
      */
@@ -153,6 +153,10 @@ void eTreeNode::onmessage(
                     delete child;
                 }
 
+                propertyv(ECOMP_IPATH, &ipath);
+                if (osal_str_ends_with(ipath.gets(), "/") == OS_NULL) {
+                    ipath += "/";
+                }
                 propertyv(ECOMP_PATH, &path);
                 if (osal_str_ends_with(path.gets(), "/") == OS_NULL) {
                     path += "/";
@@ -164,7 +168,7 @@ void eTreeNode::onmessage(
                      item = item->nextv(EBROWSE_IN_NSPACE))
                 {
                     node = new eTreeNode(this);
-                    node->setup_node(item, path);
+                    node->setup_node(item, ipath, path);
                 }
 
                 first_item = content->firstv(EBROWSE_CHILD);
@@ -179,7 +183,7 @@ void eTreeNode::onmessage(
                          item = item->nextv(EBROWSE_CHILD))
                     {
                         node = new eTreeNode(groupnode);
-                        node->setup_node(item, path);
+                        node->setup_node(item, ipath, path);
                     }
                 }
 
@@ -195,7 +199,7 @@ void eTreeNode::onmessage(
                          item = item->nextv(EBROWSE_PROPERTY))
                     {
                         node = new eTreeNode(groupnode);
-                        node->setup_node(item, path);
+                        node->setup_node(item, ipath, path);
                     }
                 }
 
@@ -211,31 +215,52 @@ void eTreeNode::onmessage(
 
 void eTreeNode::setup_node(
     eVariable *item,
+    eVariable& ipath,
     eVariable& path)
 {
-    eVariable tmp, value, *op;
-    eName *n;
+    eVariable tmp, value, ivalue, *p;
+    eSet *appendix;
+    eObject *o;
     os_int propertynr;
 
     m_show_expand_arrow = item->oid() != EBROWSE_PROPERTY;
     m_autoopen = false;
 
-    for (op = item->firstp(); op; op = op->nextp())
+    for (p = item->firstp(); p; p = p->nextp())
     {
-        propertynr = op->oid();
+        propertynr = p->oid();
         if (firstp(propertynr)) {
             item->propertyv(propertynr, &value);
             setpropertyv(propertynr, &value);
         }
     }
 
-    n = item->firstname();
+    o = item->first(EOID_APPENDIX);
+    if (o) {
+        appendix = eSet::cast(o);
+        if (appendix->get(EBROWSE_IPATH, &ivalue)) {
+            tmp = ipath;
+            if (item->oid() == EBROWSE_PROPERTY) { tmp += "_p/"; }
+            tmp += ivalue;
+            setpropertyv(ECOMP_IPATH, &tmp);
+
+            if (!appendix->get(EBROWSE_PATH, &value)) {
+                value = ivalue;
+            }
+            tmp = path;
+            if (item->oid() == EBROWSE_PROPERTY) { tmp += "_p/"; }
+            tmp += value;
+            setpropertyv(ECOMP_PATH, &tmp);
+        }
+    }
+
+    /* n = item->firstname();
     if (n) {
         tmp = path;
         if (item->oid() == EBROWSE_PROPERTY) { tmp += "_p/"; }
         tmp += *n;
         setpropertyv(ECOMP_PATH, &tmp);
-    }
+    } */
 }
 
 
@@ -291,6 +316,10 @@ eStatus eTreeNode::onpropertychange(
 
         case ECOMP_PATH:
             m_path.clear();
+            break;
+
+        case ECOMP_IPATH:
+            m_ipath.clear();
             break;
 
         default:
@@ -352,7 +381,7 @@ eStatus eTreeNode::draw(
     eDrawParams& prm)
 {
     eComponent *child;
-    os_int edit_w, unit_w, total_w, path_w, unit_spacer, total_h, h;
+    os_int text_w, edit_w, unit_w, total_w, path_w, ipath_w, unit_spacer, total_h, w_left, h;
     const os_char *label, *unit, *path;
     ImGuiInputTextFlags eflags;
     bool isopen;
@@ -393,12 +422,46 @@ eStatus eTreeNode::draw(
     // ImGui::SameLine(total_w - edit_w);
     // edit_w = total_w - 200;
 
+    /* Decide on column widths.
+     */
+    text_w = 250;
     edit_w = 200;
-    unit_spacer = 6;
-    unit_w = 60;
-    path_w = 250;
+    unit_spacer = 0;
+    unit_w = 0;
+    path_w = 0;
+    ipath_w = 0;
 
-    ImGui::SameLine(total_w - edit_w - unit_spacer - unit_w - path_w);
+    w_left = total_w - text_w - edit_w;
+    if (w_left > 0) {
+        unit_spacer = w_left;
+        if (unit_spacer > 6) unit_spacer = 6;
+        w_left -= unit_spacer;
+
+        if (w_left > 0) {
+            unit_w = w_left;
+            if (unit_w > 60) unit_w = 60;
+            w_left -= unit_w;
+
+            if (w_left > 0) {
+                path_w = w_left;
+                if (path_w > 300) path_w = 300;
+                w_left -= path_w;
+                if (w_left > 0) {
+                    ipath_w = w_left;
+                    if (ipath_w > 300) ipath_w = 300;
+                    w_left -= ipath_w;
+                }
+            }
+        }
+    }
+    else if (w_left < 0)
+    {
+        w_left /= 2;
+        text_w += w_left;
+        edit_w += w_left;
+    }
+
+    ImGui::SameLine(total_w - edit_w - unit_spacer - unit_w - path_w - ipath_w);
     ImGui::SetNextItemWidth(edit_w);
 
     if (m_edit_value) {
@@ -445,22 +508,37 @@ eStatus eTreeNode::draw(
         if (h > total_h) total_h = h;
     }
 
-    unit = m_unit.get(this, ECOMP_UNIT);
-    if (*unit != '\0') {
-        ImGui::SameLine(total_w - unit_w - path_w);
-        ImGui::SetNextItemWidth(unit_w);
-        ImGui::TextUnformatted(unit);
-        h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
+    if (unit_w > 0) {
+        unit = m_unit.get(this, ECOMP_UNIT);
+        if (*unit != '\0') {
+            ImGui::SameLine(total_w - unit_w - path_w - ipath_w);
+            ImGui::SetNextItemWidth(unit_w);
+            ImGui::TextUnformatted(unit);
+            h = ImGui::GetItemRectSize().y;
+            if (h > total_h) total_h = h;
+        }
     }
-    path = m_path.get(this, ECOMP_PATH);
-    if (*path != '\0') {
-        ImGui::SameLine(total_w - path_w);
-        ImGui::SetNextItemWidth(path_w);
-        ImGui::TextUnformatted(path);
-        h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
+    if (path_w > 0) {
+        path = m_path.get(this, ECOMP_PATH);
+        if (*path != '\0') {
+            ImGui::SameLine(total_w - path_w - ipath_w);
+            ImGui::SetNextItemWidth(path_w);
+            ImGui::TextUnformatted(path);
+            h = ImGui::GetItemRectSize().y;
+            if (h > total_h) total_h = h;
+        }
     }
+    if (ipath_w > 0) {
+        path = m_ipath.get(this, ECOMP_IPATH);
+        if (*path != '\0') {
+            ImGui::SameLine(total_w - ipath_w);
+            ImGui::SetNextItemWidth(ipath_w);
+            ImGui::TextUnformatted(path);
+            h = ImGui::GetItemRectSize().y;
+            if (h > total_h) total_h = h;
+        }
+    }
+
 
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
@@ -502,7 +580,7 @@ void eTreeNode::request_object_info()
 {
     eVariable path;
 
-    propertyv(ECOMP_PATH, &path);
+    propertyv(ECOMP_IPATH, &path);
     if (!path.isempty()) {
         message(ECMD_INFO_REQUEST, path.gets());
     }

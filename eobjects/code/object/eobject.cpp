@@ -197,7 +197,15 @@ eObject::~eObject()
   @brief Clone object
 
   The eObject::clone function is base class only. Cloning eObject base class is not supported.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
+
+  @param  parent Parent for the clone.
+  @param  id Object identifier for the clone. Set EOID_CHILD to use the same indentifier as the
+          original object.
+  @param  aflags EOBJ_NO_AFLAGS (0) for default operation.
+          - EOBJ_NO_MAP not to map names.
+          - EOBJ_CLONE_ALL_CHILDREN to clone all children, not just attachments.
+          - EOBJ_NO_CLONED_NAMES Do not clone object names.
+  @return Pointer to the new clone.
 
 ****************************************************************************************************
 */
@@ -220,8 +228,11 @@ eObject *eObject::clone(
   or all child objects and maps names to name space. This depends on flags.
 
   @param  clonedobj Pointer to cloned object being created.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names. EOBJ_CLONE_ALL_CHILDREN
-          to clone all children, not just attachments.
+  @param  aflags EOBJ_NO_AFLAGS (0) for default operation.
+          - EOBJ_NO_MAP not to map names.
+          - EOBJ_CLONE_ALL_CHILDREN to clone all children, not just attachments.
+          - EOBJ_NO_CLONED_NAMES Do not clone object names.
+
   @return None.
 
 ****************************************************************************************************
@@ -246,6 +257,9 @@ void eObject::clonegeneric(
              (aflags & EOBJ_CLONE_ALL_CHILDREN)) &&
              (handle->m_oflags & EOBJ_NOT_CLONABLE) == 0)
         {
+            if (aflags & EOBJ_NO_CLONED_NAMES) {
+                if (handle->oid() == EOID_NAME) continue;
+            }
             handle->m_object->clone(clonedobj, handle->oid(), EOBJ_NO_MAP);
         }
     }

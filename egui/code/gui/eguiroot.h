@@ -92,12 +92,10 @@ public:
         return (eGui*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return EGUICLASSID_GUI;
-    }
+    virtual os_int classid() {return EGUICLASSID_GUI; }
+    virtual const os_char *classname() {return "gui";}
 
     /* Static function to add class to propertysets and class list.
      */

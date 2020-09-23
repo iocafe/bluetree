@@ -56,6 +56,7 @@ class ePopup;
 #define ECOMP_TTIP EVARP_TTIP
 #define ECOMP_CONF EVARP_CONF
 #define ECOMP_PATH 30
+#define ECOMP_IPATH 31
 
 /* Flags for eComponent::setupproperties() to specify which optional properties for
    the component class.
@@ -65,7 +66,8 @@ class ePopup;
 #define ECOMP_VALUE_STATE_PROPERITES 2
 #define ECOMP_EXTRA_UI_PROPERITES 4
 #define ECOMP_CONF_PATH 8
-#define ECOMP_CONF_PROPERITES 16 /* Is this really needed? */
+#define ECOMP_CONF_IPATH 16
+#define ECOMP_CONF_PROPERITES 32 /* Is this really needed? */
 
 /* GUI component property names. Many of these map directly eVariable's property names
  */
@@ -86,6 +88,7 @@ class ePopup;
 #define ecomp_tstamp evarp_tstamp
 #define ecomp_conf evarp_conf
 extern const os_char ecomp_path[];
+extern const os_char ecomp_ipath[];
 
 /*@}*/
 
@@ -171,12 +174,10 @@ public:
         return (eComponent*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return EGUICLASSID_COMPONENT;
-    }
+    virtual os_int classid() {return EGUICLASSID_COMPONENT; }
+    virtual const os_char *classname() {return "component";}
 
     /* Static function to add class to propertysets and class list.
      */
