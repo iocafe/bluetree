@@ -167,6 +167,22 @@ void eTreeNode::onmessage(
                     node->setup_node(item, path);
                 }
 
+                first_item = content->firstv(EBROWSE_CHILD);
+                if (first_item)
+                {
+                    groupnode = new eTreeNode(this);
+                    groupnode->m_autoopen = false;
+                    groupnode->setpropertys(ECOMP_TEXT, "children");
+
+                    for (item = first_item;
+                         item;
+                         item = item->nextv(EBROWSE_CHILD))
+                    {
+                        node = new eTreeNode(groupnode);
+                        node->setup_node(item, path);
+                    }
+                }
+
                 first_item = content->firstv(EBROWSE_PROPERTY);
                 if (first_item)
                 {

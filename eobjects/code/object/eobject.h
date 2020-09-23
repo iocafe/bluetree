@@ -94,8 +94,6 @@ class ePointer;
 #define EJSON_NEW_LINE_ONLY 2
 #endif
 
-
-
 /* Browse eSet identifier numbers.
  */
 #define EBROWSE_THIS_OBJECT 1
