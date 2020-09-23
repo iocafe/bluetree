@@ -103,12 +103,6 @@ class ePointer;
 #define EBROWSE_CHILD 3
 #define EBROWSE_PROPERTY 4
 
-#define EBROWSE_ITEM_NAME 10
-#define EBROWSE_ITEM_NAMESPACE_ID 11
-#define EBROWSE_NAME_IS_MAPPED 12
-
-#define EBROWSE_OBJECT_FLAGS 15
-
 /* Name space identifiers as static strings. eobj_this_ns is default
    for ns_first and ns_firstv functions()
  */
@@ -624,6 +618,10 @@ public:
         os_int flags = 0,
         const os_char *namespace_id = OS_NULL);
 
+    /* Get first name given to this this object.
+     */
+    eName *firstname();
+
     /* Flags for map() function: Attach all names of child object (this) and it's childen to
        name spaces. If a name is already mapped, it is not remapped.
     */
@@ -879,7 +877,6 @@ public:
         const os_char *remotepath,
         os_int bflags);
 
-
     /* virtual void onmessagefrombinding() {}
     void messagetobinding(); */
     /*@}*/
@@ -915,7 +912,7 @@ private:
         eEnvelope *envelope);
 
     virtual void object_info(
-        eSet *item);
+        eVariable *item);
 
     void browse_list_namespace(
         eContainer *content);

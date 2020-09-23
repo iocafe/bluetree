@@ -129,20 +129,20 @@ eNameSpace::~eNameSpace()
 
     /* Detach all names from name space.
      */
-    while ((n = findname()))
-    {
+    while ((n = findname())) {
         if (n->nspace()) n->detach();
     }
 
-    /* If this is name space.
+    /* If this is name space, flag parent that it has no name space.
      */
-    if (oid() == EOID_NAMESPACE)
-    {
+    if (oid() == EOID_NAMESPACE) {
         p = parent();
 
         /* If we have parent object, flag parent that it has name space.
          */
-        if (p) p->clearflags(EOBJ_HAS_NAMESPACE);
+        if (p) {
+            p->clearflags(EOBJ_HAS_NAMESPACE);
+        }
     }
 }
 

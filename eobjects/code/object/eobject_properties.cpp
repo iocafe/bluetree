@@ -331,9 +331,9 @@ eContainer *eObject::propertyset(
            child objects, regardless wether these are attachment or not. Other values
            specify object identifier, only children with that specified object identifier
            are searched for.
-
   @param   flags EPRO_NO_ERRORS to disable error reporting if class has no property set.
            EPRO_DEFAULT for normal operation.
+
   @return  Pointer to first property, eVariable class. OS_NULL if none found.
 
 ****************************************************************************************************

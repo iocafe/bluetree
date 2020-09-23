@@ -1330,6 +1330,34 @@ eName *eObject::addname(
 }
 
 
+
+/**
+****************************************************************************************************
+
+  @brief Find object's first name.
+
+  The eObject::firstname() function gets first name given to this object.
+  Object's first name may later on separated with alternate names with name flags. At this
+  fime first name is simply name which was added first.
+
+  @return  Pointer to first name (eName), or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+eName *eObject::firstname()
+{
+    eObject *n;
+
+    for (n = first(EOID_NAME); n; n = n->next(EOID_NAME)) {
+        if (n->classid() == ECLASSID_NAME) {
+            return eName::cast(n);
+        }
+    }
+    return OS_NULL;
+}
+
+
+
 /**
 ****************************************************************************************************
 

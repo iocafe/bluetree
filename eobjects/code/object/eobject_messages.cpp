@@ -708,13 +708,13 @@ void eObject::send_browse_info(
     eEnvelope *envelope)
 {
     eContainer *content;
-    eSet *item;
+    eVariable *item;
 
     content = new eContainer;
 
     /* Store information about this object.
      */
-    item = new eSet(content, EBROWSE_THIS_OBJECT);
+    item = new eVariable(content, EBROWSE_THIS_OBJECT);
     object_info(item);
 
     /* If this object has name space, list named objects.
@@ -739,9 +739,9 @@ void eObject::send_browse_info(
 /* List names in this object's namespace. Used for browsing.
  */
 void eObject::object_info(
-    eSet *item)
+    eVariable *item)
 {
-    item->setl(EBROWSE_OBJECT_FLAGS, flags());
+    item->setpropertys(EVARP_TEXT, "no object_info");
 }
 
 
@@ -751,7 +751,7 @@ void eObject::browse_list_namespace(
     eContainer *content)
 {
     eName *name;
-    eSet *item;
+    eVariable *item;
     eObject *obj;
     bool is_process;
 
@@ -759,10 +759,10 @@ void eObject::browse_list_namespace(
 
     for (name = eObject::ns_firstv(); name; name = name->ns_next(OS_FALSE))
     {
-        item = new eSet(content, EBROWSE_IN_NSPACE);
-        item->set(EBROWSE_ITEM_NAME, name);
-        item->sets(EBROWSE_ITEM_NAMESPACE_ID, name->namespaceid());
-        item->setl(EBROWSE_NAME_IS_MAPPED, name->is_mapped());
+        item = new eVariable(content, EBROWSE_IN_NSPACE);
+        item->addname(name->gets(), ENAME_THIS_NS|ENAME_NO_MAP);
+        // item->sets(EBROWSE_ITEM_NAMESPACE_ID, name->namespaceid());
+        // item->setl(EBROWSE_NAME_IS_MAPPED, name->is_mapped());
 
         if (!is_process) {
             obj = name->parent();
@@ -778,18 +778,19 @@ void eObject::browse_list_children(
     eContainer *content)
 {
     eObject *child;
-    eSet *item;
+    eVariable *item;
     os_char buf[E_OIXSTR_BUF_SZ];
 
     for (child = first(); child; child = child->next())
     {
-        item = new eSet(content, EBROWSE_CHILD);
+        item = new eVariable(content, EBROWSE_CHILD);
 
         /** Get oix and ucnt as string.
          */
         child->oixstr(buf, sizeof(buf));
+        item->addname(buf, ENAME_THIS_NS|ENAME_NO_MAP);
 
-        item->sets(EBROWSE_ITEM_NAME, buf);
+        child->object_info(item);
     }
 }
 
@@ -803,7 +804,7 @@ void eObject::browse_list_properties(
 
     properties = eSet::cast(first(EOID_PROPERTIES));
 
-    for (p = firstp(EPRO_NO_ERRORS); p; p = p->nextp())
+    for (p = firstp(EOID_CHILD, EPRO_NO_ERRORS); p; p = p->nextp())
     {
         item = eVariable::cast(p->clone(content, EBROWSE_PROPERTY, EOBJ_NO_MAP));
 

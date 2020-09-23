@@ -133,13 +133,9 @@ void eTreeNode::onmessage(
     eEnvelope *envelope)
 {
     eContainer *content;
-    eSet *item;
-    eTreeNode *node;
+    eTreeNode *node, *groupnode;
     eComponent *child;
-    eVariable name, path, value, *pr, *op;
-    os_char *p;
-    os_int propertynr;
-    os_memsz lastpos;
+    eVariable *item, *first_item, path;
 
     /* If at final destination for the message.
      */
@@ -157,41 +153,33 @@ void eTreeNode::onmessage(
                     delete child;
                 }
 
-                for (item = content->firsts(); item; item = item->nexts())
-                {
-                    node = new eTreeNode(this);
-                    node->m_autoopen = false;
-
-                    if (!item->get(EBROWSE_ITEM_NAME, &name)) {
-                        name.sets("NO NAME");
-                    }
-
-                    propertyv(ECOMP_PATH, &path);
-                    p = path.gets();
-                    lastpos = os_strlen(p) - 2;
-                    if (lastpos >= 0) {
-                        if (p[lastpos] != '/') path += "/";
-                    }
-                    path += name;
-// os_char *uke = path.gets();
-                    node->setpropertyv(ECOMP_PATH, &path);
-                    node->setpropertyv(ECOMP_TEXT, &name);
+                propertyv(ECOMP_PATH, &path);
+                if (osal_str_ends_with(path.gets(), "/") == OS_NULL) {
+                    path += "/";
                 }
 
-                for (pr = content->firstv(); pr; pr = pr->nextv())
+                first_item = content->firstv(EBROWSE_IN_NSPACE);
+                for (item = first_item;
+                     item;
+                     item = item->nextv(EBROWSE_IN_NSPACE))
                 {
                     node = new eTreeNode(this);
-                    node->m_show_expand_arrow = false;
-                    node->m_autoopen = false;
+                    node->setup_node(item, path);
+                }
 
-                    for (op = pr->firstp(); op; op = op->nextp())
+                first_item = content->firstv(EBROWSE_PROPERTY);
+                if (first_item)
+                {
+                    groupnode = new eTreeNode(this);
+                    groupnode->m_autoopen = false;
+                    groupnode->setpropertys(ECOMP_TEXT, "properties");
+
+                    for (item = first_item;
+                         item;
+                         item = item->nextv(EBROWSE_PROPERTY))
                     {
-                        propertynr = op->oid();
-                        if (node->firstp(propertynr)) {
-                            pr->propertyv(propertynr, &value);
-// os_char *duke = value.gets();
-                            node->setpropertyv(propertynr, &value);
-                        }
+                        node = new eTreeNode(groupnode);
+                        node->setup_node(item, path);
                     }
                 }
 
@@ -203,6 +191,35 @@ void eTreeNode::onmessage(
     /* Call parent class'es onmessage.
      */
     eObject::onmessage(envelope);
+}
+
+void eTreeNode::setup_node(
+    eVariable *item,
+    eVariable& path)
+{
+    eVariable tmp, value, *op;
+    eName *n;
+    os_int propertynr;
+
+    m_show_expand_arrow = item->oid() != EBROWSE_PROPERTY;
+    m_autoopen = false;
+
+    for (op = item->firstp(); op; op = op->nextp())
+    {
+        propertynr = op->oid();
+        if (firstp(propertynr)) {
+            item->propertyv(propertynr, &value);
+            setpropertyv(propertynr, &value);
+        }
+    }
+
+    n = item->firstname();
+    if (n) {
+        tmp = path;
+        if (item->oid() == EBROWSE_PROPERTY) { tmp += "_p/"; }
+        tmp += *n;
+        setpropertyv(ECOMP_PATH, &tmp);
+    }
 }
 
 
@@ -292,19 +309,6 @@ eStatus eTreeNode::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
-    /*
-    eObject *obj;
-    switch (propertynr)
-    {
-        case ?:
-            x->setl(m_command);
-            break;
-
-
-        default:
-            break;
-    } */
-
     if (m_value->simpleproperty(propertynr, x) == ESTATUS_SUCCESS)
     {
         return ESTATUS_SUCCESS;
@@ -483,5 +487,7 @@ void eTreeNode::request_object_info()
     eVariable path;
 
     propertyv(ECOMP_PATH, &path);
-    message(ECMD_INFO_REQUEST, path.gets());
+    if (!path.isempty()) {
+        message(ECMD_INFO_REQUEST, path.gets());
+    }
 }

@@ -146,6 +146,10 @@ public:
 protected:
     void request_object_info();
 
+    void setup_node(
+        eVariable *item,
+        eVariable& path);
+
     eVariable *m_value;
 
     bool m_autoopen;
