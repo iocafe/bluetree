@@ -70,12 +70,10 @@ public:
         return (eBuffer*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
     */
-    virtual os_int classid()
-    {
-        return ECLASSID_BUFFER;
-    }
+    virtual os_int classid() {return ECLASSID_BUFFER; }
+    virtual const os_char *classname() {return "buffer";}
 
     /* Static function to add class to propertysets and class list.
      */

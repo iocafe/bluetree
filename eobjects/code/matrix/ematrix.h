@@ -82,12 +82,10 @@ public:
         return (eMatrix*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return ECLASSID_MATRIX;
-    }
+    virtual os_int classid() {return ECLASSID_MATRIX; }
+    virtual const os_char *classname() {return "matrix";}
 
     /* Static function to add class to propertysets and class list.
      */

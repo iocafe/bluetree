@@ -105,12 +105,10 @@ public:
         return (eBinding*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return ECLASSID_BINDING;
-    }
+    virtual os_int classid() {return ECLASSID_BINDING;}
+    virtual const os_char *classname() {return "basebinding";}
 
     /* Static constructor function for generating instance by class list.
      */

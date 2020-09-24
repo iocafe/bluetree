@@ -411,8 +411,16 @@ public:
 
     /* Fix string length after string length has been modified trough string pointer
      */
-    void strmodified(
-        os_memsz sz);
+    /* void strmodified(
+        os_memsz sz); */
+
+    /* Check if object name is oix.
+     */
+    os_boolean is_oix();
+
+    /* Remove stuff from path what becomes unnecessary when oix is appended to it.
+     */
+    os_boolean clean_to_append_oix();
 
     /*@}*/
 

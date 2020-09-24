@@ -65,12 +65,10 @@ public:
         return (eTimer*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return ECLASSID_TIMER;
-    }
+    virtual os_int classid() {return ECLASSID_TIMER; }
+    virtual const os_char *classname() {return "timer";}
 
     /* Static function to add class to propertysets and class list.
      */

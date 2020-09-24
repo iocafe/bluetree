@@ -82,12 +82,10 @@ public:
         return (ePointer*)o;
     }
 
-    /* Get class identifier.
-        */
-    virtual os_int classid()
-    {
-        return ECLASSID_POINTER;
-    }
+    /* Get class identifier and name.
+     */
+    virtual os_int classid() {return ECLASSID_POINTER; }
+    virtual const os_char *classname() {return "pointer";}
 
     /* Static constructor function.
     */

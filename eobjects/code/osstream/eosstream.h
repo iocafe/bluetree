@@ -65,12 +65,10 @@ public:
         return (eOsStream*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
     */
-    virtual os_int classid()
-    {
-        return ECLASSID_OSSTREAM;
-    }
+    virtual os_int classid() {return ECLASSID_OSSTREAM; }
+    virtual const os_char *classname() {return "osstream";}
 
     /* Static function to add class to propertysets and class list.
      */

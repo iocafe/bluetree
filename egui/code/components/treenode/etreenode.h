@@ -164,6 +164,7 @@ protected:
     eEditBuffer m_edit_buf;
 
     /* Property values */
+    eStrBuffer m_text;
     eStrBuffer m_unit;
     eStrBuffer m_path;
     eStrBuffer m_ipath;
@@ -172,7 +173,7 @@ protected:
      */
     eAttrBuffer m_attr;
 
-    eAutoLabel m_label_text;
+    eAutoLabel m_label_node;
     eAutoLabel m_label_value;
     eAutoLabel m_label_edit;
 };

@@ -84,12 +84,10 @@ public:
         return (eNameSpace*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return ECLASSID_NAMESPACE;
-    }
+    virtual os_int classid() {return ECLASSID_NAMESPACE; }
+    virtual const os_char *classname() {return "namespace";}
 
     /* Static constructor function for generating instance by class list.
      */

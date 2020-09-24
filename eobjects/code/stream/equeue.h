@@ -95,10 +95,8 @@ public:
 
     /* Get class identifier.
     */
-    virtual os_int classid()
-    {
-        return ECLASSID_QUEUE;
-    }
+    virtual os_int classid() {return ECLASSID_QUEUE; }
+    virtual const os_char *classname() {return "queue";}
 
     /* Static function to add class to propertysets and class list.
      */

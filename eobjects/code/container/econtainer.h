@@ -62,12 +62,10 @@ public:
         return (eContainer*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return ECLASSID_CONTAINER;
-    }
+    virtual os_int classid() {return ECLASSID_CONTAINER; }
+    virtual const os_char *classname() {return "container";}
 
     /* Static function to add class to propertysets and class list.
      */

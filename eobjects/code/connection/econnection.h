@@ -67,12 +67,10 @@ public:
         return (eConnection*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
     */
-    virtual os_int classid()
-    {
-        return ECLASSID_CONNECTION;
-    }
+    virtual os_int classid() {return ECLASSID_CONNECTION; }
+    virtual const os_char *classname() {return "connection";}
 
     /* Static function to add class to propertysets and class list.
      */

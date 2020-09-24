@@ -1732,3 +1732,86 @@ os_char *eVariable::allocate(
     appends_internal(OS_NULL, nchars);
     return gets();
 }
+
+/**
+****************************************************************************************************
+
+  @brief Check if object name is oix.
+
+  Check the object name is oix like "@401_3".
+  @return OS_TRUE if object name is oix.
+
+****************************************************************************************************
+*/
+os_boolean eVariable::is_oix()
+{
+    os_char *objname;
+
+    objname = gets();
+    return (os_boolean)(objname[0] == '@');
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Remove stuff from path what becomes unnecessary when oix is appended to it.
+
+  If a path contains oix object name like "@401_3", the last object name is removed.
+  Also other stuff what is unnecessary may be removed.
+  Is input path is terminated with '/', so is the path after function call.
+
+  Once we implement connections, this must not remove stuff on other side of the connection.
+
+  @return OS_TRUE if oix was removed, or OS_FALSE if not.
+
+****************************************************************************************************
+*/
+os_boolean eVariable::clean_to_append_oix()
+{
+    os_int trailing_slash;
+    os_char *path;
+    os_memsz vsz, e;
+
+    if (type() != OS_STR) return OS_FALSE;
+
+    /* If separate string buffer has been allocated.
+     */
+    if (m_vflags & EVAR_STRBUF_ALLOCATED)
+    {
+        path = m_value.strptr.ptr;
+        vsz = m_value.strptr.used;
+    }
+    else
+    {
+        path = m_value.strbuf.buf;
+        vsz = m_value.strbuf.used;
+    }
+
+    if (vsz <= 1) return OS_FALSE;
+    e = vsz - 2;
+
+    trailing_slash = 0;
+    if (path[e] == '/') {trailing_slash = 1; e--; }
+
+    while (e >= 0) {
+        if (path[e] == '/') {
+            if (path[e+1] == '@')
+            {
+                vsz = e + trailing_slash;
+                path[vsz++] = '\0';
+                if (m_vflags & EVAR_STRBUF_ALLOCATED) {
+                    m_value.strptr.used = vsz;
+                }
+                else {
+                    m_value.strbuf.used  = vsz;
+                }
+                return OS_TRUE;
+            }
+            break;
+        }
+        e--;
+    }
+
+    return OS_FALSE;
+}

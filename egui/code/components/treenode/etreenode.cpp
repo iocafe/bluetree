@@ -162,6 +162,11 @@ void eTreeNode::onmessage(
                     path += "/";
                 }
 
+                item = content->firstv(EBROWSE_THIS_OBJECT);
+                if (item) {
+                    setup_node(item, ipath, path);
+                }
+
                 first_item = content->firstv(EBROWSE_IN_NSPACE);
                 for (item = first_item;
                      item;
@@ -240,7 +245,12 @@ void eTreeNode::setup_node(
         appendix = eSet::cast(o);
         if (appendix->get(EBROWSE_IPATH, &ivalue)) {
             tmp = ipath;
-            if (item->oid() == EBROWSE_PROPERTY) { tmp += "_p/"; }
+            if (item->oid() == EBROWSE_PROPERTY) {
+                tmp += "_p/";
+            }
+            else {
+                if (ivalue.is_oix()) tmp.clean_to_append_oix();
+            }
             tmp += ivalue;
             setpropertyv(ECOMP_IPATH, &tmp);
 
@@ -248,7 +258,13 @@ void eTreeNode::setup_node(
                 value = ivalue;
             }
             tmp = path;
-            if (item->oid() == EBROWSE_PROPERTY) { tmp += "_p/"; }
+            if (item->oid() == EBROWSE_PROPERTY) {
+                tmp += "_p/";
+            }
+            else {
+                if (value.is_oix()) tmp.clean_to_append_oix();
+            }
+
             tmp += value;
             setpropertyv(ECOMP_PATH, &tmp);
         }
@@ -298,7 +314,7 @@ eStatus eTreeNode::onpropertychange(
             break;
 
         case ECOMP_TEXT:
-            m_label_text.clear();
+            m_text.clear();
             break;
 
         case ECOMP_UNIT:
@@ -382,7 +398,7 @@ eStatus eTreeNode::draw(
 {
     eComponent *child;
     os_int text_w, edit_w, unit_w, total_w, path_w, ipath_w, unit_spacer, total_h, w_left, h;
-    const os_char *label, *unit, *path;
+    const os_char *label, *text, *unit, *path;
     ImGuiInputTextFlags eflags;
     bool isopen;
 
@@ -402,8 +418,9 @@ eStatus eTreeNode::draw(
         m_autoopen = false;
     }
 
-    label = m_label_text.get(this, ECOMP_TEXT);
-    isopen = ImGui::TreeNodeEx(label, m_show_expand_arrow ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_Leaf);
+    label = m_label_node.get(this);
+    text = m_text.get(this, ECOMP_TEXT);
+    isopen = ImGui::TreeNodeEx(label, m_show_expand_arrow ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_Leaf, "%s", text);
 
     /* If we open the component, request information.
      */
@@ -538,7 +555,6 @@ eStatus eTreeNode::draw(
             if (h > total_h) total_h = h;
         }
     }
-
 
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;

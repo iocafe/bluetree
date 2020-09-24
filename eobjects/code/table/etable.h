@@ -63,12 +63,10 @@ public:
         return (eTable*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return ECLASSID_TABLE;
-    }
+    virtual os_int classid() {return ECLASSID_TABLE; }
+    virtual const os_char *classname() {return "table";}
 
     /* Static function to add class to propertysets and class list.
      */

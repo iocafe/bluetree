@@ -160,9 +160,10 @@ public:
         return (eEnvelope*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
     virtual os_int classid() {return ECLASSID_ENVELOPE;}
+    virtual const os_char *classname() {return "envelope";}
 
     /* Static function to add class to propertysets and class list.
      */

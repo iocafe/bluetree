@@ -835,23 +835,21 @@ void eObject::browse_list_properties(
     eContainer *content)
 {
     eVariable *p, *item, value;
-    eSet *appendix, *properties;
+    eSet *appendix;
     eName *name;
-
-    properties = eSet::cast(first(EOID_PROPERTIES));
+    os_int propertynr;
 
     for (p = firstp(EOID_CHILD, EPRO_NO_ERRORS); p; p = p->nextp())
     {
-        item = eVariable::cast(p->clone(content, EBROWSE_PROPERTY, EOBJ_NO_MAP));
+        item = eVariable::cast(p->clone(content, EBROWSE_PROPERTY,
+            EOBJ_NO_CLONED_NAMES|EOBJ_NO_MAP));
 
-        if (properties) {
-            if (properties->get(item->oid(), &value)) {
-                *item = value;
-            }
-        }
+        propertynr = p->oid();
+        propertyv(propertynr, &value);
+        *item = value;
 
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
-        name = item->firstname();
+        name = p->firstname();
         if (name) {
             appendix->set(EBROWSE_IPATH, name);
             delete name;

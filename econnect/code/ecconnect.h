@@ -118,12 +118,10 @@ public:
         return (ecConnect*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return ECONNCLASSID_CONNECT;
-    }
+    virtual os_int classid() {return ECONNCLASSID_CONNECT; }
+    virtual const os_char *classname() {return "ec_connect";}
 
     /* Static function to add class to propertysets and class list.
      */

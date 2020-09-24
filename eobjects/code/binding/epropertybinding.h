@@ -71,12 +71,10 @@ public:
         return (ePropertyBinding*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
-    virtual os_int classid()
-    {
-        return ECLASSID_PROPERTY_BINDING;
-    }
+    virtual os_int classid() {return ECLASSID_PROPERTY_BINDING; }
+    virtual const os_char *classname() {return "binding";}
 
     /* Static function to add class to propertysets and class list.
      */

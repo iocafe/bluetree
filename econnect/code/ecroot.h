@@ -124,6 +124,8 @@ public:
     {
         return ECONNCLASSID_ROOT;
     }
+    virtual const os_char *classname() {return "ec_root";}
+
 
     /* Static function to add class to propertysets and class list.
      */

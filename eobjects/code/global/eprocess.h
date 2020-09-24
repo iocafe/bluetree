@@ -64,9 +64,10 @@ public:
         return (eProcess*)o;
     }
 
-    /* Get class identifier.
+    /* Get class identifier and name.
      */
     virtual os_int classid() {return ECLASSID_PROCESS;}
+    virtual const os_char *classname() {return "process";}
 
     /*@}*/
 

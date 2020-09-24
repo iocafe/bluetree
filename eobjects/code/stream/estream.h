@@ -198,15 +198,13 @@ public:
         return (eStream*)o;
     }
 
-    /* Get class identifier.
-    */
-    virtual os_int classid()
-    {
-        return ECLASSID_STREAM;
-    }
+    /* Get class identifier and name.
+     */
+    virtual os_int classid() {return ECLASSID_STREAM; }
+    virtual const os_char *classname() {return "stream";}
 
     /* Static constructor function.
-    */
+     */
     static eStream *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
