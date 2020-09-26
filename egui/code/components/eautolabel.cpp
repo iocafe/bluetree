@@ -104,7 +104,7 @@ void eAutoLabel::setstr(
     eComponent *component,
     const os_char *text)
 {
-    const os_char hide_label_mark[] = "##l";
+    const os_char hide_label_mark[] = "###l";
     os_char nbuf[OSAL_NBUF_SZ];
     os_memsz sz;
     eWindow *window;
@@ -117,13 +117,13 @@ void eAutoLabel::setstr(
             // count = window->inc_autolabel_count();
         }
 
-        if (m_count == 0) {
+        while (m_count == 0) {
             m_count = ++(eglobal->eguiglobal->autolabel_count);
         }
     }
 
-    sz = osal_int_to_str(nbuf, sizeof(nbuf), m_count)
-       + os_strlen(hide_label_mark) - 1;
+    sz = osal_int_to_str(nbuf, sizeof(nbuf), m_count);
+    sz += os_strlen(hide_label_mark) - 1;
 
     if (text) {
         sz += os_strlen(text) - 1;
@@ -134,7 +134,7 @@ void eAutoLabel::setstr(
 
     allocate(sz);
     os_strncpy(m_label, text, m_label_sz);
-    os_strncat(m_label, "##l", m_label_sz);
+    os_strncat(m_label, hide_label_mark, m_label_sz);
     os_strncat(m_label, nbuf, m_label_sz);
 }
 
