@@ -97,12 +97,6 @@ public:
         eVariable *x,
         os_int flags);
 
-    /* Get value of simple property.
-     */
-    virtual eStatus simpleproperty(
-        os_int propertynr,
-        eVariable *x);
-
     /* Static constructor function for generating instance by class list.
      */
     static eLineEdit *newobj(
@@ -136,10 +130,6 @@ public:
 
 
 protected:
-    eVariable *m_value;
-
-
-
     bool m_edit_value;
     bool m_prev_edit_value;
 

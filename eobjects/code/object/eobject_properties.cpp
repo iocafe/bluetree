@@ -212,7 +212,7 @@ eVariable *eObject::addpropertyl(
 {
     eVariable *p;
     p = addproperty(cid, propertynr, propertyname, pflags, text);
-    p->setl(x);
+    // p->setl(x);
     p->setpropertyl(EVARP_TYPE, OS_LONG);
     p->setl(x);
     return p;
@@ -243,7 +243,7 @@ eVariable *eObject::addpropertyd(
 {
     eVariable *p;
     p = addproperty(cid, propertynr, propertyname, pflags, text);
-    p->setd(x);
+    // p->setd(x);
     p->setpropertyl(EVARP_TYPE, OS_DOUBLE);
     p->setpropertyl(EVARP_DIGS, digs);
     p->setd(x);

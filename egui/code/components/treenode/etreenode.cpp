@@ -33,9 +33,6 @@ eTreeNode::eTreeNode(
     os_int flags)
     : eComponent(parent, id, flags)
 {
-    /* m_value = new eVariable(this, EOID_ITEM,
-        EOBJ_TEMPORARY_ATTACHMENT ); */
-    m_value = new eVariable(this);
     m_isopen = false;
     m_autoopen = true;
     m_child_data_received = false;
@@ -59,7 +56,6 @@ eTreeNode::eTreeNode(
 */
 eTreeNode::~eTreeNode()
 {
-    delete m_value;
 }
 
 
@@ -108,7 +104,7 @@ void eTreeNode::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eTreeNode");
-    eComponent::setupproperties(cls, ECOMP_LINCONV_PROPERITES|ECOMP_VALUE_STATE_PROPERITES|
+    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_VALUE_STATE_PROPERITES|
         ECOMP_EXTRA_UI_PROPERITES|ECOMP_CONF_PATH|ECOMP_CONF_IPATH);
     propertysetdone(cls);
     os_unlock();
@@ -334,40 +330,7 @@ eStatus eTreeNode::onpropertychange(
             break;
     }
 
-    if (m_value->onpropertychange(propertynr, x, flags) == ESTATUS_SUCCESS) {
-        // invalidate
-        return ESTATUS_SUCCESS;
-    }
-
     return eComponent::onpropertychange(propertynr, x, flags);
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Get value of simple property (override).
-
-  The simpleproperty() function stores current value of simple property into variable x.
-
-  @param   propertynr Property number to get.
-  @param   x Variable into which to store the property value.
-  @return  If property with property number was stored in x, the function returns
-           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
-           given number was not among simple properties.
-
-****************************************************************************************************
-*/
-eStatus eTreeNode::simpleproperty(
-    os_int propertynr,
-    eVariable *x)
-{
-    if (m_value->simpleproperty(propertynr, x) == ESTATUS_SUCCESS)
-    {
-        return ESTATUS_SUCCESS;
-    }
-
-    return eComponent::simpleproperty(propertynr, x);
 }
 
 
@@ -491,8 +454,10 @@ eStatus eTreeNode::draw(
         ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
         if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
         {
+            eVariable value;
+            propertyv(ECOMP_VALUE, &value);
             m_edit_value = false;
-            if (os_strcmp(m_edit_buf.ptr(), m_value->gets())) {
+            if (os_strcmp(m_edit_buf.ptr(), value.gets())) {
                 setpropertys(ECOMP_VALUE, m_edit_buf.ptr());
                 set_modified_value();
             }
@@ -511,7 +476,10 @@ eStatus eTreeNode::draw(
         if (ImGui::IsItemActive()) {
             m_prev_edit_value = false;
             m_edit_value = true;
-            m_edit_buf.set(m_value->gets(), 256);
+
+            eVariable value;
+            propertyv(ECOMP_VALUE, &value);
+            m_edit_buf.set(value.gets(), 256);
         }
         ImGui::PopStyleVar();
         h = ImGui::GetItemRectSize().y;

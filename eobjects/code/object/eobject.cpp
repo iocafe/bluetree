@@ -1353,10 +1353,6 @@ eName *eObject::addname(
         {
             namespace_id = eobj_this_ns;
         }
-        else
-        {
-            namespace_id = eobj_parent_ns;
-        }
     }
 namespace_selected:
 

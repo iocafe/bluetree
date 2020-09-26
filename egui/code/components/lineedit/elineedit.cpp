@@ -33,9 +33,6 @@ eLineEdit::eLineEdit(
     os_int flags)
     : eComponent(parent, id, flags)
 {
-    /* m_value = new eVariable(this, EOID_ITEM,
-        EOBJ_TEMPORARY_ATTACHMENT ); */
-    m_value = new eVariable(this);
     m_edit_value = false;
     m_prev_edit_value = false;
 }
@@ -54,7 +51,6 @@ eLineEdit::eLineEdit(
 */
 eLineEdit::~eLineEdit()
 {
-    delete m_value;
 }
 
 
@@ -103,7 +99,7 @@ void eLineEdit::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eLineEdit");
-    eComponent::setupproperties(cls, ECOMP_LINCONV_PROPERITES|
+    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|
         ECOMP_VALUE_STATE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     propertysetdone(cls);
     os_unlock();
@@ -164,53 +160,7 @@ eStatus eLineEdit::onpropertychange(
             break;
     }
 
-    if (m_value->onpropertychange(propertynr, x, flags) == ESTATUS_SUCCESS) {
-        // invalidate
-        return ESTATUS_SUCCESS;
-    }
-
     return eComponent::onpropertychange(propertynr, x, flags);
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Get value of simple property (override).
-
-  The simpleproperty() function stores current value of simple property into variable x.
-
-  @param   propertynr Property number to get.
-  @param   x Variable into which to store the property value.
-  @return  If property with property number was stored in x, the function returns
-           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
-           given number was not among simple properties.
-
-****************************************************************************************************
-*/
-eStatus eLineEdit::simpleproperty(
-    os_int propertynr,
-    eVariable *x)
-{
-    /*
-    eObject *obj;
-    switch (propertynr)
-    {
-        case ?:
-            x->setl(m_command);
-            break;
-
-
-        default:
-            break;
-    } */
-
-    if (m_value->simpleproperty(propertynr, x) == ESTATUS_SUCCESS)
-    {
-        return ESTATUS_SUCCESS;
-    }
-
-    return eComponent::simpleproperty(propertynr, x);
 }
 
 
@@ -282,8 +232,10 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
         ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
         if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
         {
+            eVariable value;
+            propertyv(ECOMP_VALUE, &value);
             m_edit_value = false;
-            if (os_strcmp(m_edit_buf.ptr(), m_value->gets())) {
+            if (os_strcmp(m_edit_buf.ptr(), value.gets())) {
                 setpropertys(ECOMP_VALUE, m_edit_buf.ptr());
             }
         }
@@ -301,7 +253,10 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
         if (ImGui::IsItemActive()) {
             m_prev_edit_value = false;
             m_edit_value = true;
-            m_edit_buf.set(m_value->gets(), 256);
+
+            eVariable value;
+            propertyv(ECOMP_VALUE, &value);
+            m_edit_buf.set(value.gets(), 256);
         }
         ImGui::PopStyleVar();
         h = ImGui::GetItemRectSize().y;

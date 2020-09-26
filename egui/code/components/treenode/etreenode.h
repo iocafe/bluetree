@@ -102,12 +102,6 @@ public:
         eVariable *x,
         os_int flags);
 
-    /* Get value of simple property.
-     */
-    virtual eStatus simpleproperty(
-        os_int propertynr,
-        eVariable *x);
-
     /* Static constructor function for generating instance by class list.
      */
     static eTreeNode *newobj(
@@ -149,8 +143,6 @@ protected:
         eVariable *item,
         eVariable& ipath,
         eVariable& path);
-
-    eVariable *m_value;
 
     bool m_autoopen;
     bool m_isopen;

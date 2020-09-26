@@ -121,9 +121,9 @@ void eComponent::setupproperties(
     if (flags & ECOMP_VALUE_PROPERITES) {
         addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA, "type");
         p->setpropertyl(ECOMP_TYPE, OS_STR);
-        addproperty (cls, ECOMP_VALUE, ecomp_value, EPRO_SIMPLE, "value");
+        addproperty (cls, ECOMP_VALUE, ecomp_value, EPRO_DEFAULT, "value");
         addproperty (cls, ECOMP_DEFAULT, ecomp_default, EPRO_METADATA, "default");
-        addpropertyl(cls, ECOMP_DIGS, ecomp_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
+        addpropertyl(cls, ECOMP_DIGS, ecomp_digs, EPRO_METADATA, "digs");
         addpropertys(cls, ECOMP_UNIT, ecomp_unit, EPRO_METADATA, "unit");
         addpropertyd(cls, ECOMP_MIN, ecomp_min, EPRO_METADATA, "min");
         addpropertyd(cls, ECOMP_MAX, ecomp_max, EPRO_METADATA, "max");

@@ -861,7 +861,6 @@ void eObject::browse_list_properties(
         name = p->firstname();
         if (name) {
             appendix->set(EBROWSE_IPATH, name);
-            delete name;
         }
     }
 }
