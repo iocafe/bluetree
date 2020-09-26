@@ -118,7 +118,7 @@ void eComponent::setupproperties(
      */
     p = addproperty(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA, "text");
 
-    if (flags & ECOMP_LINCONV_PROPERITES) {
+    if (flags & ECOMP_VALUE_PROPERITES) {
         addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA, "type");
         p->setpropertyl(ECOMP_TYPE, OS_STR);
         addproperty (cls, ECOMP_VALUE, ecomp_value, EPRO_SIMPLE, "value");
@@ -136,7 +136,7 @@ void eComponent::setupproperties(
 
     addpropertyl(cls, ECOMP_ATTR, ecomp_attr, EPRO_METADATA, "attr");
 
-    if (flags & ECOMP_LINCONV_PROPERITES) {
+    if (flags & ECOMP_VALUE_PROPERITES) {
         addpropertyd(cls, ECOMP_GAIN, ecomp_gain, EPRO_METADATA, "gain");
         addpropertyd(cls, ECOMP_OFFSET, ecomp_offset, EPRO_METADATA, "offset");
     }

@@ -278,7 +278,7 @@ void eNameSpace::setnamespaceid(
   The eNameSpace::findname() function returns pointer to the first eName which matches to given
   argument. The parent() of eName is the named object.
 
-  @param   x Object name as variable. If OS_NULL, The function returns OS_NULL.
+  @param   x Object name as variable. If OS_NULL, The function returns pointer to the first name.
   @return  Pointer to name, or OS_NULL if no match was found.
 
 ****************************************************************************************************
@@ -292,10 +292,6 @@ eName *eNameSpace::findname(
 
     os_int
         c;
-
-    /* NULL argument is ok.
-     */
-    if (x == OS_NULL) return OS_NULL;
 
     /* Set n to point root of child object's red/black tree.
      */

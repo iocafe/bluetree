@@ -413,6 +413,7 @@ os_int eObject::propertynr(
      */
     ns = eNameSpace::cast(pset->first(EOID_NAMESPACE));
     v.sets(propertyname);
+    if (ns == OS_NULL) goto notfound;
     name = ns->findname(&v);
     if (name == OS_NULL) goto notfound;
     pnr = name->parent()->oid();

@@ -654,7 +654,12 @@ void eObject::onmessage(
                 envelope->move_target_over_objname((os_short)sz-1);
 
                 nspace = eNameSpace::cast(first(EOID_NAMESPACE));
-                name = nspace->findname(&objname);
+                if (nspace) {
+                    name = nspace->findname(&objname);
+                }
+                else {
+                    name = OS_NULL;
+                }
             }
             if (name == OS_NULL) goto getout;
 

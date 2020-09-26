@@ -145,10 +145,7 @@ void eName::setupclass()
 /**
 ****************************************************************************************************
 
-  @brief Clear member variables to initial state.
-
-  X...
-
+  @brief Initialize member variables to known state.
   @return  None.
 
 ****************************************************************************************************
