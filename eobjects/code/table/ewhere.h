@@ -82,10 +82,9 @@ public:
         e_oid id = EOID_RITEM,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Get class identifier and name.
+    /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_WHERE; }
-    virtual const os_char *classname() {return "where";}
 
     /*@}*/
 

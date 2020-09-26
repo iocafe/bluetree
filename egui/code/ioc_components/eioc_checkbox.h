@@ -84,10 +84,9 @@ public:
         return (eiocCheckbox*)o;
     }
 
-    /* Get class identifier and name.
+    /* Get class identifier.
      */
     virtual os_int classid() {return EGUICLASSID_IOC_CHECKBOX; }
-    virtual const os_char *classname() {return "ioc_checkbox";}
 
     /* Static function to add class to propertysets and class list.
      */

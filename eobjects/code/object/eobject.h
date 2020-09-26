@@ -187,7 +187,7 @@ public:
     /* Get class identifier and name.
      */
     virtual os_int classid() {return ECLASSID_OBJECT; }
-    virtual const os_char *classname() {return "object";}
+    const os_char *classname();
 
     /* Return OS_TRUE if object is thread (derived).
      */
@@ -618,7 +618,7 @@ public:
      */
     eName *addname(
         const os_char *name,
-        os_int flags = 0,
+        os_int flags = 0, /* 0 = ENAME_PARENT_NS */
         const os_char *namespace_id = OS_NULL);
 
     /* Get first name given to this this object.

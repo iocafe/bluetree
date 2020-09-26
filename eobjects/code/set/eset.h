@@ -71,10 +71,9 @@ public:
         return (eSet*)o;
     }
 
-    /* Get class identifier and name.
+    /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_SET; }
-    virtual const os_char *classname() {return "set";}
 
     /* Static function to add class to propertysets and class list.
      */

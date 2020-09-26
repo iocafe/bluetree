@@ -72,5 +72,6 @@ osalStatus emain(
 
     eimgui_shutdown();
     egui_shutdown();
+
     return OSAL_SUCCESS;
 }

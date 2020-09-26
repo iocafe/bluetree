@@ -582,7 +582,6 @@ void eObject::onmessage(
     eEnvelope *envelope)
 {
     os_char *target;
-    eVariable objname;
     eNameSpace *nspace;
     eName *name, *nextname;
     os_memsz sz;
@@ -648,13 +647,15 @@ void eObject::onmessage(
         /* Messages to named child objects.
          */
         default:
-            envelope->nexttarget(&objname);
-            objname.gets(&sz);
-            envelope->move_target_over_objname((os_short)sz-1);
+            {
+                eVariable objname;
+                envelope->nexttarget(&objname);
+                objname.gets(&sz);
+                envelope->move_target_over_objname((os_short)sz-1);
 
-            nspace = eNameSpace::cast(first(EOID_NAMESPACE));
-            if (nspace == OS_NULL) goto getout;
-            name = nspace->findname(&objname);
+                nspace = eNameSpace::cast(first(EOID_NAMESPACE));
+                name = nspace->findname(&objname);
+            }
             if (name == OS_NULL) goto getout;
 
             do
@@ -709,13 +710,15 @@ void eObject::send_browse_info(
 {
     eContainer *content;
     eVariable *item;
+    eName *name;
 
     content = new eContainer;
 
     /* Store information about this object.
      */
     item = new eVariable(content, EBROWSE_THIS_OBJECT);
-    object_info(item, OS_NULL);
+    name = firstname();
+    object_info(item, name);
 
     /* If this object has name space, list named objects.
      */
@@ -809,8 +812,9 @@ void eObject::browse_list_children(
     eSet *appendix;
     eName *name;
     os_char buf[E_OIXSTR_BUF_SZ];
+    os_int oid = EOID_ALL;
 
-    for (child = first(); child; child = child->next())
+    for (child = first(oid); child; child = child->next(oid))
     {
         item = new eVariable(content, EBROWSE_CHILD);
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);

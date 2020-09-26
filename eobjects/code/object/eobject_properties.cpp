@@ -412,7 +412,6 @@ os_int eObject::propertynr(
     /* Get property nr from global variable describing the property by name.
      */
     ns = eNameSpace::cast(pset->first(EOID_NAMESPACE));
-    if (ns == OS_NULL) goto notfound;
     v.sets(propertyname);
     name = ns->findname(&v);
     if (name == OS_NULL) goto notfound;

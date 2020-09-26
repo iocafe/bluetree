@@ -269,14 +269,6 @@ void eTreeNode::setup_node(
             setpropertyv(ECOMP_PATH, &tmp);
         }
     }
-
-    /* n = item->firstname();
-    if (n) {
-        tmp = path;
-        if (item->oid() == EBROWSE_PROPERTY) { tmp += "_p/"; }
-        tmp += *n;
-        setpropertyv(ECOMP_PATH, &tmp);
-    } */
 }
 
 
@@ -502,6 +494,7 @@ eStatus eTreeNode::draw(
             m_edit_value = false;
             if (os_strcmp(m_edit_buf.ptr(), m_value->gets())) {
                 setpropertys(ECOMP_VALUE, m_edit_buf.ptr());
+                set_modified_value();
             }
         }
         else {
@@ -581,14 +574,11 @@ eStatus eTreeNode::draw(
 /**
 ****************************************************************************************************
 
-  @brief Draw the component.
+  @brief Request information about an object
 
-  The eTreeNode::draw() function calls ImGui API to render the component.
+  The eTreeNode::request_object_info() function...
 
-  @param   Prm Drawing parameters.
-  @return  The function return ESTATUS_SUCCESS if all is fine. Other values indicate that the
-           component is no longer drawable or useful. This could be for example a pop up menu
-           closed implicitely by clicking elsewhere.
+  @return  None.
 
 ****************************************************************************************************
 */
@@ -599,5 +589,27 @@ void eTreeNode::request_object_info()
     propertyv(ECOMP_IPATH, &path);
     if (!path.isempty()) {
         message(ECMD_INFO_REQUEST, path.gets());
+    }
+}
+
+/**
+****************************************************************************************************
+
+  @brief Set property of object
+
+  The eTreeNode::set_modified_value() function...
+
+  @return  None.
+
+****************************************************************************************************
+*/
+void eTreeNode::set_modified_value()
+{
+    eVariable path, value;
+
+    propertyv(ECOMP_IPATH, &path);
+    if (!path.isempty()) {
+        propertyv(ECOMP_VALUE, &value);
+        setproperty_msg(path.gets(), &value);
     }
 }

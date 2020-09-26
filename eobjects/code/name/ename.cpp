@@ -39,7 +39,7 @@ eName::eName(
     /* Clear member variables to initial state.
      */
     clear_members();
-    m_ns_type = E_PARENT_NS_TYPE;
+    m_ns_type = ENAME_PARENT_NS;
     m_namespace_id = OS_NULL;
 
     /* If this is name space.
@@ -365,23 +365,23 @@ const os_char *eName::namespaceid()
     switch (m_ns_type)
     {
         default:
-        case E_PARENT_NS_TYPE:
+        case ENAME_PARENT_NS:
             namespace_id = eobj_parent_ns;
             break;
 
-        case E_PROCESS_NS_TYPE:
+        case ENAME_PROCESS_NS:
             namespace_id = eobj_process_ns;
             break;
 
-        case E_THREAD_NS_TYPE:
+        case ENAME_THREAD_NS:
             namespace_id = eobj_thread_ns;
             break;
 
-        case E_THIS_NS_TYPE:
+        case ENAME_THIS_NS:
             namespace_id = eobj_this_ns;
             break;
 
-        case E_SPECIFIED_NS_TYPE:
+        case ENAME_SPECIFIED_NS:
             namespace_id = m_namespace_id->gets();
             break;
     }
@@ -405,7 +405,7 @@ void eName::setnamespaceid(
 {
     /* Clear old stuff if any
      */
-    m_ns_type = E_PARENT_NS_TYPE;
+    m_ns_type = ENAME_PARENT_NS;
     if (m_namespace_id)
     {
         delete m_namespace_id;
@@ -416,23 +416,23 @@ void eName::setnamespaceid(
     {
         if (!os_strcmp(namespace_id, E_PROCESS_NS))
         {
-            m_ns_type = E_PROCESS_NS_TYPE;
+            m_ns_type = ENAME_PROCESS_NS;
         }
         else if (!os_strcmp(namespace_id, E_THREAD_NS))
         {
-            m_ns_type = E_THREAD_NS_TYPE;
+            m_ns_type = ENAME_THREAD_NS;
         }
         else if (!os_strcmp(namespace_id, E_PARENT_NS))
         {
-            m_ns_type = E_PARENT_NS_TYPE;
+            m_ns_type = ENAME_PARENT_NS;
         }
         else if (!os_strcmp(namespace_id, eobj_this_ns))
         {
-            m_ns_type = E_THIS_NS_TYPE;
+            m_ns_type = ENAME_THIS_NS;
         }
         else
         {
-            m_ns_type = E_SPECIFIED_NS_TYPE;
+            m_ns_type = ENAME_SPECIFIED_NS;
             m_namespace_id = new eVariable(this, EOID_CHILD, EOBJ_TEMPORARY_ATTACHMENT);
             m_namespace_id->sets(namespace_id);
         }

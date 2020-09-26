@@ -105,7 +105,7 @@ eNewObjFunc eclasslist_newobj(
 
   @brief Get class name.
 
-  The eclasslist_classname function...
+  The eclasslist_classname function returns clas name matching to class id (cid).
 
   @param   cid Class ifentifier to look for.
   @return  Class name, or OS_NULL if none found.
@@ -159,9 +159,11 @@ void eclasslist_initialize()
        themselves.
      */
     eVariable::setupclass();
+
     eSet::setupclass();
     eContainer::setupclass();
     eName::setupclass();
+    eNameSpace::setupclass();
     eEnvelope::setupclass();
     ePropertyBinding::setupclass();
     eTimer::setupclass();
@@ -172,6 +174,8 @@ void eclasslist_initialize()
     eConnection::setupclass();
     eEndPoint::setupclass();
     eThread::setupclass();
+    eProcess::setupclass();
+    eRoot::setupclass();
     eOsStream::setupclass();
 }
 

@@ -98,7 +98,7 @@ void eWindow::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eWindow");
-    eComponent::setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
+    addproperty(cls, ECOMP_VALUE, ecomp_value, EPRO_DEFAULT, "title");
     propertysetdone(cls);
     os_unlock();
 }
@@ -133,7 +133,7 @@ eStatus eWindow::onpropertychange(
 {
     switch (propertynr)
     {
-        case ECOMP_TEXT: /* clear label to display new text and proceed */
+        case ECOMP_VALUE: /* clear label to display new text and proceed */
             m_label_title.clear();
             break;
     }
@@ -185,7 +185,7 @@ eStatus eWindow::draw(
     eComponent *c;
     const os_char *label;
 
-    label = m_label_title.get(this, ECOMP_TEXT);
+    label = m_label_title.get(this, ECOMP_VALUE);
 
     ImGui::Begin(label);                          // Create a window called "Hello, world!" and append into it.
 

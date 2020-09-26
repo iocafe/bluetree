@@ -82,20 +82,19 @@ public:
         return (ePointer*)o;
     }
 
-    /* Get class identifier and name.
+    /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_POINTER; }
-    virtual const os_char *classname() {return "pointer";}
 
     /* Static constructor function.
     */
-    /* static ePointer *newobj(
+    static ePointer *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new ePointer(parent, oid, flags);
-    } */
+        return new ePointer(parent, id, flags);
+    }
 
     /*@}*/
 

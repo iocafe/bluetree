@@ -22,7 +22,7 @@
 
 /* Set to 1 to debug red/black tree for the name space.
  */
-#define EINDEX_DBTREE_DEBUG 0
+#define EINDEX_DBTREE_DEBUG 1
 
 /* Name space identifiers. These are followed by '/', thus for example path to thread looks like
    "/myobject..." or process "//myobject".
@@ -84,20 +84,23 @@ public:
         return (eNameSpace*)o;
     }
 
-    /* Get class identifier and name.
+    /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_NAMESPACE; }
-    virtual const os_char *classname() {return "namespace";}
+
+    /* Static function to add class to propertysets and class list.
+     */
+    static void setupclass();
 
     /* Static constructor function for generating instance by class list.
      */
-    /* static eNameSpace *newobj(
+    static eNameSpace *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eNameSpace(parent, oid, flags);
-    } */
+        return new eNameSpace(parent, id, flags);
+    }
 
     /*@}*/
 

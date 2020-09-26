@@ -54,6 +54,31 @@ eProcess::~eProcess()
 {
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Add eProcess to class list and class'es properties to it's property set.
+
+  The eProcess::setupclass function adds eThread to class list and class'es properties to
+  it's property set. The class list enables creating new objects dynamically by class identifier,
+  which is used for serialization reader functions. The property set stores static list of
+  class'es properties and metadata for those.
+
+****************************************************************************************************
+*/
+void eProcess::setupclass()
+{
+    const os_int cls = ECLASSID_PROCESS;
+
+    /* Add the class to class list.
+     */
+    os_lock();
+    eclasslist_add(cls, OS_NULL, "eProcess");
+    os_unlock();
+}
+
+
 void eProcess::initialize(eContainer *params)
 {
     osal_console_write("initializing worker\n");
@@ -159,3 +184,5 @@ void eprocess_close()
         eglobal->processhandle = OS_NULL;
     }
 }
+
+

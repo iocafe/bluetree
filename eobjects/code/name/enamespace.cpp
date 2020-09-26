@@ -44,7 +44,6 @@
 
   Retrieved from: http://en.literateprograms.org/Red-black_tree_(C)?oldid=16016
 
-
 ****************************************************************************************************
 */
 
@@ -186,6 +185,31 @@ eObject *eNameSpace::clone(
 /**
 ****************************************************************************************************
 
+  @brief Add NameSpace to class list and class'es properties to it's property set.
+
+  The NameSpace::setupclass function adds eNameSpace to class list and class'es properties to
+  it's property set. The class list enables creating new objects dynamically by class identifier,
+  which is used for serialization reader functions. The property set stores static list of
+  class'es properties and metadata for those.
+
+****************************************************************************************************
+*/
+void eNameSpace::setupclass()
+{
+    const os_int cls = ECLASSID_NAMESPACE;
+
+    /* Add the class to class list.
+     */
+    os_lock();
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eNameSpace");
+    propertysetdone(cls);
+    os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Delete all child objects.
 
   The eNameSpace::unmap_all() function deletes all children of this object. This is faster code
@@ -249,18 +273,13 @@ void eNameSpace::setnamespaceid(
 /**
 ****************************************************************************************************
 
-  @brief Get first child object identified by oid.
+  @brief Get pointer to first name matching to x.
 
-  The eNameSpace::findname() function returns pointer to the first child object selected by object
-  identifier oid given as argument.
+  The eNameSpace::findname() function returns pointer to the first eName which matches to given
+  argument. The parent() of eName is the named object.
 
-  @param   oid Object idenfifier. Default value EOID_CHILD specifies to get a child object,
-           which is not flagged as an attachment. Value EOID_ALL specifies to get pointer to
-           the first child object, regardless wether it is attachment or not. Other values
-           specify object identifier, only pointer to object with specified object
-           identifier is returned.
-
-  @return  Pointer to child object, or OS_NULL if no matching child object was found.
+  @param   x Object name as variable. If OS_NULL, The function returns OS_NULL.
+  @return  Pointer to name, or OS_NULL if no match was found.
 
 ****************************************************************************************************
 */
@@ -273,6 +292,10 @@ eName *eNameSpace::findname(
 
     os_int
         c;
+
+    /* NULL argument is ok.
+     */
+    if (x == OS_NULL) return OS_NULL;
 
     /* Set n to point root of child object's red/black tree.
      */

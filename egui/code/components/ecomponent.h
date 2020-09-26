@@ -174,10 +174,9 @@ public:
         return (eComponent*)o;
     }
 
-    /* Get class identifier and name.
+    /* Get class identifier.
      */
     virtual os_int classid() {return EGUICLASSID_COMPONENT; }
-    virtual const os_char *classname() {return "component";}
 
     /* Static function to add class to propertysets and class list.
      */

@@ -276,6 +276,24 @@ void eObject::clonegeneric(
 /**
 ****************************************************************************************************
 
+  @brief Get class name.
+
+  The eObject::classname function returns clas name matching to class id (cid).
+
+  @param   cid Class ifentifier to look for.
+  @return  Class name, or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+const os_char *eObject::classname()
+{
+    return eclasslist_classname(classid());
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Allocate new object of any listed class.
 
   The eObject::newobject function looks from global class list by class identifier. If static
@@ -1256,6 +1274,9 @@ eName *eObject::addname(
     const os_char *namespace_id)
 {
     eName *n;
+    os_char buf[128];
+    const os_char *p;
+    os_memsz sz;
 
     /* Create name object.
      */
@@ -1272,6 +1293,54 @@ eName *eObject::addname(
      */
     if (namespace_id == OS_NULL)
     {
+        namespace_id = eobj_parent_ns;
+
+        /* If name starts with namespace id.
+         */
+        if (name)
+        {
+            if (name[0] == '/')
+            {
+                if (name[1] == '/')
+                {
+                    namespace_id = eobj_process_ns;
+                    name += 2;
+                    goto namespace_selected;
+                }
+                else
+                {
+                    namespace_id = eobj_thread_ns;
+                    name++;
+                    goto namespace_selected;
+                }
+            }
+            else if (name[0] == '.')
+            {
+                if (name[1] == '/')
+                {
+                    namespace_id = eobj_this_ns;
+                    name += 2;
+                    goto namespace_selected;
+                }
+                else if (name[1] == '.') if (name[2] == '/')
+                {
+                    namespace_id = eobj_parent_ns;
+                    name += 3;
+                    goto namespace_selected;
+                }
+            }
+
+            p = os_strchr((char*)name, '/');
+            if (p) {
+                sz = p - name + 1;
+                if (sz > (os_memsz)sizeof(buf)) sz = sizeof(buf);
+                os_strncpy(buf, name, sz);
+                namespace_id = buf;
+                name = p + 1;
+                goto namespace_selected;
+            }
+        }
+
         if (flags & ENAME_PROCESS_NS)
         {
             namespace_id = eobj_process_ns;
@@ -1284,44 +1353,12 @@ eName *eObject::addname(
         {
             namespace_id = eobj_this_ns;
         }
-        else if (flags & ENAME_PARENT_NS)
+        else
         {
             namespace_id = eobj_parent_ns;
         }
-
-        /* If name starts with namespace id.
-           Notice: CUSTOM NAME SPACES MISSING!!!
-         */
-        else if (name)
-        {
-            if (name[0] == '/')
-            {
-                if (name[1] == '/')
-                {
-                    namespace_id = eobj_process_ns;
-                    name += 2;
-                }
-                else
-                {
-                    namespace_id = eobj_thread_ns;
-                    name++;
-                }
-            }
-            else if (name[0] == '.')
-            {
-                if (name[1] == '/')
-                {
-                    namespace_id = eobj_this_ns;
-                    name += 2;
-                }
-                else if (name[1] == '.') if (name[2] == '/')
-                {
-                    namespace_id = eobj_parent_ns;
-                    name += 3;
-                }
-            }
-        }
     }
+namespace_selected:
 
     /* Set name string, if any.
      */

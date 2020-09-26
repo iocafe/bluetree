@@ -64,10 +64,13 @@ public:
         return (eProcess*)o;
     }
 
-    /* Get class identifier and name.
+    /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_PROCESS;}
-    virtual const os_char *classname() {return "process";}
+
+    /* Static function to add class to propertysets and class list.
+     */
+    static void setupclass();
 
     /*@}*/
 
@@ -96,11 +99,12 @@ public:
 
 
 /* Create eProcess object and start a thread to run it.
- */;
+ */
 void eprocess_create();
 
 /* Terminate eProcess thread and clean up.
  */
 void eprocess_close();
+
 
 #endif

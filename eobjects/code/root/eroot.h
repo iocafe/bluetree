@@ -21,12 +21,6 @@
 /**
 ****************************************************************************************************
 
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
-
 ****************************************************************************************************
 */
 class eRoot : public eObject
@@ -62,20 +56,23 @@ public:
         return (eRoot*)o;
     }
 
-    /* Get class identifier and name.
+    /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_ROOT;}
-    virtual const os_char *classname() {return "root";}
+
+    /* Static function to add class to propertysets and class list.
+     */
+    static void setupclass();
 
     /* Static constructor function for generating instance by class list.
      */
-    static eRoot *newobj(
+    /* static eRoot *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
         return new eRoot(parent, id, flags);
-    }
+    } */
     /*@}*/
 
 

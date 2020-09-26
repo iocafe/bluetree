@@ -78,12 +78,10 @@ public:
     /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_THREAD; }
-    virtual const os_char *classname() {return "thread";}
 
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
-
 
     /* Return OS_TRUE if object is thread (derived).
      */

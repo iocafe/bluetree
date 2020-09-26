@@ -67,20 +67,19 @@ public:
         return (eThreadHandle*)o;
     }
 
-    /* Get class identifier and name.
+    /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_THREAD_HANDLE;}
-    virtual const os_char *classname() {return "threadhandle";}
 
     /* Static constructor function for generating instance by class list.
      */
-    /* static eThreadHandle *newobj(
+    static eThreadHandle *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eThreadHandle(parent, oid, flags);
-    } */
+        return new eThreadHandle(parent, id, flags);
+    }
 
     /*@}*/
 

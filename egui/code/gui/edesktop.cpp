@@ -34,7 +34,7 @@ void eGui::setup_desktop_application()
     eTreeNode *n;
 
     w = new eWindow(this);
-    w->setpropertys(ECOMP_TEXT, "Muuttujia");
+    w->setpropertys(ECOMP_VALUE, "Muuttujia");
 
     e = new eLineEdit(w);
     e->setpropertys(ECOMP_VALUE, "Jakke ja suutari");
@@ -46,7 +46,7 @@ void eGui::setup_desktop_application()
     e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
 
     w = new eWindow(this);
-    w->setpropertys(ECOMP_TEXT, "Browseri");
+    w->setpropertys(ECOMP_VALUE, "Browseri");
 
     n = new eTreeNode(w);
     n->setpropertys(ECOMP_PATH, "//");

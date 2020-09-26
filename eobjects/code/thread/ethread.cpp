@@ -65,6 +65,8 @@ eThread::eThread(
      */
     m_message_queue = new eContainer(OS_NULL, EOID_INTERNAL, EOBJ_TEMPORARY_ATTACHMENT);
 
+addname("//thread");
+
     m_exit_requested = OS_FALSE;
 }
 
@@ -96,9 +98,9 @@ eThread::~eThread()
 /**
 ****************************************************************************************************
 
-  @brief Add eVariable to class list and class'es properties to it's property set.
+  @brief Add eThread to class list and class'es properties to it's property set.
 
-  The eVariable::setupclass function adds eVariable to class list and class'es properties to
+  The eThread::setupclass function adds eThread to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
@@ -122,7 +124,7 @@ void eThread::setupclass()
 
   @brief Function to process incoming messages.
 
-  The eObject::onmessage function handles messages received by object.
+  The eThread::onmessage function handles messages received by the thread object.
 
   @param   envelope Message envelope. Contains command, target and source paths and
            message content, etc.

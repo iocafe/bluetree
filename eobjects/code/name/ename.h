@@ -25,23 +25,24 @@
  */
 #define ENAME_PERSISTENT 0
 #define ENAME_TEMPORARY 1
+#define ENAME_PARENT_NS 0
 #define ENAME_PROCESS_NS 2
 #define ENAME_THREAD_NS 4
-#define ENAME_PARENT_NS 8
+#define ENAME_SPECIFIED_NS 8
 #define ENAME_THIS_NS 16
 #define ENAME_NO_MAP 32
 
 /* Enumeration of name space types.
  */
-typedef enum
+/* typedef enum
 {
-   E_PARENT_NS_TYPE = 0,
-   E_PROCESS_NS_TYPE,
-   E_THREAD_NS_TYPE,
-   E_THIS_NS_TYPE,
-   E_SPECIFIED_NS_TYPE
+   ENAME_PARENT_NS = 0,
+   ENAME_PROCESS_NS,
+   ENAME_THREAD_NS,
+   ENAME_THIS_NS,
+   ENAME_SPECIFIED_NS
 }
-eNameSpaceTypeEnum;
+eNameSpaceTypeEnum; */
 
 
 /**
@@ -95,10 +96,9 @@ public:
         return (eName*)o;
     }
 
-    /* Get class identifier and name.
+    /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_NAME;}
-    virtual const os_char *classname() {return "name";}
 
     /* Static function to add class to propertysets and class list.
      */
@@ -200,15 +200,16 @@ protected:
         m_vflags &= ~EVAR_IS_RED;
     }
 
-    /** Namespace type.
+    /** Namespace type (max one bit set). Bits: ENAME_PARENT_NS, ENAME_PROCESS_NS,
+        ENAME_THREAD_NS, ENAME_SPECIFIED_NS, ENAME_THIS_NS.
      */
-    eNameSpaceTypeEnum m_ns_type;
+    os_int m_ns_type;
 
     /** True if the name is mapped to the process name space.
      */
     os_boolean m_is_process_ns;
 
-    /** Name space identifier string when m_ns_type is E_SPECIFIED_NS_TYPE.
+    /** Name space identifier string when m_ns_type is ENAME_SPECIFIED_NS.
      */
     eVariable *m_namespace_id;
 
