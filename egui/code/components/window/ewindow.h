@@ -136,6 +136,11 @@ public:
 
 
 protected:
+    virtual void object_info(
+        eVariable *item,
+        eVariable *name,
+        eSet *appendix);
+
     eAutoLabel m_label_title;
 
 };

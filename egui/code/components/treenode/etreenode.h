@@ -139,7 +139,7 @@ protected:
 
     void set_modified_value();
 
-    void setup_node(
+    os_int setup_node(
         eVariable *item,
         eVariable& ipath,
         eVariable& path);
@@ -151,6 +151,9 @@ protected:
 
     bool m_edit_value;
     bool m_prev_edit_value;
+
+    bool m_intermediate_node;
+    os_int m_node_type;
 
     /* Buffer for editing value.
      */

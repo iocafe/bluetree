@@ -202,3 +202,31 @@ eStatus eWindow::draw(
     return ESTATUS_SUCCESS;
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Add eTreeNode to class list and class'es properties to it's property set.
+
+  The eObject::object_info function fills in item (eVariable) to contain information
+  about this object in tree browser view.
+
+  @param   item Pointer to eVariable to set up with object information.
+  @param   name Object's name if known. OS_NULL if object is not named or name is
+           unknown at this time.
+  @param   appendix Pointer to eSet into which to store property flags. The stored property
+           flags indicate if object has namespace, children, or properties.
+
+****************************************************************************************************
+*/
+void eWindow::object_info(
+    eVariable *item,
+    eVariable *name,
+    eSet *appendix)
+{
+    eVariable tmp;
+    eObject::object_info(item, name, appendix);
+
+    propertyv(ECOMP_VALUE, &tmp);
+    item->setv(&tmp, OS_TRUE);
+}

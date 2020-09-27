@@ -96,12 +96,14 @@ class ePointer;
 #define EJSON_NEW_LINE_ONLY 2
 #endif
 
-/* Browse identifier numbers.
+/* Browse object identifier numbers (used bot as object id and as bit fields in browse flags).
  */
 #define EBROWSE_THIS_OBJECT 1
-#define EBROWSE_IN_NSPACE 2
-#define EBROWSE_CHILD 3
-#define EBROWSE_PROPERTY 4
+#define EBROWSE_NSPACE 2
+#define EBROWSE_CHILDREN 4
+#define EBROWSE_ALL_CHILDREN 8
+#define EBROWSE_PROPERTIES 16
+#define EBROWSE_BROWSE_FLAGS 32
 
 /* Browse appendix indices.
  */
@@ -901,7 +903,7 @@ public:
     }
     /*@}*/
 
-private:
+protected:
     void message_within_thread(
         eEnvelope *envelope,
         const os_char *namespace_id);
@@ -916,13 +918,15 @@ private:
 
     virtual void object_info(
         eVariable *item,
-        eName *name);
+        eVariable *name,
+        eSet *appendix);
 
     void browse_list_namespace(
         eContainer *content);
 
     void browse_list_children(
-        eContainer *content);
+        eContainer *content,
+        os_int browse_flags);
 
     void browse_list_properties(
         eContainer *content);

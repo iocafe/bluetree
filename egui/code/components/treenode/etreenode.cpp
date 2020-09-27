@@ -40,6 +40,9 @@ eTreeNode::eTreeNode(
     m_edit_value = false;
     m_prev_edit_value = false;
     m_show_expand_arrow = true;
+
+    m_intermediate_node = false;
+    m_node_type = 0;
 }
 
 
@@ -131,7 +134,9 @@ void eTreeNode::onmessage(
     eContainer *content;
     eTreeNode *node, *groupnode;
     eComponent *child;
-    eVariable *item, *first_item, path, ipath;
+    eVariable *item, path, ipath;
+    eObject *pathobj;
+    os_int browse_flags;
 
     /* If at final destination for the message.
      */
@@ -149,64 +154,72 @@ void eTreeNode::onmessage(
                     delete child;
                 }
 
-                propertyv(ECOMP_IPATH, &ipath);
+                pathobj = m_intermediate_node ? parent() : this;
+                pathobj->propertyv(ECOMP_PATH, &path);
+                pathobj->propertyv(ECOMP_IPATH, &ipath);
+
                 if (osal_str_ends_with(ipath.gets(), "/") == OS_NULL) {
                     ipath += "/";
                 }
-                propertyv(ECOMP_PATH, &path);
                 if (osal_str_ends_with(path.gets(), "/") == OS_NULL) {
                     path += "/";
                 }
 
+                browse_flags = EBROWSE_THIS_OBJECT|EBROWSE_NSPACE;
                 item = content->firstv(EBROWSE_THIS_OBJECT);
                 if (item) {
-                    setup_node(item, ipath, path);
+                    browse_flags = setup_node(item, ipath, path);
                 }
 
-                first_item = content->firstv(EBROWSE_IN_NSPACE);
-                for (item = first_item;
+                for (item = content->firstv(EBROWSE_NSPACE);
                      item;
-                     item = item->nextv(EBROWSE_IN_NSPACE))
+                     item = item->nextv(EBROWSE_NSPACE))
                 {
                     node = new eTreeNode(this);
                     node->setup_node(item, ipath, path);
                 }
 
-                first_item = content->firstv(EBROWSE_CHILD);
-                if (first_item)
+                if (m_intermediate_node)
+                {
+                    for (item = content->firstv(EBROWSE_CHILDREN);
+                         item;
+                         item = item->nextv(EBROWSE_CHILDREN))
+                    {
+                        node = new eTreeNode(this);
+                        node->setup_node(item, ipath, path);
+                    }
+                }
+                else if (browse_flags & EBROWSE_CHILDREN)
                 {
                     groupnode = new eTreeNode(this);
                     groupnode->m_autoopen = false;
                     groupnode->setpropertys(ECOMP_TEXT, "children");
+                    groupnode->m_node_type = EBROWSE_CHILDREN;
+                    groupnode->m_intermediate_node = true;
+                }
 
-                    for (item = first_item;
+                if (m_intermediate_node)
+                {
+                    for (item = content->firstv(EBROWSE_PROPERTIES);
                          item;
-                         item = item->nextv(EBROWSE_CHILD))
+                         item = item->nextv(EBROWSE_PROPERTIES))
                     {
-                        node = new eTreeNode(groupnode);
+                        node = new eTreeNode(this);
                         node->setup_node(item, ipath, path);
                     }
                 }
-
-                first_item = content->firstv(EBROWSE_PROPERTY);
-                if (first_item)
+                else if (browse_flags & EBROWSE_PROPERTIES)
                 {
                     groupnode = new eTreeNode(this);
                     groupnode->m_autoopen = false;
                     groupnode->setpropertys(ECOMP_TEXT, "properties");
-
-                    for (item = first_item;
-                         item;
-                         item = item->nextv(EBROWSE_PROPERTY))
-                    {
-                        node = new eTreeNode(groupnode);
-                        node->setup_node(item, ipath, path);
-                    }
+                    groupnode->m_node_type = EBROWSE_PROPERTIES;
+                    groupnode->m_intermediate_node = true;
                 }
 
-     /* for (eObject *o = content->first(EBROWSE_PROPERTY);
+     /* for (eObject *o = content->first(EBROWSE_PROPERTIES);
          o;
-         o = o->next(EBROWSE_PROPERTY))
+         o = o->next(EBROWSE_PROPERTIES))
     {
         eObject *e = o->first(EOID_APPENDIX);
         if (e == OS_NULL) continue;
@@ -228,7 +241,7 @@ void eTreeNode::onmessage(
     eObject::onmessage(envelope);
 }
 
-void eTreeNode::setup_node(
+os_int eTreeNode::setup_node(
     eVariable *item,
     eVariable& ipath,
     eVariable& path)
@@ -236,10 +249,11 @@ void eTreeNode::setup_node(
     eVariable tmp, value, ivalue, *p;
     eSet *appendix;
     eObject *o;
-    os_int propertynr;
+    os_int propertynr, browse_flags = 0;
 
-    m_show_expand_arrow = item->oid() != EBROWSE_PROPERTY;
+    m_show_expand_arrow = item->oid() != EBROWSE_PROPERTIES;
     m_autoopen = false;
+    m_node_type = item->oid();
 
     for (p = item->firstp(); p; p = p->nextp())
     {
@@ -255,7 +269,7 @@ void eTreeNode::setup_node(
         appendix = eSet::cast(o);
         if (appendix->get(EBROWSE_IPATH, &ivalue)) {
             tmp = ipath;
-            if (item->oid() == EBROWSE_PROPERTY) {
+            if (item->oid() == EBROWSE_PROPERTIES) {
                 tmp += "_p/";
             }
             else {
@@ -268,7 +282,7 @@ void eTreeNode::setup_node(
                 value = ivalue;
             }
             tmp = path;
-            if (item->oid() == EBROWSE_PROPERTY) {
+            if (item->oid() == EBROWSE_PROPERTIES) {
                 tmp += "_p/";
             }
             else {
@@ -280,7 +294,13 @@ void eTreeNode::setup_node(
             tmp += value;
             setpropertyv(ECOMP_PATH, &tmp);
         }
+
+        if (appendix->get(EBROWSE_BROWSE_FLAGS, &value)) {
+            browse_flags = value.geti();
+        }
     }
+
+    return browse_flags;
 }
 
 
@@ -374,7 +394,6 @@ eStatus eTreeNode::draw(
     bool isopen;
 
     m_attr.for_variable(this);
-
 
     total_w = ImGui::GetContentRegionMax().x;
     ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
@@ -568,11 +587,26 @@ eStatus eTreeNode::draw(
 */
 void eTreeNode::request_object_info()
 {
-    eVariable path;
+    eVariable path, *item;
+    eContainer *content;
+    os_int browse_flags;
 
-    propertyv(ECOMP_IPATH, &path);
+    if (m_intermediate_node) {
+        browse_flags = m_node_type;
+        parent()->propertyv(ECOMP_IPATH, &path);
+    }
+    else {
+        browse_flags = EBROWSE_THIS_OBJECT|EBROWSE_NSPACE;
+        propertyv(ECOMP_IPATH, &path);
+    }
+
     if (!path.isempty()) {
-        message(ECMD_INFO_REQUEST, path.gets());
+
+        content = new eContainer();
+        item = new eVariable(content, EBROWSE_BROWSE_FLAGS);
+        item->setl(browse_flags);
+
+        message(ECMD_INFO_REQUEST, path.gets(), OS_NULL, content, EMSG_DEL_CONTENT);
     }
 }
 

@@ -1758,20 +1758,19 @@ os_boolean eVariable::is_oix()
   @brief Remove stuff from path what becomes unnecessary when oix is appended to it.
 
   If a path contains oix object name like "@401_3", the last object name is removed.
-  Also other stuff what is unnecessary may be removed.
+  Also other unnecessary stuff, like lone "//" may be removed.
   Is input path is terminated with '/', so is the path after function call.
 
   Once we implement connections, this must not remove stuff on other side of the connection.
 
-  @return OS_TRUE if oix was removed, or OS_FALSE if not.
+  @return OS_TRUE if oix, etc was removed, or OS_FALSE if not.
 
 ****************************************************************************************************
 */
 os_boolean eVariable::clean_to_append_oix()
 {
-    os_int trailing_slash;
+    os_int trailing_slash, vsz, e;
     os_char *path;
-    os_memsz vsz, e;
 
     if (type() != OS_STR) return OS_FALSE;
 
@@ -1789,26 +1788,40 @@ os_boolean eVariable::clean_to_append_oix()
     }
 
     if (vsz <= 1) return OS_FALSE;
-    e = vsz - 2;
+    e = vsz - 1;
+
+    if (vsz == 3) if (!os_strcmp(path, "//")) {
+        sets(OS_NULL);
+        return OS_TRUE;
+    }
 
     trailing_slash = 0;
-    if (path[e] == '/') {trailing_slash = 1; e--; }
+    if (e >= 2 && path[e-1] == '/') {trailing_slash = 1; e--; }
 
     while (e >= 0) {
-        if (path[e] == '/') {
-            if (path[e+1] == '@')
-            {
-                vsz = e + trailing_slash;
-                path[vsz++] = '\0';
-                if (m_vflags & EVAR_STRBUF_ALLOCATED) {
-                    m_value.strptr.used = vsz;
-                }
-                else {
-                    m_value.strbuf.used  = vsz;
-                }
-                return OS_TRUE;
+        if (e >= 1) {
+            if (path[e-1] != '/') {
+                e--;
+                continue;
             }
-            break;
+        }
+
+        if (path[e] == '@')
+        {
+            vsz = e - 1 + trailing_slash;
+            if (vsz > 0) path[vsz] = '\0';
+            vsz++;
+            if (vsz == 3) if (!os_strcmp(path, "//")) {
+                vsz = 0;
+                path[vsz++] = '\0';
+            }
+            if (m_vflags & EVAR_STRBUF_ALLOCATED) {
+                m_value.strptr.used = vsz;
+            }
+            else {
+                m_value.strbuf.used  = vsz;
+            }
+            return OS_TRUE;
         }
         e--;
     }

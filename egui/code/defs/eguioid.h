@@ -41,7 +41,7 @@
  */
 #define EOID_GUI_ECONNECT -101
 
-/* WIndow and popup are handled differently from regular GUI components.
+/* Window and popup are handled differently from regular GUI components.
  */
 #define EOID_GUI_WINDOW -102
 #define EOID_GUI_POPUP -103

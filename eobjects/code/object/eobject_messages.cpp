@@ -713,29 +713,55 @@ getout:
 void eObject::send_browse_info(
     eEnvelope *envelope)
 {
+    eObject *o;
     eContainer *content;
     eVariable *item;
     eName *name;
+    eSet *appendix;
+    os_int browse_flags;
 
+    /* Get browse flags from request.
+     */
+    browse_flags = EBROWSE_THIS_OBJECT|EBROWSE_NSPACE;
+    o = envelope->content();
+    if (o) {
+        content = eContainer::cast(o);
+        item = content->firstv(EBROWSE_BROWSE_FLAGS);
+        if (item) {
+            browse_flags = item->geti();
+        }
+    }
+
+    /* Created container for reply content.
+     */
     content = new eContainer;
 
     /* Store information about this object.
      */
-    item = new eVariable(content, EBROWSE_THIS_OBJECT);
-    name = firstname();
-    object_info(item, name);
+    if (browse_flags & EBROWSE_THIS_OBJECT) {
+        item = new eVariable(content, EBROWSE_THIS_OBJECT);
+        appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
+        name = firstname();
+        object_info(item, name, appendix);
+    }
 
     /* If this object has name space, list named objects.
      */
-    browse_list_namespace(content);
+    if (browse_flags & EBROWSE_NSPACE) {
+        browse_list_namespace(content);
+    }
 
     /* List child objects. Used for browsing.
      */
-    browse_list_children(content);
+    if (browse_flags & (EBROWSE_CHILDREN|EBROWSE_ALL_CHILDREN)) {
+        browse_list_children(content, browse_flags);
+    }
 
     /* List object properties
      */
-    browse_list_properties(content);
+    if (browse_flags & EBROWSE_PROPERTIES) {
+        browse_list_properties(content);
+    }
 
     /* Send reply to caller
      */
@@ -744,13 +770,29 @@ void eObject::send_browse_info(
 }
 
 
-/* List names in this object's namespace. Used for browsing.
- */
+/**
+****************************************************************************************************
+
+  @brief Add eTreeNode to class list and class'es properties to it's property set.
+
+  The eObject::object_info function fills in item (eVariable) to contain information
+  about this object in tree browser view.
+
+  @param   item Pointer to eVariable to set up with object information.
+  @param   name Object's name if known. OS_NULL if object is not named or name is
+           unknown at this time.
+  @param   appendix Pointer to eSet into which to store property flags. The stored property
+           flags indicate if object has namespace, children, or properties.
+
+****************************************************************************************************
+*/
 void eObject::object_info(
     eVariable *item,
-    eName *name)
+    eVariable *name,
+    eSet *appendix)
 {
     eVariable text;
+    os_int browse_flags;
 
     if (name) {
         text = *name;
@@ -763,6 +805,27 @@ void eObject::object_info(
     text += "]";
 
     item->setpropertyv(EVARP_TEXT, &text);
+
+    browse_flags = 0;
+    if (flags() & EOBJ_HAS_NAMESPACE) {
+        browse_flags |= EBROWSE_NSPACE;
+    }
+    if (first(EOID_CHILD)) {
+        browse_flags |= EBROWSE_CHILDREN|EBROWSE_ALL_CHILDREN;
+    }
+    if (first(EOID_ALL)) {
+        browse_flags |= EBROWSE_ALL_CHILDREN;
+    }
+    if (propertyset()) {
+        browse_flags |= EBROWSE_PROPERTIES;
+    }
+
+    appendix->setl(EBROWSE_BROWSE_FLAGS, browse_flags);
+
+
+    // item->sets(EBROWSE_ITEM_NAMESPACE_ID, name->namespaceid());
+    // item->setl(EBROWSE_NAME_IS_MAPPED, name->is_mapped());
+
 }
 
 
@@ -782,7 +845,7 @@ void eObject::browse_list_namespace(
 
     for (name = eObject::ns_firstv(); name; name = name->ns_next(OS_FALSE))
     {
-        item = new eVariable(content, EBROWSE_IN_NSPACE);
+        item = new eVariable(content, EBROWSE_NSPACE);
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
         appendix->set(EBROWSE_PATH, name);
 
@@ -791,14 +854,9 @@ void eObject::browse_list_namespace(
         name->parent()->oixstr(buf, sizeof(buf));
         appendix->sets(EBROWSE_IPATH, buf);
 
-        // item->addname(name->gets(), ENAME_THIS_NS|ENAME_NO_MAP);
-
-        // item->sets(EBROWSE_ITEM_NAMESPACE_ID, name->namespaceid());
-        // item->setl(EBROWSE_NAME_IS_MAPPED, name->is_mapped());
-
         if (!is_process) {
             obj = name->parent();
-            obj->object_info(item, name);
+            obj->object_info(item, name, appendix);
         }
         else {
             item->setpropertyv(EVARP_TEXT, name);
@@ -810,18 +868,21 @@ void eObject::browse_list_namespace(
 /* List child objects. Used for browsing.
  */
 void eObject::browse_list_children(
-    eContainer *content)
+    eContainer *content,
+    os_int browse_flags)
 {
     eObject *child;
     eVariable *item;
     eSet *appendix;
     eName *name;
     os_char buf[E_OIXSTR_BUF_SZ];
-    os_int oid = EOID_ALL;
+    os_int oid;
+
+    oid = (browse_flags & EBROWSE_ALL_CHILDREN) ? EOID_ALL : EOID_CHILD;
 
     for (child = first(oid); child; child = child->next(oid))
     {
-        item = new eVariable(content, EBROWSE_CHILD);
+        item = new eVariable(content, EBROWSE_CHILDREN);
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
 
         name = child->firstname();
@@ -834,7 +895,7 @@ void eObject::browse_list_children(
         child->oixstr(buf, sizeof(buf));
         appendix->sets(EBROWSE_IPATH, buf);
 
-        child->object_info(item, name);
+        child->object_info(item, name, appendix);
     }
 }
 
@@ -850,7 +911,7 @@ void eObject::browse_list_properties(
 
     for (p = firstp(EOID_CHILD, EPRO_NO_ERRORS); p; p = p->nextp())
     {
-        item = eVariable::cast(p->clone(content, EBROWSE_PROPERTY,
+        item = eVariable::cast(p->clone(content, EBROWSE_PROPERTIES,
             EOBJ_NO_CLONED_NAMES|EOBJ_NO_MAP));
 
         propertynr = p->oid();
