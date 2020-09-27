@@ -55,7 +55,7 @@ void egui_initialize()
 
     /* Create econnect object to access IOCOM.
      */
-    eguiglobal->econnect = new ecRoot(thread, EOID_GUI_ECONNECT);
+    // eguiglobal->econnect = new ecRoot(thread, EOID_GUI_ECONNECT);
 }
 
 

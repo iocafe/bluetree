@@ -342,6 +342,60 @@ eName *eName::ns_next(
 }
 
 
+
+/**
+****************************************************************************************************
+
+  @brief Get the next next name in same namespace.
+
+  The eName::ms_next() function returns pointer to next name in namespace.
+  Next name is the next child of the same parent object as this object (it could be called
+  sibling).
+
+  @param   name_match OS_TRUE (default) to get next name inly if it is same name as this object.
+           OS_FALSE to get next name in name space, regardless of the value.
+
+  @return  Pointer to next name, or OS_NULL if no matching object was found.
+
+****************************************************************************************************
+*/
+eName *eName::ns_prev(
+    os_boolean name_match)
+{
+    eName
+        *n,
+        *m;
+
+    n = this;
+
+    if (n->m_ileft)
+    {
+        n = n->m_ileft;
+        while (n->m_iright) n = n->m_iright;
+
+        if (!name_match) return n;
+
+        return compare(n) ? OS_NULL : n;
+    }
+    else
+    {
+        m = n->m_iup;
+
+        while (OS_TRUE)
+        {
+            if (m == OS_NULL) return OS_NULL;
+            if (m->m_iright == n) break;
+            n = m;
+            m = n->m_iup;
+        }
+
+        if (!name_match) return m;
+
+        return compare(m) ? OS_NULL : m;
+    }
+}
+
+
 /**
 ****************************************************************************************************
 

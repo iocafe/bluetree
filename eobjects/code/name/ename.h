@@ -124,6 +124,9 @@ public:
     eName *ns_next(
         os_boolean name_match = OS_TRUE);
 
+    eName *ns_prev(
+        os_boolean name_match = OS_TRUE);
+
     /** Get name space to which this name is mapped to.
      */
     inline eNameSpace *nspace()

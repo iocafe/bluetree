@@ -128,7 +128,7 @@ os_char *eclasslist_classname(
     }
     else
     {
-        osal_debug_error("eclasslist_newobj: Class not found");
+        osal_debug_error_int("eclasslist_newobj: Class not found, cid=", cid);
     }
 
     os_unlock();

@@ -6,13 +6,13 @@
   @version 1.0
   @date    8.9.2020
 
-  The eHandle is base class for all objects. 
-  
+  The eHandle is base class for all objects.
+
   - Functions to manage object hierarchy and idenfify objects.
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -49,12 +49,12 @@
 */
 
 
-/** 
+/**
 ****************************************************************************************************
 
-  A red-black tree is a type of self-balancing binary search tree typically used to implement 
-  associative arrays. It has O(log n) worst-case time for each operation and is quite efficient 
-  in practice. Unfortunately, it's also quite complex to implement, requiring a number of subtle 
+  A red-black tree is a type of self-balancing binary search tree typically used to implement
+  associative arrays. It has O(log n) worst-case time for each operation and is quite efficient
+  in practice. Unfortunately, it's also quite complex to implement, requiring a number of subtle
   cases for both insertion and deletion.
 
 
@@ -72,9 +72,9 @@
   wether to count attachment in or to count children only with specific id.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
-		   which are not flagged as an attachment. Value EOID_ALL specifies to get count all 
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
            child objects, regardless wether these are attachment or not. Other values
-		   specify object identifier, only children with that specified object identifier 
+           specify object identifier, only children with that specified object identifier
            are counted.
 
   @return  Number of child objects.
@@ -84,7 +84,7 @@
 os_long eHandle::childcount(
     e_oid id)
 {
-    os_long 
+    os_long
         count;
 
     eHandle
@@ -108,23 +108,23 @@ os_long eHandle::childcount(
 
   @brief Get first child object identified by oid.
 
-  The eHandle::first() function returns pointer to the first child object selected by object 
-  identifier oid given as argument. 
+  The eHandle::first() function returns pointer to the first child object selected by object
+  identifier oid given as argument.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to get a child object,
-		   which is not flagged as an attachment. Value EOID_ALL specifies to get pointer to
-		   the first child object, regardless wether it is attachment or not. Other values
-		   specify object identifier, only pointer to object with specified object
-		   identifier is returned. 
+           which is not flagged as an attachment. Value EOID_ALL specifies to get pointer to
+           the first child object, regardless wether it is attachment or not. Other values
+           specify object identifier, only pointer to object with specified object
+           identifier is returned.
 
-  @return  Pointer to child object, or OS_NULL if no matching child object was found. 
+  @return  Pointer to child object, or OS_NULL if no matching child object was found.
 
 ****************************************************************************************************
 */
 eHandle *eHandle::first(
     e_oid id)
 {
-    eHandle 
+    eHandle
         *n,
         *m;
 
@@ -137,11 +137,11 @@ eHandle *eHandle::first(
      */
     if (id == EOID_CHILD || id == EOID_ALL)
     {
-		/* If no child objects, just return null.
-		*/
-		if (n == OS_NULL) return OS_NULL;
-		
-		/* Move to first child object.
+        /* If no child objects, just return null.
+        */
+        if (n == OS_NULL) return OS_NULL;
+
+        /* Move to first child object.
          */
         while (n->m_left) n = n->m_left;
 
@@ -149,40 +149,40 @@ eHandle *eHandle::first(
            not attachment, return pointer to the first object.
          */
         if (id == EOID_ALL || !n->isattachment()) return n;
-        
-        /* Attachments not included and first object is attachment. 
-           Call next to get first child object which is not 
+
+        /* Attachments not included and first object is attachment.
+           Call next to get first child object which is not
            an attachment.
          */
         return n->next(id);
     }
-    
+
     /* Handle normal case where child object is searched by exactly
        matching object identifier.
      */
-    while (n != OS_NULL) 
+    while (n != OS_NULL)
     {
         /* If object identifier matches, check if there
            is earlier match.
          */
         if (id == n->m_oid)
         {
-            m = n->m_left;
-            if (m == OS_NULL) break;
-            if (m->m_oid != id) break;
-            n = m;
-        } 
+            while ((m = n->prev(id))) {
+                n = m;
+            }
+            break;
+        }
 
         /* Smaller, search to the left.
          */
         else if (id < n->m_oid)
         {
             n = n->m_left;
-        } 
+        }
 
         /* Bigger, search to to right.
          */
-        else 
+        else
         {
             n = n->m_right;
         }
@@ -199,40 +199,40 @@ eHandle *eHandle::first(
 
   @brief Get last child object identified by oid.
 
-  The eHandle::last() function returns pointer to the last child object selected by object 
-  identifier oid given as argument. 
+  The eHandle::last() function returns pointer to the last child object selected by object
+  identifier oid given as argument.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to get a child object,
-		   which is not flagged as an attachment. Value EOID_ALL specifies to get pointer to
-		   the last child object, regardless wether it is attachment or not. Other values
-		   specify object identifier, only pointer to object with specified object
-		   identifier is returned. 
+           which is not flagged as an attachment. Value EOID_ALL specifies to get pointer to
+           the last child object, regardless wether it is attachment or not. Other values
+           specify object identifier, only pointer to object with specified object
+           identifier is returned.
 
-  @return  Pointer to child object, or OS_NULL if no matching child object was found. 
+  @return  Pointer to child object, or OS_NULL if no matching child object was found.
 
 ****************************************************************************************************
 */
 eHandle *eHandle::last(
     e_oid id)
 {
-    eHandle 
+    eHandle
         *n,
         *m;
 
-	/* Set n to point root of child object's red/black tree.
-	*/
-	n = m_children;
+    /* Set n to point root of child object's red/black tree.
+    */
+    n = m_children;
 
     /* Handle special object identifiers to get first child object
        of any id, with or without attachments.
      */
     if (id == EOID_CHILD || id == EOID_ALL)
     {
-		/* If no child objects, just return null.
-		*/
-		if (n == OS_NULL) return OS_NULL;
-		
-		/* Move to last child object.
+        /* If no child objects, just return null.
+        */
+        if (n == OS_NULL) return OS_NULL;
+
+        /* Move to last child object.
          */
         while (n->m_right) n = n->m_right;
 
@@ -241,8 +241,8 @@ eHandle *eHandle::last(
          */
         if (id == EOID_ALL || !n->isattachment()) return n;
 
-        /* Attachments not included and the last object is an attachment. 
-           Call prev() to get previous child object which is not 
+        /* Attachments not included and the last object is an attachment.
+           Call prev() to get previous child object which is not
            an attachment.
          */
         return n->prev(id);
@@ -251,29 +251,29 @@ eHandle *eHandle::last(
     /* Handle normal case where child object is searched by exactly
        matching object identifier.
      */
-    while (n != OS_NULL) 
+    while (n != OS_NULL)
     {
         /* If object identifier matches, check if there
            is later match.
          */
         if (id == n->m_oid)
         {
-            m = n->m_right;
-            if (m == OS_NULL) break;
-            if (m->m_oid != id) break;
-            n = m;
-        } 
+            while ((m = n->next(id))) {
+                n = m;
+            }
+            break;
+        }
 
         /* Smaller, search to the left.
          */
         else if (id < n->m_oid)
         {
             n = n->m_left;
-        } 
+        }
 
         /* Bigger, search to to right.
          */
-        else 
+        else
         {
             n = n->m_right;
         }
@@ -291,16 +291,16 @@ eHandle *eHandle::last(
   @brief Get next child of same parent object.
 
   The eHandle::next() function returns pointer to the next child of the same parent object
-  as this object (it could be called sibling). The object is selected by object identifier oid 
+  as this object (it could be called sibling). The object is selected by object identifier oid
   given as argument.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to get a child object,
-		   which is not flagged as an attachment. Value EOID_ALL specifies to get pointer to
-		   the next child object, regardless wether it is attachment or not. Other values
-		   specify object identifier, only pointer to object with specified object
-		   identifier is returned. 
+           which is not flagged as an attachment. Value EOID_ALL specifies to get pointer to
+           the next child object, regardless wether it is attachment or not. Other values
+           specify object identifier, only pointer to object with specified object
+           identifier is returned.
 
-  @return  Pointer to next object, or OS_NULL if no matching object was found. 
+  @return  Pointer to next object, or OS_NULL if no matching object was found.
 
 ****************************************************************************************************
 */
@@ -331,7 +331,7 @@ try_again:
     {
         m = n->m_up;
 
-        while (OS_TRUE) 
+        while (OS_TRUE)
         {
             if (m == OS_NULL) return OS_NULL;
             if (m->m_left == n) break;
@@ -346,7 +346,7 @@ try_again:
             n = m; // PEKKA 2.1.2017
             goto try_again;
         }
-        
+
         return (m->m_oid == id) ? m : OS_NULL;
     }
 }
@@ -358,16 +358,16 @@ try_again:
   @brief Get previous child of same parent object.
 
   The eHandle::prev() function returns pointer to the previous child of the same parent object
-  as this object (it could be called sibling). The object is selected by object identifier oid 
+  as this object (it could be called sibling). The object is selected by object identifier oid
   given as argument.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to get a child object,
-		   which is not flagged as an attachment. Value EOID_ALL specifies to get pointer to
-		   the previous child object, regardless wether it is attachment or not. Other values
-		   specify object identifier, only pointer to object with specified object
-		   identifier is returned. 
+           which is not flagged as an attachment. Value EOID_ALL specifies to get pointer to
+           the previous child object, regardless wether it is attachment or not. Other values
+           specify object identifier, only pointer to object with specified object
+           identifier is returned.
 
-  @return  Pointer to previous object, or OS_NULL if no matching object was found. 
+  @return  Pointer to previous object, or OS_NULL if no matching object was found.
 
 ****************************************************************************************************
 */
@@ -398,7 +398,7 @@ try_again:
     {
         m = n->m_up;
 
-        while (OS_TRUE) 
+        while (OS_TRUE)
         {
             if (m == OS_NULL) return OS_NULL;
             if (m->m_right == n) break;
@@ -413,12 +413,10 @@ try_again:
             n = m; // PEKKA 2.1.2017
             goto try_again;
         }
-        
+
         return (m->m_oid == id) ? m : OS_NULL;
     }
 }
-
-
 
 
 /**
@@ -435,48 +433,48 @@ try_again:
 */
 void eHandle::delete_children()
 {
-	eHandle
-		*n,
-		*p;
+    eHandle
+        *n,
+        *p;
 
     enum direc
     {
         EH_FROM_UP,
         EH_FROM_LEFT,
         EH_FROM_RIGHT
-    } 
-    direc = EH_FROM_UP; 
+    }
+    direc = EH_FROM_UP;
 
-	n = m_children;
-	if (n == OS_NULL) return;
+    n = m_children;
+    if (n == OS_NULL) return;
 
-	while (OS_TRUE)
-	{
+    while (OS_TRUE)
+    {
         p = OS_NULL;
-        if (direc == EH_FROM_UP) 
+        if (direc == EH_FROM_UP)
         {
-    		p = n->m_left;
+            p = n->m_left;
         }
         if (direc != EH_FROM_RIGHT)
         {
-        	if (p == OS_NULL) 
-			{
-				p = n->m_right;
+            if (p == OS_NULL)
+            {
+                p = n->m_right;
                 direc = EH_FROM_UP;
-			}
+            }
         }
-        if (p == OS_NULL) 
-		{
-			p = n->m_up;
+        if (p == OS_NULL)
+        {
+            p = n->m_up;
 
-		    n->m_oflags |= EOBJ_FAST_DELETE;
-		    delete n->m_object;
+            n->m_oflags |= EOBJ_FAST_DELETE;
+            delete n->m_object;
             m_root->freehandle(n);
 
             if (p == OS_NULL) return;
             direc = (p->m_left == n) ? EH_FROM_LEFT : EH_FROM_RIGHT;
-		}
-		n = p;
+        }
+        n = p;
     }
 }
 
@@ -488,9 +486,9 @@ void eHandle::delete_children()
   @brief Red/Black tree: Get grandparent.
 
   The eHandle::rb_grandparent() function returns pointer to object's grandparent in red/black tree.
-  The grandparent of a node, its parent's parent. We use assertions to make sure that 
-  we don't attempt to access the grandparent of a node that doesn't have one, such 
-  as the root node or its children: 
+  The grandparent of a node, its parent's parent. We use assertions to make sure that
+  we don't attempt to access the grandparent of a node that doesn't have one, such
+  as the root node or its children:
 
   @param   n Pointer to object whose grand parent to get.
   @return  Pointer to grand parent object.
@@ -498,17 +496,17 @@ void eHandle::delete_children()
 ****************************************************************************************************
 */
 eHandle *eHandle::rb_grandparent(
-    eHandle *n) 
+    eHandle *n)
 {
     osal_debug_assert(n != OS_NULL);
 
-	/* Not the root node.
-	 */
-    osal_debug_assert(n->m_up != OS_NULL); 
+    /* Not the root node.
+     */
+    osal_debug_assert(n->m_up != OS_NULL);
 
-	/* Not child of root.
-	 */
-    osal_debug_assert(n->m_up->m_up != OS_NULL); 
+    /* Not child of root.
+     */
+    osal_debug_assert(n->m_up->m_up != OS_NULL);
     return n->m_up->m_up;
 }
 
@@ -519,8 +517,8 @@ eHandle *eHandle::rb_grandparent(
   @brief Red/Black tree: Get sibling.
 
   The eHandle::sibling() function returns pointer to object's sibling in red/black tree.
-  The sibling of a node, defined as the other child of its parent. Note that the sibling may 
-  be OS_NULL, if the parent has only one child. 
+  The sibling of a node, defined as the other child of its parent. Note that the sibling may
+  be OS_NULL, if the parent has only one child.
 
   @param   n Pointer to object whose sibling to get.
   @return  Pointer to sibling object in red/black tree, or OS_NULL if object has no sibling.
@@ -528,13 +526,13 @@ eHandle *eHandle::rb_grandparent(
 ****************************************************************************************************
 */
 eHandle *eHandle::sibling(
-    eHandle *n) 
+    eHandle *n)
 {
     osal_debug_assert(n != OS_NULL);
 
-	/* Root node has no sibling.
-	 */
-    osal_debug_assert(n->m_up != OS_NULL); 
+    /* Root node has no sibling.
+     */
+    osal_debug_assert(n->m_up != OS_NULL);
 
     if (n == n->m_up->m_left)
         return n->m_up->m_right;
@@ -549,8 +547,8 @@ eHandle *eHandle::sibling(
   @brief Red/Black tree: Get uncle.
 
   The eHandle::uncle() function returns pointer to object's uncle in red/black tree.
-  The uncle of a node, defined as the sibling of its parent. The uncle may also be OS_NULL, 
-  if the grandparent has only one child. 
+  The uncle of a node, defined as the sibling of its parent. The uncle may also be OS_NULL,
+  if the grandparent has only one child.
 
   @param   n Pointer to object whose uncle to get.
   @return  Pointer to sibling object in red/black tree, or OS_NULL if object has no uncle.
@@ -558,17 +556,17 @@ eHandle *eHandle::sibling(
 ****************************************************************************************************
 */
 eHandle *eHandle::uncle(
-    eHandle *n) 
+    eHandle *n)
 {
     osal_debug_assert(n != OS_NULL);
 
-	/* Root node has no uncle.
-	 */
-    osal_debug_assert(n->m_up != OS_NULL); 
+    /* Root node has no uncle.
+     */
+    osal_debug_assert(n->m_up != OS_NULL);
 
-	/* Children of root have no uncle.
-	 */
-    osal_debug_assert(n->m_up->m_up != OS_NULL); 
+    /* Children of root have no uncle.
+     */
+    osal_debug_assert(n->m_up->m_up != OS_NULL);
 
     return sibling(n->m_up);
 }
@@ -582,22 +580,22 @@ eHandle *eHandle::uncle(
   The eHandle::verify_properties() function is for red/black tree implementation debugging only.
   The function checks integrity of the tree and calls osal_debug_assert() if an error is detected.
 
-  We will at all times enforce the following five properties, which provide a theoretical 
-  guarantee that the tree remains balanced. We will have a helper function verify_properties() 
-  that asserts all five properties in a debug build, to help verify the correctness of our 
-  implementation and formally demonstrate their meaning. Note that many of these tests walk 
+  We will at all times enforce the following five properties, which provide a theoretical
+  guarantee that the tree remains balanced. We will have a helper function verify_properties()
+  that asserts all five properties in a debug build, to help verify the correctness of our
+  implementation and formally demonstrate their meaning. Note that many of these tests walk
   the tree, making them very expensive - for this reason we require the symbol EOBJECT_DBTREE_DEBUG
   to be defined to turn them on.
 
-  As shown, the tree terminates in NIL leaves, which we represent using OS_NULL (we set the 
-  child pointers of their parents to OS_NULL). In an empty tree, the root pointer is OS_NULL. 
-  This saves substantial space compared to explicit representation of leaves. 
+  As shown, the tree terminates in NIL leaves, which we represent using OS_NULL (we set the
+  child pointers of their parents to OS_NULL). In an empty tree, the root pointer is OS_NULL.
+  This saves substantial space compared to explicit representation of leaves.
 
   @return  None.
 
 ****************************************************************************************************
 */
-void eHandle::verify_properties() 
+void eHandle::verify_properties()
 {
     verify_property_2();
     verify_property_4(m_children);
@@ -618,7 +616,7 @@ void eHandle::verify_properties()
 
 ****************************************************************************************************
 */
-void eHandle::verify_property_2() 
+void eHandle::verify_property_2()
 {
     osal_debug_assert(isblack(m_children));
 }
@@ -629,8 +627,8 @@ void eHandle::verify_property_2()
 
   @brief Red/Black tree: Verify that every red node has two black children.
 
-  The eHandle::verify_property_4() function verifies that every red node has two children, 
-  and both are black (or equivalently, the parent of every red node is black). 
+  The eHandle::verify_property_4() function verifies that every red node has two children,
+  and both are black (or equivalently, the parent of every red node is black).
 
   @param   n Pointer to current node.
   @return  None.
@@ -638,9 +636,9 @@ void eHandle::verify_property_2()
 ****************************************************************************************************
 */
 void eHandle::verify_property_4(
-    eHandle *n) 
+    eHandle *n)
 {
-    if (isred(n)) 
+    if (isred(n))
     {
         osal_debug_assert(isblack(n->m_left));
         osal_debug_assert(isblack(n->m_right));
@@ -657,11 +655,11 @@ void eHandle::verify_property_4(
 
   @brief Red/Black tree: Verify that number of black nodes on match.
 
-  The eHandle::verify_property_5() function verifies that all paths from any given node to 
-  its leaf nodes contain the same number of black nodes. This one is the trickiest to verify; 
-  we do it by traversing the tree, incrementing a black node count as we go. 
-  The first time we reach a leaf we save the count. When we subsequently reach other leaves, 
-  we compare the count to this saved count. 
+  The eHandle::verify_property_5() function verifies that all paths from any given node to
+  its leaf nodes contain the same number of black nodes. This one is the trickiest to verify;
+  we do it by traversing the tree, incrementing a black node count as we go.
+  The first time we reach a leaf we save the count. When we subsequently reach other leaves,
+  we compare the count to this saved count.
 
   The this pointer points to the parent object in eobjects object hierarcy. The red/black tree
   manipulated here is tree of child objects.
@@ -670,7 +668,7 @@ void eHandle::verify_property_4(
 
 ****************************************************************************************************
 */
-void eHandle::verify_property_5() 
+void eHandle::verify_property_5()
 {
     int black_count_path = -1;
     verify_property_5_helper(m_children, 0, &black_count_path);
@@ -682,7 +680,7 @@ void eHandle::verify_property_5()
 
   @brief Red/Black tree: Helper function for verify_property_5().
 
-  The eHandle::verify_property_5_helper() function is called by eHandle::verify_property_5() 
+  The eHandle::verify_property_5_helper() function is called by eHandle::verify_property_5()
   to do actual verifiction. See eHandle::verify_property_5() for comments.
 
   @param   n Pointer to current node.
@@ -691,21 +689,21 @@ void eHandle::verify_property_5()
 ****************************************************************************************************
 */
 void eHandle::verify_property_5_helper(
-    eHandle *n, 
-    int black_count, 
-    int *path_black_count) 
+    eHandle *n,
+    int black_count,
+    int *path_black_count)
 {
-    if (isblack(n)) 
-	{
+    if (isblack(n))
+    {
         black_count++;
     }
-    if (n == OS_NULL) 
+    if (n == OS_NULL)
     {
-        if (*path_black_count == -1) 
+        if (*path_black_count == -1)
         {
             *path_black_count = black_count;
-        } 
-        else 
+        }
+        else
         {
             osal_debug_assert (black_count == *path_black_count);
         }
@@ -723,7 +721,7 @@ void eHandle::verify_property_5_helper(
 
   @brief Verify whole object tree.
 
-  The eHandle::verify_whole_tree() function verifies whole object tree starting from any 
+  The eHandle::verify_whole_tree() function verifies whole object tree starting from any
   handle.
 
   @return  None.
@@ -732,7 +730,7 @@ void eHandle::verify_property_5_helper(
 */
 void eHandle::verify_whole_tree()
 {
-    eHandle 
+    eHandle
         *topmost;
 
     eRoot
@@ -787,8 +785,8 @@ void eHandle::verify_node(
     if (m_children) osal_debug_assert(m_children->m_object->mm_parent == this->m_object);
     osal_debug_assert(m_object->mm_handle == this);
     osal_debug_assert(m_root == root);
-}        
-#endif 
+}
+#endif
 
 #if EOBJECT_DBTREE_DEBUG
 /**
@@ -805,46 +803,46 @@ void eHandle::verify_node(
 void eHandle::verify_children(
     eRoot *root)
 {
-	eHandle
-		*n,
-		*p;
+    eHandle
+        *n,
+        *p;
 
     enum direc
     {
         EH_FROM_UP,
         EH_FROM_LEFT,
         EH_FROM_RIGHT
-    } 
-    direc = EH_FROM_UP; 
+    }
+    direc = EH_FROM_UP;
 
-	n = m_children;
-	if (n == OS_NULL) return;
+    n = m_children;
+    if (n == OS_NULL) return;
 
-	while (OS_TRUE)
-	{
+    while (OS_TRUE)
+    {
         p = OS_NULL;
-        if (direc == EH_FROM_UP) 
+        if (direc == EH_FROM_UP)
         {
             n->verify_node(root);
             n->verify_children(root);
-    		p = n->m_left;
+            p = n->m_left;
         }
         if (direc != EH_FROM_RIGHT)
         {
-        	if (p == OS_NULL) 
-			{
-				p = n->m_right;
+            if (p == OS_NULL)
+            {
+                p = n->m_right;
                 direc = EH_FROM_UP;
-			}
+            }
         }
-        if (p == OS_NULL) 
-		{
-			p = n->m_up;
+        if (p == OS_NULL)
+        {
+            p = n->m_up;
             if (p == OS_NULL) return;
             direc = (p->m_left == n) ? EH_FROM_LEFT : EH_FROM_RIGHT;
-		}
-		n = p;
-	}
+        }
+        n = p;
+    }
 }
 #endif
 
@@ -856,9 +854,9 @@ void eHandle::verify_children(
 
   The eHandle::rotate_left() function rotates tree one step left at current node (this).
 
-  Both insertion and deletion rely on a fundamental operation for reducing tree height called 
-  a rotation. A rotation locally changes the structure of the tree without changing the in-order 
-  order of the sequence of values that it stores. 
+  Both insertion and deletion rely on a fundamental operation for reducing tree height called
+  a rotation. A rotation locally changes the structure of the tree without changing the in-order
+  order of the sequence of values that it stores.
 
   The this pointer points to the parent object in eobjects object hierarcy. The red/black tree
   manipulated here is tree of child objects.
@@ -868,20 +866,20 @@ void eHandle::verify_children(
 ****************************************************************************************************
 */
 void eHandle::rotate_left(
-	eHandle *n)
+    eHandle *n)
 {
-    eHandle 
+    eHandle
         *r;
 
-	r = n->m_right;
-	replace_node(n, r);
-	n->m_right = r->m_left;
-	if (r->m_left)
-	{
-		r->m_left->m_up = n;
-	}
-	r->m_left = n;
-	n->m_up = r;
+    r = n->m_right;
+    replace_node(n, r);
+    n->m_right = r->m_left;
+    if (r->m_left)
+    {
+        r->m_left->m_up = n;
+    }
+    r->m_left = n;
+    n->m_up = r;
 }
 
 
@@ -892,9 +890,9 @@ void eHandle::rotate_left(
 
   The eHandle::rotate_right() function rotates tree one step right at current node (this).
 
-  Both insertion and deletion rely on a fundamental operation for reducing tree height called 
-  a rotation. A rotation locally changes the structure of the tree without changing the in-order 
-  order of the sequence of values that it stores. 
+  Both insertion and deletion rely on a fundamental operation for reducing tree height called
+  a rotation. A rotation locally changes the structure of the tree without changing the in-order
+  order of the sequence of values that it stores.
 
   The this pointer points to the parent object in eobjects object hierarcy. The red/black tree
   manipulated here is tree of child objects.
@@ -904,20 +902,20 @@ void eHandle::rotate_left(
 ****************************************************************************************************
 */
 void eHandle::rotate_right(
-	eHandle *n)
+    eHandle *n)
 {
-    eHandle 
+    eHandle
         *l;
 
-	l = n->m_left;
-	replace_node(n, l);
-	n->m_left = l->m_right;
-	if (l->m_right)
-	{
-		l->m_right->m_up = n;
-	}
-	l->m_right = n;
-	n->m_up = l;
+    l = n->m_left;
+    replace_node(n, l);
+    n->m_left = l->m_right;
+    if (l->m_right)
+    {
+        l->m_right->m_up = n;
+    }
+    l->m_right = n;
+    n->m_up = l;
 }
 
 
@@ -927,9 +925,9 @@ void eHandle::rotate_right(
   @brief Red/Black tree: Replace a node by another node.
 
   The eHandle::replace_node() function replaces this node by node "newn".
-  Here, replace_node() is a helper function that cuts a node away from its parent, substituting 
-  a new node (or OS_NULL) in its place. It simplifies consistent updating of parent and child 
-  pointers. It needs the tree passed in because it may change which node is the root. 
+  Here, replace_node() is a helper function that cuts a node away from its parent, substituting
+  a new node (or OS_NULL) in its place. It simplifies consistent updating of parent and child
+  pointers. It needs the tree passed in because it may change which node is the root.
 
   The this pointer points to the parent object in eobjects object hierarcy. The red/black tree
   manipulated here is tree of child objects.
@@ -941,27 +939,27 @@ void eHandle::rotate_right(
 ****************************************************************************************************
 */
 void eHandle::replace_node(
-	eHandle *oldn,
-    eHandle *newn) 
+    eHandle *oldn,
+    eHandle *newn)
 {
-	if (oldn->m_up)
-	{
-		if (oldn == oldn->m_up->m_left)
-			oldn->m_up->m_left = newn;
+    if (oldn->m_up)
+    {
+        if (oldn == oldn->m_up->m_left)
+            oldn->m_up->m_left = newn;
 
-		else
-			oldn->m_up->m_right = newn;
-	}
+        else
+            oldn->m_up->m_right = newn;
+    }
 
-	else
-	{
-		m_children = newn;
-	}
+    else
+    {
+        m_children = newn;
+    }
 
-	if (newn)
-	{
-		newn->m_up = oldn->m_up;
-	}
+    if (newn)
+    {
+        newn->m_up = oldn->m_up;
+    }
 }
 
 
@@ -970,16 +968,16 @@ void eHandle::replace_node(
 
   @brief Red/Black tree: Insert a node to red black tree.
 
-  The eHandle::rbtree_insert() function inserts a node to red/black tree. Before calling this 
+  The eHandle::rbtree_insert() function inserts a node to red/black tree. Before calling this
   function, make sure that node's m_oflags EOBJ_IS_RED bit is set and m_left, m_right and m_up
   are all set to OS_NULL.
 
-  When inserting a new node, we first insert it into the tree as we would into an ordinary 
-  binary search tree. We find the place in the tree where the new node belongs, then attach 
-  a new red node containing the value: 
+  When inserting a new node, we first insert it into the tree as we would into an ordinary
+  binary search tree. We find the place in the tree where the new node belongs, then attach
+  a new red node containing the value:
 
-  The problem is that the resulting tree may not satify our five red-black tree properties. 
-  The call to insert_case1() above begins the process of correcting the tree so that it 
+  The problem is that the resulting tree may not satify our five red-black tree properties.
+  The call to insert_case1() above begins the process of correcting the tree so that it
   satifies the properties once more.
 
   The this pointer points to the parent object in eobjects object hierarcy. The red/black tree
@@ -991,40 +989,40 @@ void eHandle::replace_node(
 ****************************************************************************************************
 */
 void eHandle::rbtree_insert(
-    eHandle *inserted_node) 
+    eHandle *inserted_node)
 {
-	eHandle 
-			*n;
+    eHandle
+            *n;
 
     if (m_children == OS_NULL)
     {
-		m_children = inserted_node;
-    } 
-    else 
+        m_children = inserted_node;
+    }
+    else
     {
         n = m_children;
-        while (1) 
+        while (1)
         {
-            if (inserted_node->m_oid < n->m_oid) 
+            if (inserted_node->m_oid < n->m_oid)
             {
-                if (n->m_left == OS_NULL) 
+                if (n->m_left == OS_NULL)
                 {
                     n->m_left = inserted_node;
                     break;
                 }
-                else 
+                else
                 {
                     n = n->m_left;
                 }
-            } 
-            else 
+            }
+            else
             {
-                if (n->m_right == OS_NULL) 
+                if (n->m_right == OS_NULL)
                 {
                     n->m_right = inserted_node;
                     break;
-                } 
-                else 
+                }
+                else
                 {
                     n = n->m_right;
                 }
@@ -1048,17 +1046,17 @@ void eHandle::rbtree_insert(
   The eHandle::insert_case1() function combines original insert_case1, insert_case2 and
   insert_case3 functions.
 
-  Case 1: In this case, the new node is now the root node of the tree. Since the root node must 
-  be black, and changing its color adds the same number of black nodes to every path, we simply 
-  recolor it black. Because only the root node has no parent, we can assume henceforth that the 
-  node has a parent. 
+  Case 1: In this case, the new node is now the root node of the tree. Since the root node must
+  be black, and changing its color adds the same number of black nodes to every path, we simply
+  recolor it black. Because only the root node has no parent, we can assume henceforth that the
+  node has a parent.
 
-  Case 2: In this case, the new node has a black parent. All the properties are still satisfied 
-  and we return. 
+  Case 2: In this case, the new node has a black parent. All the properties are still satisfied
+  and we return.
 
-  Case 3: In this case, the uncle node is red. We recolor the parent and uncle black and the 
-  grandparent red. However, the red grandparent node may now violate the red-black tree 
-  properties; we recursively invoke this procedure on it from case 1 to deal with this. 
+  Case 3: In this case, the uncle node is red. We recolor the parent and uncle black and the
+  grandparent red. However, the red grandparent node may now violate the red-black tree
+  properties; we recursively invoke this procedure on it from case 1 to deal with this.
 
   The this pointer points to the parent object in eobjects object hierarcy. The red/black tree
   manipulated here is tree of child objects.
@@ -1069,7 +1067,7 @@ void eHandle::rbtree_insert(
 ****************************************************************************************************
 */
 void eHandle::insert_case1(
-    eHandle *n) 
+    eHandle *n)
 {
     if (n->m_up == OS_NULL)
     {
@@ -1077,18 +1075,18 @@ void eHandle::insert_case1(
     }
     else if (isred(n->m_up))
     {
-		if (isred(uncle(n))) 
-		{
-			n->m_up->setblack();
-			uncle(n)->setblack();
-			rb_grandparent(n)->setred();
-			insert_case1(rb_grandparent(n));
-		} 
-		else 
-		{
-			insert_case4(n);
-		}
-	}
+        if (isred(uncle(n)))
+        {
+            n->m_up->setblack();
+            uncle(n)->setblack();
+            rb_grandparent(n)->setred();
+            insert_case1(rb_grandparent(n));
+        }
+        else
+        {
+            insert_case4(n);
+        }
+    }
 }
 
 
@@ -1100,18 +1098,18 @@ void eHandle::insert_case1(
   The eHandle::insert_case4() function combines original insert_case4 and insert_case5 functions.
 
   Case 4: In this case, we deal with two cases that are mirror images of one another:
-  - The new node is the right child of its parent and the parent is the left child of 
+  - The new node is the right child of its parent and the parent is the left child of
     the grandparent. In this case we rotate left about the parent.
-  - The new node is the left child of its parent and the parent is the right child of 
-    the grandparent. In this case we rotate right about the parent. 
+  - The new node is the left child of its parent and the parent is the right child of
+    the grandparent. In this case we rotate right about the parent.
 
-  Neither of these fixes the properties, but they put the tree in the correct form to apply case 5. 
+  Neither of these fixes the properties, but they put the tree in the correct form to apply case 5.
 
   Case 5: In this final case, we deal with two cases that are mirror images of one another:
-  - The new node is the left child of its parent and the parent is the left child of the 
+  - The new node is the left child of its parent and the parent is the left child of the
     grandparent. In this case we rotate right about the grandparent.
-  - The new node is the right child of its parent and the parent is the right child of 
-    the grandparent. In this case we rotate left about the grandparent. 
+  - The new node is the right child of its parent and the parent is the right child of
+    the grandparent. In this case we rotate left about the grandparent.
 
   Now the properties are satisfied and all cases have been covered.
 
@@ -1124,14 +1122,14 @@ void eHandle::insert_case1(
 ****************************************************************************************************
 */
 void eHandle::insert_case4(
-    eHandle *n) 
+    eHandle *n)
 {
-    if (n == n->m_up->m_right && n->m_up == rb_grandparent(n)->m_left) 
+    if (n == n->m_up->m_right && n->m_up == rb_grandparent(n)->m_left)
     {
         rotate_left(n->m_up);
         n = n->m_left;
-    } 
-    else if (n == n->m_up->m_left && n->m_up == rb_grandparent(n)->m_right) 
+    }
+    else if (n == n->m_up->m_left && n->m_up == rb_grandparent(n)->m_right)
     {
         rotate_right(n->m_up);
         n = n->m_right;
@@ -1139,17 +1137,17 @@ void eHandle::insert_case4(
 
     n->m_up->setblack();
     rb_grandparent(n)->setred();
-    if (n == n->m_up->m_left && n->m_up == rb_grandparent(n)->m_left) 
+    if (n == n->m_up->m_left && n->m_up == rb_grandparent(n)->m_left)
     {
         rotate_right(rb_grandparent(n));
-    } 
-    else 
+    }
+    else
     {
 #if EOBJECT_DBTREE_DEBUG
         osal_debug_assert (n == n->m_up->m_right &&
             n->m_up == rb_grandparent(n)->m_right);
 #endif
-		rotate_left(rb_grandparent(n));
+        rotate_left(rb_grandparent(n));
     }
 }
 
@@ -1159,17 +1157,17 @@ void eHandle::insert_case4(
 
   @brief Red/Black tree: Remove node from red/black.
 
-  The eHandle::rbtree_remove() function removes an object from red/black tree. The this pointer 
+  The eHandle::rbtree_remove() function removes an object from red/black tree. The this pointer
   points to the parent object in eobjects object hierarcy, and after this call the object n
-  is no longer child of this object. After this call removed node's m_oflags EOBJ_IS_RED bit 
+  is no longer child of this object. After this call removed node's m_oflags EOBJ_IS_RED bit
   may have any value, as can m_left, m_right and m_up pointers.
 
-  There are two cases for removal, depending on whether the node to be deleted has at most one, 
-  or two non-leaf children. A node with at most one non-leaf child can simply be replaced with 
-  its non-leaf child. When deleting a node with two non-leaf children, we copy the value from 
-  the in-order predecessor (the maximum or rightmost element in the left subtree) into the node 
-  to be deleted, and then we then delete the predecessor node, which has only one non-leaf child. 
-  This same procedure also works in a red-black tree without affecting any properties. 
+  There are two cases for removal, depending on whether the node to be deleted has at most one,
+  or two non-leaf children. A node with at most one non-leaf child can simply be replaced with
+  its non-leaf child. When deleting a node with two non-leaf children, we copy the value from
+  the in-order predecessor (the maximum or rightmost element in the left subtree) into the node
+  to be deleted, and then we then delete the predecessor node, which has only one non-leaf child.
+  This same procedure also works in a red-black tree without affecting any properties.
 
   @param   n Pointer to the node to remove.
   @return  None.
@@ -1177,83 +1175,83 @@ void eHandle::insert_case4(
 ****************************************************************************************************
 */
 void eHandle::rbtree_remove(
-	eHandle *n)
+    eHandle *n)
 {
-    eHandle 
+    eHandle
         *child,
         *pred;
 
-	if (n->m_left != OS_NULL && n->m_right != OS_NULL)
-	{
-		/* Swap pred and n.
-		*/
-		pred = n->m_left;
-		while (pred->m_right != OS_NULL)
-		{
-			pred = pred->m_right;
-		}
+    if (n->m_left != OS_NULL && n->m_right != OS_NULL)
+    {
+        /* Swap pred and n.
+        */
+        pred = n->m_left;
+        while (pred->m_right != OS_NULL)
+        {
+            pred = pred->m_right;
+        }
 
-		if (n->m_up)
-		{
-			if (n->m_up->m_left == n) n->m_up->m_left = pred;
-			else n->m_up->m_right = pred;
-		}
-		else
-		{
-			m_children = pred;
-		}
+        if (n->m_up)
+        {
+            if (n->m_up->m_left == n) n->m_up->m_left = pred;
+            else n->m_up->m_right = pred;
+        }
+        else
+        {
+            m_children = pred;
+        }
 
-		if (pred == n->m_left)
-		{
-			n->m_left = pred->m_left;
-			pred->m_up = n->m_up;
-			n->m_up = pred;
-			pred->m_left = n;
-		}
-		else
-		{
-			if (pred->m_up->m_left == pred) pred->m_up->m_left = n;
-			else pred->m_up->m_right = n;
+        if (pred == n->m_left)
+        {
+            n->m_left = pred->m_left;
+            pred->m_up = n->m_up;
+            n->m_up = pred;
+            pred->m_left = n;
+        }
+        else
+        {
+            if (pred->m_up->m_left == pred) pred->m_up->m_left = n;
+            else pred->m_up->m_right = n;
 
-			child = n->m_up; n->m_up = pred->m_up; pred->m_up = child;
-			child = n->m_left; n->m_left = pred->m_left; pred->m_left = child;
-			pred->m_left->m_up = pred;
-		}
+            child = n->m_up; n->m_up = pred->m_up; pred->m_up = child;
+            child = n->m_left; n->m_left = pred->m_left; pred->m_left = child;
+            pred->m_left->m_up = pred;
+        }
 
-		pred->m_right = n->m_right;
-		n->m_right = OS_NULL;
+        pred->m_right = n->m_right;
+        n->m_right = OS_NULL;
 
-		if (n->m_left) n->m_left->m_up = n;
-		if (pred->m_right) pred->m_right->m_up = pred;
+        if (n->m_left) n->m_left->m_up = n;
+        if (pred->m_right) pred->m_right->m_up = pred;
 
-		/* If red flags are different, swap flags.
-		*/
-		if ((n->m_oflags ^ pred->m_oflags) & EOBJ_IS_RED)
-		{
-			n->m_oflags ^= EOBJ_IS_RED;
-			pred->m_oflags ^= EOBJ_IS_RED;
-		}
-	}
+        /* If red flags are different, swap flags.
+        */
+        if ((n->m_oflags ^ pred->m_oflags) & EOBJ_IS_RED)
+        {
+            n->m_oflags ^= EOBJ_IS_RED;
+            pred->m_oflags ^= EOBJ_IS_RED;
+        }
+    }
 
 #if EOBJECT_DBTREE_DEBUG
-	osal_debug_assert(n->m_left == OS_NULL || n->m_right == OS_NULL);
+    osal_debug_assert(n->m_left == OS_NULL || n->m_right == OS_NULL);
 #endif
 
-	child = (n->m_right == OS_NULL) ? n->m_left : n->m_right;
-	if (isblack(n))
-	{
-		if (isblack(child)) n->setblack();
-		else n->setred();
+    child = (n->m_right == OS_NULL) ? n->m_left : n->m_right;
+    if (isblack(n))
+    {
+        if (isblack(child)) n->setblack();
+        else n->setred();
 
-		if (n->m_up) delete_case2(n);
-	}
-	replace_node(n, child);
+        if (n->m_up) delete_case2(n);
+    }
+    replace_node(n, child);
 
-	if (n->m_up == OS_NULL && child != OS_NULL)
-		child->setblack();
+    if (n->m_up == OS_NULL && child != OS_NULL)
+        child->setblack();
 
 #if EOBJECT_DBTREE_DEBUG
-	verify_properties();
+    verify_properties();
 #endif
 }
 
@@ -1265,13 +1263,13 @@ void eHandle::rbtree_remove(
 
   The eHandle::delete_case2() function combines original delete_case2 and delete_case3 functions.
 
-  Case 2: N has a red sibling. In this case we exchange the colors of the parent and sibling, 
-  then rotate about the parent so that the sibling becomes the parent of its former parent. 
-  This does not restore the tree properties, but reduces the problem to one of the remaining cases. 
+  Case 2: N has a red sibling. In this case we exchange the colors of the parent and sibling,
+  then rotate about the parent so that the sibling becomes the parent of its former parent.
+  This does not restore the tree properties, but reduces the problem to one of the remaining cases.
 
-  Case 3: In this case N's parent, sibling, and sibling's children are black. In this case we 
-  paint the sibling red. Now all paths passing through N's parent have one less black node 
-  than before the deletion, so we must recursively run this procedure from case 1 on N's parent. 
+  Case 3: In this case N's parent, sibling, and sibling's children are black. In this case we
+  paint the sibling red. Now all paths passing through N's parent have one less black node
+  than before the deletion, so we must recursively run this procedure from case 1 on N's parent.
 
   The this pointer points to the parent object in eobjects object hierarcy. The red/black tree
   manipulated here is tree of child objects.
@@ -1282,31 +1280,31 @@ void eHandle::rbtree_remove(
 ****************************************************************************************************
 */
 void eHandle::delete_case2(
-	eHandle *n)
+    eHandle *n)
 {
-	if (isred(sibling(n)))
-	{
-		n->m_up->setred();
-		sibling(n)->setblack();
+    if (isred(sibling(n)))
+    {
+        n->m_up->setred();
+        sibling(n)->setblack();
 
-		if (n == n->m_up->m_left)
-			rotate_left(n->m_up);
-		else
-			rotate_right(n->m_up);
-	}
+        if (n == n->m_up->m_left)
+            rotate_left(n->m_up);
+        else
+            rotate_right(n->m_up);
+    }
 
-	if (isblack(n->m_up) &&
-		isblack(sibling(n)) &&
-		isblack(sibling(n)->m_left) &&
-		isblack(sibling(n)->m_right))
-	{
-		sibling(n)->setred();
-		if (n->m_up->m_up) delete_case2(n->m_up);
-	}
-	else
-	{
-		delete_case4(n);
-	}
+    if (isblack(n->m_up) &&
+        isblack(sibling(n)) &&
+        isblack(sibling(n)->m_left) &&
+        isblack(sibling(n)->m_right))
+    {
+        sibling(n)->setred();
+        if (n->m_up->m_up) delete_case2(n->m_up);
+    }
+    else
+    {
+        delete_case4(n);
+    }
 }
 
 
@@ -1317,8 +1315,8 @@ void eHandle::delete_case2(
 
   The eHandle::delete_case4()...
 
-  Case 4: N's sibling and sibling's children are black, but its parent is red. We exchange 
-  the colors of the sibling and parent; this restores the tree properties. 
+  Case 4: N's sibling and sibling's children are black, but its parent is red. We exchange
+  the colors of the sibling and parent; this restores the tree properties.
 
   The this pointer points to the parent object in eobjects object hierarcy. The red/black tree
   manipulated here is tree of child objects.
@@ -1329,18 +1327,18 @@ void eHandle::delete_case2(
 ****************************************************************************************************
 */
 void eHandle::delete_case4(
-	eHandle *n)
+    eHandle *n)
 {
-	if (isred(n->m_up) &&
-		isblack(sibling(n)) &&
-		isblack(sibling(n)->m_left) &&
-		isblack(sibling(n)->m_right))
-	{
-		sibling(n)->setred();
-		n->m_up->setblack();
-	}
-	else
-		delete_case5(n);
+    if (isred(n->m_up) &&
+        isblack(sibling(n)) &&
+        isblack(sibling(n)->m_left) &&
+        isblack(sibling(n)->m_right))
+    {
+        sibling(n)->setred();
+        n->m_up->setblack();
+    }
+    else
+        delete_case5(n);
 }
 
 
@@ -1352,12 +1350,12 @@ void eHandle::delete_case4(
   The eHandle::delete_case5()...
 
   Case 5: There are two cases handled here which are mirror images of one another:
-  - N's sibling S is black, S's left child is red, S's right child is black, and N is the left 
+  - N's sibling S is black, S's left child is red, S's right child is black, and N is the left
     child of its parent. We exchange the colors of S and its left sibling and rotate right at S.
-  - N's sibling S is black, S's right child is red, S's left child is black, and N is the right 
-    child of its parent. We exchange the colors of S and its right sibling and rotate left at S. 
+  - N's sibling S is black, S's right child is red, S's left child is black, and N is the right
+    child of its parent. We exchange the colors of S and its right sibling and rotate left at S.
 
-  Both of these function to reduce us to the situation described in case 6. 
+  Both of these function to reduce us to the situation described in case 6.
 
   The this pointer points to the parent object in eobjects object hierarcy. The red/black tree
   manipulated here is tree of child objects.
@@ -1368,27 +1366,27 @@ void eHandle::delete_case4(
 ****************************************************************************************************
 */
 void eHandle::delete_case5(
-	eHandle *n)
+    eHandle *n)
 {
-	if (n == n->m_up->m_left &&
-		isblack(sibling(n)) &&
-		isred(sibling(n)->m_left) &&
-		isblack(sibling(n)->m_right))
-	{
-		sibling(n)->setred();
-		sibling(n)->m_left->setblack();
-		rotate_right(sibling(n));
-	}
-	else if (n == n->m_up->m_right &&
-		isblack(sibling(n)) &&
-		isred(sibling(n)->m_right) &&
-		isblack(sibling(n)->m_left))
-	{
-		sibling(n)->setred();
-		sibling(n)->m_right->setblack();
-		rotate_left(sibling(n));
-	}
-	delete_case6(n);
+    if (n == n->m_up->m_left &&
+        isblack(sibling(n)) &&
+        isred(sibling(n)->m_left) &&
+        isblack(sibling(n)->m_right))
+    {
+        sibling(n)->setred();
+        sibling(n)->m_left->setblack();
+        rotate_right(sibling(n));
+    }
+    else if (n == n->m_up->m_right &&
+        isblack(sibling(n)) &&
+        isred(sibling(n)->m_right) &&
+        isblack(sibling(n)->m_left))
+    {
+        sibling(n)->setred();
+        sibling(n)->m_right->setblack();
+        rotate_left(sibling(n));
+    }
+    delete_case6(n);
 }
 
 
@@ -1400,21 +1398,21 @@ void eHandle::delete_case5(
   The eHandle::delete_case6()...
 
   Case 6: There are two cases handled here which are mirror images of one another:
-  - N's sibling S is black, S's right child is red, and N is the left child of its parent. 
-    We exchange the colors of N's parent and sibling, make S's right child black, then 
-	rotate left at N's parent.
-  - N's sibling S is black, S's left child is red, and N is the right child of its parent. 
-    We exchange the colors of N's parent and sibling, make S's left child black, then rotate 
-	right at N's parent. 
+  - N's sibling S is black, S's right child is red, and N is the left child of its parent.
+    We exchange the colors of N's parent and sibling, make S's right child black, then
+    rotate left at N's parent.
+  - N's sibling S is black, S's left child is red, and N is the right child of its parent.
+    We exchange the colors of N's parent and sibling, make S's left child black, then rotate
+    right at N's parent.
 
   This accomplishes three things at once:
-  - We add a black node to all paths through N, either by adding a black S to those paths 
+  - We add a black node to all paths through N, either by adding a black S to those paths
     or by recoloring N's parent black.
-  - We remove a black node from all paths through S's red child, either by removing P from 
+  - We remove a black node from all paths through S's red child, either by removing P from
     those paths or by recoloring S.
-  - We recolor S's red child black, adding a black node back to all paths through S's red child. 
+  - We recolor S's red child black, adding a black node back to all paths through S's red child.
 
-  S's left child has become a child of N's parent during the rotation and so is unaffected. 
+  S's left child has become a child of N's parent during the rotation and so is unaffected.
 
   The this pointer points to the parent object in eobjects object hierarcy. The red/black tree
   manipulated here is tree of child objects.
@@ -1425,30 +1423,30 @@ void eHandle::delete_case5(
 ****************************************************************************************************
 */
 void eHandle::delete_case6(
-	eHandle *n)
+    eHandle *n)
 {
-	if (isblack(n->m_up))
-		sibling(n)->setblack();
-	else
-		sibling(n)->setred();
+    if (isblack(n->m_up))
+        sibling(n)->setblack();
+    else
+        sibling(n)->setred();
 
-	n->m_up->setblack();
-	if (n == n->m_up->m_left)
-	{
+    n->m_up->setblack();
+    if (n == n->m_up->m_left)
+    {
 #if EOBJECT_DBTREE_DEBUG
-		osal_debug_assert(isred(sibling(n)->m_right));
+        osal_debug_assert(isred(sibling(n)->m_right));
 #endif
-		sibling(n)->m_right->setblack();
-		rotate_left(n->m_up);
-	}
-	else
-	{
+        sibling(n)->m_right->setblack();
+        rotate_left(n->m_up);
+    }
+    else
+    {
 #if EOBJECT_DBTREE_DEBUG
-		osal_debug_assert(isred(sibling(n)->m_left));
+        osal_debug_assert(isred(sibling(n)->m_left));
 #endif
-		sibling(n)->m_left->setblack();
-		rotate_right(n->m_up);
-	}
+        sibling(n)->m_left->setblack();
+        rotate_right(n->m_up);
+    }
 }
 
 
@@ -1459,7 +1457,7 @@ void eHandle::delete_case6(
 
   The eHandle::write() function writes object with class information, attachments, etc to
   the stream.
-  
+
   @param  stream The stream to write to.
   @param  flags Serialization flags.
 
@@ -1471,10 +1469,10 @@ void eHandle::delete_case6(
 */
 #if 0
 eStatus eHandle::write(
-    eStream *stream, 
-    os_int flags) 
+    eStream *stream,
+    os_int flags)
 {
-    eHandle 
+    eHandle
         *child;
 
     os_long
@@ -1494,7 +1492,7 @@ eStatus eHandle::write(
         if (child->isserattachment()) n_attachements++;
     }
     if (*stream << n_attachements) goto failed;
-    
+
     /* Write the object content.
      */
     if (writer(stream, flags)) goto failed;
@@ -1503,12 +1501,12 @@ eStatus eHandle::write(
      */
     for (child = first(EOID_ALL); child; child = child->next(EOID_ALL))
     {
-        if (child->isserattachment()) 
+        if (child->isserattachment())
         {
             if (child->write(stream, flags)) goto failed;
         }
     }
-    
+
     /* Object succesfully written.
      */
     return ESTATUS_SUCCESS;
@@ -1525,20 +1523,20 @@ failed:
 
   @brief Read object from stream.
 
-  The eHandle::read() function reads class information, etc from the stream, creates new 
+  The eHandle::read() function reads class information, etc from the stream, creates new
   child object and reads child object content and attachments.
-  
+
   @param  stream The stream to write to.
   @param  flags Serialization flags.
 
-  @return If successfull the function returns pointer to te new child object. 
-          If reading object from stream fails, value OS_NULL is returned. 
+  @return If successfull the function returns pointer to te new child object.
+          If reading object from stream fails, value OS_NULL is returned.
 
 ****************************************************************************************************
 */
 #if 0
 eHandle *eHandle::read(
-    eStream *stream, 
+    eStream *stream,
     os_int flags)
 {
     os_int
@@ -1569,7 +1567,7 @@ eHandle *eHandle::read(
     /* Set flags.
      */
     child->setflags(oflags);
-    
+
     /* Read the object content.
      */
     if (child->reader(stream, flags)) goto failed;

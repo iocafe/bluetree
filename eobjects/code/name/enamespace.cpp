@@ -325,10 +325,11 @@ eName *eNameSpace::findname(
          */
         if (c == 0)
         {
-            m = n->m_ileft;
-            if (m == OS_NULL) break;
-            if (x->compare(m)) break;
-            n = m;
+            while ((m = n->ns_prev()))
+            {
+                n = m;
+            }
+            break;
         }
 
         /* Smaller, search to the left.

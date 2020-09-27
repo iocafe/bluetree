@@ -42,7 +42,7 @@ typedef struct eGuiGlobal
 
     /* econnect library root object, API to IOCOM communication
      */
-    ecRoot *econnect;
+    // ecRoot *econnect;
 
     /* ImGui autolabel count for generating labels.
      */

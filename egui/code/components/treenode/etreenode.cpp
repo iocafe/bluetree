@@ -204,6 +204,20 @@ void eTreeNode::onmessage(
                     }
                 }
 
+     /* for (eObject *o = content->first(EBROWSE_PROPERTY);
+         o;
+         o = o->next(EBROWSE_PROPERTY))
+    {
+        eObject *e = o->first(EOID_APPENDIX);
+        if (e == OS_NULL) continue;
+        eSet *appendix = eSet::cast(e);
+        eVariable name;
+        appendix->get(EBROWSE_IPATH, &name);
+
+        osal_debug_error_str("HERE ", name.gets());
+        osal_debug_error_int("HERE ", o->oid());
+    } */
+
                 return;
 
         }
@@ -260,6 +274,8 @@ void eTreeNode::setup_node(
             else {
                 if (value.is_oix()) tmp.clean_to_append_oix();
             }
+
+// osal_debug_error_str("HERE ", value.gets());
 
             tmp += value;
             setpropertyv(ECOMP_PATH, &tmp);
