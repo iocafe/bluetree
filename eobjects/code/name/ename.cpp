@@ -164,7 +164,7 @@ void eName::clear_members()
 
   @brief Get next child name identified by oid.
 
-  The eVariable::nextn() function returns pointer to the next child name of this object.
+  The eVariable::nextn() function returns pointer to the name of this object.
 
   @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
            which are not flagged as an attachment. Value EOID_ALL specifies to get count all
@@ -172,7 +172,7 @@ void eName::clear_members()
            specify object identifier, only children with that specified object identifier
            are searched for.
 
-  @return  Pointer to the first child name, or OS_NULL if none found.
+  @return  Pointer to object's next name, or OS_NULL if none found.
 
 ****************************************************************************************************
 */
@@ -292,16 +292,14 @@ failed:
 /**
 ****************************************************************************************************
 
-  @brief Get the next next name in same namespace.
+  @brief Get the next name in same namespace.
 
   The eName::ms_next() function returns pointer to next name in namespace.
-  Next name is the next child of the same parent object as this object (it could be called
-  sibling).
 
-  @param   name_match OS_TRUE (default) to get next name inly if it is same name as this object.
+  @param   name_match OS_TRUE (default) to get next name only if it is same name as this object.
            OS_FALSE to get next name in name space, regardless of the value.
 
-  @return  Pointer to next name, or OS_NULL if no matching object was found.
+  @return  Pointer to the next name within the name space, or OS_NULL if no more names.
 
 ****************************************************************************************************
 */
@@ -342,20 +340,17 @@ eName *eName::ns_next(
 }
 
 
-
 /**
 ****************************************************************************************************
 
-  @brief Get the next next name in same namespace.
+  @brief Get the previous name in same namespace.
 
-  The eName::ms_next() function returns pointer to next name in namespace.
-  Next name is the next child of the same parent object as this object (it could be called
-  sibling).
+  The eName::ms_prev() function returns pointer to previous name in namespace.
 
-  @param   name_match OS_TRUE (default) to get next name inly if it is same name as this object.
-           OS_FALSE to get next name in name space, regardless of the value.
+  @param   name_match OS_TRUE (default) to get prev name only if it is same name as this object.
+           OS_FALSE to get prev name in name space, regardless of the value.
 
-  @return  Pointer to next name, or OS_NULL if no matching object was found.
+  @return  Pointer to the prev name in same namespace, or OS_NULL if no more matching names.
 
 ****************************************************************************************************
 */
