@@ -168,17 +168,15 @@ void eVariable::setupclass()
 void eVariable::setupproperties(
     os_int cls)
 {
-    eVariable *p;
+    eVariable *text, *vtype;
 
     /* Order of these addproperty() calls is important, since eVariable itself is used to
        describe the properties in property set. The property to set must be added to
        property set before setting value for it. There is trick with p to set text type
        after adding property type. This effects only eVariable class.
      */
-    p = addproperty(cls, EVARP_TEXT, evarp_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
-    addpropertyl (cls, EVARP_TYPE, evarp_type, EPRO_METADATA|EPRO_NOONPRCH, "type");
-    p->setpropertyl(EVARP_TYPE, OS_STR);
-
+    text = addproperty(cls, EVARP_TEXT, evarp_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
+    vtype = addpropertyl (cls, EVARP_TYPE, evarp_type, EPRO_METADATA|EPRO_NOONPRCH, "type");
     addproperty (cls, EVARP_ABBR, evarp_abbr, EPRO_METADATA|EPRO_NOONPRCH, "abbreviation");
     addproperty (cls, EVARP_TTIP, evarp_ttip, EPRO_METADATA|EPRO_NOONPRCH, "tooltip");
     addproperty (cls, EVARP_VALUE, evarp_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
@@ -193,6 +191,13 @@ void eVariable::setupproperties(
     addproperty (cls, EVARP_SBITS, evarp_sbits, EPRO_NOONPRCH, "state bits");
     addproperty (cls, EVARP_TSTAMP, evarp_tstamp, EPRO_PERSISTENT|EPRO_NOONPRCH, "timestamp");
     addproperty (cls, EVARP_CONF, evarp_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
+
+    {
+        eVariable tmp;
+        text->setpropertyl(EVARP_TYPE, OS_STR);
+        emake_type_enum_str(&tmp);
+        vtype->setpropertyv(EVARP_ATTR, &tmp);
+    }
 }
 
 

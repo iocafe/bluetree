@@ -46,7 +46,7 @@ void eobjects_shutdown();
 #include "code/object/eobject.h"
 #include "code/object/ehandletable.h"
 #include "code/object/ehandleroot.h"
-#include "code/initialize/eclasslist.h"
+#include "code/global/eclasslist.h"
 #include "code/root/eroot.h"
 #include "code/variable/evariable.h"
 #include "code/set/eset.h"
@@ -71,6 +71,7 @@ void eobjects_shutdown();
 #include "code/buffer/ebuffer.h"
 #include "code/connection/econnection.h"
 #include "code/connection/eendpoint.h"
+#include "code/helpers/eenum_types_str.h"
 #include "code/main/emain.h"
 
 #endif

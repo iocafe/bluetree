@@ -1,7 +1,7 @@
 /**
 
-  @file    eobjects.cpp
-  @brief   Initialize and shut down eobject library.
+  @file    einitialize.cpp
+  @brief   Initialize and shut down eobjects library.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020

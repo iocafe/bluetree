@@ -99,10 +99,20 @@ void eAttrBuffer::initialize(
     os_double min,
     os_double max)
 {
+    const os_char *list_str, *value;
+    os_memsz value_sz;
 
     /* If this is drop down list, color selector, time stamp, etc.
        which selects type.
      */
+    list_str = attr->gets();
+    if (list_str) {
+        value = osal_str_get_item_value(list_str, "enum", &value_sz, OSAL_STRING_DEFAULT);
+        if (value) {
+            m_show_as = E_SHOWAS_DROP_DOWN_ENUM;
+            goto goon;
+        }
+    }
 
     if (OSAL_IS_UNDEFINED_TYPE(type))
     {
@@ -130,6 +140,8 @@ void eAttrBuffer::initialize(
     else {
         m_show_as = E_SHOWAS_STRING;
     }
+
+goon:
 
     m_initialized = true;
 }

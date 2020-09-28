@@ -109,24 +109,30 @@ void eComponent::setupproperties(
     os_int cls,
     os_int flags)
 {
-    eVariable *p;
+    eVariable *text, *vtype;
 
     /* Order of these addproperty() calls is important, since eComponent itself is used to
        describe the properties in property set. The property to set must be added to
        property set before setting value for it. There is trick with p to set text type
        after adding property type. This effects only eComponent class.
      */
-    p = addproperty(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA, "text");
+    text = addproperty(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA, "text");
 
     if (flags & ECOMP_VALUE_PROPERITES) {
-        addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA, "type");
-        p->setpropertyl(ECOMP_TYPE, OS_STR);
+        vtype = addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA, "type");
         addproperty (cls, ECOMP_VALUE, ecomp_value, EPRO_DEFAULT, "value");
         addproperty (cls, ECOMP_DEFAULT, ecomp_default, EPRO_METADATA, "default");
         addpropertyl(cls, ECOMP_DIGS, ecomp_digs, EPRO_METADATA, "digs");
         addpropertys(cls, ECOMP_UNIT, ecomp_unit, EPRO_METADATA, "unit");
         addpropertyd(cls, ECOMP_MIN, ecomp_min, EPRO_METADATA, "min");
         addpropertyd(cls, ECOMP_MAX, ecomp_max, EPRO_METADATA, "max");
+
+        {
+            eVariable tmp;
+            text->setpropertyl(ECOMP_TYPE, OS_STR);
+            emake_type_enum_str(&tmp);
+            vtype->setpropertyv(ECOMP_ATTR, &tmp);
+        }
     }
 
     if (flags & ECOMP_EXTRA_UI_PROPERITES) {
