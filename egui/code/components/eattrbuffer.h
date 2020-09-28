@@ -65,14 +65,10 @@ public:
     inline eShowAs showas()
         {return m_show_as; }
 
+    inline eContainer *get_list()
+        {return m_drop_down_list;}
 
 protected:
-    void allocate(
-        os_memsz sz);
-
-    /* void setv(
-        eVariable *value); */
-
     void initialize_for_variable(
         eComponent *component);
 
@@ -84,12 +80,15 @@ protected:
         os_double min,
         os_double max);
 
+    void setup_list(
+        const os_char *value,
+        os_memsz value_sz);
+
     bool m_initialized;
 
     eShowAs m_show_as;
 
-    os_char *m_buf;
-    os_memsz m_buf_sz;
+    eContainer *m_drop_down_list;
 };
 
 

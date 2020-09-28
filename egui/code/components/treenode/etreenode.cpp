@@ -509,12 +509,7 @@ eStatus eTreeNode::draw(
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
         ImGui::Button(label, ImVec2(edit_w, 0));
         if (ImGui::IsItemActive()) {
-            m_prev_edit_value = false;
-            m_edit_value = true;
-
-            eVariable value;
-            propertyv(ECOMP_VALUE, &value);
-            m_edit_buf.set(value.gets(), 256);
+            activate();
         }
         ImGui::PopStyleVar();
         h = ImGui::GetItemRectSize().y;
@@ -577,6 +572,39 @@ eStatus eTreeNode::draw(
 /**
 ****************************************************************************************************
 
+  @brief Start editing value, toggle checkbox or show drop down list.
+
+  The eLineEdit::activate() function is called when a value is clicked, or key (for example
+  spacebar) is hit to start editing the value. Actual operation depends on metadata, the
+  function can either start value edit, toggle a checkbox or show drop down list.
+
+  @return  None.
+
+****************************************************************************************************
+*/
+void eTreeNode::activate()
+{
+    switch (m_attr.showas())
+    {
+        case E_SHOWAS_DROP_DOWN_ENUM:
+            drop_down_list(m_attr.get_list());
+            break;
+
+        default:
+            m_prev_edit_value = false;
+            m_edit_value = true;
+
+            eVariable value;
+            propertyv(ECOMP_VALUE, &value);
+            m_edit_buf.set(value.gets(), 256);
+            break;
+    }
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Request information about an object
 
   The eTreeNode::request_object_info() function...
@@ -601,7 +629,6 @@ void eTreeNode::request_object_info()
     }
 
     if (!path.isempty()) {
-
         content = new eContainer();
         item = new eVariable(content, EBROWSE_BROWSE_FLAGS);
         item->setl(browse_flags);
@@ -609,6 +636,7 @@ void eTreeNode::request_object_info()
         message(ECMD_INFO_REQUEST, path.gets(), OS_NULL, content, EMSG_DEL_CONTENT);
     }
 }
+
 
 /**
 ****************************************************************************************************

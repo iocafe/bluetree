@@ -323,8 +323,13 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
-    virtual ePopup *popup();
-    virtual void close_popup();
+    /* Start editing value, toggle checkbox or show drop down list.
+     */
+    virtual void activate() {}
+
+    ePopup *popup();
+    ePopup *drop_down_list(eContainer *list);
+    void close_popup();
 
 
 #if 0

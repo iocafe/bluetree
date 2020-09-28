@@ -26,8 +26,7 @@
 eAttrBuffer::eAttrBuffer()
 {
     m_initialized = false;
-    m_buf = OS_NULL;
-    m_buf_sz = 0;
+    m_drop_down_list = OS_NULL;
 }
 
 eAttrBuffer::~eAttrBuffer()
@@ -35,38 +34,15 @@ eAttrBuffer::~eAttrBuffer()
     clear();
 }
 
-void eAttrBuffer::allocate(
-    os_memsz sz)
-{
-    if (sz > m_buf_sz) {
-        if (m_buf) {
-            os_free(m_buf, m_buf_sz);
-        }
-        m_buf = os_malloc(sz, &m_buf_sz);
-    }
-}
 
 void eAttrBuffer::clear()
 {
-    if (m_buf) {
-        os_free(m_buf, m_buf_sz);
-        m_buf = OS_NULL;
-        m_buf_sz = 0;
+    if (m_drop_down_list) {
+        delete m_drop_down_list;
+        m_drop_down_list = OS_NULL;
     }
     m_initialized = false;
 }
-
-/* void eAttrBuffer::setv(
-    eVariable *value)
-{
-    os_char *ptr;
-    os_memsz sz;
-
-    ptr = value->gets(&sz);
-    allocate(sz);
-    os_memcpy(m_buf, ptr, sz);
-}
-*/
 
 
 /* This function is typically used only when drawing, etc to avoid buffer allocation when
@@ -110,6 +86,7 @@ void eAttrBuffer::initialize(
         value = osal_str_get_item_value(list_str, "enum", &value_sz, OSAL_STRING_DEFAULT);
         if (value) {
             m_show_as = E_SHOWAS_DROP_DOWN_ENUM;
+            setup_list(value, value_sz);
             goto goon;
         }
     }
@@ -142,6 +119,39 @@ void eAttrBuffer::initialize(
     }
 
 goon:
-
     m_initialized = true;
+}
+
+void eAttrBuffer::setup_list(
+    const os_char *value,
+    os_memsz value_sz)
+{
+    eVariable tmp, *item;
+    const os_char *p;
+    os_memsz bytes;
+    os_char buf[128];
+    osalStatus s;
+    os_int id;
+
+    if (m_drop_down_list) {
+        delete m_drop_down_list;
+    }
+    m_drop_down_list = new eContainer();
+
+    tmp.sets(value, value_sz);
+    p = tmp.gets();
+
+    while (OS_TRUE) {
+        s = osal_str_list_iter(buf, sizeof(buf), &p, OSAL_STRING_DEFAULT);
+        if (s) break;
+        if (m_show_as == E_SHOWAS_DROP_DOWN_ENUM)
+        {
+            id = osal_str_to_int(buf, &bytes);
+            if (id < 0) id = EOID_CHILD;
+            while (buf[bytes] == '.' || osal_char_isspace(buf[bytes])) bytes++;
+
+            item = new eVariable(m_drop_down_list, id);
+            item->sets(buf + bytes);
+        }
+    }
 }

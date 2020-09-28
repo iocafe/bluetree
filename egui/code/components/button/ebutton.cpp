@@ -1,7 +1,7 @@
 /**
 
-  @file    elineedit.cpp
-  @brief   Line edit with label and value.
+  @file    ebutton.cpp
+  @brief   Push button or menu item.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    15.9.2020
@@ -27,7 +27,7 @@
 
 ****************************************************************************************************
 */
-eLineEdit::eLineEdit(
+eButton::eButton(
     eObject *parent,
     e_oid id,
     os_int flags)
@@ -49,7 +49,7 @@ eLineEdit::eLineEdit(
 
 ****************************************************************************************************
 */
-eLineEdit::~eLineEdit()
+eButton::~eButton()
 {
 }
 
@@ -69,13 +69,13 @@ eLineEdit::~eLineEdit()
 
 ****************************************************************************************************
 */
-eObject *eLineEdit::clone(
+eObject *eButton::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
-    eLineEdit *clonedobj;
-    clonedobj = new eLineEdit(parent, id == EOID_CHILD ? oid() : id, flags());
+    eButton *clonedobj;
+    clonedobj = new eButton(parent, id == EOID_CHILD ? oid() : id, flags());
     clonegeneric(clonedobj, aflags);
     return clonedobj;
 }
@@ -84,21 +84,21 @@ eObject *eLineEdit::clone(
 /**
 ****************************************************************************************************
 
-  @brief Add eLineEdit to class list and class'es properties to it's property set.
+  @brief Add eButton to class list and class'es properties to it's property set.
 
-  The eLineEdit::setupclass function adds eLineEdit to class list and class'es properties to
+  The eButton::setupclass function adds eButton to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
 ****************************************************************************************************
 */
-void eLineEdit::setupclass()
+void eButton::setupclass()
 {
     const os_int cls = EGUICLASSID_LINE_EDIT;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eLineEdit");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eButton");
     eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|
         ECOMP_VALUE_STATE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     propertysetdone(cls);
@@ -128,7 +128,7 @@ void eLineEdit::setupclass()
 
 ****************************************************************************************************
 */
-eStatus eLineEdit::onpropertychange(
+eStatus eButton::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -169,7 +169,7 @@ eStatus eLineEdit::onpropertychange(
 
   @brief Draw the component.
 
-  The eLineEdit::draw() function calls ImGui API to render the component.
+  The eButton::draw() function calls ImGui API to render the component.
 
   @param   Prm Drawing parameters.
   @return  The function return ESTATUS_SUCCESS if all is fine. Other values indicate that the
@@ -178,7 +178,7 @@ eStatus eLineEdit::onpropertychange(
 
 ****************************************************************************************************
 */
-eStatus eLineEdit::draw(
+eStatus eButton::draw(
     eDrawParams& prm)
 {
     os_int edit_w, unit_w, total_w, unit_spacer, total_h, h;
@@ -305,7 +305,7 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
 
   @brief Start editing value, toggle checkbox or show drop down list.
 
-  The eLineEdit::activate() function is called when a value is clicked, or key (for example
+  The eButton::activate() function is called when a value is clicked, or key (for example
   spacebar) is hit to start editing the value. Actual operation depends on metadata, the
   function can either start value edit, toggle a checkbox or show drop down list.
 
@@ -313,12 +313,12 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
 
 ****************************************************************************************************
 */
-void eLineEdit::activate()
+void eButton::activate()
 {
     switch (m_attr.showas())
     {
         case E_SHOWAS_DROP_DOWN_ENUM:
-            drop_down_list(m_attr.get_list());
+            popup();
             break;
 
         default:

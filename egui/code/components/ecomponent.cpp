@@ -604,6 +604,31 @@ ePopup *eComponent::popup()
     return p;
 }
 
+ePopup *eComponent::drop_down_list(
+    eContainer *list)
+{
+    ePopup *p;
+    eVariable *v;
+    eButton *b;
+
+    p = popup();
+
+    if (list == OS_NULL) {
+        osal_debug_error("No drop down list data");
+        return p;
+    }
+
+    for (v = list->firstv(); v; v = v->nextv())
+    {
+        b = new eButton(p);
+        b->setpropertyv(ECOMP_TEXT, v);
+        b->setpropertyv(ECOMP_VALUE, v);
+    }
+
+    return p;
+}
+
+
 
 void eComponent::close_popup()
 {

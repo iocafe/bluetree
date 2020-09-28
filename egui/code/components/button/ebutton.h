@@ -1,7 +1,7 @@
 /**
 
-  @file    elineedit.h
-  @brief   Line edit with label and value.
+  @file    ebutton.h
+  @brief   Push button or menu item.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    15.9.2020
@@ -14,8 +14,8 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef ELINEEDIT_H_
-#define ELINEEDIT_H_
+#ifndef EBUTTON_H_
+#define EBUTTON_H_
 #include "egui.h"
 
 /**
@@ -35,19 +35,16 @@
 /**
 ****************************************************************************************************
 
-  @brief eLineEdit class.
-
-  The eLineEdit is dynamically typed variable, which can store integers, floating point values
-  and strings.
+  @brief eButton class.
 
 ****************************************************************************************************
 */
-class eLineEdit : public eComponent
+class eButton : public eComponent
 {
     /**
     ************************************************************************************************
 
-      @name eLineEdit overrides for eObject base class functions.
+      @name eButton overrides for eObject base class functions.
 
       X...
 
@@ -57,14 +54,14 @@ class eLineEdit : public eComponent
 public:
     /* Constructor.
      */
-    eLineEdit(
+    eButton(
         eObject *parent = OS_NULL,
         e_oid id = EOID_GUI_COMPONENT,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eLineEdit();
+    virtual ~eButton();
 
     /* Clone object.
      */
@@ -73,13 +70,13 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to eLineEdit pointer.
+    /* Casting eObject pointer to eButton pointer.
      */
-    inline static eLineEdit *cast(
+    inline static eButton *cast(
         eObject *o)
     {
         e_assert_type(o, EGUICLASSID_LINE_EDIT)
-        return (eLineEdit*)o;
+        return (eButton*)o;
     }
 
     /* Get class identifier.
@@ -99,12 +96,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eLineEdit *newobj(
+    static eButton *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eLineEdit(parent, id, flags);
+        return new eButton(parent, id, flags);
     }
 
     /*@}*/

@@ -131,6 +131,10 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
+    /* Activate the component (start editing value, toggle checkbox, or show drop down list).
+     */
+    virtual void activate();
+
     /*@}*/
 
 
