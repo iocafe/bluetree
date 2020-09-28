@@ -38,6 +38,7 @@ void eguiclasslist_initialize()
     eWindow::setupclass();
     eLineEdit::setupclass();
     eTreeNode::setupclass();
+    eButton::setupclass();
 
     eiocCheckbox::setupclass();
 }

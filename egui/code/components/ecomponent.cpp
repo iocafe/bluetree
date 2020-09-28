@@ -21,7 +21,8 @@
  */
 const os_char
     ecomp_path[] = "path",
-    ecomp_ipath[] = "ipath";
+    ecomp_ipath[] = "ipath",
+    ecomp_setvalue[] = "setvalue";
 
 
 /**
@@ -610,6 +611,7 @@ ePopup *eComponent::drop_down_list(
     ePopup *p;
     eVariable *v;
     eButton *b;
+    os_int propertynr, value;
 
     p = popup();
 
@@ -618,11 +620,16 @@ ePopup *eComponent::drop_down_list(
         return p;
     }
 
+    value = propertyi(ECOMP_VALUE);
+
     for (v = list->firstv(); v; v = v->nextv())
     {
+        propertynr = v->oid();
+
         b = new eButton(p);
         b->setpropertyv(ECOMP_TEXT, v);
-        b->setpropertyv(ECOMP_VALUE, v);
+        b->setpropertyl(ECOMP_VALUE, value);
+        b->setpropertyl(ECOMP_SETVALUE, propertynr);
     }
 
     return p;

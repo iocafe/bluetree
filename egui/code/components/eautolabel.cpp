@@ -73,14 +73,15 @@ void eAutoLabel::clear(
 */
 const os_char *eAutoLabel::get(
     eComponent *component,
-    os_int propertynr)
+    os_int propertynr,
+    eAttrBuffer *attr)
 {
     if (m_label) {
         return m_label;
     }
 
     if (propertynr) {
-        set(component, propertynr);
+        set(component, propertynr, attr);
     }
     else {
         setstr(component, OS_NULL);
@@ -140,9 +141,31 @@ void eAutoLabel::setstr(
 
 void eAutoLabel::set(
     eComponent *component,
-    os_int propertynr)
+    os_int propertynr,
+    eAttrBuffer *attr)
 {
-    eVariable tmp;
+    eVariable tmp, *item;
+    eContainer *drop_down_list;
+    os_int id;
     component->propertyv(propertynr, &tmp);
+
+    if (attr) {
+        switch (attr->showas())
+        {
+            case E_SHOWAS_DROP_DOWN_ENUM:
+                id = tmp.geti();
+                drop_down_list = attr->get_list();
+                if (drop_down_list) {
+                    item = drop_down_list->firstv(id);
+                    if (item) tmp = *item;
+                }
+                break;
+
+
+            default:
+                break;
+        }
+    }
+
     setstr(component, tmp.gets());
 }

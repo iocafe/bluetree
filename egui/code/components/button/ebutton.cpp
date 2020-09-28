@@ -33,8 +33,8 @@ eButton::eButton(
     os_int flags)
     : eComponent(parent, id, flags)
 {
-    m_edit_value = false;
-    m_prev_edit_value = false;
+    m_imgui_toggl = false;
+    m_set_toggled = true;
 }
 
 
@@ -99,8 +99,13 @@ void eButton::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eButton");
-    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|
-        ECOMP_VALUE_STATE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
+    // eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|
+    //        ECOMP_VALUE_STATE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
+
+    addpropertys(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA, "text");
+    addproperty(cls, ECOMP_VALUE, ecomp_value, EPRO_DEFAULT, "value");
+    addpropertyl(cls, ECOMP_SETVALUE, ecomp_setvalue, EPRO_METADATA, "set value", 1);
+
     propertysetdone(cls);
     os_unlock();
 }
@@ -135,25 +140,16 @@ eStatus eButton::onpropertychange(
 {
     switch (propertynr)
     {
-        case ECOMP_VALUE: /* clear label to display new text and proceed */
-            m_label_value.clear();
+        case ECOMP_VALUE:
+            m_set_toggled = true;
             break;
 
         case ECOMP_TEXT:
-            m_text.clear();
+            m_label_text.clear();
             break;
 
-        case ECOMP_UNIT:
-            m_unit.clear();
-            m_attr.clear();
-            break;
-
-        case EVARP_DIGS:
-        case EVARP_MIN:
-        case EVARP_MAX:
-        case EVARP_TYPE:
-        case EVARP_ATTR:
-            m_attr.clear();
+        case ECOMP_SETVALUE:
+            m_set_toggled = true;
             break;
 
         default:
@@ -181,122 +177,39 @@ eStatus eButton::onpropertychange(
 eStatus eButton::draw(
     eDrawParams& prm)
 {
-    os_int edit_w, unit_w, total_w, unit_spacer, total_h, h;
-    const os_char *label, *unit;
-    ImGuiInputTextFlags eflags;
+    const os_char *label;
+    ImVec2 sz;
 
-    m_attr.for_variable(this);
+    if (m_set_toggled) {
+        set_toggled();
+        m_set_toggled = false;
+    }
 
-    ImVec2 c = ImGui::GetContentRegionAvail();
-    total_w = c.x;
-
-
-ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
+    ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
     m_rect.x1 = cpos.x;
     m_rect.y1 = cpos.y;
 
-    ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT));
-    total_h = ImGui::GetItemRectSize().y;
+    sz.x = sz.y = 0;
 
-    //    ImGui::GetForegroundDrawList()->AddLine(prm.io->MouseClickedPos[0], prm.io->MousePos, ImGui::GetColorU32(ImGuiCol_Button), 4.0f); // Draw a line between the button and the mouse cursor
+    label = m_label_text.get(this, ECOMP_TEXT);
+    // ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
 
+    ImGui::MenuItem(label, "", &m_imgui_toggl);
+    // ImGui::Button(label, ImVec2(edit_w, 0));
 
-    // int edit_w = ImGui::CalcItemWidth();
-    // ImGui::SameLine(total_w - edit_w);
-    // edit_w = total_w - 200;
-
-    edit_w = 200;
-    unit_w = 60;
-    unit_spacer = 6;
-
-    ImGui::SameLine(total_w - edit_w - unit_spacer - unit_w);
-
-
-    ImGui::SetNextItemWidth(edit_w);
-
-    if (m_edit_value) {
-        label = m_label_edit.get(this);
-
-        switch (m_attr.showas())
-        {
-            case E_SHOWAS_INTEGER_NUMBER:
-            case E_SHOWAS_FLOAT_NUMBER:
-                eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue;
-                break;
-
-            default:
-                eflags = ImGuiInputTextFlags_EnterReturnsTrue;
-                break;
-        }
-
-        ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
-        if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
-        {
-            eVariable value;
-            propertyv(ECOMP_VALUE, &value);
-            m_edit_value = false;
-            if (os_strcmp(m_edit_buf.ptr(), value.gets())) {
-                setpropertys(ECOMP_VALUE, m_edit_buf.ptr());
-            }
-        }
-        else {
-            if (!m_prev_edit_value) {
-                ImGui::SetKeyboardFocusHere(-1);
-                m_prev_edit_value = true;
-            }
-        }
+    if (ImGui::IsItemActive()) {
+        activate();
     }
-    else {
-        label = m_label_value.get(this, ECOMP_VALUE);
-        ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
-        ImGui::Button(label, ImVec2(edit_w, 0));
-        if (ImGui::IsItemActive()) {
-            activate();
-        }
-        ImGui::PopStyleVar();
-        h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
-    }
+    // ImGui::PopStyleVar();
+    sz = ImGui::GetItemRectSize();
 
-    unit = m_unit.get(this, ECOMP_UNIT);
-    if (*unit != '\0') {
-        ImGui::SameLine(total_w - unit_w);
-        ImGui::SetNextItemWidth(unit_w);
-        ImGui::TextUnformatted(unit);
-        h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
-    }
 
-    m_rect.x2 = m_rect.x1 + total_w - 1;
-    m_rect.y2 = m_rect.y1 + total_h - 1;
+    m_rect.x2 = m_rect.x1 + sz.x - 1;
+    m_rect.y2 = m_rect.y1 + sz.y - 1;
 
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
-
-#if 0
-    ImGuiInputTextFlags_None                = 0,
-    ImGuiInputTextFlags_CharsDecimal        = 1 << 0,   // Allow 0123456789.+-*/
-    ImGuiInputTextFlags_CharsHexadecimal    = 1 << 1,   // Allow 0123456789ABCDEFabcdef
-    ImGuiInputTextFlags_CharsUppercase      = 1 << 2,   // Turn a..z into A..Z
-    ImGuiInputTextFlags_CharsNoBlank        = 1 << 3,   // Filter out spaces, tabs
-    ImGuiInputTextFlags_AutoSelectAll       = 1 << 4,   // Select entire text when first taking mouse focus
-    ImGuiInputTextFlags_EnterReturnsTrue    = 1 << 5,   // Return 'true' when Enter is pressed (as opposed to every time the value was modified). Consider looking at the IsItemDeactivatedAfterEdit() function.
-    ImGuiInputTextFlags_CallbackCompletion  = 1 << 6,   // Callback on pressing TAB (for completion handling)
-    ImGuiInputTextFlags_CallbackHistory     = 1 << 7,   // Callback on pressing Up/Down arrows (for history handling)
-    ImGuiInputTextFlags_CallbackAlways      = 1 << 8,   // Callback on each iteration. User code may query cursor position, modify text buffer.
-    ImGuiInputTextFlags_CallbackCharFilter  = 1 << 9,   // Callback on character inputs to replace or discard them. Modify 'EventChar' to replace or discard, or return 1 in callback to discard.
-    ImGuiInputTextFlags_AllowTabInput       = 1 << 10,  // Pressing TAB input a '\t' character into the text field
-    ImGuiInputTextFlags_CtrlEnterForNewLine = 1 << 11,  // In multi-line mode, unfocus with Enter, add new line with Ctrl+Enter (default is opposite: unfocus with Ctrl+Enter, add line with Enter).
-    ImGuiInputTextFlags_NoHorizontalScroll  = 1 << 12,  // Disable following the cursor horizontally
-    ImGuiInputTextFlags_AlwaysInsertMode    = 1 << 13,  // Insert mode
-    ImGuiInputTextFlags_ReadOnly            = 1 << 14,  // Read-only mode
-    ImGuiInputTextFlags_Password            = 1 << 15,  // Password mode, display all characters as '*'
-    ImGuiInputTextFlags_NoUndoRedo          = 1 << 16,  // Disable undo/redo. Note that input text owns the text data while active, if you want to provide your own undo/redo stack you need e.g. to call ClearActiveID().
-    ImGuiInputTextFlags_CharsScientific     = 1 << 17,  // Allow 0123456789.+-*/eE (Scientific notation input)
-    ImGuiInputTextFlags_CallbackResize      = 1 << 18,  // Callback on buffer capacity changes request (beyond 'buf_size' parameter value), allowing the string to grow. Notify when the string wants to be resized (for string types which hold a cache of their Size). You will be provided a new BufSize in the callback and NEED to honor it. (see misc/cpp/imgui_stdlib.h for an example of using this)
-    ImGuiInputTextFlags_CallbackEdit        = 1 << 19,  // Callback on any edit (note that InputText() already returns true on edit, the callback is useful mainly to manipulate the underlying buffer while focus is active)
-#endif
 }
 
 
@@ -315,19 +228,16 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
 */
 void eButton::activate()
 {
-    switch (m_attr.showas())
-    {
-        case E_SHOWAS_DROP_DOWN_ENUM:
-            popup();
-            break;
 
-        default:
-            m_prev_edit_value = false;
-            m_edit_value = true;
+}
 
-            eVariable value;
-            propertyv(ECOMP_VALUE, &value);
-            m_edit_buf.set(value.gets(), 256);
-            break;
-    }
+
+void eButton::set_toggled()
+{
+    eVariable tmp1, tmp2;
+
+    propertyv(ECOMP_VALUE, &tmp1);
+    propertyv(ECOMP_SETVALUE, &tmp2);
+
+    m_imgui_toggl = tmp1.compare(&tmp2) ? false : true;
 }

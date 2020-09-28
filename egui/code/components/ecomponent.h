@@ -57,6 +57,7 @@ class ePopup;
 #define ECOMP_CONF EVARP_CONF
 #define ECOMP_PATH 30
 #define ECOMP_IPATH 31
+#define ECOMP_SETVALUE 32
 
 /* Flags for eComponent::setupproperties() to specify which optional properties for
    the component class.
@@ -89,6 +90,7 @@ class ePopup;
 #define ecomp_conf evarp_conf
 extern const os_char ecomp_path[];
 extern const os_char ecomp_ipath[];
+extern const os_char ecomp_setvalue[];
 
 /*@}*/
 

@@ -194,7 +194,7 @@ eStatus ePopup::draw(
 
     if (ImGui::BeginPopup(label))
     {
-        const char* names[] = { "Bream", "Haddock", "Mackerel", "Pollock", "Tilefish" };
+        /* const char* names[] = { "Bream", "Haddock", "Mackerel", "Pollock", "Tilefish" };
         static bool toggles[] = { true, false, false, false, false };
 
         for (int i = 0; i < IM_ARRAYSIZE(names); i++)
@@ -229,7 +229,7 @@ eStatus ePopup::draw(
                 ImGui::EndMenu();
             }
             ImGui::EndPopup();
-        }
+        } */
 
         for (c = firstcomponent(EOID_GUI_COMPONENT); c; c = c->nextcomponent(EOID_GUI_COMPONENT))
         {

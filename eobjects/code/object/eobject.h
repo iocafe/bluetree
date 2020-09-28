@@ -815,6 +815,10 @@ public:
         os_int propertynr,
         os_long x);
 
+    inline void setpropertyi(
+        os_int propertynr,
+        os_int x) {setpropertyl(propertynr, x);}
+
     /* Set property value as double.
      */
     void setpropertyd(
@@ -836,6 +840,9 @@ public:
 
     os_long propertyl(
         os_int propertynr);
+
+    inline os_int propertyi(
+        os_int propertynr) {return (os_int)propertyl(propertynr);}
 
     os_double propertyd(
         os_int propertynr);

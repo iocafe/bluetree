@@ -19,6 +19,7 @@
 #include "egui.h"
 
 class eComponent;
+class eAttrBuffer;
 
 /**
 ****************************************************************************************************
@@ -41,7 +42,8 @@ public:
      */
     const os_char *get(
         eComponent *component,
-        os_int propertynr = 0);
+        os_int propertynr = 0,
+        eAttrBuffer *attr = OS_NULL);
 
     void clear(
         bool clear_count = false);
@@ -55,7 +57,8 @@ protected:
 
     void set(
         eComponent *component,
-        os_int propertynr);
+        os_int propertynr,
+        eAttrBuffer *attr);
 
     void allocate(
         os_memsz sz);

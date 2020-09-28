@@ -247,7 +247,7 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
         }
     }
     else {
-        label = m_label_value.get(this, ECOMP_VALUE);
+        label = m_label_value.get(this, ECOMP_VALUE, &m_attr);
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
         ImGui::Button(label, ImVec2(edit_w, 0));
         if (ImGui::IsItemActive()) {

@@ -131,23 +131,12 @@ public:
 
 
 protected:
-    bool m_edit_value;
-    bool m_prev_edit_value;
+    void set_toggled();
 
-    /* Buffer for editing value.
-     */
-    eEditBuffer m_edit_buf;
+    bool m_set_toggled;
+    bool m_imgui_toggl;
 
-    /* Property values */
-    eStrBuffer m_text;
-    eStrBuffer m_unit;
-
-    /* Parsed attrbutes, digits, etc.
-     */
-    eAttrBuffer m_attr;
-
-    eAutoLabel m_label_edit;
-    eAutoLabel m_label_value;
+    eAutoLabel m_label_text;
 };
 
 
