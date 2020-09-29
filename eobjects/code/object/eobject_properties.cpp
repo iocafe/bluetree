@@ -543,9 +543,9 @@ void eObject::setpropertyv(
         properties->get(propertynr, &v);
         if (!v.compare(x)) return;
 
-        /* Call class'es onpropertychange function.
+        /* Early call class'es onpropertychange function.
          */
-        if ((pflags & EPRO_NOONPRCH) == 0)
+        if ((pflags & (EPRO_NOONPRCH|EPRO_EARLYPRCH)) == EPRO_EARLYPRCH)
         {
             onpropertychange(propertynr, x,  0); // CHECK FLAGS
         }
@@ -563,6 +563,13 @@ void eObject::setpropertyv(
         else
         {
             properties->set(propertynr, x);
+        }
+
+        /* Late (normal) call class'es onpropertychange function.
+         */
+        if ((pflags & (EPRO_NOONPRCH|EPRO_EARLYPRCH)) == 0)
+        {
+            onpropertychange(propertynr, x,  0); // CHECK FLAGS
         }
     }
 

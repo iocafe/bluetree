@@ -150,18 +150,18 @@ protected:
         eVariable& ipath,
         eVariable& path);
 
+    os_int m_received_change;
+
     bool m_autoopen;
     bool m_isopen;
     bool m_child_data_received;
     bool m_show_expand_arrow;
-
     bool m_edit_value;
     bool m_prev_edit_value;
-
     bool m_set_checked;
     bool m_imgui_checked;
-
     bool m_intermediate_node;
+
     os_int m_node_type;
 
     /* Buffer for editing value.

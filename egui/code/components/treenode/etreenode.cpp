@@ -18,13 +18,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eTreeNode::eTreeNode(
@@ -45,18 +39,13 @@ eTreeNode::eTreeNode(
 
     m_intermediate_node = false;
     m_node_type = 0;
+    m_received_change = 0;
 }
 
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eTreeNode::~eTreeNode()
@@ -124,7 +113,7 @@ void eTreeNode::setupclass()
 
   @brief Function to process incoming messages.
 
-  The eeTreeNode::onmessage function handles messages received by object. If this function
+  The eTreeNode::onmessage function handles messages received by object. If this function
   doesn't process message, it calls parent class'es onmessage function.
 
   @param   envelope Message envelope. Contains command, target and source paths and
@@ -150,6 +139,7 @@ void eTreeNode::onmessage(
         switch (envelope->command())
         {
             case ECMD_INFO_REPLY:
+                m_received_change++;
                 m_child_data_received = true;
 
                 content = eContainer::cast(envelope->content());
@@ -222,22 +212,11 @@ void eTreeNode::onmessage(
                     groupnode->m_intermediate_node = true;
                 }
 
-     /* for (eObject *o = content->first(EBROWSE_PROPERTIES);
-         o;
-         o = o->next(EBROWSE_PROPERTIES))
-    {
-        eObject *e = o->first(EOID_APPENDIX);
-        if (e == OS_NULL) continue;
-        eSet *appendix = eSet::cast(e);
-        eVariable name;
-        appendix->get(EBROWSE_IPATH, &name);
-
-        osal_debug_error_str("HERE ", name.gets());
-        osal_debug_error_int("HERE ", o->oid());
-    } */
-
+                m_received_change--;
                 return;
 
+            default:
+                break;
         }
     }
 
@@ -246,6 +225,23 @@ void eTreeNode::onmessage(
     eObject::onmessage(envelope);
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Set up this tree node.
+
+  The eTreeNode::setup_node function sets up a tree node.
+
+  @param   item Variable containing received data for this tree node.
+  @param   ipath Internal path used by parent tree node (skipping intermediate nodes).
+           This specified browsed object uniquely.
+  @param   path Path of parent tree node (skipping intermediate nodes). This may specify multiple
+           browsed objects.
+  @return  None.
+
+****************************************************************************************************
+*/
 os_int eTreeNode::setup_node(
     eVariable *item,
     eVariable& ipath,
@@ -294,8 +290,6 @@ os_int eTreeNode::setup_node(
                 if (value.is_oix()) tmp.clean_to_append_oix();
             }
 
-// osal_debug_error_str("HERE ", value.gets());
-
             tmp += value;
             setpropertyv(ECOMP_PATH, &tmp);
         }
@@ -338,7 +332,10 @@ eStatus eTreeNode::onpropertychange(
 {
     switch (propertynr)
     {
-        case ECOMP_VALUE: /* clear label to display new text and proceed */
+        case ECOMP_VALUE:
+            if (m_received_change == 0) {
+                set_modified_value();
+            }
             m_label_value.clear();
             m_set_checked = true;
             break;
@@ -396,18 +393,16 @@ eStatus eTreeNode::draw(
 {
     eComponent *child;
     os_int text_w, edit_w, unit_w, total_w, path_w, ipath_w, unit_spacer, total_h, w_left, h;
-    const os_char *label, *value, *text, *unit, *path, *ipath;
+    const os_char *label, *value, *text, *unit, *path;
     ImGuiInputTextFlags eflags;
     bool isopen;
 
     m_attr.for_variable(this);
 
     total_w = ImGui::GetContentRegionMax().x;
-    ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
+    ImVec2 cpos = ImGui::GetCursorScreenPos();
     m_rect.x1 = cpos.x;
     m_rect.y1 = cpos.y;
-
-    // const float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
 
     if (m_autoopen)
     {
@@ -429,12 +424,6 @@ eStatus eTreeNode::draw(
     }
 
     total_h = ImGui::GetItemRectSize().y;
-
-    //    ImGui::GetForegroundDrawList()->AddLine(prm.io->MouseClickedPos[0], prm.io->MousePos, ImGui::GetColorU32(ImGuiCol_Button), 4.0f); // Draw a line between the button and the mouse cursor
-
-    // int edit_w = ImGui::CalcItemWidth();
-    // ImGui::SameLine(total_w - edit_w);
-    // edit_w = total_w - 200;
 
     /* Decide on column widths.
      */
@@ -506,7 +495,6 @@ eStatus eTreeNode::draw(
             m_edit_value = false;
             if (os_strcmp(m_edit_buf.ptr(), value.gets())) {
                 setpropertys(ECOMP_VALUE, m_edit_buf.ptr());
-                set_modified_value();
             }
         }
         else {
@@ -567,21 +555,16 @@ eStatus eTreeNode::draw(
             if (h > total_h) total_h = h;
         }
     }
-    ipath = m_ipath.get(this, ECOMP_IPATH);
     if (ipath_w > 0) {
-        if (*ipath != '\0') {
+        path = m_ipath.get(this, ECOMP_IPATH);
+        if (*path != '\0') {
             ImGui::SameLine(total_w - ipath_w);
             ImGui::SetNextItemWidth(ipath_w);
-            ImGui::TextUnformatted(ipath);
+            ImGui::TextUnformatted(path);
             h = ImGui::GetItemRectSize().y;
             if (h > total_h) total_h = h;
         }
     }
-
-    /* if (*ipath != '\0' && os_strcmp(ipath, m_bound_ipath.gets())) {
-        m_bound_ipath = ipath;
-        bind(ECOMP_VALUE, ipath, EBIND_TEMPORARY);
-    } */
 
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
@@ -679,7 +662,9 @@ void eTreeNode::request_object_info()
 
   @brief Set property of object
 
-  The eTreeNode::set_modified_value() function...
+  The eTreeNode::set_modified_value() function when tree node's ECOMP_VALUE property changed by
+  user setting. Member variable m_received_change is used to block calls to this function
+  caused by setting received data to this function.
 
   @return  None.
 
@@ -695,6 +680,7 @@ void eTreeNode::set_modified_value()
         setproperty_msg(path.gets(), &value);
     }
 }
+
 
 /**
 ****************************************************************************************************
