@@ -1,6 +1,6 @@
 /**
 
-  @file    eautolabel.cppl
+  @file    eautolabel.cpp
   @brief   Generate Dear ImGui labels by enumeration.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -149,28 +149,9 @@ void eAutoLabel::set(
     os_int propertynr,
     eAttrBuffer *attr)
 {
-    eVariable tmp, *item;
-    eContainer *drop_down_list;
-    os_int id;
+    eVariable tmp;
+
     component->propertyv(propertynr, &tmp);
-
-    if (attr) {
-        switch (attr->showas())
-        {
-            case E_SHOWAS_DROP_DOWN_ENUM:
-                id = tmp.geti();
-                drop_down_list = attr->get_list();
-                if (drop_down_list) {
-                    item = drop_down_list->firstv(id);
-                    if (item) tmp = *item;
-                }
-                break;
-
-
-            default:
-                break;
-        }
-    }
-
+    enice_value_for_ui(&tmp, component, attr);
     setstr(component, tmp.gets());
 }

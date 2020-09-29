@@ -355,6 +355,7 @@ eStatus eTreeNode::onpropertychange(
         case ECOMP_TYPE:
         case ECOMP_ATTR:
             m_attr.clear();
+            m_label_value.clear();
             m_set_checked = true;
             break;
 
@@ -412,7 +413,8 @@ eStatus eTreeNode::draw(
 
     label = m_label_node.get(this);
     text = m_text.get(this, ECOMP_TEXT);
-    isopen = ImGui::TreeNodeEx(label, m_show_expand_arrow ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_Leaf, "%s", text);
+    isopen = ImGui::TreeNodeEx(label, m_show_expand_arrow
+        ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_Leaf, "%s", text);
 
     /* If we open the component, request information.
      */
@@ -478,7 +480,7 @@ eStatus eTreeNode::draw(
         switch (m_attr.showas())
         {
             case E_SHOWAS_INTEGER_NUMBER:
-            case E_SHOWAS_FLOAT_NUMBER:
+            case E_SHOWAS_DECIMAL_NUMBER:
                 eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue;
                 break;
 
@@ -605,6 +607,11 @@ void eTreeNode::activate()
 {
     switch (m_attr.showas())
     {
+        case E_SHOWAS_CHECKBOX:
+            setpropertyi(ECOMP_VALUE, m_imgui_checked);
+            m_set_checked = true;
+            break;
+
         case E_SHOWAS_DROP_DOWN_ENUM:
             drop_down_list(m_attr.get_list());
             break;
@@ -615,6 +622,7 @@ void eTreeNode::activate()
 
             eVariable value;
             propertyv(ECOMP_VALUE, &value);
+            enice_value_for_ui(&value, this, &m_attr);
             m_edit_buf.set(value.gets(), 256);
             break;
     }

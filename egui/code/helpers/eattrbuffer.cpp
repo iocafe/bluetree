@@ -26,6 +26,8 @@
 eAttrBuffer::eAttrBuffer()
 {
     m_initialized = false;
+    m_digs = 2;
+    m_show_as = E_SHOWAS_STRING;
     m_drop_down_list = OS_NULL;
 }
 
@@ -57,9 +59,9 @@ void eAttrBuffer::initialize_for_variable(
     os_double min, max;
 
     component->propertyv(EVARP_ATTR, &attr);
-    type = (osalTypeId)component->propertyl(EVARP_TYPE);
+    type = (osalTypeId)component->propertyi(EVARP_TYPE);
     component->propertyv(EVARP_UNIT, &unit);
-    digs = (os_int)component->propertyl(EVARP_DIGS);
+    digs = component->propertyi(EVARP_DIGS);
     min = component->propertyd(EVARP_MIN);
     max = component->propertyd(EVARP_MAX);
 
@@ -77,6 +79,8 @@ void eAttrBuffer::initialize(
 {
     const os_char *list_str, *value;
     os_memsz value_sz;
+
+    m_digs = digs;
 
     /* If this is drop down list, color selector, time stamp, etc.
        which selects type.
@@ -112,7 +116,7 @@ void eAttrBuffer::initialize(
     }
     else if (OSAL_IS_FLOAT_TYPE(type))
     {
-        m_show_as = E_SHOWAS_FLOAT_NUMBER;
+        m_show_as = E_SHOWAS_DECIMAL_NUMBER;
     }
     else {
         m_show_as = E_SHOWAS_STRING;

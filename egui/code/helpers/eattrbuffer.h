@@ -22,7 +22,7 @@ typedef enum
 {
     E_SHOWAS_CHECKBOX,
     E_SHOWAS_INTEGER_NUMBER,
-    E_SHOWAS_FLOAT_NUMBER,
+    E_SHOWAS_DECIMAL_NUMBER,
     E_SHOWAS_STRING,
 
     E_SHOWAS_TIMESTAMP,
@@ -65,6 +65,9 @@ public:
     inline eShowAs showas()
         {return m_show_as; }
 
+    inline os_int digs()
+        {return m_digs; }
+
     inline eContainer *get_list()
         {return m_drop_down_list;}
 
@@ -87,6 +90,10 @@ protected:
     bool m_initialized;
 
     eShowAs m_show_as;
+
+    /* Digits after decimal point
+     */
+    os_int m_digs;
 
     eContainer *m_drop_down_list;
 };

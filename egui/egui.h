@@ -63,6 +63,7 @@ void egui_shutdown();
 #include "code/helpers/eeditbuffer.h"
 #include "code/helpers/estrbuffer.h"
 #include "code/helpers/eattrbuffer.h"
+#include "code/helpers/enicevalue.h"
 #include "code/components/ecomponent.h"
 #include "code/components/window/ewindow.h"
 #include "code/components/popup/epopup.h"

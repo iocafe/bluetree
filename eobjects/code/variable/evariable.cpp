@@ -185,7 +185,7 @@ void eVariable::setupproperties(
     addpropertys(cls, EVARP_UNIT, evarp_unit, EPRO_METADATA|EPRO_NOONPRCH, "unit");
     addpropertyd(cls, EVARP_MIN, evarp_min, EPRO_METADATA|EPRO_NOONPRCH, "min");
     addpropertyd(cls, EVARP_MAX, evarp_max, EPRO_METADATA|EPRO_NOONPRCH, "max");
-    addpropertyl(cls, EVARP_ATTR, evarp_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
+    addpropertys(cls, EVARP_ATTR, evarp_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
     addpropertyd(cls, EVARP_GAIN, evarp_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
     addpropertyd(cls, EVARP_OFFSET, evarp_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
     addproperty (cls, EVARP_SBITS, evarp_sbits, EPRO_NOONPRCH, "state bits");

@@ -129,7 +129,7 @@ void eComponent::setupproperties(
         addproperty(cls, ECOMP_TTIP, ecomp_ttip, EPRO_METADATA, "tooltip");
     }
 
-    addpropertyl(cls, ECOMP_ATTR, ecomp_attr, EPRO_METADATA, "attr");
+    addpropertys(cls, ECOMP_ATTR, ecomp_attr, EPRO_METADATA, "attr");
 
     if (flags & ECOMP_VALUE_PROPERITES) {
         addpropertyd(cls, ECOMP_GAIN, ecomp_gain, EPRO_METADATA, "gain");
