@@ -22,7 +22,8 @@
 const os_char
     ecomp_path[] = "path",
     ecomp_ipath[] = "ipath",
-    ecomp_setvalue[] = "setvalue";
+    ecomp_setvalue[] = "setvalue",
+    ecomp_target[] = "target";
 
 
 /**
@@ -42,10 +43,6 @@ eComponent::eComponent(
     os_int flags)
     : eObject(parent, id, flags)
 {
-    /* No type, number 2 digits after decimal point for doubles.
-     */
-    // m_vflags = OS_UNDEFINED_TYPE|(2 << EVAR_DDIGS_SHIFT);
-    // m_value.valbuf.tmpstr = OS_NULL;
 }
 
 
@@ -62,9 +59,6 @@ eComponent::eComponent(
 */
 eComponent::~eComponent()
 {
-    /* Release any allocated memory.
-     */
-    // clear();
 }
 
 
@@ -110,14 +104,9 @@ void eComponent::setupproperties(
     os_int cls,
     os_int flags)
 {
-    eVariable *text, *vtype;
+    eVariable *vtype;
 
-    /* Order of these addproperty() calls is important, since eComponent itself is used to
-       describe the properties in property set. The property to set must be added to
-       property set before setting value for it. There is trick with p to set text type
-       after adding property type. This effects only eComponent class.
-     */
-    text = addproperty(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA, "text");
+    addpropertys(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA, "text");
 
     if (flags & ECOMP_VALUE_PROPERITES) {
         vtype = addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA, "type");
@@ -130,7 +119,6 @@ void eComponent::setupproperties(
 
         {
             eVariable tmp;
-            text->setpropertyl(ECOMP_TYPE, OS_STR);
             emake_type_enum_str(&tmp);
             vtype->setpropertyv(ECOMP_ATTR, &tmp);
         }
@@ -155,13 +143,6 @@ void eComponent::setupproperties(
 
     if (flags & ECOMP_CONF_PROPERITES) {
         addproperty (cls, ECOMP_CONF, ecomp_conf, EPRO_METADATA, "conf");
-    }
-
-    if (flags & ECOMP_CONF_PATH) {
-        addproperty (cls, ECOMP_PATH, ecomp_path, EPRO_METADATA, "path");
-    }
-    if (flags & ECOMP_CONF_IPATH) {
-        addproperty (cls, ECOMP_IPATH, ecomp_ipath, EPRO_METADATA, "ipath");
     }
 }
 
@@ -609,9 +590,11 @@ ePopup *eComponent::drop_down_list(
     eContainer *list)
 {
     ePopup *p;
-    eVariable *v;
+    eVariable *v, target;
     eButton *b;
     os_int propertynr, value;
+    os_char buf[E_OIXSTR_BUF_SZ];
+
 
     p = popup();
 
@@ -622,14 +605,19 @@ ePopup *eComponent::drop_down_list(
 
     value = propertyi(ECOMP_VALUE);
 
+    oixstr(buf, sizeof(buf));
+    target = buf;
+    target += "/_p/x";
+
     for (v = list->firstv(); v; v = v->nextv())
     {
         propertynr = v->oid();
 
         b = new eButton(p);
         b->setpropertyv(ECOMP_TEXT, v);
-        b->setpropertyl(ECOMP_VALUE, value);
-        b->setpropertyl(ECOMP_SETVALUE, propertynr);
+        b->setpropertyi(ECOMP_VALUE, value);
+        b->setpropertyi(ECOMP_SETVALUE, propertynr);
+        b->setpropertyv(ECOMP_TARGET, &target);
     }
 
     return p;

@@ -58,6 +58,7 @@ class ePopup;
 #define ECOMP_PATH 30
 #define ECOMP_IPATH 31
 #define ECOMP_SETVALUE 32
+#define ECOMP_TARGET 33
 
 /* Flags for eComponent::setupproperties() to specify which optional properties for
    the component class.
@@ -66,8 +67,6 @@ class ePopup;
 #define ECOMP_VALUE_PROPERITES 1
 #define ECOMP_VALUE_STATE_PROPERITES 2
 #define ECOMP_EXTRA_UI_PROPERITES 4
-#define ECOMP_CONF_PATH 8
-#define ECOMP_CONF_IPATH 16
 #define ECOMP_CONF_PROPERITES 32 /* Is this really needed? */
 
 /* GUI component property names. Many of these map directly eVariable's property names
@@ -91,6 +90,7 @@ class ePopup;
 extern const os_char ecomp_path[];
 extern const os_char ecomp_ipath[];
 extern const os_char ecomp_setvalue[];
+extern const os_char ecomp_target[];
 
 /*@}*/
 

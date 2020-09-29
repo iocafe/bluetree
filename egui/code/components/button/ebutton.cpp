@@ -95,7 +95,7 @@ eObject *eButton::clone(
 */
 void eButton::setupclass()
 {
-    const os_int cls = EGUICLASSID_LINE_EDIT;
+    const os_int cls = EGUICLASSID_BUTTON;
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eButton");
@@ -105,6 +105,7 @@ void eButton::setupclass()
     addpropertys(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA, "text");
     addproperty(cls, ECOMP_VALUE, ecomp_value, EPRO_DEFAULT, "value");
     addpropertyl(cls, ECOMP_SETVALUE, ecomp_setvalue, EPRO_METADATA, "set value", 1);
+    addpropertys(cls, ECOMP_TARGET, ecomp_target, EPRO_METADATA, "target");
 
     propertysetdone(cls);
     os_unlock();
@@ -145,7 +146,7 @@ eStatus eButton::onpropertychange(
             break;
 
         case ECOMP_TEXT:
-            m_label_text.clear();
+            m_text.clear();
             break;
 
         case ECOMP_SETVALUE:
@@ -185,24 +186,26 @@ eStatus eButton::draw(
         m_set_toggled = false;
     }
 
-    ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
+    ImVec2 cpos = ImGui::GetCursorScreenPos();
     m_rect.x1 = cpos.x;
     m_rect.y1 = cpos.y;
 
     sz.x = sz.y = 0;
 
-    label = m_label_text.get(this, ECOMP_TEXT);
+    label = m_text.get(this, ECOMP_TEXT);
     // ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
 
-    ImGui::MenuItem(label, "", &m_imgui_toggl);
-    // ImGui::Button(label, ImVec2(edit_w, 0));
-
-    if (ImGui::IsItemActive()) {
+    if (ImGui::MenuItem(label, "", &m_imgui_toggl))
+    {
         activate();
     }
+
+    // ImGui::Button(label, ImVec2(edit_w, 0));
+    // if (ImGui::IsItemActive()) {
+    //     activate();
+    // }
     // ImGui::PopStyleVar();
     sz = ImGui::GetItemRectSize();
-
 
     m_rect.x2 = m_rect.x1 + sz.x - 1;
     m_rect.y2 = m_rect.y1 + sz.y - 1;
@@ -228,7 +231,14 @@ eStatus eButton::draw(
 */
 void eButton::activate()
 {
+    eVariable target;
 
+    propertyv(ECOMP_TARGET, &target);
+    if (!target.isempty()){
+        eVariable value;
+        propertyv(ECOMP_SETVALUE, &value);
+        setproperty_msg(target.gets(), &value);
+    }
 }
 
 

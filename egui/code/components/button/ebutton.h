@@ -75,13 +75,13 @@ public:
     inline static eButton *cast(
         eObject *o)
     {
-        e_assert_type(o, EGUICLASSID_LINE_EDIT)
+        e_assert_type(o, EGUICLASSID_BUTTON)
         return (eButton*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return EGUICLASSID_LINE_EDIT; }
+    virtual os_int classid() {return EGUICLASSID_BUTTON; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -136,7 +136,7 @@ protected:
     bool m_set_toggled;
     bool m_imgui_toggl;
 
-    eAutoLabel m_label_text;
+    eStrBuffer m_text;
 };
 
 

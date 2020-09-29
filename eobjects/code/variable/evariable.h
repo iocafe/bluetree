@@ -42,21 +42,21 @@
  * A
  */
 #define EVARP_VALUE 1
-#define EVARP_SBITS 2
-#define EVARP_TSTAMP 3
-#define EVARP_DIGS 4
-#define EVARP_TEXT 5
-#define EVARP_UNIT 6
-#define EVARP_MIN 10
-#define EVARP_MAX 11
-#define EVARP_TYPE 12
-#define EVARP_ATTR 13
-#define EVARP_DEFAULT 14
-#define EVARP_GAIN 15
-#define EVARP_OFFSET 16
-#define EVARP_ABBR 17
-#define EVARP_TTIP 18
-#define EVARP_CONF 19
+#define EVARP_TYPE 2
+#define EVARP_TEXT 3
+#define EVARP_UNIT 4
+#define EVARP_ATTR 5
+#define EVARP_DEFAULT 6
+#define EVARP_ABBR 10
+#define EVARP_TTIP 11
+#define EVARP_DIGS 12
+#define EVARP_MIN 15
+#define EVARP_MAX 16
+#define EVARP_GAIN 17
+#define EVARP_OFFSET 18
+#define EVARP_SBITS 20
+#define EVARP_TSTAMP 21
+#define EVARP_CONF 25
 
 /* Variable property names.
  */
