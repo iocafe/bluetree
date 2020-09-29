@@ -34,6 +34,7 @@ eWindow::eWindow(
     : eComponent(parent, id, flags)
 {
     addname("window", ENAME_TEMPORARY, "gui");
+    m_autolabel_count = 0;
 }
 
 
@@ -161,6 +162,24 @@ eStatus eWindow::simpleproperty(
     eVariable *x)
 {
     return eComponent::simpleproperty(propertynr, x);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Generating ImGui autolabel.
+
+  The eWindow::make_autolabel generates unique nonzero numbers for ImGui labels.
+
+  @return Unique number (we wish).
+
+****************************************************************************************************
+*/
+os_long eWindow::make_autolabel()
+{
+    while (++m_autolabel_count == 0);
+    return m_autolabel_count;
 }
 
 

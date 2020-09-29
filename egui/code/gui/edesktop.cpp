@@ -45,6 +45,16 @@ void eGui::setup_desktop_application()
     e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
     e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
 
+    e = new eLineEdit(w);
+    e->setpropertyi(ECOMP_VALUE, OS_FALSE);
+    e->setpropertys(ECOMP_TEXT, "BOxI");
+    e->setpropertyi(ECOMP_TYPE, OS_BOOLEAN);
+
+    e = new eLineEdit(w);
+    e->setpropertyi(ECOMP_VALUE, OS_TRUE);
+    e->setpropertys(ECOMP_TEXT, "BOxI2");
+    e->setpropertyi(ECOMP_TYPE, OS_BOOLEAN);
+
     w = new eWindow(this);
     w->setpropertys(ECOMP_VALUE, "Browseri");
 

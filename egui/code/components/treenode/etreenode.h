@@ -143,6 +143,8 @@ protected:
 
     void set_modified_value();
 
+    void set_checked();
+
     os_int setup_node(
         eVariable *item,
         eVariable& ipath,
@@ -156,6 +158,9 @@ protected:
     bool m_edit_value;
     bool m_prev_edit_value;
 
+    bool m_set_checked;
+    bool m_imgui_checked;
+
     bool m_intermediate_node;
     os_int m_node_type;
 
@@ -168,6 +173,8 @@ protected:
     eStrBuffer m_unit;
     eStrBuffer m_path;
     eStrBuffer m_ipath;
+
+    eVariable m_bound_ipath;
 
     /* Parsed attrbutes, digits, etc.
      */

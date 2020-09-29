@@ -113,6 +113,10 @@ public:
         return new ePopup(parent, id, flags);
     }
 
+    /* Generating ImGui autolabel.
+     */
+    virtual os_long make_autolabel();
+
     /*@}*/
 
 
@@ -139,6 +143,9 @@ public:
 protected:
     eAutoLabel m_label_title;
 
+    /* ImGui autolabel count for generating labels for components within the ePopup.
+     */
+    os_long m_autolabel_count;
 };
 
 

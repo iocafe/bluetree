@@ -35,6 +35,8 @@ eLineEdit::eLineEdit(
 {
     m_edit_value = false;
     m_prev_edit_value = false;
+    m_set_checked = true;
+    m_imgui_checked = false;
 }
 
 
@@ -137,6 +139,7 @@ eStatus eLineEdit::onpropertychange(
     {
         case ECOMP_VALUE: /* clear label to display new text and proceed */
             m_label_value.clear();
+            m_set_checked = true;
             break;
 
         case ECOMP_TEXT:
@@ -144,7 +147,7 @@ eStatus eLineEdit::onpropertychange(
             break;
 
         case ECOMP_UNIT:
-            m_unit.clear();
+            // m_unit.clear();
             m_attr.clear();
             break;
 
@@ -154,6 +157,7 @@ eStatus eLineEdit::onpropertychange(
         case EVARP_TYPE:
         case EVARP_ATTR:
             m_attr.clear();
+            m_set_checked = true;
             break;
 
         default:
@@ -182,13 +186,14 @@ eStatus eLineEdit::draw(
     eDrawParams& prm)
 {
     os_int edit_w, unit_w, total_w, unit_spacer, total_h, h;
-    const os_char *label, *unit;
+    const os_char *value, *label, *unit;
     ImGuiInputTextFlags eflags;
 
     m_attr.for_variable(this);
 
-    ImVec2 c = ImGui::GetContentRegionAvail();
-    total_w = c.x;
+    // ImVec2 c = ImGui::GetContentRegionAvail();
+    // total_w = c.x;
+    total_w = ImGui::GetContentRegionMax().x;
 
 
 ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
@@ -205,13 +210,16 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
     // ImGui::SameLine(total_w - edit_w);
     // edit_w = total_w - 200;
 
-    edit_w = 200;
+    if (m_attr.showas() == E_SHOWAS_CHECKBOX) {
+        edit_w = ImGui::GetFrameHeight();
+    }
+    else {
+        edit_w = 200;
+    }
     unit_w = 60;
     unit_spacer = 6;
 
     ImGui::SameLine(total_w - edit_w - unit_spacer - unit_w);
-
-
     ImGui::SetNextItemWidth(edit_w);
 
     if (m_edit_value) {
@@ -247,11 +255,30 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
         }
     }
     else {
-        label = m_label_value.get(this, ECOMP_VALUE, &m_attr);
+        value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
+
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
-        ImGui::Button(label, ImVec2(edit_w, 0));
-        if (ImGui::IsItemActive()) {
-            activate();
+        switch (m_attr.showas())
+        {
+            case E_SHOWAS_CHECKBOX:
+                if (m_set_checked) {
+                    set_checked();
+                    m_set_checked = false;
+                }
+
+                label = m_label_edit.get(this);
+                if (ImGui::Checkbox(label, &m_imgui_checked))
+                {
+                    activate();
+                }
+                break;
+
+            default:
+                ImGui::Button(value, ImVec2(edit_w, 0));
+                if (ImGui::IsItemActive()) {
+                    activate();
+                }
+                break;
         }
         ImGui::PopStyleVar();
         h = ImGui::GetItemRectSize().y;
@@ -317,6 +344,11 @@ void eLineEdit::activate()
 {
     switch (m_attr.showas())
     {
+        case E_SHOWAS_CHECKBOX:
+            setpropertyi(ECOMP_VALUE, m_imgui_checked);
+            m_set_checked = true;
+            break;
+
         case E_SHOWAS_DROP_DOWN_ENUM:
             drop_down_list(m_attr.get_list());
             break;
@@ -330,4 +362,23 @@ void eLineEdit::activate()
             m_edit_buf.set(value.gets(), 256);
             break;
     }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Set value for ImGui checkmark, when needed.
+
+  The set_checked() function is called when drawing to set value to determine value for
+  m_imgui_checked boolean. Pointer to this boolean is passed to the ImGui to inform wether
+  to draw a check mark in to indicate true or false state of boolean.
+
+  @return  None.
+
+****************************************************************************************************
+*/
+void eLineEdit::set_checked()
+{
+    m_imgui_checked = propertyi(ECOMP_VALUE) ? true : false;
 }

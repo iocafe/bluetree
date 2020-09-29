@@ -113,6 +113,10 @@ public:
         return new eWindow(parent, id, flags);
     }
 
+    /* Generating ImGui autolabel.
+     */
+    virtual os_long make_autolabel();
+
     /*@}*/
 
 
@@ -143,6 +147,9 @@ protected:
 
     eAutoLabel m_label_title;
 
+    /* ImGui autolabel count for generating labels for components within the eWindow.
+     */
+    os_long m_autolabel_count;
 };
 
 

@@ -40,6 +40,8 @@ eTreeNode::eTreeNode(
     m_edit_value = false;
     m_prev_edit_value = false;
     m_show_expand_arrow = true;
+    m_set_checked = true;
+    m_imgui_checked = false;
 
     m_intermediate_node = false;
     m_node_type = 0;
@@ -338,6 +340,7 @@ eStatus eTreeNode::onpropertychange(
     {
         case ECOMP_VALUE: /* clear label to display new text and proceed */
             m_label_value.clear();
+            m_set_checked = true;
             break;
 
         case ECOMP_TEXT:
@@ -346,7 +349,7 @@ eStatus eTreeNode::onpropertychange(
 
         case ECOMP_UNIT:
             m_unit.clear();
-            m_attr.clear();
+            // m_attr.clear();
             break;
 
         case ECOMP_DIGS:
@@ -355,6 +358,7 @@ eStatus eTreeNode::onpropertychange(
         case ECOMP_TYPE:
         case ECOMP_ATTR:
             m_attr.clear();
+            m_set_checked = true;
             break;
 
         case ECOMP_PATH:
@@ -392,7 +396,7 @@ eStatus eTreeNode::draw(
 {
     eComponent *child;
     os_int text_w, edit_w, unit_w, total_w, path_w, ipath_w, unit_spacer, total_h, w_left, h;
-    const os_char *label, *text, *unit, *path;
+    const os_char *label, *value, *text, *unit, *path, *ipath;
     ImGuiInputTextFlags eflags;
     bool isopen;
 
@@ -435,7 +439,12 @@ eStatus eTreeNode::draw(
     /* Decide on column widths.
      */
     text_w = 250;
-    edit_w = 200;
+    if (m_attr.showas() == E_SHOWAS_CHECKBOX) {
+        edit_w = ImGui::GetFrameHeight();
+    }
+    else {
+        edit_w = 200;
+    }
     unit_spacer = 0;
     unit_w = 0;
     path_w = 0;
@@ -508,11 +517,30 @@ eStatus eTreeNode::draw(
         }
     }
     else {
-        label = m_label_value.get(this, ECOMP_VALUE, &m_attr);
+        value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
+
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
-        ImGui::Button(label, ImVec2(edit_w, 0));
-        if (ImGui::IsItemActive()) {
-            activate();
+        switch (m_attr.showas())
+        {
+            case E_SHOWAS_CHECKBOX:
+                if (m_set_checked) {
+                    set_checked();
+                    m_set_checked = false;
+                }
+
+                label = m_label_edit.get(this);
+                if (ImGui::Checkbox(label, &m_imgui_checked))
+                {
+                    activate();
+                }
+                break;
+
+            default:
+                ImGui::Button(value, ImVec2(edit_w, 0));
+                if (ImGui::IsItemActive()) {
+                    activate();
+                }
+                break;
         }
         ImGui::PopStyleVar();
         h = ImGui::GetItemRectSize().y;
@@ -539,16 +567,21 @@ eStatus eTreeNode::draw(
             if (h > total_h) total_h = h;
         }
     }
+    ipath = m_ipath.get(this, ECOMP_IPATH);
     if (ipath_w > 0) {
-        path = m_ipath.get(this, ECOMP_IPATH);
-        if (*path != '\0') {
+        if (*ipath != '\0') {
             ImGui::SameLine(total_w - ipath_w);
             ImGui::SetNextItemWidth(ipath_w);
-            ImGui::TextUnformatted(path);
+            ImGui::TextUnformatted(ipath);
             h = ImGui::GetItemRectSize().y;
             if (h > total_h) total_h = h;
         }
     }
+
+    /* if (*ipath != '\0' && os_strcmp(ipath, m_bound_ipath.gets())) {
+        m_bound_ipath = ipath;
+        bind(ECOMP_VALUE, ipath, EBIND_TEMPORARY);
+    } */
 
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
@@ -661,4 +694,22 @@ void eTreeNode::set_modified_value()
         propertyv(ECOMP_VALUE, &value);
         setproperty_msg(path.gets(), &value);
     }
+}
+
+/**
+****************************************************************************************************
+
+  @brief Set value for ImGui checkmark, when needed.
+
+  The set_checked() function is called when drawing to set value to determine value for
+  m_imgui_checked boolean. Pointer to this boolean is passed to the ImGui to inform wether
+  to draw a check mark in to indicate true or false state of boolean.
+
+  @return  None.
+
+****************************************************************************************************
+*/
+void eTreeNode::set_checked()
+{
+    m_imgui_checked = propertyi(ECOMP_VALUE) ? true : false;
 }

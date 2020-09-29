@@ -134,8 +134,14 @@ public:
 
 
 protected:
+    void set_checked();
+
+
     bool m_edit_value;
     bool m_prev_edit_value;
+
+    bool m_set_checked;
+    bool m_imgui_checked;
 
     /* Buffer for editing value.
      */

@@ -1,6 +1,6 @@
 /**
 
-  @file    eguiroot.h
+  @file    eguix.h
   @brief   GUI root object.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -14,8 +14,8 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EGUIROOT_H_
-#define EGUIROOT_H_
+#ifndef EGUIX_H_
+#define EGUIX_H_
 #include "egui.h"
 
 /**
@@ -104,6 +104,10 @@ public:
      */
     static void setupproperties(
         os_int cls);
+
+    /* Generating ImGui autolabel.
+     */
+    os_long make_autolabel();
 
     /* Static constructor function for generating instance by class list.
      */
@@ -236,6 +240,10 @@ protected:
     /* Display size.
      */
     eSize m_sz;
+
+    /* ImGui autolabel count for generating labels for windows eWindow and ePopup.
+     */
+    os_long m_autolabel_count;
 };
 
 

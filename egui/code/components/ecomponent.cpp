@@ -237,6 +237,49 @@ eComponent *eComponent::nextcomponent(
 /**
 ****************************************************************************************************
 
+  @brief Get component's parent window.
+
+  The eComponent::window() function returns pointer to the parent window (eWindow or
+  ePopup). If this object is pointer window, the pointer to itself is returned
+
+  @param   check_this If true, the function can also return pointer to this object if it
+           matches the search criteria (not necessarily an ancestor). If false, this object
+           is not checked.
+
+  @return  Pointer to the parent window, or OS_NULL if there is this component is not enclosed
+           within a parent window.
+
+****************************************************************************************************
+*/
+eComponent *eComponent::window(
+    bool check_this)
+{
+    eObject *obj;
+    os_int cid;
+
+    if (check_this) {
+        obj = this;
+    }
+    else {
+        obj = parent();
+    }
+
+    while (obj) {
+        cid = obj->classid();
+        if (cid == EGUICLASSID_WINDOW || cid == EGUICLASSID_POPUP)
+        {
+            return (eComponent*)obj;
+        }
+        obj = obj->parent();
+    }
+
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Called to inform the class about property value change (override).
 
   The onpropertychange() function is called when class'es property changes, unless the

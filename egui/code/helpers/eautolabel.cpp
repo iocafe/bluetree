@@ -108,18 +108,23 @@ void eAutoLabel::setstr(
     const os_char hide_label_mark[] = "###l";
     os_char nbuf[OSAL_NBUF_SZ];
     os_memsz sz;
-    eWindow *window;
+    eComponent *window;
+    eGui *g;
+    os_int cid;
 
     /* Make sure that we have count.
      */
     if (m_count == 0) {
-        window = component->window(true);
-        if (window) {
-            // count = window->inc_autolabel_count();
+        osal_debug_assert(component != OS_NULL);
+        cid = component->classid();
+        if (cid == EGUICLASSID_WINDOW || cid == EGUICLASSID_POPUP)
+        {
+            g = component->gui();
+            if (g) m_count = g->make_autolabel();
         }
-
-        while (m_count == 0) {
-            m_count = ++(eglobal->eguiglobal->autolabel_count);
+        else {
+            window = component->window(true);
+            if (window) m_count = window->make_autolabel();
         }
     }
 

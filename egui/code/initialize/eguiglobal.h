@@ -46,7 +46,7 @@ typedef struct eGuiGlobal
 
     /* ImGui autolabel count for generating labels.
      */
-    os_long autolabel_count;
+    // os_long m_autolabel_count;
 }
 eGuiGlobal;
 

@@ -59,10 +59,10 @@ void egui_shutdown();
 #include "code/imgui_iface/eimgui_iface.h"
 #include "code/userinput/emouse.h"
 #include "code/userinput/ekeyboard.h"
-#include "code/components/eautolabel.h"
-#include "code/components/eeditbuffer.h"
-#include "code/components/estrbuffer.h"
-#include "code/components/eattrbuffer.h"
+#include "code/helpers/eautolabel.h"
+#include "code/helpers/eeditbuffer.h"
+#include "code/helpers/estrbuffer.h"
+#include "code/helpers/eattrbuffer.h"
 #include "code/components/ecomponent.h"
 #include "code/components/window/ewindow.h"
 #include "code/components/popup/epopup.h"
@@ -71,7 +71,7 @@ void egui_shutdown();
 #include "code/components/treenode/etreenode.h"
 
 #include "code/ioc_components/eioc_checkbox.h"
-#include "code/gui/eguiroot.h"
+#include "code/gui/eguix.h"
 
 
 #endif

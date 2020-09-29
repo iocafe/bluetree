@@ -242,6 +242,18 @@ void eButton::activate()
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Set value for ImGui toggle mark, when needed.
+
+  The set_toggled() function is called when drawing to set value to determine value for
+  m_imgui_toggl boolean. Pointer to this boolean is passed to the ImGui to inform wether
+  to draw a check mark in menu button.
+  @return  None.
+
+****************************************************************************************************
+*/
 void eButton::set_toggled()
 {
     eVariable tmp1, tmp2;

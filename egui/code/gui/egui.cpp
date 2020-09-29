@@ -1,6 +1,6 @@
 /**
 
-  @file    eguiroot.cpp
+  @file    egui.cpp
   @brief   GUI root object.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -43,6 +43,7 @@ eGui::eGui(
 
     os_memclear(&m_draw_prm, sizeof(eDrawParams));
     m_draw_prm.gui = this;
+    m_autolabel_count = 0;
 
     addname("//gui");
     ns_create("gui");
@@ -143,6 +144,24 @@ void eGui::setupproperties(
     os_int cls)
 {
     addproperty(cls, EGUIP_TEXT, eguip_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Generating ImGui autolabel.
+
+  The eGui::make_autolabel generates unique nonzero numbers for ImGui labels.
+
+  @return Unique number (we wish).
+
+****************************************************************************************************
+*/
+os_long eGui::make_autolabel()
+{
+    while (++m_autolabel_count == 0);
+    return m_autolabel_count;
 }
 
 

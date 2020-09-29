@@ -52,5 +52,4 @@ protected:
     os_memsz m_buf_sz;
 };
 
-
 #endif

@@ -200,6 +200,10 @@ public:
         return new eComponent(parent, id, flags);
     }
 
+    /* Generating ImGui autolabel.
+     */
+    virtual os_long make_autolabel() {return 0;}
+
     /* Get first child component identified by oid.
      */
     eComponent *firstcomponent(
@@ -210,13 +214,10 @@ public:
     eComponent *nextcomponent(
         e_oid id = EOID_CHILD);
 
-    /* Get parent window.
+    /* Get parent window (eWindow or ePopup).
      */
-    inline eWindow *window(
-        bool check_this = false)
-    {
-        return (eWindow*)parent(EGUICLASSID_WINDOW, EOID_ALL, check_this);
-    }
+    eComponent *window(
+        bool check_this);
 
     /* Get parent gui.
      */

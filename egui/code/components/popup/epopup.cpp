@@ -33,6 +33,7 @@ ePopup::ePopup(
     os_int flags)
     : eComponent(parent, id, flags)
 {
+    m_autolabel_count = 0;
 }
 
 
@@ -167,6 +168,24 @@ void ePopup::open_popup()
     const os_char *label;
     label = m_label_title.get(this);
     ImGui::OpenPopup(label);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Generating ImGui autolabel.
+
+  The ePopup::make_autolabel generates unique nonzero numbers for ImGui labels.
+
+  @return Unique number (we wish).
+
+****************************************************************************************************
+*/
+os_long ePopup::make_autolabel()
+{
+    while (++m_autolabel_count == 0);
+    return m_autolabel_count;
 }
 
 
