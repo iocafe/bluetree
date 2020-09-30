@@ -53,7 +53,6 @@ os_char *eint2str(
     if (dst == OS_NULL) return OS_NULL;
 
     e = dst + max_chars;
-    if (dst >= e) return OS_NULL;
 
     /* If we may be padding with something else but space, handle '-' sign first.
      */
@@ -61,20 +60,21 @@ os_char *eint2str(
         x = -x;
         max_chars--;
         min_width--;
-        if (++dst >= e) return OS_NULL;
+        if (dst >= e) return OS_NULL;
+        *(dst++) = '-';
     }
 
     bytes = (os_int)osal_int_to_str(nbuf, sizeof(nbuf), x) - 1;
 
     count = min_width - bytes;
     while (count-- > 0) {
-        *dst = pad_char;
-        if (++dst >= e) return OS_NULL;
+        if (dst >= e) return OS_NULL;
+        *(dst++) = pad_char;
     }
 
     for (i = 0; i<bytes; i++) {
-        *dst = nbuf[bytes];
-        if (++dst >= e) return OS_NULL;
+        if (dst >= e) return OS_NULL;
+        *(dst++) = nbuf[i];
     }
 
     return dst;

@@ -47,6 +47,38 @@ void enice_value_for_ui(
                 }
                 break;
 
+            case E_SHOWAS_TIMESTAMP:
+                if (!value->isempty())
+                {
+                    os_long utc;
+                    eLocalTime localt;
+                    os_char buf[EDATETIME_STR_BUF_SZ];
+
+                    utc = value->getl();
+                    if (elocaltime(&localt, utc)) {
+                        value->sets("bad tstamp");
+                    }
+                    else {
+                        if (attr->dstr_flags() != EDATESTR_DISABLED) {
+                            edate_make_str(&localt, buf, sizeof(buf), OS_NULL, attr->dstr_flags());
+                            *value = buf;
+
+                            if (attr->tstr_flags() != ETIMESTR_DISABLED) {
+                                *value += " ";
+                            }
+                        }
+                        else {
+                            *value = "";
+                        }
+
+                        if (attr->tstr_flags() != ETIMESTR_DISABLED) {
+                            etime_make_str(&localt, buf, sizeof(buf), OS_NULL, attr->tstr_flags());
+                            *value += buf;
+                        }
+                    }
+                }
+                break;
+
             case E_SHOWAS_DROP_DOWN_ENUM:
                 id = value->geti();
                 drop_down_list = attr->get_list();

@@ -38,7 +38,7 @@ void eGui::setup_desktop_application()
 
     e = new eLineEdit(w);
     e->setpropertys(ECOMP_TEXT, "Editti");
-    e->setpropertys(ECOMP_ATTR, "tstamp=\"dt-mmm\"");
+    e->setpropertys(ECOMP_ATTR, "tstamp=\"yy,usec\"");
     e->setpropertyl(ECOMP_VALUE, etime());
 
     e = new eLineEdit(w);

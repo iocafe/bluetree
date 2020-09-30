@@ -29,6 +29,8 @@ eAttrBuffer::eAttrBuffer()
     m_digs = 2;
     m_show_as = E_SHOWAS_STRING;
     m_drop_down_list = OS_NULL;
+    m_tstr_flags = ETIMESTR_DISABLED;
+    m_dstr_flags = EDATESTR_DISABLED;
 }
 
 eAttrBuffer::~eAttrBuffer()
@@ -78,6 +80,7 @@ void eAttrBuffer::initialize(
     os_double max)
 {
     const os_char *list_str, *value;
+    os_char *p, *e;
     os_memsz value_sz;
 
     m_digs = digs;
@@ -91,6 +94,60 @@ void eAttrBuffer::initialize(
         if (value) {
             m_show_as = E_SHOWAS_DROP_DOWN_ENUM;
             setup_list(value, value_sz);
+            goto goon;
+        }
+
+        value = osal_str_get_item_value(list_str, "tstamp", &value_sz, OSAL_STRING_DEFAULT);
+        if (value) {
+            eVariable tmp;
+            tmp.sets(value, value_sz);
+            p = tmp.gets();
+
+            m_tstr_flags = ETIMESTR_DISABLED;
+            m_dstr_flags = EDATESTR_DISABLED;
+            while (OS_TRUE) {
+                e = os_strchr(p, ','); /* in case new flags are added in future */
+                if (e) *e = '\0';
+
+                if (!os_strcmp(p, "min"))  {
+                    m_tstr_flags = ETIMESTR_MINUTES;
+                }
+                else if (!os_strcmp(p, "sec")) {
+                    m_tstr_flags = ETIMESTR_MINUTES|ETIMESTR_SECONDS;
+                }
+                else if (!os_strcmp(p, "msec")) {
+                    m_tstr_flags = ETIMESTR_MINUTES|ETIMESTR_SECONDS|
+                        ETIMESTR_MILLISECONDS;
+                }
+                else if (!os_strcmp(p, "usec")) {
+                    m_tstr_flags = ETIMESTR_MINUTES|ETIMESTR_SECONDS|
+                        ETIMESTR_MILLISECONDS|ETIMESTR_MICROSECONDS;
+                }
+                else if (!os_strcmp(p, "usec")) {
+                    m_tstr_flags = ETIMESTR_MINUTES|ETIMESTR_SECONDS|
+                        ETIMESTR_MILLISECONDS|ETIMESTR_MICROSECONDS;
+                }
+                else if (!os_strcmp(p, "yyyy")) {
+                    m_dstr_flags = EDATESTR_FOUR_DIGIT_YEAR;
+                }
+                else if (!os_strcmp(p, "yy")) {
+                    m_dstr_flags = EDATESTR_TWO_DIGIT_YEAR;
+                }
+
+                if (e == OS_NULL) break;
+                p = e + 1;
+            }
+
+            /* If no sensible time stamp format, set something.
+             */
+            if (m_tstr_flags == ETIMESTR_DISABLED &&
+                m_dstr_flags == ETIMESTR_DISABLED)
+            {
+                m_dstr_flags = EDATESTR_TWO_DIGIT_YEAR;
+                m_tstr_flags = ETIMESTR_MINUTES|ETIMESTR_SECONDS;
+            }
+
+            m_show_as = E_SHOWAS_TIMESTAMP;
             goto goon;
         }
     }

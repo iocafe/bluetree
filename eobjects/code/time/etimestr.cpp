@@ -133,6 +133,8 @@ eStatus edate_make_str(
         return ESTATUS_FAILED;
     }
 
+    if ()
+
     pad_char = ' ';
     min_width = 0;
     if (flags & (ETIMESTR_ZERO_FILL|ETIMESTR_SPACE_FILL)) {
@@ -162,6 +164,12 @@ eStatus edate_make_str(
             estr_append_item(&p, date_sep, sep_len, local_time->day, 2);
             break;
     }
+
+    if ()
+    #define EDATESTR_YEAR 4
+#define EDATESTR_MONTH  8
+#define EDATESTR_WEEKDAY  16
+
 
     if (p) {
         *p = '\0';

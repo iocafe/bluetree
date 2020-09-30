@@ -80,8 +80,14 @@ public:
     inline eShowAs showas()
         {return m_show_as; }
 
-    inline os_int digs()
+    inline os_short digs()
         {return m_digs; }
+
+    inline os_short tstr_flags()
+        {return m_tstr_flags; }
+
+    inline os_short dstr_flags()
+        {return m_dstr_flags; }
 
     inline eContainer *get_list()
         {return m_drop_down_list;}
@@ -108,7 +114,10 @@ protected:
 
     /* Digits after decimal point
      */
-    os_int m_digs;
+    os_short m_digs;
+
+    os_short m_tstr_flags;
+    os_short m_dstr_flags;
 
     eContainer *m_drop_down_list;
 };
