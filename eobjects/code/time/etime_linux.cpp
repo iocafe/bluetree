@@ -14,6 +14,7 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
+#if OSAL_LINUX
 
 /* Convert UTC to local time.
  */
@@ -35,46 +36,4 @@ eStatus emktime(
     return ESTATUS_SUCCESS;
 }
 
-/* Generate time string from local time structure.
- */
-eStatus etime_make_str(
-    eLocalTime *local_time,
-    os_char *buf,
-    os_memsz buf_sz,
-    eDateTimeFormat *format,
-    os_int flags)
-{
-    return ESTATUS_SUCCESS;
-}
-
-/* Parse time string into local time structure.
- */
-eStatus etime_parse_str(
-    eLocalTime *local_time,
-    const os_char *str,
-    eDateTimeFormat *format)
-{
-    return ESTATUS_SUCCESS;
-}
-
-/* Generate date string from local time structure.
- */
-eStatus edate_make_str(
-    eLocalTime *local_time,
-    os_char *buf,
-    os_memsz buf_sz,
-    eDateTimeFormat *format,
-    os_int flags)
-{
-    return ESTATUS_SUCCESS;
-}
-
-/* Parse date string into local time structure.
- */
-eStatus edate_parse_str(
-    eLocalTime *local_time,
-    const os_char *str,
-    eDateTimeFormat *format)
-{
-    return ESTATUS_SUCCESS;
-}
+#endif
