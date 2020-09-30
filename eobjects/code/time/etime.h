@@ -32,7 +32,9 @@
     - minute: 0 - 59
     - second: 0 - 59
     - millisecond: 0 - 999
-    - dst: 1 = daylight saving in effect. 2 = not in effect, 0 = unknown.
+    - microsecond: 0 - 999
+    - dst: E_IS_DST (1)  = daylight saving in effect. E_NOT_DST (2) = not in effect,
+      E_UNKNOWN_DST (0) = not known if daylight saving time is used for the local time.
 
 ****************************************************************************************************
 */
@@ -41,12 +43,13 @@ typedef struct eLocalTime
     os_short year;
     os_char month;
     os_char day;
+    os_short yearday;
     os_char weekday;
-
     os_char hour;
     os_char minute;
     os_char second;
     os_short millisecond;
+    os_short microsecond;
     os_char dst;
 }
 eLocalTime;
@@ -54,15 +57,22 @@ eLocalTime;
 /* Order of date fields.
  */
 typedef enum {
+    E_UNDEFINED_DATE_ORDER = 0,
     E_DATE_ORDER_MDY = 1,
     E_DATE_ORDER_DMY = 2,
     E_DATE_ORDER_YMD = 3
 }
 eDateOrder;
 
+/* Daylight saving time values.
+ */
+#define E_UNKNOWN_DST 0
+#define E_IS_DST 1
+#define E_NOT_DST 2
+
 /* Recommended buffer size for date or time string.
  */
-#define EDATETIME_STR_BUF_SZ 16
+#define EDATETIME_STR_BUF_SZ 24
 
 /* Field separator string size allocation.
  */
@@ -85,13 +95,16 @@ eDateTimeFormat;
 #define ETIMESTR_DEFAULT 0
 #define ETIMESTR_SECONDS 1
 #define ETIMESTR_MILLISECONDS 2
-#define ETIMESTR_ZERO_FILL 4
-#define ETIMESTR_SPACE_FILL 8
+#define ETIMESTR_MICROSECONDS 4
+#define ETIMESTR_ZERO_FILL 8
+#define ETIMESTR_SPACE_FILL 16
 
 /* Flags for edate_make_str() and edate_parse_str() functions.
  */
 #define EDATESTR_DEFAULT 0
 #define EDATESTR_FOUR_DIGIT_YEAR 1
+#define EDATESTR_ZERO_FILL 8
+#define EDATESTR_SPACE_FILL 16
 
 /* Get current time as UTC from computer's clock.
  */

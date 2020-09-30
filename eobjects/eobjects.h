@@ -73,6 +73,7 @@ void eobjects_shutdown();
 #include "code/connection/econnection.h"
 #include "code/connection/eendpoint.h"
 #include "code/helpers/eenum_types_str.h"
+#include "code/string/eint2str.h"
 #include "code/main/emain.h"
 
 #endif
