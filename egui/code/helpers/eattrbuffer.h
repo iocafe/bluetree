@@ -31,6 +31,21 @@ typedef enum
 }
 eShowAs;
 
+
+typedef enum
+{
+    E_TSTAMP_HHMM,
+    E_TSTAMP_HHMMSS,
+    E_TSTAMP_HHMMSSMMM,
+
+    E_TS_DATE,
+    E_TS_DATE_HHMM,
+    E_TS_DATE_HHMMSS,
+    E_TS_DATE_HHMMSSMMM
+}
+eTimeStampFormat;
+
+
 /**
 ****************************************************************************************************
 

@@ -37,9 +37,9 @@ void eGui::setup_desktop_application()
     w->setpropertys(ECOMP_VALUE, "Muuttujia");
 
     e = new eLineEdit(w);
-    e->setpropertys(ECOMP_VALUE, "Jakke ja suutari");
     e->setpropertys(ECOMP_TEXT, "Editti");
-    e->setpropertys(ECOMP_UNIT, "%");
+    e->setpropertys(ECOMP_ATTR, "tstamp=\"dt-mmm\"");
+    e->setpropertyl(ECOMP_VALUE, etime());
 
     e = new eLineEdit(w);
     e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
