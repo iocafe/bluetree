@@ -85,6 +85,18 @@ os_long emktime(
     OSAL_UNUSED(tzone);
 
     lt = *local_time;
+
+    if (lt.year < 2020 || lt.year > 2999 ||
+        lt.month < 1 || lt.month > 12 ||
+        lt.day < 1 || lt.day > 31 ||
+        lt.hour < 0 || lt.hour > 23 ||
+        lt.minute < 0 || lt.minute > 59 ||
+        lt.millisecond < 0 || lt.millisecond > 999 ||
+        lt.microsecond < 0 || lt.microsecond > 999)
+    {
+        return -1;
+    }
+
     os_memclear(&tm, sizeof(tm));
     tm.tm_year = lt.year - 1900;
     tm.tm_mon = lt.month - 1;
