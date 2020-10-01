@@ -26,4 +26,9 @@ void enice_value_for_ui(
     eComponent *component,
     eAttrBuffer *attr);
 
+void enice_ui_value_to_internal_type(
+    eVariable *value,
+    eComponent *component,
+    eAttrBuffer *attr);
+
 #endif

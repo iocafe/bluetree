@@ -47,13 +47,19 @@ void eGui::setup_desktop_application()
 
     e = new eLineEdit(w);
     e->setpropertyi(ECOMP_VALUE, OS_FALSE);
-    e->setpropertys(ECOMP_TEXT, "BOxI");
-    e->setpropertyi(ECOMP_TYPE, OS_BOOLEAN);
+    e->setpropertys(ECOMP_TEXT, "ENNUUPPI");
+    e->setpropertys(ECOMP_ATTR, "enum=\"1.eka,2.toka\"");
 
     e = new eLineEdit(w);
     e->setpropertyi(ECOMP_VALUE, OS_TRUE);
     e->setpropertys(ECOMP_TEXT, "BOxI2");
     e->setpropertyi(ECOMP_TYPE, OS_BOOLEAN);
+
+    e = new eLineEdit(w);
+    e->setpropertyi(ECOMP_VALUE, OS_TRUE);
+    e->setpropertys(ECOMP_TEXT, "floppia");
+    e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
+    e->setpropertyi(ECOMP_DIGS, 2);
 
     w = new eWindow(this);
     w->setpropertys(ECOMP_VALUE, "Browseri");

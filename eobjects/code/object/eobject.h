@@ -924,6 +924,8 @@ protected:
     void send_browse_info(
         eEnvelope *envelope);
 
+    /* Collect information about this object for tree browser.
+     */
     virtual void object_info(
         eVariable *item,
         eVariable *name,

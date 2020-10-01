@@ -242,7 +242,9 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
             propertyv(ECOMP_VALUE, &value);
             m_edit_value = false;
             if (os_strcmp(m_edit_buf.ptr(), value.gets())) {
-                setpropertys(ECOMP_VALUE, m_edit_buf.ptr());
+                value.sets(m_edit_buf.ptr());
+                enice_ui_value_to_internal_type(&value, this, &m_attr);
+                setpropertyv(ECOMP_VALUE, &value);
             }
         }
         else {
@@ -357,3 +359,52 @@ void eLineEdit::set_checked()
 {
     m_imgui_checked = propertyi(ECOMP_VALUE) ? true : false;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Collect information about this object for tree browser.
+
+  The eLineEdit::object_info function fills in item (eVariable) to contain information
+  about this object for tree browser view.
+
+  @param   item Pointer to eVariable to set up with object information.
+  @param   name Object's name if known. OS_NULL if object is not named or name is
+           unknown at this time.
+  @param   appendix Pointer to eSet into which to store property flags. The stored property
+           flags indicate if object has namespace, children, or properties.
+
+****************************************************************************************************
+*/
+void eLineEdit::object_info(
+    eVariable *item,
+    eVariable *name,
+    eSet *appendix)
+{
+    eVariable value;
+    os_int propertynr, i;
+
+    static os_int copy_property_list[] = {EVARP_VALUE, EVARP_TYPE, EVARP_UNIT, EVARP_ATTR,
+        EVARP_DEFAULT, EVARP_ABBR, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
+        EVARP_GAIN, EVARP_OFFSET, EVARP_SBITS, EVARP_TSTAMP, 0};
+
+
+    eObject::object_info(item, name, appendix);
+
+    propertyv(ECOMP_TEXT, &value);
+    if (!value.isempty()) {
+        eVariable value2;
+        item->propertyv(EVARP_TEXT, &value2);
+        value += ", ";
+        value += value2;
+        item->setpropertyv(EVARP_TEXT, &value);
+    }
+
+    i = 0;
+    while ((propertynr = copy_property_list[i++])) {
+        propertyv(propertynr, &value);
+        item->setpropertyv(propertynr, &value);
+    }
+}
+

@@ -136,6 +136,13 @@ public:
 protected:
     void set_checked();
 
+    /* Collect information about this object for tree browser.
+     */
+    virtual void object_info(
+        eVariable *item,
+        eVariable *name,
+        eSet *appendix);
+
 
     bool m_edit_value;
     bool m_prev_edit_value;

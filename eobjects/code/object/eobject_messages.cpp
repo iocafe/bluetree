@@ -773,7 +773,7 @@ void eObject::send_browse_info(
 /**
 ****************************************************************************************************
 
-  @brief Add eTreeNode to class list and class'es properties to it's property set.
+  @brief Collect information about this object for tree browser.
 
   The eObject::object_info function fills in item (eVariable) to contain information
   about this object in tree browser view.
