@@ -133,8 +133,6 @@ eStatus edate_make_str(
         return ESTATUS_FAILED;
     }
 
-    if ()
-
     pad_char = ' ';
     min_width = 0;
     if (flags & (ETIMESTR_ZERO_FILL|ETIMESTR_SPACE_FILL)) {
@@ -142,34 +140,40 @@ eStatus edate_make_str(
         if (flags & ETIMESTR_ZERO_FILL) pad_char = '0';
     }
 
-    switch (format->dateorder)
-    {
-        default:
-        case E_DATE_ORDER_MDY:
-            p = eint2str(buf, local_time->month, 2, min_width, pad_char);
-            estr_append_item(&p, date_sep, sep_len, local_time->day, 2);
-            estr_append_item(&p, date_sep, sep_len, year, year_len);
-            break;
-
-        case E_DATE_ORDER_DMY:
-            p = eint2str(buf, local_time->day, 2, min_width, pad_char);
-            estr_append_item(&p, "", 0, local_time->day, 2);
-            estr_append_item(&p, date_sep, sep_len, local_time->month, 2);
-            estr_append_item(&p, date_sep, sep_len, year, year_len);
-            break;
-
-        case E_DATE_ORDER_YMD:
-            p = eint2str(buf, year, year_len, min_width, pad_char);
-            estr_append_item(&p, date_sep, sep_len, local_time->month, 2);
-            estr_append_item(&p, date_sep, sep_len, local_time->day, 2);
-            break;
+    if (flags & EDATESTR_YEAR) {
+        p = eint2str(buf, local_time->year, 4, 4, ' ');
     }
+    else if (flags & EDATESTR_MONTH) {
+        p = eint2str(buf, local_time->month, 2, min_width, pad_char);
+    }
+    else if (flags & EDATESTR_WEEKDAY) {
+        p = eint2str(buf, local_time->weekday, 2, min_width, pad_char);
+    }
+    else
+    {
+        switch (format->dateorder)
+        {
+            default:
+            case E_DATE_ORDER_MDY:
+                p = eint2str(buf, local_time->month, 2, min_width, pad_char);
+                estr_append_item(&p, date_sep, sep_len, local_time->day, 2);
+                estr_append_item(&p, date_sep, sep_len, year, year_len);
+                break;
 
-    if ()
-    #define EDATESTR_YEAR 4
-#define EDATESTR_MONTH  8
-#define EDATESTR_WEEKDAY  16
+            case E_DATE_ORDER_DMY:
+                p = eint2str(buf, local_time->day, 2, min_width, pad_char);
+                estr_append_item(&p, "", 0, local_time->day, 2);
+                estr_append_item(&p, date_sep, sep_len, local_time->month, 2);
+                estr_append_item(&p, date_sep, sep_len, year, year_len);
+                break;
 
+            case E_DATE_ORDER_YMD:
+                p = eint2str(buf, year, year_len, min_width, pad_char);
+                estr_append_item(&p, date_sep, sep_len, local_time->month, 2);
+                estr_append_item(&p, date_sep, sep_len, local_time->day, 2);
+                break;
+        }
+    }
 
     if (p) {
         *p = '\0';

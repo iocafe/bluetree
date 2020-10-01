@@ -174,6 +174,7 @@ eStatus edate_make_str(
 eStatus edate_parse_str(
     eLocalTime *local_time,
     const os_char *str,
-    eDateTimeFormat *format = OS_NULL);
+    eDateTimeFormat *format = OS_NULL,
+    os_int flags = 0);
 
 #endif

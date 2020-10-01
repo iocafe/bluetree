@@ -65,6 +65,8 @@ public:
 
     void clear();
 
+    /* Set attributes for LineEdit, eTreeNode.
+     */
     inline void for_variable(
         eComponent *component)
     {
@@ -93,9 +95,13 @@ public:
         {return m_drop_down_list;}
 
 protected:
+    /* Set attributes for LineEdit, eTreeNode.
+     */
     void initialize_for_variable(
         eComponent *component);
 
+    /* Set attributes as values of member variables.
+     */
     void initialize(
         eVariable *attr,
         osalTypeId type,
@@ -104,15 +110,20 @@ protected:
         os_double min,
         os_double max);
 
+    /* Make a drop-down list for the component.
+     */
     void setup_list(
         const os_char *value,
         os_memsz value_sz);
 
+    /* Flag indicating that the vValues stored in this class have been
+       initailized and are up to date.
+     */
     bool m_initialized;
 
     eShowAs m_show_as;
 
-    /* Digits after decimal point
+    /* Number of digits after decimal point, significant only for decimal numbers.
      */
     os_short m_digs;
 

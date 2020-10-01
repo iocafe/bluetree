@@ -18,9 +18,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor and destructor.
-
+  Constructor
 ****************************************************************************************************
 */
 eAttrBuffer::eAttrBuffer()
@@ -33,12 +31,24 @@ eAttrBuffer::eAttrBuffer()
     m_dstr_flags = EDATESTR_DISABLED;
 }
 
+
+/**
+****************************************************************************************************
+  The destructor releases allocated memory.
+****************************************************************************************************
+*/
 eAttrBuffer::~eAttrBuffer()
 {
     clear();
 }
 
 
+/**
+****************************************************************************************************
+  @brief Release allocated memory and mark that attributes are not up to date.
+  @return  None.
+****************************************************************************************************
+*/
 void eAttrBuffer::clear()
 {
     if (m_drop_down_list) {
@@ -49,9 +59,21 @@ void eAttrBuffer::clear()
 }
 
 
-/* This function is typically used only when drawing, etc to avoid buffer allocation when
-   inactive in memory. component pointer is used to get context for translation redirects, etc.
- */
+/**
+****************************************************************************************************
+
+  @brief Set attributes for LineEdit, eTreeNode.
+
+  The eAttrBuffer::initialize_for_variable function function sets UI value formating related
+  attributes assuming that properties are same as for eLineEdit, eTreeNode, etc.
+  The function calls eAttrBuffer::initialize().
+
+  @param   component Pointer to eLineEdit, eTreeNode, etc. GUI component whose properties are
+           similar to eVariable.
+  @return  None.
+
+****************************************************************************************************
+*/
 void eAttrBuffer::initialize_for_variable(
     eComponent *component)
 {
@@ -71,6 +93,20 @@ void eAttrBuffer::initialize_for_variable(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Set attributes as values of member variables.
+
+  The eAttrBuffer::initialize() function function sets UI value formating related attributes
+  within members of the eAttrBuffer class, making them quick to to access.
+  The function takes property values of the GUI component as arguments, and sets up display
+  related data accorringly
+
+  @return  None.
+
+****************************************************************************************************
+*/
 void eAttrBuffer::initialize(
     eVariable *attr,
     osalTypeId type,
@@ -133,6 +169,15 @@ void eAttrBuffer::initialize(
                 else if (!os_strcmp(p, "yy")) {
                     m_dstr_flags = EDATESTR_TWO_DIGIT_YEAR;
                 }
+                else if (!os_strcmp(p, "year")) {
+                    m_dstr_flags = EDATESTR_YEAR;
+                }
+                else if (!os_strcmp(p, "month")) {
+                    m_dstr_flags = EDATESTR_MONTH;
+                }
+                else if (!os_strcmp(p, "weekday")) {
+                    m_dstr_flags = EDATESTR_WEEKDAY;
+                }
 
                 if (e == OS_NULL) break;
                 p = e + 1;
@@ -183,6 +228,22 @@ goon:
     m_initialized = true;
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Make a drop-down list for the component.
+
+  The eAttrBuffer::setup_list() function function parses a string like enum="1.candy,2.gina" and
+  creates m_drop_down_list to to hold drop down list items. The m_drop_down_list is eContainer
+  and each item is eVariable. Object identifier oid() of the eVariable is the enum value.
+
+  @param   value Pointer to string to parse, this doesn't need to be '\0' terminated.
+  @param   value_sz Number of characters in value to parse.
+  @return  None.
+
+****************************************************************************************************
+*/
 void eAttrBuffer::setup_list(
     const os_char *value,
     os_memsz value_sz)
