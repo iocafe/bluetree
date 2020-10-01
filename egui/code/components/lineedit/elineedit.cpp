@@ -395,10 +395,12 @@ void eLineEdit::object_info(
     propertyv(ECOMP_TEXT, &value);
     if (!value.isempty()) {
         eVariable value2;
-        item->propertyv(EVARP_TEXT, &value2);
-        value += ", ";
-        value += value2;
-        item->setpropertyv(EVARP_TEXT, &value);
+        value2 += "\"";
+        value2 += value;
+        value2 += "\" ";
+        item->propertyv(EVARP_TEXT, &value);
+        value2 += value;
+        item->setpropertyv(EVARP_TEXT, &value2);
     }
 
     i = 0;
