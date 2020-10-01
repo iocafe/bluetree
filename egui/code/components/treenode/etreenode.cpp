@@ -496,8 +496,9 @@ eStatus eTreeNode::draw(
             propertyv(ECOMP_VALUE, &value);
             m_edit_value = false;
             if (os_strcmp(m_edit_buf.ptr(), value.gets())) {
-                value.sets(m_edit_buf.ptr());
-                enice_ui_value_to_internal_type(&value, this, &m_attr);
+                eVariable new_value;
+                new_value.sets(m_edit_buf.ptr());
+                enice_ui_value_to_internal_type(&value, &new_value, this, &m_attr);
                 setpropertyv(ECOMP_VALUE, &value);
             }
         }

@@ -242,8 +242,9 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
             propertyv(ECOMP_VALUE, &value);
             m_edit_value = false;
             if (os_strcmp(m_edit_buf.ptr(), value.gets())) {
-                value.sets(m_edit_buf.ptr());
-                enice_ui_value_to_internal_type(&value, this, &m_attr);
+                eVariable new_value;
+                new_value.sets(m_edit_buf.ptr());
+                enice_ui_value_to_internal_type(&value, &new_value, this, &m_attr);
                 setpropertyv(ECOMP_VALUE, &value);
             }
         }
@@ -388,7 +389,6 @@ void eLineEdit::object_info(
     static os_int copy_property_list[] = {EVARP_VALUE, EVARP_TYPE, EVARP_UNIT, EVARP_ATTR,
         EVARP_DEFAULT, EVARP_ABBR, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
         EVARP_GAIN, EVARP_OFFSET, EVARP_SBITS, EVARP_TSTAMP, 0};
-
 
     eObject::object_info(item, name, appendix);
 

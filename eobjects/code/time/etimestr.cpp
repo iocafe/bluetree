@@ -15,8 +15,14 @@
 */
 #include "eobjects.h"
 
+/* Limits for valid time stamp
+ */
+const os_long etimestamp_min = 1601557429043337L; /* 1.1.2020 */
+const os_long etimestamp_max = 9601557429043337L; /* ? */
+
+
 static eDateTimeFormat etime_default_format = {
-    E_DATE_ORDER_YMD, ":", ".", "/"};
+    E_DATE_ORDER_MDY, ":", ".", "/"};
 
 
 static void estr_append_item(
@@ -95,10 +101,49 @@ eStatus etime_make_str(
 eStatus etime_parse_str(
     eLocalTime *local_time,
     const os_char *str,
-    eDateTimeFormat *format)
+    eDateTimeFormat *format,
+    os_memsz *n_chars_parsed)
 {
+    #define ETIMESTR_ITEMS 8
+    os_short item[ETIMESTR_ITEMS];
+    const os_char *p;
+    os_memsz count, sep_len;
+    os_int n;
+    os_char *sep;
+
+    if (format == OS_NULL) {
+        format = &etime_default_format;
+    }
+
+    p = str;
+    for (n = 0; n < ETIMESTR_ITEMS; n++) {
+        item[n] = osal_str_to_int(p, &count);
+        if (count == 0) break;
+        p += count;
+        sep = (n <= 1 ? format->time_sep : format->millisecond_sep);
+        sep_len = os_strlen(sep) - 1;
+        if (os_strncmp(p, sep, sep_len)) {
+            n++;
+            break;
+        }
+        p += sep_len;
+    }
+
+    if (n < 2) {
+        if (n_chars_parsed) *n_chars_parsed = 0;
+        return ESTATUS_FAILED;
+    }
+
+    local_time->hour = item[0];
+    local_time->minute = item[1];
+    if (n >= 3) local_time->second = item[2];
+    if (n >= 4) local_time->millisecond = item[3];
+    if (n >= 5) local_time->microsecond = item[4];
+
+    if (n_chars_parsed) *n_chars_parsed = p - str;
     return ESTATUS_SUCCESS;
 }
+
 
 /* Generate date string from local time structure.
  */
@@ -189,8 +234,78 @@ eStatus edate_make_str(
 eStatus edate_parse_str(
     eLocalTime *local_time,
     const os_char *str,
-    eDateTimeFormat *format)
+    eDateTimeFormat *format,
+    os_memsz *n_chars_parsed)
 {
+    #define EDATESTR_ITEMS 6
+    os_short item[EDATESTR_ITEMS];
+    const os_char *p;
+    os_memsz count, sep_len;
+    os_int n, i0, i1, i2;
+    os_char *sep, used_sep_ch;
+    eDateOrder dateorder;
+
+    if (format == OS_NULL) {
+        format = &etime_default_format;
+    }
+
+    p = str;
+    used_sep_ch = 0;
+    for (n = 0; n < EDATESTR_ITEMS; n++) {
+        item[n] = osal_str_to_int(p, &count);
+        if (count == 0) break;
+        p += count;
+        sep = format->date_sep;
+        sep_len = os_strlen(sep) - 1;
+        if (os_strncmp(p, sep, sep_len)) {
+            if (*p == '/' || *p == '.') {
+                used_sep_ch = *(p++);
+            }
+            else {
+                n++;
+                break;
+            }
+        }
+        else {
+            used_sep_ch = *sep;
+            p += sep_len;
+        }
+    }
+
+    if (n < 3) {
+        if (n_chars_parsed) *n_chars_parsed = 0;
+        return ESTATUS_FAILED;
+    }
+
+    /* Handle unspecified date order.
+     */
+    dateorder = format->dateorder;
+    if (dateorder == E_UNDEFINED_DATE_ORDER)
+    {
+        if (item[0] >= 2000) {
+            dateorder = E_DATE_ORDER_YMD;
+        }
+        else if (used_sep_ch == '.') {
+            dateorder = E_DATE_ORDER_DMY;
+        }
+        else {
+            dateorder = E_DATE_ORDER_MDY;
+        }
+    }
+
+    switch (dateorder) {
+        default:
+        case E_DATE_ORDER_MDY: i0 = 2; i1 = 0; i2 = 1; break;
+        case E_DATE_ORDER_DMY: i0 = 2; i1 = 1; i2 = 0; break;
+        case E_DATE_ORDER_YMD: i0 = 0; i1 = 1; i2 = 2; break;
+    }
+
+    local_time->year = item[i0];
+    if (local_time->year < 1000) local_time->year += 2000;
+    local_time->month = item[i1];
+    local_time->day = item[i2];
+
+    if (n_chars_parsed) *n_chars_parsed = p - str;
     return ESTATUS_SUCCESS;
 }
 

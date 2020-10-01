@@ -38,6 +38,12 @@
 
 ****************************************************************************************************
 */
+
+/* Limits for valid time stamp
+ */
+extern const os_long etimestamp_min; /* 1.1.2020 */
+extern const os_long etimestamp_max; /* ? */
+
 typedef struct eLocalTime
 {
     os_short year;
@@ -137,10 +143,9 @@ eStatus elocaltime(
     os_long utc,
     eObject *tzone = OS_NULL);
 
-/* Convert local time to UTC.
+/* Convert local time to UTC (returns -1 if failed).
  */
-eStatus emktime(
-    os_long *utc,
+os_long emktime(
     eLocalTime *local_time,
     eObject *tzone = OS_NULL);
 
@@ -158,7 +163,8 @@ eStatus etime_make_str(
 eStatus etime_parse_str(
     eLocalTime *local_time,
     const os_char *str,
-    eDateTimeFormat *format = OS_NULL);
+    eDateTimeFormat *format = OS_NULL,
+    os_memsz *n_chars_parsed = OS_NULL);
 
 /* Generate date string from local time structure.
  */
@@ -175,6 +181,6 @@ eStatus edate_parse_str(
     eLocalTime *local_time,
     const os_char *str,
     eDateTimeFormat *format = OS_NULL,
-    os_int flags = 0);
+    os_memsz *n_chars_parsed = OS_NULL);
 
 #endif

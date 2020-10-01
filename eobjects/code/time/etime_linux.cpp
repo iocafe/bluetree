@@ -14,8 +14,9 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#if OSAL_LINUX
+#ifdef OSAL_LINUX
 #include <time.h>
+
 
 /* Convert UTC to local time.
  */
@@ -33,11 +34,16 @@ eStatus elocaltime(
     OSAL_UNUSED(tzone);
 
     os_memclear(&lt, sizeof(lt));
+
+    if (utc < etimestamp_min || utc > etimestamp_max) {
+        return ESTATUS_FAILED;
+    }
+
     os_memclear(&result, sizeof(result));
 
     usec = utc % 1000000;
-    lt.millisecond = (os_short)usec / 1000;
-    lt.microsecond = (os_short)usec % 1000;
+    lt.millisecond = (os_short)(usec / 1000);
+    lt.microsecond = (os_short)(usec % 1000);
     ti = utc / 1000000;
 
     s = localtime_r(&ti, &result) ? ESTATUS_SUCCESS :  ESTATUS_FAILED;
@@ -71,7 +77,7 @@ os_long emktime(
     eLocalTime *local_time,
     eObject *tzone)
 {
-    os_long usec;
+    os_long usec, utc;
     struct tm tm;
     eLocalTime lt;
     time_t ti;
@@ -97,8 +103,13 @@ os_long emktime(
     ti = mktime(&tm);
     if (ti == -1) return -1;
 
-    usec = lt.microsecond + 1000 * lt.millisecond;
-    return 1000000L * (os_long)ti + usec;
+    usec = lt.microsecond + 1000L * (os_long)lt.millisecond;
+    utc = 1000000L * (os_long)ti + usec;
+
+    if (utc < etimestamp_min || utc > etimestamp_max) {
+        return -1;
+    }
+    return utc;
 }
 
 #endif

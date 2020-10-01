@@ -101,77 +101,81 @@ void enice_value_for_ui(
 
 
 /* Format value nicely for UI display.
+ * Current value of property to be set or updated.
+ * new_value Edited string
  */
 void enice_ui_value_to_internal_type(
     eVariable *value,
+    eVariable *new_value,
     eComponent *component,
     eAttrBuffer *attr)
 {
     os_double d;
-    osalTypeId type_id;
+    const os_char *str;
 
     if (attr) {
         switch (attr->showas())
         {
             case E_SHOWAS_INTEGER_NUMBER:
-                type_id = value->type();
-                if (!value->isempty() && !OSAL_IS_INTEGER_TYPE(type_id))
-                {
-                    d = value->getd();
+                if (!new_value->isempty()) {
+                    d = new_value->getd();
                     value->setl(os_round_long(d));
                 }
-                break;
+                else {
+                    value->clear();
+                }
+                return;
 
             case E_SHOWAS_DECIMAL_NUMBER:
-                type_id = value->type();
-                if (!value->isempty() && !OSAL_IS_FLOAT_TYPE(type_id))
-                {
-                    d = value->getd();
+                if (!new_value->isempty()) {
+                    d = new_value->getd();
                     value->setd(d);
                 }
-                // value->setdigs(attr->digs());
-                break;
+                else {
+                    value->clear();
+                }
+                return;
 
-/*                     os_long utc;
             case E_SHOWAS_TIMESTAMP:
-                if (!value->isempty())
+                str = new_value->gets();
+                if (!new_value->isempty() && str)
                 {
                     eLocalTime localt;
-                    os_char buf[EDATETIME_STR_BUF_SZ];
+                    os_long utc;
+                    os_memsz n_chars_parsed;
+                    eStatus s = ESTATUS_FAILED, s2 = ESTATUS_FAILED;
 
                     utc = value->getl();
                     if (elocaltime(&localt, utc)) {
-                        value->sets("bad tstamp");
+                        utc = etime();
+                        elocaltime(&localt, utc);
                     }
-                    else {
-                        if (attr->dstr_flags() != EDATESTR_DISABLED) {
-                            edate_make_str(&localt, buf, sizeof(buf), OS_NULL, attr->dstr_flags());
-                            *value = buf;
 
-                            if (attr->tstr_flags() != ETIMESTR_DISABLED) {
-                                *value += " ";
-                            }
-                        }
-                        else {
-                            *value = "";
-                        }
+                    if (attr->dstr_flags() != EDATESTR_DISABLED) {
+                        s = edate_parse_str(&localt, str, OS_NULL, &n_chars_parsed);
+                        str += n_chars_parsed;
+                    }
 
-                        if (attr->tstr_flags() != ETIMESTR_DISABLED) {
-                            etime_make_str(&localt, buf, sizeof(buf), OS_NULL, attr->tstr_flags());
-                            *value += buf;
+                    if (attr->tstr_flags() != ETIMESTR_DISABLED) {
+                        s2 = etime_parse_str(&localt, str, OS_NULL);
+                    }
+
+                    if (s == ESTATUS_SUCCESS || s2 == ESTATUS_SUCCESS) {
+                        utc = emktime(&localt);
+                        if (utc != -1) {
+                            value->setl(utc);
                         }
                     }
                 }
-                break;
-*/
-
-            case E_SHOWAS_DROP_DOWN_ENUM:
-                break;
-
-            // CHECK FOR LANGUAGE TRANSLATION FOR STRINGS HERE
+                else {
+                    value->clear(); /* Here only if we allow empty input */
+                }
+                return;
 
             default:
                 break;
         }
     }
+
+    value->setv(new_value);
 }
