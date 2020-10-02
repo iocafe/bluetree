@@ -117,6 +117,7 @@ public:
         return new eValueX(parent, id, flags);
     }
 
+
     /* Write name to stream.
      */
     virtual eStatus writer(
@@ -131,6 +132,40 @@ public:
 
     /*@}*/
 
+
+    /**
+    ************************************************************************************************
+
+      @name Operator overloads
+
+      The operator overloads are implemented for convinience, and map to the member functions.
+      Using operator overloads may lead to more readable code, but may also confuse the
+      reader.
+
+    ************************************************************************************************
+    */
+    /*@{*/
+
+    /** Operator "=", setting variable value.
+     */
+    inline const os_char operator=(const os_char x) { setl(x); return x; }
+    inline const os_uchar operator=(const os_uchar x) { setl(x); return x; }
+    inline const os_short operator=(const os_short x) { setl(x); return x; }
+    inline const os_ushort operator=(const os_ushort x) { setl(x); return x; }
+    inline const os_int operator=(const os_int x) { setl(x); return x; }
+    inline const os_uint operator=(const os_uint x) { setl(x); return x; }
+    inline const os_long operator=(const os_long x) { setl(x); return x; }
+    inline const os_float operator=(const os_float x) { setd(x); return x; }
+    inline const os_double operator=(const os_double x) { setd(x); return x; }
+    inline const os_char *operator=(const os_char *x) { sets(x); return x; }
+    inline void operator=(eVariable& x) { setv(&x); }
+
+    /** Operator "+=", appending variable value.
+     */
+    inline const os_char *operator+=(const os_char *x) { appends(x); return x; }
+    inline void operator+=(eVariable& x) { appendv(&x); }
+
+    /*@}*/
 
     /**
     ************************************************************************************************

@@ -686,13 +686,19 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
-    /* Set object's property by sending a message.
+    /* Set property by sending a message.
      */
-    void setproperty_msg(
+    void setpropertyv_msg(
+        const os_char *remotepath,
+        eVariable *x,
+        const os_char *propertyname = OS_NULL,
+        os_boolean adopt_x = OS_FALSE);
+
+    void setpropertyo_msg(
         const os_char *remotepath,
         eObject *x,
         const os_char *propertyname = OS_NULL,
-        os_int flags = EMSG_KEEP_CONTENT|EMSG_NO_REPLIES);
+        os_boolean adopt_x = OS_FALSE);
 
     void setpropertyl_msg(
         const os_char *remotepath,
@@ -794,7 +800,7 @@ public:
     os_char *propertyname(
         os_int propertynr);
 
-    /* Set property value.
+    /* Set property value from variable.
      */
     void setpropertyv(
         os_int propertynr,
@@ -802,13 +808,12 @@ public:
         eObject *source = OS_NULL,
         os_int flags = 0);
 
-    /* Forward property change trough bindings.
+    /* Set object as property value.
      */
-    void forwardproperty(
+    void setpropertyo(
         os_int propertynr,
-        eVariable *x,
-        eObject *source,
-        os_int flags);
+        eObject *x,
+        os_boolean adopt_x = OS_FALSE);
 
     /* Set property value as integer.
      */
@@ -831,6 +836,14 @@ public:
     void setpropertys(
         os_int propertynr,
         const os_char *x);
+
+    /* Forward property change trough bindings.
+     */
+    void forwardproperty(
+        os_int propertynr,
+        eVariable *x,
+        eObject *source,
+        os_int flags);
 
     /* Get property value.
      */

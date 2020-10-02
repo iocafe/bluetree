@@ -17,63 +17,75 @@
 */
 #include "eobjects.h"
 
-void eObject::setproperty_msg(
+void eObject::setpropertyv_msg(
     const os_char *remotepath,
-    eObject *x,
+    eVariable *x,
     const os_char *propertyname,
-    os_int flags)
+    os_boolean adopt_x)
 {
-    eVariable
-        path;
+    eVariable path;
 
-    if (propertyname)
-    {
+    if (propertyname) {
         path.sets(remotepath);
         path.appends("/_p/");
         path.appends(propertyname);
         remotepath = path.gets();
     }
-    else
-    {
-        if (os_strstr(remotepath, "/_p/", OSAL_STRING_DEFAULT) == OS_NULL)
-        {
+    else {
+        if (os_strstr(remotepath, "/_p/", OSAL_STRING_DEFAULT) == OS_NULL) {
             path.sets(remotepath);
             path.appends("/_p/x");
             remotepath = path.gets();
         }
     }
 
-    message (ECMD_SETPROPERTY, remotepath, OS_NULL, x, EMSG_KEEP_CONTENT|EMSG_NO_REPLIES);
+    message(ECMD_SETPROPERTY, remotepath, OS_NULL, x,
+        adopt_x ? EMSG_DEL_CONTENT|EMSG_NO_REPLIES
+                : EMSG_KEEP_CONTENT|EMSG_NO_REPLIES);
 }
+
+void eObject::setpropertyo_msg(
+    const os_char *remotepath,
+    eObject *x,
+    const os_char *propertyname,
+    os_boolean adopt_x)
+{
+    eVariable *v = new eVariable();
+    v->seto(x, adopt_x);
+    setpropertyv_msg(remotepath, v, propertyname, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
+}
+
 
 void eObject::setpropertyl_msg(
     const os_char *remotepath,
     os_long x,
     const os_char *propertyname)
 {
-    eVariable v;
-    v.setl(x);
-    setproperty_msg(remotepath,  &v, propertyname);
+    eVariable *v = new eVariable();
+    v->setl(x);
+    setpropertyv_msg(remotepath, v, propertyname, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 }
+
 
 void eObject::setpropertyd_msg(
     const os_char *remotepath,
     os_double x,
     const os_char *propertyname)
 {
-    eVariable v;
-    v.setd(x);
-    setproperty_msg(remotepath,  &v, propertyname);
+    eVariable *v = new eVariable();
+    v->setd(x);
+    setpropertyv_msg(remotepath, v, propertyname, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 }
+
 
 void eObject::setpropertys_msg(
     const os_char *remotepath,
     const os_char *x,
     const os_char *propertyname)
 {
-    eVariable v;
-    v.sets(x);
-    setproperty_msg(remotepath,  &v, propertyname);
+    eVariable *v = new eVariable();
+    v->sets(x);
+    setpropertyv_msg(remotepath, v, propertyname, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 }
 
 
@@ -212,7 +224,6 @@ eVariable *eObject::addpropertyl(
 {
     eVariable *p;
     p = addproperty(cid, propertynr, propertyname, pflags, text);
-    // p->setl(x);
     p->setpropertyl(EVARP_TYPE, OS_LONG);
     p->setl(x);
     return p;
@@ -243,7 +254,6 @@ eVariable *eObject::addpropertyd(
 {
     eVariable *p;
     p = addproperty(cid, propertynr, propertyname, pflags, text);
-    // p->setd(x);
     p->setpropertyl(EVARP_TYPE, OS_DOUBLE);
     p->setpropertyl(EVARP_DIGS, digs);
     p->setd(x);
@@ -576,6 +586,18 @@ void eObject::setpropertyv(
     /* Forward property value to bindings, if any.
      */
     forwardproperty(propertynr, x, source, flags);
+}
+
+
+void eObject::setpropertyo(
+    os_int propertynr,
+    eObject *x,
+    os_boolean adopt_x)
+{
+
+    eVariable v;
+    v.seto(x, adopt_x);
+    setpropertyv(propertynr, &v);
 }
 
 

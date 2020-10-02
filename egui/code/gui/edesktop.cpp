@@ -32,6 +32,7 @@ void eGui::setup_desktop_application()
     eWindow *w;
     eLineEdit *e;
     eTreeNode *n;
+    eValueX x;
 
     w = new eWindow(this);
     w->setpropertys(ECOMP_VALUE, "Muuttujia");
@@ -44,6 +45,10 @@ void eGui::setup_desktop_application()
     e = new eLineEdit(w);
     e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
     e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
+    x = 1234.5;
+    x.set_sbits(OSAL_STATE_YELLOW);
+    x.set_tstamp(etime());
+    e->setpropertyo(ECOMP_VALUE, &x);
 
     e = new eLineEdit(w);
     e->setpropertyi(ECOMP_VALUE, OS_FALSE);

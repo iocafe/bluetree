@@ -687,7 +687,7 @@ void eTreeNode::set_modified_value()
     propertyv(ECOMP_IPATH, &path);
     if (!path.isempty()) {
         propertyv(ECOMP_VALUE, &value);
-        setproperty_msg(path.gets(), &value);
+        setpropertyv_msg(path.gets(), &value);
     }
 }
 

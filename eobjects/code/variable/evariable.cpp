@@ -550,11 +550,8 @@ void eVariable::setv(
     eVariable *x,
     os_boolean move_value)
 {
-    osalTypeId
-        srctype;
-
-    os_memsz
-        n;
+    osalTypeId srctype;
+    os_memsz n;
 
     /* Release any allocated memory.
      */
@@ -609,16 +606,18 @@ void eVariable::setv(
             }
             break;
 
-        /* If variable contains object, delete it.
+        /* If variable contains object.
          */
         case OS_OBJECT:
             if (move_value)
             {
-
+                m_value.valbuf.v.o = x->m_value.valbuf.v.o;
+                adopt(m_value.valbuf.v.o, EOID_ITEM);
+                x->settype(OS_UNDEFINED_TYPE);
             }
             else
             {
-
+                m_value.valbuf.v.o = x->m_value.valbuf.v.o->clone(this, EOID_ITEM);
             }
             break;
 
@@ -711,6 +710,8 @@ void eVariable::setp(
   @brief Check if variable is empty.
 
   The isempty() function checks if variable is empty. Empty string is considered empty.
+  If variable contains extended value object eValueX, it returns if extended value object
+  is empty.
 
   @return OS_TRUE if variable is empty, OS_FALSE if not.
 
@@ -718,8 +719,8 @@ void eVariable::setp(
 */
 os_boolean eVariable::isempty()
 {
-    os_char
-        c;
+    eValueX *ex;
+    os_char c;
 
     switch (type())
     {
@@ -737,9 +738,17 @@ os_boolean eVariable::isempty()
             }
             return (c == '\0') ? OS_TRUE : OS_FALSE;
 
+        case OS_OBJECT:
+            ex = getx();
+            if (ex) {
+                return ex->isempty();
+            }
+            break;
+
         default:
-            return OS_FALSE;
+            break;
     }
+    return OS_FALSE;
 }
 
 
@@ -757,8 +766,8 @@ os_boolean eVariable::isempty()
 */
 os_long eVariable::getl()
 {
-    os_long
-        x;
+    eValueX *ex;
+    os_long x;
 
     /* Convert value to long integer.
      */
@@ -769,12 +778,10 @@ os_long eVariable::getl()
             break;
 
         case OS_DOUBLE:
-            if (m_value.valbuf.v.d >= 0)
-            {
+            if (m_value.valbuf.v.d >= 0) {
                 x = (os_long)(m_value.valbuf.v.d + 0.5);
             }
-            else
-            {
+            else {
                 x = -(os_long)(-m_value.valbuf.v.d + 0.5);
             }
             break;
@@ -785,6 +792,13 @@ os_long eVariable::getl()
                 ? m_value.strptr.ptr
                 : m_value.strbuf.buf,
                 OS_NULL);
+            break;
+
+        case OS_OBJECT:
+            ex = getx();
+            if (ex) {
+                return ex->getl();
+            }
             break;
 
         default:
@@ -811,8 +825,8 @@ os_long eVariable::getl()
 */
 os_double eVariable::getd()
 {
-    os_double
-        x;
+    eValueX *ex;
+    os_double x;
 
     /* Convert value to double.
      */
@@ -827,13 +841,18 @@ os_double eVariable::getd()
             break;
 
         case OS_STR:
-            if (m_vflags & EVAR_STRBUF_ALLOCATED)
-            {
+            if (m_vflags & EVAR_STRBUF_ALLOCATED) {
                 x = osal_str_to_double(m_value.strptr.ptr, OS_NULL);
             }
-            else
-            {
+            else {
                 x = osal_str_to_double(m_value.strbuf.buf, OS_NULL);
+            }
+            break;
+
+        case OS_OBJECT:
+            ex = getx();
+            if (ex) {
+                return ex->getd();
             }
             break;
 
@@ -869,12 +888,9 @@ os_double eVariable::getd()
 os_char *eVariable::gets(
     os_memsz *sz)
 {
-    os_char
-        *str,
-        buf[64];
-
-    os_memsz
-        vsz;
+    os_char *str, *vstr, buf[64];
+    eValueX *ex;
+    os_memsz vsz;
 
     switch (type())
     {
@@ -931,8 +947,20 @@ os_char *eVariable::gets(
             break;
 
         case OS_OBJECT:
-            os_strncpy(buf, "<obj>", sizeof(buf));
-            vsz = os_strlen(buf);
+            ex = getx();
+            if (ex) {
+                vstr = ex->gets(&vsz);
+                str = os_malloc(vsz, OS_NULL);
+                os_memcpy(str, vstr, vsz);
+                m_value.valbuf.tmpstr = str;
+                m_value.valbuf.tmpstr_sz = vsz;
+                ex->gets_free();
+                goto getout;
+            }
+            else {
+                os_strncpy(buf, "<obj>", sizeof(buf));
+                vsz = os_strlen(buf);
+            }
             break;
 
         case OS_POINTER:
@@ -1007,6 +1035,33 @@ eObject *eVariable::geto()
 
     return OS_NULL;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Get extended value.
+
+  The getx() function returns pointer to extended value object.
+
+  @return Pointer to extended value object, or OS_NULL if variable value if not extended.
+
+****************************************************************************************************
+*/
+eValueX *eVariable::getx()
+{
+    eObject *x;
+
+    if (type() == OS_OBJECT) {
+        x = m_value.valbuf.v.o;
+        if (x) if (x->classid() == ECLASSID_VALUEX) {
+            return (eValueX*)x;
+        }
+    }
+
+    return OS_NULL;
+}
+
 
 /**
 ****************************************************************************************************

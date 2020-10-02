@@ -20,6 +20,8 @@
 #define EVARIABLE_H_
 #include "eobjects.h"
 
+class eValueX;
+
 /**
 ****************************************************************************************************
 
@@ -336,6 +338,10 @@ public:
     /* Get pointer to object contained by variable.
      */
     eObject *geto();
+
+    /* Get pointer to extended value container by variable.
+     */
+    eValueX *getx();
 
     /* Get pointer stored in variable.
      */

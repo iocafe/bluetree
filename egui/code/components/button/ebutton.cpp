@@ -237,7 +237,7 @@ void eButton::activate()
     if (!target.isempty()){
         eVariable value;
         propertyv(ECOMP_SETVALUE, &value);
-        setproperty_msg(target.gets(), &value);
+        setpropertyv_msg(target.gets(), &value);
     }
 }
 
