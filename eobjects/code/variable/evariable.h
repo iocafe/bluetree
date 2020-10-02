@@ -52,8 +52,6 @@
 #define EVARP_MAX 16
 #define EVARP_GAIN 17
 #define EVARP_OFFSET 18
-#define EVARP_SBITS 20
-#define EVARP_TSTAMP 21
 #define EVARP_CONF 25
 
 /* Variable property names.
@@ -72,8 +70,6 @@ extern const os_char
     evarp_default[],
     evarp_gain[],
     evarp_offset[],
-    evarp_sbits[],
-    evarp_tstamp[],
     evarp_conf[];
 
 

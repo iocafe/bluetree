@@ -38,7 +38,7 @@
 
   @brief eName class.
 
-  The eName is a class derived from eVariable. It adds capanility to map to eNameSpace.
+  The eName is a class derived from eVariable. It adds capability to map to eNameSpace.
 
 ****************************************************************************************************
 */

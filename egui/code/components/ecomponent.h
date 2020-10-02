@@ -40,8 +40,6 @@ class ePopup;
    eComponent has also properties which eVariable doesn't have.
  */
 #define ECOMP_VALUE EVARP_VALUE
-#define ECOMP_SBITS EVARP_SBITS
-#define ECOMP_TSTAMP EVARP_TSTAMP
 #define ECOMP_DIGS EVARP_DIGS
 #define ECOMP_TEXT EVARP_TEXT
 #define ECOMP_UNIT EVARP_UNIT
@@ -65,7 +63,6 @@ class ePopup;
  */
 #define ECOMP_NO_OPTIONAL_PROPERITES 0
 #define ECOMP_VALUE_PROPERITES 1
-#define ECOMP_VALUE_STATE_PROPERITES 2
 #define ECOMP_EXTRA_UI_PROPERITES 4
 #define ECOMP_CONF_PROPERITES 32 /* Is this really needed? */
 
@@ -84,8 +81,6 @@ class ePopup;
 #define ecomp_default evarp_default
 #define ecomp_gain evarp_gain
 #define ecomp_offset evarp_offset
-#define ecomp_sbits evarp_sbits
-#define ecomp_tstamp evarp_tstamp
 #define ecomp_conf evarp_conf
 extern const os_char ecomp_path[];
 extern const os_char ecomp_ipath[];

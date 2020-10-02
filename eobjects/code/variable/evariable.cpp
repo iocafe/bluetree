@@ -34,8 +34,6 @@ const os_char
     evarp_default[] = "x.default",
     evarp_gain[] = "x.gain",
     evarp_offset[] = "x.offset",
-    evarp_sbits[] = "x.sbits",
-    evarp_tstamp[] = "x.tstamp",
     evarp_conf[] = "conf"; /* This MUST not start with "x." */
 
 

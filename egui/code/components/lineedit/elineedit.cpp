@@ -101,8 +101,7 @@ void eLineEdit::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eLineEdit");
-    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|
-        ECOMP_VALUE_STATE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
+    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     propertysetdone(cls);
     os_unlock();
 }
@@ -388,7 +387,7 @@ void eLineEdit::object_info(
 
     static os_int copy_property_list[] = {EVARP_VALUE, EVARP_TYPE, EVARP_UNIT, EVARP_ATTR,
         EVARP_DEFAULT, EVARP_ABBR, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
-        EVARP_GAIN, EVARP_OFFSET, EVARP_SBITS, EVARP_TSTAMP, 0};
+        EVARP_GAIN, EVARP_OFFSET, 0};
 
     eObject::object_info(item, name, appendix);
 

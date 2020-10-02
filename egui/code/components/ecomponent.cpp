@@ -136,11 +136,6 @@ void eComponent::setupproperties(
         addpropertyd(cls, ECOMP_OFFSET, ecomp_offset, EPRO_METADATA, "offset");
     }
 
-    if (flags & ECOMP_VALUE_STATE_PROPERITES) {
-        addproperty (cls, ECOMP_SBITS, ecomp_sbits, EPRO_DEFAULT, "state bits");
-        addproperty (cls, ECOMP_TSTAMP, ecomp_tstamp, EPRO_DEFAULT, "timestamp");
-    }
-
     if (flags & ECOMP_CONF_PROPERITES) {
         addproperty (cls, ECOMP_CONF, ecomp_conf, EPRO_METADATA, "conf");
     }

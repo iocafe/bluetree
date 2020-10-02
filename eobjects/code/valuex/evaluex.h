@@ -40,7 +40,7 @@ extern const os_char
 
   @brief eValueX class.
 
-  The eValueX is a class derived from eVariable. It adds capanility to map to eValueXSpace.
+  The eValueX is a class derived from eVariable. It adds time stamp and state bits.
 
 ****************************************************************************************************
 */
@@ -134,14 +134,9 @@ public:
 
     /**
     ************************************************************************************************
-
-      @name Extended value functions
-
-      X...
-
+      Extended value functions
     ************************************************************************************************
     */
-
     inline os_int sbits() {return m_state_bits;}
     inline os_long tstamp() {return m_timestamp;}
     inline void set_sbits(os_int x) {m_state_bits = x;}

@@ -98,8 +98,7 @@ void eTreeNode::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eTreeNode");
-    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_VALUE_STATE_PROPERITES|
-        ECOMP_EXTRA_UI_PROPERITES);
+    eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     addproperty (cls, ECOMP_PATH, ecomp_path, EPRO_DEFAULT, "path");
     addproperty (cls, ECOMP_IPATH, ecomp_ipath, EPRO_DEFAULT, "ipath");
 
