@@ -105,9 +105,7 @@ eObject *eName::clone(
     if (m_namespace_id) {
         clonedobj->setnamespaceid(namespaceid());
     }
-    else {
-        clonedobj->m_ns_type = m_ns_type;
-    }
+    clonedobj->m_ns_type = m_ns_type;
 
     /* Copy clonable attachments.
      */

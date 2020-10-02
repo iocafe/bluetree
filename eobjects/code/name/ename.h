@@ -32,18 +32,6 @@
 #define ENAME_THIS_NS 16
 #define ENAME_NO_MAP 32
 
-/* Enumeration of name space types.
- */
-/* typedef enum
-{
-   ENAME_PARENT_NS = 0,
-   ENAME_PROCESS_NS,
-   ENAME_THREAD_NS,
-   ENAME_THIS_NS,
-   ENAME_SPECIFIED_NS
-}
-eNameSpaceTypeEnum; */
-
 
 /**
 ****************************************************************************************************

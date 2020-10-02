@@ -36,10 +36,8 @@
  */
 #define EVARIABLE_STRBUF_SZ ((os_memsz)(sizeof(os_memsz)*2 + sizeof(os_char*) - sizeof(os_uchar)))
 
-/* Enumeration of variable properties.
- * SBITS = State bits
- * TSTAMP = Time stamp
- * A
+/* Variable property numbers. Same numbers cannot be used for these as for eValueX
+   properties EVALXP_SBITS and EVALXP_TSTAMP.
  */
 #define EVARP_VALUE 1
 #define EVARP_TYPE 2
