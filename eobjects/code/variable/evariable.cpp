@@ -188,8 +188,6 @@ void eVariable::setupproperties(
     addpropertys(cls, EVARP_ATTR, evarp_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
     addpropertyd(cls, EVARP_GAIN, evarp_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
     addpropertyd(cls, EVARP_OFFSET, evarp_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
-    addproperty (cls, EVARP_SBITS, evarp_sbits, EPRO_NOONPRCH, "state bits");
-    addproperty (cls, EVARP_TSTAMP, evarp_tstamp, EPRO_PERSISTENT|EPRO_NOONPRCH, "timestamp");
     addproperty (cls, EVARP_CONF, evarp_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
 
     {

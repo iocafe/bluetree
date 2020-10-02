@@ -41,6 +41,8 @@ eValueX::eValueX(
     os_int flags)
     : eVariable(parent, id, flags)
 {
+    m_state_bits = OSAL_STATE_CONNECTED;
+    m_timestamp = 0;
 }
 
 
@@ -88,6 +90,12 @@ eObject *eValueX::clone(
     clonedobj->setv(this);
     clonedobj->setdigs(digs());
 
+    /* Copy state bits and time stamp.
+     */
+    clonedobj->m_state_bits = m_state_bits;
+    clonedobj->m_timestamp = m_timestamp;
+
+
     /* Copy clonable attachments.
      */
     clonegeneric(clonedobj, aflags);
@@ -116,10 +124,91 @@ void eValueX::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eValueX");
     eVariable::setupproperties(cls);
+    addproperty (cls, EVALXP_SBITS, evalxp_sbits, EPRO_PERSISTENT|EPRO_SIMPLE, "state bits");
+    addproperty (cls, EVALXP_TSTAMP, evalxp_tstamp, EPRO_PERSISTENT|EPRO_SIMPLE, "timestamp");
     propertysetdone(cls);
     os_unlock();
 }
 
+/**
+****************************************************************************************************
+
+  @brief Called to inform the class about property value change (override).
+
+  The onpropertychange() function is called when class'es property changes, unless the
+  property is flagged with EPRO_NOONPRCH.
+  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
+  in class members and and return it when simpleproperty() is called.
+
+  Notice for change logging: Previous value is still valid when this function is called.
+  You can get the old value by calling property() function inside onpropertychange()
+  function.
+
+  @param   propertynr Property number of changed property.
+  @param   x Variable containing the new value.
+  @param   flags
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
+           indicate that there was no property with given property number.
+
+****************************************************************************************************
+*/
+eStatus eValueX::onpropertychange(
+    os_int propertynr,
+    eVariable *x,
+    os_int flags)
+{
+    switch (propertynr)
+    {
+        case EVALXP_SBITS:
+            m_state_bits = (os_int)x->getl();
+            break;
+
+        case EVALXP_TSTAMP:
+            m_timestamp = x->getl();
+            break;
+
+        default:
+            return eVariable::onpropertychange(propertynr, x, flags);
+    }
+
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get value of simple property (override).
+
+  The simpleproperty() function stores current value of simple property into variable x.
+
+  @param   propertynr Property number to get.
+  @param   x Variable into which to store the property value.
+  @return  If property with property number was stored in x, the function returns
+           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
+           given number was not among simple properties.
+
+****************************************************************************************************
+*/
+eStatus eValueX::simpleproperty(
+    os_int propertynr,
+    eVariable *x)
+{
+    switch (propertynr)
+    {
+        case EVALXP_SBITS:
+            x->setl(m_state_bits);
+            break;
+
+        case EVALXP_TSTAMP:
+            x->setl(m_timestamp);
+            break;
+
+        default:
+            return eVariable::simpleproperty(propertynr, x);
+    }
+    return ESTATUS_SUCCESS;
+}
 
 /**
 ****************************************************************************************************

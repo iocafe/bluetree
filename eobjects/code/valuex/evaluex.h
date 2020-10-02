@@ -94,6 +94,19 @@ public:
      */
     static void setupclass();
 
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
+    /* Get value of simple property.
+     */
+    virtual eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
+
     /* Static constructor function for generating instance by class list.
      */
     static eValueX *newobj(
@@ -122,15 +135,21 @@ public:
     /**
     ************************************************************************************************
 
-      @name Extended value fuunctions
+      @name Extended value functions
 
       X...
 
     ************************************************************************************************
     */
 
-protected:
+    inline os_int sbits() {return m_state_bits;}
+    inline os_long tstamp() {return m_timestamp;}
+    inline void set_sbits(os_int x) {m_state_bits = x;}
+    inline void set_tstamp(os_long x) {m_timestamp = x;}
 
+protected:
+    os_int m_state_bits;
+    os_long m_timestamp;
 };
 
 #endif

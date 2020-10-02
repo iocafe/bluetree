@@ -140,7 +140,7 @@ public:
     /**
     ************************************************************************************************
 
-      @name Name specific fuunctions
+      @name Name specific functions
 
       X...
 
