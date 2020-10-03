@@ -134,6 +134,9 @@ public:
 
 
 protected:
+    void draw_state_bits(os_int x);
+    void draw_tooltip();
+
     void set_checked();
 
     /* Collect information about this object for tree browser.

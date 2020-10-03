@@ -191,22 +191,15 @@ eStatus eLineEdit::draw(
 
     m_attr.for_variable(this);
 
-    // ImVec2 c = ImGui::GetContentRegionAvail();
-    // total_w = c.x;
     relative_x2 = ImGui::GetContentRegionMax().x;
     total_w = relative_x2 - ImGui::GetCursorPosX();
 
-
-ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
+    ImVec2 cpos = ImGui::GetCursorScreenPos();
     m_rect.x1 = cpos.x;
     m_rect.y1 = cpos.y;
 
     ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT));
     total_h = ImGui::GetItemRectSize().y;
-
-    // int edit_w = ImGui::CalcItemWidth();
-    // ImGui::SameLine(relative_x2 - edit_w);
-    // edit_w = relative_x2 - 200;
 
     if (m_attr.showas() == E_SHOWAS_CHECKBOX) {
         edit_w = ImGui::GetFrameHeight();
@@ -284,6 +277,12 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
         ImGui::PopStyleVar();
         h = ImGui::GetItemRectSize().y;
         if (h > total_h) total_h = h;
+
+        /* Tool tip
+         */
+        if (ImGui::IsItemHovered()) {
+            draw_tooltip();
+        }
     }
 
     unit = m_unit.get(this, ECOMP_UNIT);
@@ -298,9 +297,138 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
 
+    /* Draw marker for state bits if we have an extended value.
+     */
+    draw_state_bits(m_rect.x2 - edit_w - unit_spacer - unit_w);
+
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Draw marker for state bits if we have extended value
+
+****************************************************************************************************
+*/
+void eLineEdit::draw_state_bits(
+    os_int x)
+{
+    os_int state_bits;
+    float circ_x, circ_y;
+    const os_int rad = 8;
+
+    if (!m_edit_value && m_label_value.isx())
+    {
+        ImVec4 colf;
+
+        state_bits = m_label_value.sbits();
+        colf = ImVec4(0.5f, 0.5f, 0.5f, 0.5f);
+        switch (state_bits & OSAL_STATE_ERROR_MASK)
+        {
+            case OSAL_STATE_YELLOW:
+                if (state_bits & OSAL_STATE_CONNECTED) {
+                    colf = ImVec4(0.8f, 0.8f, 0.2f, 0.5f /* alpha */);
+                }
+                break;
+
+            case OSAL_STATE_ORANGE:
+                if (state_bits & OSAL_STATE_CONNECTED) {
+                    colf = ImVec4(1.0f, 0.7f, 0.0f, 0.5f);
+                }
+                break;
+
+            case OSAL_STATE_RED:
+                colf = ImVec4(1.0f, 0.0f, 0.0f, 0.5f);
+                break;
+
+            default:
+                if (state_bits & OSAL_STATE_CONNECTED) {
+                    return;
+                }
+                break;
+        }
+
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        ImU32 col = ImColor(colf);
+        circ_x = (float)(x + 3*rad/2);
+        circ_y = m_rect.y1 + 0.5 * (m_rect.y2 - m_rect.y1 + 1);
+        draw_list->AddCircleFilled(ImVec2(circ_x, circ_y), rad, col, 0);
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Draw tool tip, called when mouse is hovering over the value
+
+****************************************************************************************************
+*/
+void eLineEdit::draw_tooltip()
+{
+    eVariable text, item;
+    eValueX *ex;
+    os_long utc;
+    os_int state_bits;
+    os_boolean worth_showing = OS_FALSE;
+
+    /* text = m_text.get(this, ECOMP_TEXT); */
+    propertyv(ECOMP_TTIP, &item);
+    if (!item.isempty()) {
+        if (!text.isempty()) text += "\n";
+        text += item;
+        worth_showing = OS_TRUE;
+    }
+
+    propertyv(ECOMP_VALUE, &item);
+    ex = item.getx();
+    if (ex) {
+        state_bits = ex->sbits();
+
+        utc = ex->tstamp();
+        if (etime_timestamp_str(utc, &item) == ESTATUS_SUCCESS)
+        {
+            if (!text.isempty()) text += "\n";
+            text += "updated ";
+            text += item;
+            worth_showing = OS_TRUE;
+        }
+
+        if ((state_bits & OSAL_STATE_CONNECTED) == 0) {
+            if (!text.isempty()) text += "\n";
+            text += "signal is disconnected";
+            worth_showing = OS_TRUE;
+        }
+        if (state_bits & OSAL_STATE_ERROR_MASK) {
+            if (state_bits & OSAL_STATE_CONNECTED) {
+                if (!text.isempty()) text += "\n";
+                text += "signal ";
+            }
+            else {
+                text += ", ";
+            }
+            switch (state_bits & OSAL_STATE_ERROR_MASK)
+            {
+                case OSAL_STATE_YELLOW: text += "warning"; break;
+                default:
+                case OSAL_STATE_ORANGE: text += "error"; break;
+                case OSAL_STATE_RED: text += "fault"; break;
+            }
+            worth_showing = OS_TRUE;
+        }
+    }
+
+    if (worth_showing) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(text.gets());
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }
 
 

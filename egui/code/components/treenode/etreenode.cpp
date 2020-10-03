@@ -581,7 +581,8 @@ eStatus eTreeNode::draw(
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
 
-    /* Draw marker for state bits if we have extended value */
+    /* Draw marker for state bits if we have an extended value.
+     */
     draw_state_bits(m_rect.x2 - edit_w - unit_spacer - unit_w - path_w - ipath_w);
 
     /* Let base class implementation handle the rest.
@@ -602,14 +603,11 @@ eStatus eTreeNode::draw(
     return ESTATUS_SUCCESS;
 }
 
+
 /**
 ****************************************************************************************************
 
   @brief Draw marker for state bits if we have extended value
-
-  The eTreeNode::draw_state_bits() function...
-
-  @return  None.
 
 ****************************************************************************************************
 */
@@ -664,24 +662,23 @@ void eTreeNode::draw_state_bits(
 
   @brief Draw tool tip, called when mouse is hovering over the value
 
-  The eTreeNode::draw_tooltip() function...
-
-  @return  None.
-
 ****************************************************************************************************
 */
 void eTreeNode::draw_tooltip()
 {
     eVariable text, item;
     eValueX *ex;
+    const os_char *str;
     os_long utc;
     os_int state_bits;
+    os_boolean worth_showing = OS_FALSE;
 
-    text = m_text.get(this, ECOMP_TEXT);
+    /* text = m_text.get(this, ECOMP_TEXT); */
     propertyv(ECOMP_TTIP, &item);
     if (!item.isempty()) {
-        text += "\n";
+        if (!text.isempty()) text += "\n";
         text += item;
+        worth_showing = OS_TRUE;
     }
 
     propertyv(ECOMP_VALUE, &item);
@@ -692,33 +689,51 @@ void eTreeNode::draw_tooltip()
         utc = ex->tstamp();
         if (etime_timestamp_str(utc, &item) == ESTATUS_SUCCESS)
         {
-            text += "\nmodified ";
+            if (!text.isempty()) text += "\n";
+            text += "updated ";
             text += item;
+            worth_showing = OS_TRUE;
         }
 
         if ((state_bits & OSAL_STATE_CONNECTED) == 0) {
-            text += "\nstate: disconnected";
+            if (!text.isempty()) text += "\n";
+            text += "signal is disconnected";
+            worth_showing = OS_TRUE;
         }
         if (state_bits & OSAL_STATE_ERROR_MASK) {
-            text += (state_bits & OSAL_STATE_CONNECTED) ? "\nstate: " : ", ";
+            if (state_bits & OSAL_STATE_CONNECTED) {
+                if (!text.isempty()) text += "\n";
+                text += "signal ";
+            }
+            else {
+                text += ", ";
+            }
             switch (state_bits & OSAL_STATE_ERROR_MASK)
             {
-                case OSAL_STATE_YELLOW: text += "attention"; break;
+                case OSAL_STATE_YELLOW: text += "warning"; break;
                 default:
-                case OSAL_STATE_ORANGE: text += "warning"; break;
-                case OSAL_STATE_RED: text += "error"; break;
+                case OSAL_STATE_ORANGE: text += "error"; break;
+                case OSAL_STATE_RED: text += "fault"; break;
             }
+            worth_showing = OS_TRUE;
         }
     }
-    text += "\npath: ";
-    text += m_path.get(this, ECOMP_PATH);
-    text += "\nflags: ";
 
-    ImGui::BeginTooltip();
-    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-    ImGui::TextUnformatted(text.gets());
-    ImGui::PopTextWrapPos();
-    ImGui::EndTooltip();
+    str = m_path.get(this, ECOMP_PATH);
+    if (*str != '\0' && os_strchr((os_char*)str, '@') == OS_NULL) {
+        if (!text.isempty()) text += "\n";
+        text += "path: ";
+        text += m_path.get(this, ECOMP_PATH);
+        worth_showing = OS_TRUE;
+    }
+
+    if (worth_showing) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(text.gets());
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }
 
 
