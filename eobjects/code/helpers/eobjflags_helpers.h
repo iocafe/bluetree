@@ -1,12 +1,10 @@
 /**
 
-  @file    eenum_types_str.h
-  @brief   Create string to enumerate data types in "attr" property.
+  @file    eobjflags_helpers.h
+  @brief   Convert various flags to strings.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
-
-  The enumeration allows equi, etc, to show drop down list, etc, to select data type.
+  @date    2.1.2020
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -16,19 +14,14 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EENUM_TYPES_STR_H_
-#define EENUM_TYPES_STR_H_
+#ifndef EOBJFLAGS_HELPERS_H_
+#define EOBJFLAGS_HELPERS_H_
 #include "eobjects.h"
 
-/* Get user interface string label for type number
+/* Convert eObject flags to string.
  */
-const os_char *etype_to_label(
-    osalTypeId type_id);
-
-/* Generate enumeration of types for "attr" property.
- */
-void emake_type_enum_str(
-    eVariable *str,
-    os_boolean append_it = OS_FALSE);
+void eobjflags_to_str(
+    eVariable *strvar,
+    os_uint flags);
 
 #endif

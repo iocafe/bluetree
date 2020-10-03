@@ -19,7 +19,8 @@
 /* GUI property names.
  */
 const os_char
-    eguip_text[] = "x";
+    eguip_text[] = "x",
+    eguip_open[] = "open";
 
 
 /**
@@ -143,7 +144,8 @@ void eGui::setupclass()
 void eGui::setupproperties(
     os_int cls)
 {
-    addproperty(cls, EGUIP_TEXT, eguip_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
+    addproperty(cls, EGUIP_TEXT, eguip_text, EPRO_DEFAULT, "text");
+    addproperty(cls, EGUIP_OPEN, eguip_open, EPRO_DEFAULT, "open window");
 }
 
 
@@ -243,13 +245,13 @@ eStatus eGui::onpropertychange(
 {
     switch (propertynr)
     {
-/*         case EGUIP_VALUE:
-            setv(x);
+        case EGUIP_TEXT:
+            eimgui_set_window_title(x->gets());
             break;
 
-        case EGUIP_DIGS:
-            setdigs((os_int)x->getl());
-            break; */
+        case EGUIP_OPEN:
+            // setdigs((os_int)x->getl());
+            break;
 
         default:
             return eObject::onpropertychange(propertynr, x, flags);
@@ -278,22 +280,7 @@ eStatus eGui::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
-    switch (propertynr)
-    {
-/*
-        case EGUIP_VALUE:
-            x->setv(this);
-            break;
-
-        case EGUIP_DIGS:
-            x->setl(digs());
-            break;
-*/
-
-        default:
-            return eObject::simpleproperty(propertynr, x);
-    }
-    return ESTATUS_SUCCESS;
+    return eObject::simpleproperty(propertynr, x);
 }
 
 

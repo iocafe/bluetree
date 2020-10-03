@@ -63,8 +63,9 @@ using namespace gl;
 
 /* For now support for only one window.
  */
-static GLFWwindow* window;
+static GLFWwindow* window = OS_NULL;
 
+static os_char eimgui_window_title[64] = "egui";
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -109,7 +110,7 @@ eStatus eimgui_initialize()
 #endif
 
     // Create window with graphics context
-    window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    window = glfwCreateWindow(2048, 1600, eimgui_window_title, NULL, NULL);
     if (window == NULL)
         return ESTATUS_FAILED;
     glfwMakeContextCurrent(window);
@@ -210,6 +211,26 @@ void eimgui_shutdown()
 
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Set operating system window title.
+
+  Calls GLFW to set operating system window title.
+
+  @param   title New title string to set.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eimgui_set_window_title(
+    os_char *title)
+{
+    os_strncpy(eimgui_window_title, title, sizeof(eimgui_window_title));
+    if (window) glfwSetWindowTitle(window, title);
 }
 
 

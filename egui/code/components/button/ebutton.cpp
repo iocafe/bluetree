@@ -178,6 +178,7 @@ eStatus eButton::onpropertychange(
 eStatus eButton::draw(
     eDrawParams& prm)
 {
+    eComponent *c;
     const os_char *label;
     ImVec2 sz;
 
@@ -193,11 +194,29 @@ eStatus eButton::draw(
     sz.x = sz.y = 0;
 
     label = m_text.get(this, ECOMP_TEXT);
-    // ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
 
-    if (ImGui::MenuItem(label, "", &m_imgui_toggl))
-    {
-        activate();
+    // ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
+    // if classif(parent()) == POPUP
+
+    /* If this component has children, it contains a sub menu.
+     */
+    c = firstcomponent(EOID_GUI_COMPONENT);
+    if (c) {
+            if (ImGui::BeginMenu(label))
+            {
+                while (c) {
+                    c->draw(prm);
+                    c = c->nextcomponent(EOID_GUI_COMPONENT);
+                }
+
+                ImGui::EndMenu();
+            }
+
+    }
+    else {
+        if (ImGui::MenuItem(label, "", &m_imgui_toggl)) {
+            activate();
+        }
     }
 
     // ImGui::Button(label, ImVec2(edit_w, 0));

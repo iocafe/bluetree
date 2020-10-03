@@ -1,6 +1,6 @@
 /**
 
-  @file    eenum_types_str.cpp
+  @file    etypeenum_helpers.cpp
   @brief   Create string to enumerate data types in "attr" property.
   @author  Pekka Lehtikoski
   @version 1.0

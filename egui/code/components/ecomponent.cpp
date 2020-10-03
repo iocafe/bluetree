@@ -584,7 +584,7 @@ eStatus eComponent::draw(
     if (prm.right_click) {
         if (erect_is_point_inside(&visible_rect, prm.io->MousePos.x, prm.io->MousePos.y))
         {
-            popup();
+            right_click_popup();
         }
     }
 
@@ -624,6 +624,39 @@ ePopup *eComponent::popup()
     return p;
 }
 
+ePopup *eComponent::right_click_popup()
+{
+    ePopup *p;
+    eButton *scope, *item;
+
+    p = popup();
+
+
+    /* Generic component scope items.
+     */
+
+    /* Window scope items.
+     */
+    scope = new eButton(p);
+    scope->setpropertys(ECOMP_TEXT, "window");
+
+    item = new eButton(scope);
+    item->setpropertys(ECOMP_TEXT, "edit window");
+
+    /* GUI scope items.
+     */
+    scope = new eButton(p);
+    scope->setpropertys(ECOMP_TEXT, "gui");
+
+    item = new eButton(scope);
+    item->setpropertys(ECOMP_TEXT, "settings");
+    item->setpropertys(ECOMP_VALUE, "guisettings");
+    item->setpropertys(ECOMP_TARGET, "gui/_p/open");
+
+    return p;
+}
+
+
 ePopup *eComponent::drop_down_list(
     eContainer *list)
 {
@@ -632,7 +665,6 @@ ePopup *eComponent::drop_down_list(
     eButton *b;
     os_int propertynr, value;
     os_char buf[E_OIXSTR_BUF_SZ];
-
 
     p = popup();
 

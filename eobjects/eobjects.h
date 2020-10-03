@@ -73,7 +73,9 @@ void eobjects_shutdown();
 #include "code/buffer/ebuffer.h"
 #include "code/connection/econnection.h"
 #include "code/connection/eendpoint.h"
-#include "code/helpers/eenum_types_str.h"
+#include "code/helpers/etypeenum_helpers.h"
+#include "code/helpers/eliststr_helpers.h"
+#include "code/helpers/eobjflags_helpers.h"
 #include "code/string/eint2str.h"
 #include "code/main/emain.h"
 

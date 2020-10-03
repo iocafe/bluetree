@@ -822,6 +822,7 @@ void eObject::object_info(
 
     appendix->setl(EBROWSE_BROWSE_FLAGS, browse_flags);
 
+    appendix->setl(EBROWSE_OBJECT_FLAGS, flags());
 
     // item->sets(EBROWSE_ITEM_NAMESPACE_ID, name->namespaceid());
     // item->setl(EBROWSE_NAME_IS_MAPPED, name->is_mapped());

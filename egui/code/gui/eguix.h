@@ -32,11 +32,13 @@
 /* Enumeration of GUI object properties.
  */
 #define EGUIP_TEXT 1
+#define EGUIP_OPEN 10
 
 /* GUI property names.
  */
 extern const os_char
-    eguip_text[];
+    eguip_text[],
+    eguip_open[];
 
 /*@}*/
 

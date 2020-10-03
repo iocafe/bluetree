@@ -296,6 +296,11 @@ os_int eTreeNode::setup_node(
         if (appendix->get(EBROWSE_BROWSE_FLAGS, &value)) {
             browse_flags = value.geti();
         }
+
+#if ETREENODE_TOOLTIPS_FOR_DEBUG
+        m_object_flags = (os_uint)appendix->getl(EBROWSE_OBJECT_FLAGS);
+#endif
+
     }
 
     return browse_flags;
@@ -673,11 +678,12 @@ void eTreeNode::draw_tooltip()
     os_int state_bits;
     os_boolean worth_showing = OS_FALSE;
 
-    /* text = m_text.get(this, ECOMP_TEXT); */
+#if ETREENODE_TOOLTIPS_FOR_DEBUG
+    text.sets(m_text.get(this, ECOMP_TEXT));
+#endif
     propertyv(ECOMP_TTIP, &item);
     if (!item.isempty()) {
-        if (!text.isempty()) text += "\n";
-        text += item;
+        eliststr_appenedv(&text, &item);
         worth_showing = OS_TRUE;
     }
 
@@ -689,15 +695,13 @@ void eTreeNode::draw_tooltip()
         utc = ex->tstamp();
         if (etime_timestamp_str(utc, &item) == ESTATUS_SUCCESS)
         {
-            if (!text.isempty()) text += "\n";
-            text += "updated ";
+            eliststr_appeneds(&text, "updated ");
             text += item;
             worth_showing = OS_TRUE;
         }
 
         if ((state_bits & OSAL_STATE_CONNECTED) == 0) {
-            if (!text.isempty()) text += "\n";
-            text += "signal is disconnected";
+            eliststr_appeneds(&text, "signal is disconnected");
             worth_showing = OS_TRUE;
         }
         if (state_bits & OSAL_STATE_ERROR_MASK) {
@@ -720,12 +724,24 @@ void eTreeNode::draw_tooltip()
     }
 
     str = m_path.get(this, ECOMP_PATH);
-    if (*str != '\0' && os_strchr((os_char*)str, '@') == OS_NULL) {
-        if (!text.isempty()) text += "\n";
-        text += "path: ";
+#if ETREENODE_TOOLTIPS_FOR_DEBUG
+    if (*str != '\0')
+#else
+    if (*str != '\0' && os_strchr((os_char*)str, '@') == OS_NULL)
+#endif
+    {
+        eliststr_appeneds(&text, "path: ");
         text += m_path.get(this, ECOMP_PATH);
         worth_showing = OS_TRUE;
     }
+
+#if ETREENODE_TOOLTIPS_FOR_DEBUG
+    eobjflags_to_str(&item, m_object_flags);
+    if (!item.isempty()) {
+        eliststr_appeneds(&text, "o-flags: ");
+        text += item;
+    }
+#endif
 
     if (worth_showing) {
         ImGui::BeginTooltip();

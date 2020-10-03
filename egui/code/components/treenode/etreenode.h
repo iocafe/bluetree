@@ -29,6 +29,9 @@
 */
 /*@{*/
 
+#define ETREENODE_TOOLTIPS_FOR_DEBUG 1
+
+
 /*@}*/
 
 
@@ -186,6 +189,11 @@ protected:
     eAutoLabel m_label_node;
     eAutoLabel m_label_value;
     eAutoLabel m_label_edit;
+
+#if ETREENODE_TOOLTIPS_FOR_DEBUG
+    os_uint m_object_flags;
+#endif
+
 };
 
 

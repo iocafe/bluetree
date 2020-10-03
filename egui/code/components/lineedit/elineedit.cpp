@@ -376,7 +376,11 @@ void eLineEdit::draw_tooltip()
     os_int state_bits;
     os_boolean worth_showing = OS_FALSE;
 
-    /* text = m_text.get(this, ECOMP_TEXT); */
+#define E_DEBUG_TOOLTIPS 0
+
+#if E_DEBUG_TOOLTIPS
+    text.sets(m_text.get(this, ECOMP_TEXT));
+#endif
     propertyv(ECOMP_TTIP, &item);
     if (!item.isempty()) {
         if (!text.isempty()) text += "\n";

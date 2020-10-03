@@ -326,6 +326,7 @@ public:
     virtual void activate() {}
 
     ePopup *popup();
+    virtual ePopup *right_click_popup();
     ePopup *drop_down_list(eContainer *list);
     void close_popup();
 

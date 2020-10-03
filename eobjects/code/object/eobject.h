@@ -89,7 +89,7 @@ class ePointer;
  */
 #define EOBJ_SERIALIZE_DEFAULT 0
 
-/** Flags for json_indent()
+/* Flags for json_indent()
  */
 #if E_SUPPROT_JSON
 #define EJSON_NO_NEW_LINE 0
@@ -97,7 +97,7 @@ class ePointer;
 #define EJSON_NEW_LINE_ONLY 2
 #endif
 
-/* Browse object identifier numbers (used bot as object id and as bit fields in browse flags).
+/* Browse object identifier numbers (used as object id and as bit field in browse flags).
  */
 #define EBROWSE_THIS_OBJECT 1
 #define EBROWSE_NSPACE 2
@@ -105,6 +105,10 @@ class ePointer;
 #define EBROWSE_ALL_CHILDREN 8
 #define EBROWSE_PROPERTIES 16
 #define EBROWSE_BROWSE_FLAGS 32
+
+/* More browse object identifier numbers (used bot object id but not in bit fields).
+ */
+#define EBROWSE_OBJECT_FLAGS 33
 
 /* Browse appendix indices.
  */

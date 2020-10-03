@@ -41,6 +41,11 @@ eStatus eimgui_initialize();
  */
 void eimgui_shutdown();
 
+/* Set operating system window title.
+ */
+void eimgui_set_window_title(
+    os_char *title);
+
 
 eViewPort *eimgui_open_viewport();
 void egui_close_viewport(eViewPort *viewport);
