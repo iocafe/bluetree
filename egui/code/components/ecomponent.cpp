@@ -23,7 +23,8 @@ const os_char
     ecomp_path[] = "path",
     ecomp_ipath[] = "ipath",
     ecomp_setvalue[] = "setvalue",
-    ecomp_target[] = "target";
+    ecomp_target[] = "target",
+    ecomp_edit[] = "edit";
 
 
 /**
@@ -106,16 +107,16 @@ void eComponent::setupproperties(
 {
     eVariable *vtype;
 
-    addpropertys(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA, "text");
+    addpropertys(cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
 
     if (flags & ECOMP_VALUE_PROPERITES) {
-        vtype = addpropertyl (cls, ECOMP_TYPE, ecomp_type, EPRO_METADATA, "type");
-        addproperty (cls, ECOMP_VALUE, ecomp_value, EPRO_DEFAULT, "value");
-        addproperty (cls, ECOMP_DEFAULT, ecomp_default, EPRO_METADATA, "default");
-        addpropertyl(cls, ECOMP_DIGS, ecomp_digs, EPRO_METADATA, "digs");
-        addpropertys(cls, ECOMP_UNIT, ecomp_unit, EPRO_METADATA, "unit");
-        addpropertyd(cls, ECOMP_MIN, ecomp_min, EPRO_METADATA, "min");
-        addpropertyd(cls, ECOMP_MAX, ecomp_max, EPRO_METADATA, "max");
+        vtype = addpropertyl (cls, ECOMP_TYPE, ecomp_type, "type", EPRO_METADATA);
+        addproperty (cls, ECOMP_VALUE, ecomp_value, "value");
+        addproperty (cls, ECOMP_DEFAULT, ecomp_default, "default", EPRO_METADATA);
+        addpropertyl(cls, ECOMP_DIGS, ecomp_digs, "digs", EPRO_METADATA);
+        addpropertys(cls, ECOMP_UNIT, ecomp_unit, "unit", EPRO_METADATA);
+        addpropertyd(cls, ECOMP_MIN, ecomp_min, "min", EPRO_METADATA);
+        addpropertyd(cls, ECOMP_MAX, ecomp_max, "max", EPRO_METADATA);
 
         {
             eVariable tmp;
@@ -125,19 +126,19 @@ void eComponent::setupproperties(
     }
 
     if (flags & ECOMP_EXTRA_UI_PROPERITES) {
-        addproperty(cls, ECOMP_ABBR, ecomp_abbr, EPRO_METADATA, "abbreviation");
-        addproperty(cls, ECOMP_TTIP, ecomp_ttip, EPRO_METADATA, "tooltip");
+        addproperty(cls, ECOMP_ABBR, ecomp_abbr, "abbreviation", EPRO_METADATA);
+        addproperty(cls, ECOMP_TTIP, ecomp_ttip, "tooltip", EPRO_METADATA);
     }
 
-    addpropertys(cls, ECOMP_ATTR, ecomp_attr, EPRO_METADATA, "attr");
+    addpropertys(cls, ECOMP_ATTR, ecomp_attr, "attr", EPRO_METADATA);
 
     if (flags & ECOMP_VALUE_PROPERITES) {
-        addpropertyd(cls, ECOMP_GAIN, ecomp_gain, EPRO_METADATA, "gain");
-        addpropertyd(cls, ECOMP_OFFSET, ecomp_offset, EPRO_METADATA, "offset");
+        addpropertyd(cls, ECOMP_GAIN, ecomp_gain, "gain", EPRO_METADATA);
+        addpropertyd(cls, ECOMP_OFFSET, ecomp_offset, "offset", EPRO_METADATA);
     }
 
     if (flags & ECOMP_CONF_PROPERITES) {
-        addproperty (cls, ECOMP_CONF, ecomp_conf, EPRO_METADATA, "conf");
+        addproperty (cls, ECOMP_CONF, ecomp_conf, "conf", EPRO_METADATA);
     }
 }
 

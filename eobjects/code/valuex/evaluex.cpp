@@ -124,8 +124,8 @@ void eValueX::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eValueX");
     eVariable::setupproperties(cls);
-    addproperty (cls, EVALXP_SBITS, evalxp_sbits, EPRO_PERSISTENT|EPRO_SIMPLE, "state bits");
-    addproperty (cls, EVALXP_TSTAMP, evalxp_tstamp, EPRO_PERSISTENT|EPRO_SIMPLE, "timestamp");
+    addproperty (cls, EVALXP_SBITS, evalxp_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EVALXP_TSTAMP, evalxp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();
 }

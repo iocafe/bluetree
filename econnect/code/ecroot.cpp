@@ -155,13 +155,9 @@ void ecRoot::setupproperties(
        property set before setting value for it. There is trick with p to set text type
        after adding property type. This effects only ecRoot class.
      */
-    p = addproperty(cls, ECROOTP_TEXT, ecrootp_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
-    addpropertyl (cls, ECROOTP_TYPE, ecrootp_type, EPRO_METADATA|EPRO_NOONPRCH, "type");
+    p = addproperty(cls, ECROOTP_TEXT, ecrootp_text, "text", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertyl (cls, ECROOTP_TYPE, ecrootp_type, "type", EPRO_METADATA|EPRO_NOONPRCH);
     p->setpropertyl(ECROOTP_TYPE, OS_STR);
-
-    addproperty (cls, ECROOTP_VALUE, ecrootp_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
-    addproperty (cls, ECROOTP_DEFAULT, ecrootp_default, EPRO_METADATA|EPRO_NOONPRCH, "default");
-    addpropertyl(cls, ECROOTP_DIGS, ecrootp_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
 }
 
 

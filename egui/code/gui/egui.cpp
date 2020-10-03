@@ -144,8 +144,8 @@ void eGui::setupclass()
 void eGui::setupproperties(
     os_int cls)
 {
-    addproperty(cls, EGUIP_TEXT, eguip_text, EPRO_DEFAULT, "text");
-    addproperty(cls, EGUIP_OPEN, eguip_open, EPRO_DEFAULT, "open window");
+    addproperty(cls, EGUIP_TEXT, eguip_text, "text");
+    addproperty(cls, EGUIP_OPEN, eguip_open, "open window");
 }
 
 

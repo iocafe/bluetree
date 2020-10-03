@@ -74,14 +74,14 @@ public:
         eVariable *p;
 
         os_lock();
-        p = addpropertyd(cls, EMYCLASSP_CELCIUS, emyclassp_celcius, EPRO_PERSISTENT, "value", 20.0);
+        p = addpropertyd(cls, EMYCLASSP_CELCIUS, emyclassp_celcius, 20.0, "celcius", EPRO_PERSISTENT);
         p->setpropertys(EVARP_UNIT, "C");
 
-        p = addpropertyd(cls, EMYCLASSP_FAHRENHEIT, emyclassp_fahrenheit, EPRO_NOONPRCH, "default");
+        p = addpropertyd(cls, EMYCLASSP_FAHRENHEIT, emyclassp_fahrenheit, "fahrenheit", EPRO_NOONPRCH);
         p->setpropertys(EVARP_UNIT, "F");
         p->setpropertyl(EVARP_DIGS, 5);
 
-        addpropertys(cls, EMYCLASSP_OPINION, emyclassp_opinion, EPRO_NOONPRCH, "default");
+        addpropertys(cls, EMYCLASSP_OPINION, emyclassp_opinion, "opinion", EPRO_NOONPRCH);
         os_unlock();
     }
 

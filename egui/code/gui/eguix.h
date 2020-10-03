@@ -32,7 +32,7 @@
 /* Enumeration of GUI object properties.
  */
 #define EGUIP_TEXT 1
-#define EGUIP_OPEN 10
+#define EGUIP_OPEN 20
 
 /* GUI property names.
  */

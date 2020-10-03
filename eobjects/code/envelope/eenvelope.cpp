@@ -210,11 +210,11 @@ void eEnvelope::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eEnvelope");
 
-    addpropertyl(cls, EENVP_COMMAND, eenvp_command, EPRO_PERSISTENT|EPRO_SIMPLE, "command");
-    addpropertys(cls, EENVP_TARGET, eenvp_target, EPRO_PERSISTENT|EPRO_SIMPLE, "target");
-    addpropertys(cls, EENVP_SOURCE, eenvp_source, EPRO_PERSISTENT|EPRO_SIMPLE, "source");
-    addproperty (cls, EENVP_CONTENT, eenvp_content, EPRO_PERSISTENT|EPRO_SIMPLE, "content");
-    addproperty (cls, EENVP_CONTEXT, eenvp_context, EPRO_PERSISTENT|EPRO_SIMPLE, "context");
+    addpropertyl(cls, EENVP_COMMAND, eenvp_command, "command", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, EENVP_TARGET, eenvp_target, "target", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, EENVP_SOURCE, eenvp_source, "source", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EENVP_CONTENT, eenvp_content, "content", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EENVP_CONTEXT, eenvp_context, "context", EPRO_PERSISTENT|EPRO_SIMPLE);
     os_unlock();
 }
 

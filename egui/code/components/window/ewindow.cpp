@@ -99,7 +99,8 @@ void eWindow::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eWindow");
-    addproperty(cls, ECOMP_VALUE, ecomp_value, EPRO_DEFAULT, "title");
+    addpropertys(cls, ECOMP_VALUE, ecomp_value, "title");
+    addpropertyb(cls, ECOMP_EDIT, ecomp_edit, "edit");
     propertysetdone(cls);
     os_unlock();
 }

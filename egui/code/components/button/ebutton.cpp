@@ -102,10 +102,10 @@ void eButton::setupclass()
     // eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|
     //        ECOMP_VALUE_STATE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
 
-    addpropertys(cls, ECOMP_TEXT, ecomp_text, EPRO_METADATA, "text");
-    addproperty(cls, ECOMP_VALUE, ecomp_value, EPRO_DEFAULT, "value");
-    addpropertyl(cls, ECOMP_SETVALUE, ecomp_setvalue, EPRO_METADATA, "set value", 1);
-    addpropertys(cls, ECOMP_TARGET, ecomp_target, EPRO_METADATA, "target");
+    addpropertys(cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
+    addproperty (cls, ECOMP_VALUE, ecomp_value, "value");
+    addpropertyl(cls, ECOMP_SETVALUE, ecomp_setvalue, OS_TRUE, "set value", EPRO_METADATA);
+    addpropertys(cls, ECOMP_TARGET, ecomp_target, "target", EPRO_METADATA);
 
     propertysetdone(cls);
     os_unlock();

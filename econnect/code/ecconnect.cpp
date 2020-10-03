@@ -147,7 +147,7 @@ void ecConnect::setupproperties(
        property set before setting value for it. There is trick with p to set text type
        after adding property type. This effects only ecConnect class.
      */
-    /* p = */ addproperty(cls, ECCONP_TEXT, ecconp_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
+    /* p = */ addproperty(cls, ECCONP_TEXT, ecconp_text, "text", EPRO_METADATA|EPRO_NOONPRCH);
 }
 
 

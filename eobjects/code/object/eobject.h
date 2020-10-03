@@ -740,8 +740,27 @@ public:
         os_int cid,
         os_int propertynr,
         const os_char *propertyname,
-        os_int pflags = EPRO_DEFAULT,
-        const os_char *text = OS_NULL);
+        const os_char *text = osal_str_empty,
+        os_int pflags = EPRO_DEFAULT);
+
+    /* Add integer property to property set.
+     */
+    static eVariable *addpropertyb(
+        os_int cid,
+        os_int propertynr,
+        const os_char *propertyname,
+        const os_char *text,
+        os_int pflags = EPRO_DEFAULT);
+
+    /* Add integer property to property set (initial/default value).
+     */
+    static eVariable *addpropertyb(
+        os_int cid,
+        os_int propertynr,
+        const os_char *propertyname,
+        os_boolean x,
+        const os_char *text,
+        os_int pflags = EPRO_DEFAULT);
 
     /* Add integer property to property set.
      */
@@ -749,9 +768,18 @@ public:
         os_int cid,
         os_int propertynr,
         const os_char *propertyname,
-        os_int pflags = EPRO_DEFAULT,
-        const os_char *text = OS_NULL,
-        os_long x = 0);
+        const os_char *text,
+        os_int pflags = EPRO_DEFAULT);
+
+    /* Add integer property to property set (initial/default value).
+     */
+    static eVariable *addpropertyl(
+        os_int cid,
+        os_int propertynr,
+        const os_char *propertyname,
+        os_long x,
+        const os_char *text,
+        os_int pflags = EPRO_DEFAULT);
 
     /* Add double property to property set.
      */
@@ -759,10 +787,20 @@ public:
         os_int cid,
         os_int propertynr,
         const os_char *propertyname,
-        os_int pflags = EPRO_DEFAULT,
-        const os_char *text = OS_NULL,
-        os_double x = 0.0,
-        os_int digs = 2);
+        const os_char *text,
+        os_int digs,
+        os_int pflags = EPRO_DEFAULT);
+
+    /* Add double property to property set.
+     */
+    static eVariable *addpropertyd(
+        os_int cid,
+        os_int propertynr,
+        const os_char *propertyname,
+        os_double x,
+        const os_char *text,
+        os_int digs,
+        os_int pflags = EPRO_DEFAULT);
 
     /* Add string property to property set.
      */
@@ -770,9 +808,18 @@ public:
         os_int cid,
         os_int propertynr,
         const os_char *propertyname,
-        os_int pflags = EPRO_DEFAULT,
-        const os_char *text = OS_NULL,
-        const os_char *x = OS_NULL);
+        const os_char *text,
+        os_int pflags = EPRO_DEFAULT);
+
+    /* Add string property to property set.
+     */
+    static eVariable *addpropertys(
+        os_int cid,
+        os_int propertynr,
+        const os_char *propertyname,
+        const os_char *x,
+        const os_char *text,
+        os_int pflags = EPRO_DEFAULT);
 
     /* Property set for class done, complete it.
      */

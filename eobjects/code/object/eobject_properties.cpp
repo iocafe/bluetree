@@ -94,11 +94,12 @@ void eObject::setpropertys_msg(
 
   @brief Add property to property set (any type).
 
-  The addproperty function adds a property to class'es global property set.
+  The function adds a property to class'es global property set.
 
-  @param  classid Specifies to which classes property set the property is being added.
+  @param  cid Specifies to which classes property set the property is being added.
   @param  propertynr Property number, class specific.
   @param  propertyname Property name, class specific.
+  @param  text Name of the property displayed to user. osal_str_empty to not to set text.
   @param  pflags Bit fields, combination of:
           - EPRO_DEFAULT (0): No options
           - EPRO_PERSISTENT: Property value is persistant is when saving.
@@ -108,10 +109,10 @@ void eObject::setpropertys_msg(
             takes care about this.
           - EPRO_NOONPRCH: Do not call onpropertychange when value changes.
           - EPRO_NOPACK: Do not pack this property value within property set.
-  @param  text Name of the property displayed to user.
+          - EPRO_EARLYPRCH: Call onpropertychange() before setting stored property value.
 
-  @return Pointer to eVariable in property set defining the property. Additional attributes for
-          property can be added trough this returned pointer.
+  @return Pointer to the new eVariable representing the property in class'es property set.
+          Additional attributes for the property can be added trough the returned pointer.
 
 ****************************************************************************************************
 */
@@ -119,8 +120,8 @@ eVariable *eObject::addproperty(
     os_int cid,
     os_int propertynr,
     const os_char *propertyname,
-    os_int pflags,
-    const os_char *text)
+    const os_char *text,
+    os_int pflags)
 {
     eContainer *pset;
     eVariable *p;
@@ -142,11 +143,240 @@ eVariable *eObject::addproperty(
 
     /* Set name of the property to display to user.
      */
-    if (text) {
+    if (text) if (*text != '\0') {
         p->setpropertys(EVARP_TEXT, text);
     }
 
     return p;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add bolean property to property set.
+
+  The addpropertyb function adds property typed as boolean to property set.
+  See addproperty() for more information.
+
+  @param  x Default value.
+  @return Pointer to eVariable in property set.
+
+****************************************************************************************************
+*/
+eVariable *eObject::addpropertyb(
+    os_int cid,
+    os_int propertynr,
+    const os_char *propertyname,
+    const os_char *text,
+    os_int pflags)
+{
+    eVariable *p;
+    p = addproperty(cid, propertynr, propertyname, text, pflags);
+    p->setpropertyl(EVARP_TYPE, OS_BOOLEAN);
+    return p;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add boolean property to property set.
+
+  The addpropertyb function adds property typed as boolean to class'es property set and
+  sets initial/default value for it. See addproperty() for more information.
+
+  @param  x Default value.
+  @return Pointer to eVariable in property set.
+
+****************************************************************************************************
+*/
+eVariable *eObject::addpropertyb(
+    os_int cid,
+    os_int propertynr,
+    const os_char *propertyname,
+    os_boolean x,
+    const os_char *text,
+    os_int pflags)
+{
+    eVariable *p;
+    p = addpropertyb(cid, propertynr, propertyname, text, pflags);
+    p->setpropertyl(EVARP_DEFAULT, x);
+    p->setl(x);
+    return p;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add integer property to property set.
+
+  The addpropertyl function adds property typed as integer to property set.
+  See addproperty() for more information.
+
+  @param  x Default value.
+  @return Pointer to eVariable in property set.
+
+****************************************************************************************************
+*/
+eVariable *eObject::addpropertyl(
+    os_int cid,
+    os_int propertynr,
+    const os_char *propertyname,
+    const os_char *text,
+    os_int pflags)
+{
+    eVariable *p;
+    p = addproperty(cid, propertynr, propertyname, text, pflags);
+    p->setpropertyl(EVARP_TYPE, OS_LONG);
+    return p;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add integer property to property set.
+
+  The addpropertyl function adds property typed as long integer to property set, and
+  sets default value for it. See addproperty() for more information.
+
+  @param  x Default value.
+  @return Pointer to eVariable in property set.
+
+****************************************************************************************************
+*/
+eVariable *eObject::addpropertyl(
+    os_int cid,
+    os_int propertynr,
+    const os_char *propertyname,
+    os_long x,
+    const os_char *text,
+    os_int pflags)
+{
+    eVariable *p;
+    p = addpropertyl(cid, propertynr, propertyname, text, pflags);
+    p->setpropertyl(EVARP_DEFAULT, x);
+    p->setl(x);
+    return p;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add double property to property set.
+
+  The addpropertyd function adds property typed as double precision float to property set.
+  See addproperty() for more information.
+
+  @param  x Default value.
+  @return Pointer to eVariable in property set.
+
+****************************************************************************************************
+*/
+eVariable *eObject::addpropertyd(
+    os_int cid,
+    os_int propertynr,
+    const os_char *propertyname,
+    const os_char *text,
+    os_int digs,
+    os_int pflags)
+{
+    eVariable *p;
+    p = addproperty(cid, propertynr, propertyname, text, pflags);
+    p->setpropertyl(EVARP_TYPE, OS_DOUBLE);
+    p->setpropertyl(EVARP_DIGS, digs);
+    return p;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add double property to property set.
+
+  The addpropertyd function adds property typed as double precision float to property set, and
+  sets default value for it. See addproperty() for more information.
+
+  @param  x Default value.
+  @return Pointer to eVariable in property set.
+
+****************************************************************************************************
+*/
+eVariable *eObject::addpropertyd(
+    os_int cid,
+    os_int propertynr,
+    const os_char *propertyname,
+    os_double x,
+    const os_char *text,
+    os_int digs,
+    os_int pflags)
+{
+    eVariable *p;
+    p = addpropertyd(cid, propertynr, propertyname, text, digs, pflags);
+    p->setpropertyd(EVARP_DEFAULT, x);
+    p->setd(x);
+    return p;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add string property to property set.
+
+  The addpropertys function adds property typed as string to property set.
+  See addproperty() for more information.
+
+  @param  x Default value.
+  @return Pointer to eVariable in property set.
+
+****************************************************************************************************
+*/
+eVariable *eObject::addpropertys(
+    os_int cid,
+    os_int propertynr,
+    const os_char *propertyname,
+    const os_char *text,
+    os_int pflags)
+{
+    eVariable *p;
+    p = addproperty(cid, propertynr, propertyname, text, pflags);
+    p->setpropertyl(EVARP_TYPE, OS_STR);
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add string property to property set.
+
+  The addpropertys function adds property typed as string to property set, and sets
+  default value for it. See addproperty() for more information.
+
+  @param  x Default value.
+  @return Pointer to eVariable in property set.
+
+****************************************************************************************************
+*/
+eVariable *eObject::addpropertys(
+    os_int cid,
+    os_int propertynr,
+    const os_char *propertyname,
+    const os_char *x,
+    const os_char *text,
+    os_int pflags)
+{
+    eVariable *p;
+    p = addpropertys(cid, propertynr, propertyname, text, pflags);
+    if (x) {
+        p->sets(x);
+        p->setpropertys(EVARP_DEFAULT, x);
+    }
+    return OS_NULL;
 }
 
 
@@ -198,98 +428,6 @@ void eObject::propertysetdone(
             }
         }
     }
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Add integer property to property set.
-
-  The addpropertyl function adds property typed as integer to property set, and optionally
-  sets default value for it. See addproperty() for more information.
-
-  @param  x Default value.
-  @return Pointer to eVariable in property set.
-
-****************************************************************************************************
-*/
-eVariable *eObject::addpropertyl(
-    os_int cid,
-    os_int propertynr,
-    const os_char *propertyname,
-    os_int pflags,
-    const os_char *text,
-    os_long x)
-{
-    eVariable *p;
-    p = addproperty(cid, propertynr, propertyname, pflags, text);
-    p->setpropertyl(EVARP_TYPE, OS_LONG);
-    p->setl(x);
-    return p;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Add double property to property set.
-
-  The addpropertyd function adds property typed as double precision float to property set, and
-  optionally sets default value for it. See addproperty() for more information.
-
-  @param  x Default value.
-  @return Pointer to eVariable in property set.
-
-****************************************************************************************************
-*/
-eVariable *eObject::addpropertyd(
-    os_int cid,
-    os_int propertynr,
-    const os_char *propertyname,
-    os_int pflags,
-    const os_char *text,
-    os_double x,
-    os_int digs)
-{
-    eVariable *p;
-    p = addproperty(cid, propertynr, propertyname, pflags, text);
-    p->setpropertyl(EVARP_TYPE, OS_DOUBLE);
-    p->setpropertyl(EVARP_DIGS, digs);
-    p->setd(x);
-    return p;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Add string property to property set.
-
-  The addpropertys function adds property typed as string to property set, and optionally sets
-  default value for it. See addproperty() for more information.
-
-  @param  x Default value.
-  @return Pointer to eVariable in property set.
-
-****************************************************************************************************
-*/
-eVariable *eObject::addpropertys(
-    os_int cid,
-    os_int propertynr,
-    const os_char *propertyname,
-    os_int pflags,
-    const os_char *text,
-    const os_char *x)
-{
-    eVariable *p;
-    p = addproperty(cid, propertynr, propertyname, pflags, text);
-    p->setpropertyl(EVARP_TYPE, OS_STR);
-    if (x)
-    {
-        p->sets(x);
-    }
-    return OS_NULL;
 }
 
 

@@ -6,15 +6,15 @@
   @version 1.0
   @date    8.9.2016
 
-  Base class for objects in 3D object tree. Like "car" could be child of world and "car door" 
-  child of car. 
+  Base class for objects in 3D object tree. Like "car" could be child of world and "car door"
+  child of car.
   - Holds current object position, speed, rotation, rotational speed, scale.
   - References to mesh which contains vertices.
   - References to code related to object?
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -34,9 +34,9 @@
 ****************************************************************************************************
 */
 eObject3D::eObject3D(
-	eObject *parent,
-	os_int oid,
-	os_int flags)
+    eObject *parent,
+    os_int oid,
+    os_int flags)
     : eObject(parent, oid, flags)
 {
     m_flags = EOBJ3D_DEFAULT;
@@ -126,11 +126,11 @@ void eEnvelope::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eEnvelope");
 
-    addpropertyl(cls, EENVP_COMMAND, eenvp_command, EPRO_PERSISTENT|EPRO_SIMPLE, "command");
-    addpropertys(cls, EENVP_TARGET, eenvp_target, EPRO_PERSISTENT|EPRO_SIMPLE, "target");
-    addpropertys(cls, EENVP_SOURCE, eenvp_source, EPRO_PERSISTENT|EPRO_SIMPLE, "source");
-    addproperty (cls, EENVP_CONTENT, eenvp_content, EPRO_PERSISTENT|EPRO_SIMPLE, "content");
-    addproperty (cls, EENVP_CONTEXT, eenvp_context, EPRO_PERSISTENT|EPRO_SIMPLE, "context");
+    addpropertyl(cls, EENVP_COMMAND, eenvp_command, "command", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, EENVP_TARGET, eenvp_target, "target", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, EENVP_SOURCE, eenvp_source, "source", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EENVP_CONTENT, eenvp_content, "content", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EENVP_CONTEXT, eenvp_context, "context", EPRO_PERSISTENT|EPRO_SIMPLE);
     os_unlock();
 }
 #endif
@@ -141,7 +141,7 @@ void eEnvelope::setupclass()
 
   @brief Get object flags.
 
-  Get object flags. Bit fields, returns EOBJ3D_DEFAULT (0) for no flags. Flag EOBJ3D_CAMERA 
+  Get object flags. Bit fields, returns EOBJ3D_DEFAULT (0) for no flags. Flag EOBJ3D_CAMERA
   indicates camera, EOBJ3D_LIGHT a light source...
 
   @return  3D object flags.
@@ -170,7 +170,7 @@ void eObject3D::update_game(
     eKeyboardCtrl *kbctrl,
     os_double elapsed_s)
 {
-    eObject3D 
+    eObject3D
         *objroot;
 
     if ((flags() & EOBJ3D_MOVING) && m_bb_ok_world)
@@ -183,8 +183,8 @@ void eObject3D::update_game(
             do
             {
                 if (objroot->m_flags & EOBJ3D_OBJECT_ROOT)
-                { 
-                    if (objroot->m_velocity.y < 0) 
+                {
+                    if (objroot->m_velocity.y < 0)
                     {
                         objroot->m_velocity.y = -0.27 * objroot->m_velocity.y;
                     }
@@ -441,7 +441,7 @@ void eObject3D::calculate_bounding_box_world()
     /* If we do not have bounding box in mesh coordinates, we cannot calculate.
      */
     if (!m_bb_ok_mesh)
-    { 
+    {
         m_bb_ok_world = false;
         return;
     }
@@ -471,7 +471,7 @@ void eObject3D::calculate_bounding_box_camera(
     /* If mouse click is not supported for this object or we have no bounding box in mesh
        cooddinates, then do nothing.
      */
-    if ((flags() & EOBJ3D_MOUSE_CLICK)==0 || !m_bb_ok_mesh) 
+    if ((flags() & EOBJ3D_MOUSE_CLICK)==0 || !m_bb_ok_mesh)
     {
         m_bb_ok_cam = false;
         return;

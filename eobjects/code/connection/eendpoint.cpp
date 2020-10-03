@@ -89,12 +89,9 @@ void eEndPoint::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eEndPoint");
-    addproperty(cls, EENDPP_CLASSID, eendpp_classid,
-        EPRO_PERSISTENT|EPRO_SIMPLE, "class ID");
-    addproperty(cls, EENDPP_IPADDR, eendpp_ipaddr,
-        EPRO_PERSISTENT|EPRO_SIMPLE, "IP");
-    p = addpropertyl(cls, EENDPP_ISOPEN, eendpp_isopen,
-        EPRO_NOONPRCH, "is open", OS_FALSE);
+    addproperty(cls, EENDPP_CLASSID, eendpp_classid, "class ID", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty(cls, EENDPP_IPADDR, eendpp_ipaddr, "IP", EPRO_PERSISTENT|EPRO_SIMPLE);
+    p = addpropertyl(cls, EENDPP_ISOPEN, eendpp_isopen, OS_FALSE, "is open", EPRO_NOONPRCH);
     p->setpropertys(EVARP_ATTR, "rdonly;chkbox");
     os_unlock();
 }

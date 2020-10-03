@@ -173,20 +173,20 @@ void eVariable::setupproperties(
        property set before setting value for it. There is trick with p to set text type
        after adding property type. This effects only eVariable class.
      */
-    text = addproperty(cls, EVARP_TEXT, evarp_text, EPRO_METADATA|EPRO_NOONPRCH, "text");
-    vtype = addpropertyl (cls, EVARP_TYPE, evarp_type, EPRO_METADATA|EPRO_NOONPRCH, "type");
-    addproperty (cls, EVARP_ABBR, evarp_abbr, EPRO_METADATA|EPRO_NOONPRCH, "abbreviation");
-    addproperty (cls, EVARP_TTIP, evarp_ttip, EPRO_METADATA|EPRO_NOONPRCH, "tooltip");
-    addproperty (cls, EVARP_VALUE, evarp_value, EPRO_PERSISTENT|EPRO_SIMPLE, "value");
-    addproperty (cls, EVARP_DEFAULT, evarp_default, EPRO_METADATA|EPRO_NOONPRCH, "default");
-    addpropertyl(cls, EVARP_DIGS, evarp_digs, EPRO_METADATA|EPRO_SIMPLE, "digs");
-    addpropertys(cls, EVARP_UNIT, evarp_unit, EPRO_METADATA|EPRO_NOONPRCH, "unit");
-    addpropertyd(cls, EVARP_MIN, evarp_min, EPRO_METADATA|EPRO_NOONPRCH, "min");
-    addpropertyd(cls, EVARP_MAX, evarp_max, EPRO_METADATA|EPRO_NOONPRCH, "max");
-    addpropertys(cls, EVARP_ATTR, evarp_attr, EPRO_METADATA|EPRO_NOONPRCH, "attr");
-    addpropertyd(cls, EVARP_GAIN, evarp_gain, EPRO_METADATA|EPRO_NOONPRCH, "gain");
-    addpropertyd(cls, EVARP_OFFSET, evarp_offset, EPRO_METADATA|EPRO_NOONPRCH, "offset");
-    addproperty (cls, EVARP_CONF, evarp_conf, EPRO_METADATA|EPRO_NOONPRCH, "conf");
+    text = addproperty(cls, EVARP_TEXT, evarp_text, "text", EPRO_METADATA|EPRO_NOONPRCH);
+    vtype = addpropertyl (cls, EVARP_TYPE, evarp_type, "type", EPRO_METADATA|EPRO_NOONPRCH);
+    addproperty (cls, EVARP_ABBR, evarp_abbr, "abbreviation", EPRO_METADATA|EPRO_NOONPRCH);
+    addproperty (cls, EVARP_TTIP, evarp_ttip, "tooltip", EPRO_METADATA|EPRO_NOONPRCH);
+    addproperty (cls, EVARP_VALUE, evarp_value, "value", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EVARP_DEFAULT, evarp_default, "default", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertyl(cls, EVARP_DIGS, evarp_digs, "digs", EPRO_METADATA|EPRO_SIMPLE);
+    addpropertys(cls, EVARP_UNIT, evarp_unit, "unit", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertyd(cls, EVARP_MIN, evarp_min, "min", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertyd(cls, EVARP_MAX, evarp_max, "max", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertys(cls, EVARP_ATTR, evarp_attr, "attr", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertyd(cls, EVARP_GAIN, evarp_gain, "gain", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertyd(cls, EVARP_OFFSET, evarp_offset, "offset", EPRO_METADATA|EPRO_NOONPRCH);
+    addproperty (cls, EVARP_CONF, evarp_conf, "conf", EPRO_METADATA|EPRO_NOONPRCH);
 
     {
         eVariable tmp;
