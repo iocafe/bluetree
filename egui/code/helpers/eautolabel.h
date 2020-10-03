@@ -48,6 +48,9 @@ public:
     void clear(
         bool clear_count = false);
 
+    inline os_boolean isx() {return m_extended_value;}
+    inline os_int sbits() {return m_state_bits;}
+
 protected:
     /* Set text to display as label before "##".
      */
@@ -66,6 +69,8 @@ protected:
     os_char *m_label;
     os_memsz m_label_sz;
     os_long m_count;
+    os_boolean m_extended_value;
+    os_char m_state_bits;
 };
 
 

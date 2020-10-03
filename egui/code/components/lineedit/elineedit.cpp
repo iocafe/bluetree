@@ -185,7 +185,7 @@ eStatus eLineEdit::onpropertychange(
 eStatus eLineEdit::draw(
     eDrawParams& prm)
 {
-    os_int edit_w, unit_w, total_w, unit_spacer, total_h, h;
+    os_int edit_w, unit_w, relative_x2, unit_spacer, total_w, total_h, h;
     const os_char *value, *label, *unit;
     ImGuiInputTextFlags eflags;
 
@@ -193,7 +193,8 @@ eStatus eLineEdit::draw(
 
     // ImVec2 c = ImGui::GetContentRegionAvail();
     // total_w = c.x;
-    total_w = ImGui::GetContentRegionMax().x;
+    relative_x2 = ImGui::GetContentRegionMax().x;
+    total_w = relative_x2 - ImGui::GetCursorPosX();
 
 
 ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen coordinates!
@@ -204,8 +205,8 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
     total_h = ImGui::GetItemRectSize().y;
 
     // int edit_w = ImGui::CalcItemWidth();
-    // ImGui::SameLine(total_w - edit_w);
-    // edit_w = total_w - 200;
+    // ImGui::SameLine(relative_x2 - edit_w);
+    // edit_w = relative_x2 - 200;
 
     if (m_attr.showas() == E_SHOWAS_CHECKBOX) {
         edit_w = ImGui::GetFrameHeight();
@@ -216,7 +217,7 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
     unit_w = 60;
     unit_spacer = 6;
 
-    ImGui::SameLine(total_w - edit_w - unit_spacer - unit_w);
+    ImGui::SameLine(relative_x2 - edit_w - unit_spacer - unit_w);
     ImGui::SetNextItemWidth(edit_w);
 
     if (m_edit_value) {
@@ -287,7 +288,7 @@ ImVec2 cpos = ImGui::GetCursorScreenPos();      // ImDrawList API uses screen co
 
     unit = m_unit.get(this, ECOMP_UNIT);
     if (*unit != '\0') {
-        ImGui::SameLine(total_w - unit_w);
+        ImGui::SameLine(relative_x2 - unit_w);
         ImGui::SetNextItemWidth(unit_w);
         ImGui::TextUnformatted(unit);
         h = ImGui::GetItemRectSize().y;

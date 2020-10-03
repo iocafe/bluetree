@@ -41,12 +41,13 @@ void eGui::setup_desktop_application()
     e->setpropertys(ECOMP_TEXT, "Editti");
     e->setpropertys(ECOMP_ATTR, "tstamp=\"yy,usec\"");
     e->setpropertyl(ECOMP_VALUE, etime());
+    e->setpropertys(ECOMP_TTIP, "Minun helppo helppi");
 
     e = new eLineEdit(w);
     e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
     e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
     x = 1234.5;
-    x.set_sbits(OSAL_STATE_YELLOW);
+    x.set_sbits(OSAL_STATE_ORANGE|OSAL_STATE_CONNECTED);
     x.set_tstamp(etime());
     e->setpropertyo(ECOMP_VALUE, &x);
 

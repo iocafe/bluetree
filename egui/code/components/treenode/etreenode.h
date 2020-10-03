@@ -139,6 +139,11 @@ public:
 
 
 protected:
+    void draw_state_bits(
+        os_int x);
+
+    void draw_tooltip();
+
     void request_object_info();
 
     void set_modified_value();

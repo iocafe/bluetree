@@ -392,14 +392,16 @@ eStatus eTreeNode::draw(
     eDrawParams& prm)
 {
     eComponent *child;
-    os_int text_w, edit_w, unit_w, total_w, path_w, ipath_w, unit_spacer, total_h, w_left, h;
+    os_int text_w, edit_w, unit_w, relative_x2, path_w, ipath_w, unit_spacer,
+        total_w, total_h, w_left, h;
     const os_char *label, *value, *text, *unit, *path;
     ImGuiInputTextFlags eflags;
     bool isopen;
 
     m_attr.for_variable(this);
 
-    total_w = ImGui::GetContentRegionMax().x;
+    relative_x2 = ImGui::GetContentRegionMax().x;
+    total_w = relative_x2 - ImGui::GetCursorPosX();
     ImVec2 cpos = ImGui::GetCursorScreenPos();
     m_rect.x1 = cpos.x;
     m_rect.y1 = cpos.y;
@@ -440,7 +442,7 @@ eStatus eTreeNode::draw(
     path_w = 0;
     ipath_w = 0;
 
-    w_left = total_w - text_w - edit_w;
+    w_left = relative_x2 - text_w - edit_w;
     if (w_left > 0) {
         unit_spacer = w_left;
         if (unit_spacer > 6) unit_spacer = 6;
@@ -470,7 +472,7 @@ eStatus eTreeNode::draw(
         edit_w += w_left;
     }
 
-    ImGui::SameLine(total_w - edit_w - unit_spacer - unit_w - path_w - ipath_w);
+    ImGui::SameLine(relative_x2 - edit_w - unit_spacer - unit_w - path_w - ipath_w);
     ImGui::SetNextItemWidth(edit_w);
 
     if (m_edit_value) {
@@ -537,12 +539,18 @@ eStatus eTreeNode::draw(
         ImGui::PopStyleVar();
         h = ImGui::GetItemRectSize().y;
         if (h > total_h) total_h = h;
+
+        /* Tool tip
+         */
+        if (ImGui::IsItemHovered()) {
+            draw_tooltip();
+        }
     }
 
     if (unit_w > 0) {
         unit = m_unit.get(this, ECOMP_UNIT);
         if (*unit != '\0') {
-            ImGui::SameLine(total_w - unit_w - path_w - ipath_w);
+            ImGui::SameLine(relative_x2 - unit_w - path_w - ipath_w);
             ImGui::SetNextItemWidth(unit_w);
             ImGui::TextUnformatted(unit);
             h = ImGui::GetItemRectSize().y;
@@ -552,7 +560,7 @@ eStatus eTreeNode::draw(
     if (path_w > 0) {
         path = m_path.get(this, ECOMP_PATH);
         if (*path != '\0') {
-            ImGui::SameLine(total_w - path_w - ipath_w);
+            ImGui::SameLine(relative_x2 - path_w - ipath_w);
             ImGui::SetNextItemWidth(path_w);
             ImGui::TextUnformatted(path);
             h = ImGui::GetItemRectSize().y;
@@ -562,7 +570,7 @@ eStatus eTreeNode::draw(
     if (ipath_w > 0) {
         path = m_ipath.get(this, ECOMP_IPATH);
         if (*path != '\0') {
-            ImGui::SameLine(total_w - ipath_w);
+            ImGui::SameLine(relative_x2 - ipath_w);
             ImGui::SetNextItemWidth(ipath_w);
             ImGui::TextUnformatted(path);
             h = ImGui::GetItemRectSize().y;
@@ -572,6 +580,9 @@ eStatus eTreeNode::draw(
 
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
+
+    /* Draw marker for state bits if we have extended value */
+    draw_state_bits(m_rect.x2 - edit_w - unit_spacer - unit_w - path_w - ipath_w);
 
     /* Let base class implementation handle the rest.
      */
@@ -589,6 +600,125 @@ eStatus eTreeNode::draw(
     }
 
     return ESTATUS_SUCCESS;
+}
+
+/**
+****************************************************************************************************
+
+  @brief Draw marker for state bits if we have extended value
+
+  The eTreeNode::draw_state_bits() function...
+
+  @return  None.
+
+****************************************************************************************************
+*/
+void eTreeNode::draw_state_bits(
+    os_int x)
+{
+    os_int state_bits;
+    float circ_x, circ_y;
+    const os_int rad = 8;
+
+    if (!m_edit_value && m_label_value.isx())
+    {
+        ImVec4 colf;
+
+        state_bits = m_label_value.sbits();
+        colf = ImVec4(0.5f, 0.5f, 0.5f, 0.5f);
+        switch (state_bits & OSAL_STATE_ERROR_MASK)
+        {
+            case OSAL_STATE_YELLOW:
+                if (state_bits & OSAL_STATE_CONNECTED) {
+                    colf = ImVec4(0.8f, 0.8f, 0.2f, 0.5f /* alpha */);
+                }
+                break;
+
+            case OSAL_STATE_ORANGE:
+                if (state_bits & OSAL_STATE_CONNECTED) {
+                    colf = ImVec4(1.0f, 0.7f, 0.0f, 0.5f);
+                }
+                break;
+
+            case OSAL_STATE_RED:
+                colf = ImVec4(1.0f, 0.0f, 0.0f, 0.5f);
+                break;
+
+            default:
+                if (state_bits & OSAL_STATE_CONNECTED) {
+                    return;
+                }
+                break;
+        }
+
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        ImU32 col = ImColor(colf);
+        circ_x = (float)(x + 3*rad/2);
+        circ_y = m_rect.y1 + 0.5 * (m_rect.y2 - m_rect.y1 + 1);
+        draw_list->AddCircleFilled(ImVec2(circ_x, circ_y), rad, col, 0);
+    }
+}
+
+/**
+****************************************************************************************************
+
+  @brief Draw tool tip, called when mouse is hovering over the value
+
+  The eTreeNode::draw_tooltip() function...
+
+  @return  None.
+
+****************************************************************************************************
+*/
+void eTreeNode::draw_tooltip()
+{
+    eVariable text, item;
+    eValueX *ex;
+    os_long utc;
+    os_int state_bits;
+
+    text = m_text.get(this, ECOMP_TEXT);
+    propertyv(ECOMP_TTIP, &item);
+    if (!item.isempty()) {
+        text += "\n";
+        text += item;
+    }
+
+    propertyv(ECOMP_VALUE, &item);
+    ex = item.getx();
+    if (ex) {
+        state_bits = ex->sbits();
+
+        utc = ex->tstamp();
+        if (etime_timestamp_str(utc, &item) == ESTATUS_SUCCESS)
+        {
+            text += "\nmodified ";
+            text += item;
+        }
+
+        if ((state_bits & OSAL_STATE_CONNECTED) == 0) {
+            text += "\nstate: disconnected";
+        }
+        if (state_bits & OSAL_STATE_ERROR_MASK) {
+            text += (state_bits & OSAL_STATE_CONNECTED) ? "\nstate: " : ", ";
+            switch (state_bits & OSAL_STATE_ERROR_MASK)
+            {
+                case OSAL_STATE_YELLOW: text += "attention"; break;
+                default:
+                case OSAL_STATE_ORANGE: text += "warning"; break;
+                case OSAL_STATE_RED: text += "error"; break;
+            }
+        }
+    }
+    text += "\npath: ";
+    text += m_path.get(this, ECOMP_PATH);
+    text += "\nflags: ";
+
+    ImGui::BeginTooltip();
+    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+    ImGui::TextUnformatted(text.gets());
+    ImGui::PopTextWrapPos();
+    ImGui::EndTooltip();
 }
 
 

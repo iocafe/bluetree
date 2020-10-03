@@ -28,6 +28,8 @@ eAutoLabel::eAutoLabel()
     m_label = OS_NULL;
     m_label_sz = 0;
     m_count = 0;
+    m_extended_value = OS_FALSE;
+    m_state_bits = OSAL_STATE_CONNECTED;
 }
 
 eAutoLabel::~eAutoLabel()
@@ -54,6 +56,8 @@ void eAutoLabel::clear(
         m_label = OS_NULL;
         m_label_sz = 0;
     }
+    m_extended_value = OS_FALSE;
+    m_state_bits = OSAL_STATE_CONNECTED;
 
     if (clear_count) {
         m_count = 0;
@@ -150,8 +154,16 @@ void eAutoLabel::set(
     eAttrBuffer *attr)
 {
     eVariable tmp;
+    eValueX *ex;
 
     component->propertyv(propertynr, &tmp);
     enice_value_for_ui(&tmp, component, attr);
     setstr(component, tmp.gets());
+
+    ex = tmp.getx();
+    if (ex) {
+        m_extended_value = OS_TRUE;
+        m_state_bits = ex->sbits();
+    }
+
 }

@@ -183,4 +183,10 @@ eStatus edate_parse_str(
     eDateTimeFormat *format = OS_NULL,
     os_memsz *n_chars_parsed = OS_NULL);
 
+/* Convert UTC to timestamp string.
+ */
+eStatus etime_timestamp_str(
+    os_long utc,
+    eVariable *x);
+
 #endif

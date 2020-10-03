@@ -309,6 +309,38 @@ eStatus edate_parse_str(
     return ESTATUS_SUCCESS;
 }
 
+/* Convert UTC to timestamp string.
+ */
+eStatus etime_timestamp_str(
+    os_long utc,
+    eVariable *x)
+{
+    eLocalTime localt;
+    os_char buf[EDATETIME_STR_BUF_SZ];
+
+    x->clear();
+    if (utc == 0) {
+        return ESTATUS_FAILED;
+    }
+
+    if (elocaltime(&localt, utc)) {
+        return ESTATUS_FAILED;
+    }
+
+    if (edate_make_str(&localt, buf, sizeof(buf)) == ESTATUS_SUCCESS)
+    {
+        x->sets(buf);
+        x->appends(" ");
+    }
+
+    if (etime_make_str(&localt, buf, sizeof(buf), OS_NULL, ETIMESTR_MILLISECONDS)
+        == ESTATUS_SUCCESS)
+    {
+        x->appends(buf);
+    }
+
+    return ESTATUS_SUCCESS;
+}
 
 static void estr_append_item(
     os_char **p,
@@ -323,3 +355,4 @@ static void estr_append_item(
     }
     *p = eint2str(*p, x, w, w, '0');
 }
+
