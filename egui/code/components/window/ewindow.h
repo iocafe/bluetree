@@ -126,6 +126,11 @@ public:
     /*@}*/
 
 
+    /* Get/set edit mode.
+     */
+    inline os_boolean editmode() {return m_edit_mode; }
+    inline void set_editmode(os_int x) {m_edit_mode = (os_boolean)x; }
+
 protected:
     virtual void object_info(
         eVariable *item,
@@ -137,6 +142,11 @@ protected:
     /* ImGui autolabel count for generating labels for components within the eWindow.
      */
     os_long m_autolabel_count;
+
+    /* This component is in edit mode.
+     */
+    os_boolean m_edit_mode;
+
 };
 
 

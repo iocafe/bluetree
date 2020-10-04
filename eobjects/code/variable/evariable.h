@@ -495,6 +495,13 @@ public:
     }
 
 protected:
+    /* Collect information about this object for tree browser.
+     */
+    virtual void object_info(
+        eVariable *item,
+        eVariable *name,
+        eSet *appendix);
+
     /** Set data type.
      */
     inline void settype(osalTypeId type_id)

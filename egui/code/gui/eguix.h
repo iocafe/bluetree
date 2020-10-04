@@ -231,6 +231,8 @@ public:
 
 
 protected:
+    void handle_mouse();
+
     /* Viewport, corresponds to operating system window, etc.
      */
     eViewPort *m_viewport;

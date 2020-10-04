@@ -112,15 +112,15 @@ typedef struct eLayoutParams
 
     /* This component can set input focus.
      */
-    bool can_focus;
+    os_boolean can_focus;
 
     /* This component can react to mouse and get mouse capture.
      */
-    bool enable_mouse;
+    os_boolean enable_mouse;
 
     /* This component is in edit mode.
      */
-    bool edit_mode;
+    os_boolean edit_mode;
 }
 eLayoutParams;
 
@@ -129,7 +129,36 @@ typedef struct eDrawParams
 {
     eGui *gui;
     ImGuiIO *io;
-    bool right_click;
+
+    /* Internal for mouse processing. Normally components should not use these.
+     */
+    os_boolean mouse_press[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_release[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_is_down[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_is_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_held_still[EIMGUI_NRO_MOUSE_BUTTONS];
+
+    // ePos mouse_down_pos[EIMGUI_NRO_MOUSE_BUTTONS];
+    // ePos mouse_drag_delta_down[EIMGUI_NRO_MOUSE_BUTTONS];
+
+
+    /* Components should use these.
+     */
+    ePos mouse_pos;
+
+    os_boolean mouse_left_click;
+    os_boolean mouse_left_drag_and_drop;
+    ePos mouse_left_drag_start;
+    ePos mouse_left_drag_delta;
+
+    os_boolean mouse_right_click;
+    os_boolean mouse_right_drag_and_drop;
+    ePos mouse_right_drag_start;
+    ePos mouse_right_drag_delta;
+
+    /* This component is in edit mode.
+     */
+    os_boolean edit_mode;
 }
 eDrawParams;
 
@@ -388,11 +417,6 @@ public:
      */
     void capture_mouse();
 
-    /* Get/set edit mode.
-     */
-    inline os_boolean editmode() {return m_editmode; }
-    inline void set_editmode(os_int x) {m_editmode = (os_boolean)x; }
-
     /*@}*/
 
 
@@ -419,9 +443,6 @@ protected:
     eSize m_natural_sz;
 
     bool m_popup_open;
-
-    os_boolean m_editmode;
-
 };
 
 

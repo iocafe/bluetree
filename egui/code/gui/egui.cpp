@@ -407,7 +407,9 @@ eStatus eGui::run()
         ShowExampleAppDockSpace(&openoi);
 
         m_draw_prm.io = &ImGui::GetIO();
-        m_draw_prm.right_click = ImGui::IsMouseReleased(EIMGUI_RIGHT_MOUSE_BUTTON);
+
+        handle_mouse();
+        // m_draw_prm.right_click = ImGui::IsMouseReleased(EIMGUI_RIGHT_MOUSE_BUTTON);
 
         for (c = firstcomponent(EOID_GUI_WINDOW); c; c = c->nextcomponent(EOID_GUI_WINDOW))
         {
@@ -415,74 +417,97 @@ eStatus eGui::run()
         }
 
 
-#if 0
-        // TEST BEGIN
-        static bool show_another_window = false;
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-            static bool show_demo_window = true;
-
-// static ImVec2 zero(0,0);
-// ImGui::SetNextWindowPos(zero);
-// () and SetNextWindowSize()
-
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-        // TEST END
-
-        ImGui::Begin("Doodleli!");                          // Create a window called "Hello, world!" and append into it.
-        for (c = firstcomponent(); c; c = c->nextcomponent())
-        {
-            c->draw(m_draw_prm);
-        }
-        ImGui::End();
-
-
-        // TEST BEGIN
-        if (show_another_window) {
-            static float f = 0.0f;
-            static int counter = 0;
-            static bool show_demo_window = true;
-
-            ImGui::Begin("Jello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            // ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-        // TEST END
-#endif
-
         eimgui_finish_frame(m_viewport);
 
     }
 
     return s;
 }
+
+
+/* Convert mouse signals to click and drag
+ */
+void eGui::handle_mouse()
+{
+    os_int i;
+
+    m_draw_prm.io = &ImGui::GetIO();
+
+    /* Normally we give only "pulses" to components.
+     */
+    m_draw_prm.mouse_left_click = OS_FALSE;
+    m_draw_prm.mouse_left_drag_and_drop = OS_FALSE;
+    m_draw_prm.mouse_right_click = OS_FALSE;
+    m_draw_prm.mouse_right_drag_and_drop = OS_FALSE;
+    m_draw_prm.mouse_pos.x = m_draw_prm.io->MousePos.x;
+    m_draw_prm.mouse_pos.y = m_draw_prm.io->MousePos.y;
+
+    for (i = 0; i < EIMGUI_NRO_MOUSE_BUTTONS; i++)
+    {
+        m_draw_prm.mouse_press[i] = ImGui::IsMouseClicked(i);
+        m_draw_prm.mouse_release[i] = ImGui::IsMouseReleased(i);
+        m_draw_prm.mouse_is_down[i] = ImGui::IsMouseDown(i);
+
+        /* Detect if we have started dwagging
+         */
+        if (m_draw_prm.mouse_is_down[i]) {
+            ImVec2 delta = ImGui::GetMouseDragDelta(i);
+
+            if ((delta.x || delta.y) && !m_draw_prm.mouse_is_dragging[i])
+            {
+                m_draw_prm.mouse_is_dragging[i] = OS_TRUE;
+            }
+
+            if (!m_draw_prm.mouse_is_dragging[i] &&
+                !m_draw_prm.mouse_held_still[i])
+            {
+                if (m_draw_prm.io->MouseDownDuration[i] > 1)
+                {
+                    m_draw_prm.mouse_held_still[i] = OS_TRUE;
+                }
+            }
+        }
+
+        /* Save mouse drag delta
+         */
+        if (m_draw_prm.mouse_release[i])
+        {
+            if (m_draw_prm.mouse_is_dragging[i]) {
+                ImVec2 delta = ImGui::GetMouseDragDelta(i);
+
+                if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_draw_prm.mouse_held_still[i]) {
+                    m_draw_prm.mouse_left_drag_start.x = m_draw_prm.mouse_pos.x - delta.x;
+                    m_draw_prm.mouse_left_drag_start.y = m_draw_prm.mouse_pos.y - delta.y;
+                    m_draw_prm.mouse_left_drag_delta.x = delta.x;
+                    m_draw_prm.mouse_left_drag_delta.y = delta.y;
+                    m_draw_prm.mouse_left_drag_and_drop = OS_TRUE;
+                }
+                else {
+                    m_draw_prm.mouse_right_drag_start.x = m_draw_prm.mouse_pos.x - delta.x;
+                    m_draw_prm.mouse_right_drag_start.y = m_draw_prm.mouse_pos.y - delta.y;
+                    m_draw_prm.mouse_right_drag_delta.x = delta.x;
+                    m_draw_prm.mouse_right_drag_delta.y = delta.y;
+                    m_draw_prm.mouse_right_drag_and_drop = OS_TRUE;
+               }
+            }
+
+            else {
+                if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_draw_prm.mouse_held_still[i]) {
+                    m_draw_prm.mouse_left_click = OS_TRUE;
+                }
+                else {
+                    m_draw_prm.mouse_right_click = OS_TRUE;
+                }
+            }
+        }
+
+        /* Clear mouse button state on press and release.
+         */
+        if (m_draw_prm.mouse_press[i] || m_draw_prm.mouse_release[i])
+        {
+            m_draw_prm.mouse_is_dragging[i] = OS_FALSE;
+            m_draw_prm.mouse_held_still[i] = OS_FALSE;
+        }
+    }
+}
+

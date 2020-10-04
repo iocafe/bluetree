@@ -584,8 +584,8 @@ eStatus eComponent::draw(
 
     // And make sure item is in Z order
 
-    if (prm.right_click) {
-        if (erect_is_point_inside(&visible_rect, prm.io->MousePos.x, prm.io->MousePos.y))
+    if (prm.mouse_right_click) {
+        if (erect_is_point_inside(&visible_rect, prm.mouse_pos.x, prm.mouse_pos.y))
         {
             right_click_popup();
         }
@@ -657,14 +657,14 @@ ePopup *eComponent::right_click_popup()
      */
     scope = new eButton(p);
     w = window(false);
-    if (w) {
+    if (w) if (w->classid() == EGUICLASSID_WINDOW){
         scope->setpropertys(ECOMP_TEXT, "window");
 
         item = new eButton(scope);
         item->setpropertys(ECOMP_TEXT, "edit window");
 
         item->setpropertyl(ECOMP_VALUE, OS_FALSE);
-        item->setpropertyl(ECOMP_SETVALUE, !w->editmode());
+        item->setpropertyl(ECOMP_SETVALUE, !((eWindow*)w)->editmode());
         item->setpropertys(ECOMP_TARGET, "window/_p/edit");
     }
 

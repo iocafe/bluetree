@@ -34,7 +34,7 @@ eWindow::eWindow(
     : eComponent(parent, id, flags)
 {
     m_autolabel_count = 0;
-    m_editmode = OS_FALSE;
+    m_edit_mode = OS_FALSE;
 
     addname("window", ENAME_TEMPORARY, "gui");
     ns_create("window");
@@ -217,8 +217,10 @@ eStatus eWindow::draw(
     ImGui::Begin(label);                          // Create a window called "Hello, world!" and append into it.
 
     childprm = prm;
+    childprm.edit_mode = m_edit_mode;
+
     if (!ImGui::IsWindowHovered()) {
-        childprm.right_click = false;
+        childprm.mouse_right_click = false;
     }
 
     for (c = firstcomponent(EOID_GUI_COMPONENT); c; c = c->nextcomponent(EOID_GUI_COMPONENT))

@@ -200,6 +200,55 @@ void eVariable::setupproperties(
 /**
 ****************************************************************************************************
 
+  @brief Collect information about this object for tree browser.
+
+  The eVariable::object_info function fills in item (eVariable) to contain information
+  about this object for tree browser view.
+
+  @param   item Pointer to eVariable to set up with object information.
+  @param   name Object's name if known. OS_NULL if object is not named or name is
+           unknown at this time.
+  @param   appendix Pointer to eSet into which to store property flags. The stored property
+           flags indicate if object has namespace, children, or properties.
+
+****************************************************************************************************
+*/
+void eVariable::object_info(
+    eVariable *item,
+    eVariable *name,
+    eSet *appendix)
+{
+    eVariable value;
+    os_int propertynr, i;
+
+    static os_int copy_property_list[] = {EVARP_VALUE, EVARP_TYPE, EVARP_UNIT, EVARP_ATTR,
+        EVARP_DEFAULT, EVARP_ABBR, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
+        EVARP_GAIN, EVARP_OFFSET, 0};
+
+    eObject::object_info(item, name, appendix);
+
+    propertyv(EVARP_TEXT, &value);
+    if (!value.isempty()) {
+        eVariable value2;
+        value2 += "\"";
+        value2 += value;
+        value2 += "\" ";
+        item->propertyv(EVARP_TEXT, &value);
+        value2 += value;
+        item->setpropertyv(EVARP_TEXT, &value2);
+    }
+
+    i = 0;
+    while ((propertynr = copy_property_list[i++])) {
+        propertyv(propertynr, &value);
+        item->setpropertyv(propertynr, &value);
+    }
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Get next child variable identified by oid.
 
   The eVariable::nextv() function returns pointer to the next object of the same class.

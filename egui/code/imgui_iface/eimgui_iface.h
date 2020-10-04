@@ -30,8 +30,15 @@ typedef struct eViewPort
 eViewPort;
 
 
-#define EIMGUI_LEFT_MOUSE_BUTTON ImGuiMouseButton_Left
-#define EIMGUI_RIGHT_MOUSE_BUTTON ImGuiMouseButton_Right
+/* Constant EIMGUI_LEFT_MOUSE_BUTTON and ImGuiMouseButton_Left are 0, and promiced by ImGui to remain so.
+   We use the same indexed, so defined here as numbers. Same goes for EIMGUI_RIGHT_MOUSE_BUTTON and
+   ImGuiMouseButton_Right, these are 1. This software doesn't support middle mouse button (it supports
+   mouse wheel), so number of buttons for this software is defined as 2.
+ */
+#define EIMGUI_LEFT_MOUSE_BUTTON 0
+#define EIMGUI_RIGHT_MOUSE_BUTTON 1
+#define EIMGUI_NRO_MOUSE_BUTTONS 2
+
 
 /* Initialize ImGUI for use.
  */

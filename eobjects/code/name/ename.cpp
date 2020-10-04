@@ -143,6 +143,43 @@ void eName::setupclass()
 /**
 ****************************************************************************************************
 
+  @brief Collect information about this object for tree browser.
+
+  The eName::object_info function fills in item (eVariable) to contain information
+  about this object for tree browser view.
+
+  @param   item Pointer to eVariable to set up with object information.
+  @param   name Object's name if known. OS_NULL if object is not named or name is
+           unknown at this time.
+  @param   appendix Pointer to eSet into which to store property flags. The stored property
+           flags indicate if object has namespace, children, or properties.
+
+****************************************************************************************************
+*/
+void eName::object_info(
+    eVariable *item,
+    eVariable *name,
+    eSet *appendix)
+{
+    eVariable value, value2;
+
+    eObject::object_info(item, name, appendix);
+
+    value = "/";
+    if (m_namespace_id) {
+        value += namespaceid();
+    }
+    value += "/";
+    propertyv(EVARP_VALUE, &value2);
+    value += value2;
+
+    item->setpropertyv(EVARP_VALUE, &value);
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Initialize member variables to known state.
   @return  None.
 

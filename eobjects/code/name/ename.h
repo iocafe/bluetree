@@ -175,6 +175,13 @@ public:
     inline bool is_mapped() {return m_namespace != OS_NULL; }
 
 protected:
+    /* Collect information about this object for tree browser.
+     */
+    virtual void object_info(
+        eVariable *item,
+        eVariable *name,
+        eSet *appendix);
+
     void clear_members();
 
     /** Tag this object as "red".
