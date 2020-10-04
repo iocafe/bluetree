@@ -46,6 +46,8 @@ eComponent::eComponent(
     os_int flags)
     : eObject(parent, id, flags)
 {
+    m_popup_open = OS_FALSE;
+    m_next_z = m_prev_z = OS_NULL;
 }
 
 
@@ -62,6 +64,7 @@ eComponent::eComponent(
 */
 eComponent::~eComponent()
 {
+    remove_from_zorder();
 }
 
 
@@ -759,4 +762,49 @@ void eComponent::close_popup()
         }
         m_popup_open = false;
     }
+}
+
+
+/* Add component to window's Z order
+ */
+void eComponent::add_to_zorder(eWindow *window)
+{
+    if (window == OS_NULL) return;
+
+    if (classid() != EGUICLASSID_WINDOW)
+    {
+        m_prev_z = window->m_prev_z;
+        m_next_z = window;
+        m_prev_z->m_next_z = this;
+        window->m_prev_z = this;
+    }
+}
+
+
+/* Remove component from window's Z order
+ */
+void eComponent::remove_from_zorder()
+{
+    if (classid() != EGUICLASSID_WINDOW && m_next_z)
+    {
+        m_prev_z->m_next_z = m_next_z;
+        m_next_z->m_prev_z = m_prev_z;
+        m_next_z = m_prev_z = OS_NULL;
+    }
+}
+
+/* Wipe out whole Z order
+ */
+void eComponent::clear_zorder()
+{
+    eComponent *c, *next_c;
+
+    c = this;
+    do {
+        next_c = c->m_next_z;
+        c->remove_from_zorder();
+        if (c == next_c) break;
+        c = next_c;
+    }
+    while(c);
 }

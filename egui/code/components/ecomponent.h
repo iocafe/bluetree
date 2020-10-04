@@ -127,20 +127,13 @@ eLayoutParams;
 
 typedef struct eDrawParams
 {
-    eGui *gui;
-    ImGuiIO *io;
-
-    /* Internal for mouse processing. Normally components should not use these.
+    /* Pointer to eGui
      */
-    os_boolean mouse_press[EIMGUI_NRO_MOUSE_BUTTONS];
-    os_boolean mouse_release[EIMGUI_NRO_MOUSE_BUTTONS];
-    os_boolean mouse_is_down[EIMGUI_NRO_MOUSE_BUTTONS];
-    os_boolean mouse_is_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
-    os_boolean mouse_held_still[EIMGUI_NRO_MOUSE_BUTTONS];
+    eGui *gui;
 
-    // ePos mouse_down_pos[EIMGUI_NRO_MOUSE_BUTTONS];
-    // ePos mouse_drag_delta_down[EIMGUI_NRO_MOUSE_BUTTONS];
-
+    /* Pointer to eWindow. OS_NULL if this is popup, etc.
+     */
+    eWindow *window;
 
     /* Components should use these.
      */
@@ -159,6 +152,15 @@ typedef struct eDrawParams
     /* This component is in edit mode.
      */
     os_boolean edit_mode;
+
+    /* Internal for mouse processing. Normally components should not use these.
+     */
+    ImGuiIO *io;
+    os_boolean mouse_press[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_release[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_is_down[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_is_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_held_still[EIMGUI_NRO_MOUSE_BUTTONS];
 }
 eDrawParams;
 
@@ -339,7 +341,7 @@ public:
 
       @name Base class functions to implement component functionality
 
-      CreaSerialization means writing object to stream or reading it from strem.
+      X...
 
     ************************************************************************************************
     */
@@ -386,9 +388,9 @@ public:
     /**
     ************************************************************************************************
 
-      @name Base class functions to implement component functionality
+      @name Component functionality (base class only)
 
-      CreaSerialization means writing object to stream or reading it from strem.
+      X...
 
     ************************************************************************************************
     */
@@ -417,6 +419,18 @@ public:
      */
     void capture_mouse();
 
+    /* Add component to window's Z order
+     */
+    void add_to_zorder(eWindow *window);
+
+    /* Remove component from window's Z order
+     */
+    void remove_from_zorder();
+
+    /* Wipe out whole Z order
+     */
+    void clear_zorder();
+
     /*@}*/
 
 
@@ -444,7 +458,10 @@ protected:
      */
     eSize m_natural_sz;
 
-    bool m_popup_open;
+    os_boolean m_popup_open;
+
+    /* Z order */
+    eComponent *m_next_z, *m_prev_z;
 };
 
 

@@ -423,8 +423,9 @@ eStatus eTreeNode::draw(
     ImGuiInputTextFlags eflags;
     bool isopen;
 
-    m_attr.for_variable(this);
+    add_to_zorder(prm.window);
 
+    m_attr.for_variable(this);
     relative_x2 = ImGui::GetContentRegionMax().x;
     total_w = relative_x2 - ImGui::GetCursorPosX();
     ImVec2 cpos = ImGui::GetCursorScreenPos();

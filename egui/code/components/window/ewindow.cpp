@@ -35,6 +35,7 @@ eWindow::eWindow(
 {
     m_autolabel_count = 0;
     m_edit_mode = OS_FALSE;
+    m_next_z = m_prev_z = this;
 
     addname("window", ENAME_TEMPORARY, "gui");
     ns_create("window");
@@ -54,6 +55,7 @@ eWindow::eWindow(
 */
 eWindow::~eWindow()
 {
+    clear_zorder();
 }
 
 
@@ -224,13 +226,15 @@ eStatus eWindow::draw(
 
     childprm = prm;
     childprm.edit_mode = m_edit_mode;
+    childprm.window = this;
 
     if (!ImGui::IsWindowHovered()) {
         childprm.mouse_right_click = false;
     }
 
-    /* Finished with the window.
+    /* Draw child components and setup Z order.
      */
+    clear_zorder();
     for (c = firstcomponent(EOID_GUI_COMPONENT); c; c = c->nextcomponent(EOID_GUI_COMPONENT))
     {
         c->draw(childprm);
@@ -250,6 +254,45 @@ eStatus eWindow::draw(
     ImGui::End();
     return ESTATUS_SUCCESS;
 }
+
+#if 0
+void eWindow::handle_popup(
+    eDrawParams& prm)
+{
+    eRect visible_rect;
+    eObject *o;
+    bool popup_drawn;
+
+    // Union component rect and parent clip to get visible rect !!!!!!!!!!!!!!!!!!!!!!
+    visible_rect = m_rect;
+
+    // And make sure item is in Z order
+
+    if (prm.mouse_right_click) {
+        if (erect_is_point_inside(&visible_rect, prm.mouse_pos.x, prm.mouse_pos.y))
+        {
+            right_click_popup();
+        }
+    }
+
+    if (m_popup_open)
+    {
+        popup_drawn = false;
+        for (o = first(EOID_GUI_POPUP); o; o = o->next(EOID_GUI_POPUP))
+        {
+            if (EGUICLASSID_IS_COMPONENT(o->classid())) {
+                if (((eComponent*)o)->draw(prm) == ESTATUS_SUCCESS) {
+                    popup_drawn = true;
+                }
+            }
+        }
+
+        if (!popup_drawn) {
+            close_popup();
+        }
+    }
+}
+#endif
 
 
 /**
