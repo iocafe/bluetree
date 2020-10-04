@@ -211,10 +211,16 @@ eStatus eWindow::draw(
     eDrawParams childprm;
     eComponent *c;
     const os_char *label;
+    ImVec2 pos, sz;
 
     label = m_label_title.get(this, ECOMP_VALUE);
 
-    ImGui::Begin(label);                          // Create a window called "Hello, world!" and append into it.
+    /* Create a window.
+     */
+    ImGui::Begin(label);
+    /*  ImGui::Begin(label, NULL, ImGuiWindowFlags_NoSavedSettings |ImGuiWindowFlags_NoMove
+      | ImGuiWindowFlags_NoTitleBar);
+    */
 
     childprm = prm;
     childprm.edit_mode = m_edit_mode;
@@ -223,10 +229,24 @@ eStatus eWindow::draw(
         childprm.mouse_right_click = false;
     }
 
+    /* Finished with the window.
+     */
     for (c = firstcomponent(EOID_GUI_COMPONENT); c; c = c->nextcomponent(EOID_GUI_COMPONENT))
     {
         c->draw(childprm);
     }
+
+    pos = ImGui::GetWindowPos();
+    sz = ImGui::GetWindowSize();
+    m_rect.x1 = pos.x;
+    m_rect.y1 = pos.y;
+    m_rect.x2 = m_rect.x1 + sz.x - 1;
+    m_rect.y2 = m_rect.y1 + sz.y - 1;
+
+    eComponent::draw(prm);
+
+    /* Finished with the window.
+     */
     ImGui::End();
     return ESTATUS_SUCCESS;
 }

@@ -127,7 +127,7 @@ void eAutoLabel::setstr(
             if (g) m_count = g->make_autolabel();
         }
         else {
-            window = component->window(true);
+            window = component->window();
             if (window) m_count = window->make_autolabel();
         }
     }

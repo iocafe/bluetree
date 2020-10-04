@@ -247,7 +247,7 @@ public:
     /* Get parent window (eWindow or ePopup).
      */
     eComponent *window(
-        bool check_this);
+        os_int cid = 0);
 
     /* Get parent gui.
      */
@@ -421,7 +421,9 @@ public:
 
 
 protected:
-    /* Current component rectangle.
+    void draw_edit_mode_decorations();
+
+    /* Current component rectangle (screen coordinates).
      */
     eRect m_rect;
 
@@ -431,7 +433,7 @@ protected:
 
     /* Saved layout parameters.
      */
-    eLayoutParams m_layout_prm;
+    eLayoutParams m_layout_prm; // ?????????????????????????????????????????????????????
 
     /* Minimum and maximum sizes in pixels what component can be drawn in and still looks acceptable.
      */

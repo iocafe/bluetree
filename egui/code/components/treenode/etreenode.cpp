@@ -417,7 +417,7 @@ eStatus eTreeNode::draw(
     eDrawParams& prm)
 {
     eComponent *child;
-    os_int text_w, edit_w, unit_w, relative_x2, path_w, ipath_w, unit_spacer,
+    os_int text_w, edit_w, full_edit_w, unit_w, relative_x2, path_w, ipath_w, unit_spacer,
         total_w, total_h, w_left, h;
     const os_char *label, *value, *text, *unit, *path;
     ImGuiInputTextFlags eflags;
@@ -456,18 +456,19 @@ eStatus eTreeNode::draw(
     /* Decide on column widths.
      */
     text_w = 250;
+    full_edit_w = 200;
     if (m_attr.showas() == E_SHOWAS_CHECKBOX) {
         edit_w = ImGui::GetFrameHeight();
     }
     else {
-        edit_w = 200;
+        edit_w = full_edit_w;
     }
     unit_spacer = 0;
     unit_w = 0;
     path_w = 0;
     ipath_w = 0;
 
-    w_left = relative_x2 - text_w - edit_w;
+    w_left = relative_x2 - text_w - full_edit_w;
     if (w_left > 0) {
         unit_spacer = w_left;
         if (unit_spacer > 6) unit_spacer = 6;
@@ -494,7 +495,7 @@ eStatus eTreeNode::draw(
     {
         w_left /= 2;
         text_w += w_left;
-        edit_w += w_left;
+        full_edit_w += w_left;
     }
 
     ImGui::SameLine(relative_x2 - edit_w - unit_spacer - unit_w - path_w - ipath_w);
@@ -555,7 +556,7 @@ eStatus eTreeNode::draw(
                 break;
 
             default:
-                ImGui::Button(value, ImVec2(edit_w, 0));
+                ImGui::Button(value, ImVec2(full_edit_w, 0));
                 if (ImGui::IsItemActive()) {
                     activate();
                 }
@@ -606,6 +607,10 @@ eStatus eTreeNode::draw(
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
 
+    if (!prm.edit_mode) {
+        draw_underline(m_rect.y1 + total_h - 1);
+    }
+
     /* Draw marker for state bits if we have an extended value.
      */
     draw_state_bits(m_rect.x2 - edit_w - unit_spacer - unit_w - path_w - ipath_w);
@@ -626,6 +631,31 @@ eStatus eTreeNode::draw(
     }
 
     return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Draw line rectangle around component
+
+****************************************************************************************************
+*/
+void eTreeNode::draw_underline(
+    os_int y)
+{
+    ImDrawList* draw_list;
+    ImVec2 top_left, bottom_right;
+    ImU32 col;
+
+    top_left.x = m_rect.x1;
+    top_left.y = y;
+    bottom_right.x = m_rect.x2;
+    bottom_right.y = y+1;
+
+    draw_list = ImGui::GetWindowDrawList();
+    col = IM_COL32(128, 128, 128, 20);
+    draw_list->AddRect(top_left, bottom_right, col);
 }
 
 

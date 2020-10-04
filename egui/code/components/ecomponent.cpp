@@ -240,9 +240,10 @@ eComponent *eComponent::nextcomponent(
   The eComponent::window() function returns pointer to the parent window (eWindow or
   ePopup). If this object is pointer window, the pointer to itself is returned
 
-  @param   check_this If true, the function can also return pointer to this object if it
-           matches the search criteria (not necessarily an ancestor). If false, this object
-           is not checked.
+  @param   cid Set 0 to get pointer to either eWindow or ePopup. EGUICLASSID_WINDOW
+           to get eWindow pointer only (if ePopup, the function returns os_NULL).
+           EGUICLASSID_POPUP to get ePopup. Tree above first eWindow or ePopup is not
+           checked, regardless of value of cid parameter.
 
   @return  Pointer to the parent window, or OS_NULL if there is this component is not enclosed
            within a parent window.
@@ -250,23 +251,20 @@ eComponent *eComponent::nextcomponent(
 ****************************************************************************************************
 */
 eComponent *eComponent::window(
-    bool check_this)
+    os_int cid)
 {
     eObject *obj;
-    os_int cid;
+    os_int id;
 
-    if (check_this) {
-        obj = this;
-    }
-    else {
-        obj = parent();
-    }
-
+    obj = this;
     while (obj) {
-        cid = obj->classid();
-        if (cid == EGUICLASSID_WINDOW || cid == EGUICLASSID_POPUP)
+        id = obj->classid();
+        if (id == EGUICLASSID_WINDOW || id == EGUICLASSID_POPUP)
         {
-            return (eComponent*)obj;
+            if (cid == 0 || cid == id) {
+                return (eComponent*)obj;
+            }
+            return OS_NULL;
         }
         obj = obj->parent();
     }
@@ -608,8 +606,39 @@ eStatus eComponent::draw(
         }
     }
 
+    /* In edit mode, draw decorations.
+     */
+    if (prm.edit_mode) {
+        draw_edit_mode_decorations();
+    }
+
     return ESTATUS_SUCCESS;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Edit mode: Draw a rectangle around component
+
+****************************************************************************************************
+*/
+void eComponent::draw_edit_mode_decorations()
+{
+    ImDrawList* draw_list;
+    ImVec2 top_left, bottom_right;
+    ImU32 col;
+
+    top_left.x = m_rect.x1;
+    top_left.y = m_rect.y1;
+    bottom_right.x = m_rect.x2;
+    bottom_right.y = m_rect.y2;
+
+    draw_list = ImGui::GetWindowDrawList();
+    col = IM_COL32(255, 80, 80, 50);
+    draw_list->AddRect(top_left, bottom_right, col);
+}
+
 
 
 ePopup *eComponent::popup()
@@ -646,7 +675,7 @@ ePopup *eComponent::right_click_popup()
 {
     ePopup *p;
     eButton *scope, *item;
-    eComponent *w;
+    eWindow *w;
 
     p = popup();
 
@@ -656,15 +685,15 @@ ePopup *eComponent::right_click_popup()
     /* Window scope items (also for popups).
      */
     scope = new eButton(p);
-    w = window(false);
-    if (w) if (w->classid() == EGUICLASSID_WINDOW){
+    w = (eWindow*)window(EGUICLASSID_WINDOW);
+    if (w) {
         scope->setpropertys(ECOMP_TEXT, "window");
 
         item = new eButton(scope);
         item->setpropertys(ECOMP_TEXT, "edit window");
 
         item->setpropertyl(ECOMP_VALUE, OS_FALSE);
-        item->setpropertyl(ECOMP_SETVALUE, !((eWindow*)w)->editmode());
+        item->setpropertyl(ECOMP_SETVALUE, !w->editmode());
         item->setpropertys(ECOMP_TARGET, "window/_p/edit");
     }
 

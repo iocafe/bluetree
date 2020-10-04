@@ -146,6 +146,7 @@ public:
 
 
 protected:
+    void draw_underline(os_int y);
     void draw_state_bits(os_int x);
     void draw_tooltip();
 
