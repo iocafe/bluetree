@@ -58,6 +58,8 @@ class ePopup;
 #define ECOMP_SETVALUE 32
 #define ECOMP_TARGET 33
 #define ECOMP_EDIT 34
+#define ECOMP_REFRESH 35
+#define ECOMP_ALL 36
 
 /* Flags for eComponent::setupproperties() to specify which optional properties for
    the component class.
@@ -88,6 +90,8 @@ extern const os_char ecomp_ipath[];
 extern const os_char ecomp_setvalue[];
 extern const os_char ecomp_target[];
 extern const os_char ecomp_edit[];
+extern const os_char ecomp_refresh[];
+extern const os_char ecomp_all[];
 
 /*@}*/
 
@@ -328,6 +332,9 @@ public:
     virtual void activate() {}
 
     ePopup *popup();
+
+    /* Generate right click popup menu.
+     */
     virtual ePopup *right_click_popup();
     ePopup *drop_down_list(eContainer *list);
     void close_popup();
@@ -381,6 +388,11 @@ public:
      */
     void capture_mouse();
 
+    /* Get/set edit mode.
+     */
+    inline os_boolean editmode() {return m_editmode; }
+    inline void set_editmode(os_int x) {m_editmode = (os_boolean)x; }
+
     /*@}*/
 
 
@@ -407,6 +419,9 @@ protected:
     eSize m_natural_sz;
 
     bool m_popup_open;
+
+    os_boolean m_editmode;
+
 };
 
 

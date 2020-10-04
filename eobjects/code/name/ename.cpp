@@ -458,15 +458,15 @@ void eName::setnamespaceid(
 
     if (namespace_id)
     {
-        if (!os_strcmp(namespace_id, E_PROCESS_NS))
+        if (!os_strcmp(namespace_id, eobj_process_ns))
         {
             m_ns_type = ENAME_PROCESS_NS;
         }
-        else if (!os_strcmp(namespace_id, E_THREAD_NS))
+        else if (!os_strcmp(namespace_id, eobj_thread_ns))
         {
             m_ns_type = ENAME_THREAD_NS;
         }
-        else if (!os_strcmp(namespace_id, E_PARENT_NS))
+        else if (!os_strcmp(namespace_id, eobj_parent_ns))
         {
             m_ns_type = ENAME_PARENT_NS;
         }

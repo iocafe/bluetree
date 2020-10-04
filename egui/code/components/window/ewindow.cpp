@@ -33,8 +33,11 @@ eWindow::eWindow(
     os_int flags)
     : eComponent(parent, id, flags)
 {
-    addname("window", ENAME_TEMPORARY, "gui");
     m_autolabel_count = 0;
+    m_editmode = OS_FALSE;
+
+    addname("window", ENAME_TEMPORARY, "gui");
+    ns_create("window");
 }
 
 
@@ -135,8 +138,12 @@ eStatus eWindow::onpropertychange(
 {
     switch (propertynr)
     {
-        case ECOMP_VALUE: /* clear label to display new text and proceed */
+        case ECOMP_VALUE:
             m_label_title.clear();
+            break;
+
+        case ECOMP_EDIT: /* toggle edit mode */
+            set_editmode(x->geti());
             break;
     }
 

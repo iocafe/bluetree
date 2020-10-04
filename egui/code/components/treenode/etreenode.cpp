@@ -40,6 +40,7 @@ eTreeNode::eTreeNode(
     m_intermediate_node = false;
     m_node_type = 0;
     m_received_change = 0;
+    m_all = OS_FALSE;
 }
 
 
@@ -101,6 +102,8 @@ void eTreeNode::setupclass()
     eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     addpropertys(cls, ECOMP_PATH, ecomp_path, "path");
     addpropertys(cls, ECOMP_IPATH, ecomp_ipath, "ipath");
+    addpropertyb(cls, ECOMP_REFRESH, ecomp_refresh, "refresh");
+    addpropertyb(cls, ECOMP_ALL, ecomp_all, "show all");
 
     propertysetdone(cls);
     os_unlock();
@@ -170,6 +173,7 @@ void eTreeNode::onmessage(
                      item = item->nextv(EBROWSE_NSPACE))
                 {
                     node = new eTreeNode(this);
+                    node->m_all = m_all;
                     node->setup_node(item, ipath, path);
                 }
 
@@ -180,12 +184,14 @@ void eTreeNode::onmessage(
                          item = item->nextv(EBROWSE_CHILDREN))
                     {
                         node = new eTreeNode(this);
+                        node->m_all = m_all;
                         node->setup_node(item, ipath, path);
                     }
                 }
                 else if (browse_flags & EBROWSE_CHILDREN)
                 {
                     groupnode = new eTreeNode(this);
+                    groupnode->m_all = m_all;
                     groupnode->m_autoopen = false;
                     groupnode->setpropertys(ECOMP_TEXT, "children");
                     groupnode->m_node_type = EBROWSE_CHILDREN;
@@ -199,12 +205,14 @@ void eTreeNode::onmessage(
                          item = item->nextv(EBROWSE_PROPERTIES))
                     {
                         node = new eTreeNode(this);
+                        node->m_all = m_all;
                         node->setup_node(item, ipath, path);
                     }
                 }
                 else if (browse_flags & EBROWSE_PROPERTIES)
                 {
                     groupnode = new eTreeNode(this);
+                    groupnode->m_all = m_all;
                     groupnode->m_autoopen = false;
                     groupnode->setpropertys(ECOMP_TEXT, "properties");
                     groupnode->m_node_type = EBROWSE_PROPERTIES;
@@ -336,6 +344,18 @@ eStatus eTreeNode::onpropertychange(
 {
     switch (propertynr)
     {
+        case ECOMP_REFRESH:
+            if (x->geti()) {
+                request_object_info();
+                setpropertyi(ECOMP_REFRESH, OS_FALSE);
+            }
+            break;
+
+        case ECOMP_ALL:
+            m_all = (os_boolean) x->geti();
+            request_object_info();
+            break;
+
         case ECOMP_VALUE:
             if (m_received_change == 0) {
                 set_modified_value();
@@ -350,7 +370,7 @@ eStatus eTreeNode::onpropertychange(
 
         case ECOMP_UNIT:
             m_unit.clear();
-            // m_attr.clear();
+            m_attr.clear();
             break;
 
         case ECOMP_DIGS:
@@ -795,6 +815,49 @@ void eTreeNode::activate()
 /**
 ****************************************************************************************************
 
+  @brief Generate right click popup menu.
+
+  Derived component class adds call the base class'es function to generate the right click
+  popup menu and then adds tree node specific items.
+
+  @return  Pointer to the new right click popup window.
+
+****************************************************************************************************
+*/
+ePopup *eTreeNode::right_click_popup()
+{
+    ePopup *p;
+    eButton *item;
+    eVariable target;
+    os_char buf[E_OIXSTR_BUF_SZ];
+
+    p = eComponent::right_click_popup();
+
+    oixstr(buf, sizeof(buf));
+
+    /* Generic component scope items: refresh and show all.
+     */
+    item = new eButton(p);
+    item->setpropertys(ECOMP_TEXT, "refresh");
+    item->setpropertyl(ECOMP_VALUE, 0);
+    item->setpropertyl(ECOMP_SETVALUE, 1);
+    target = buf; target += "/_p/refresh";
+    item->setpropertyv(ECOMP_TARGET, &target);
+
+    item = new eButton(p);
+    item->setpropertys(ECOMP_TEXT, "all items");
+    item->setpropertyl(ECOMP_VALUE, OS_FALSE);
+    item->setpropertyl(ECOMP_SETVALUE, !m_all);
+    target = buf; target += "/_p/all";
+    item->setpropertyv(ECOMP_TARGET, &target);
+
+    return p;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Request information about an object
 
   The eTreeNode::request_object_info() function...
@@ -811,6 +874,9 @@ void eTreeNode::request_object_info()
 
     if (m_intermediate_node) {
         browse_flags = m_node_type;
+        if (m_all && browse_flags == EBROWSE_CHILDREN) {
+            browse_flags |= EBROWSE_ALL_CHILDREN;
+        }
         parent()->propertyv(ECOMP_IPATH, &path);
     }
     else {

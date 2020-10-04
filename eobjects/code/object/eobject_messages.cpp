@@ -125,7 +125,7 @@ void eObject::message(
         else
         {
             envelope->move_target_pos(1);
-            message_within_thread(envelope, E_THREAD_NS);
+            message_within_thread(envelope, eobj_thread_ns);
         }
         return;
 
@@ -153,7 +153,7 @@ void eObject::message(
              if (target[2] == '/' || target[2] == '\0')
         {
             envelope->move_target_over_objname(2);
-            message_within_thread(envelope, E_PARENT_NS);
+            message_within_thread(envelope, eobj_parent_ns);
             return;
         }
         break;
@@ -165,7 +165,6 @@ void eObject::message(
     envelope->nexttarget(&nspacevar);
     namespace_id = nspacevar.gets(&sz);
     envelope->move_target_over_objname((os_short)sz-1);
-
     message_within_thread(envelope, namespace_id);
 }
 
@@ -208,10 +207,13 @@ void eObject::message_within_thread(
     name = nspace->findname(&objname);
     if (name == OS_NULL)
     {
-        goto getout;
+        // WE ARE FORWARDING ALL MESSAGES THOUGH NAMESPACE WHICH DO NOT HAVE MATCH
+        // IN NAMESPACE TO PARENT OF THE NAMESPACE. TOO MUCH?
+        nspace->parent()->onmessage(envelope);
     }
-
-    name->parent()->onmessage(envelope);
+    else {
+        name->parent()->onmessage(envelope);
+    }
     delete envelope;
     return;
 

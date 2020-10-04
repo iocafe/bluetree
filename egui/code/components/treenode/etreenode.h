@@ -138,6 +138,10 @@ public:
      */
     virtual void activate();
 
+    /* Generate right click popup menu.
+     */
+    virtual ePopup *right_click_popup();
+
     /*@}*/
 
 
@@ -167,6 +171,8 @@ protected:
     bool m_set_checked;
     bool m_imgui_checked;
     bool m_intermediate_node;
+
+    os_boolean m_all;
 
     os_int m_node_type;
 

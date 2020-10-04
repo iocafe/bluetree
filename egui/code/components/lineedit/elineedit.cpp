@@ -146,7 +146,7 @@ eStatus eLineEdit::onpropertychange(
             break;
 
         case ECOMP_UNIT:
-            // m_unit.clear();
+            m_unit.clear();
             m_attr.clear();
             break;
 

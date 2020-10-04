@@ -24,7 +24,9 @@ const os_char
     ecomp_ipath[] = "ipath",
     ecomp_setvalue[] = "setvalue",
     ecomp_target[] = "target",
-    ecomp_edit[] = "edit";
+    ecomp_edit[] = "edit",
+    ecomp_refresh[] = "refresh",
+    ecomp_all[] = "all";
 
 
 /**
@@ -625,24 +627,46 @@ ePopup *eComponent::popup()
     return p;
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Generate right click popup menu.
+
+  A derived component class may override this function to add it's own component specific
+  items to right click popup menu. Overridden function should call the base class'es
+  function to generate the popup menu and then add it's own items using returned ePopup
+  pointer.
+
+  @return  Pointer to the new right click popup window.
+
+****************************************************************************************************
+*/
 ePopup *eComponent::right_click_popup()
 {
     ePopup *p;
     eButton *scope, *item;
+    eComponent *w;
 
     p = popup();
-
 
     /* Generic component scope items.
      */
 
-    /* Window scope items.
+    /* Window scope items (also for popups).
      */
     scope = new eButton(p);
-    scope->setpropertys(ECOMP_TEXT, "window");
+    w = window(false);
+    if (w) {
+        scope->setpropertys(ECOMP_TEXT, "window");
 
-    item = new eButton(scope);
-    item->setpropertys(ECOMP_TEXT, "edit window");
+        item = new eButton(scope);
+        item->setpropertys(ECOMP_TEXT, "edit window");
+
+        item->setpropertyl(ECOMP_VALUE, OS_FALSE);
+        item->setpropertyl(ECOMP_SETVALUE, !w->editmode());
+        item->setpropertys(ECOMP_TARGET, "window/_p/edit");
+    }
 
     /* GUI scope items.
      */
@@ -693,7 +717,6 @@ ePopup *eComponent::drop_down_list(
 
     return p;
 }
-
 
 
 void eComponent::close_popup()
