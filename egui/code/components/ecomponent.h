@@ -144,31 +144,40 @@ typedef struct eDrawParams
      */
     eWindow *window;
 
-    /* Components should use these.
-     */
-    ePos mouse_pos;
-
-    os_boolean mouse_left_click;
-    os_boolean mouse_left_drag_and_drop;
-    ePos mouse_left_drag_start;
-    ePos mouse_left_drag_delta;
-
-    os_boolean mouse_right_click;
-    os_boolean mouse_right_drag_and_drop;
-    ePos mouse_right_drag_start;
-    ePos mouse_right_drag_delta;
-
     /* This component is in edit mode.
      */
     os_boolean edit_mode;
 
+    /* Components should use these.
+     - mouse_pos Current mouse position.
+     - mouse_left_click Pulse 1 when mouse click (no drag drop detected)
+     - mouse_left_drag_event Pulse 1 when drag starts.
+     - mouse_left_drop_event Pulse 1 when dropped.
+     - mouse_left_dragging Stays 1 while dragging.
+     - mouse_left_drag_start_pos Mouse down position for drag, set at same time with mouse_left_drag_event.
+     */
+    ePos mouse_pos;
+
+    os_boolean mouse_left_click;
+    os_boolean mouse_left_drag_event;
+    os_boolean mouse_left_drop_event;
+    os_boolean mouse_left_dragging;
+    ePos mouse_left_drag_start_pos;
+
+    os_boolean mouse_right_click;
+    os_boolean mouse_right_drag_event;
+    os_boolean mouse_right_drop_event;
+    os_boolean mouse_right_dragging;
+    ePos mouse_right_drag_start_pos;
+
     /* Internal for mouse processing. Normally components should not use these.
      */
     ImGuiIO *io;
-    os_boolean mouse_press[EIMGUI_NRO_MOUSE_BUTTONS];
-    os_boolean mouse_release[EIMGUI_NRO_MOUSE_BUTTONS];
+    ePos mouse_down_pos[EIMGUI_NRO_MOUSE_BUTTONS];
     os_boolean mouse_is_down[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_was_down[EIMGUI_NRO_MOUSE_BUTTONS];
     os_boolean mouse_is_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_was_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
     os_boolean mouse_held_still[EIMGUI_NRO_MOUSE_BUTTONS];
 }
 eDrawParams;

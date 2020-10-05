@@ -398,7 +398,7 @@ eStatus eGui::run()
 
     while (true)
     {
-// TEMP PATCH. THIS NEEDS TO WAIT FOR USER INPUT OR OTHER EVENTS, NOT TO RUN IN CRAZY LOOP
+// TEMP PATCH. THIS NEEDS TO WAIT FOR USER INPUT OR OTHER EVENTS, NOT TO RUN IN FAST LOOP
         eglobal->eguiglobal->guilib_thread->alive(EALIVE_RETURN_IMMEDIATELY);
 
         s = eimgui_start_frame(m_viewport);
@@ -416,44 +416,62 @@ eStatus eGui::run()
             c->draw(m_draw_prm);
         }
 
-
         eimgui_finish_frame(m_viewport);
-
     }
 
     return s;
 }
 
 
-/* Convert mouse signals to click and drag
+/* Convert mouse signals to click, and drag and stop
+ *
+    - mouse_pos Current mouse position.
+    - mouse_left_click Pulse 1 when mouse click (no drag drop detected)
+    - mouse_left_drag_event Pulse 1 when drag starts.
+    - mouse_left_drop_event Pulse 1 when dropped.
+    - mouse_left_dragging Stays 1 while dragging.
+    - mouse_left_drag_start_pos Mouse down position for drag, set at same time with mouse_left_drag_event
  */
 void eGui::handle_mouse()
 {
-    os_int i;
+    os_int i, dx, dy;
 
     m_draw_prm.io = &ImGui::GetIO();
 
     /* Normally we give only "pulses" to components.
      */
     m_draw_prm.mouse_left_click = OS_FALSE;
-    m_draw_prm.mouse_left_drag_and_drop = OS_FALSE;
+    m_draw_prm.mouse_left_drop_event = OS_FALSE;
     m_draw_prm.mouse_right_click = OS_FALSE;
-    m_draw_prm.mouse_right_drag_and_drop = OS_FALSE;
+    m_draw_prm.mouse_right_drop_event = OS_FALSE;
+    m_draw_prm.mouse_left_drag_event = OS_FALSE;
+    m_draw_prm.mouse_right_drag_event = OS_FALSE;
+    m_draw_prm.mouse_left_dragging = OS_FALSE;
+    m_draw_prm.mouse_right_dragging = OS_FALSE;
+
     m_draw_prm.mouse_pos.x = m_draw_prm.io->MousePos.x;
     m_draw_prm.mouse_pos.y = m_draw_prm.io->MousePos.y;
 
     for (i = 0; i < EIMGUI_NRO_MOUSE_BUTTONS; i++)
     {
-        m_draw_prm.mouse_press[i] = ImGui::IsMouseClicked(i);
-        m_draw_prm.mouse_release[i] = ImGui::IsMouseReleased(i);
         m_draw_prm.mouse_is_down[i] = ImGui::IsMouseDown(i);
 
-        /* Detect if we have started dwagging
+        /* When mouse is down, detect hold down and start of drag
          */
         if (m_draw_prm.mouse_is_down[i]) {
-            ImVec2 delta = ImGui::GetMouseDragDelta(i);
 
-            if ((delta.x || delta.y) && !m_draw_prm.mouse_is_dragging[i])
+            if (m_draw_prm.mouse_is_down[i] &&
+                m_draw_prm.mouse_was_down[i] != m_draw_prm.mouse_is_down[i])
+            {
+                m_draw_prm.mouse_down_pos[i] = m_draw_prm.mouse_pos;
+                m_draw_prm.mouse_is_dragging[i] = OS_FALSE;
+                m_draw_prm.mouse_held_still[i] = OS_FALSE;
+            }
+
+            dx = m_draw_prm.mouse_pos.x - m_draw_prm.mouse_down_pos[i].x;
+            dy = m_draw_prm.mouse_pos.y - m_draw_prm.mouse_down_pos[i].y;
+
+            if (dx*dx + dy + dy > 20 && !m_draw_prm.mouse_is_dragging[i])
             {
                 m_draw_prm.mouse_is_dragging[i] = OS_TRUE;
             }
@@ -468,26 +486,42 @@ void eGui::handle_mouse()
             }
         }
 
-        /* Save mouse drag delta
+        /* Start dragging event with position, maintain "dragging" flag.
          */
-        if (m_draw_prm.mouse_release[i])
+        if (m_draw_prm.mouse_is_dragging[i])
         {
-            if (m_draw_prm.mouse_is_dragging[i]) {
-                ImVec2 delta = ImGui::GetMouseDragDelta(i);
-
+            if (m_draw_prm.mouse_is_dragging[i] != m_draw_prm.mouse_was_dragging[i])
+            {
                 if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_draw_prm.mouse_held_still[i]) {
-                    m_draw_prm.mouse_left_drag_start.x = m_draw_prm.mouse_pos.x - delta.x;
-                    m_draw_prm.mouse_left_drag_start.y = m_draw_prm.mouse_pos.y - delta.y;
-                    m_draw_prm.mouse_left_drag_delta.x = delta.x;
-                    m_draw_prm.mouse_left_drag_delta.y = delta.y;
-                    m_draw_prm.mouse_left_drag_and_drop = OS_TRUE;
+                    m_draw_prm.mouse_left_drag_event = OS_TRUE;
+                    m_draw_prm.mouse_left_drag_start_pos = m_draw_prm.mouse_down_pos[i];
                 }
                 else {
-                    m_draw_prm.mouse_right_drag_start.x = m_draw_prm.mouse_pos.x - delta.x;
-                    m_draw_prm.mouse_right_drag_start.y = m_draw_prm.mouse_pos.y - delta.y;
-                    m_draw_prm.mouse_right_drag_delta.x = delta.x;
-                    m_draw_prm.mouse_right_drag_delta.y = delta.y;
-                    m_draw_prm.mouse_right_drag_and_drop = OS_TRUE;
+                    m_draw_prm.mouse_right_drag_event = OS_TRUE;
+                    m_draw_prm.mouse_right_drag_start_pos = m_draw_prm.mouse_down_pos[i];
+                }
+            }
+            if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_draw_prm.mouse_held_still[i]) {
+                m_draw_prm.mouse_left_dragging = OS_TRUE;
+            }
+            else {
+                m_draw_prm.mouse_right_dragging = OS_TRUE;
+            }
+        }
+        m_draw_prm.mouse_was_dragging[i] = m_draw_prm.mouse_is_dragging[i];
+
+        /* Generate mouse click and drop on release pulses on mouse release.
+         */
+        if (!m_draw_prm.mouse_is_down[i] &&
+            m_draw_prm.mouse_was_down[i] != m_draw_prm.mouse_is_down[i])
+        {
+            if (m_draw_prm.mouse_is_dragging[i])
+            {
+                if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_draw_prm.mouse_held_still[i]) {
+                    m_draw_prm.mouse_left_drop_event = OS_TRUE;
+                }
+                else {
+                    m_draw_prm.mouse_right_drop_event = OS_TRUE;
                }
             }
 
@@ -499,15 +533,12 @@ void eGui::handle_mouse()
                     m_draw_prm.mouse_right_click = OS_TRUE;
                 }
             }
-        }
 
-        /* Clear mouse button state on press and release.
-         */
-        if (m_draw_prm.mouse_press[i] || m_draw_prm.mouse_release[i])
-        {
             m_draw_prm.mouse_is_dragging[i] = OS_FALSE;
             m_draw_prm.mouse_held_still[i] = OS_FALSE;
         }
+
+        m_draw_prm.mouse_was_down[i] = m_draw_prm.mouse_is_down[i];
     }
 }
 
