@@ -36,9 +36,13 @@ typedef struct ePos
 }
 ePos;
 
-bool erect_is_point_inside(
-    eRect *r,
+os_boolean erect_is_xy_inside(
+    eRect& r,
     os_int x,
     os_int y);
+
+os_boolean erect_is_point_inside(
+    eRect& r,
+    ePos& p);
 
 #endif

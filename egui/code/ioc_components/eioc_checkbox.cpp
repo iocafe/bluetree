@@ -122,6 +122,8 @@ void eiocCheckbox::setupclass()
 eStatus eiocCheckbox::draw(
     eDrawParams& prm)
 {
+    add_to_zorder(prm.window);
+
     ImGui::Text("HERREE.");
 
     return ESTATUS_SUCCESS;

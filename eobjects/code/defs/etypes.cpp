@@ -15,17 +15,21 @@
 */
 #include "eobjects.h"
 
-bool erect_is_point_inside(
-    eRect *r,
+os_boolean erect_is_xy_inside(
+    eRect& r,
     os_int x,
     os_int y)
 {
-    if (r) {
-        if (x >= r->x1 && x <= r->x2) {
-            return (y >= r->y1 && y <= r->y2);
-        }
+    if (x >= r.x1 && x <= r.x2) {
+        return (os_boolean)(y >= r.y1 && y <= r.y2);
     }
+    return OS_FALSE;
+}
 
-    return false;
+os_boolean erect_is_point_inside(
+    eRect& r,
+    ePos& p)
+{
+    return erect_is_xy_inside(r, p.x, p.y);
 }
 

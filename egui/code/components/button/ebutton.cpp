@@ -99,9 +99,6 @@ void eButton::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eButton");
-    // eComponent::setupproperties(cls, ECOMP_VALUE_PROPERITES|
-    //        ECOMP_VALUE_STATE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
-
     addpropertys(cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
     addproperty (cls, ECOMP_VALUE, ecomp_value, "value");
     addpropertyl(cls, ECOMP_SETVALUE, ecomp_setvalue, OS_TRUE, "set value", EPRO_METADATA);
@@ -182,6 +179,8 @@ eStatus eButton::draw(
     const os_char *label;
     ImVec2 sz;
 
+    add_to_zorder(prm.window);
+
     if (m_set_toggled) {
         set_toggled();
         m_set_toggled = false;
@@ -194,9 +193,6 @@ eStatus eButton::draw(
     sz.x = sz.y = 0;
 
     label = m_text.get(this, ECOMP_TEXT);
-
-    // ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
-    // if classif(parent()) == POPUP
 
     /* If this component has children, it contains a sub menu.
      */
@@ -219,11 +215,6 @@ eStatus eButton::draw(
         }
     }
 
-    // ImGui::Button(label, ImVec2(edit_w, 0));
-    // if (ImGui::IsItemActive()) {
-    //     activate();
-    // }
-    // ImGui::PopStyleVar();
     sz = ImGui::GetItemRectSize();
 
     m_rect.x2 = m_rect.x1 + sz.x - 1;

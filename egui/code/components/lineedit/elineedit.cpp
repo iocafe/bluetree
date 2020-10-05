@@ -189,6 +189,7 @@ eStatus eLineEdit::draw(
     const os_char *value, *label, *unit;
     ImGuiInputTextFlags eflags;
 
+    add_to_zorder(prm.window);
     m_attr.for_variable(this);
 
     relative_x2 = ImGui::GetContentRegionMax().x;
@@ -247,6 +248,9 @@ eStatus eLineEdit::draw(
                 m_prev_edit_value = true;
             }
         }
+
+        h = ImGui::GetItemRectSize().y;
+        if (h > total_h) total_h = h;
     }
     else {
         value = m_label_value.get(this, ECOMP_VALUE, &m_attr);

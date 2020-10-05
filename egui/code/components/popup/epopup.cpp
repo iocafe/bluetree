@@ -34,6 +34,7 @@ ePopup::ePopup(
     : eComponent(parent, id, flags)
 {
     m_autolabel_count = 0;
+    m_open_popup_called = OS_FALSE;
 }
 
 
@@ -133,7 +134,7 @@ eStatus ePopup::onpropertychange(
 {
     switch (propertynr)
     {
-        case ECOMP_TEXT: /* clear label to display new text and proceed */
+        case ECOMP_TEXT:
             m_label_title.clear();
             break;
     }
@@ -161,13 +162,6 @@ eStatus ePopup::simpleproperty(
     eVariable *x)
 {
     return eComponent::simpleproperty(propertynr, x);
-}
-
-void ePopup::open_popup()
-{
-    const os_char *label;
-    label = m_label_title.get(this);
-    ImGui::OpenPopup(label);
 }
 
 
@@ -211,56 +205,25 @@ eStatus ePopup::draw(
 
     label = m_label_title.get(this);
 
+    if (!m_open_popup_called)
+    {
+        ImGui::OpenPopup(label);
+        m_open_popup_called = OS_TRUE;
+    }
+
     if (ImGui::BeginPopup(label))
     {
-        /* const char* names[] = { "Bream", "Haddock", "Mackerel", "Pollock", "Tilefish" };
-        static bool toggles[] = { true, false, false, false, false };
-
-        for (int i = 0; i < IM_ARRAYSIZE(names); i++)
-            ImGui::MenuItem(names[i], "", &toggles[i]);
-        if (ImGui::BeginMenu("Sub-menu"))
-        {
-            ImGui::MenuItem("Click me");
-            ImGui::EndMenu();
-        }
-
-        ImGui::Separator();
-        ImGui::Text("Tooltip here");
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("I am a tooltip over a popup");
-
-        if (ImGui::Button("Stacked Popup"))
-            ImGui::OpenPopup("another popup");
-        if (ImGui::BeginPopup("another popup"))
-        {
-            for (int i = 0; i < IM_ARRAYSIZE(names); i++)
-                ImGui::MenuItem(names[i], "", &toggles[i]);
-            if (ImGui::BeginMenu("Sub-menu"))
-            {
-                ImGui::MenuItem("Click me");
-                if (ImGui::Button("Stacked Popup"))
-                    ImGui::OpenPopup("another popup");
-                if (ImGui::BeginPopup("another popup"))
-                {
-                    ImGui::Text("I am the last one here.");
-                    ImGui::EndPopup();
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndPopup();
-        } */
-
-        for (c = firstcomponent(EOID_GUI_COMPONENT); c; c = c->nextcomponent(EOID_GUI_COMPONENT))
+        for (c = firstcomponent(EOID_GUI_COMPONENT);
+             c;
+             c = c->nextcomponent(EOID_GUI_COMPONENT))
         {
             c->draw(prm);
         }
-        ImGui::EndPopup();
 
+        ImGui::EndPopup();
         return ESTATUS_SUCCESS;
     }
-    else
-    {
-        return ESTATUS_FAILED;
-    }
+
+    return ESTATUS_FAILED;
 }
 

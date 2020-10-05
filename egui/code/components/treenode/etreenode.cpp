@@ -424,8 +424,8 @@ eStatus eTreeNode::draw(
     bool isopen;
 
     add_to_zorder(prm.window);
-
     m_attr.for_variable(this);
+
     relative_x2 = ImGui::GetContentRegionMax().x;
     total_w = relative_x2 - ImGui::GetCursorPosX();
     ImVec2 cpos = ImGui::GetCursorScreenPos();
@@ -536,6 +536,9 @@ eStatus eTreeNode::draw(
                 m_prev_edit_value = true;
             }
         }
+
+        h = ImGui::GetItemRectSize().y;
+        if (h > total_h) total_h = h;
     }
     else {
         value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
@@ -616,10 +619,6 @@ eStatus eTreeNode::draw(
      */
     draw_state_bits(m_rect.x2 - edit_w - unit_spacer - unit_w - path_w - ipath_w);
 
-    /* Let base class implementation handle the rest.
-     */
-    eComponent::draw(prm);
-
     if (isopen)
     {
         for (child = firstcomponent(EOID_GUI_COMPONENT);
@@ -630,6 +629,10 @@ eStatus eTreeNode::draw(
         }
         ImGui::TreePop();
     }
+
+    /* Let base class implementation handle the rest.
+     */
+    eComponent::draw(prm);
 
     return ESTATUS_SUCCESS;
 }
@@ -863,7 +866,6 @@ ePopup *eTreeNode::right_click_popup()
     os_char buf[E_OIXSTR_BUF_SZ];
 
     p = eComponent::right_click_popup();
-
     oixstr(buf, sizeof(buf));
 
     /* Generic component scope items: refresh and show all.

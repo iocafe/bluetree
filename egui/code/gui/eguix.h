@@ -212,7 +212,7 @@ public:
 
     /* Capture mouse events to this component.
      */
-    void capture_mouse();
+    // void capture_mouse();
 
     /*@}*/
 

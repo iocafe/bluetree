@@ -249,50 +249,25 @@ eStatus eWindow::draw(
 
     eComponent::draw(prm);
 
+    handle_popup(prm);
+
     /* Finished with the window.
      */
     ImGui::End();
     return ESTATUS_SUCCESS;
 }
 
-#if 0
 void eWindow::handle_popup(
     eDrawParams& prm)
 {
-    eRect visible_rect;
-    eObject *o;
-    bool popup_drawn;
-
-    // Union component rect and parent clip to get visible rect !!!!!!!!!!!!!!!!!!!!!!
-    visible_rect = m_rect;
-
-    // And make sure item is in Z order
-
+    eComponent *c;
     if (prm.mouse_right_click) {
-        if (erect_is_point_inside(&visible_rect, prm.mouse_pos.x, prm.mouse_pos.y))
-        {
-            right_click_popup();
-        }
-    }
-
-    if (m_popup_open)
-    {
-        popup_drawn = false;
-        for (o = first(EOID_GUI_POPUP); o; o = o->next(EOID_GUI_POPUP))
-        {
-            if (EGUICLASSID_IS_COMPONENT(o->classid())) {
-                if (((eComponent*)o)->draw(prm) == ESTATUS_SUCCESS) {
-                    popup_drawn = true;
-                }
-            }
-        }
-
-        if (!popup_drawn) {
-            close_popup();
+        c = findcomponent(prm.mouse_pos);
+        if (c) {
+            c->right_click_popup();
         }
     }
 }
-#endif
 
 
 /**

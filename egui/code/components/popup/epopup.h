@@ -138,9 +138,9 @@ public:
 
     /*@}*/
 
-    void open_popup();
-
 protected:
+    os_boolean m_open_popup_called;
+
     eAutoLabel m_label_title;
 
     /* ImGui autolabel count for generating labels for components within the ePopup.

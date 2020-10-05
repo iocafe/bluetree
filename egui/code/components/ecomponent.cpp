@@ -235,6 +235,74 @@ eComponent *eComponent::nextcomponent(
 }
 
 
+/* Get topmost component in Z orderr which encloses (x, y) position.
+ * Returns OS_NULL if none found.
+ */
+eComponent *eComponent::findcomponent(
+        ePos pos)
+{
+    eComponent *w, *c;
+
+    w = window(EGUICLASSID_WINDOW);
+    if (w == OS_NULL) return OS_NULL;
+
+    c = w;
+    do {
+        c = c->m_prev_z;
+        if (erect_is_point_inside(c->visible_rect(), pos)) {
+            if (check_click(pos) != ECOMPO_CLICK_IGNORE) return c;
+        }
+    }
+    while (c != w);
+
+    return OS_NULL;
+}
+
+/* Add component to window's Z order
+ */
+void eComponent::add_to_zorder(eWindow *w)
+{
+    if (w == OS_NULL) return;
+
+    if (classid() != EGUICLASSID_WINDOW)
+    {
+        m_prev_z = w->m_prev_z;
+        m_next_z = w;
+        m_prev_z->m_next_z = this;
+        w->m_prev_z = this;
+    }
+}
+
+
+/* Remove component from window's Z order
+ */
+void eComponent::remove_from_zorder()
+{
+    if (classid() != EGUICLASSID_WINDOW && m_next_z)
+    {
+        m_prev_z->m_next_z = m_next_z;
+        m_next_z->m_prev_z = m_prev_z;
+        m_next_z = m_prev_z = OS_NULL;
+    }
+}
+
+/* Wipe out whole Z order
+ */
+void eComponent::clear_zorder()
+{
+    eComponent *c, *next_c;
+
+    c = this;
+    do {
+        next_c = c->m_next_z;
+        c->remove_from_zorder();
+        if (c == next_c) break;
+        c = next_c;
+    }
+    while(c);
+}
+
+
 /**
 ****************************************************************************************************
 
@@ -576,21 +644,20 @@ failed:
 eStatus eComponent::draw(
     eDrawParams& prm)
 {
-    eRect visible_rect;
     eObject *o;
     bool popup_drawn;
 
     // Union component rect and parent clip to get visible rect !!!!!!!!!!!!!!!!!!!!!!
-    visible_rect = m_rect;
+    // visible_rectx = visible_rect();
 
     // And make sure item is in Z order
 
-    if (prm.mouse_right_click) {
-        if (erect_is_point_inside(&visible_rect, prm.mouse_pos.x, prm.mouse_pos.y))
+    /* if (prm.mouse_right_click) {
+        if (erect_is_xy_inside(visible_rectx, prm.mouse_pos.x, prm.mouse_pos.y))
         {
             right_click_popup();
         }
-    }
+    } */
 
     if (m_popup_open)
     {
@@ -653,7 +720,6 @@ ePopup *eComponent::popup()
     p = new ePopup(this, EOID_GUI_POPUP,
         EOBJ_TEMPORARY_ATTACHMENT );
 
-    p->open_popup();
     m_popup_open = true;
 
     return p;
@@ -765,46 +831,3 @@ void eComponent::close_popup()
 }
 
 
-/* Add component to window's Z order
- */
-void eComponent::add_to_zorder(eWindow *window)
-{
-    if (window == OS_NULL) return;
-
-    if (classid() != EGUICLASSID_WINDOW)
-    {
-        m_prev_z = window->m_prev_z;
-        m_next_z = window;
-        m_prev_z->m_next_z = this;
-        window->m_prev_z = this;
-    }
-}
-
-
-/* Remove component from window's Z order
- */
-void eComponent::remove_from_zorder()
-{
-    if (classid() != EGUICLASSID_WINDOW && m_next_z)
-    {
-        m_prev_z->m_next_z = m_next_z;
-        m_next_z->m_prev_z = m_prev_z;
-        m_next_z = m_prev_z = OS_NULL;
-    }
-}
-
-/* Wipe out whole Z order
- */
-void eComponent::clear_zorder()
-{
-    eComponent *c, *next_c;
-
-    c = this;
-    do {
-        next_c = c->m_next_z;
-        c->remove_from_zorder();
-        if (c == next_c) break;
-        c = next_c;
-    }
-    while(c);
-}

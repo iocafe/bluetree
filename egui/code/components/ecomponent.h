@@ -95,6 +95,15 @@ extern const os_char ecomp_all[];
 
 /*@}*/
 
+/* More specific info about click position, returned by check_click() function.
+ */
+typedef enum ecompoClickSpec
+{
+    ECOMPO_CLICK_IGNORE = 0,
+    ECOMPO_CLICK_OK,
+}
+ecompoClickSpec;
+
 
 /* Parameters for layout(). These determine size, position of component and it's subcomponents.
    Setup Z order for draing.
@@ -245,6 +254,23 @@ public:
      */
     eComponent *nextcomponent(
         e_oid id = EOID_CHILD);
+
+    /* Get topmost component in Z orderr which encloses (x, y) position.
+     */
+    eComponent *findcomponent(
+        ePos pos);
+
+    /* Add component to window's Z order
+     */
+    void add_to_zorder(eWindow *w);
+
+    /* Remove component from window's Z order
+     */
+    void remove_from_zorder();
+
+    /* Wipe out whole Z order
+     */
+    void clear_zorder();
 
     /* Get parent window (eWindow or ePopup).
      */
@@ -417,19 +443,19 @@ public:
 
     /* Capture mouse events to this component.
      */
-    void capture_mouse();
+    // void capture_mouse();
 
-    /* Add component to window's Z order
+    /* Get visible component rectangle, for checking mouse clicks, ect.
+     * For now whole component rectangle is returned.
      */
-    void add_to_zorder(eWindow *window);
+    eRect& visible_rect() {return m_rect; }
 
-    /* Remove component from window's Z order
+    /* If mouse is clicked within component's visible rectangle, we still verify that click is
+       close enough to line, etc, to select the component, and if the point is "special point",
+       like end point of the line which can be used to modify the component.
      */
-    void remove_from_zorder();
+    virtual ecompoClickSpec check_click(ePos pos) {OSAL_UNUSED(pos); return ECOMPO_CLICK_OK;}
 
-    /* Wipe out whole Z order
-     */
-    void clear_zorder();
 
     /*@}*/
 

@@ -137,6 +137,9 @@ protected:
         eVariable *name,
         eSet *appendix);
 
+    void handle_popup(
+        eDrawParams& prm);
+
     eAutoLabel m_label_title;
 
     /* ImGui autolabel count for generating labels for components within the eWindow.
