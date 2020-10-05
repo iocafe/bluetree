@@ -210,7 +210,7 @@ os_long eWindow::make_autolabel()
 eStatus eWindow::draw(
     eDrawParams& prm)
 {
-    eDrawParams childprm;
+    eDrawParams wprm;
     eComponent *c;
     const os_char *label;
     ImVec2 pos, sz;
@@ -224,12 +224,16 @@ eStatus eWindow::draw(
       | ImGuiWindowFlags_NoTitleBar);
     */
 
-    childprm = prm;
-    childprm.edit_mode = m_edit_mode;
-    childprm.window = this;
+    wprm = prm;
+    wprm.edit_mode = m_edit_mode;
+    wprm.window = this;
 
     if (!ImGui::IsWindowHovered()) {
-        childprm.mouse_right_click = false;
+        wprm.mouse_right_click = OS_FALSE;
+        wprm.mouse_left_drag_event = OS_FALSE;
+        wprm.mouse_right_drag_event = OS_FALSE;
+        wprm.mouse_left_drop_event = OS_FALSE;
+        wprm.mouse_right_drop_event = OS_FALSE;
     }
 
     /* Draw child components and setup Z order.
@@ -237,7 +241,7 @@ eStatus eWindow::draw(
     clear_zorder();
     for (c = firstcomponent(EOID_GUI_COMPONENT); c; c = c->nextcomponent(EOID_GUI_COMPONENT))
     {
-        c->draw(childprm);
+        c->draw(wprm);
     }
 
     pos = ImGui::GetWindowPos();
@@ -247,9 +251,19 @@ eStatus eWindow::draw(
     m_rect.x2 = m_rect.x1 + sz.x - 1;
     m_rect.y2 = m_rect.y1 + sz.y - 1;
 
-    eComponent::draw(prm);
+    eComponent::draw(wprm);
 
-    handle_popup(prm);
+    if (prm.mouse_right_click) {
+        open_popup(wprm);
+    }
+
+    if (prm.mouse_right_drag_event) {
+        start_drag(wprm);
+    }
+
+    if (prm.mouse_right_drop_event) {
+        drop(wprm);
+    }
 
     /* Finished with the window.
      */
@@ -257,18 +271,35 @@ eStatus eWindow::draw(
     return ESTATUS_SUCCESS;
 }
 
-void eWindow::handle_popup(
+void eWindow::open_popup(
     eDrawParams& prm)
 {
     eComponent *c;
-    if (prm.mouse_right_click) {
-        c = findcomponent(prm.mouse_pos);
-        if (c) {
-            c->right_click_popup();
-        }
+    c = findcomponent(prm.mouse_pos);
+    if (c) {
+        c->right_click_popup();
     }
 }
 
+void eWindow::start_drag(
+    eDrawParams& prm)
+{
+    eComponent *c;
+    c = findcomponent(prm.mouse_right_drag_start_pos);
+    if (c) {
+        c = c;
+    }
+}
+
+void eWindow::drop(
+    eDrawParams& prm)
+{
+    eComponent *c;
+    c = findcomponent(prm.mouse_pos);
+    if (c) {
+        c = c;
+    }
+}
 
 /**
 ****************************************************************************************************

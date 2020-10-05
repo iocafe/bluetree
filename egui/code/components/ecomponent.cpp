@@ -647,18 +647,6 @@ eStatus eComponent::draw(
     eObject *o;
     bool popup_drawn;
 
-    // Union component rect and parent clip to get visible rect !!!!!!!!!!!!!!!!!!!!!!
-    // visible_rectx = visible_rect();
-
-    // And make sure item is in Z order
-
-    /* if (prm.mouse_right_click) {
-        if (erect_is_xy_inside(visible_rectx, prm.mouse_pos.x, prm.mouse_pos.y))
-        {
-            right_click_popup();
-        }
-    } */
-
     if (m_popup_open)
     {
         popup_drawn = false;
@@ -708,7 +696,6 @@ void eComponent::draw_edit_mode_decorations()
     col = IM_COL32(255, 80, 80, 50);
     draw_list->AddRect(top_left, bottom_right, col);
 }
-
 
 
 ePopup *eComponent::popup()

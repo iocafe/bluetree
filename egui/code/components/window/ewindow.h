@@ -137,7 +137,13 @@ protected:
         eVariable *name,
         eSet *appendix);
 
-    void handle_popup(
+    void open_popup(
+        eDrawParams& prm);
+
+    void start_drag(
+        eDrawParams& prm);
+
+    void drop(
         eDrawParams& prm);
 
     eAutoLabel m_label_title;

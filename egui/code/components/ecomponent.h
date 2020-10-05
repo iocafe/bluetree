@@ -173,12 +173,6 @@ typedef struct eDrawParams
     /* Internal for mouse processing. Normally components should not use these.
      */
     ImGuiIO *io;
-    ePos mouse_down_pos[EIMGUI_NRO_MOUSE_BUTTONS];
-    os_boolean mouse_is_down[EIMGUI_NRO_MOUSE_BUTTONS];
-    os_boolean mouse_was_down[EIMGUI_NRO_MOUSE_BUTTONS];
-    os_boolean mouse_is_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
-    os_boolean mouse_was_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
-    os_boolean mouse_held_still[EIMGUI_NRO_MOUSE_BUTTONS];
 }
 eDrawParams;
 

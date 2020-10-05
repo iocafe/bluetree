@@ -43,6 +43,19 @@ extern const os_char
 /*@}*/
 
 
+typedef struct eguiMouseState
+{
+    ePos down_pos[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean is_down[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean was_down[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean is_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean was_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean held_still[EIMGUI_NRO_MOUSE_BUTTONS];
+}
+eguiMouseState;
+
+
+
 /**
 ****************************************************************************************************
 
@@ -210,9 +223,13 @@ public:
      */
     void focus();
 
-    /* Capture mouse events to this component.
+    /* Set GUI component to use as drag origin.
      */
-    // void capture_mouse();
+    void save_drag_origin(eComponent *c);
+
+    /* Get drag origin component.
+     */
+    eComponent *get_drag_origin();
 
     /*@}*/
 
@@ -248,6 +265,14 @@ protected:
     /* ImGui autolabel count for generating labels for windows eWindow and ePopup.
      */
     os_long m_autolabel_count;
+
+    /* Component we use as an anchor for drag
+     */
+    ePointer m_drag_origin;
+
+    /* Mouse state data.
+     */
+    eguiMouseState m_mouse;
 };
 
 
