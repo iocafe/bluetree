@@ -488,6 +488,17 @@ void eGui::handle_mouse()
             }
         }
 
+        /* Mouse left_press is always is used to lock window to place.
+           Do not check held_still
+         */
+        if (i == EIMGUI_LEFT_MOUSE_BUTTON && m_draw_prm.mouse_left_press != m_mouse.is_down[i])
+        {
+            m_draw_prm.mouse_left_press = m_mouse.is_down[i];
+            if (m_draw_prm.mouse_left_press) {
+                m_draw_prm.left_press_pos = m_draw_prm.mouse_pos;
+            }
+        }
+
         /* Start dragging event with position, maintain "dragging" flag.
          */
         if (m_mouse.is_dragging[i])
@@ -548,9 +559,12 @@ void eGui::handle_mouse()
 
 /* Set drag component.
  */
-void eGui::save_drag_origin(eComponent *c)
+void eGui::save_drag_origin(
+    eComponent *c,
+    eGuiDragMode drag_mode)
 {
     m_drag_origin.set(c);
+    m_drag_mode = drag_mode;
 }
 
 /* Set drag component.

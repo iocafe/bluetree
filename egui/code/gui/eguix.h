@@ -223,13 +223,19 @@ public:
      */
     void focus();
 
-    /* Set GUI component to use as drag origin.
+    /* Set GUI component to use as drag origin. We copy, move or modify a component.
+     * We may also copy/mode/modify selected components.
      */
-    void save_drag_origin(eComponent *c);
+    void save_drag_origin(eComponent *c ,
+        eGuiDragMode drag_mode = EGUI_DRAG_TO_COPY_COMPONENT);
 
     /* Get drag origin component.
      */
     eComponent *get_drag_origin();
+
+    /* Get drag mode, are wee copying, moveigt or modifying component(s).
+     */
+    eGuiDragMode get_drag_mode() {return m_drag_mode;}
 
     /*@}*/
 
@@ -266,9 +272,15 @@ protected:
      */
     os_long m_autolabel_count;
 
-    /* Component we use as an anchor for drag
+    /* Component we use as an origin for drag or component beging modifified.
      */
     ePointer m_drag_origin;
+
+    /* Are we copying or moving component? Are we modifying component?
+       EGUI_DRAG_TO_COPY_COMPONENT, EGUI_DRAG_TO_MOVE_COMPONENT or
+       EGUI_DRAG_TO_MODIFY_COMPONENT.
+     */
+    eGuiDragMode m_drag_mode;
 
     /* Mouse state data.
      */

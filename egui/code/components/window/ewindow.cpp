@@ -214,19 +214,31 @@ eStatus eWindow::draw(
     eComponent *c;
     const os_char *label;
     ImVec2 pos, sz;
-
-    label = m_label_title.get(this, ECOMP_VALUE);
-
-    /* Create a window.
-     */
-    ImGui::Begin(label);
-    /*  ImGui::Begin(label, NULL, ImGuiWindowFlags_NoSavedSettings |ImGuiWindowFlags_NoMove
-      | ImGuiWindowFlags_NoTitleBar);
-    */
+    os_boolean lock_window;
 
     wprm = prm;
     wprm.edit_mode = m_edit_mode;
     wprm.window = this;
+
+    /* Decide if we need to lock window to place for drag and drop.
+     */
+    lock_window = OS_FALSE;
+    if (wprm.mouse_left_press && wprm.edit_mode) {
+        lock_window = erect_is_point_inside(m_rect, prm.left_press_pos);
+    }
+
+    /* Create a window.
+     */
+    label = m_label_title.get(this, ECOMP_VALUE);
+    if (lock_window) {
+        ImGui::Begin(label, NULL, ImGuiWindowFlags_NoMove);
+    }
+    else
+    {
+        ImGui::Begin(label);
+        /*  ImGui::Begin(label, NULL, ImGuiWindowFlags_NoSavedSettings |ImGuiWindowFlags_NoMove
+          | ImGuiWindowFlags_NoTitleBar); */
+    }
 
     if (!ImGui::IsWindowHovered()) {
         wprm.mouse_right_click = OS_FALSE;
@@ -244,12 +256,38 @@ eStatus eWindow::draw(
         c->draw(wprm);
     }
 
+    /* This gets rectangle including window framing.
+     */
     pos = ImGui::GetWindowPos();
     sz = ImGui::GetWindowSize();
     m_rect.x1 = pos.x;
     m_rect.y1 = pos.y;
     m_rect.x2 = m_rect.x1 + sz.x - 1;
     m_rect.y2 = m_rect.y1 + sz.y - 1;
+
+    /* This is what we need, window content rectangle excluding framing.
+     */
+    pos = ImGui::GetWindowPos();
+    sz = ImGui::GetWindowContentRegionMin();
+    m_rect.x1 = sz.x + pos.x;
+    m_rect.y1 = sz.y + pos.y;
+    sz = ImGui::GetWindowContentRegionMax();
+    m_rect.x2 = sz.x + pos.x - 1;
+    m_rect.y2 = sz.y + pos.y - 1;
+
+    ImVec2 vMin(m_rect.x1, m_rect.y1);
+    ImVec2 vMax(m_rect.x2, m_rect.y2);
+ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 0, 0, 255 ) );
+
+    /* Good way to visually test.
+    ImVec2 vMin = ImGui::GetWindowContentRegionMin();
+    ImVec2 vMax = ImGui::GetWindowContentRegionMax();
+    vMin.x += ImGui::GetWindowPos().x;
+    vMin.y += ImGui::GetWindowPos().y;
+    vMax.x += ImGui::GetWindowPos().x;
+    vMax.y += ImGui::GetWindowPos().y;
+    ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 255, 0, 255 ) );
+     */
 
     eComponent::draw(wprm);
 
@@ -258,6 +296,10 @@ eStatus eWindow::draw(
     }
 
     if (prm.mouse_right_drag_event) {
+        start_drag(wprm);
+    }
+
+    if (prm.mouse_right_dragging) {
         start_drag(wprm);
     }
 
@@ -287,18 +329,43 @@ void eWindow::start_drag(
     eComponent *c;
     c = findcomponent(prm.mouse_right_drag_start_pos);
     if (c) {
-        c = c;
+        c->on_start_drag(prm, prm.mouse_right_drag_start_pos);
     }
 }
+
+void eWindow::drag(
+    eDrawParams& prm)
+{
+    eComponent *c;
+    c = prm.gui->get_drag_origin();
+    if (c) {
+        c->on_drag(prm, prm.gui->get_drag_mode(), prm.mouse_pos);
+    }
+}
+
 
 void eWindow::drop(
     eDrawParams& prm)
 {
     eComponent *c;
-    c = findcomponent(prm.mouse_pos);
-    if (c) {
-        c = c;
+    eGuiDragMode drag_mode;
+
+    drag_mode = prm.gui->get_drag_mode();
+    if (drag_mode == EGUI_DRAG_TO_MODIFY_COMPONENT)
+    {
+        c = prm.gui->get_drag_origin();
+        if (c) {
+            c->on_drop(prm, drag_mode, prm.mouse_pos);
+        }
     }
+    else {
+        c = findcomponent(prm.mouse_pos);
+        if (c) {
+            c->on_drop(prm, drag_mode, prm.mouse_pos);
+        }
+    }
+
+    prm.gui->save_drag_origin(OS_NULL);
 }
 
 /**

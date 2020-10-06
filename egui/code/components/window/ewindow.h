@@ -143,6 +143,9 @@ protected:
     void start_drag(
         eDrawParams& prm);
 
+    void drag(
+        eDrawParams& prm);
+
     void drop(
         eDrawParams& prm);
 

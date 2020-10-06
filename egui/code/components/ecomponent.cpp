@@ -818,3 +818,31 @@ void eComponent::close_popup()
 }
 
 
+/* Drag desture detected, we are starting to drag this component.
+ */
+void eComponent::on_start_drag(
+    eDrawParams& prm,
+    ePos& mouse_down_pos)
+{
+    prm.gui->save_drag_origin(this, EGUI_DRAG_TO_COPY_COMPONENT);
+}
+
+/* Mouse dragging, we are copying/moving/mofifying component(s).
+ */
+void eComponent::on_drag(
+    eDrawParams& prm,
+    eGuiDragMode drag_mode,
+    ePos& mouse_pos)
+{
+
+}
+
+/* Mouse released to end drag, actually copy/move object or and modification.
+ */
+void eComponent::on_drop(
+    eDrawParams& prm,
+    eGuiDragMode drag_mode,
+    ePos& mouse_up_pos)
+{
+
+}

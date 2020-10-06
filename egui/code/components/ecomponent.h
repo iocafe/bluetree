@@ -151,6 +151,7 @@ typedef struct eDrawParams
     /* Components should use these.
      - mouse_pos Current mouse position.
      - mouse_left_click Pulse 1 when mouse click (no drag drop detected)
+     - mouse_left_press Left mouse button pressed, used to lock window to place. This is always real mouse button.
      - mouse_left_drag_event Pulse 1 when drag starts.
      - mouse_left_drop_event Pulse 1 when dropped.
      - mouse_left_dragging Stays 1 while dragging.
@@ -159,6 +160,8 @@ typedef struct eDrawParams
     ePos mouse_pos;
 
     os_boolean mouse_left_click;
+    os_boolean mouse_left_press;
+    ePos left_press_pos;
     os_boolean mouse_left_drag_event;
     os_boolean mouse_left_drop_event;
     os_boolean mouse_left_dragging;
@@ -175,6 +178,15 @@ typedef struct eDrawParams
     ImGuiIO *io;
 }
 eDrawParams;
+
+/* Draw mode: Are we copying or moving component? Are we modifying component?
+ */
+typedef enum {
+    EGUI_DRAG_TO_COPY_COMPONENT,
+    EGUI_DRAG_TO_MOVE_COMPONENT,
+    EGUI_DRAG_TO_MODIFY_COMPONENT
+}
+eGuiDragMode;
 
 
 /**
@@ -459,6 +471,25 @@ public:
      */
     virtual ecompoClickSpec check_click(ePos pos) {OSAL_UNUSED(pos); return ECOMPO_CLICK_OK;}
 
+    /* Drag desture detected, we are starting to drag this component.
+     */
+    void on_start_drag(
+        eDrawParams& prm,
+        ePos& mouse_down_pos);
+
+    /* Mouse dragging, we are copying/moving/mofifying component(s).
+     */
+    void on_drag(
+        eDrawParams& prm,
+        eGuiDragMode drag_mode,
+        ePos& mouse_pos);
+
+    /* Mouse released to end drag, actually copy/move object or and modification.
+     */
+    void on_drop(
+        eDrawParams& prm,
+        eGuiDragMode drag_mode,
+        ePos& mouse_up_pos);
 
     /*@}*/
 
