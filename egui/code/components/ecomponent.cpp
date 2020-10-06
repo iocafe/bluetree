@@ -822,6 +822,7 @@ void eComponent::close_popup()
  */
 void eComponent::on_start_drag(
     eDrawParams& prm,
+    os_int mouse_button_nr,
     ePos& mouse_down_pos)
 {
     prm.gui->save_drag_origin(this, EGUI_DRAG_TO_COPY_COMPONENT);
@@ -831,6 +832,7 @@ void eComponent::on_start_drag(
  */
 void eComponent::on_drag(
     eDrawParams& prm,
+    os_int mouse_button_nr,
     eGuiDragMode drag_mode,
     ePos& mouse_pos)
 {
@@ -841,8 +843,10 @@ void eComponent::on_drag(
  */
 void eComponent::on_drop(
     eDrawParams& prm,
+    os_int mouse_button_nr,
+    eComponent *origin,
     eGuiDragMode drag_mode,
     ePos& mouse_up_pos)
 {
-
+    origin->clone(this, EOID_GUI_COMPONENT);
 }

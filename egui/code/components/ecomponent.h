@@ -134,6 +134,7 @@ typedef struct eLayoutParams
 eLayoutParams;
 
 
+
 typedef struct eDrawParams
 {
     /* Pointer to eGui
@@ -159,19 +160,15 @@ typedef struct eDrawParams
      */
     ePos mouse_pos;
 
-    os_boolean mouse_left_click;
     os_boolean mouse_left_press;
-    ePos left_press_pos;
-    os_boolean mouse_left_drag_event;
-    os_boolean mouse_left_drop_event;
-    os_boolean mouse_left_dragging;
-    ePos mouse_left_drag_start_pos;
+    ePos mouse_left_press_pos;
 
-    os_boolean mouse_right_click;
-    os_boolean mouse_right_drag_event;
-    os_boolean mouse_right_drop_event;
-    os_boolean mouse_right_dragging;
-    ePos mouse_right_drag_start_pos;
+    os_boolean mouse_click[EIMGUI_NRO_MOUSE_BUTTONS];
+
+    os_boolean mouse_drag_event[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_drop_event[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
+    ePos mouse_drag_start_pos[EIMGUI_NRO_MOUSE_BUTTONS];
 
     /* Internal for mouse processing. Normally components should not use these.
      */
@@ -475,12 +472,14 @@ public:
      */
     void on_start_drag(
         eDrawParams& prm,
+        os_int mouse_button_nr,
         ePos& mouse_down_pos);
 
     /* Mouse dragging, we are copying/moving/mofifying component(s).
      */
     void on_drag(
         eDrawParams& prm,
+        os_int mouse_button_nr,
         eGuiDragMode drag_mode,
         ePos& mouse_pos);
 
@@ -488,6 +487,8 @@ public:
      */
     void on_drop(
         eDrawParams& prm,
+        os_int mouse_button_nr,
+        eComponent *origin,
         eGuiDragMode drag_mode,
         ePos& mouse_up_pos);
 

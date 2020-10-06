@@ -214,6 +214,7 @@ eStatus eWindow::draw(
     eComponent *c;
     const os_char *label;
     ImVec2 pos, sz;
+    os_int mouse_button_nr;
     os_boolean lock_window;
 
     wprm = prm;
@@ -224,7 +225,7 @@ eStatus eWindow::draw(
      */
     lock_window = OS_FALSE;
     if (wprm.mouse_left_press && wprm.edit_mode) {
-        lock_window = erect_is_point_inside(m_rect, prm.left_press_pos);
+        lock_window = erect_is_point_inside(m_rect, prm.mouse_left_press_pos);
     }
 
     /* Create a window.
@@ -241,11 +242,12 @@ eStatus eWindow::draw(
     }
 
     if (!ImGui::IsWindowHovered()) {
-        wprm.mouse_right_click = OS_FALSE;
-        wprm.mouse_left_drag_event = OS_FALSE;
-        wprm.mouse_right_drag_event = OS_FALSE;
-        wprm.mouse_left_drop_event = OS_FALSE;
-        wprm.mouse_right_drop_event = OS_FALSE;
+        wprm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
+        wprm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
+        wprm.mouse_drag_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
+        wprm.mouse_drag_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
+        wprm.mouse_drop_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
+        wprm.mouse_drop_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
     }
 
     /* Draw child components and setup Z order.
@@ -275,9 +277,11 @@ eStatus eWindow::draw(
     m_rect.x2 = sz.x + pos.x - 1;
     m_rect.y2 = sz.y + pos.y - 1;
 
-    ImVec2 vMin(m_rect.x1, m_rect.y1);
+    /* test visualization
+     * ImVec2 vMin(m_rect.x1, m_rect.y1);
     ImVec2 vMax(m_rect.x2, m_rect.y2);
-ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 0, 0, 255 ) );
+    ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 0, 0, 255 ) );
+    */
 
     /* Good way to visually test.
     ImVec2 vMin = ImGui::GetWindowContentRegionMin();
@@ -291,20 +295,25 @@ ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 0, 0, 255 ) 
 
     eComponent::draw(wprm);
 
-    if (prm.mouse_right_click) {
+    if (prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON]) {
         open_popup(wprm);
     }
 
-    if (prm.mouse_right_drag_event) {
-        start_drag(wprm);
-    }
+    for (mouse_button_nr = 0;
+         mouse_button_nr < EIMGUI_NRO_MOUSE_BUTTONS;
+         mouse_button_nr++)
+    {
+        if (prm.mouse_drag_event[mouse_button_nr]) {
+            start_drag(wprm, mouse_button_nr);
+        }
 
-    if (prm.mouse_right_dragging) {
-        start_drag(wprm);
-    }
+        if (prm.mouse_dragging[mouse_button_nr]) {
+            start_drag(wprm, mouse_button_nr);
+        }
 
-    if (prm.mouse_right_drop_event) {
-        drop(wprm);
+        if (prm.mouse_drop_event[mouse_button_nr]) {
+            drop(wprm, mouse_button_nr);
+        }
     }
 
     /* Finished with the window.
@@ -324,44 +333,49 @@ void eWindow::open_popup(
 }
 
 void eWindow::start_drag(
-    eDrawParams& prm)
+    eDrawParams& prm,
+    os_int mouse_button_nr)
 {
     eComponent *c;
-    c = findcomponent(prm.mouse_right_drag_start_pos);
+    c = findcomponent(prm.mouse_drag_start_pos[mouse_button_nr]);
     if (c) {
-        c->on_start_drag(prm, prm.mouse_right_drag_start_pos);
+        c->on_start_drag(prm, mouse_button_nr, prm.mouse_drag_start_pos[mouse_button_nr]);
     }
 }
 
 void eWindow::drag(
-    eDrawParams& prm)
+    eDrawParams& prm,
+    os_int mouse_button_nr)
 {
     eComponent *c;
     c = prm.gui->get_drag_origin();
     if (c) {
-        c->on_drag(prm, prm.gui->get_drag_mode(), prm.mouse_pos);
+        c->on_drag(prm, mouse_button_nr, prm.gui->get_drag_mode(), prm.mouse_pos);
     }
 }
 
 
 void eWindow::drop(
-    eDrawParams& prm)
+    eDrawParams& prm,
+    os_int mouse_button_nr)
 {
-    eComponent *c;
+    eComponent *origin, *c;
     eGuiDragMode drag_mode;
 
     drag_mode = prm.gui->get_drag_mode();
+    if (origin == OS_NULL) {
+        return;
+    }
+
+    origin = prm.gui->get_drag_origin();
     if (drag_mode == EGUI_DRAG_TO_MODIFY_COMPONENT)
     {
-        c = prm.gui->get_drag_origin();
-        if (c) {
-            c->on_drop(prm, drag_mode, prm.mouse_pos);
-        }
+        origin->on_drop(prm, mouse_button_nr, OS_NULL, drag_mode, prm.mouse_pos);
     }
     else {
         c = findcomponent(prm.mouse_pos);
         if (c) {
-            c->on_drop(prm, drag_mode, prm.mouse_pos);
+            c->on_drop(prm, mouse_button_nr, origin, drag_mode, prm.mouse_pos);
         }
     }
 

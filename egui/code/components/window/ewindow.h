@@ -141,13 +141,16 @@ protected:
         eDrawParams& prm);
 
     void start_drag(
-        eDrawParams& prm);
+        eDrawParams& prm,
+        os_int mouse_button_nr);
 
     void drag(
-        eDrawParams& prm);
+        eDrawParams& prm,
+        os_int mouse_button_nr);
 
     void drop(
-        eDrawParams& prm);
+        eDrawParams& prm,
+        os_int mouse_button_nr);
 
     eAutoLabel m_label_title;
 

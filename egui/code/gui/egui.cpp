@@ -442,14 +442,15 @@ void eGui::handle_mouse()
 
     /* Normally we give only "pulses" to components.
      */
-    m_draw_prm.mouse_left_click = OS_FALSE;
-    m_draw_prm.mouse_left_drop_event = OS_FALSE;
-    m_draw_prm.mouse_right_click = OS_FALSE;
-    m_draw_prm.mouse_right_drop_event = OS_FALSE;
-    m_draw_prm.mouse_left_drag_event = OS_FALSE;
-    m_draw_prm.mouse_right_drag_event = OS_FALSE;
-    m_draw_prm.mouse_left_dragging = OS_FALSE;
-    m_draw_prm.mouse_right_dragging = OS_FALSE;
+    m_draw_prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
+    m_draw_prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
+
+    m_draw_prm.mouse_drop_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
+    m_draw_prm.mouse_drop_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
+    m_draw_prm.mouse_drag_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
+    m_draw_prm.mouse_drag_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
+    m_draw_prm.mouse_dragging[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
+    m_draw_prm.mouse_dragging[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
 
     m_draw_prm.mouse_pos.x = m_draw_prm.io->MousePos.x;
     m_draw_prm.mouse_pos.y = m_draw_prm.io->MousePos.y;
@@ -495,7 +496,7 @@ void eGui::handle_mouse()
         {
             m_draw_prm.mouse_left_press = m_mouse.is_down[i];
             if (m_draw_prm.mouse_left_press) {
-                m_draw_prm.left_press_pos = m_draw_prm.mouse_pos;
+                m_draw_prm.mouse_left_press_pos = m_draw_prm.mouse_pos;
             }
         }
 
@@ -506,20 +507,20 @@ void eGui::handle_mouse()
             if (m_mouse.is_dragging[i] != m_mouse.was_dragging[i])
             {
                 if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_mouse.held_still[i]) {
-                    m_draw_prm.mouse_left_drag_event = OS_TRUE;
-                    m_draw_prm.mouse_left_drag_start_pos = m_mouse.down_pos[i];
+                    m_draw_prm.mouse_drag_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_TRUE;
+                    m_draw_prm.mouse_drag_start_pos[EIMGUI_LEFT_MOUSE_BUTTON] = m_mouse.down_pos[i];
                 }
                 else {
-                    m_draw_prm.mouse_right_drag_event = OS_TRUE;
-                    m_draw_prm.mouse_right_drag_start_pos = m_mouse.down_pos[i];
+                    m_draw_prm.mouse_drag_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_TRUE;
+                    m_draw_prm.mouse_drag_start_pos[EIMGUI_RIGHT_MOUSE_BUTTON] = m_mouse.down_pos[i];
                 }
                 save_drag_origin(OS_NULL);
             }
             if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_mouse.held_still[i]) {
-                m_draw_prm.mouse_left_dragging = OS_TRUE;
+                m_draw_prm.mouse_dragging[EIMGUI_LEFT_MOUSE_BUTTON] = OS_TRUE;
             }
             else {
-                m_draw_prm.mouse_right_dragging = OS_TRUE;
+                m_draw_prm.mouse_dragging[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_TRUE;
             }
         }
         m_mouse.was_dragging[i] = m_mouse.is_dragging[i];
@@ -532,19 +533,19 @@ void eGui::handle_mouse()
             if (m_mouse.is_dragging[i])
             {
                 if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_mouse.held_still[i]) {
-                    m_draw_prm.mouse_left_drop_event = OS_TRUE;
+                    m_draw_prm.mouse_drop_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_TRUE;
                 }
                 else {
-                    m_draw_prm.mouse_right_drop_event = OS_TRUE;
+                    m_draw_prm.mouse_drop_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_TRUE;
                }
             }
 
             else {
                 if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_mouse.held_still[i]) {
-                    m_draw_prm.mouse_left_click = OS_TRUE;
+                    m_draw_prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON] = OS_TRUE;
                 }
                 else {
-                    m_draw_prm.mouse_right_click = OS_TRUE;
+                    m_draw_prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_TRUE;
                 }
             }
 
