@@ -567,6 +567,35 @@ eObject *eObject::parent(
 /**
 ****************************************************************************************************
 
+  @brief Check is object my ancestor.
+
+  The eObject::isdecendentof() function check if this object is a decendent of specified
+  ansestor.
+
+  @param   ancestor Pointer to ancestor object. If OS_NULL, the function returns OS_FALSE.
+
+  @return  OS_TRUE if this is decendent of ancestor, OS_FALSE if not. If ancestor equals this
+           object, the function returns OS_TRUE.
+
+****************************************************************************************************
+*/
+os_boolean eObject::isdecendentof(
+    eObject *ancestor)
+{
+    while (ancestor != this) {
+        if (ancestor == OS_NULL) {
+            return OS_FALSE;
+        }
+        ancestor = ancestor->parent();
+    }
+
+    return OS_TRUE;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Get first child object identified by oid.
 
   The eObject::first() function returns pointer to the first child object of this object.

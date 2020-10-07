@@ -372,13 +372,6 @@ public:
     inline eObject *parent()
     {
         return mm_parent;
-        /* if (mm_handle)
-        {
-            eHandle *h;
-            h = mm_handle->parent();
-            if (h) return h->m_object;
-        }
-        return OS_NULL; */
     }
 
     /** Get grandparent of this object.
@@ -390,13 +383,6 @@ public:
             return mm_parent->mm_parent;
         }
         return OS_NULL;
-        /* if (mm_handle)
-        {
-            eHandle *h;
-            h = mm_handle->grandparent();
-            if (h) return h->m_object;
-        }
-        return OS_NULL; */
     }
 
     /** Get parent object of specific class and/or
@@ -406,6 +392,11 @@ public:
         os_int cid,
         e_oid id = EOID_ALL,
         bool check_this = false);
+
+    /** Check if this object is decendent of specific ancestor.
+     */
+    os_boolean isdecendentof(
+        eObject *ancestor);
 
     /** Get thread object.
      */

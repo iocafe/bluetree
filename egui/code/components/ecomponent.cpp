@@ -685,7 +685,7 @@ void eComponent::draw_edit_mode_decorations(
 
     if (m_select || mouse_over) {
         thickness = 2.0f;
-        rounding = 4.0f;
+        rounding = 0.0f;
     }
     else {
         thickness = 1.0f;
@@ -840,7 +840,22 @@ void eComponent::on_click(
     eDrawParams& prm,
     os_int mouse_button_nr)
 {
-    setpropertyl(ECOMP_SELECT, !m_select);
+    eWindowSelect op;
+
+    if (prm.edit_mode && mouse_button_nr == EIMGUI_LEFT_MOUSE_BUTTON)
+    {
+        if (prm.mouse_click_keyboard_flags[mouse_button_nr] & EDRAW_LEFT_CTRL_DOWN)
+        {
+            op = m_select
+               ? EWINDOW_REMOVE_FROM_SELECTION
+               : EWINDOW_APPEND_TO_SELECTION;
+        }
+        else {
+            op = EWINDOW_NEW_SELECTION;
+        }
+
+        prm.window->select(this, op);
+    }
 }
 
 

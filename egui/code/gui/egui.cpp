@@ -436,7 +436,7 @@ eStatus eGui::run()
  */
 void eGui::handle_mouse()
 {
-    os_int i, dx, dy;
+    os_int i, dx, dy, kf;
 
     m_draw_prm.io = &ImGui::GetIO();
 
@@ -469,6 +469,13 @@ void eGui::handle_mouse()
                 m_mouse.down_pos[i] = m_draw_prm.mouse_pos;
                 m_mouse.is_dragging[i] = OS_FALSE;
                 m_mouse.held_still[i] = OS_FALSE;
+
+                // m_draw_prm.io->KeyMap[] - convert key define to key number
+                // m_draw_prm.io->KeysDown[]; - check if key is down by key number
+                kf = 0;
+
+                if (m_draw_prm.io->KeyCtrl) kf |= EDRAW_LEFT_CTRL_DOWN;
+                m_mouse.keyboard_flags[i] = kf;
             }
 
             dx = m_draw_prm.mouse_pos.x - m_mouse.down_pos[i].x;
@@ -509,10 +516,13 @@ void eGui::handle_mouse()
                 if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_mouse.held_still[i]) {
                     m_draw_prm.mouse_drag_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_TRUE;
                     m_draw_prm.mouse_drag_start_pos[EIMGUI_LEFT_MOUSE_BUTTON] = m_mouse.down_pos[i];
+                    m_draw_prm.mouse_drag_keyboard_flags[EIMGUI_LEFT_MOUSE_BUTTON] = m_mouse.keyboard_flags[i];
+
                 }
                 else {
                     m_draw_prm.mouse_drag_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_TRUE;
                     m_draw_prm.mouse_drag_start_pos[EIMGUI_RIGHT_MOUSE_BUTTON] = m_mouse.down_pos[i];
+                    m_draw_prm.mouse_drag_keyboard_flags[EIMGUI_RIGHT_MOUSE_BUTTON] = m_mouse.keyboard_flags[i];
                 }
                 save_drag_origin(OS_NULL);
             }
@@ -543,9 +553,11 @@ void eGui::handle_mouse()
             else {
                 if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_mouse.held_still[i]) {
                     m_draw_prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON] = OS_TRUE;
+                    m_draw_prm.mouse_click_keyboard_flags[EIMGUI_LEFT_MOUSE_BUTTON] = m_mouse.keyboard_flags[i];
                 }
                 else {
                     m_draw_prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_TRUE;
+                    m_draw_prm.mouse_click_keyboard_flags[EIMGUI_RIGHT_MOUSE_BUTTON] = m_mouse.keyboard_flags[i];
                 }
             }
 

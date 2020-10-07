@@ -18,6 +18,16 @@
 #define EWINDOW_H_
 #include "egui.h"
 
+/* Possible select operation for eWindow::select() function.
+ */
+typedef enum {
+    EWINDOW_NEW_SELECTION,
+    EWINDOW_CLEAR_SELECTION,
+    EWINDOW_APPEND_TO_SELECTION,
+    EWINDOW_REMOVE_FROM_SELECTION
+}
+eWindowSelect;
+
 
 /**
 ****************************************************************************************************
@@ -100,6 +110,11 @@ public:
         return new eWindow(parent, id, flags);
     }
 
+    /* Modify selecction list and select flags of components.
+     */
+    void select(eComponent *c,
+        eWindowSelect op);
+
     /* Generating ImGui autolabel.
      */
     virtual os_long make_autolabel();
@@ -158,6 +173,11 @@ protected:
     void drop(
         eDrawParams& prm,
         os_int mouse_button_nr);
+
+
+    /* Pointers to selected components.
+     */
+    eContainer *m_select_list;
 
     eAutoLabel m_label_title;
 

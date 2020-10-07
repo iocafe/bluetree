@@ -47,6 +47,11 @@
 #define EOID_GUI_POPUP -103
 #define EOID_GUI_COMPONENT -104
 
+/* Misc objects used by components
+ */
+#define EOID_GUI_SELECTED -110
+
+
 /*@}*/
 
 #endif

@@ -39,6 +39,9 @@ eWindow::eWindow(
 
     addname("window", ENAME_TEMPORARY, "gui");
     ns_create("window");
+
+    m_select_list = new eContainer(this, EOID_GUI_SELECTED, EOBJ_TEMPORARY_ATTACHMENT);
+    addname("../_select", ENAME_TEMPORARY);
 }
 
 
@@ -432,6 +435,82 @@ void eWindow::drop(
 
     prm.gui->save_drag_origin(OS_NULL);
 }
+
+/* Modify selecction list and select flags of components.
+ */
+void eWindow::select(eComponent *c,
+    eWindowSelect op)
+{
+    ePointer *p, *next_p;
+    eComponent *cc;
+    os_boolean c_in_selection, is_c;
+
+    /* Clearing selection is same as new empty selection.
+     */
+    if (op == EWINDOW_CLEAR_SELECTION) {
+        op = EWINDOW_NEW_SELECTION;
+        c = OS_NULL;
+    }
+
+    /* If we need to remove current selection
+     */
+    c_in_selection = OS_FALSE;
+    for (p = (ePointer*)m_select_list->first(); p; p = next_p) {
+        next_p = (ePointer*)p->next();
+        if (p->classid() != ECLASSID_POINTER) continue;
+        cc = (eComponent*)p->get();
+        if (cc) {
+            is_c = (os_boolean)(cc == c);
+            c_in_selection |= is_c;
+
+            switch (op) {
+                default:
+                case EWINDOW_NEW_SELECTION:
+                    cc->setpropertyl(ECOMP_SELECT, is_c);
+                    if (!is_c) delete p;
+                    break;
+
+                case EWINDOW_APPEND_TO_SELECTION:
+                    if (is_c) {
+                        cc->setpropertyl(ECOMP_SELECT, OS_TRUE);
+                    }
+                    else {
+                        if (c->isdecendentof(cc) ||
+                            cc->isdecendentof(c))
+                        {
+                            return;
+                        }
+                    }
+                    break;
+
+                case EWINDOW_REMOVE_FROM_SELECTION:
+                    if (is_c) {
+                        cc->setpropertyl(ECOMP_SELECT, OS_FALSE);
+                        delete p;
+                    }
+                    break;
+            }
+        }
+        else {
+            /* Componen has been deleted but pointer is still in
+               select list, just forget it.
+             */
+            delete p;
+        }
+    }
+
+    /* If component is not in select list, we may need to add it.
+     */
+    if (!c_in_selection && c) {
+        if (op == EWINDOW_NEW_SELECTION || op == EWINDOW_APPEND_TO_SELECTION)
+        {
+            p = new ePointer(m_select_list);
+            p->set(c);
+            c->setpropertyl(ECOMP_SELECT, OS_TRUE);
+        }
+    }
+}
+
 
 /**
 ****************************************************************************************************

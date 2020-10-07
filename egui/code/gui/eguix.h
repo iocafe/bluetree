@@ -51,6 +51,7 @@ typedef struct eguiMouseState
     os_boolean is_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
     os_boolean was_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
     os_boolean held_still[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean keyboard_flags[EIMGUI_NRO_MOUSE_BUTTONS];
 }
 eguiMouseState;
 

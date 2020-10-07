@@ -137,7 +137,9 @@ typedef struct eLayoutParams
 }
 eLayoutParams;
 
-
+/* Keyboard flags with mouse.
+ */
+#define EDRAW_LEFT_CTRL_DOWN 1
 
 typedef struct eDrawParams
 {
@@ -172,11 +174,14 @@ typedef struct eDrawParams
     ePos mouse_left_press_pos;
 
     os_boolean mouse_click[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_click_keyboard_flags[EIMGUI_NRO_MOUSE_BUTTONS];
 
     os_boolean mouse_drag_event[EIMGUI_NRO_MOUSE_BUTTONS];
     os_boolean mouse_drop_event[EIMGUI_NRO_MOUSE_BUTTONS];
     os_boolean mouse_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
     ePos mouse_drag_start_pos[EIMGUI_NRO_MOUSE_BUTTONS];
+    os_boolean mouse_drag_keyboard_flags[EIMGUI_NRO_MOUSE_BUTTONS];
+
 
     /* Internal for mouse processing. Normally components should not use these.
      */
