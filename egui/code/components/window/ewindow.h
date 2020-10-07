@@ -132,6 +132,9 @@ public:
     inline void set_editmode(os_int x) {m_edit_mode = (os_boolean)x; }
 
 protected:
+    void draw_edit_mode_decorations(
+        eDrawParams& prm);
+
     virtual void object_info(
         eVariable *item,
         eVariable *name,
@@ -139,6 +142,10 @@ protected:
 
     void open_popup(
         eDrawParams& prm);
+
+    void click(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
 
     void start_drag(
         eDrawParams& prm,

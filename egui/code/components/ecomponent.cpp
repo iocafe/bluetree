@@ -20,11 +20,12 @@
 /* Variable property names.
  */
 const os_char
+    ecomp_target[] = "target",
+    ecomp_setvalue[] = "setvalue",
     ecomp_path[] = "path",
     ecomp_ipath[] = "ipath",
-    ecomp_setvalue[] = "setvalue",
-    ecomp_target[] = "target",
     ecomp_edit[] = "edit",
+    ecomp_select[] = "select",
     ecomp_refresh[] = "refresh",
     ecomp_all[] = "all";
 
@@ -46,6 +47,7 @@ eComponent::eComponent(
     os_int flags)
     : eObject(parent, id, flags)
 {
+    m_select = OS_FALSE;
     m_popup_open = OS_FALSE;
     m_next_z = m_prev_z = OS_NULL;
 }
@@ -110,34 +112,27 @@ void eComponent::setupproperties(
     os_int cls,
     os_int flags)
 {
-    eVariable *vtype;
-
-    addpropertys(cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
+    eVariable *p;
 
     if (flags & ECOMP_VALUE_PROPERITES) {
-        vtype = addpropertyl (cls, ECOMP_TYPE, ecomp_type, "type", EPRO_METADATA);
+        eVariable tmp;
         addproperty (cls, ECOMP_VALUE, ecomp_value, "value");
+        p = addpropertyl (cls, ECOMP_TYPE, ecomp_type, "type", EPRO_METADATA);
+        emake_type_enum_str(&tmp);
+        p->setpropertyv(ECOMP_ATTR, &tmp);
+
+        addproperty (cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
         addproperty (cls, ECOMP_DEFAULT, ecomp_default, "default", EPRO_METADATA);
         addpropertyl(cls, ECOMP_DIGS, ecomp_digs, "digs", EPRO_METADATA);
         addpropertys(cls, ECOMP_UNIT, ecomp_unit, "unit", EPRO_METADATA);
-        addpropertyd(cls, ECOMP_MIN, ecomp_min, "min", EPRO_METADATA);
-        addpropertyd(cls, ECOMP_MAX, ecomp_max, "max", EPRO_METADATA);
-
-        {
-            eVariable tmp;
-            emake_type_enum_str(&tmp);
-            vtype->setpropertyv(ECOMP_ATTR, &tmp);
-        }
+        addpropertys(cls, ECOMP_ATTR, ecomp_attr, "attr", EPRO_METADATA);
     }
 
     if (flags & ECOMP_EXTRA_UI_PROPERITES) {
-        addproperty(cls, ECOMP_ABBR, ecomp_abbr, "abbreviation", EPRO_METADATA);
-        addproperty(cls, ECOMP_TTIP, ecomp_ttip, "tooltip", EPRO_METADATA);
-    }
-
-    addpropertys(cls, ECOMP_ATTR, ecomp_attr, "attr", EPRO_METADATA);
-
-    if (flags & ECOMP_VALUE_PROPERITES) {
+        addpropertyd(cls, ECOMP_MIN, ecomp_min, "min", EPRO_METADATA);
+        addpropertyd(cls, ECOMP_MAX, ecomp_max, "max", EPRO_METADATA);
+        addproperty (cls, ECOMP_ABBR, ecomp_abbr, "abbreviation", EPRO_METADATA);
+        addproperty (cls, ECOMP_TTIP, ecomp_ttip, "tooltip", EPRO_METADATA);
         addpropertyd(cls, ECOMP_GAIN, ecomp_gain, "gain", EPRO_METADATA);
         addpropertyd(cls, ECOMP_OFFSET, ecomp_offset, "offset", EPRO_METADATA);
     }
@@ -145,6 +140,8 @@ void eComponent::setupproperties(
     if (flags & ECOMP_CONF_PROPERITES) {
         addproperty (cls, ECOMP_CONF, ecomp_conf, "conf", EPRO_METADATA);
     }
+
+    addpropertyb(cls, ECOMP_SELECT, ecomp_select, "select", EPRO_SIMPLE);
 }
 
 
@@ -373,13 +370,9 @@ eStatus eComponent::onpropertychange(
 {
     switch (propertynr)
     {
-/*         case ECOMP_VALUE:
-            setv(x);
+        case ECOMP_SELECT:
+            m_select = (os_boolean)x->getl();
             break;
-
-        case ECOMP_DIGS:
-            setdigs((os_int)x->getl());
-            break; */
 
         default:
             return eObject::onpropertychange(propertynr, x, flags);
@@ -410,15 +403,9 @@ eStatus eComponent::simpleproperty(
 {
     switch (propertynr)
     {
-/*
-        case ECOMP_VALUE:
-            x->setv(this);
+        case ECOMP_SELECT:
+            x->setl(m_select);
             break;
-
-        case ECOMP_DIGS:
-            x->setl(digs());
-            break;
-*/
 
         default:
             return eObject::simpleproperty(propertynr, x);
@@ -666,9 +653,9 @@ eStatus eComponent::draw(
 
     /* In edit mode, draw decorations.
      */
-    if (prm.edit_mode) {
+/*     if (prm.edit_mode) {
         draw_edit_mode_decorations();
-    }
+    } */
 
     return ESTATUS_SUCCESS;
 }
@@ -681,20 +668,50 @@ eStatus eComponent::draw(
 
 ****************************************************************************************************
 */
-void eComponent::draw_edit_mode_decorations()
+void eComponent::draw_edit_mode_decorations(
+    eDrawParams& prm,
+    os_boolean mouse_over)
 {
     ImDrawList* draw_list;
     ImVec2 top_left, bottom_right;
     ImU32 col;
+    float thickness;
+    float rounding = 4.0f;
 
     top_left.x = m_rect.x1;
     top_left.y = m_rect.y1;
     bottom_right.x = m_rect.x2;
     bottom_right.y = m_rect.y2;
 
+    if (m_select || mouse_over) {
+        thickness = 2.0f;
+        rounding = 4.0f;
+    }
+    else {
+        thickness = 1.0f;
+        rounding = 0.0f;
+    }
+
+    if (mouse_over) {
+        if (m_select) {
+            col = IM_COL32(48, 48, 255, 250);
+        }
+        else {
+            col = IM_COL32(128, 128, 128, 150);
+            if (classid() == EGUICLASSID_WINDOW) {
+                thickness = 1.0f;
+                rounding = 0.0f;
+                col = IM_COL32(128, 128, 128, 60);
+            }
+        }
+    }
+    else {
+        col = m_select ? IM_COL32(48, 48, 255, 80) : IM_COL32(128, 128, 128, 60);
+    }
+
     draw_list = ImGui::GetWindowDrawList();
-    col = IM_COL32(255, 80, 80, 50);
-    draw_list->AddRect(top_left, bottom_right, col);
+    draw_list->AddRect(top_left, bottom_right, col,rounding,
+        rounding > 0.0f ? ImDrawCornerFlags_All : ImDrawCornerFlags_None, thickness);
 }
 
 
@@ -815,6 +832,15 @@ void eComponent::close_popup()
         }
         m_popup_open = false;
     }
+}
+
+/* Component clicked.
+ */
+void eComponent::on_click(
+    eDrawParams& prm,
+    os_int mouse_button_nr)
+{
+    setpropertyl(ECOMP_SELECT, !m_select);
 }
 
 

@@ -53,13 +53,16 @@ class ePopup;
 #define ECOMP_ABBR EVARP_ABBR
 #define ECOMP_TTIP EVARP_TTIP
 #define ECOMP_CONF EVARP_CONF
-#define ECOMP_PATH 30
-#define ECOMP_IPATH 31
-#define ECOMP_SETVALUE 32
-#define ECOMP_TARGET 33
-#define ECOMP_EDIT 34
-#define ECOMP_REFRESH 35
-#define ECOMP_ALL 36
+
+#define ECOMP_TARGET 30
+#define ECOMP_SETVALUE 31
+#define ECOMP_PATH 32
+#define ECOMP_IPATH 33
+
+#define ECOMP_EDIT 60
+#define ECOMP_SELECT 61
+#define ECOMP_REFRESH 62
+#define ECOMP_ALL 63
 
 /* Flags for eComponent::setupproperties() to specify which optional properties for
    the component class.
@@ -85,11 +88,12 @@ class ePopup;
 #define ecomp_gain evarp_gain
 #define ecomp_offset evarp_offset
 #define ecomp_conf evarp_conf
+extern const os_char ecomp_target[];
+extern const os_char ecomp_setvalue[];
 extern const os_char ecomp_path[];
 extern const os_char ecomp_ipath[];
-extern const os_char ecomp_setvalue[];
-extern const os_char ecomp_target[];
 extern const os_char ecomp_edit[];
+extern const os_char ecomp_select[];
 extern const os_char ecomp_refresh[];
 extern const os_char ecomp_all[];
 
@@ -149,6 +153,10 @@ typedef struct eDrawParams
      */
     os_boolean edit_mode;
 
+    /* Mouse is over this window.
+     */
+    os_boolean mouse_over_window;
+
     /* Components should use these.
      - mouse_pos Current mouse position.
      - mouse_left_click Pulse 1 when mouse click (no drag drop detected)
@@ -198,6 +206,8 @@ eGuiDragMode;
 */
 class eComponent : public eObject
 {
+    friend class eWindow;
+
     /**
     ************************************************************************************************
 
@@ -396,6 +406,12 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
+    /* Draw edit mode decorations, like component frames, etc.
+     */
+    void draw_edit_mode_decorations(
+        eDrawParams& prm,
+        os_boolean mouse_over);
+
     /* Start editing value, toggle checkbox or show drop down list.
      */
     virtual void activate() {}
@@ -451,7 +467,7 @@ public:
 
     /* Set keyboard input focus to this component.
      */
-    void focus();
+    // void focus();
 
     /* Capture mouse events to this component.
      */
@@ -467,6 +483,12 @@ public:
        like end point of the line which can be used to modify the component.
      */
     virtual ecompoClickSpec check_click(ePos pos) {OSAL_UNUSED(pos); return ECOMPO_CLICK_OK;}
+
+    /* Component clicked (select in edit mode, etc ).
+     */
+    void on_click(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
 
     /* Drag desture detected, we are starting to drag this component.
      */
@@ -496,8 +518,6 @@ public:
 
 
 protected:
-    void draw_edit_mode_decorations();
-
     /* Current component rectangle (screen coordinates).
      */
     eRect m_rect;
@@ -512,13 +532,14 @@ protected:
 
     /* Minimum and maximum sizes in pixels what component can be drawn in and still looks acceptable.
      */
-    eSize m_min_sz;
-    eSize m_max_sz;
+    // eSize m_min_sz;
+    // eSize m_max_sz;
 
     /* Natural size for the component.
      */
-    eSize m_natural_sz;
+    // eSize m_natural_sz;
 
+    os_boolean m_select;        /* Component is selected, property value */
     os_boolean m_popup_open;
 
     /* Z order */

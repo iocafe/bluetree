@@ -241,7 +241,8 @@ eStatus eWindow::draw(
           | ImGuiWindowFlags_NoTitleBar); */
     }
 
-    if (!ImGui::IsWindowHovered()) {
+    wprm.mouse_over_window = ImGui::IsWindowHovered();
+    if (!wprm.mouse_over_window) {
         wprm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
         wprm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
         wprm.mouse_drag_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
@@ -295,6 +296,10 @@ eStatus eWindow::draw(
 
     eComponent::draw(wprm);
 
+    if (wprm.edit_mode) {
+        draw_edit_mode_decorations(wprm);
+    }
+
     if (prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON]) {
         open_popup(wprm);
     }
@@ -303,6 +308,10 @@ eStatus eWindow::draw(
          mouse_button_nr < EIMGUI_NRO_MOUSE_BUTTONS;
          mouse_button_nr++)
     {
+        if (prm.mouse_click[mouse_button_nr]) {
+            click(wprm, mouse_button_nr);
+        }
+
         if (prm.mouse_drag_event[mouse_button_nr]) {
             start_drag(wprm, mouse_button_nr);
         }
@@ -322,6 +331,37 @@ eStatus eWindow::draw(
     return ESTATUS_SUCCESS;
 }
 
+/**
+****************************************************************************************************
+
+  @brief Draw edit mode decorations, like component frames, etc.
+
+  The eWindow::edit_mode_decorations()....
+
+  @param   prm Drawing parameters.
+  @return  None
+
+****************************************************************************************************
+*/
+void eWindow::draw_edit_mode_decorations(
+    eDrawParams& prm)
+{
+    eComponent *c, *mouse_over;
+
+    if (prm.mouse_over_window) {
+        mouse_over = findcomponent(prm.mouse_pos);
+    }
+    else {
+        mouse_over = OS_NULL;
+    }
+
+    for (c = m_next_z; c; c = c->m_next_z)
+    {
+        c->draw_edit_mode_decorations(prm, (os_boolean)(mouse_over == c));
+        if (c == this) break;
+    }
+}
+
 void eWindow::open_popup(
     eDrawParams& prm)
 {
@@ -329,6 +369,17 @@ void eWindow::open_popup(
     c = findcomponent(prm.mouse_pos);
     if (c) {
         c->right_click_popup();
+    }
+}
+
+void eWindow::click(
+    eDrawParams& prm,
+    os_int mouse_button_nr)
+{
+    eComponent *c;
+    c = findcomponent(prm.mouse_pos);
+    if (c) {
+        c->on_click(prm, mouse_button_nr);
     }
 }
 
@@ -362,12 +413,12 @@ void eWindow::drop(
     eComponent *origin, *c;
     eGuiDragMode drag_mode;
 
-    drag_mode = prm.gui->get_drag_mode();
+    origin = prm.gui->get_drag_origin();
     if (origin == OS_NULL) {
         return;
     }
 
-    origin = prm.gui->get_drag_origin();
+    drag_mode = prm.gui->get_drag_mode();
     if (drag_mode == EGUI_DRAG_TO_MODIFY_COMPONENT)
     {
         origin->on_drop(prm, mouse_button_nr, OS_NULL, drag_mode, prm.mouse_pos);
