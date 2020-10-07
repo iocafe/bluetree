@@ -57,8 +57,6 @@ void egui_shutdown();
 #include "code/initialize/eguiglobal.h"
 #include "code/initialize/eguiclasslist.h"
 #include "code/imgui_iface/eimgui_iface.h"
-#include "code/userinput/emouse.h"
-#include "code/userinput/ekeyboard.h"
 #include "code/helpers/eautolabel.h"
 #include "code/helpers/eeditbuffer.h"
 #include "code/helpers/estrbuffer.h"

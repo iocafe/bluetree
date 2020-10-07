@@ -116,11 +116,6 @@ public:
      */
     static void setupclass();
 
-    /* Add class'es properties to property set.
-     */
-    static void setupproperties(
-        os_int cls);
-
     /* Generating ImGui autolabel.
      */
     os_long make_autolabel();
@@ -189,16 +184,6 @@ public:
         eDrawParams& prm,
         os_int flags);
 
-    /* Pass mouse event to component, returns true if mouse event was processed.
-     */
-    bool onmouse(
-        eMouseMessage& mevent);
-
-    /* Pass keyboard event to component, returns true if keyboard event was processed.
-     */
-    bool onkeyboard(
-        eKeyboardMessage& mevent);
-
     /*@}*/
 
     /**
@@ -227,8 +212,8 @@ public:
     /* Set GUI component to use as drag origin. We copy, move or modify a component.
      * We may also copy/mode/modify selected components.
      */
-    void save_drag_origin(eComponent *c ,
-        eGuiDragMode drag_mode = EGUI_DRAG_TO_COPY_COMPONENT);
+    void save_drag_origin(eComponent *c,
+        eGuiDragMode drag_mode);
 
     /* Get drag origin component.
      */
@@ -257,6 +242,9 @@ public:
 protected:
     void handle_mouse();
 
+    void drag(os_int mouse_button_nr);
+    void drop_modification(os_int mouse_button_nr);
+
     /* Viewport, corresponds to operating system window, etc.
      */
     eViewPort *m_viewport;
@@ -267,7 +255,7 @@ protected:
 
     /* Display size.
      */
-    eSize m_sz;
+    // eSize m_sz;
 
     /* ImGui autolabel count for generating labels for windows eWindow and ePopup.
      */
@@ -278,7 +266,7 @@ protected:
     ePointer m_drag_origin;
 
     /* Are we copying or moving component? Are we modifying component?
-       EGUI_DRAG_TO_COPY_COMPONENT, EGUI_DRAG_TO_MOVE_COMPONENT or
+       EGUI_DRAG_TO_COPY_COMPONENT, EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT or
        EGUI_DRAG_TO_MODIFY_COMPONENT.
      */
     eGuiDragMode m_drag_mode;

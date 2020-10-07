@@ -166,14 +166,9 @@ protected:
         eDrawParams& prm,
         os_int mouse_button_nr);
 
-    void drag(
+    void drop_component(
         eDrawParams& prm,
         os_int mouse_button_nr);
-
-    void drop(
-        eDrawParams& prm,
-        os_int mouse_button_nr);
-
 
     /* Pointers to selected components.
      */

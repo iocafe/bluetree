@@ -99,6 +99,7 @@ void eButton::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eButton");
+    setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
     addpropertys(cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
     addproperty (cls, ECOMP_VALUE, ecomp_value, "value");
     addpropertyl(cls, ECOMP_SETVALUE, ecomp_setvalue, OS_TRUE, "set value", EPRO_METADATA);

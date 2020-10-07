@@ -41,7 +41,7 @@ eWindow::eWindow(
     ns_create("window");
 
     m_select_list = new eContainer(this, EOID_GUI_SELECTED, EOBJ_TEMPORARY_ATTACHMENT);
-    addname("../_select", ENAME_TEMPORARY);
+    m_select_list->addname("../_select", ENAME_TEMPORARY);
 }
 
 
@@ -107,6 +107,7 @@ void eWindow::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eWindow");
+    setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
     addpropertys(cls, ECOMP_VALUE, ecomp_value, "title");
     addpropertyb(cls, ECOMP_EDIT, ecomp_edit, "edit");
     propertysetdone(cls);
@@ -217,6 +218,7 @@ eStatus eWindow::draw(
     eComponent *c;
     const os_char *label;
     ImVec2 pos, sz;
+    eGuiDragMode dm;
     os_int mouse_button_nr;
     os_boolean lock_window;
 
@@ -245,13 +247,35 @@ eStatus eWindow::draw(
     }
 
     wprm.mouse_over_window = ImGui::IsWindowHovered();
+    wprm.mouse_dragged_over_window = OS_FALSE;
+
+    dm = wprm.gui->get_drag_mode();
+    if (dm == EGUI_DRAG_TO_COPY_COMPONENT || EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT)
+    {
+        wprm.mouse_dragged_over_window
+            = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+    }
+
     if (!wprm.mouse_over_window) {
         wprm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
         wprm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
         wprm.mouse_drag_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
         wprm.mouse_drag_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
-        wprm.mouse_drop_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
-        wprm.mouse_drop_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
+        if (!wprm.mouse_dragged_over_window) {
+            wprm.mouse_drop_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
+            wprm.mouse_drop_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
+        }
+    }
+
+    if (wprm.mouse_over_window || wprm.mouse_dragged_over_window)
+    {
+        eVariable tmp;
+        static os_int iii;
+        iii++;
+
+        propertyv(ECOMP_VALUE, &tmp);
+        osal_debug_error_str("Mouse over ", tmp.gets());
+        osal_debug_error_int("HERE ", iii);
     }
 
     /* Draw child components and setup Z order.
@@ -281,22 +305,6 @@ eStatus eWindow::draw(
     m_rect.x2 = sz.x + pos.x - 1;
     m_rect.y2 = sz.y + pos.y - 1;
 
-    /* test visualization
-     * ImVec2 vMin(m_rect.x1, m_rect.y1);
-    ImVec2 vMax(m_rect.x2, m_rect.y2);
-    ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 0, 0, 255 ) );
-    */
-
-    /* Good way to visually test.
-    ImVec2 vMin = ImGui::GetWindowContentRegionMin();
-    ImVec2 vMax = ImGui::GetWindowContentRegionMax();
-    vMin.x += ImGui::GetWindowPos().x;
-    vMin.y += ImGui::GetWindowPos().y;
-    vMax.x += ImGui::GetWindowPos().x;
-    vMax.y += ImGui::GetWindowPos().y;
-    ImGui::GetForegroundDrawList()->AddRect( vMin, vMax, IM_COL32( 255, 255, 0, 255 ) );
-     */
-
     eComponent::draw(wprm);
 
     if (wprm.edit_mode) {
@@ -319,12 +327,8 @@ eStatus eWindow::draw(
             start_drag(wprm, mouse_button_nr);
         }
 
-        if (prm.mouse_dragging[mouse_button_nr]) {
-            start_drag(wprm, mouse_button_nr);
-        }
-
         if (prm.mouse_drop_event[mouse_button_nr]) {
-            drop(wprm, mouse_button_nr);
+            drop_component(wprm, mouse_button_nr);
         }
     }
 
@@ -351,7 +355,7 @@ void eWindow::draw_edit_mode_decorations(
 {
     eComponent *c, *mouse_over;
 
-    if (prm.mouse_over_window) {
+    if (prm.mouse_over_window || prm.mouse_dragged_over_window) {
         mouse_over = findcomponent(prm.mouse_pos);
     }
     else {
@@ -397,19 +401,8 @@ void eWindow::start_drag(
     }
 }
 
-void eWindow::drag(
-    eDrawParams& prm,
-    os_int mouse_button_nr)
-{
-    eComponent *c;
-    c = prm.gui->get_drag_origin();
-    if (c) {
-        c->on_drag(prm, mouse_button_nr, prm.gui->get_drag_mode(), prm.mouse_pos);
-    }
-}
 
-
-void eWindow::drop(
+void eWindow::drop_component(
     eDrawParams& prm,
     os_int mouse_button_nr)
 {
@@ -422,19 +415,17 @@ void eWindow::drop(
     }
 
     drag_mode = prm.gui->get_drag_mode();
-    if (drag_mode == EGUI_DRAG_TO_MODIFY_COMPONENT)
+    if (drag_mode == EGUI_DRAG_TO_COPY_COMPONENT ||
+        drag_mode == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT)
     {
-        origin->on_drop(prm, mouse_button_nr, OS_NULL, drag_mode, prm.mouse_pos);
-    }
-    else {
         c = findcomponent(prm.mouse_pos);
         if (c) {
             c->on_drop(prm, mouse_button_nr, origin, drag_mode, prm.mouse_pos);
+            prm.gui->save_drag_origin(OS_NULL, EGUI_NOT_DRAGGING);
         }
     }
-
-    prm.gui->save_drag_origin(OS_NULL);
 }
+
 
 /* Modify selecction list and select flags of components.
  */

@@ -99,7 +99,7 @@ void ePopup::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "ePopup");
-    eComponent::setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
+    setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
     propertysetdone(cls);
     os_unlock();
 }

@@ -159,6 +159,10 @@ typedef struct eDrawParams
      */
     os_boolean mouse_over_window;
 
+    /* Component is beging dragged with mouse to this window.
+     */
+    os_boolean mouse_dragged_over_window;
+
     /* Components should use these.
      - mouse_pos Current mouse position.
      - mouse_left_click Pulse 1 when mouse click (no drag drop detected)
@@ -192,8 +196,9 @@ eDrawParams;
 /* Draw mode: Are we copying or moving component? Are we modifying component?
  */
 typedef enum {
+    EGUI_NOT_DRAGGING,
     EGUI_DRAG_TO_COPY_COMPONENT,
-    EGUI_DRAG_TO_MOVE_COMPONENT,
+    EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT,
     EGUI_DRAG_TO_MODIFY_COMPONENT
 }
 eGuiDragMode;
@@ -429,19 +434,6 @@ public:
     ePopup *drop_down_list(eContainer *list);
     void close_popup();
 
-
-#if 0
-    /* Pass mouse event to component, returns true if mouse event was processed.
-     */
-    virtual bool onmouse(
-        eMouseMessage& mevent);
-
-    /* Pass keyboard event to component, returns true if keyboard event was processed.
-     */
-    virtual bool onkeyboard(
-        eKeyboardMessage& mevent);
-
-#endif
     /*@}*/
 
     /**

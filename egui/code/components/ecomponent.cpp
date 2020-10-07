@@ -866,6 +866,10 @@ void eComponent::on_start_drag(
     os_int mouse_button_nr,
     ePos& mouse_down_pos)
 {
+    if (!m_select) {
+        prm.window->select(this, EWINDOW_NEW_SELECTION);
+    }
+
     prm.gui->save_drag_origin(this, EGUI_DRAG_TO_COPY_COMPONENT);
 }
 

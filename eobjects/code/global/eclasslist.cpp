@@ -165,6 +165,7 @@ void eclasslist_initialize()
     eName::setupclass();
     eNameSpace::setupclass();
     eValueX::setupclass();
+    // ePointer::setupclass();
     eEnvelope::setupclass();
     ePropertyBinding::setupclass();
     eTimer::setupclass();

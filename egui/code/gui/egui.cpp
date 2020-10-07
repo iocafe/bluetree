@@ -45,6 +45,7 @@ eGui::eGui(
     os_memclear(&m_draw_prm, sizeof(eDrawParams));
     m_draw_prm.gui = this;
     m_autolabel_count = 0;
+    m_drag_mode = EGUI_NOT_DRAGGING;
 
     os_memclear(&m_mouse, sizeof(eguiMouseState));
 
@@ -125,29 +126,10 @@ void eGui::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eGui");
-    setupproperties(cls);
-    propertysetdone(cls);
-    os_unlock();
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Add class'es properties to property set.
-
-  The eGui::setupproperties is helper function for setupclass, it is called from both
-  eGui class and derived classes like eName.
-
-  Process mutex must be locked when calling this function.
-
-****************************************************************************************************
-*/
-void eGui::setupproperties(
-    os_int cls)
-{
     addproperty(cls, EGUIP_TEXT, eguip_text, "text");
     addproperty(cls, EGUIP_OPEN, eguip_open, "open window");
+    propertysetdone(cls);
+    os_unlock();
 }
 
 
@@ -395,6 +377,7 @@ eStatus eGui::run()
 {
     eComponent *c;
     eStatus s;
+    os_int mouse_button_nr;
 
     bool  openoi = true;
 
@@ -416,6 +399,19 @@ eStatus eGui::run()
         for (c = firstcomponent(EOID_GUI_WINDOW); c; c = c->nextcomponent(EOID_GUI_WINDOW))
         {
             c->draw(m_draw_prm);
+        }
+
+        for (mouse_button_nr = 0;
+             mouse_button_nr < EIMGUI_NRO_MOUSE_BUTTONS;
+             mouse_button_nr++)
+        {
+            if (m_draw_prm.mouse_dragging[mouse_button_nr]) {
+                drag(mouse_button_nr);
+            }
+
+            if (m_draw_prm.mouse_drop_event[mouse_button_nr]) {
+                drop_modification(mouse_button_nr);
+            }
         }
 
         eimgui_finish_frame(m_viewport);
@@ -524,7 +520,7 @@ void eGui::handle_mouse()
                     m_draw_prm.mouse_drag_start_pos[EIMGUI_RIGHT_MOUSE_BUTTON] = m_mouse.down_pos[i];
                     m_draw_prm.mouse_drag_keyboard_flags[EIMGUI_RIGHT_MOUSE_BUTTON] = m_mouse.keyboard_flags[i];
                 }
-                save_drag_origin(OS_NULL);
+                save_drag_origin(OS_NULL, EGUI_NOT_DRAGGING);
             }
             if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_mouse.held_still[i]) {
                 m_draw_prm.mouse_dragging[EIMGUI_LEFT_MOUSE_BUTTON] = OS_TRUE;
@@ -585,4 +581,33 @@ void eGui::save_drag_origin(
 eComponent *eGui::get_drag_origin()
 {
     return (eComponent*)m_drag_origin.get();
+}
+
+void eGui::drag(
+    os_int mouse_button_nr)
+{
+    eComponent *c;
+    c = get_drag_origin();
+    if (c) {
+        c->on_drag(m_draw_prm, mouse_button_nr, get_drag_mode(), m_draw_prm.mouse_pos);
+    }
+}
+
+
+void eGui::drop_modification(
+    os_int mouse_button_nr)
+{
+    eComponent *origin;
+    eGuiDragMode drag_mode;
+
+    origin = get_drag_origin();
+    if (origin == OS_NULL) {
+        return;
+    }
+
+    drag_mode = get_drag_mode();
+    if (drag_mode == EGUI_DRAG_TO_MODIFY_COMPONENT) {
+        origin->on_drop(m_draw_prm, mouse_button_nr, OS_NULL, drag_mode, m_draw_prm.mouse_pos);
+        save_drag_origin(OS_NULL, EGUI_NOT_DRAGGING);
+    }
 }
