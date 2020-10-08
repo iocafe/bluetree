@@ -110,8 +110,6 @@ public:
 
       @name Base class functions to implement component functionality
 
-      CreaSerialization means writing object to stream or reading it from strem.
-
     ************************************************************************************************
     */
     /*@{*/
