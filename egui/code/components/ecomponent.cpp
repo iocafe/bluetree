@@ -369,7 +369,6 @@ eStatus eComponent::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-    eGui *g;
     os_int command;
 
     switch (propertynr)
@@ -383,8 +382,7 @@ eStatus eComponent::onpropertychange(
             if (command == ECOMPO_NO_COMMAND) break;
             switch (command) {
                 case ECOMPO_CUT:
-                    g = gui();
-                    if (g) g->delete_later(this);
+                    on_delete();
                     break;
 
                 default:
@@ -833,12 +831,14 @@ void eComponent::add_popup_edit_mode_items(
 
     /* Generic component scope items: refresh and show all.
      */
-    item = new eButton(p);
-    item->setpropertys(ECOMP_TEXT, "cut");
-    item->setpropertyl(ECOMP_VALUE, 0);
-    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_CUT);
-    target = buf; target += "/_p/_command";
-    item->setpropertyv(ECOMP_TARGET, &target);
+    if (classid() != EGUICLASSID_WINDOW) {
+        item = new eButton(p);
+        item->setpropertys(ECOMP_TEXT, "cut");
+        item->setpropertyl(ECOMP_VALUE, 0);
+        item->setpropertyl(ECOMP_SETVALUE, ECOMPO_CUT);
+        target = buf; target += "/_p/_command";
+        item->setpropertyv(ECOMP_TARGET, &target);
+    }
 }
 
 
@@ -988,7 +988,39 @@ void eComponent::on_drop(
             /* Delete original if moving.
              */
             if (drag_mode == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT) {
-                delete c;
+                prm.gui->delete_later(c);
+            }
+        }
+    }
+}
+
+
+/* Delete has been selected from pop up menu.
+ */
+void eComponent::on_delete()
+{
+    eGui *g;
+    eWindow *w;
+    ePointer *p, *next_p;
+    eComponent *c;
+    eContainer *select_list;
+
+    w = (eWindow*)window(EGUICLASSID_WINDOW);
+    g = gui();
+    if (w == OS_NULL || g == OS_NULL) return;
+
+    if (w->editmode())
+    {
+        if (!m_select) {
+            w->select(this, EWINDOW_NEW_SELECTION);
+        }
+
+        select_list = w->get_select_list();
+        for (p = (ePointer*)select_list->first(); p; p = next_p) {
+            next_p = (ePointer*)p->next();
+            c = (eComponent*)p->get();
+            if (c) {
+                g->delete_later(c);
             }
         }
     }

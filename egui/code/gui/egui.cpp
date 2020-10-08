@@ -617,8 +617,18 @@ void eGui::drop_modification(
 }
 
 
-/* Add object to list of pending deletes.
- */
+/**
+****************************************************************************************************
+
+  @brief Add object to list of pending deletes.
+
+  Add reference to object (usually GUI component) to list objects to be deleted.
+  See delete_pending() function.
+
+  @param   o Pointer to object to add to pending deletes.
+
+****************************************************************************************************
+*/
 void eGui::delete_later(eObject *o)
 {
     ePointer *p;
@@ -628,14 +638,26 @@ void eGui::delete_later(eObject *o)
 }
 
 
-/* Do pending deletes.
- */
+/**
+****************************************************************************************************
+
+  @brief Do pending deletes.
+
+  When GUI component is to be deleted, deleting it immediately while prosessing messages, etc,
+  is risky. To avoid issues with objects deleted in middle of operation, the ePointer
+  reference to object is added to list of pending deletes by calling delete_later() function.
+  This function is called after all GUI frame processing has been completed. It deletes
+  objects referred on pending deletes list and clears the list.
+
+****************************************************************************************************
+*/
 void eGui::delete_pending()
 {
     ePointer *p, *next_p;
     eObject *o;
 
-    for (p = (ePointer*)m_delete_list->first(); p; p = next_p) {
+    for (p = (ePointer*)m_delete_list->first(); p; p = next_p)
+    {
         next_p = (ePointer*)p->next();
         if (p->classid() != ECLASSID_POINTER) continue;
         o = p->get();

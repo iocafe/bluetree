@@ -524,6 +524,10 @@ public:
         eGuiDragMode drag_mode,
         ePos& mouse_up_pos);
 
+    /* Delete has been selected from pop up menu, etc.
+     */
+    void on_delete();
+
     /*@}*/
 
 
