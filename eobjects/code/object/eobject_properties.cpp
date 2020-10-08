@@ -103,8 +103,7 @@ void eObject::setpropertys_msg(
   @param  pflags Bit fields, combination of:
           - EPRO_DEFAULT (0): No options
           - EPRO_PERSISTENT: Property value is persistant is when saving.
-          - EPRO_METADATA: Much like EPRO_PERSISTENT, but property value is saved if
-            metadata is to be saved.
+          - EPRO_METADATA: The same as EPRO_PERSISTENT.
           - EPRO_SIMPLE: Do not keep copy of non default property in variable. Class implementation
             takes care about this.
           - EPRO_NOONPRCH: Do not call onpropertychange when value changes.

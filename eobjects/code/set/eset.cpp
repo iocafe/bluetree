@@ -112,7 +112,6 @@ eObject *eSet::clone(
     os_schar itype;
     os_int strsz;
     os_memsz sz;
-    eHandle *handle;
 
     clonedobj = new eSet(parent, id == EOID_CHILD ? oid() : id, flags());
 
@@ -128,7 +127,7 @@ eObject *eSet::clone(
         p = clonedobj->m_items;
         e = p + m_used;
 
-        /* Search id from items untim match found.
+        /* Clone item at a time.
          */
         while (p < e)
         {
@@ -160,35 +159,7 @@ eObject *eSet::clone(
         }
     }
 
-//    clonegeneric(clonedobj, aflags);
-
-    /* Copy attachments and properties stored as variable.
-     */
-
-    /* If there is no handle pointer, there can be no children to clone.
-     */
-    if (mm_handle == OS_NULL) return clonedobj;
-
-    /* Copy clonable attachments or all clonable object.
-     */
-    for (handle = mm_handle->first();
-         handle;
-         handle = handle->next())
-    {
-        if (((handle->flags() & EOBJ_IS_ATTACHMENT) || handle->oid() >= 0) &&
-            (handle->flags() & EOBJ_NOT_CLONABLE) == 0)
-        {
-            handle->object()->clone(clonedobj, handle->oid(), EOBJ_NO_MAP);
-        }
-    }
-
-    /* Map names to name spaces.
-     */
-    if ((aflags & EOBJ_NO_MAP) == 0)
-    {
-        map(E_ATTACH_NAMES);
-    }
-
+    clonegeneric(clonedobj, aflags);
     return clonedobj;
 }
 
@@ -304,7 +275,7 @@ eStatus eSet::writer(
     p = m_items;
     e = p + m_used;
 
-    /* Search id from items untim match found.
+    /* Search id from items until match found.
      */
     while (p < e)
     {
@@ -563,7 +534,7 @@ eStatus eSet::json_writer(
     if (p == OS_NULL) return ESTATUS_SUCCESS;
     e = p + m_used;
 
-    /* Search id from items untim match found.
+    /* Search id from items until match found.
      */
     while (p < e)
     {
@@ -963,7 +934,7 @@ os_boolean eSet::get(
     if (p == OS_NULL) goto getout;
     e = p + m_used;
 
-    /* Search id from items untim match found.
+    /* Search id from items until match found.
      */
     while (p < e)
     {
@@ -1063,7 +1034,7 @@ void eSet::clear()
     if (p == OS_NULL) return;
     e = p + m_used;
 
-    /* Search id from items untim match found.
+    /* Search id from items until match found.
      */
     while (p < e)
     {

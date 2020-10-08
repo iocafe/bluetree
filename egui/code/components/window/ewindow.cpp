@@ -253,7 +253,7 @@ eStatus eWindow::draw(
     wprm.mouse_dragged_over_window = OS_FALSE;
 
     dm = wprm.gui->get_drag_mode();
-    if (dm == EGUI_DRAG_TO_COPY_COMPONENT || EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT)
+    if (dm == EGUI_DRAG_TO_COPY_COMPONENT || dm == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT)
     {
         wprm.mouse_dragged_over_window
             = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
@@ -279,6 +279,8 @@ eStatus eWindow::draw(
         propertyv(ECOMP_VALUE, &tmp);
         osal_debug_error_str("Mouse over ", tmp.gets());
         osal_debug_error_int("HERE ", iii);
+        osal_debug_error_int("HERE DOV ", wprm.mouse_over_window);
+        osal_debug_error_int("HERE MDOV ", wprm.mouse_dragged_over_window);
     } */
 
     /* Draw child components and setup Z order.
@@ -314,7 +316,7 @@ eStatus eWindow::draw(
         draw_edit_mode_decorations(wprm);
     }
 
-    if (prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON]) {
+    if (wprm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON]) {
         open_popup(wprm);
     }
 
@@ -322,15 +324,15 @@ eStatus eWindow::draw(
          mouse_button_nr < EIMGUI_NRO_MOUSE_BUTTONS;
          mouse_button_nr++)
     {
-        if (prm.mouse_click[mouse_button_nr]) {
+        if (wprm.mouse_click[mouse_button_nr]) {
             click(wprm, mouse_button_nr);
         }
 
-        if (prm.mouse_drag_event[mouse_button_nr]) {
+        if (wprm.mouse_drag_event[mouse_button_nr]) {
             start_drag(wprm, mouse_button_nr);
         }
 
-        if (prm.mouse_drop_event[mouse_button_nr]) {
+        if (wprm.mouse_drop_event[mouse_button_nr]) {
             drop_component(wprm, mouse_button_nr);
         }
     }
