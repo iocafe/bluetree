@@ -425,15 +425,26 @@ eStatus eGui::run()
 }
 
 
-/* Convert mouse signals to click, and drag and stop
- *
+
+/**
+****************************************************************************************************
+
+  @brief Sort out ImGui mouse clicks, and drag and drop, etc, into m_draw_prm.
+
+  This function separated drag and drop from mouse click, etc, and stores this information
+  into eDrawParams structure "m_draw_prm" in format which is useful for egui library.
+
+  About eDrawParams structure
+
     - mouse_pos Current mouse position.
-    - mouse_left_click Pulse 1 when mouse click (no drag drop detected)
-    - mouse_left_drag_event Pulse 1 when drag starts.
-    - mouse_left_drop_event Pulse 1 when dropped.
-    - mouse_left_dragging Stays 1 while dragging.
-    - mouse_left_drag_start_pos Mouse down position for drag, set at same time with mouse_left_drag_event
- */
+    - mouse_click Pulse 1 when mouse click (no drag drop detected)
+    - mouse_drag_event Pulse 1 when drag starts.
+    - mouse_drop_event Pulse 1 when dropped.
+    - mouse_dragging Stays 1 while dragging.
+    - mouse_drag_start_pos Mouse down position for drag, set at same time with mouse_drag_event
+
+****************************************************************************************************
+*/
 void eGui::handle_mouse()
 {
     os_int i, dx, dy, kf;
@@ -499,7 +510,8 @@ void eGui::handle_mouse()
         /* Mouse left_press is always is used to lock window to place.
            Do not check held_still
          */
-        if (i == EIMGUI_LEFT_MOUSE_BUTTON && m_draw_prm.mouse_left_press != m_mouse.is_down[i])
+        if (i == EIMGUI_LEFT_MOUSE_BUTTON &&
+            m_draw_prm.mouse_left_press != m_mouse.is_down[i])
         {
             m_draw_prm.mouse_left_press = m_mouse.is_down[i];
             if (m_draw_prm.mouse_left_press) {
@@ -515,14 +527,17 @@ void eGui::handle_mouse()
             {
                 if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_mouse.held_still[i]) {
                     m_draw_prm.mouse_drag_event[EIMGUI_LEFT_MOUSE_BUTTON] = OS_TRUE;
-                    m_draw_prm.mouse_drag_start_pos[EIMGUI_LEFT_MOUSE_BUTTON] = m_mouse.down_pos[i];
-                    m_draw_prm.mouse_drag_keyboard_flags[EIMGUI_LEFT_MOUSE_BUTTON] = m_mouse.keyboard_flags[i];
-
+                    m_draw_prm.mouse_drag_start_pos[EIMGUI_LEFT_MOUSE_BUTTON]
+                        = m_mouse.down_pos[i];
+                    m_draw_prm.mouse_drag_keyboard_flags[EIMGUI_LEFT_MOUSE_BUTTON]
+                        = m_mouse.keyboard_flags[i];
                 }
                 else {
                     m_draw_prm.mouse_drag_event[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_TRUE;
-                    m_draw_prm.mouse_drag_start_pos[EIMGUI_RIGHT_MOUSE_BUTTON] = m_mouse.down_pos[i];
-                    m_draw_prm.mouse_drag_keyboard_flags[EIMGUI_RIGHT_MOUSE_BUTTON] = m_mouse.keyboard_flags[i];
+                    m_draw_prm.mouse_drag_start_pos[EIMGUI_RIGHT_MOUSE_BUTTON]
+                        = m_mouse.down_pos[i];
+                    m_draw_prm.mouse_drag_keyboard_flags[EIMGUI_RIGHT_MOUSE_BUTTON]
+                        = m_mouse.keyboard_flags[i];
                 }
                 save_drag_origin(OS_NULL, EGUI_NOT_DRAGGING);
             }
@@ -553,11 +568,13 @@ void eGui::handle_mouse()
             else {
                 if (i == EIMGUI_LEFT_MOUSE_BUTTON && !m_mouse.held_still[i]) {
                     m_draw_prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON] = OS_TRUE;
-                    m_draw_prm.mouse_click_keyboard_flags[EIMGUI_LEFT_MOUSE_BUTTON] = m_mouse.keyboard_flags[i];
+                    m_draw_prm.mouse_click_keyboard_flags[EIMGUI_LEFT_MOUSE_BUTTON]
+                        = m_mouse.keyboard_flags[i];
                 }
                 else {
                     m_draw_prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_TRUE;
-                    m_draw_prm.mouse_click_keyboard_flags[EIMGUI_RIGHT_MOUSE_BUTTON] = m_mouse.keyboard_flags[i];
+                    m_draw_prm.mouse_click_keyboard_flags[EIMGUI_RIGHT_MOUSE_BUTTON]
+                        = m_mouse.keyboard_flags[i];
                 }
             }
 
@@ -570,8 +587,25 @@ void eGui::handle_mouse()
 }
 
 
-/* Set drag component.
- */
+/**
+****************************************************************************************************
+
+  @brief Set drag origin component.
+
+  The function stores reference (ePointer) to refer to "drag origin" component and sets drag
+  mode. These are stored within eGui object.
+
+  @param   c Pointer to component to use as "drag origin".
+  @param   drag_mode Drag modes EGUI_DRAG_TO_COPY_COMPONENT and EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT
+           drag GUI components to move or copy them. If component is dragged from window to
+           another, it is always copied. If component is dragged within window, it is moved
+           by default. But it will be copied if user presses CTRL key when starting the
+           drag.
+           Value EGUI_DRAG_TO_MODIFY_COMPONENT specifies that we are mofifying component
+           by dragging some point of it with mouse.
+
+****************************************************************************************************
+*/
 void eGui::save_drag_origin(
     eComponent *c,
     eGuiDragMode drag_mode)
@@ -580,13 +614,43 @@ void eGui::save_drag_origin(
     m_drag_mode = drag_mode;
 }
 
-/* Set drag component.
- */
+
+/**
+****************************************************************************************************
+
+  @brief Get drag origin component.
+
+  Drag modes EGUI_DRAG_TO_COPY_COMPONENT and EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT:
+  When dragging components, we drag all components in select list of a window. Despite this
+  one of dragged components can be called "drag origin" component. The drag origin is used
+  to get the window from which components are dragged from, etc.
+
+  EGUI_DRAG_TO_MODIFY_COMPONENT drag origin is component being modified.
+
+  @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON (0) or
+           EIMGUI_RIGHT_MOUSE_BUTTON (1).
+
+****************************************************************************************************
+*/
 eComponent *eGui::get_drag_origin()
 {
     return (eComponent*)m_drag_origin.get();
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Visualize dragging.
+
+  Plan is to add drag visualization code to on_drag for gui component.
+  NO VISUALIZATION FOR NOW.
+
+  @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON (0) or
+           EIMGUI_RIGHT_MOUSE_BUTTON (1).
+
+****************************************************************************************************
+*/
 void eGui::drag(
     os_int mouse_button_nr)
 {
@@ -598,6 +662,18 @@ void eGui::drag(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Finish "drag" modification to GUI component.
+
+  This function is called to end EGUI_DRAG_TO_MODIFY_COMPONENT drag to modify a component.
+
+  @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON (0) or
+           EIMGUI_RIGHT_MOUSE_BUTTON (1).
+
+****************************************************************************************************
+*/
 void eGui::drop_modification(
     os_int mouse_button_nr)
 {
