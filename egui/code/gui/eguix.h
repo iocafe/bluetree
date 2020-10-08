@@ -223,6 +223,14 @@ public:
      */
     eGuiDragMode get_drag_mode() {return m_drag_mode;}
 
+    /* Add object to list of pending deletes.
+     */
+    void delete_later(eObject *o);
+
+    /* Do pending deletes.
+     */
+    void delete_pending();
+
     /*@}*/
 
 
@@ -274,6 +282,10 @@ protected:
     /* Mouse state data.
      */
     eguiMouseState m_mouse;
+
+    /* Pointers to object to be deleted by gui.
+     */
+    eContainer *m_delete_list;
 };
 
 

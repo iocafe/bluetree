@@ -102,7 +102,6 @@ void eTreeNode::setupclass()
     setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     addpropertys(cls, ECOMP_PATH, ecomp_path, "path");
     addpropertys(cls, ECOMP_IPATH, ecomp_ipath, "ipath");
-    addpropertyb(cls, ECOMP_REFRESH, ecomp_refresh, "refresh");
     addpropertyb(cls, ECOMP_ALL, ecomp_all, "show all");
 
     propertysetdone(cls);
@@ -344,10 +343,13 @@ eStatus eTreeNode::onpropertychange(
 {
     switch (propertynr)
     {
-        case ECOMP_REFRESH:
-            if (x->geti()) {
+        case ECOMP_COMMAND:
+            if (x->geti() == ECOMPO_REFRESH) {
                 request_object_info();
-                setpropertyi(ECOMP_REFRESH, OS_FALSE);
+                setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
+            }
+            else {
+                goto call_parent;
             }
             break;
 
@@ -392,9 +394,12 @@ eStatus eTreeNode::onpropertychange(
             break;
 
         default:
-            break;
+            goto call_parent;
     }
 
+    return ESTATUS_SUCCESS;
+
+call_parent:
     return eComponent::onpropertychange(propertynr, x, flags);
 }
 
@@ -858,14 +863,15 @@ void eTreeNode::activate()
 
 ****************************************************************************************************
 */
-ePopup *eTreeNode::right_click_popup()
+ePopup *eTreeNode::right_click_popup(
+    eDrawParams& prm)
 {
     ePopup *p;
     eButton *item;
     eVariable target;
     os_char buf[E_OIXSTR_BUF_SZ];
 
-    p = eComponent::right_click_popup();
+    p = eComponent::right_click_popup(prm);
     oixstr(buf, sizeof(buf));
 
     /* Generic component scope items: refresh and show all.
@@ -873,8 +879,8 @@ ePopup *eTreeNode::right_click_popup()
     item = new eButton(p);
     item->setpropertys(ECOMP_TEXT, "refresh");
     item->setpropertyl(ECOMP_VALUE, 0);
-    item->setpropertyl(ECOMP_SETVALUE, 1);
-    target = buf; target += "/_p/refresh";
+    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_REFRESH);
+    target = buf; target += "/_p/_command";
     item->setpropertyv(ECOMP_TARGET, &target);
 
     item = new eButton(p);

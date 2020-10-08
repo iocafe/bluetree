@@ -58,11 +58,11 @@ class ePopup;
 #define ECOMP_SETVALUE 31
 #define ECOMP_PATH 32
 #define ECOMP_IPATH 33
+#define ECOMP_EDIT 34
+#define ECOMP_ALL 35
 
-#define ECOMP_EDIT 60
-#define ECOMP_SELECT 61
-#define ECOMP_REFRESH 62
-#define ECOMP_ALL 63
+#define ECOMP_SELECT 60
+#define ECOMP_COMMAND 61
 
 /* Flags for eComponent::setupproperties() to specify which optional properties for
    the component class.
@@ -93,9 +93,10 @@ extern const os_char ecomp_setvalue[];
 extern const os_char ecomp_path[];
 extern const os_char ecomp_ipath[];
 extern const os_char ecomp_edit[];
-extern const os_char ecomp_select[];
-extern const os_char ecomp_refresh[];
 extern const os_char ecomp_all[];
+
+extern const os_char ecomp_select[];
+extern const os_char ecomp_command[];
 
 /*@}*/
 
@@ -202,6 +203,17 @@ typedef enum {
     EGUI_DRAG_TO_MODIFY_COMPONENT
 }
 eGuiDragMode;
+
+/* Commands, typically from right click popup to component.
+ */
+typedef enum {
+    ECOMPO_NO_COMMAND = 0,
+    ECOMPO_REFRESH = 1,
+    ECOMPO_CUT,
+    ECOMPO_COPY,
+    ECOMPO_PASTE,
+}
+eCompoCommand;
 
 
 /**
@@ -430,8 +442,9 @@ public:
 
     /* Generate right click popup menu.
      */
-    virtual ePopup *right_click_popup();
+    virtual ePopup *right_click_popup(eDrawParams& prm);
     ePopup *drop_down_list(eContainer *list);
+    void add_popup_edit_mode_items(eDrawParams& prm, ePopup *p);
     void close_popup();
 
     /*@}*/

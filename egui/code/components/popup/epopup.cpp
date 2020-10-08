@@ -137,9 +137,12 @@ eStatus ePopup::onpropertychange(
         case ECOMP_TEXT:
             m_label_title.clear();
             break;
+
+        default:
+            return eComponent::onpropertychange(propertynr, x, flags);
     }
 
-    return eComponent::onpropertychange(propertynr, x, flags);
+    return ESTATUS_SUCCESS;
 }
 
 

@@ -115,6 +115,11 @@ public:
     void select(eComponent *c,
         eWindowSelect op);
 
+    /* Modify selecction list and select flags of components.
+     */
+    inline eContainer *get_select_list()
+        {return m_select_list;}
+
     /* Generating ImGui autolabel.
      */
     virtual os_long make_autolabel();

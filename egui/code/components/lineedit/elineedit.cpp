@@ -161,10 +161,10 @@ eStatus eLineEdit::onpropertychange(
             break;
 
         default:
-            break;
+            return eComponent::onpropertychange(propertynr, x, flags);
     }
 
-    return eComponent::onpropertychange(propertynr, x, flags);
+    return ESTATUS_SUCCESS;
 }
 
 

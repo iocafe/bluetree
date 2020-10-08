@@ -25,9 +25,9 @@ const os_char
     ecomp_path[] = "path",
     ecomp_ipath[] = "ipath",
     ecomp_edit[] = "edit",
-    ecomp_select[] = "select",
-    ecomp_refresh[] = "refresh",
-    ecomp_all[] = "all";
+    ecomp_all[] = "all",
+    ecomp_select[] = "_select",
+    ecomp_command[] = "_command";
 
 
 /**
@@ -142,6 +142,7 @@ void eComponent::setupproperties(
     }
 
     addpropertyb(cls, ECOMP_SELECT, ecomp_select, "select", EPRO_SIMPLE);
+    addpropertyl(cls, ECOMP_COMMAND, ecomp_command, "command");
 }
 
 
@@ -368,10 +369,28 @@ eStatus eComponent::onpropertychange(
     eVariable *x,
     os_int flags)
 {
+    eGui *g;
+    os_int command;
+
     switch (propertynr)
     {
         case ECOMP_SELECT:
             m_select = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_COMMAND:
+            command = x->geti();
+            if (command == ECOMPO_NO_COMMAND) break;
+            switch (command) {
+                case ECOMPO_CUT:
+                    g = gui();
+                    if (g) g->delete_later(this);
+                    break;
+
+                default:
+                    break;
+            }
+            setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
             break;
 
         default:
@@ -744,7 +763,8 @@ ePopup *eComponent::popup()
 
 ****************************************************************************************************
 */
-ePopup *eComponent::right_click_popup()
+ePopup *eComponent::right_click_popup(
+    eDrawParams& prm)
 {
     ePopup *p;
     eButton *scope, *item;
@@ -780,7 +800,45 @@ ePopup *eComponent::right_click_popup()
     item->setpropertys(ECOMP_VALUE, "guisettings");
     item->setpropertys(ECOMP_TARGET, "gui/_p/open");
 
+    if (prm.edit_mode) {
+        add_popup_edit_mode_items(prm, p);
+    }
+
     return p;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add edit mode items to right click popup.
+
+  The add_popup_edit_mode_items functions adds edit mode items, like "cut", "copy", "paste"
+  to right click popup.
+
+  @param   p Pointer to the right click popup window.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eComponent::add_popup_edit_mode_items(
+    eDrawParams& prm,
+    ePopup *p)
+{
+    eButton *item;
+    eVariable target;
+    os_char buf[E_OIXSTR_BUF_SZ];
+
+    oixstr(buf, sizeof(buf));
+
+    /* Generic component scope items: refresh and show all.
+     */
+    item = new eButton(p);
+    item->setpropertys(ECOMP_TEXT, "cut");
+    item->setpropertyl(ECOMP_VALUE, 0);
+    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_CUT);
+    target = buf; target += "/_p/_command";
+    item->setpropertyv(ECOMP_TARGET, &target);
 }
 
 
@@ -866,11 +924,19 @@ void eComponent::on_start_drag(
     os_int mouse_button_nr,
     ePos& mouse_down_pos)
 {
-    if (!m_select) {
-        prm.window->select(this, EWINDOW_NEW_SELECTION);
-    }
+    eGuiDragMode drag_mode;
 
-    prm.gui->save_drag_origin(this, EGUI_DRAG_TO_COPY_COMPONENT);
+    if (prm.edit_mode)
+    {
+        if (!m_select) {
+            prm.window->select(this, EWINDOW_NEW_SELECTION);
+        }
+
+        drag_mode = (prm.mouse_drag_keyboard_flags[mouse_button_nr] & EDRAW_LEFT_CTRL_DOWN)
+            ? EGUI_DRAG_TO_COPY_COMPONENT : EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT;
+
+        prm.gui->save_drag_origin(this, drag_mode);
+    }
 }
 
 /* Mouse dragging, we are copying/moving/mofifying component(s).
@@ -893,5 +959,37 @@ void eComponent::on_drop(
     eGuiDragMode drag_mode,
     ePos& mouse_up_pos)
 {
-    origin->clone(this, EOID_GUI_COMPONENT);
+    eWindow *source_w, *destination_w;
+    ePointer *p, *next_p;
+    eComponent *c;
+    eContainer *select_list;
+
+    if ((drag_mode == EGUI_DRAG_TO_COPY_COMPONENT ||
+         drag_mode == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT) &&
+         prm.edit_mode)
+    {
+        source_w = (eWindow*)origin->window(EGUICLASSID_WINDOW);
+        destination_w = (eWindow*)window(EGUICLASSID_WINDOW);
+
+        if (source_w != destination_w) {
+            drag_mode = EGUI_DRAG_TO_COPY_COMPONENT;
+        }
+
+        select_list = source_w->get_select_list();
+        for (p = (ePointer*)select_list->first(); p; p = next_p) {
+            next_p = (ePointer*)p->next();
+            c = (eComponent*)p->get();
+            if (c == OS_NULL) continue;
+
+            /* Always clone, to get rid of temporary state.
+             */
+            c->clone(this);
+
+            /* Delete original if moving.
+             */
+            if (drag_mode == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT) {
+                delete c;
+            }
+        }
+    }
 }

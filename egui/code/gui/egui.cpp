@@ -51,6 +51,8 @@ eGui::eGui(
 
     addname("//gui");
     ns_create("gui");
+
+    m_delete_list = new eContainer(this, EOID_GUI_TO_BE_DELETED, EOBJ_TEMPORARY_ATTACHMENT);
 }
 
 
@@ -415,6 +417,8 @@ eStatus eGui::run()
         }
 
         eimgui_finish_frame(m_viewport);
+
+        delete_pending();
     }
 
     return s;
@@ -609,5 +613,33 @@ void eGui::drop_modification(
     if (drag_mode == EGUI_DRAG_TO_MODIFY_COMPONENT) {
         origin->on_drop(m_draw_prm, mouse_button_nr, OS_NULL, drag_mode, m_draw_prm.mouse_pos);
         save_drag_origin(OS_NULL, EGUI_NOT_DRAGGING);
+    }
+}
+
+
+/* Add object to list of pending deletes.
+ */
+void eGui::delete_later(eObject *o)
+{
+    ePointer *p;
+
+    p = new ePointer(m_delete_list);
+    p->set(o);
+}
+
+
+/* Do pending deletes.
+ */
+void eGui::delete_pending()
+{
+    ePointer *p, *next_p;
+    eObject *o;
+
+    for (p = (ePointer*)m_delete_list->first(); p; p = next_p) {
+        next_p = (ePointer*)p->next();
+        if (p->classid() != ECLASSID_POINTER) continue;
+        o = p->get();
+        if (o) delete o;
+        delete p;
     }
 }

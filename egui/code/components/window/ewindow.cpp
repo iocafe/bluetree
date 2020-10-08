@@ -151,9 +151,12 @@ eStatus eWindow::onpropertychange(
         case ECOMP_EDIT: /* toggle edit mode */
             set_editmode(x->geti());
             break;
+
+        default:
+            return eComponent::onpropertychange(propertynr, x, flags);
     }
 
-    return eComponent::onpropertychange(propertynr, x, flags);
+    return ESTATUS_SUCCESS;
 }
 
 /**
@@ -267,7 +270,7 @@ eStatus eWindow::draw(
         }
     }
 
-    if (wprm.mouse_over_window || wprm.mouse_dragged_over_window)
+    /* if (wprm.mouse_over_window || wprm.mouse_dragged_over_window)
     {
         eVariable tmp;
         static os_int iii;
@@ -276,7 +279,7 @@ eStatus eWindow::draw(
         propertyv(ECOMP_VALUE, &tmp);
         osal_debug_error_str("Mouse over ", tmp.gets());
         osal_debug_error_int("HERE ", iii);
-    }
+    } */
 
     /* Draw child components and setup Z order.
      */
@@ -375,7 +378,7 @@ void eWindow::open_popup(
     eComponent *c;
     c = findcomponent(prm.mouse_pos);
     if (c) {
-        c->right_click_popup();
+        c->right_click_popup(prm);
     }
 }
 
@@ -435,6 +438,13 @@ void eWindow::select(eComponent *c,
     ePointer *p, *next_p;
     eComponent *cc;
     os_boolean c_in_selection, is_c;
+
+    /* We cannot select window. If tried, ignore or clear selection.
+     */
+    if (c) if (c->classid() == EGUICLASSID_WINDOW) {
+        if (op == EWINDOW_APPEND_TO_SELECTION) return;
+        op = EWINDOW_CLEAR_SELECTION;
+    }
 
     /* Clearing selection is same as new empty selection.
      */

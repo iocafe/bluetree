@@ -140,7 +140,8 @@ public:
 
     /* Generate right click popup menu.
      */
-    virtual ePopup *right_click_popup();
+    virtual ePopup *right_click_popup(
+        eDrawParams& prm);
 
     /*@}*/
 
