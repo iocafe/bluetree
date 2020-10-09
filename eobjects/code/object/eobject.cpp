@@ -37,6 +37,7 @@ const os_char eobj_process_ns[] = E_PROCESS_NS;
 const os_char eobj_thread_ns[] = E_THREAD_NS;
 const os_char eobj_parent_ns[] = E_PARENT_NS;
 const os_char eobj_this_ns[] = E_THIS_NS;
+const os_char eobj_no_ns[] = E_NO_NS;
 
 
 /**
@@ -1235,6 +1236,10 @@ eNameSpace *eObject::findnamespace(
             }
             else
             {
+                if (!os_strcmp(namespace_id, eobj_no_ns)) {
+                    return OS_NULL;
+                }
+
                 getparent = (os_boolean)!os_strcmp(namespace_id, "..");
             }
             break;
@@ -1381,6 +1386,10 @@ eName *eObject::addname(
         else if (flags & ENAME_THIS_NS)
         {
             namespace_id = eobj_this_ns;
+        }
+        else if (flags & ENAME_NO_NS)
+        {
+            namespace_id = eobj_no_ns;
         }
     }
 namespace_selected:

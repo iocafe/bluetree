@@ -29,8 +29,9 @@
 #define ENAME_PROCESS_NS 2
 #define ENAME_THREAD_NS 4
 #define ENAME_SPECIFIED_NS 8
-#define ENAME_THIS_NS 16
-#define ENAME_NO_MAP 32
+#define ENAME_NO_NS 16
+#define ENAME_THIS_NS 32
+#define ENAME_NO_MAP 64
 
 
 /**
@@ -199,7 +200,7 @@ protected:
     }
 
     /** Namespace type (max one bit set). Bits: ENAME_PARENT_NS, ENAME_PROCESS_NS,
-        ENAME_THREAD_NS, ENAME_SPECIFIED_NS, ENAME_THIS_NS.
+        ENAME_THREAD_NS, ENAME_SPECIFIED_NS, ENAME_NO_NS, ENAME_THIS_NS.
      */
     os_int m_ns_type;
 

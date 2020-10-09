@@ -462,6 +462,10 @@ const os_char *eName::namespaceid()
             namespace_id = eobj_this_ns;
             break;
 
+        case ENAME_NO_NS:
+            namespace_id = eobj_no_ns;
+            break;
+
         case ENAME_SPECIFIED_NS:
             namespace_id = m_namespace_id->gets();
             break;
@@ -510,6 +514,10 @@ void eName::setnamespaceid(
         else if (!os_strcmp(namespace_id, eobj_this_ns))
         {
             m_ns_type = ENAME_THIS_NS;
+        }
+        else if (!os_strcmp(namespace_id, eobj_no_ns))
+        {
+            m_ns_type = ENAME_NO_NS;
         }
         else
         {

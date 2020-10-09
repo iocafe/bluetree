@@ -122,6 +122,7 @@ extern const os_char eobj_process_ns[];
 extern const os_char eobj_thread_ns[];
 extern const os_char eobj_parent_ns[];
 extern const os_char eobj_this_ns[];
+extern const os_char eobj_no_ns[];
 
 
 /**

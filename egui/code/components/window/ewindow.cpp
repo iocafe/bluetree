@@ -37,11 +37,10 @@ eWindow::eWindow(
     m_edit_mode = OS_FALSE;
     m_next_z = m_prev_z = this;
 
-    // addname("window", ENAME_TEMPORARY, "gui");
     ns_create("window");
 
     m_select_list = new eContainer(this, EOID_GUI_SELECTED, EOBJ_TEMPORARY_ATTACHMENT);
-    m_select_list->addname("../_select", ENAME_TEMPORARY);
+    m_select_list->addname("_select", ENAME_NO_NS|ENAME_TEMPORARY);
 }
 
 
