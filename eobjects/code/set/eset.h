@@ -24,6 +24,7 @@
  */
 #define ESET_PERSISTENT 0
 #define ESET_TEMPORARY 1
+#define ESET_STORE_AS_VARIABLE 2
 
 /**
 ****************************************************************************************************

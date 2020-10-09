@@ -1,12 +1,12 @@
 /**
 
   @file    ecomponent.cpp
-  @brief   Abstract GUI component.
+  @brief   GUI component base class.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
 
-  Base call for all GUI components (widgets)...
+  Base class for all GUI components (widgets).
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -32,13 +32,7 @@ const os_char
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eComponent::eComponent(
@@ -55,13 +49,7 @@ eComponent::eComponent(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eComponent::~eComponent()
@@ -116,7 +104,7 @@ void eComponent::setupproperties(
 
     if (flags & ECOMP_VALUE_PROPERITES) {
         eVariable tmp;
-        addproperty (cls, ECOMP_VALUE, ecomp_value, "value");
+        addproperty (cls, ECOMP_VALUE, ecomp_value, "value", EPRO_NOPACK);
         p = addpropertyl (cls, ECOMP_TYPE, ecomp_type, "type", EPRO_METADATA);
         emake_type_enum_str(&tmp);
         p->setpropertyv(ECOMP_ATTR, &tmp);
@@ -233,11 +221,23 @@ eComponent *eComponent::nextcomponent(
 }
 
 
-/* Get topmost component in Z orderr which encloses (x, y) position.
- * Returns OS_NULL if none found.
- */
+/**
+****************************************************************************************************
+
+  @brief Get the topmost component in Z order which enclose (x, y) position.
+
+  The eComponent::findcomponent function looks up the eWindow containing this component (this
+  component can be the eWindow itsel) and searched for component.
+
+  @param   pos ePos structure specifying point (x, y).
+
+  @return  Pointer to the topmost component in Z order which encloses point (x, y).
+           Returns OS_NULL if none of the components covers point (x,y) found.
+
+****************************************************************************************************
+*/
 eComponent *eComponent::findcomponent(
-        ePos pos)
+    ePos pos)
 {
     eComponent *w, *c;
 
@@ -256,9 +256,21 @@ eComponent *eComponent::findcomponent(
     return OS_NULL;
 }
 
-/* Add component to window's Z order
- */
-void eComponent::add_to_zorder(eWindow *w)
+
+/**
+****************************************************************************************************
+
+  @brief Add this component to window's Z order
+
+  Component will be added as new topmost component in Z order. Notice that Z order sorts
+  components of window by "depth", from bottom to top. Z order is two directional linked list.
+
+  @param   w Pointer to eWindow.
+
+****************************************************************************************************
+*/
+void eComponent::add_to_zorder(
+    eWindow *w)
 {
     if (w == OS_NULL) return;
 
@@ -272,8 +284,16 @@ void eComponent::add_to_zorder(eWindow *w)
 }
 
 
-/* Remove component from window's Z order
- */
+/**
+****************************************************************************************************
+
+  @brief Remove component from window's Z order
+
+  The function detaches the component from two directional linked list Z order. This function
+  needs to be called by component destructor, not to leave pointers hanging.
+
+****************************************************************************************************
+*/
 void eComponent::remove_from_zorder()
 {
     if (classid() != EGUICLASSID_WINDOW && m_next_z)
@@ -284,8 +304,16 @@ void eComponent::remove_from_zorder()
     }
 }
 
-/* Wipe out whole Z order
- */
+
+/**
+****************************************************************************************************
+
+  @brief Wipe out whole Z order
+
+  The function detaches the all component in Z order from Z order.
+
+****************************************************************************************************
+*/
 void eComponent::clear_zorder()
 {
     eComponent *c, *next_c;
@@ -434,10 +462,13 @@ eStatus eComponent::simpleproperty(
 /**
 ****************************************************************************************************
 
-  @brief Write variable to stream.
+  @brief Write component to stream (place holder).
 
-  The eComponent::writer() function serialized variable to stream. This writes only variable
-  specific content, use eObject::write() to save also class information, attachements, etc.
+  The writer() function serializes component to stream. This eComponent::writer() is
+  a place holder and must be overloaded to enable serialization for a class.
+
+  This overloaded function writes only component specific content, use write() to save also
+  class information, attachements, etc.
 
   @param  stream The stream to write to.
   @param  flags Serialization flags.
@@ -452,65 +483,7 @@ eStatus eComponent::writer(
     eStream *stream,
     os_int flags)
 {
-#if 0
-    /* Version number. Increment if new serialized items are to the object,
-       and check for new version's items in read() function.
-     */
-    const os_int version = 0;
-
-    /* Begin the object and write version number.
-     */
-    if (stream->write_begin_block(version)) goto failed;
-
-    /* Write type and number of decimal digits in flags.
-     */
-    if (*stream << (m_vflags & EVAR_SERIALIZATION_MASK)) goto failed;
-
-    /* Write the value, if any.
-     */
-    switch (type())
-    {
-        case OS_LONG:
-            if (*stream << m_value.valbuf.v.l) goto failed;
-            break;
-
-        case OS_DOUBLE:
-            if (*stream << m_value.valbuf.v.d) goto failed;
-            break;
-
-        case OS_STR:
-            if (m_vflags & EVAR_STRBUF_ALLOCATED)
-            {
-                if (*stream << m_value.strptr.used - 1) goto failed;
-                if (stream->write(m_value.strptr.ptr, m_value.strptr.used - 1)) goto failed;
-            }
-            else
-            {
-                if (*stream << m_value.strbuf.used - 1) goto failed;
-                if (stream->write(m_value.strbuf.buf, m_value.strbuf.used - 1)) goto failed;
-            }
-            break;
-
-        case OS_OBJECT:
-            if (m_value.valbuf.v.o->write(stream, flags)) goto failed;
-            break;
-
-        default:
-            break;
-    }
-
-    /* End the object.
-     */
-    if (stream->write_end_block()) goto failed;
-
-    /* Object succesfully written.
-     */
-    return ESTATUS_SUCCESS;
-
-    /* Writing object failed.
-     */
-failed:
-#endif
+    osal_debug_error("eComponent::writer is not overloaded for serialization");
     return ESTATUS_WRITING_OBJ_FAILED;
 }
 
@@ -518,9 +491,11 @@ failed:
 /**
 ****************************************************************************************************
 
-  @brief Read variable from stream.
+  @brief Read component from stream (place holder).
 
-  The eComponent::reader() function reads serialized variable from stream.
+  The reader() function reads serialized component from stream. This eComponent::reader() is
+  a place holder and must be overloaded to enable serialization for a class.
+
   This function reads only object content. To read whole object including attachments, names,
   etc, use eObject::read().
 
@@ -537,92 +512,7 @@ eStatus eComponent::reader(
     eStream *stream,
     os_int flags)
 {
-#if 0
-    /* Version number. Used to check which versions item's are in serialized data.
-     */
-    os_int version;
-
-    os_short vflags;
-
-    os_long sz;
-
-    /* Release any allocated memory.
-     */
-    clear();
-
-    /* Read object start mark and version number.
-     */
-    if (stream->read_begin_block(&version)) goto failed;
-
-    /* Read type and number of decimal digits in flags.
-     */
-    if (*stream >> vflags) goto failed;
-
-    /* Read the value, if any.
-     */
-    switch (vflags & EVAR_TYPE_MASK)
-    {
-        case OS_LONG:
-            if (*stream >> m_value.valbuf.v.l) goto failed;
-            break;
-
-        case OS_DOUBLE:
-            if (*stream >> m_value.valbuf.v.d) goto failed;
-            break;
-
-        case OS_STR:
-            if (*stream >> sz) goto failed;
-
-            /* If string fits into small buffer, copy it and save used size.
-               Leave space for '\0' character (sz doesn not include '\0').
-             */
-            if (sz < EVARIABLE_STRBUF_SZ)
-            {
-                if (stream->read(m_value.strbuf.buf, sz)) goto failed;
-                m_value.strbuf.buf[sz] = '\0';
-                m_value.strbuf.used = (os_uchar)sz;
-            }
-
-            /* Otherwise we need to allocate buffer for long string. Allocate buffer, copy data in,
-               save allocated size and used size. Set EVAR_STRBUF_ALLOCATED flag to indicate that
-               buffer was allocated.
-             */
-            else
-            {
-                m_value.strptr.ptr = os_malloc(sz+1, &m_value.strptr.allocated);
-                if (stream->read(m_value.strptr.ptr, sz)) goto failed;
-                m_value.strptr.ptr[sz] = '\0';
-                m_value.strptr.used = sz+1;
-                m_vflags |= EVAR_STRBUF_ALLOCATED;
-            }
-            break;
-
-        case OS_OBJECT:
-            m_value.valbuf.v.o = read(stream, flags);
-            if (m_value.valbuf.v.o == OS_NULL) goto failed;
-            break;
-
-        default:
-            break;
-    }
-
-    /* Store data type and decimal digits.
-     */
-    m_vflags &= ~EVAR_SERIALIZATION_MASK;
-    m_vflags |= (vflags & EVAR_SERIALIZATION_MASK);
-
-    /* End the object.
-     */
-    if (stream->read_end_block()) goto failed;
-
-    /* Object succesfully read.
-     */
-    return ESTATUS_SUCCESS;
-
-    /* Reading object failed.
-     */
-failed:
-#endif
+    osal_debug_error("eComponent::reader is not overloaded for serialization");
     return ESTATUS_READING_OBJ_FAILED;
 }
 
@@ -630,15 +520,15 @@ failed:
 /**
 ****************************************************************************************************
 
-  @brief Base class support for dwaring the component.
+  @brief Base class support for drawing the component.
 
   The eComponent::draw() base class function should be called at end of a regular GUI component's
   draw function, but not from top level components like ePopup and eWindow.
 
   The function calls ImGui API to implement some generic component functionality,
-  like right clicks, drag and drop in edit mode, etc.
+  mostly popups at this time.
 
-  @param   Prm Drawing parameters.
+  @param   prm Drawing parameters.
   @return  The function return ESTATUS_SUCCESS if all is fine. Other values indicate that the
            component is no longer drawable or useful. This could be for example a pop up menu
            closed implicitely by clicking elsewhere.
@@ -667,12 +557,6 @@ eStatus eComponent::draw(
             close_popup();
         }
     }
-
-    /* In edit mode, draw decorations.
-     */
-/*     if (prm.edit_mode) {
-        draw_edit_mode_decorations();
-    } */
 
     return ESTATUS_SUCCESS;
 }
@@ -732,17 +616,25 @@ void eComponent::draw_edit_mode_decorations(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Generate popup window for any purpose.
+
+  This function crate general purpose ePopup window for this GUI component. The popup window
+  is used to show drop down lists, right click menu, etc.
+
+  @return  Pointer to the new popup window.
+
+****************************************************************************************************
+*/
 ePopup *eComponent::popup()
 {
     ePopup *p;
-
     close_popup();
 
-    p = new ePopup(this, EOID_GUI_POPUP,
-        EOBJ_TEMPORARY_ATTACHMENT );
-
+    p = new ePopup(this, EOID_GUI_POPUP, EOBJ_TEMPORARY_ATTACHMENT);
     m_popup_open = true;
-
     return p;
 }
 

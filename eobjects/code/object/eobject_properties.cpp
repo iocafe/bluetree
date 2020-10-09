@@ -107,7 +107,7 @@ void eObject::setpropertys_msg(
           - EPRO_SIMPLE: Do not keep copy of non default property in variable. Class implementation
             takes care about this.
           - EPRO_NOONPRCH: Do not call onpropertychange when value changes.
-          - EPRO_NOPACK: Do not pack this property value within property set.
+          - EPRO_NOPACK: Do not pack this property value but keep it as variable within property set.
           - EPRO_EARLYPRCH: Call onpropertychange() before setting stored property value.
 
   @return Pointer to the new eVariable representing the property in class'es property set.
@@ -711,6 +711,10 @@ void eObject::setpropertyv(
         {
             sflags = (pflags & (EPRO_PERSISTENT|EPRO_METADATA))
                 ? ESET_PERSISTENT : ESET_TEMPORARY;
+
+            if (pflags & EPRO_NOPACK) {
+                sflags |= ESET_STORE_AS_VARIABLE;
+            }
 
             properties->setv(propertynr, x, sflags);
         }

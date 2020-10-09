@@ -225,31 +225,31 @@ eStatus eSet::writer(
      */
     if (stream->write_begin_block(version)) goto failed;
 
-    /* Save properties stored as variable. THERE NEEDS TO BE GENERIC FUNCTION FOR THIS, like clonegeneric
+    /* Save items stored as variable.
      */
     if (mm_handle)
     {
-        /* Save count.
+        /* Calculate number of items to be saves and store write this number.
          */
         count = 0;
         for (handle = mm_handle->first();
              handle;
              handle = handle->next())
         {
-            if (handle->oid() >= 0 && (handle->flags() & EOBJ_NOT_CLONABLE) == 0)
+            if (handle->oid() >= 0 && (handle->flags() & EOBJ_NOT_SERIALIZABLE) == 0)
             {
                 count++;
             }
         }
         if (stream->putl(count)) goto failed;
 
-        /* Copy clonable attachments or all clonable object.
+        /* Write serializable items.
          */
         for (handle = mm_handle->first();
              handle;
              handle = handle->next())
         {
-            if (handle->oid() >= 0 && (handle->flags() & EOBJ_NOT_CLONABLE) == 0)
+            if (handle->oid() >= 0 && (handle->flags() & EOBJ_NOT_SERIALIZABLE) == 0)
             {
                 if (stream->putl(handle->oid())) goto failed;
                 if (handle->object()->writer(stream, flags)) goto failed;
@@ -369,31 +369,21 @@ eStatus eSet::reader(
     os_int i;
     os_short s;
 
-    /* If we have old data, delete it.
-     */
-    /* if (m_items)
-    {
-        os_free(m_items, m_alloc);
-        m_items = OS_NULL;
-        m_alloc = m_used = 0;
-    }
-    while ((objptr = first())) delete objptr; */
-
     /* Read object start mark and version number.
      */
     if (stream->read_begin_block(&version)) goto failed;
 
-    /* Save properties stored as variable.
+    /* Read item stored as variable.
      */
     if (mm_handle)
     {
-        /* Read count.
+        /* Read number if items.
          */
         if (stream->getl(&count)) goto failed;
 
-        /* Copy clonable attachments or all clonable object.
+        /* Read the items.
          */
-        while (count--)
+        while (count-- > 0)
         {
             /* Read object identifier, allocate variable and
                read variable from stream.
@@ -404,7 +394,7 @@ eStatus eSet::reader(
         }
     }
 
-    /* Buffer used, bytes.
+    /* Buffer used number of bytes for m_items buffer.
      */
     if (stream->getl(&lval)) goto failed;
     m_used = (os_int)lval;
@@ -645,8 +635,13 @@ failed:
   @param  id Identification number (for example property number) for value to store.
   @param  x Variable containing value to store.
           - x = OS_NULL -> delete value
-  @param  sflags Either ESET_PERSISTENT (0) or ESET_TEMPORARY (1). Temporary values are not
-          cloned or serialized.
+  @param  sflags Least signigican bit is either ESET_PERSISTENT (0) or ESET_TEMPORARY (1).
+          Temporary values are not cloned or serialized.
+          Flag ESET_STORE_AS_VARIABLE (2) speciifed that value is always stored as variable
+          and never packed in m_items buffer. If value changes often, and expecially
+          if value byte size varies, storing as bariable is faster, but takes more memory.
+          if this eSet is used to store object's properities, property flag
+          EPRO_NOPACK will select this option.
 
   @return None.
 
@@ -688,7 +683,7 @@ void eSet::setv(
 
     /* If this id cannot be presented as uchar, use variable.
      */
-    if (id < 0 || id > 255)
+    if (id < 0 || id > 255 || (sflags & ESET_STORE_AS_VARIABLE))
     {
         goto store_as_var;
     }
