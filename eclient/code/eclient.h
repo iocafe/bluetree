@@ -17,17 +17,5 @@
 #ifndef ECLIENT_H_
 #define ECLIENT_H_
 #include "egui.h"
-
-/* using IoDevice::AbstractApplication;
-using IoDevice::AbstractCamera;
-using IoDevice::AbstractAppParams;
-using IoDevice::AbstractSlaveDevice;
-using IoDevice::AbstractSequence;
-*/
-
-/* Include application headers.
- */
-/* #include "minion.h"
-#include "blink_sequence.h" */
-
+#include "extensions/netclient/enetclient.h"
 #endif

@@ -32,6 +32,7 @@ const os_char
     evarp_type[] = "x.type",
     evarp_attr[] = "x.attr",
     evarp_default[] = "x.default",
+    evarp_group[] = "x.group",
     evarp_gain[] = "x.gain",
     evarp_offset[] = "x.offset",
     evarp_conf[] = "conf"; /* This MUST not start with "x." */
@@ -179,6 +180,7 @@ void eVariable::setupproperties(
     addproperty (cls, EVARP_TTIP, evarp_ttip, "tooltip", EPRO_METADATA|EPRO_NOONPRCH);
     addproperty (cls, EVARP_VALUE, evarp_value, "value", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty (cls, EVARP_DEFAULT, evarp_default, "default", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertys(cls, EVARP_GROUP, evarp_group, "group", EPRO_METADATA|EPRO_NOONPRCH);
     addpropertyl(cls, EVARP_DIGS, evarp_digs, "digs", EPRO_METADATA|EPRO_SIMPLE);
     addpropertys(cls, EVARP_UNIT, evarp_unit, "unit", EPRO_METADATA|EPRO_NOONPRCH);
     addpropertyd(cls, EVARP_MIN, evarp_min, "min", EPRO_METADATA|EPRO_NOONPRCH);
@@ -222,7 +224,7 @@ void eVariable::object_info(
     os_int propertynr, i;
 
     static os_int copy_property_list[] = {EVARP_VALUE, EVARP_TYPE, EVARP_UNIT, EVARP_ATTR,
-        EVARP_DEFAULT, EVARP_ABBR, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
+        EVARP_DEFAULT, EVARP_GROUP, EVARP_ABBR, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
         EVARP_GAIN, EVARP_OFFSET, 0};
 
     eObject::object_info(item, name, appendix);

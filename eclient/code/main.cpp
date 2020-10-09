@@ -66,6 +66,10 @@ osalStatus emain(
         return OSAL_STATUS_FAILED;
     }
 
+    /* Manage network connections.
+     */
+    enet_start_client();
+
     gui = new eGui(egui_get_container());
     gui->setup_desktop_application();
     gui->run();

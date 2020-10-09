@@ -45,7 +45,7 @@ eMatrix::eMatrix(
     eObject *parent,
     e_oid id,
     os_int flags)
-    : eObject(parent, id, flags)
+    : eTable(parent, id, flags)
 {
     /** Default data type is OS_OBJECT.
      */

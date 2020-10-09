@@ -47,6 +47,7 @@ class eValueX;
 #define EVARP_UNIT 4
 #define EVARP_ATTR 5
 #define EVARP_DEFAULT 6
+#define EVARP_GROUP 8
 #define EVARP_ABBR 10
 #define EVARP_TTIP 11
 #define EVARP_DIGS 12
@@ -69,6 +70,7 @@ extern const os_char
     evarp_max[],
     evarp_type[],
     evarp_attr[],
+    evarp_group[],
     evarp_default[],
     evarp_gain[],
     evarp_offset[],

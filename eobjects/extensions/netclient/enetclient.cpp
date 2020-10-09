@@ -34,6 +34,33 @@ eNetClient::eNetClient(
     os_int flags)
     : eThread(parent, oid, flags)
 {
+    eContainer *configuration, *columns;
+    eVariable *column;
+
+    addname("client", ENAME_PROCESS_NS|ENAME_TEMPORARY);
+    ns_create("client");
+
+    m_connections = new eMatrix(this, EOID_ITEM);
+    m_connections->addname("connections", ENAME_PARENT_NS|ENAME_TEMPORARY);
+
+    configuration = new eContainer();
+
+    columns = new eContainer(configuration);
+    columns->addname("columns", ENAME_PARENT_NS|ENAME_NO_MAP);
+
+    column = new eVariable(columns);
+    column->addname("ix", ENAME_PARENT_NS|ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "rivi");
+
+    column = new eVariable(columns);
+    column->addname("connected", ENAME_PARENT_NS|ENAME_NO_MAP);
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+
+    column = new eVariable(columns);
+    column->addname("connectto", ENAME_PARENT_NS|ENAME_NO_MAP);
+
+    m_connections->configure(configuration, 0 /*os_int tflags */);
+
     initproperties();
 }
 
@@ -106,3 +133,8 @@ void eNetClient::setupclass()
 
 
 
+
+void enet_start_client()
+{
+
+}

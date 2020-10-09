@@ -73,6 +73,13 @@ public:
     {
         return new eNetClient(parent, id, flags);
     }
+
+protected:
+    eMatrix *m_connections;
 };
+
+
+void enet_start_client();
+
 
 #endif

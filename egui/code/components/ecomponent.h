@@ -48,6 +48,7 @@ class ePopup;
 #define ECOMP_TYPE EVARP_TYPE
 #define ECOMP_ATTR EVARP_ATTR
 #define ECOMP_DEFAULT EVARP_DEFAULT
+#define ECOMP_GROUP EVARP_GROUP
 #define ECOMP_GAIN EVARP_GAIN
 #define ECOMP_OFFSET EVARP_OFFSET
 #define ECOMP_ABBR EVARP_ABBR
@@ -85,6 +86,7 @@ class ePopup;
 #define ecomp_type evarp_type
 #define ecomp_attr evarp_attr
 #define ecomp_default evarp_default
+#define ecomp_group evarp_group
 #define ecomp_gain evarp_gain
 #define ecomp_offset evarp_offset
 #define ecomp_conf evarp_conf

@@ -523,7 +523,7 @@ void eLineEdit::object_info(
     os_int propertynr, i;
 
     static os_int copy_property_list[] = {EVARP_VALUE, EVARP_TYPE, EVARP_UNIT, EVARP_ATTR,
-        EVARP_DEFAULT, EVARP_ABBR, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
+        EVARP_DEFAULT, EVARP_ABBR, EVARP_GROUP, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
         EVARP_GAIN, EVARP_OFFSET, 0};
 
     eObject::object_info(item, name, appendix);

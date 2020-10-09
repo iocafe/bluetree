@@ -117,6 +117,7 @@ void eComponent::setupproperties(
     }
 
     if (flags & ECOMP_EXTRA_UI_PROPERITES) {
+        addpropertys(cls, ECOMP_GROUP, ecomp_group, "group", EPRO_METADATA);
         addpropertyd(cls, ECOMP_MIN, ecomp_min, "min", EPRO_METADATA);
         addpropertyd(cls, ECOMP_MAX, ecomp_max, "max", EPRO_METADATA);
         addproperty (cls, ECOMP_ABBR, ecomp_abbr, "abbreviation", EPRO_METADATA);
