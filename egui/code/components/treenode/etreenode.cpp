@@ -274,7 +274,7 @@ os_int eTreeNode::setup_node(
     o = item->first(EOID_APPENDIX);
     if (o) {
         appendix = eSet::cast(o);
-        if (appendix->get(EBROWSE_IPATH, &ivalue)) {
+        if (appendix->getv(EBROWSE_IPATH, &ivalue)) {
             tmp = ipath;
             if (item->oid() == EBROWSE_PROPERTIES) {
                 tmp += "_p/";
@@ -285,7 +285,7 @@ os_int eTreeNode::setup_node(
             tmp += ivalue;
             setpropertyv(ECOMP_IPATH, &tmp);
 
-            if (!appendix->get(EBROWSE_PATH, &value)) {
+            if (!appendix->getv(EBROWSE_PATH, &value)) {
                 value = ivalue;
             }
             tmp = path;
@@ -300,7 +300,7 @@ os_int eTreeNode::setup_node(
             setpropertyv(ECOMP_PATH, &tmp);
         }
 
-        if (appendix->get(EBROWSE_BROWSE_FLAGS, &value)) {
+        if (appendix->getv(EBROWSE_BROWSE_FLAGS, &value)) {
             browse_flags = value.geti();
         }
 

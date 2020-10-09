@@ -850,7 +850,7 @@ void eObject::browse_list_namespace(
     {
         item = new eVariable(content, EBROWSE_NSPACE);
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
-        appendix->set(EBROWSE_PATH, name);
+        appendix->setv(EBROWSE_PATH, name);
 
         /** Get oix and ucnt as string.
          */
@@ -890,7 +890,7 @@ void eObject::browse_list_children(
 
         name = child->firstname();
         if (name) {
-            appendix->set(EBROWSE_PATH, name);
+            appendix->setv(EBROWSE_PATH, name);
         }
 
         /** Get oix and ucnt as string.
@@ -924,8 +924,7 @@ void eObject::browse_list_properties(
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
         name = p->firstname();
         if (name) {
-            appendix->set(EBROWSE_IPATH, name);
-// osal_debug_error_str("HERE ", name->gets());
+            appendix->setv(EBROWSE_IPATH, name);
         }
     }
 }

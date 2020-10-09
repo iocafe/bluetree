@@ -20,6 +20,11 @@
 #define ESET_H_
 #include "eobjects.h"
 
+/* Set flags
+ */
+#define ESET_PERSISTENT 0
+#define ESET_TEMPORARY 1
+
 /**
 ****************************************************************************************************
 
@@ -131,7 +136,7 @@ public:
 
     /* Store value into set.
      */
-    void set(
+    void setv(
         os_int id,
         eVariable *x,
         os_int sflags = 0);
@@ -144,7 +149,7 @@ public:
     {
         eVariable v;
         v.setl(x);
-        set(id, &v); // ??????????? CHECK SHOULD FLAGS BE ADDED
+        setv(id, &v);
     }
 
     /* Store value into set.
@@ -155,7 +160,7 @@ public:
     {
         eVariable v;
         v.setd(x);
-        set(id, &v);
+        setv(id, &v);
     }
 
     /* Store value into set.
@@ -166,14 +171,15 @@ public:
     {
         eVariable v;
         v.sets(x);
-        set(id, &v);
+        setv(id, &v);
     }
 
     /* Get value from set.
      */
-    os_boolean get(
+    os_boolean getv(
         os_int id,
-        eVariable *x);
+        eVariable *x,
+        os_int *sflags = OS_NULL);
 
     /* Get value as integer.
      */
@@ -181,7 +187,7 @@ public:
         os_int id)
     {
         eVariable v;
-        get(id, &v);
+        getv(id, &v);
         return v.getl();
     }
 
@@ -191,7 +197,7 @@ public:
         os_int id)
     {
         eVariable v;
-        get(id, &v);
+        getv(id, &v);
         return v.getd();
     }
 
@@ -204,7 +210,7 @@ public:
 protected:
     /* Buffer containing items
      */
-    os_char *m_items;
+    os_uchar *m_items;
 
     /* Buffer used, bytes.
      */

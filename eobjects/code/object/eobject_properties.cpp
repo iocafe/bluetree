@@ -687,7 +687,7 @@ void eObject::setpropertyv(
 
         /* Find stored property value. If matches value to set, do nothing.
          */
-        properties->get(propertynr, &v);
+        properties->getv(propertynr, &v);
         if (!v.compare(x)) return;
 
         /* Early call class'es onpropertychange function.
@@ -702,14 +702,14 @@ void eObject::setpropertyv(
          */
         if (!p->compare(x))
         {
-            properties->set(propertynr, OS_NULL);
+            properties->setv(propertynr, OS_NULL);
         }
 
         /* No match. Store x in eSet.
          */
         else
         {
-            properties->set(propertynr, x);
+            properties->setv(propertynr, x);
         }
 
         /* Late (normal) call class'es onpropertychange function.
@@ -789,7 +789,7 @@ void eObject::propertyv(
     {
         /* Find stored property value. If matches value to set, do nothing.
          */
-        if (properties->get(propertynr, x)) return;
+        if (properties->getv(propertynr, x)) return;
     }
 
     /* Check for simple property

@@ -363,7 +363,7 @@ void ePropertyBinding::bind2(
 #endif
             return;
         }
-        parameters->set(E_BINDPRM_VALUE, &x);
+        parameters->setv(E_BINDPRM_VALUE, &x);
     }
 
     /* If we are binding attributes like "x.min", get these.
@@ -372,7 +372,7 @@ void ePropertyBinding::bind2(
     {
         if (listattr(m_localpropertynr, &x))
         {
-            parameters->set(E_BINDPRM_ATTRLIST, &x);
+            parameters->setv(E_BINDPRM_ATTRLIST, &x);
         }
     }
 
@@ -412,7 +412,7 @@ void ePropertyBinding::srvbind(
 
     /* Get property name.
      */
-    if (!parameters->get(E_BINDPRM_PROPERTYNAME, &v))
+    if (!parameters->getv(E_BINDPRM_PROPERTYNAME, &v))
     {
 #if OSAL_DEBUG
         osal_debug_error("srvbind() failed: Property name missing");
@@ -456,11 +456,11 @@ xxxx
     if ((m_bflags & EBIND_CLIENTINIT) == 0)
     {
         binding_getproperty(&v);
-        reply->set(E_BINDPRM_VALUE, &v);
+        reply->setv(E_BINDPRM_VALUE, &v);
     }
     else
     {
-        parameters->get(E_BINDPRM_VALUE, &v);
+        parameters->getv(E_BINDPRM_VALUE, &v);
         binding_setproperty(&v);
     }
 
@@ -513,7 +513,7 @@ void ePropertyBinding::cbindok(
      */
     if ((m_bflags & EBIND_CLIENTINIT) == 0)
     {
-        parameters->get(E_BINDPRM_VALUE, &v);
+        parameters->getv(E_BINDPRM_VALUE, &v);
         binding_setproperty(&v);
     }
 

@@ -17,6 +17,10 @@
 */
 #include "eobjects.h"
 
+/* Bit combined with vale type to mark that this item is not cloned or serialized.
+ */
+#define ESET_TYPEID_TEMPORARY OSAL_TYPEID_EXTRA_BIT_A
+
 
 /**
 ****************************************************************************************************
@@ -106,60 +110,45 @@ eObject *eSet::clone(
     os_int aflags)
 {
     eSet *clonedobj;
-    eObject *objptr;
-    os_char *p, *e, *strptr, *newstr;
-    os_uchar iid, ibytes;
-    os_schar itype;
-    os_int strsz;
+    os_uchar *src, *dst;
+    os_uchar ibytes, itype;
+    os_int spos, dpos;
     os_memsz sz;
 
     clonedobj = new eSet(parent, id == EOID_CHILD ? oid() : id, flags());
 
     if (m_items)
     {
-        clonedobj->m_items = os_malloc(m_used, &sz);
+        clonedobj->m_items = (os_uchar*)os_malloc(m_used, &sz);
         clonedobj->m_used = m_used;
         clonedobj->m_alloc = (os_int)sz;
-        os_memcpy(clonedobj->m_items, m_items, m_used);
 
         /* Prepare to go trough items.
          */
-        p = clonedobj->m_items;
-        e = p + m_used;
+        src = m_items;
+        dst = clonedobj->m_items;
+
+        spos = 0;
+        dpos = 0;
 
         /* Clone item at a time.
          */
-        while (p < e)
+        while (spos < m_used)
         {
-            iid = *(os_uchar*)(p++);
-            OSAL_UNUSED(iid);
-            ibytes = *(os_uchar*)(p++);
-            if (ibytes)
+            ibytes = src[spos + 1] + 3;
+            itype = src[spos + 2];
+            if ((itype & ESET_TYPEID_TEMPORARY) == 0)
             {
-                itype = *(os_schar*)(p++);
-
-                switch (itype)
-                {
-                    case -OS_STR:
-                        strptr = *(os_char**)p;
-                        strsz = *(os_int*)(p + sizeof(os_char*));
-                        newstr = os_malloc(strsz, OS_NULL);
-                        os_memcpy(newstr, strptr, strsz);
-                        *(os_char**)p = newstr;
-                        break;
-
-                    case OS_OBJECT:
-                        objptr = *(eObject**)p;
-                        *(eObject**)p = objptr->clone(clonedobj, EOID_CHILD, EOBJ_NO_MAP);
-                        break;
-                }
-
-                p += ibytes;
+                os_memcpy(dst + dpos, src + spos, ibytes);
+                dpos += ibytes;
             }
+
+            spos += ibytes;
         }
+        clonedobj->m_used = dpos;
     }
 
-    clonegeneric(clonedobj, aflags);
+    clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
     return clonedobj;
 }
 
@@ -222,19 +211,21 @@ eStatus eSet::writer(
        and check for new version's items in read() function.
      */
     const os_int version = 0;
-    os_int strsz, count;
-    os_memsz nwritten;
-    eObject *objptr;
-    os_char *p, *e, *strptr;
-    os_uchar iid, ibytes;
-    os_schar itype;
+    os_uchar *p, *e;
     eHandle *handle;
+    os_int count;
+    os_memsz nwritten;
+    os_uchar iid, ibytes, itype;
+    os_double d;
+    os_long l;
+    os_int i;
+    os_short s;
 
     /* Begin the object and write version number.
      */
     if (stream->write_begin_block(version)) goto failed;
 
-    /* Save properties stored as variable.
+    /* Save properties stored as variable. THERE NEEDS TO BE GENERIC FUNCTION FOR THIS, like clonegeneric
      */
     if (mm_handle)
     {
@@ -279,39 +270,54 @@ eStatus eSet::writer(
      */
     while (p < e)
     {
-        iid = *(os_uchar*)(p++);
-        ibytes = *(os_uchar*)(p++);
-        if (stream->putl(iid)) goto failed;
-        if (stream->putl(ibytes)) goto failed;
+        iid = *(p++);
+        ibytes = *(p++);
+        itype = *(p++);
 
-        if (ibytes)
+        if ((itype & ESET_TYPEID_TEMPORARY) == 0)
         {
-            itype = *(os_schar*)(p++);
+            if (stream->putl(iid)) goto failed;
             if (stream->putl(itype)) goto failed;
 
             switch (itype)
             {
-                case -OS_STR:
-                    strptr = *(os_char**)p;
-                    strsz = *(os_int*)(p + sizeof(char*)) - 1;
-                    if (stream->putl(strsz)) goto failed;
-                    stream->write(strptr, strsz, &nwritten);
-                    if (nwritten != strsz) goto failed;
+                case OS_CHAR:
+                    if (stream->putl(*(os_schar*)p)) goto failed;
                     break;
 
-                case OS_OBJECT:
-                    objptr = *(eObject**)p;
-                    if (objptr->write(stream, flags)) goto failed;
+                case OS_SHORT:
+                    os_memcpy(&s, p, sizeof(s));
+                    if (stream->putl(s)) goto failed;
+                    break;
+
+                case OS_INT:
+                    os_memcpy(&i, p, sizeof(i));
+                    if (stream->putl(i)) goto failed;
+                    break;
+
+                case OS_LONG:
+                    os_memcpy(&l, p, sizeof(l));
+                    if (stream->putl(l)) goto failed;
+                    break;
+
+                case OS_DOUBLE:
+                    os_memcpy(&d, p, sizeof(d));
+                    if (stream->putd(d)) goto failed;
+                    break;
+
+                case OS_STR:
+                    if (stream->putl(ibytes)) goto failed;
+                    if (stream->write((os_char*)p, ibytes, &nwritten)) goto failed;
+                    if (nwritten != ibytes) goto failed;
                     break;
 
                 default:
-                    stream->write(p, ibytes, &nwritten);
-                    if (nwritten != ibytes) goto failed;
-                    break;
+                    osal_debug_error("eset: Unknown itype");
+                    goto failed;
             }
-
-            p += ibytes;
         }
+
+        p += ibytes;
     }
 
     /* End the object.
@@ -356,12 +362,12 @@ eStatus eSet::reader(
     os_int version;
     os_long lval, count;
     os_memsz nread;
-    os_int strsz;
-    eObject *objptr;
     eVariable *v;
-    os_char *p, *e, *strptr;
-    os_uchar iid, ibytes;
-    os_schar itype;
+    os_uchar *p, *e, *ibytes_pos;
+    os_uchar iid, ibytes, itype;
+    os_double d;
+    os_int i;
+    os_short s;
 
     /* If we have old data, delete it.
      */
@@ -406,7 +412,7 @@ eStatus eSet::reader(
 
     /* Allocate buffer containing items
      */
-    m_items = os_malloc(m_used, &nread);
+    m_items = (os_uchar*)os_malloc(m_used, &nread);
     m_alloc = (os_int)nread;
 
     /* Prepare to go trough items.
@@ -421,46 +427,58 @@ eStatus eSet::reader(
         if (stream->getl(&lval)) goto failed;
         iid = (os_uchar)lval;
         if (stream->getl(&lval)) goto failed;
-        ibytes = (os_uchar)lval;
+        itype = (os_uchar)lval;
 
         *(os_uchar*)(p++) = iid;
-        *(os_uchar*)(p++) = ibytes;
+        ibytes_pos = p++;
+        *(os_schar*)(p++) = itype;
+        ibytes = (os_uchar)osal_type_size((osalTypeId)itype);
+        *ibytes_pos = ibytes;
 
-        if (ibytes)
+        switch (itype)
         {
-            if (stream->getl(&lval)) goto failed;
-            itype = (os_schar)lval;
-            *(os_schar*)(p++) = itype;
+            case OS_CHAR:
+                if (stream->getl(&lval)) goto failed;
+                *(os_schar*)p = (os_schar)lval;
+                break;
 
-            switch (itype)
-            {
-                case -OS_STR:
-                    if (stream->getl(&lval)) goto failed;
-                    strsz = (os_int)(lval+1);
-                    strptr = os_malloc(strsz, OS_NULL);
-                    stream->read(strptr, (os_memsz)lval, &nread);
-                    if (nread != lval) goto failed;
-                    strptr[lval] = '\0';
+            case OS_SHORT:
+                if (stream->getl(&lval)) goto failed;
+                s = (os_short)lval;
+                os_memcpy(p, &s, sizeof(s));
+                break;
 
-                    *(os_char**)p = strptr;
-                    *(os_int*)(p + sizeof(char*)) = strsz;
-                    break;
+            case OS_INT:
+                if (stream->getl(&lval)) goto failed;
+                i = (os_int)lval;
+                os_memcpy(p, &i, sizeof(i));
+                break;
 
-                case OS_OBJECT:
-                    objptr = read(stream, flags);
-                    *(eObject**)p = objptr;
-                    break;
+            case OS_LONG:
+                if (stream->getl(&lval)) goto failed;
+                os_memcpy(p, &lval, sizeof(lval));
+                break;
 
-                default:
-                    stream->read(p, ibytes, &nread);
-                    if (nread != ibytes) goto failed;
-                    break;
-            }
+            case OS_DOUBLE:
+                if (stream->getd(&d)) goto failed;
+                os_memcpy(p, &d, sizeof(d));
+                break;
 
-            p += ibytes;
+            case OS_STR:
+                if (stream->getl(&lval)) goto failed;
+                ibytes = (os_uchar)lval;
+                if (stream->read((os_char*)p, ibytes, &nread)) goto failed;
+                if (nread != lval) goto failed;
+                *ibytes_pos = ibytes;
+                break;
+
+            default:
+                osal_debug_error("eset: Unknown itype");
+                goto failed;
         }
-    }
 
+        p += ibytes;
+    }
 
 skipit:
     /* End the object.
@@ -506,10 +524,9 @@ eStatus eSet::json_writer(
     os_int indent)
 {
     eVariable x, *v;
-    eObject *objptr;
-    os_char *p, *e, *strptr, nbuf[OSAL_NBUF_SZ];
-    os_uchar iid, ibytes;
-    os_schar itype;
+    os_uchar *p, *e;
+    os_char nbuf[OSAL_NBUF_SZ];
+    os_uchar iid, ibytes, itype;
     os_boolean comma = OS_TRUE;
 
 #if 0
@@ -547,7 +564,7 @@ eStatus eSet::json_writer(
         }
         else
         {
-            itype = *(os_schar*)(p++);
+            itype = *(p++);
 
             switch (itype)
             {
@@ -575,17 +592,7 @@ eStatus eSet::json_writer(
                     break;
 
                 case OS_STR:
-                    x.sets(p, ibytes);
-                    break;
-
-                case -OS_STR:
-                    strptr = *(os_char**)p;
-                    x.sets(strptr);
-                    break;
-
-                case OS_OBJECT:
-                    objptr = *(eObject**)p;
-                    x.seto(objptr);
+                    x.sets((os_char*)p, ibytes);
                     break;
 
                 default:
@@ -633,45 +640,49 @@ failed:
 
   @brief Store value into set.
 
-  The eSet::set function
+  The eSet::setv function
 
   @param  id Identification number (for example property number) for value to store.
   @param  x Variable containing value to store.
           - x = OS_NULL -> delete value
-          - x = empty var -> store empty mark;
-  @param  flags Reserved for future, set 0 for now.
+  @param  sflags Either ESET_PERSISTENT (0) or ESET_TEMPORARY (1). Temporary values are not
+          cloned or serialized.
 
   @return None.
 
+
 ****************************************************************************************************
 */
-void eSet::set(
+void eSet::setv(
     os_int id,
     eVariable *x,
     os_int sflags)
 {
     eVariable *v;
-    eObject *o, *optr;
-    os_long l;
-    os_double d;
-    os_int i, isz;
-    os_short s;
-    os_schar itype, jtype, c;
-    os_uchar ibytes, jbytes, jid;
-    os_char *p, *e, *q, *sptr, *start;
+    os_uchar itype, ibytes, jbytes, jid;
+    os_uchar *p, *e, *q, *start;
+    os_char *bufp;
     os_memsz sz;
     const os_int slack = 10;
     void *iptr;
+    os_double d;
+    os_long l;
+    os_int i;
+    os_short s;
+    os_schar c;
 
     osal_debug_assert(id >= 0);
 
     /* If we have variable with this id, use it.
      */
     v = firstv(id);
-    if (v)
-    {
-        if (x == OS_NULL) delete v;
-        else v->setv(x);
+    if (v) {
+        if (x) if (!x->isempty())
+        {
+            v->setv(x);
+            return;
+        }
+        delete v;
         return;
     }
 
@@ -686,10 +697,13 @@ void eSet::set(
      */
     if (x == OS_NULL)
     {
-        ibytes = -1;
+        itype = OS_UNDEFINED_TYPE;
+        ibytes = 0;
+        iptr = OS_NULL;
     }
     else switch (x->type())
     {
+        default:
         case OS_LONG:
             l = x->getl();
             if (l >= -0x80 && l <= 0x7F)
@@ -721,48 +735,48 @@ void eSet::set(
             }
             break;
 
+        case OS_FLOAT:
         case OS_DOUBLE:
+        case OS_DEC01:
+        case OS_DEC001:
             d = x->getd();
             itype = OS_DOUBLE;
             ibytes = sizeof(os_double);
             iptr = &d;
-            if (d >= -128.0 && d <= 127.0)
+            if (d == (os_double)x->getl())
             {
-                if (d == (os_double)x->getl())
+                if (d >= -128.0 && d <= 127.0)
                 {
                     ibytes = sizeof(os_char);
-                    if (d >= 0) c = (os_char)(d+0.5);
-                    else c = -(os_char)(-d+0.5);
+                    c = os_round_char(d);
                     iptr = &c;
+                    itype = OS_CHAR;
+                }
+                else if (d >= -32768.0 && d <= 32767.0)
+                {
+                    ibytes = sizeof(os_short);
+                    s = os_round_short(d);
+                    iptr = &s;
+                    itype = OS_SHORT;
                 }
             }
             break;
 
         case OS_OBJECT:
-            itype = OS_OBJECT;
-            ibytes = sizeof(eObject *);
-            o = x->geto();
-            optr = o->clone(this, EOID_ITEM);
-            iptr = &optr;
-            break;
+        case OS_POINTER:
+            goto store_as_var;
 
-        default:
         case OS_STR:
-            q = x->gets(&sz);
+            q = (os_uchar*)x->gets(&sz);
             if (*q == '\0')
             {
                 itype = OS_UNDEFINED_TYPE;
                 ibytes = 0;
                 iptr = OS_NULL;
             }
-            else if (sz > 64)
+            else if (sz > 255)
             {
-                itype = -OS_STR;
-                ibytes = sizeof(os_char*) + sizeof(os_int);
-                sptr = os_malloc(sz, OS_NULL);
-                os_memcpy(sptr, q, sz);
-                iptr = &sptr;
-                isz = (os_int)sz;
+                goto store_as_var;
             }
             else
             {
@@ -779,6 +793,12 @@ void eSet::set(
             break;
     }
 
+    /* If this is temporary value, set temporary bit
+     */
+    if (sflags & ESET_TEMPORARY) {
+        itype |= ESET_TYPEID_TEMPORARY;
+    }
+
     /* Prepare to go trough items.
      */
     p = m_items;
@@ -789,38 +809,19 @@ void eSet::set(
     while (p < e)
     {
         start = p;
-        jid = *(os_uchar*)(p++);
-        jbytes = *(os_uchar*)(p++);
-        if (jbytes) jtype = *(os_uchar*)(p++);
-        else jtype = OS_UNDEFINED_TYPE;
+        jid = *(p++);
+        jbytes = *(p++);
+        p++;
         if (jid == (os_uchar)id)
         {
-            /* Release memory allocated for previous value.
-             */
-            if (jtype == OS_OBJECT)
-            {
-                delete *(eObject**)p;
-            }
-            else if (jtype == -OS_STR)
-            {
-                os_free(*(void**)p, *(os_int*)(p + sizeof(os_char*)));
-            }
-
             /* If it is same length
              */
             if (ibytes == jbytes)
             {
-                /* p = start + 1;
-                *(os_uchar*)(p++) = ibytes; */
                 p = start + 2;
-                if (ibytes == 0) return;
-                *(os_schar*)(p++) = itype;
-
-                os_memcpy(p, iptr, ibytes);
-                if (itype == -OS_STR)
-                {
-                    p += ibytes;
-                    *(os_int*)p = isz;
+                *(p++) = itype;
+                if (ibytes) {
+                    os_memcpy(p, iptr, ibytes);
                 }
                 return;
             }
@@ -838,50 +839,42 @@ void eSet::set(
         p += jbytes;
     }
 
-    if (x == OS_NULL) return;
+    /* If no value.
+     */
+    if (ibytes == 0) return;
 
     /* If we need to allocate more memory?
      */
     if ((os_memsz)(m_used + ibytes + 3 * sizeof(os_char)) > m_alloc)
     {
-        start = os_malloc(3 * sizeof(os_char)
+        bufp = os_malloc(3 * sizeof(os_char)
             + ibytes + m_used + m_used/4 + slack, &sz);
         if (m_items)
         {
-            os_memcpy(start, m_items, m_used);
+            os_memcpy(bufp, m_items, m_used);
             os_free(m_items, m_alloc);
         }
         m_alloc = (os_int)sz;
-        m_items = start;
+        m_items = (os_uchar*)bufp;
     }
 
     /* Append new value.
      */
     p = m_items + m_used;
-    *(os_uchar*)(p++) = (os_uchar)id;
-    *(os_uchar*)(p++) = (os_uchar)ibytes;
+    *(p++) = (os_uchar)id;
+    *(p++) = ibytes;
+    *(p++) = itype;
     if (ibytes)
     {
-        *(os_schar*)(p++) = itype;
-        if (itype != -OS_STR)
-        {
-            os_memcpy(p, iptr, ibytes);
-            p += ibytes;
-        }
-        else
-        {
-            ibytes = sizeof(os_char*);
-            os_memcpy(p, iptr, ibytes);
-            p += ibytes;
-            *(os_int*)p = isz;
-            p += sizeof(os_int);
-        }
+        os_memcpy(p, iptr, ibytes);
+        p += ibytes;
     }
     m_used = (os_int)(p - m_items);
-   return;
+    return;
 
 store_as_var:
-    v = new eVariable(this, id);
+    v = new eVariable(this, id, sflags & ESET_TEMPORARY
+        ? EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
     v->setv(x);
 }
 
@@ -891,13 +884,15 @@ store_as_var:
 
   @brief Get value from set.
 
-  The eSet::get function
+  The eSet::getv function
 
   @param  id Identification number (for example property number) for value to store.
   @param  x Variable containing value to store.
           - x = OS_NULL -> delete value
           - x = empty var -> store empty mark;
-  @param  flags Reserved for future, set 0 for now.
+  @param  sflags Pointer to integer where to store flags. If not needed, set OS_NULL.
+          Either ESET_PERSISTENT (0) or ESET_TEMPORARY (1). Temporary values are not
+          cloned or serialized.
 
   @return Return value can be used between empty value and unset value. This is needed for
           properties. OS_TRUE if value was found, even empty one. OS_FALSE if no value for
@@ -905,22 +900,31 @@ store_as_var:
 
 ****************************************************************************************************
 */
-os_boolean eSet::get(
+os_boolean eSet::getv(
     os_int id,
-    eVariable *x)
+    eVariable *x,
+    os_int *sflags)
 {
     eVariable *v;
-    eObject *objptr;
-    os_char *p, *e, *strptr;
-    os_uchar iid, ibytes;
-    os_schar itype;
+    os_uchar *p, *e;
+    os_uchar iid, ibytes, itype;
+    os_double d;
+    os_long l;
+    os_int i;
+    os_short s;
+
+    if (sflags) {
+        *sflags = ESET_PERSISTENT;
+    }
 
     /* Try first if this value is stored in separate variable.
      */
     v = firstv(id);
-    if (v)
-    {
+    if (v) {
         x->setv(v);
+        if (sflags && (v->flags() & EOBJ_NOT_CLONABLE)) {
+            *sflags = ESET_TEMPORARY;
+        }
         return OS_TRUE;
     }
 
@@ -938,8 +942,9 @@ os_boolean eSet::get(
      */
     while (p < e)
     {
-        iid = *(os_uchar*)(p++);
-        ibytes = *(os_uchar*)(p++);
+        iid = *(p++);
+        ibytes = *(p++);
+        itype = *(p++);
         if (iid == (os_uchar)id)
         {
             if (ibytes == 0)
@@ -947,7 +952,6 @@ os_boolean eSet::get(
                 x->clear();
                 return OS_TRUE;
             }
-            itype = *(os_schar*)(p++);
 
             switch (itype)
             {
@@ -956,36 +960,27 @@ os_boolean eSet::get(
                     break;
 
                 case OS_SHORT:
-                    x->setl(*(os_short*)p);
+                    os_memcpy(&s, p, sizeof(s));
+                    x->setl(s);
                     break;
 
                 case OS_INT:
-                    x->setl(*(os_int*)p);
+                    os_memcpy(&i, p, sizeof(i));
+                    x->setl(i);
                     break;
 
                 case OS_LONG:
-                    x->setl(*(os_long*)p);
+                    os_memcpy(&l, p, sizeof(l));
+                    x->setl(l);
                     break;
 
                 case OS_DOUBLE:
-                    if (ibytes == 1)
-                        x->setd(*(os_schar*)p);
-                    else
-                        x->setd(*(os_double*)p);
+                    os_memcpy(&d, p, sizeof(d));
+                    x->setd(d);
                     break;
 
                 case OS_STR:
-                    x->sets(p, ibytes);
-                    break;
-
-                case -OS_STR:
-                    strptr = *(os_char**)p;
-                    x->sets(strptr);
-                    break;
-
-                case OS_OBJECT:
-                    objptr = *(eObject**)p;
-                    x->seto(objptr);
+                    x->sets((os_char*)p, ibytes);
                     break;
 
                 default:
@@ -996,10 +991,10 @@ os_boolean eSet::get(
             return OS_TRUE;
         }
 
-        if (ibytes) p += ibytes + 1;
+        p += ibytes;
     }
 
-    /* comtinues ...
+    /* continues...
      */
 getout:
     x->clear();
@@ -1012,55 +1007,17 @@ getout:
 
   @brief Clear the set.
 
-  The eSet::clear function ...
-
-  @return Return value can be used between empty value and unset value. This is needed for
-          properties. OS_TRUE if value was found, even empty one. OS_FALSE if no value for
-          the ID was found.
+  The eSet::clear function clears all data in set, but doesn't release internal buffer. This
+  is left for possiblt reuse.
 
 ****************************************************************************************************
 */
 void eSet::clear()
 {
-    eObject *objptr;
-    os_char *p, *e, *strptr;
-    os_uchar iid, ibytes;
-    os_schar itype;
-    os_int strsz;
+    eVariable *v;
 
-    /* Prepare to go trough items.
-     */
-    p = m_items;
-    if (p == OS_NULL) return;
-    e = p + m_used;
-
-    /* Search id from items until match found.
-     */
-    while (p < e)
-    {
-        iid = *(os_uchar*)(p++);
-        OSAL_UNUSED(iid);
-        ibytes = *(os_uchar*)(p++);
-        if (ibytes)
-        {
-            itype = *(os_schar*)(p++);
-
-            switch (itype)
-            {
-                case -OS_STR:
-                    strptr = *(os_char**)p;
-                    strsz = *(os_int*)(p + sizeof(char*)) ;
-                    os_free(strptr, strsz);
-                    break;
-
-                case OS_OBJECT:
-                    objptr = *(eObject**)p;
-                    delete objptr;
-                    break;
-            }
-
-            p += ibytes;
-        }
+    while ((v = firstv())) {
+        delete v;
     }
 
     m_used = 0;

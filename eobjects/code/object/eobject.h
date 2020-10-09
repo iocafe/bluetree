@@ -1012,7 +1012,7 @@ protected:
 protected:
     /* Delete all child objects.
      */
-    void delete_children();
+    // void delete_children();
 
     void map2(
         eHandle *handle,
