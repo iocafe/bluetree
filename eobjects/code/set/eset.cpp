@@ -279,7 +279,7 @@ eStatus eSet::writer(
             if (stream->putl(iid)) goto failed;
             if (stream->putl(itype)) goto failed;
 
-            switch (itype)
+            switch (itype & OSAL_TYPEID_MASK)
             {
                 case OS_CHAR:
                     if (stream->putl(*(os_schar*)p)) goto failed;
@@ -435,7 +435,7 @@ eStatus eSet::reader(
         ibytes = (os_uchar)osal_type_size((osalTypeId)itype);
         *ibytes_pos = ibytes;
 
-        switch (itype)
+        switch (itype & OSAL_TYPEID_MASK)
         {
             case OS_CHAR:
                 if (stream->getl(&lval)) goto failed;
@@ -566,7 +566,7 @@ eStatus eSet::json_writer(
         {
             itype = *(p++);
 
-            switch (itype)
+            switch (itype & OSAL_TYPEID_MASK)
             {
                 case OS_CHAR:
                     x.setl(*(os_schar*)p);
@@ -953,7 +953,7 @@ os_boolean eSet::getv(
                 return OS_TRUE;
             }
 
-            switch (itype)
+            switch (itype & OSAL_TYPEID_MASK)
             {
                 case OS_CHAR:
                     x->setl(*(os_schar*)p);

@@ -635,7 +635,7 @@ void eObject::setpropertyv(
     eSet *properties;
     eVariable *p;
     eVariable v;
-    os_int pflags;
+    os_int pflags, sflags;
 
     /* Get global eVariable describing this property.
      */
@@ -709,7 +709,10 @@ void eObject::setpropertyv(
          */
         else
         {
-            properties->setv(propertynr, x);
+            sflags = (pflags & (EPRO_PERSISTENT|EPRO_METADATA))
+                ? ESET_PERSISTENT : ESET_TEMPORARY;
+
+            properties->setv(propertynr, x, sflags);
         }
 
         /* Late (normal) call class'es onpropertychange function.
@@ -782,13 +785,10 @@ void eObject::propertyv(
     eVariable *p;
 
     /* Look for eSet holding stored property values. If found, check for
-       property number.
+       stored propery with property number.
      */
     properties = eSet::cast(first(EOID_PROPERTIES));
-    if (properties)
-    {
-        /* Find stored property value. If matches value to set, do nothing.
-         */
+    if (properties) {
         if (properties->getv(propertynr, x)) return;
     }
 
