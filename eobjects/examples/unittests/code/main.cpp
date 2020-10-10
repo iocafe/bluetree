@@ -51,7 +51,22 @@ eStatus emain(
     os_int argc,
     os_char *argv[])
 {
-    property_example_4();
+    os_int test_nr = 11;
+
+    switch (test_nr)
+    {
+        case 11: container_example1(); break;
+        case 21: variables_example1(); break;
+        case 31: thread_example_1(); break;
+        case 32: thread_example_2(); break;
+        case 41: names_example1(); break;
+        case 51: property_example_1(); break;
+        case 52: property_example_2(); break;
+        case 53: property_example_3(); break;
+        case 54: property_example_4(); break;
+        case 61: connection_example_1(); break;
+        case 71: endpoint_example_1(); break;
+    }
 
     return ESTATUS_SUCCESS;
 }
