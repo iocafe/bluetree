@@ -34,7 +34,7 @@
 static os_char emyclass1p_a[] = "A";
 static os_char emyclass1p_b[] = "B";
 
-/* Enumeration of eMyClass2 properties.
+/* Enumeration of p4MyClass2 properties.
  */
 #define EMYCLASS2P_X 10
 #define EMYCLASS2P_Y 12
@@ -45,11 +45,7 @@ static const os_char emyclass2p_y[] = "Y";
 
 /**
 ****************************************************************************************************
-
-  @brief Example property class.
-
-  X...
-
+  Example class with properties class.
 ****************************************************************************************************
 */
 class p4MyClass : public eThread
@@ -126,12 +122,12 @@ public:
 
 ****************************************************************************************************
 */
-class eMyClass2 : public eThread
+class p4MyClass2 : public eThread
 {
 public:
     /* Constructor.
      */
-    eMyClass2(
+    p4MyClass2(
         eObject *parent = OS_NULL,
         e_oid oid = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
@@ -235,10 +231,10 @@ void property_example_4()
     printf ("%d\n", (int)sizeof(eHandle)); */
 // return;
 
-    /* Adds the p4MyClass and eMyClass2 to class list and creates property set for the class.
+    /* Adds the p4MyClass and p4MyClass2 to class list and creates property set for the class.
      */
     p4MyClass::setupclass();
-    eMyClass2::setupclass();
+    p4MyClass2::setupclass();
 
     /* Create and start thread named "thread1".
      */
@@ -248,7 +244,7 @@ void property_example_4()
 
     /* Create and start thread named "thread2".
      */
-    t = new eMyClass2();
+    t = new p4MyClass2();
     t->addname("thread2", ENAME_PROCESS_NS);
     t->start(&thandle2); /* After this t pointer is useless */
 

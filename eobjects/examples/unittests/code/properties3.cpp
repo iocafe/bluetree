@@ -38,11 +38,7 @@ static const os_char emyclassp_opinion[] = "opinion";
 
 /**
 ****************************************************************************************************
-
-  @brief Example property class.
-
-  X...
-
+  Example class with properties.
 ****************************************************************************************************
 */
 class p3MyClass : public eObject

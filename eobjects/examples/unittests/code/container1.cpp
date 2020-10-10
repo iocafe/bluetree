@@ -21,16 +21,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Application entry point.
-
-  The emain() function is eobjects application's entry point.
-
-  @param   argc Number of command line arguments.
-  @param   argv Array of string pointers, one for each command line argument. UTF8 encoded.
-
-  @return  None.
-
+  Container example.
 ****************************************************************************************************
 */
 void container_example1()

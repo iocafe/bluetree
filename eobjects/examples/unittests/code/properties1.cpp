@@ -22,7 +22,7 @@
 /**
 ****************************************************************************************************
 
-  @brief Set example 1.
+  @brief eSet example 1.
 
   Sets are used to implement properties...
   @return  None.
