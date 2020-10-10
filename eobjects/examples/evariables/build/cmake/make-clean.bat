@@ -1,1 +1,0 @@
-git clean -d -f -x C:\coderoot\borromean\evariables\examples\econtainer

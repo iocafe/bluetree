@@ -21,17 +21,24 @@
 #define ENAME_H_
 #include "eobjects.h"
 
-/* Flags for addname()
+/* Flags for eObject::addname()
  */
-#define ENAME_PERSISTENT 0
-#define ENAME_TEMPORARY 1
-#define ENAME_PARENT_NS 0
-#define ENAME_PROCESS_NS 2
-#define ENAME_THREAD_NS 4
-#define ENAME_SPECIFIED_NS 8
-#define ENAME_NO_NS 16
-#define ENAME_THIS_NS 32
-#define ENAME_NO_MAP 64
+#define ENAME_PERSISTENT   0
+#define ENAME_TEMPORARY    0x00000001
+#define ENAME_PRIMARY      0x00000002
+#define ENAME_UNIQUE       0x00000004
+#define ENAME_PARENT_NS    0
+#define ENAME_PROCESS_NS   0x00000008
+#define ENAME_THREAD_NS    0x00000010
+#define ENAME_SPECIFIED_NS 0x00000020
+#define ENAME_NO_NS        0x00000040
+#define ENAME_THIS_NS      0x00000080
+#define ENAME_NO_MAP       0x00001000
+
+/* Object flags related to name
+ */
+#define EOBJ_UNIQUE_NAME   EOBJ_CUST_FLAG1
+#define EOBJ_PRIMARY_NAME  EOBJ_CUST_FLAG2
 
 
 /**

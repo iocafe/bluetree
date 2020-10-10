@@ -59,13 +59,14 @@ X...
 
 #define EOBJ_TEMPORARY_ATTACHMENT  (EOBJ_IS_ATTACHMENT | EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE)
 
-
 #define EOBJ_CUST_FLAG1    0x00000010
 #define EOBJ_CUST_FLAG2    0x00000020
 #define EOBJ_CUST_FLAG3    0x00000040
 #define EOBJ_CUST_FLAG4    0x00000080
 #define EOBJ_CUST_FLAG5    0x00000100
 #define EOBJ_CUST_FLAG6    0x00000200
+#define EOBJ_CUST_FLAG7    0x00000400
+#define EOBJ_CUST_FLAG8    0x00000800
 
 /** Flag EOBJ_FAST_DELETE is used internallly to speed up deletion: When an object is being deleted,
 there is no need to detach it's children from red/black of the object. The EOBJ_FAST_DELETE
@@ -78,19 +79,17 @@ the treee structure after deletion. This changes deleting object trees from Nlog
  */
 #define EOBJ_IS_RED        0x40000000
 
+/** Custom flags mask.
+ */
+#define EOBJ_CUST_FLAGS_MASK 0x000FF0
+
 /** Serialization mask, which bits to save.
  */
 #define EOBJ_SERIALIZATION_MASK 0x0000FFFF
 
-/** Custom flags mask.
- */
-#define EOBJ_CUST_FLAGS_MASK 0x0002F0
-
 /** Clone mask, which bits to clone.
  */
 #define EOBJ_CLONE_MASK EOBJ_SERIALIZATION_MASK
-
-
 
 /*@}*/
 

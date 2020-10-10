@@ -1298,6 +1298,18 @@ eNameSpace *eObject::findnamespace(
            argument will be ignored.
   @param   namespace_id Identifier for the name space. OS_NULL is first parent's name space.
   @param   flags
+           - ENAME_PERSISTENT   0
+           - ENAME_TEMPORARY    0x00000001
+           - ENAME_PRIMARY      0x00000002
+           - ENAME_UNIQUE       0x00000004
+           - ENAME_PARENT_NS    0
+           - ENAME_PROCESS_NS   0x00000008
+           - ENAME_THREAD_NS    0x00000010
+           - ENAME_SPECIFIED_NS 0x00000020
+           - ENAME_NO_NS        0x00000040
+           - ENAME_THIS_NS      0x00000080
+           - ENAME_NO_MAP       0x00001000
+
   @return  Pointer to newly created name, eName class.
 
 ****************************************************************************************************
@@ -1318,9 +1330,14 @@ eName *eObject::addname(
 
     /* Set flags for name, like persistancy.
      */
-    if (flags & ENAME_TEMPORARY)
-    {
+    if (flags & ENAME_TEMPORARY) {
         n->setflags(EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
+    }
+    if (flags & ENAME_UNIQUE) {
+        n->setflags(EOBJ_UNIQUE_NAME);
+    }
+    if (flags & ENAME_PRIMARY) {
+        n->setflags(EOBJ_PRIMARY_NAME);
     }
 
     /* If name space is not given as argument, decide by flags.
@@ -1421,7 +1438,7 @@ namespace_selected:
 
   @brief Find object's first name.
 
-  The eObject::firstname() function gets first name given to this object.
+  The eObject::primaryname() function gets first name given to this object.
   Object's first name may later on separated with alternate names with name flags. At this
   fime first name is simply name which was added first.
 
@@ -1429,7 +1446,7 @@ namespace_selected:
 
 ****************************************************************************************************
 */
-eName *eObject::firstname()
+eName *eObject::primaryname()
 {
     eObject *n;
 

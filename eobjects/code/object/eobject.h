@@ -622,7 +622,7 @@ public:
 
     /* Get first name given to this this object.
      */
-    eName *firstname();
+    eName *primaryname();
 
     /* Flags for map() function: Attach all names of child object (this) and it's childen to
        name spaces. If a name is already mapped, it is not remapped.

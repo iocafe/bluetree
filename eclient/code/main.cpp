@@ -54,6 +54,7 @@ osalStatus emain(
     os_char *argv[])
 {
     eGui *gui;
+    eThreadHandle client_thread_handle;
     eStatus s;
 
 //    duudeli(); return OSAL_SUCCESS;
@@ -68,11 +69,14 @@ osalStatus emain(
 
     /* Manage network connections.
      */
-    enet_start_client();
+    enet_start_client(&client_thread_handle);
 
     gui = new eGui(egui_get_container());
     gui->setup_desktop_application();
     gui->run();
+
+    client_thread_handle.terminate();
+    client_thread_handle.join();
 
     eimgui_shutdown();
     egui_shutdown();

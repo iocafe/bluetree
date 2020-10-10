@@ -743,7 +743,7 @@ void eObject::send_browse_info(
     if (browse_flags & EBROWSE_THIS_OBJECT) {
         item = new eVariable(content, EBROWSE_THIS_OBJECT);
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
-        name = firstname();
+        name = primaryname();
         object_info(item, name, appendix);
     }
 
@@ -828,7 +828,6 @@ void eObject::object_info(
 
     // item->sets(EBROWSE_ITEM_NAMESPACE_ID, name->namespaceid());
     // item->setl(EBROWSE_NAME_IS_MAPPED, name->is_mapped());
-
 }
 
 
@@ -888,7 +887,7 @@ void eObject::browse_list_children(
         item = new eVariable(content, EBROWSE_CHILDREN);
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
 
-        name = child->firstname();
+        name = child->primaryname();
         if (name) {
             appendix->setv(EBROWSE_PATH, name);
         }
@@ -922,7 +921,7 @@ void eObject::browse_list_properties(
         *item = value;
 
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
-        name = p->firstname();
+        name = p->primaryname();
         if (name) {
             appendix->setv(EBROWSE_IPATH, name);
         }

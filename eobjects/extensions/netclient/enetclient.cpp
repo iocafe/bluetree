@@ -22,9 +22,7 @@
 
   @brief Constructor.
 
-  X...
-
-  @return  None.
+  Name this object and create connections table.
 
 ****************************************************************************************************
 */
@@ -37,7 +35,7 @@ eNetClient::eNetClient(
     eContainer *configuration, *columns;
     eVariable *column;
 
-    addname("client", ENAME_PROCESS_NS|ENAME_TEMPORARY);
+    addname("client", ENAME_PROCESS_NS|ENAME_TEMPORARY|ENAME_PRIMARY|ENAME_UNIQUE);
     ns_create("client");
 
     m_connections = new eMatrix(this, EOID_ITEM);
@@ -67,13 +65,7 @@ eNetClient::eNetClient(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eNetClient::~eNetClient()
@@ -134,7 +126,13 @@ void eNetClient::setupclass()
 
 
 
-void enet_start_client()
+void enet_start_client(
+    eThreadHandle *client_thread_handle)
 {
+    eNetClient *net_client;
 
+    /* Start net client as a thread.
+     */
+    net_client = new eNetClient();
+    net_client->start(client_thread_handle);
 }

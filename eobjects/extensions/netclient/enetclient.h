@@ -79,7 +79,8 @@ protected:
 };
 
 
-void enet_start_client();
+void enet_start_client(
+    eThreadHandle *client_thread_handle);
 
 
 #endif
