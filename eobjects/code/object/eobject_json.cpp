@@ -1,12 +1,12 @@
 /**
 
-  @file    ejsonserialization.cpp
-  @brief   Object base class.
+  @file    eobject_json.cpp
+  @brief   Object base class, JSON.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    10.10.2020
 
-  Object serialization in json format.
+  JSON serialization.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -17,6 +17,31 @@
 */
 #include "eobjects.h"
 #if E_SUPPROT_JSON
+
+
+/* Print object as JSON to console.
+ */
+void eObject::print_json()
+{
+    eBuffer buf;
+
+    json_write(&buf);
+    buf.writechar('\0');
+
+    osal_console_write(buf.ptr());
+}
+
+/* Class specific part of JSON writer.
+ */
+eStatus eObject::json_writer(
+    eStream *stream,
+    os_int sflags,
+    os_int indent)
+{
+    osal_debug_error("json_writer is not overloaded for the class");
+    return ESTATUS_SUCCESS;
+}
+
 
 
 /**

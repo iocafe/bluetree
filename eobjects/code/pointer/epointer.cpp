@@ -8,9 +8,9 @@
 
   Automatic object pointer is a pointer which detects if object pointing to it is deleted.
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -30,9 +30,9 @@
 ****************************************************************************************************
 */
 ePointer::ePointer(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eObject(parent, id, flags)
 {
     os_memclear(&m_ref, sizeof(ePointerRef));
@@ -58,6 +58,30 @@ ePointer::~ePointer()
 /**
 ****************************************************************************************************
 
+  @brief Add the class to class list and class'es properties to it's property set.
+
+  The ePointer::setupclass function adds the class to class list and class'es properties to
+  it's property set. The class list enables creating new objects dynamically by class identifier,
+  which is used for serialization reader functions. The property set stores static list of
+  class'es properties and metadata for those.
+
+****************************************************************************************************
+*/
+void ePointer::setupclass()
+{
+    const os_int cls = ECLASSID_POINTER;
+
+    /* Add the class to class list.
+     */
+    os_lock();
+    eclasslist_add(cls, (eNewObjFunc)newobj, "ePointer");
+    os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Set object pointer.
 
   The object pointer is much like C pointer, but it is known if the pointer object is deleted.
@@ -74,7 +98,7 @@ void ePointer::set(
 
     /* If no change, do nothing.
      */
-    if (ptr == OS_NULL) 
+    if (ptr == OS_NULL)
     {
         os_memclear(&m_ref, sizeof(ePointerRef));
         return;
@@ -113,7 +137,7 @@ eObject *ePointer::get()
     /* If not set.
      */
     if (m_ref.ref.ucnt <= 0) return OS_NULL;
-    
+
     handle = eget_handle(m_ref.ref.oix);
     if (m_ref.ref.ucnt != handle->m_ucnt)
     {

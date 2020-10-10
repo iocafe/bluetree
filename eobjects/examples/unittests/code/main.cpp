@@ -24,6 +24,7 @@
 #include "properties.h"
 #include "threads.h"
 #include "variables.h"
+#include "matrix.h"
 
 /* If needed for the operating system, EOSAL_C_MAIN macro generates the actual C main() function.
    and macro EMAIN_CONSOLE_ENTRY eobjects specific osal_main() function which calls emain.
@@ -51,7 +52,7 @@ eStatus emain(
     os_int argc,
     os_char *argv[])
 {
-    os_int test_nr = 11;
+    os_int test_nr = 81;
 
     switch (test_nr)
     {
@@ -66,6 +67,7 @@ eStatus emain(
         case 54: property_example_4(); break;
         case 61: connection_example_1(); break;
         case 71: endpoint_example_1(); break;
+        case 81: matrix_example1(); break;
     }
 
     return ESTATUS_SUCCESS;

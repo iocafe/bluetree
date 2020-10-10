@@ -519,7 +519,7 @@ public:
     /**
     ************************************************************************************************
 
-      @name Sopport JSON format object serialization.
+      @name JSON serialization.
 
       This includes reading and writing object as from/to stream as JSON. Object can be desccribed
       as valus of it's properties and it's children.
@@ -542,16 +542,16 @@ public:
         eStream *stream,
         os_int sflags = EOBJ_SERIALIZE_DEFAULT);
 
+    /* Print object as JSON to console.
+     */
+    void print_json();
+
     /* Class specific part of JSON writer.
      */
     virtual eStatus json_writer(
         eStream *stream,
         os_int sflags = EOBJ_SERIALIZE_DEFAULT,
-        os_int indent = 0)
-    {
-        return ESTATUS_SUCCESS;
-    }
-
+        os_int indent = 0);
 #endif
 
     /**

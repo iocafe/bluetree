@@ -27,7 +27,7 @@ typedef union
     os_char *s;
     eObject *o;
 }
-eMatrixObj;
+eMatrixDataItem;
 
 
 /**
@@ -51,11 +51,13 @@ eMatrix::eMatrix(
      */
     m_datatype = OS_OBJECT;
     m_typesz = typesz(m_datatype);
+    m_elemsz = m_typesz + sizeof(os_char);
 
     /** Clear rest of member variables.
      */
     m_nrows = m_ncolumns = 0;
-    m_elems_per_block = 0;
+    m_buf_alloc_sz = 0;
+    // per_block = 0;
 }
 
 
@@ -173,7 +175,7 @@ eStatus eMatrix::writer(
     os_double d;
     os_float f;
     e_oid id;
-    os_int first_elem_ix, elem_ix, first_full_ix, full_count, i;
+    os_int first_elem_ix, elem_ix, first_full_ix, full_count, i, per_block;
     os_boolean prev_isempty, isempty;
 
     /* Version number. Increment if new serialized items are added to the object,
@@ -196,6 +198,8 @@ eStatus eMatrix::writer(
     prev_isempty = OS_TRUE;
     first_full_ix = full_count = 0;
 
+    per_block = elems_per_block();
+
     for (buffer = eBuffer::cast(first());
          buffer;
          buffer = eBuffer::cast(buffer->next()))
@@ -203,12 +207,12 @@ eStatus eMatrix::writer(
         id = buffer->oid();
         if (id <= 0) continue;
 
-        first_elem_ix = (id - 1) * m_elems_per_block;
+        first_elem_ix = (id - 1) * per_block;
 
         dataptr = buffer->ptr();
-        typeptr = dataptr + m_elems_per_block * m_typesz;
+        typeptr = dataptr + per_block * m_typesz;
 
-        for (i = 0; i < m_elems_per_block; i++)
+        for (i = 0; i < per_block; i++)
         {
             elem_ix = first_elem_ix + i;
 
@@ -326,24 +330,26 @@ eStatus eMatrix::elementwrite(
     os_int sflags)
 {
     eBuffer *buffer = OS_NULL;
-    eMatrixObj *mo;
+    eMatrixDataItem *mo;
     eObject *o;
     os_char *s, *dataptr, *typeptr;
     os_long l;
     os_double d;
     os_float f;
     osalTypeId datatype;
-    os_int i, prev_buffer_nr, buffer_nr, elem_ix;
+    os_int i, prev_buffer_nr, buffer_nr, elem_ix, per_block;
 
     if (stream->putl(first_full_ix)) goto failed;
     if (stream->putl(full_count)) goto failed;
 
     prev_buffer_nr = -1;
 
+    per_block = elems_per_block();
+
     for (i = 0; i<full_count; i++)
     {
         elem_ix = first_full_ix + i;
-        buffer_nr =  elem_ix / m_elems_per_block + 1;
+        buffer_nr =  elem_ix / per_block + 1;
         if (buffer_nr != prev_buffer_nr)
         {
             buffer = eBuffer::cast(first(buffer_nr));
@@ -357,13 +363,13 @@ eStatus eMatrix::elementwrite(
         }
 
 //        dataptr = buffer->ptr();
-//        typeptr = dataptr + m_elems_per_block * m_typesz;          HERE IS SOMETHING WERY WRONG
+//        typeptr = dataptr + per_block * m_typesz;          HERE IS SOMETHING WERY WRONG
 
         datatype = OS_UNDEFINED_TYPE;
         switch (m_datatype)
         {
             case OS_OBJECT:
-                mo = ((eMatrixObj*)dataptr) + i;
+                mo = ((eMatrixDataItem*)dataptr) + i;
                 switch (typeptr[i])
                 {
                     case OS_LONG:
@@ -625,11 +631,16 @@ void eMatrix::allocate(
         clear();
     }
 
+
+/* Old content not handled */
+
     /* Save data type and element size. Elements per block has not been set yet
      */
     m_datatype = datatype;
-    m_typesz = typesz(datatype);
-    m_elems_per_block = 0;
+    m_typesz = m_elemsz = typesz(datatype);
+    if (m_datatype == OS_OBJECT) m_elemsz += sizeof(os_char);
+
+    // per_block = 0;
 
     /* Resize the matrix. This doesn't allocate any memory yet, unless data can
        fit into small buffer.
@@ -757,7 +768,7 @@ void eMatrix::setl(
     switch (m_datatype)
     {
         case OS_OBJECT:
-            ((eMatrixObj*)dataptr)->l = x;
+            ((eMatrixDataItem*)dataptr)->l = x;
             *typeptr = OS_LONG;
             break;
 
@@ -827,7 +838,7 @@ void eMatrix::setd(
     switch (m_datatype)
     {
         case OS_OBJECT:
-            ((eMatrixObj*)dataptr)->d = x;
+            ((eMatrixDataItem*)dataptr)->d = x;
             *typeptr = OS_DOUBLE;
             break;
 
@@ -909,7 +920,7 @@ void eMatrix::sets(
             sz = os_strlen(x);
             p = os_malloc(sz, OS_NULL);
             os_memcpy(p, x, sz);
-            ((eMatrixObj*)dataptr)->s = p;
+            ((eMatrixDataItem*)dataptr)->s = p;
             *typeptr = OS_DOUBLE;
             break;
 
@@ -980,7 +991,7 @@ void eMatrix::seto(
 
     o = x->clone(buffer, EOID_INTERNAL);
     o->setflags(EOBJ_TEMPORARY_ATTACHMENT);
-    ((eMatrixObj*)dataptr)->o = o;
+    ((eMatrixDataItem*)dataptr)->o = o;
     *typeptr = OS_OBJECT;
 }
 
@@ -1042,7 +1053,7 @@ os_boolean eMatrix::getv(
     eVariable *x)
 {
     os_char *dataptr, *typeptr;
-    eMatrixObj *mo;
+    eMatrixDataItem *mo;
     os_long l;
     os_double d;
     os_float f;
@@ -1060,7 +1071,7 @@ os_boolean eMatrix::getv(
     switch (m_datatype)
     {
         case OS_OBJECT:
-            mo = (eMatrixObj*)dataptr;
+            mo = (eMatrixDataItem*)dataptr;
             switch (*typeptr)
             {
                 case OS_LONG:
@@ -1153,7 +1164,7 @@ os_long eMatrix::getl(
     os_boolean *hasvalue)
 {
     os_char *dataptr, *typeptr;
-    eMatrixObj *mo;
+    eMatrixDataItem *mo;
     os_long l;
     os_double d;
     os_float f;
@@ -1173,7 +1184,7 @@ os_long eMatrix::getl(
     switch (m_datatype)
     {
         case OS_OBJECT:
-            mo = (eMatrixObj*)dataptr;
+            mo = (eMatrixDataItem*)dataptr;
             switch (*typeptr)
             {
                 case OS_LONG:
@@ -1260,7 +1271,7 @@ os_double eMatrix::getd(
     os_boolean *hasvalue)
 {
     os_char *dataptr, *typeptr;
-    eMatrixObj *mo;
+    eMatrixDataItem *mo;
     os_long l;
     os_double d;
     os_float f;
@@ -1280,7 +1291,7 @@ os_double eMatrix::getd(
     switch (m_datatype)
     {
         case OS_OBJECT:
-            mo = (eMatrixObj*)dataptr;
+            mo = (eMatrixDataItem*)dataptr;
             switch (*typeptr)
             {
                 case OS_LONG:
@@ -1367,7 +1378,7 @@ void eMatrix::resize(
     eBuffer *buffer, *nextbuffer;
     eVariable *tmp;
     eMatrix *m;
-    os_int elem_ix, buffer_nr, minrows, mincolumns, row, column;
+    os_int elem_ix, buffer_nr, minrows, mincolumns, row, column, per_block;
 
     /* If we need to reorganize, do it the hard way. This is slow, application
        should be written in such way that this is not needed repeatedly.
@@ -1416,9 +1427,12 @@ void eMatrix::resize(
          */
         elem_ix = ((nrows-1) * m_ncolumns-1) + (ncolumns-1);
 
+    per_block = elems_per_block();
+
+
         /* Buffer number of last buffer to keep
          */
-        buffer_nr =  elem_ix / m_elems_per_block + 1;
+        buffer_nr =  elem_ix / per_block + 1;
 
         /* Delete buffers with bigger number than buffer_nr
          */
@@ -1472,7 +1486,7 @@ os_char *eMatrix::getptrs(
 {
     eBuffer *buffer;
     os_char *dataptr;
-    os_int elem_ix, buffer_nr;
+    os_int elem_ix, buffer_nr, per_block;
 
     /* If this is outside current matrix size.
      */
@@ -1493,10 +1507,12 @@ os_char *eMatrix::getptrs(
      */
     elem_ix = (row * m_ncolumns + column);
 
+    per_block = elems_per_block();
+
     /* Buffer index from 1... and element index within buffer 0...
      */
-    buffer_nr =  elem_ix / m_elems_per_block + 1;
-    elem_ix %= m_elems_per_block;
+    buffer_nr = elem_ix / per_block + 1;
+    elem_ix %= per_block;
 
     /* Get eBuffer where this value belongs to.
      */
@@ -1504,7 +1520,7 @@ os_char *eMatrix::getptrs(
     if (buffer == OS_NULL) return OS_NULL;
 
     dataptr = buffer->ptr();
-    *typeptr = dataptr + m_elems_per_block * m_typesz + elem_ix;
+    *typeptr = dataptr + per_block * m_typesz + elem_ix;
     dataptr += elem_ix * m_typesz;
 
     /* Item found, dataptr and typeptr are set now. If this is
@@ -1520,6 +1536,36 @@ os_char *eMatrix::getptrs(
 }
 
 
+/* If we do not have number of matrix elements per block (per_block):
+ * Allocate buffer 1 to know how much we can store in buffer. This depends
+   on eBuffer class implementation.
+ */
+/* void eMatrix::set_element_sz()
+{
+    eBuffer *buffer;
+    const os_int buffer_nr = 1;
+    os_int bytes_per_elem;
+
+    if (m_buf_alloc_sz == 0)
+    {
+        buffer = eBuffer::cast(first(buffer_nr));
+        if (buffer == OS_NULL) {
+            buffer = getbuffer(buffer_nr, OS_TRUE);
+            buffer->allocate(OEMATRIX_APPROX_BUF_SZ);
+        }
+
+        m_buf_alloc_sz = buffer->allocated();
+
+        bytes_per_elem = m_typesz;
+        if (m_datatype == OS_OBJECT) bytes_per_elem += sizeof(os_char);
+        per_block = (os_int)(buffer->allocated() / bytes_per_elem);
+    }
+
+    {if (m_elemsz) return m_buf_alloc_sz/m_elemsz; else return 0;}
+    xx
+}
+*/
+
 /* Get or allocate eBuffer by buffer number (oid).
  */
 eBuffer *eMatrix::getbuffer(
@@ -1527,7 +1573,7 @@ eBuffer *eMatrix::getbuffer(
     os_boolean isset)
 {
     eBuffer *buffer;
-    os_int bytes_per_elem, count;
+    os_int bytes_per_elem, count, per_block;
     os_char *ptr;
 
     buffer = eBuffer::cast(first(buffer_nr));
@@ -1538,16 +1584,18 @@ eBuffer *eMatrix::getbuffer(
     bytes_per_elem = m_typesz;
     if (m_datatype == OS_OBJECT) bytes_per_elem += sizeof(os_char);
 
+    per_block = elems_per_block();
+
     /* If we have not yet decided on elements per block
      */
-    if (m_elems_per_block == 0)
+    if (per_block == 0)
     {
         buffer->allocate(OEMATRIX_APPROX_BUF_SZ);
-        m_elems_per_block = (os_int)(buffer->allocated() / bytes_per_elem);
+        per_block = (os_int)(buffer->allocated() / bytes_per_elem);
     }
     else
     {
-        buffer->allocate(m_elems_per_block * bytes_per_elem);
+        buffer->allocate(per_block * bytes_per_elem);
     }
 
     /* If this is not object data type, mark all items
@@ -1556,7 +1604,7 @@ eBuffer *eMatrix::getbuffer(
     if (m_datatype != OS_OBJECT)
     {
         ptr = buffer->ptr();
-        count = m_elems_per_block;
+        count = per_block;
         while (count--)
         {
             emptyobject(ptr, OS_NULL);
@@ -1572,18 +1620,19 @@ eBuffer *eMatrix::getbuffer(
 void eMatrix::releasebuffer(
     eBuffer *buffer)
 {
-    eMatrixObj *mo;
+    eMatrixDataItem *mo;
     os_char *typeptr;
-    os_int i;
+    os_int i, per_block;
 
     /* If this object data type.
      */
     if (m_datatype == OS_OBJECT)
     {
-        mo = (eMatrixObj*)buffer->ptr();
-        typeptr = (os_char*)(mo + m_elems_per_block);
+        mo = (eMatrixDataItem*)buffer->ptr();
+        per_block = elems_per_block();
+        typeptr = (os_char*)(mo + per_block);
 
-        for (i = 0; i < m_elems_per_block; i++)
+        for (i = 0; i < per_block; i++)
         {
             switch (typeptr[i])
             {
@@ -1611,12 +1660,12 @@ void eMatrix::emptyobject(
     os_char *dataptr,
     os_char *typeptr)
 {
-    eMatrixObj *mo;
+    eMatrixDataItem *mo;
 
     switch (m_datatype)
     {
         case OS_OBJECT:
-            mo = (eMatrixObj*)dataptr;
+            mo = (eMatrixDataItem*)dataptr;
             switch (*typeptr)
             {
                 case OS_STR:
@@ -1631,7 +1680,7 @@ void eMatrix::emptyobject(
                     break;
             }
 
-            os_memclear(mo, sizeof(eMatrixObj));
+            os_memclear(mo, sizeof(eMatrixDataItem));
             *typeptr = OS_UNDEFINED_TYPE;
             break;
 
@@ -1670,6 +1719,6 @@ void eMatrix::emptyobject(
 os_short eMatrix::typesz(
     osalTypeId datatype)
 {
-    if (datatype == OS_OBJECT) return sizeof(eMatrixObj);
+    if (datatype == OS_OBJECT) return sizeof(eMatrixDataItem);
     return (os_short)osal_type_size(datatype);
 }

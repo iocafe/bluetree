@@ -321,6 +321,10 @@ protected:
         os_boolean isset,
         eBuffer **pbuffer = OS_NULL);
 
+    /* Set number of elements per block.
+     */
+    // void set_element_sz();
+
     /* Get or allocate eBuffer by buffer number (oid).
      */
     eBuffer *getbuffer(
@@ -341,10 +345,19 @@ protected:
     os_short typesz(
         osalTypeId datatype);
 
+    inline os_int elems_per_block() {if (m_elemsz) return m_buf_alloc_sz/m_elemsz; else return 0;}
 
     /** Matrix data type.
      */
     osalTypeId m_datatype;
+
+    /** Matrix data size in bytes.
+     */
+    os_short m_typesz;
+
+    /** Matrix element size in bytes. This is typesz + 1 for object data type;
+     */
+    os_short m_elemsz;
 
     /** Number of rows.
      */
@@ -354,13 +367,13 @@ protected:
      */
     os_int m_ncolumns;
 
-    /** Matrix data size in bytes.
+    /** Number of elements per block.
      */
-    os_short m_typesz;
+    // os_short m_elems_per_block;
 
-    /* Number of elements per block.
+    /** Buffer allocation size.
      */
-    os_short m_elems_per_block;
+    os_int m_buf_alloc_sz;
 
     /*@}*/
 };

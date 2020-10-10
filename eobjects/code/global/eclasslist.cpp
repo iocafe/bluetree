@@ -159,13 +159,12 @@ void eclasslist_initialize()
        themselves.
      */
     eVariable::setupclass();
-
     eSet::setupclass();
     eContainer::setupclass();
     eName::setupclass();
     eNameSpace::setupclass();
     eValueX::setupclass();
-    // ePointer::setupclass();
+    ePointer::setupclass();
     eEnvelope::setupclass();
     ePropertyBinding::setupclass();
     eTimer::setupclass();

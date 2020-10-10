@@ -493,6 +493,13 @@ os_char *eBuffer::allocate(
         return OS_NULL;
     }
 
+    /* If no change. We do not bother to shrink buffer for less than 64 bytes
+       (efficiency).
+     */
+    if (m_ptr && sz <= m_allocated && sz + 64 > m_allocated) {
+        return m_ptr;
+    }
+
     /* Allocate new buffer
      */
     newbuf = os_malloc(sz, &newallocation);
