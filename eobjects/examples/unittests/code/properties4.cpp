@@ -1,10 +1,10 @@
 /**
 
-  @file    eobjects_property_example4.cpp
+  @file    properties4.cpp
   @brief   Example code object properties.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    28.12.2016
+  @date    10.10.2020
 
   This example demonstrates setting up a new class with properties, and how to react to property
   value changes.
@@ -17,7 +17,7 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "eobjects_property_example.h"
+#include "properties.h"
 #include <stdio.h>
 
 /* Every class needs to have unique class identifier (classid). Class identifier is is 32 bit
@@ -26,10 +26,10 @@
 #define MY_CLASS_ID_1 (ECLASSID_APP_BASE + 1)
 #define MY_CLASS_ID_2 (ECLASSID_APP_BASE + 2)
 
-/* Enumeration of eMyClass1 properties. Normally these would be in header file.
+/* Enumeration of p4MyClass properties. Normally these would be in header file.
  */
 #define EMYCLASS1P_A 10
-#define EMYCLASS1P_B 20
+#define EMYCLASS1P_B 12
 
 static os_char emyclass1p_a[] = "A";
 static os_char emyclass1p_b[] = "B";
@@ -37,7 +37,7 @@ static os_char emyclass1p_b[] = "B";
 /* Enumeration of eMyClass2 properties.
  */
 #define EMYCLASS2P_X 10
-#define EMYCLASS2P_Y 20
+#define EMYCLASS2P_Y 12
 
 static const os_char emyclass2p_x[] = "X";
 static const os_char emyclass2p_y[] = "Y";
@@ -52,12 +52,12 @@ static const os_char emyclass2p_y[] = "Y";
 
 ****************************************************************************************************
 */
-class eMyClass1 : public eThread
+class p4MyClass : public eThread
 {
 public:
     /* Constructor.
      */
-    eMyClass1(
+    p4MyClass(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
@@ -73,8 +73,8 @@ public:
         const os_int cls = MY_CLASS_ID_1;
 
         os_lock();
-        addproperty(cls, EMYCLASS1P_A, emyclass1p_a, EPRO_PERSISTENT, "A");
-        addproperty(cls, EMYCLASS1P_B, emyclass1p_b, EPRO_PERSISTENT, "B");
+        addproperty(cls, EMYCLASS1P_A, emyclass1p_a, "A");
+        addproperty(cls, EMYCLASS1P_B, emyclass1p_b, "B");
         os_unlock();
     }
 
@@ -87,7 +87,7 @@ public:
 
     /* This gets called when property value changes
      */
-    virtual void onpropertychange(
+    virtual eStatus onpropertychange(
         os_int propertynr,
         eVariable *x,
         os_int flags)
@@ -106,7 +106,12 @@ public:
                 printf ("1: GOT B %f\n", b);
                 setpropertyd(EMYCLASS1P_A, b * 1.01);
                 break;
+
+            default:
+                return ESTATUS_FAILED;
         }
+
+        return ESTATUS_SUCCESS;
     }
 };
 
@@ -142,8 +147,9 @@ public:
         const os_int cls = MY_CLASS_ID_2;
 
         os_lock();
-        addproperty(cls, EMYCLASS2P_X, emyclass2p_x, EPRO_PERSISTENT, "X");
-        addproperty(cls, EMYCLASS2P_Y, emyclass2p_y, EPRO_PERSISTENT, "Y");
+        addproperty(cls, EMYCLASS2P_X, emyclass2p_x, "X");
+        addproperty(cls, EMYCLASS2P_Y, emyclass2p_y, "Y");
+        propertysetdone(cls);
         os_unlock();
     }
 
@@ -165,7 +171,7 @@ setpropertyd(EMYCLASS2P_Y, 4.3);
 
     /* This gets called when property value changes
      */
-    virtual void onpropertychange(
+    virtual eStatus onpropertychange(
         os_int propertynr,
         eVariable *x,
         os_int flags)
@@ -184,7 +190,11 @@ setpropertyd(EMYCLASS2P_Y, 4.3);
                 b = x->getd();
                 printf ("1: GOT Y %f\n", b);
                 break;
+            default:
+                return ESTATUS_FAILED;
         }
+
+        return ESTATUS_SUCCESS;
     }
 };
 
@@ -207,9 +217,9 @@ void property_example_4()
     eThreadHandle thandle1, thandle2;
     eContainer c;
 
-    os_timer st, tn;
-    eVariable *v;
-    os_long i;
+    //os_timer st, tn;
+    //eVariable *v;
+    //os_long i;
 
     /* os_get_timer(&st);
     for (i = 0; i<100000000; i++)
@@ -225,14 +235,14 @@ void property_example_4()
     printf ("%d\n", (int)sizeof(eHandle)); */
 // return;
 
-    /* Adds the eMyClass1 and eMyClass2 to class list and creates property set for the class.
+    /* Adds the p4MyClass and eMyClass2 to class list and creates property set for the class.
      */
-    eMyClass1::setupclass();
+    p4MyClass::setupclass();
     eMyClass2::setupclass();
 
     /* Create and start thread named "thread1".
      */
-    t = new eMyClass1();
+    t = new p4MyClass();
     t->addname("thread1", ENAME_PROCESS_NS);
     t->start(&thandle1); /* After this t pointer is useless */
 

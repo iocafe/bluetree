@@ -45,11 +45,11 @@ EMAIN_CONSOLE_ENTRY
 
   @oaran   argc Number of command line arguments (PC only)
   @oaran   argv Array of command line argument pointers (PC only)
-  @return  OSAL_SUCCESS if all fine, other values indicate an error.
+  @return  ESTATUS_SUCCESS if all fine, other values indicate an error.
 
 ****************************************************************************************************
 */
-osalStatus emain(
+eStatus emain(
     os_int argc,
     os_char *argv[])
 {
@@ -64,7 +64,7 @@ osalStatus emain(
     if (s) {
         osal_debug_error("ImGui initialization failed");
         egui_shutdown();
-        return OSAL_STATUS_FAILED;
+        return ESTATUS_FAILED;
     }
 
     /* Manage network connections.
@@ -81,5 +81,5 @@ osalStatus emain(
     eimgui_shutdown();
     egui_shutdown();
 
-    return OSAL_SUCCESS;
+    return ESTATUS_SUCCESS;
 }

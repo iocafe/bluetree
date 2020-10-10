@@ -1,10 +1,10 @@
 /**
 
-  @file    variables.cpp
+  @file    variables.h
   @brief   Example code about using eobjects variable class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    10.10.2020
 
   This example demonstrates how to use dynamically typed variable class eVariable.
 
@@ -15,34 +15,5 @@
 
 ****************************************************************************************************
 */
-#include "eobjects.h"
-#include "variables.h"
 
-void variables_example1()
-{
-    eVariable
-        var,
-        dar;
-
-    os_long
-        u = 22;
-
-    dar = var = "abba ";
-    dar = 10;
-    dar = u;
-    osal_console_write(dar.gets());
-    osal_console_write("\n");
-
-    var += dar;
-    var += " ja nasse";
-    var += " ja pulla";
-
-    osal_console_write(var.gets());
-    osal_console_write("\n");
-
-    dar = 1110.018;
-    dar.setdigs(5);
-    dar += var;
-    osal_console_write(dar.gets());
-    osal_console_write("\n");
-}
+void variables_example1();

@@ -4,7 +4,7 @@
   @brief   Example code about connecting two processes.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    28.12.2016
+  @date    10.10.2020
 
   This demonstrates creating an end point which listens for socket connections.
 

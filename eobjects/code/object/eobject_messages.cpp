@@ -333,8 +333,7 @@ void eObject::message_process_ns(
 #if OSAL_DEBUG
             if ((envelope->flags() & EMSG_NO_ERRORS) == 0)
             {
-                osal_debug_error("message() failed: Name not found in process NS");
-                osal_debug_error(objname.gets());
+                osal_debug_error_str("message() failed: Name not found in process NS, name=", oname);
             }
 #endif
             goto getout;

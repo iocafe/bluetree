@@ -28,7 +28,7 @@ OSAL_C_HEADER_BEGINS
 
 /* Prototype for application's entry point function.
  */
-osalStatus emain(
+eStatus emain(
     os_int argc,
     os_char *argv[]);
 
@@ -57,7 +57,7 @@ OSAL_C_HEADER_ENDS
     osalStatus s; \
     eobjects_initialize(OS_NULL); \
     eprocess_create(); \
-    s = emain(argc, argv); \
+    s = (osalStatus)emain(argc, argv); \
     eprocess_close(); \
     eobjects_shutdown(); \
     return s; }

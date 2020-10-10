@@ -1,22 +1,22 @@
 /**
 
-  @file    eobjects_thread_example.cpp
+  @file    thread2.cpp
   @brief   Example code about naming objects.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    28.12.2016
+  @date    10.10.2020
 
   This example demonstrates how to create threads.
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "eobjects_thread_example.h"
+#include "threads.h"
 
 /* Purpose of a message is specified by 32 bit command. Negative command identifiers are
    reserved for the eobject library related, but positive ones can be used freely.
@@ -46,13 +46,13 @@ class eMyThread1 : public eThread
 {
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return MY_CLASS_ID_1;
     }
 
     virtual void onmessage(
-        eEnvelope *envelope) 
+        eEnvelope *envelope)
     {
         eVariable *txt, *v;
 
@@ -103,13 +103,13 @@ class eMyThread2 : public eThread
 {
     /* Get class identifier.
      */
-    virtual os_int classid() 
+    virtual os_int classid()
     {
         return MY_CLASS_ID_2;
     }
 
     virtual void onmessage(
-        eEnvelope *envelope) 
+        eEnvelope *envelope)
     {
         eVariable *txt, *v;
 
@@ -126,7 +126,7 @@ class eMyThread2 : public eThread
 
                     txt = new eVariable(this);
                     txt->sets("hi, I am here?");
-                    message (MYCMD_HI_OTHER_COMRADE, envelope->source(), 
+                    message (MYCMD_HI_OTHER_COMRADE, envelope->source(),
                         OS_NULL, txt, EMSG_DEL_CONTENT, envelope->context());
                     return;
             }
@@ -150,8 +150,8 @@ class eMyThread2 : public eThread
 */
 void thread_example_2()
 {
-	eContainer
-		root;
+    eContainer
+        root;
 
     eVariable
         *txt;
@@ -159,21 +159,21 @@ void thread_example_2()
     eThread
         *t;
 
-    eThreadHandle 
+    eThreadHandle
         thandle1,
         thandle2;
 
     /* Create and start thread 1 named "thread1".
      */
     t = new eMyThread1();
-	t->addname("thread1", ENAME_PROCESS_NS);
+    t->addname("thread1", ENAME_PROCESS_NS);
 //    t->setpriority();
     t->start(&thandle1); /* After this t pointer is useless */
 
     /* Create and start thread 2 named "thread2".
      */
     t = new eMyThread2();
-	t->addname("thread2", ENAME_PROCESS_NS);
+    t->addname("thread2", ENAME_PROCESS_NS);
     t->start(&thandle2); /* After this t pointer is useless */
 
     for (os_int i = 0; i<2; i++)

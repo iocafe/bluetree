@@ -1,10 +1,10 @@
 /**
 
-  @file    eobjects_connection_example1.cpp
+  @file    connection1.cpp
   @brief   Example code for connecting two processes.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    28.12.2016
+  @date    10.10.2020
 
   This example demonstrates connecting two processes.
 
@@ -16,8 +16,7 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "eobjects/extensions/socket/esocket.h"
-#include "eobjects_connection_example.h"
+#include "connection.h"
 #include <stdio.h>
 
 /* Every class needs to have unique class identifier (classid). Class identifier is is 32 bit
@@ -25,7 +24,7 @@
  */
 #define MY_CLASS_ID_2 (ECLASSID_APP_BASE + 2)
 
-/* Enumeration of eMyClass2 properties.
+/* Enumeration of c1MyClass properties.
  */
 #define EMYCLASS2P_X 10
 #define EMYCLASS2P_Y 20
@@ -43,12 +42,12 @@ static const os_char emyclass2p_y[] = "Y";
 
 ****************************************************************************************************
 */
-class eMyClass2 : public eThread
+class c1MyClass : public eThread
 {
 public:
     /* Constructor. It is here just to initialize properties to default values.s
      */
-    eMyClass2(
+    c1MyClass(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
@@ -64,8 +63,8 @@ public:
         const os_int cls = MY_CLASS_ID_2;
 
         os_lock();
-        addproperty(cls, EMYCLASS2P_X, emyclass2p_x, EPRO_PERSISTENT, "X");
-        addproperty(cls, EMYCLASS2P_Y, emyclass2p_y, EPRO_PERSISTENT, "Y");
+        addproperty(cls, EMYCLASS2P_X, emyclass2p_x, "X", EPRO_PERSISTENT);
+        addproperty(cls, EMYCLASS2P_Y, emyclass2p_y, "Y", EPRO_PERSISTENT);
         os_unlock();
     }
 
@@ -121,7 +120,7 @@ printf ("ULLE \'%s\'\n", v.gets());
 
     /* This gets called when property value changes
      */
-    virtual void onpropertychange(
+    virtual eStatus onpropertychange(
         os_int propertynr,
         eVariable *x,
         os_int flags)
@@ -135,7 +134,12 @@ printf ("ULLE \'%s\'\n", v.gets());
             case EMYCLASS2P_Y:
                 printf ("GOT Y \'%s\'\n", x->gets());
                 break;
+
+            default:
+                return ESTATUS_FAILED;
         }
+
+        return ESTATUS_SUCCESS;
     }
 };
 
@@ -159,8 +163,8 @@ void connection_example_1()
 
     /* Set up eSocket and my own classes for use.
      */
-    eSocket::setupclass();
-    eMyClass2::setupclass();
+    eOsStream::setupclass();
+    c1MyClass::setupclass();
 
     /* Create and start thread to listen for incoming socket connections,
        name it "endpointthread".
@@ -178,7 +182,7 @@ void connection_example_1()
 
     /* Create and start thread named "thread2".
      */
-    t = new eMyClass2();
+    t = new c1MyClass();
     t->addname("thread2", ENAME_PROCESS_NS);
 //  t->timer(120);
     t->start(&thandle2); /* After this t pointer is useless */

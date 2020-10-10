@@ -1,10 +1,10 @@
 /**
 
-  @file    eobjects_property_example3.cpp
+  @file    properties1.cpp
   @brief   Example code object properties.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    28.12.2016
+  @date    10.10.2020
 
   This example demonstrates setting up a new class with properties, and how to react to property
   value changes.
@@ -17,7 +17,7 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "eobjects_property_example.h"
+#include "properties.h"
 #include <stdio.h>
 
 /* Every class needs to have unique class identifier (classid). Class identifier is is 32 bit
@@ -25,7 +25,7 @@
  */
 #define MY_CLASS_ID (ECLASSID_APP_BASE + 1)
 
-/* Enumeration of eMyClass properties. Normally these would be in header file.
+/* Enumeration of p3MyClass properties. Normally these would be in header file.
  */
 #define EMYCLASSP_CELCIUS 10
 #define EMYCLASSP_FAHRENHEIT 12
@@ -45,12 +45,12 @@ static const os_char emyclassp_opinion[] = "opinion";
 
 ****************************************************************************************************
 */
-class eMyClass : public eObject
+class p3MyClass : public eObject
 {
 public:
     /* Constructor.
      */
-    eMyClass(
+    p3MyClass(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
@@ -66,7 +66,7 @@ public:
         return MY_CLASS_ID;
     }
 
-    /* Add eMyClass'es properties to class'es property set.
+    /* Add p3MyClass'es properties to class'es property set.
     */
     static void setupclass()
     {
@@ -87,7 +87,7 @@ public:
 
     /* This gets called when property value changes
      */
-    virtual void onpropertychange(
+    virtual eStatus onpropertychange(
         os_int propertynr,
         eVariable *x,
         os_int flags)
@@ -106,7 +106,12 @@ public:
                 else if (f < 80) setpropertys(EMYCLASSP_OPINION, "ok");
                 else setpropertys(EMYCLASSP_OPINION, "hot");
                 break;
+
+            default:
+                return ESTATUS_FAILED;
         }
+
+        return ESTATUS_SUCCESS;
     }
 };
 
@@ -116,7 +121,7 @@ public:
 
   @brief Property example 3.
 
-  The property_example_3() function sets up new class eMyClass and uses for Celcius
+  The property_example_3() function sets up new class p3MyClass and uses for Celcius
   to Fahrenheit conversion. Purpose of this is to show how class can react to property changes.
 
   @return  None.
@@ -125,15 +130,15 @@ public:
 */
 void property_example_3()
 {
-    eMyClass *converter;
+    p3MyClass *converter;
     eVariable v, u;
     os_double f;
 
-    /* Adds the eMyClass to class list and creates property set for the class.
+    /* Adds the p3MyClass to class list and creates property set for the class.
      */
-    eMyClass::setupclass();
+    p3MyClass::setupclass();
 
-    converter = new eMyClass();
+    converter = new p3MyClass();
 
     f = converter->propertyd(EMYCLASSP_FAHRENHEIT);
     converter->propertyv(EMYCLASSP_OPINION, &v);

@@ -1,10 +1,10 @@
 /**
 
-  @file    eobjects_endpoint_example1.cpp
+  @file    endpoint1.cpp
   @brief   Example code about connecting two processes.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    28.12.2016
+  @date    10.10.2020
 
   This demonstrates creating an end point which listens for socket connections.
 
@@ -16,8 +16,7 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "eobjects/extensions/socket/esocket.h"
-#include "eobjects_endpoint_example.h"
+#include "endpoint.h"
 #include <stdio.h>
 
 /* Every class needs to have unique class identifier (classid). Class identifier is is 32 bit
@@ -25,7 +24,7 @@
  */
 #define MY_CLASS_ID_1 (ECLASSID_APP_BASE + 1)
 
-/* Enumeration of eMyClass1 properties. Normally these would be in header file.
+/* Enumeration of epMyClass properties. Normally these would be in header file.
  */
 #define EMYCLASS1P_A 10
 #define EMYCLASS1P_B 20
@@ -43,12 +42,12 @@ static const os_char emyclass1p_b[] = "B";
 
 ****************************************************************************************************
 */
-class eMyClass1 : public eThread
+class epMyClass : public eThread
 {
 public:
     /* Constructor.
      */
-    eMyClass1(
+    epMyClass(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
@@ -64,20 +63,20 @@ public:
         const os_int cls = MY_CLASS_ID_1;
 
         os_lock();
-        eclasslist_add(cls, (eNewObjFunc)newobj, "eMyClass1");
-        addproperty(cls, EMYCLASS1P_A, emyclass1p_a, EPRO_PERSISTENT, "A");
-        addproperty(cls, EMYCLASS1P_B, emyclass1p_b, EPRO_PERSISTENT, "B");
+        eclasslist_add(cls, (eNewObjFunc)newobj, "epMyClass");
+        addproperty(cls, EMYCLASS1P_A, emyclass1p_a, "A");
+        addproperty(cls, EMYCLASS1P_B, emyclass1p_b, "B");
         os_unlock();
     }
 
     /* Static constructor function for generating instance by class list.
      */
-    static eMyClass1 *newobj(
+    static epMyClass *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eMyClass1(parent, id, flags);
+        return new epMyClass(parent, id, flags);
     }
 
     /* Get class identifier.
@@ -112,7 +111,7 @@ public:
 
     /* This gets called when property value changes
      */
-    virtual void onpropertychange(
+    virtual eStatus onpropertychange(
         os_int propertynr,
         eVariable *x,
         os_int flags)
@@ -126,7 +125,12 @@ public:
             case EMYCLASS1P_B:
                 printf ("1: GOT B \'%s\'\n", x->gets());
                 break;
+
+            default:
+                return ESTATUS_FAILED;
         }
+
+        return ESTATUS_SUCCESS;
     }
 };
 
@@ -150,12 +154,12 @@ void endpoint_example_1()
 
     /* Set up eSocket and my own classes for use.
      */
-    eSocket::setupclass();
-    eMyClass1::setupclass();
+    eOsStream::setupclass();
+    epMyClass::setupclass();
 
-    /* Create and start class eMyClass1 as thread named "myclass1".
+    /* Create and start class epMyClass as thread named "myclass1".
      */
-    t = new eMyClass1();
+    t = new epMyClass();
     t->addname("myclass1", ENAME_PROCESS_NS);
 t->setpropertys(EMYCLASS1P_A, "Nasse");
     t->timer(4500);

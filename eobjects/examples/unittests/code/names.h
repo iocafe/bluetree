@@ -1,6 +1,6 @@
 /**
 
-  @file    threads.h
+  @file    names.h
   @brief   Example code about naming objects.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -16,5 +16,4 @@
 ****************************************************************************************************
 */
 
-void thread_example_1();
-void thread_example_2();
+void names_example1();

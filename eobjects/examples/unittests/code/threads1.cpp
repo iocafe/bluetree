@@ -1,22 +1,22 @@
 /**
 
-  @file    eobjects_thread_example.cpp
+  @file    thread1.cpp
   @brief   Example code about naming objects.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    28.12.2016
+  @date    10.10.2020
 
   This example demonstrates how to create a thread and sen messages to it.
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "eobjects_thread_example.h"
+#include "threads.h"
 
 /* Purpose of a message is specified by 32 bit command. Negative command identifiers are
    reserved for the eobject library related, but positive ones can be used freely.
@@ -60,7 +60,7 @@ class eMyThread : public eThread
     }
 
     virtual void onmessage(
-        eEnvelope *envelope) 
+        eEnvelope *envelope)
     {
         /* If at final destination for the message.
          */
@@ -91,8 +91,8 @@ class eMyThread : public eThread
 */
 void thread_example_1()
 {
-	eContainer
-		root;
+    eContainer
+        root;
 
     eVariable
         *txt;
@@ -100,13 +100,13 @@ void thread_example_1()
     eThread
         *t;
 
-    eThreadHandle 
+    eThreadHandle
         thandle;
 
     /* Create and start thread named "worker".
      */
     t = new eMyThread();
-	t->addname("worker", ENAME_PROCESS_NS);
+    t->addname("worker", ENAME_PROCESS_NS);
     t->start(&thandle); /* After this t pointer is useless */
 
     for (os_int i = 0; i<1000; i++)
