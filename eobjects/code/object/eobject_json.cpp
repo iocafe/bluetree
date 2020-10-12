@@ -216,6 +216,8 @@ eStatus eObject::json_write(
 
     /* Write content (children, etc)
      */
+    if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma1)) goto failed;
+    if (json_puts(stream, "\"content\": ")) goto failed;
     if (json_writer(stream, sflags, indent)) goto failed;
 
     /* Write terminating '}'
@@ -356,7 +358,7 @@ eStatus eObject::json_puts(
     const os_char *str)
 {
     os_memsz len;
-    len = os_strlen(str);
+    len = os_strlen(str) - 1;
 
     return stream->write(str, len);
 }

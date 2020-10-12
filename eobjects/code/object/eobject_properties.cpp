@@ -738,7 +738,6 @@ void eObject::setpropertyo(
     eObject *x,
     os_boolean adopt_x)
 {
-
     eVariable v;
     v.seto(x, adopt_x);
     setpropertyv(propertynr, &v);

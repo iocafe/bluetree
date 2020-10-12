@@ -16,6 +16,13 @@
 #include "eobjects.h"
 
 
+/* Matrix property names.
+ */
+const os_char
+    emtxp_datatype[] = "type",
+    emtxp_nrows[] = "nrows",
+    emtxp_ncolumns[] = "ncolumns";
+
 /* Approximate size for one eBuffer, adjusted to memory allocation block.
  */
 #define OEMATRIX_APPROX_BUF_SZ 256
@@ -41,13 +48,7 @@ static const os_int emtx_no_long_value = OS_LONG_MIN;
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eMatrix::eMatrix(
@@ -65,18 +66,14 @@ eMatrix::eMatrix(
     /** Initial size is 0, 0
      */
     m_nrows = m_ncolumns = 0;
+
+    m_own_change = 0;
 }
 
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eMatrix::~eMatrix()
@@ -106,6 +103,10 @@ void eMatrix::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eMatrix");
+    addproperty (cls, EMTXP_DATATYPE, emtxp_datatype, "data type", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EMTXP_NROWS, emtxp_nrows, "nro rows", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EMTXP_NCOLUMNS, emtxp_ncolumns, "nro columns", EPRO_PERSISTENT|EPRO_SIMPLE);
+    propertysetdone(cls);
     os_unlock();
 
     /* Test memory manager and eBuffer implementation, how much memory we
@@ -162,6 +163,106 @@ eObject *eMatrix::clone(
 
     delete tmp;
     return clonedobj;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Called to inform the class about property value change (override).
+
+  The onpropertychange() function is called when class'es property changes, unless the
+  property is flagged with EPRO_NOONPRCH.
+  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
+  in class members and and return it when simpleproperty() is called.
+
+  Notice for change logging: Previous value is still valid when this function is called.
+  You can get the old value by calling property() function inside onpropertychange()
+  function.
+
+  @param   propertynr Property number of changed property.
+  @param   x Variable containing the new value.
+  @param   flags
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
+           indicate that there was no property with given property number.
+
+****************************************************************************************************
+*/
+eStatus eMatrix::onpropertychange(
+    os_int propertynr,
+    eVariable *x,
+    os_int flags)
+{
+    os_long v;
+
+    switch (propertynr)
+    {
+        case EMTXP_DATATYPE:
+            if (m_own_change == 0) {
+                v = x->getl();
+                resize((osalTypeId)v, m_nrows, m_ncolumns);
+            }
+            break;
+
+        case EMTXP_NROWS:
+            if (m_own_change == 0) {
+                v = x->getl();
+                resize(m_datatype, v, m_ncolumns);
+            }
+            break;
+
+        case EMTXP_NCOLUMNS:
+            if (m_own_change == 0) {
+                v = x->getl();
+                resize(m_datatype, m_nrows, v);
+            }
+            break;
+
+        default:
+            return eObject::onpropertychange(propertynr, x, flags);
+    }
+
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get value of simple property (override).
+
+  The simpleproperty() function stores current value of simple property into variable x.
+
+  @param   propertynr Property number to get.
+  @param   x Variable into which to store the property value.
+  @return  If property with property number was stored in x, the function returns
+           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
+           given number was not among simple properties.
+
+****************************************************************************************************
+*/
+eStatus eMatrix::simpleproperty(
+    os_int propertynr,
+    eVariable *x)
+{
+    switch (propertynr)
+    {
+        case EMTXP_DATATYPE:
+            x->setl(m_datatype);
+            break;
+
+        case EMTXP_NROWS:
+            x->setl(m_nrows);
+            break;
+
+        case EMTXP_NCOLUMNS:
+            x->setl(m_ncolumns);
+            break;
+
+        default:
+            return eObject::simpleproperty(propertynr, x);
+    }
+    return ESTATUS_SUCCESS;
 }
 
 
@@ -572,7 +673,8 @@ eStatus eMatrix::reader(
 
                 case OS_FLOAT:
                     if (stream->getf(&f)) goto failed;
-                    setd(row, column, f);               // SHOULD SETF BE IMPLEMETED
+                    /* TO DO: SHOULD SETF BE IMPLEMETED TO MINIMIZE DOUBLE-FLOAT CONV RUNDING ERRORS? */
+                    setd(row, column, f);
                     break;
 
                 case OS_DOUBLE:
@@ -587,7 +689,8 @@ eStatus eMatrix::reader(
 
                 case OS_OBJECT:
                     o = read(stream, sflags);
-                    seto(row, column, o);  // MONOR OPTIMIZATION: HERE WE COULD ADOPT THE CONTENT, NOT COPY
+                    /* TO DO: MINOR SPEED OPTIMIZATION: HERE WE COULD ADOPT THE CONTENT, NOT COPY */
+                    seto(row, column, o);
                     delete o;
                     break;
             }
@@ -607,6 +710,91 @@ eStatus eMatrix::reader(
 failed:
     return ESTATUS_READING_OBJ_FAILED;
 }
+
+
+#if E_SUPPROT_JSON
+/**
+****************************************************************************************************
+
+  @brief Write matrix specific content to stream as JSON.
+
+  The eMatrix::json_writer() function writes class specific object content to stream as JSON.
+
+  @param  stream The stream to write to.
+  @param  sflags Serialization flags. Typically EOBJ_SERIALIZE_DEFAULT.
+  @param  indent Indentation depth, 0, 1... Writes 2x this spaces at beginning of a line.
+
+  @return If successfull the function returns ESTATUS_SUCCESS (0). If writing object to stream
+          fails, value ESTATUS_WRITING_OBJ_FAILED is returned. Assume that all nonzero values
+          indicate an error.
+
+****************************************************************************************************
+*/
+eStatus eMatrix::json_writer(
+    eStream *stream,
+    os_int sflags,
+    os_int indent)
+{
+    os_boolean comma1, comma2;
+    eVariable tmp;
+    os_int row, column, type_id;
+
+    if (json_indent(stream, indent++, EJSON_NO_NEW_LINE /* , &comma */)) goto failed;
+    if (json_puts(stream, "[")) goto failed;
+    comma1 = OS_FALSE;
+    for (row = 0; row < m_nrows; row++)
+    {
+        if (comma1) {
+            if (json_puts(stream, ",")) goto failed;
+        }
+        comma1 = OS_TRUE;
+
+        if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE /* , &comma */)) goto failed;
+        if (json_puts(stream, "[")) goto failed;
+        comma2 = OS_FALSE;
+
+        for (column = 0; column < m_ncolumns; column++)
+        {
+            if (comma2) {
+                if (json_puts(stream, ",")) goto failed;
+            }
+            comma2 = OS_TRUE;
+
+            if (getv(row, column, &tmp))
+            {
+                type_id = tmp.type();
+                if (OSAL_IS_BOOLEAN_TYPE(type_id) ||
+                    OSAL_IS_INTEGER_TYPE(type_id) ||
+                    OSAL_IS_FLOAT_TYPE(type_id))
+                {
+                    if (json_puts(stream, tmp.gets())) goto failed;
+                }
+                else if (type_id == OS_OBJECT)
+                {
+                    if (json_putqs(stream, "?")) goto failed;
+                }
+                else
+                {
+                    if (json_putqs(stream, tmp.gets())) goto failed;
+                }
+            }
+            else {
+                if (json_putqs(stream, "")) goto failed;
+            }
+        }
+
+        if (json_puts(stream, "]")) goto failed;
+    }
+
+    if (json_indent(stream, --indent, EJSON_NEW_LINE_BEFORE /* , &comma */)) goto failed;
+    if (json_puts(stream, "]")) goto failed;
+
+    return ESTATUS_SUCCESS;
+
+failed:
+    return ESTATUS_FAILED;
+}
+#endif
 
 
 /* Allocate matrix.
@@ -642,26 +830,10 @@ void eMatrix::allocate(
             break;
     }
 
-    /* If we have existing matrix, resize the matrix.
+    /* Set data type, element size and matrix dimensions.
+       If we have existing matrix, resize the matrix.
      */
-    if (m_nrows && m_ncolumns) {
-        resize(datatype, nrows, ncolumns);
-    }
-
-    /* Otherwise set data type, element size and matrix dimensions
-     */
-    else {
-        m_datatype = datatype;
-        m_typesz = m_elemsz = typesz(datatype);
-        if (m_datatype == OS_OBJECT ||
-            m_datatype == OS_DOUBLE ||
-            m_datatype == OS_FLOAT)
-        {
-            m_elemsz += sizeof(os_char);
-        }
-        m_nrows = nrows;
-        m_ncolumns= ncolumns;
-    }
+    resize(datatype, nrows, ncolumns);
 }
 
 
@@ -822,12 +994,12 @@ void eMatrix::setl(
             break;
 
         case OS_DEC01:
-            ss = (os_short)(100 * x);
+            ss = (os_short)(10 * x);
             os_memcpy(dataptr, &ss, sizeof(os_short));
             break;
 
         case OS_DEC001:
-            ss = (os_short)(1000 * x);
+            ss = (os_short)(100 * x);
             os_memcpy(dataptr, &ss, sizeof(os_short));
             break;
 
@@ -915,12 +1087,12 @@ void eMatrix::setd(
             break;
 
         case OS_DEC01:
-            ss = eround_double_to_short(100.0 * x);
+            ss = eround_double_to_short(10.0 * x);
             os_memcpy(dataptr, &ss, sizeof(os_short));
             break;
 
         case OS_DEC001:
-            ss = eround_double_to_short(1000.0 * x);
+            ss = eround_double_to_short(100.0 * x);
             os_memcpy(dataptr, &ss, sizeof(os_short));
             break;
 
@@ -1211,13 +1383,13 @@ os_boolean eMatrix::getv(
         case OS_DEC01:
             os_memcpy(&s, dataptr, sizeof(os_short));
             if (s == OS_SHORT_MIN) goto return_empty;
-            x->setd(0.01 * s);
+            x->setd(0.1 * s);
             break;
 
         case OS_DEC001:
             os_memcpy(&s, dataptr, sizeof(os_short));
             if (s == OS_SHORT_MIN) goto return_empty;
-            x->setd(0.001 * s);
+            x->setd(0.01 * s);
             break;
 
         case OS_FLOAT:
@@ -1330,13 +1502,13 @@ os_long eMatrix::getl(
         case OS_DEC01:
             os_memcpy(&s, dataptr, sizeof(os_short));
             if (s == OS_SHORT_MIN) goto return_empty;
-            l = eround_double_to_long(0.01 * s);
+            l = eround_double_to_long(0.1 * s);
             break;
 
         case OS_DEC001:
             os_memcpy(&s, dataptr, sizeof(os_short));
             if (s == OS_SHORT_MIN) goto return_empty;
-            l = eround_double_to_long(0.001 * s);
+            l = eround_double_to_long(0.01 * s);
             break;
 
         case OS_FLOAT:
@@ -1454,13 +1626,13 @@ os_double eMatrix::getd(
         case OS_DEC01:
             os_memcpy(&s, dataptr, sizeof(os_short));
             if (s == OS_SHORT_MIN) goto return_empty;
-            d = 0.01 * s;
+            d = 0.1 * s;
             break;
 
         case OS_DEC001:
             os_memcpy(&s, dataptr, sizeof(os_short));
             if (s == OS_SHORT_MIN) goto return_empty;
-            d = 0.001 * s;
+            d = 0.01 * s;
             break;
 
         case OS_FLOAT:
@@ -1587,8 +1759,22 @@ void eMatrix::resize(
     }
 
     m_datatype = datatype;
+    m_typesz = typesz(m_datatype);
+    m_elemsz = m_typesz;
+    if (m_datatype == OS_OBJECT ||
+        m_datatype == OS_DOUBLE ||
+        m_datatype == OS_FLOAT)
+    {
+        m_elemsz += sizeof(os_char);
+    }
     m_nrows = nrows;
-    m_ncolumns = ncolumns;
+    m_ncolumns =ncolumns;
+
+    m_own_change++;
+    setpropertyl(EMTXP_DATATYPE, m_datatype);
+    setpropertyl(EMTXP_NROWS, m_nrows);
+    setpropertyl(EMTXP_NCOLUMNS, m_ncolumns);
+    m_own_change--;
 }
 
 
@@ -1736,8 +1922,17 @@ eBuffer *eMatrix::getbuffer(
     return buffer;
 }
 
-/* Free memory buffer and any objects and strings allocated for it.
- */
+
+/**
+****************************************************************************************************
+
+  @brief Free buffer and any objects/strings allocated for it.
+
+  The eMatrix::releasebuffer function...
+  @param  buffer_Pointer to buffer to free.
+
+****************************************************************************************************
+*/
 void eMatrix::releasebuffer(
     eBuffer *buffer)
 {
@@ -1775,9 +1970,19 @@ void eMatrix::releasebuffer(
 }
 
 
-/* Release element memory allocated for matrix element (if any) and mark
-   matrix value empty.
- */
+/**
+****************************************************************************************************
+
+  @brief Make matrix element empty and release memory associated with it, if any.
+
+  Release element memory allocated for matrix element (if any) and mark
+  matrix value empty.
+
+  @param  dataptr
+  @param  typeptr
+
+****************************************************************************************************
+*/
 void eMatrix::emptyobject(
     os_char *dataptr,
     os_char *typeptr)
@@ -1839,8 +2044,19 @@ void eMatrix::emptyobject(
     }
 }
 
-/* How many bytes are needed for matrix datatype
- */
+
+/**
+****************************************************************************************************
+
+  @brief Get matrix element size in byte.
+
+  How many bytes are needed in buffer to store this data type.
+
+  @param  datatype Data type like OS_LONG, OS_DOUBLE, OS_OBJECT, etc.
+  @param  Number of bytes needed in buffer.
+
+****************************************************************************************************
+*/
 os_short eMatrix::typesz(
     osalTypeId datatype)
 {
@@ -1849,8 +2065,18 @@ os_short eMatrix::typesz(
 }
 
 
-/* How many element we can fit in memory block?
- */
+/**
+****************************************************************************************************
+
+  @brief How many element we can fit in memory buffer?
+
+  How many matrix element are stored in one buffer. This depends on buffer allocation size
+  and number of bytes needed to store the data and is there element specific type flag.
+
+  @param  Number of elements what can ne stored in one buffer.
+
+****************************************************************************************************
+*/
 os_int eMatrix::elems_per_block()
 {
     return eglobal->matrix_buffer_allocation_sz/m_elemsz;

@@ -1,12 +1,10 @@
 /**
 
   @file    matrix.cpp
-  @brief   Example code about using eobjects variable class.
+  @brief   Storing data as matrix.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
-
-  This example demonstrates how to use dynamically typed variable class eVariable.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -21,15 +19,44 @@
 void matrix_example1()
 {
     eMatrix mtx;
+    eVariable value;
     os_int i, x, y;
+    os_char nbuf[OSAL_NBUF_SZ];
 
-    mtx.allocate(OS_INT, 100, 100);
+    const os_int w = 8, h = 12;
 
-    for (i = 0; i<1000; i++) {
-        x = osal_rand(0, 100);
-        y = osal_rand(0, 100);
-        mtx.setl(y, x, osal_rand(0, 100));
+    /* Allocating matrix in advance is optional, but will make memory allocation more efficient.
+       Data type: OS_FLOAT matrix can store floating point number in each element.
+       Specifying data type allows more efficient storage and serialization. Empty values
+       are marked with "" in JSON.
+     */
+    mtx.allocate(OS_FLOAT, h, w);
+    for (i = 0; i<200; i++) {
+        x = osal_rand(0, w - 1);
+        y = osal_rand(0, h - 1);
+        mtx.setd(y, x, 0.01 * osal_rand(0, 1000));
     }
 
+    osal_console_write("Matrix as JSON:\n\n");
     mtx.print_json();
+
+    /* Set up matrix to store any data type and store strings to it. Data type OS_OBJECT
+       is the default data type if mtx.allocate() is not called: Each element has it's
+       own type and data types can be mixed within matrix.
+     */
+    mtx.allocate(OS_OBJECT, h, w);
+    for (i = 0; i<1000; i++) {
+        x = osal_rand(0, w - 1);
+        y = osal_rand(0, h - 1);
+        osal_int_to_str(nbuf, sizeof(nbuf), osal_rand(0, 100));
+
+        value = "s";
+        value += nbuf;
+        mtx.setv(y, x, &value);
+    }
+
+    osal_console_write("\n\nMatrix as JSON:\n\n");
+    mtx.print_json();
+
+    osal_console_write("\n");
 }

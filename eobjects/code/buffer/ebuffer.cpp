@@ -432,7 +432,7 @@ eStatus eBuffer::writechar(
 
     /* Save the character.
      */
-    m_ptr[m_used] = (os_char)c;
+    m_ptr[m_used++] = (os_char)c;
 
     return ESTATUS_SUCCESS;
 }

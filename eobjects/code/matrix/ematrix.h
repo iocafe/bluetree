@@ -20,15 +20,26 @@
 
 class eBuffer;
 
-/* Cache which can be used to avoid looking buffer again.
- */
-typedef struct eMatrixCache
-{
-    eBuffer *buffer;
 
-    os_int buffer_nr;
-}
-eMatrixCache;
+/**
+****************************************************************************************************
+  Defines
+****************************************************************************************************
+*/
+/*@{*/
+
+/* Matrix property numbers.
+ */
+#define EMTXP_DATATYPE 20
+#define EMTXP_NROWS 21
+#define EMTXP_NCOLUMNS 22
+
+/* Matrix property names.
+ */
+extern const os_char
+    emtxp_datatype[],
+    emtxp_nrows[],
+    emtxp_ncolumns[];
 
 
 /**
@@ -100,6 +111,19 @@ public:
         return new eMatrix(parent, id, flags);
     }
 
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
+    /* Get value of simple property.
+     */
+    virtual eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
+
     /* Write matrix content to stream.
      */
     virtual eStatus writer(
@@ -113,13 +137,12 @@ public:
         os_int flags);
 
 #if E_SUPPROT_JSON
-    /* Write set to stream as JSON.
+    /* Write matrix specific content to stream as JSON.
      */
-/*     eStatus json_writer(
+    virtual eStatus json_writer(
         eStream *stream,
         os_int sflags,
         os_int indent);
- */
 #endif
 
     /*@}*/
@@ -368,6 +391,10 @@ protected:
     /** Number of columns.
      */
     os_int m_ncolumns;
+
+    /** To prevent recursive resizing.
+     */
+    os_int m_own_change;
 
     /*@}*/
 };
