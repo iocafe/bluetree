@@ -23,6 +23,8 @@ void matrix_example1()
     eMatrix mtx;
     os_int i, x, y;
 
+    mtx.allocate(OS_INT, 100, 100);
+
     for (i = 0; i<1000; i++) {
         x = osal_rand(0, 100);
         y = osal_rand(0, 100);

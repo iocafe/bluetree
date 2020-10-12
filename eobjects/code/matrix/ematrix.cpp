@@ -18,7 +18,12 @@
 
 /* Approximate size for one eBuffer, adjusted to memory allocation block.
  */
-#define OEMATRIX_APPROX_BUF_SZ 120
+#define OEMATRIX_APPROX_BUF_SZ 256
+
+/* Flags for getptrs() function.
+ */
+#define EMATRIX_ALLOCATE_IF_NEEDED 1
+#define EMATRIX_CLEAR_ELEMENT 2
 
 typedef union
 {
@@ -28,6 +33,10 @@ typedef union
     eObject *o;
 }
 eMatrixDataItem;
+
+static const os_short emtx_no_short_value = OS_SHORT_MIN;
+static const os_int emtx_no_int_value = OS_INT_MIN;
+static const os_int emtx_no_long_value = OS_LONG_MIN;
 
 
 /**
@@ -47,17 +56,15 @@ eMatrix::eMatrix(
     os_int flags)
     : eTable(parent, id, flags)
 {
-    /** Default data type is OS_OBJECT.
+    /** Initial data type is OS_OBJECT.
      */
     m_datatype = OS_OBJECT;
     m_typesz = typesz(m_datatype);
     m_elemsz = m_typesz + sizeof(os_char);
 
-    /** Clear rest of member variables.
+    /** Initial size is 0, 0
      */
     m_nrows = m_ncolumns = 0;
-    m_buf_alloc_sz = 0;
-    // per_block = 0;
 }
 
 
@@ -87,6 +94,8 @@ eMatrix::~eMatrix()
   new objects dynamically by class identifier, which is used for serialization reader()
   functions.
 
+  This needs to be called after eBuffer:setupclass(), there is a dependency in setup.
+
 ****************************************************************************************************
 */
 void eMatrix::setupclass()
@@ -98,6 +107,14 @@ void eMatrix::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eMatrix");
     os_unlock();
+
+    /* Test memory manager and eBuffer implementation, how much memory we
+     * actually get when we request OEMATRIX_APPROX_BUF_SZ bytes. It can be significantly
+     * more and we do not want to leave it unused.
+     */
+    eBuffer buf;
+    buf.allocate(OEMATRIX_APPROX_BUF_SZ);
+    eglobal->matrix_buffer_allocation_sz = buf.allocated();
 }
 
 
@@ -171,9 +188,6 @@ eStatus eMatrix::writer(
 {
     eBuffer *buffer;
     os_char *dataptr, *typeptr;
-    os_long l;
-    os_double d;
-    os_float f;
     e_oid id;
     os_int first_elem_ix, elem_ix, first_full_ix, full_count, i, per_block;
     os_boolean prev_isempty, isempty;
@@ -237,33 +251,26 @@ eStatus eMatrix::writer(
                     break;
 
                 case OS_CHAR:
-                    l = *((os_char*)dataptr);
-                    isempty = (os_boolean)(l == OS_CHAR_MAX);
+                    isempty = (os_boolean)((os_char*)dataptr == OS_CHAR_MIN);
                     break;
 
                 case OS_SHORT:
-                    l = *((os_short*)dataptr);
-                    isempty = (os_boolean)(l == OS_SHORT_MAX);
+                case OS_DEC01:
+                case OS_DEC001:
+                    isempty = !os_memcmp(dataptr, &emtx_no_short_value, sizeof(os_short));
                     break;
 
                 case OS_INT:
-                    l = *((os_int*)dataptr);
-                    isempty = (os_boolean)(l == OS_INT_MAX);
+                    isempty = !os_memcmp(dataptr, &emtx_no_int_value, sizeof(os_int));
                     break;
 
                 case OS_LONG:
-                    l = *((os_long*)dataptr);
-                    isempty = (os_boolean)(l == OS_INT_MAX);
+                    isempty = !os_memcmp(dataptr, &emtx_no_long_value, sizeof(os_long));
                     break;
 
                 case OS_FLOAT:
-                    f = *((os_float*)dataptr);
-                    isempty = (os_boolean)(f == OS_FLOAT_MAX);
-                    break;
-
                 case OS_DOUBLE:
-                    d = *((os_double*)dataptr);
-                    isempty = (os_boolean)(d == OS_DOUBLE_MAX);
+                    isempty = (*typeptr == OS_UNDEFINED_TYPE);
                     break;
 
                 default:
@@ -330,14 +337,15 @@ eStatus eMatrix::elementwrite(
     os_int sflags)
 {
     eBuffer *buffer = OS_NULL;
-    eMatrixDataItem *mo;
+    eMatrixDataItem mo;
     eObject *o;
     os_char *s, *dataptr, *typeptr;
     os_long l;
     os_double d;
     os_float f;
     osalTypeId datatype;
-    os_int i, prev_buffer_nr, buffer_nr, elem_ix, per_block;
+    os_int i, prev_buffer_nr, buffer_nr, elem_ix, per_block, ii;
+    os_short ss;
 
     if (stream->putl(first_full_ix)) goto failed;
     if (stream->putl(full_count)) goto failed;
@@ -362,33 +370,33 @@ eStatus eMatrix::elementwrite(
             prev_buffer_nr = buffer_nr;
         }
 
-//        dataptr = buffer->ptr();
-//        typeptr = dataptr + per_block * m_typesz;          HERE IS SOMETHING WERY WRONG
+        dataptr = buffer->ptr();
+        typeptr = dataptr + per_block * m_typesz;
 
         datatype = OS_UNDEFINED_TYPE;
         switch (m_datatype)
         {
             case OS_OBJECT:
-                mo = ((eMatrixDataItem*)dataptr) + i;
+                os_memcpy(&mo, dataptr + sizeof(eMatrixDataItem) * i, sizeof(eMatrixDataItem));
                 switch (typeptr[i])
                 {
                     case OS_LONG:
-                        l = mo->l;
+                        l = mo.l;
                         datatype = OS_LONG;
                         break;
 
                     case OS_DOUBLE:
-                        l = mo->l;
+                        d = mo.l;
                         datatype = OS_DOUBLE;
                         break;
 
                     case OS_STR:
-                        s = mo->s;
+                        s = mo.s;
                         datatype = OS_STR;
                         break;
 
                     case OS_OBJECT:
-                        o = mo->o;
+                        o = mo.o;
                         datatype = OS_OBJECT;
                         break;
 
@@ -403,27 +411,31 @@ eStatus eMatrix::elementwrite(
                 break;
 
             case OS_SHORT:
-                l = *((os_short*)dataptr);
+            case OS_DEC01:
+            case OS_DEC001:
+                os_memcpy(&ss, dataptr, sizeof(os_short));
+                l = ss;
                 datatype = OS_LONG;
                 break;
 
             case OS_INT:
-                l = *((os_int*)dataptr);
+                os_memcpy(&ii, dataptr, sizeof(os_int));
+                l = ii;
                 datatype = OS_LONG;
                 break;
 
             case OS_LONG:
-                l = *((os_long*)dataptr);
+                os_memcpy(&l, dataptr, sizeof(os_long));
                 datatype = OS_LONG;
                 break;
 
             case OS_FLOAT:
-                f = *((os_float*)dataptr);
+                os_memcpy(&f, dataptr, sizeof(os_float));
                 datatype = OS_FLOAT;
                 break;
 
             case OS_DOUBLE:
-                d = *((os_double*)dataptr);
+                os_memcpy(&d, dataptr, sizeof(os_double));
                 datatype = OS_DOUBLE;
                 break;
 
@@ -465,7 +477,6 @@ eStatus eMatrix::elementwrite(
                 break;
         }
     }
-
 
     /* Object succesfully written.
      */
@@ -576,7 +587,7 @@ eStatus eMatrix::reader(
 
                 case OS_OBJECT:
                     o = read(stream, sflags);
-                    seto(row, column, o);  // HERE WE SHOULD USE ADOPT
+                    seto(row, column, o);  // MONOR OPTIMIZATION: HERE WE COULD ADOPT THE CONTENT, NOT COPY
                     delete o;
                     break;
             }
@@ -603,8 +614,7 @@ failed:
 void eMatrix::allocate(
     osalTypeId datatype,
     os_int nrows,
-    os_int ncolumns,
-    os_int mflags)
+    os_int ncolumns)
 {
     /* Make sure that data type is known.
      */
@@ -615,41 +625,55 @@ void eMatrix::allocate(
         case OS_SHORT:
         case OS_INT:
         case OS_LONG:
+        case OS_DEC01:
+        case OS_DEC001:
         case OS_FLOAT:
         case OS_DOUBLE:
             break;
+
+        case OS_BOOLEAN: datatype = OS_CHAR; break;
+        case OS_UCHAR: datatype = OS_SHORT; break;
+        case OS_USHORT: datatype = OS_INT; break;
+        case OS_UINT: datatype = OS_LONG; break;
+        case OS_INT64: datatype = OS_LONG; break;
 
         default:
             datatype = OS_OBJECT;
             break;
     }
 
-    /* If we have previous data with different data type, clear it from memory.
+    /* If we have existing matrix, resize the matrix.
      */
-    if (datatype != m_datatype && m_nrows && m_ncolumns)
-    {
-        clear();
+    if (m_nrows && m_ncolumns) {
+        resize(datatype, nrows, ncolumns);
     }
 
-
-/* Old content not handled */
-
-    /* Save data type and element size. Elements per block has not been set yet
+    /* Otherwise set data type, element size and matrix dimensions
      */
-    m_datatype = datatype;
-    m_typesz = m_elemsz = typesz(datatype);
-    if (m_datatype == OS_OBJECT) m_elemsz += sizeof(os_char);
-
-    // per_block = 0;
-
-    /* Resize the matrix. This doesn't allocate any memory yet, unless data can
-       fit into small buffer.
-     */
-    resize(nrows, ncolumns);
+    else {
+        m_datatype = datatype;
+        m_typesz = m_elemsz = typesz(datatype);
+        if (m_datatype == OS_OBJECT ||
+            m_datatype == OS_DOUBLE ||
+            m_datatype == OS_FLOAT)
+        {
+            m_elemsz += sizeof(os_char);
+        }
+        m_nrows = nrows;
+        m_ncolumns= ncolumns;
+    }
 }
 
-/* Release all allocated data, empty the matrix.
- */
+
+/**
+****************************************************************************************************
+
+  @brief Clear matrix.
+
+  The eMatrix::clear releases all data allocated for matrix and sets matrix size to 0, 0.
+
+****************************************************************************************************
+*/
 void eMatrix::clear()
 {
     eBuffer *buffer, *nextbuffer;
@@ -704,11 +728,22 @@ void eMatrix::setv(
      */
     switch (x->type())
     {
+        case OS_BOOLEAN:
+        case OS_CHAR:
+        case OS_UCHAR:
+        case OS_SHORT:
+        case OS_USHORT:
+        case OS_INT:
+        case OS_UINT:
         case OS_LONG:
+        case OS_INT64:
             setl(row, column, x->getl());
             break;
 
+        case OS_FLOAT:
         case OS_DOUBLE:
+        case OS_DEC01:
+        case OS_DEC001:
             setd(row, column, x->getd());
             break;
 
@@ -718,10 +753,6 @@ void eMatrix::setv(
 
         case OS_OBJECT:
             seto(row, column, x->geto());
-            break;
-
-        case OS_POINTER:
-            clear(row, column);
             break;
 
         default:
@@ -754,6 +785,11 @@ void eMatrix::setl(
     os_long x)
 {
     os_char *dataptr, *typeptr;
+    os_short ss;
+    os_int ii;
+    os_float ff;
+    os_double dd;
+    eMatrixDataItem mo;
 
     /* Make sure that row and column are not negative.
      */
@@ -762,38 +798,55 @@ void eMatrix::setl(
     /* Get pointer to data and if matrix data type is OS_OBJECT, also to
        data type of item.
      */
-    dataptr = getptrs(row, column, &typeptr, OS_TRUE);
+    dataptr = getptrs(row, column, &typeptr, EMATRIX_ALLOCATE_IF_NEEDED|EMATRIX_CLEAR_ELEMENT);
     if (dataptr == OS_NULL) return;
 
     switch (m_datatype)
     {
-        case OS_OBJECT:
-            ((eMatrixDataItem*)dataptr)->l = x;
-            *typeptr = OS_LONG;
-            break;
-
         case OS_CHAR:
             *((os_char*)dataptr) = (os_char)x;
             break;
 
         case OS_SHORT:
-            *((os_short*)dataptr) = (os_short)x;
+            ss = (os_short)x;
+            os_memcpy(dataptr, &ss, sizeof(os_short));
             break;
 
         case OS_INT:
-            *((os_int*)dataptr) = (os_int)x;
+            ii = (os_int)x;
+            os_memcpy(dataptr, &ii, sizeof(os_int));
             break;
 
         case OS_LONG:
-            *((os_int*)dataptr) = (os_int)x;
+            os_memcpy(dataptr, &x, sizeof(os_long));
+            break;
+
+        case OS_DEC01:
+            ss = (os_short)(100 * x);
+            os_memcpy(dataptr, &ss, sizeof(os_short));
+            break;
+
+        case OS_DEC001:
+            ss = (os_short)(1000 * x);
+            os_memcpy(dataptr, &ss, sizeof(os_short));
             break;
 
         case OS_FLOAT:
-            *((os_float*)dataptr) = (os_float)x;
+            ff = (os_float)x;
+            os_memcpy(dataptr, &ff, sizeof(os_float));
+            *typeptr = OS_FLOAT;
             break;
 
         case OS_DOUBLE:
-            *((os_double*)dataptr) = (os_double)x;
+            dd = (os_double)x;
+            os_memcpy(dataptr, &dd, sizeof(os_double));
+            *typeptr = OS_DOUBLE;
+            break;
+
+        case OS_OBJECT:
+            mo.l = x;
+            os_memcpy(dataptr, &mo, sizeof(eMatrixDataItem));
+            *typeptr = OS_LONG;
             break;
 
         default:
@@ -824,6 +877,11 @@ void eMatrix::setd(
     os_double x)
 {
     os_char *dataptr, *typeptr;
+    os_short ss;
+    os_int ii;
+    os_long ll;
+    os_float ff;
+    eMatrixDataItem mo;
 
     /* Make sure that row and column are not negative.
      */
@@ -832,38 +890,55 @@ void eMatrix::setd(
     /* Get pointer to data and if matrix data type is OS_OBJECT, also to
        data type of item.
      */
-    dataptr = getptrs(row, column, &typeptr, OS_TRUE);
+    dataptr = getptrs(row, column, &typeptr, EMATRIX_ALLOCATE_IF_NEEDED|EMATRIX_CLEAR_ELEMENT);
     if (dataptr == OS_NULL) return;
 
     switch (m_datatype)
     {
-        case OS_OBJECT:
-            ((eMatrixDataItem*)dataptr)->d = x;
-            *typeptr = OS_DOUBLE;
-            break;
-
         case OS_CHAR:
             *((os_char*)dataptr) = eround_double_to_char(x);
             break;
 
         case OS_SHORT:
-            *((os_short*)dataptr) = eround_double_to_short(x);
+            ss = eround_double_to_short(x);
+            os_memcpy(dataptr, &ss, sizeof(os_short));
             break;
 
         case OS_INT:
-            *((os_int*)dataptr) = eround_double_to_int(x);
+            ii = eround_double_to_int(x);
+            os_memcpy(dataptr, &ii, sizeof(os_int));
             break;
 
         case OS_LONG:
-            *((os_long*)dataptr) = eround_double_to_long(x);
+            ll = eround_double_to_long(x);
+            os_memcpy(dataptr, &ll, sizeof(os_long));
+            break;
+
+        case OS_DEC01:
+            ss = eround_double_to_short(100.0 * x);
+            os_memcpy(dataptr, &ss, sizeof(os_short));
+            break;
+
+        case OS_DEC001:
+            ss = eround_double_to_short(1000.0 * x);
+            os_memcpy(dataptr, &ss, sizeof(os_short));
             break;
 
         case OS_FLOAT:
-            *((os_float*)dataptr) = (os_float)x;
+            ff = (os_float)x;
+            os_memcpy(dataptr, &ff, sizeof(os_float));
+            *typeptr = OS_FLOAT;
             break;
 
         case OS_DOUBLE:
-            *((os_double*)dataptr) = x;
+            os_memcpy(dataptr, &x, sizeof(os_double));
+            *typeptr = OS_DOUBLE;
+            break;
+
+        case OS_OBJECT:
+            mo.d = x;
+            os_memcpy(dataptr, &mo, sizeof(eMatrixDataItem));
+            *typeptr = OS_DOUBLE;
             break;
 
         default:
@@ -893,9 +968,12 @@ void eMatrix::sets(
     os_int column,
     const os_char *x)
 {
-    os_char *dataptr, *typeptr, *p;
+    os_char *dataptr, *typeptr;
     os_long l;
     os_memsz sz;
+    os_memsz count;
+    os_double d;
+    eMatrixDataItem mo;
 
     if (x == 0) x = "";
     if (*x == '\0')
@@ -911,34 +989,45 @@ void eMatrix::sets(
     /* Get pointer to data and if matrix data type is OS_OBJECT, also to
        data type of item.
      */
-    dataptr = getptrs(row, column, &typeptr, OS_TRUE);
+    dataptr = getptrs(row, column, &typeptr, EMATRIX_ALLOCATE_IF_NEEDED|EMATRIX_CLEAR_ELEMENT);
     if (dataptr == OS_NULL) return;
 
     switch (m_datatype)
     {
-        case OS_OBJECT:
-            sz = os_strlen(x);
-            p = os_malloc(sz, OS_NULL);
-            os_memcpy(p, x, sz);
-            ((eMatrixDataItem*)dataptr)->s = p;
-            *typeptr = OS_DOUBLE;
-            break;
-
         case OS_CHAR:
         case OS_SHORT:
         case OS_INT:
         case OS_LONG:
             /* Convert string to integer.
              */
-            l = osal_str_to_int(x, OS_NULL);
-            setl(row, column, l);
+            l = osal_str_to_int(x, &count);
+            if (count >= 1) {
+                setl(row, column, l);
+            }
+            else {
+                clear(row, column);
+            }
             break;
 
         case OS_FLOAT:
         case OS_DOUBLE:
-            /* Convert string to float.
+            /* Convert string to double.
              */
-            setd(row, column, osal_str_to_double(x, OS_NULL));
+            d = osal_str_to_double(x, &count);
+            if (count >= 1) {
+                setd(row, column, d);
+            }
+            else {
+                clear(row, column);
+            }
+            break;
+
+        case OS_OBJECT:
+            sz = os_strlen(x);
+            mo.s = os_malloc(sz, OS_NULL);
+            os_memcpy(mo.s, x, sz);
+            os_memcpy(dataptr, &mo, sizeof(eMatrixDataItem));
+            *typeptr = OS_STR;
             break;
 
         default:
@@ -973,6 +1062,7 @@ void eMatrix::seto(
     os_char *dataptr, *typeptr;
     eBuffer *buffer;
     eObject *o;
+    eMatrixDataItem mo;
 
     /* Make sure that row and column are not negative.
      */
@@ -986,12 +1076,13 @@ void eMatrix::seto(
         return;
     }
 
-    dataptr = getptrs(row, column, &typeptr, OS_TRUE, &buffer);
+    dataptr = getptrs(row, column, &typeptr, EMATRIX_ALLOCATE_IF_NEEDED|EMATRIX_CLEAR_ELEMENT, &buffer);
     if (dataptr == OS_NULL) return;
 
     o = x->clone(buffer, EOID_INTERNAL);
     o->setflags(EOBJ_TEMPORARY_ATTACHMENT);
-    ((eMatrixDataItem*)dataptr)->o = o;
+    mo.o = o;
+    os_memcpy(dataptr, &mo, sizeof(eMatrixDataItem));
     *typeptr = OS_OBJECT;
 }
 
@@ -1015,19 +1106,15 @@ void eMatrix::clear(
     os_int row,
     os_int column)
 {
-    os_char *dataptr, *typeptr;
+    os_char *typeptr;
 
     /* Make sure that row and column are not negative.
      */
     if (checknegative(row, column)) return;
 
-    /* Get pointer to data and if matrix data type is OS_OBJECT, also to
-       data type of item.
+    /* Getptrs function is used to clear the elemenet.
      */
-    dataptr = getptrs(row, column, &typeptr, OS_FALSE);
-    if (dataptr == OS_NULL) return;
-
-    emptyobject(dataptr, typeptr);
+    getptrs(row, column, &typeptr, EMATRIX_CLEAR_ELEMENT);
 }
 
 
@@ -1054,6 +1141,8 @@ os_boolean eMatrix::getv(
 {
     os_char *dataptr, *typeptr;
     eMatrixDataItem *mo;
+    os_short s;
+    os_int i;
     os_long l;
     os_double d;
     os_float f;
@@ -1097,37 +1186,49 @@ os_boolean eMatrix::getv(
 
         case OS_CHAR:
             l = *((os_char*)dataptr);
-            if (l == OS_CHAR_MAX) goto return_empty;
+            if (l == OS_CHAR_MIN) goto return_empty;
             x->setl(l);
             break;
 
         case OS_SHORT:
-            l = *((os_short*)dataptr);
-            if (l == OS_SHORT_MAX) goto return_empty;
-            x->setl(l);
+            os_memcpy(&s, dataptr, sizeof(os_short));
+            if (s == OS_SHORT_MIN) goto return_empty;
+            x->setl(s);
             break;
 
         case OS_INT:
-            l = *((os_int*)dataptr);
-            if (l == OS_INT_MAX) goto return_empty;
-            x->setl(l);
+            os_memcpy(&i, dataptr, sizeof(os_int));
+            if (i == OS_INT_MIN) goto return_empty;
+            x->setl(i);
             break;
 
         case OS_LONG:
-            l = *((os_long*)dataptr);
-            if (l == OS_INT_MAX) goto return_empty;
+            os_memcpy(&l, dataptr, sizeof(os_long));
+            if (l == OS_LONG_MIN) goto return_empty;
             x->setl(l);
             break;
 
+        case OS_DEC01:
+            os_memcpy(&s, dataptr, sizeof(os_short));
+            if (s == OS_SHORT_MIN) goto return_empty;
+            x->setd(0.01 * s);
+            break;
+
+        case OS_DEC001:
+            os_memcpy(&s, dataptr, sizeof(os_short));
+            if (s == OS_SHORT_MIN) goto return_empty;
+            x->setd(0.001 * s);
+            break;
+
         case OS_FLOAT:
-            f = *((os_float*)dataptr);
-            if (f == OS_FLOAT_MAX) goto return_empty;
+            if (*typeptr == OS_UNDEFINED_TYPE) goto return_empty;
+            os_memcpy(&f, dataptr, sizeof(os_float));
             x->setd(f);
             break;
 
         case OS_DOUBLE:
-            d = *((os_double*)dataptr);
-            if (d == OS_DOUBLE_MAX) goto return_empty;
+            if (*typeptr == OS_UNDEFINED_TYPE) goto return_empty;
+            os_memcpy(&d, dataptr, sizeof(os_double));
             x->setd(d);
             break;
 
@@ -1164,39 +1265,39 @@ os_long eMatrix::getl(
     os_boolean *hasvalue)
 {
     os_char *dataptr, *typeptr;
-    eMatrixDataItem *mo;
+    eMatrixDataItem mo;
+    os_short s;
+    os_int i;
     os_long l;
     os_double d;
     os_float f;
 
-    if (hasvalue) *hasvalue = OS_FALSE;
-
     /* Make sure that row and column are not negative.
      */
-    if (checknegative(row, column)) return 0;
+    if (checknegative(row, column)) goto return_empty;
 
     /* Get pointer to data and if matrix data type is OS_OBJECT, also to
        data type of item.
      */
     dataptr = getptrs(row, column, &typeptr, OS_FALSE);
-    if (dataptr == OS_NULL) return 0;
+    if (dataptr == OS_NULL) goto return_empty;
 
     switch (m_datatype)
     {
         case OS_OBJECT:
-            mo = (eMatrixDataItem*)dataptr;
+            os_memcpy(&mo, dataptr, sizeof(eMatrixDataItem));
             switch (*typeptr)
             {
                 case OS_LONG:
-                    l = mo->l;
+                    l = mo.l;
                     break;
 
                 case OS_DOUBLE:
-                    l = eround_double_to_long(mo->d);
+                    l = eround_double_to_long(mo.d);
                     break;
 
                 case OS_STR:
-                    l = osal_str_to_int(mo->s, OS_NULL);
+                    l = osal_str_to_int(mo.s, OS_NULL);
                     break;
 
                 default:
@@ -1206,33 +1307,47 @@ os_long eMatrix::getl(
 
         case OS_CHAR:
             l = *((os_char*)dataptr);
-            if (l == OS_CHAR_MAX) goto return_empty;
+            if (l == OS_CHAR_MIN) goto return_empty;
             break;
 
         case OS_SHORT:
-            l = *((os_short*)dataptr);
-            if (l == OS_SHORT_MAX) goto return_empty;
+            os_memcpy(&s, dataptr, sizeof(os_short));
+            if (s == OS_SHORT_MIN) goto return_empty;
+            l = s;
             break;
 
         case OS_INT:
-            l = *((os_int*)dataptr);
-            if (l == OS_INT_MAX) goto return_empty;
+            os_memcpy(&i, dataptr, sizeof(os_int));
+            if (i == OS_INT_MIN) goto return_empty;
+            l = i;
             break;
 
         case OS_LONG:
-            l = *((os_long*)dataptr);
-            if (l == OS_INT_MAX) goto return_empty;
+            os_memcpy(&l, dataptr, sizeof(os_long));
+            if (l == OS_LONG_MIN) goto return_empty;
+            break;
+
+        case OS_DEC01:
+            os_memcpy(&s, dataptr, sizeof(os_short));
+            if (s == OS_SHORT_MIN) goto return_empty;
+            l = eround_double_to_long(0.01 * s);
+            break;
+
+        case OS_DEC001:
+            os_memcpy(&s, dataptr, sizeof(os_short));
+            if (s == OS_SHORT_MIN) goto return_empty;
+            l = eround_double_to_long(0.001 * s);
             break;
 
         case OS_FLOAT:
-            f = *((os_float*)dataptr);
-            if (f == OS_FLOAT_MAX) goto return_empty;
+            if (*typeptr == OS_UNDEFINED_TYPE) goto return_empty;
+            os_memcpy(&f, dataptr, sizeof(os_float));
             l = eround_float_to_long(f);
             break;
 
         case OS_DOUBLE:
-            d = *((os_double*)dataptr);
-            if (d == OS_DOUBLE_MAX) goto return_empty;
+            if (*typeptr == OS_UNDEFINED_TYPE) goto return_empty;
+            os_memcpy(&d, dataptr, sizeof(os_double));
             l = eround_double_to_long(d);
             break;
 
@@ -1244,6 +1359,7 @@ os_long eMatrix::getl(
     return l;
 
 return_empty:
+    if (hasvalue) *hasvalue = OS_FALSE;
     return 0;
 }
 
@@ -1271,39 +1387,39 @@ os_double eMatrix::getd(
     os_boolean *hasvalue)
 {
     os_char *dataptr, *typeptr;
-    eMatrixDataItem *mo;
+    eMatrixDataItem mo;
+    os_short s;
+    os_int i;
     os_long l;
     os_double d;
     os_float f;
 
-    if (hasvalue) *hasvalue = OS_FALSE;
-
     /* Make sure that row and column are not negative.
      */
-    if (checknegative(row, column)) return 0;
+    if (checknegative(row, column)) goto return_empty;
 
     /* Get pointer to data and if matrix data type is OS_OBJECT, also to
        data type of item.
      */
     dataptr = getptrs(row, column, &typeptr, OS_FALSE);
-    if (dataptr == OS_NULL) return 0;
+    if (dataptr == OS_NULL) goto return_empty;
 
     switch (m_datatype)
     {
         case OS_OBJECT:
-            mo = (eMatrixDataItem*)dataptr;
+            os_memcpy(&mo, dataptr, sizeof(eMatrixDataItem));
             switch (*typeptr)
             {
                 case OS_LONG:
-                    d = (os_double)mo->l;
+                    d = (os_double)mo.l;
                     break;
 
                 case OS_DOUBLE:
-                    d = mo->d;
+                    d = mo.d;
                     break;
 
                 case OS_STR:
-                    d = osal_str_to_double(mo->s, OS_NULL);
+                    d = osal_str_to_double(mo.s, OS_NULL);
                     break;
 
                 default:
@@ -1313,37 +1429,49 @@ os_double eMatrix::getd(
 
         case OS_CHAR:
             l = *((os_char*)dataptr);
-            if (l == OS_CHAR_MAX) goto return_empty;
+            if (l == OS_CHAR_MIN) goto return_empty;
             d = (os_double)l;
             break;
 
         case OS_SHORT:
-            l = *((os_short*)dataptr);
-            if (l == OS_SHORT_MAX) goto return_empty;
-            d = (os_double)l;
+            os_memcpy(&s, dataptr, sizeof(os_short));
+            if (s == OS_SHORT_MIN) goto return_empty;
+            d = (os_double)s;
             break;
 
         case OS_INT:
-            l = *((os_int*)dataptr);
-            if (l == OS_INT_MAX) goto return_empty;
-            d = (os_double)l;
+            os_memcpy(&i, dataptr, sizeof(os_int));
+            if (i == OS_INT_MIN) goto return_empty;
+            d = (os_double)i;
             break;
 
         case OS_LONG:
-            l = *((os_long*)dataptr);
-            if (l == OS_INT_MAX) goto return_empty;
+            os_memcpy(&l, dataptr, sizeof(os_long));
+            if (l == OS_LONG_MIN) goto return_empty;
             d = (os_double)l;
             break;
 
+        case OS_DEC01:
+            os_memcpy(&s, dataptr, sizeof(os_short));
+            if (s == OS_SHORT_MIN) goto return_empty;
+            d = 0.01 * s;
+            break;
+
+        case OS_DEC001:
+            os_memcpy(&s, dataptr, sizeof(os_short));
+            if (s == OS_SHORT_MIN) goto return_empty;
+            d = 0.001 * s;
+            break;
+
         case OS_FLOAT:
-            f = *((os_float*)dataptr);
-            if (f == OS_FLOAT_MAX) goto return_empty;
+            if (*typeptr == OS_UNDEFINED_TYPE) goto return_empty;
+            os_memcpy(&f, dataptr, sizeof(os_float));
             d = f;
             break;
 
         case OS_DOUBLE:
-            d = *((os_double*)dataptr);
-            if (d == OS_DOUBLE_MAX) goto return_empty;
+            if (*typeptr == OS_UNDEFINED_TYPE) goto return_empty;
+            os_memcpy(&d, dataptr, sizeof(os_double));
             break;
 
         default:
@@ -1354,6 +1482,7 @@ os_double eMatrix::getd(
     return d;
 
 return_empty:
+    if (hasvalue) *hasvalue = OS_FALSE;
     return 0;
 }
 
@@ -1372,6 +1501,7 @@ return_empty:
 ****************************************************************************************************
 */
 void eMatrix::resize(
+    osalTypeId datatype,
     os_int nrows,
     os_int ncolumns)
 {
@@ -1382,12 +1512,17 @@ void eMatrix::resize(
 
     /* If we need to reorganize, do it the hard way. This is slow, application
        should be written in such way that this is not needed repeatedly.
+       We need to reorganize if:
+       - We number of columns has changed and we have more than 1 row of data.
+       - Datatype has changed and we have data.
      */
-    if (ncolumns != m_ncolumns && m_nrows > 1 && m_ncolumns > 0)
+    if ((ncolumns != m_ncolumns || datatype != m_datatype)
+        && (m_nrows > 1 || (datatype != m_datatype && m_nrows > 0))
+        && m_ncolumns > 0)
     {
-        tmp = new eVariable(this);
-        m = new eMatrix(this);
-        m->allocate(m_datatype, nrows, ncolumns);
+        tmp = new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+        m = new eMatrix(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+        m->allocate(datatype, nrows, ncolumns);
 
         minrows = nrows < m_nrows ? nrows : m_nrows;
         mincolumns = ncolumns < m_ncolumns ? ncolumns : m_ncolumns;
@@ -1419,35 +1554,39 @@ void eMatrix::resize(
         delete tmp;
     }
 
-    /* Otherwise if we need to delete rows
+    /* No reorganization.
      */
-    else if (nrows < m_nrows && m_nrows > 0 && m_ncolumns > 0)
+    else
     {
-        /* Element index of last element to keep.
+        /* Otherwise if we need to delete rows
          */
-        elem_ix = ((nrows-1) * m_ncolumns-1) + (ncolumns-1);
-
-    per_block = elems_per_block();
-
-
-        /* Buffer number of last buffer to keep
-         */
-        buffer_nr =  elem_ix / per_block + 1;
-
-        /* Delete buffers with bigger number than buffer_nr
-         */
-        for (buffer = eBuffer::cast(first());
-             buffer;
-             buffer = nextbuffer)
+        if (nrows < m_nrows && m_nrows > 0 && m_ncolumns > 0)
         {
-            nextbuffer = eBuffer::cast(buffer->next());
-            if (buffer->oid() > buffer_nr)
+            /* Element index of last element to keep.
+             */
+            elem_ix = ((nrows-1) * m_ncolumns-1) + (ncolumns-1);
+
+            /* Buffer number of last buffer to keep
+             */
+            per_block = elems_per_block();
+            buffer_nr =  elem_ix / per_block + 1;
+
+            /* Delete buffers with bigger number than buffer_nr
+             */
+            for (buffer = eBuffer::cast(first());
+                 buffer;
+                 buffer = nextbuffer)
             {
-                releasebuffer(buffer);
+                nextbuffer = eBuffer::cast(buffer->next());
+                if (buffer->oid() > buffer_nr)
+                {
+                    releasebuffer(buffer);
+                }
             }
         }
     }
 
+    m_datatype = datatype;
     m_nrows = nrows;
     m_ncolumns = ncolumns;
 }
@@ -1469,10 +1608,13 @@ void eMatrix::resize(
 
   @param  row Row number, 0...
   @param  column Column number, 0...
-  @param  typeptr Where to store pointer to data type.
-  @param  isset Controls how this function works.
+  @param  typeptr Where to store pointer to data type for matrix containing objects.
+  @param  flags EMATRIX_ALLOCATE_IF_NEEDED: Allocate memory block if it doesn't exist.
+          If the flag is not given, function returns OS_NULL if the buffer doesn't exist.
+          EMATRIX_CLEAR_ELEMENT If the matrix element currently contains object, it is
+          deleted.
   @param  pbuffer Pointer to eBuffer containing the matrix element is stored here.
-          OS_NULL if not needed.
+          Set OS_NULL if not needed.
   @return Pointer to element data.
 
 ****************************************************************************************************
@@ -1481,7 +1623,7 @@ os_char *eMatrix::getptrs(
     os_int row,
     os_int column,
     os_char **typeptr,
-    os_boolean isset,
+    os_int flags,
     eBuffer **pbuffer)
 {
     eBuffer *buffer;
@@ -1495,11 +1637,11 @@ os_char *eMatrix::getptrs(
     {
         /* If reading from matrix, it cannot be expanded.
          */
-        if (!isset) return OS_NULL;
+        if ((flags & EMATRIX_ALLOCATE_IF_NEEDED) == 0) return OS_NULL;
 
         /* Make matrix bigger to fit this point
          */
-        resize(row >= m_nrows ? row + 1 : m_nrows,
+        resize(m_datatype, row >= m_nrows ? row + 1 : m_nrows,
             column >= m_ncolumns ? column + 1 : m_ncolumns);
     }
 
@@ -1516,18 +1658,23 @@ os_char *eMatrix::getptrs(
 
     /* Get eBuffer where this value belongs to.
      */
-    buffer = getbuffer(buffer_nr, isset);
+    buffer = getbuffer(buffer_nr, flags);
     if (buffer == OS_NULL) return OS_NULL;
 
     dataptr = buffer->ptr();
-    *typeptr = dataptr + per_block * m_typesz + elem_ix;
+    if (m_datatype == OS_OBJECT || m_datatype == OS_DOUBLE || m_datatype == OS_FLOAT) {
+        *typeptr = dataptr + per_block * m_typesz + elem_ix;
+    }
+    else {
+        *typeptr = OS_NULL;
+    }
     dataptr += elem_ix * m_typesz;
 
     /* Item found, dataptr and typeptr are set now. If this is
        set and m_datatype is OS_OBJECT, we check if we need to
        release object or string from memory.
      */
-    if (isset && m_datatype == OS_OBJECT)
+    if (flags & EMATRIX_CLEAR_ELEMENT)
     {
         emptyobject(dataptr, *typeptr);
     }
@@ -1536,75 +1683,49 @@ os_char *eMatrix::getptrs(
 }
 
 
-/* If we do not have number of matrix elements per block (per_block):
- * Allocate buffer 1 to know how much we can store in buffer. This depends
-   on eBuffer class implementation.
- */
-/* void eMatrix::set_element_sz()
-{
-    eBuffer *buffer;
-    const os_int buffer_nr = 1;
-    os_int bytes_per_elem;
+/**
+****************************************************************************************************
 
-    if (m_buf_alloc_sz == 0)
-    {
-        buffer = eBuffer::cast(first(buffer_nr));
-        if (buffer == OS_NULL) {
-            buffer = getbuffer(buffer_nr, OS_TRUE);
-            buffer->allocate(OEMATRIX_APPROX_BUF_SZ);
-        }
+  @brief Get or allocate eBuffer by buffer number (oid).
 
-        m_buf_alloc_sz = buffer->allocated();
+  The eMatrix::getbuffer function...
 
-        bytes_per_elem = m_typesz;
-        if (m_datatype == OS_OBJECT) bytes_per_elem += sizeof(os_char);
-        per_block = (os_int)(buffer->allocated() / bytes_per_elem);
-    }
+  @param  buffer_nr Object ID
+  @param  flags EMATRIX_ALLOCATE_IF_NEEDED: Allocate memory block if it doesn't exist.
+          If the flag is not given, function returns OS_NULL if the buffer doesn't exist.
+  @return Pointer to eBuffer.
 
-    {if (m_elemsz) return m_buf_alloc_sz/m_elemsz; else return 0;}
-    xx
-}
+****************************************************************************************************
 */
-
-/* Get or allocate eBuffer by buffer number (oid).
- */
 eBuffer *eMatrix::getbuffer(
     os_int buffer_nr,
-    os_boolean isset)
+    os_int flags)
 {
     eBuffer *buffer;
-    os_int bytes_per_elem, count, per_block;
+    os_int bytes_per_elem, count;
     os_char *ptr;
 
     buffer = eBuffer::cast(first(buffer_nr));
-    if (buffer || !isset) return buffer;
+    if (buffer || (flags & EMATRIX_ALLOCATE_IF_NEEDED) == 0) return buffer;
 
     buffer = new eBuffer(this, buffer_nr);
 
     bytes_per_elem = m_typesz;
     if (m_datatype == OS_OBJECT) bytes_per_elem += sizeof(os_char);
 
-    per_block = elems_per_block();
-
-    /* If we have not yet decided on elements per block
+    /* eBuffer:allocate() fills buffer with zeroes.
      */
-    if (per_block == 0)
-    {
-        buffer->allocate(OEMATRIX_APPROX_BUF_SZ);
-        per_block = (os_int)(buffer->allocated() / bytes_per_elem);
-    }
-    else
-    {
-        buffer->allocate(per_block * bytes_per_elem);
-    }
+    buffer->allocate(eglobal->matrix_buffer_allocation_sz);
 
-    /* If this is not object data type, mark all items
-       empty (maximum value of the type.
+    /* If matrix data type has no type for element which is cleared by buffer->allocate(),
+       but empry values are rather indicated by minimum integer, set empty values.
      */
-    if (m_datatype != OS_OBJECT)
+    if (m_datatype != OS_OBJECT &&
+        m_datatype != OS_FLOAT &&
+        m_datatype != OS_DOUBLE)
     {
         ptr = buffer->ptr();
-        count = per_block;
+        count = elems_per_block();
         while (count--)
         {
             emptyobject(ptr, OS_NULL);
@@ -1654,65 +1775,69 @@ void eMatrix::releasebuffer(
 }
 
 
-/* Release element empty. Release allocated data if any.
+/* Release element memory allocated for matrix element (if any) and mark
+   matrix value empty.
  */
 void eMatrix::emptyobject(
     os_char *dataptr,
     os_char *typeptr)
 {
-    eMatrixDataItem *mo;
+    eMatrixDataItem mo;
 
     switch (m_datatype)
     {
         case OS_OBJECT:
-            mo = (eMatrixDataItem*)dataptr;
+            os_memcpy(&mo, dataptr, sizeof(eMatrixDataItem));
             switch (*typeptr)
             {
                 case OS_STR:
-                    os_free(mo->s, os_strlen(mo->s));
+                    os_free(mo.s, os_strlen(mo.s));
                     break;
 
                 case OS_OBJECT:
-                    delete mo->o;
+                    delete mo.o;
                     break;
 
                 default:
                     break;
             }
 
-            os_memclear(mo, sizeof(eMatrixDataItem));
+            os_memclear(dataptr, sizeof(eMatrixDataItem));
             *typeptr = OS_UNDEFINED_TYPE;
             break;
 
         case OS_CHAR:
-            *(os_char*)dataptr = OS_CHAR_MAX;
+            *(os_char*)dataptr = OS_CHAR_MIN;
             break;
 
         case OS_SHORT:
-            *(os_short*)dataptr = OS_SHORT_MAX;
+        case OS_DEC01:
+        case OS_DEC001:
+            os_memcpy(dataptr, &emtx_no_short_value, sizeof(os_short));
             break;
 
         case OS_INT:
-            *(os_int*)dataptr = OS_INT_MAX;
+            os_memcpy(dataptr, &emtx_no_int_value, sizeof(os_int));
             break;
 
         case OS_LONG:
-            *(os_long*)dataptr = OS_LONG_MAX;
+            os_memcpy(dataptr, &emtx_no_long_value, sizeof(os_long));
             break;
 
         case OS_FLOAT:
-            *(os_float*)dataptr = OS_FLOAT_MAX;
+            os_memclear(dataptr, sizeof(os_float));
+            *typeptr = OS_UNDEFINED_TYPE;
             break;
 
         case OS_DOUBLE:
-            *(os_double*)dataptr = OS_DOUBLE_MAX;
+            os_memclear(dataptr, sizeof(os_double));
+            *typeptr = OS_UNDEFINED_TYPE;
             break;
 
         default:
             break;
     }
 }
-
 
 /* How many bytes are needed for matrix datatype
  */
@@ -1721,4 +1846,12 @@ os_short eMatrix::typesz(
 {
     if (datatype == OS_OBJECT) return sizeof(eMatrixDataItem);
     return (os_short)osal_type_size(datatype);
+}
+
+
+/* How many element we can fit in memory block?
+ */
+os_int eMatrix::elems_per_block()
+{
+    return eglobal->matrix_buffer_allocation_sz/m_elemsz;
 }

@@ -124,6 +124,12 @@ typedef struct eGlobal
      */
     os_char composition[ENET_COMPOSITION_NAME_SZ];
 
+    /** This is special for eMatrix clas. Memory manager and eBuffer implementation
+        are tested at startup, how much memory we actually get when we request
+        OEMATRIX_APPROX_BUF_SZ bytes.
+     */
+    os_int matrix_buffer_allocation_sz;
+
     /** Pointer to global structure for egui library.
      */
     struct eGuiGlobal *eguiglobal;

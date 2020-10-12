@@ -190,8 +190,7 @@ public:
     void allocate(
         osalTypeId type,
         os_int nrows = 0,
-        os_int ncolumns = 0,
-        os_int mflags = 0);
+        os_int ncolumns = 0);
 
     /* Release all allocated data, empty the matrix.
      */
@@ -309,6 +308,7 @@ protected:
     /* Resize the matrix.
      */
     void resize(
+        osalTypeId datatype,
         os_int nrows,
         os_int ncolumns);
 
@@ -318,7 +318,7 @@ protected:
         os_int row,
         os_int column,
         os_char **typeptr,
-        os_boolean isset,
+        os_int flags,
         eBuffer **pbuffer = OS_NULL);
 
     /* Set number of elements per block.
@@ -329,7 +329,7 @@ protected:
      */
     eBuffer *getbuffer(
         os_int buffer_nr,
-        os_boolean isset);
+        os_int flags);
 
     /* Free memory buffer and any objects and strings allocated for it.
      */
@@ -345,7 +345,9 @@ protected:
     os_short typesz(
         osalTypeId datatype);
 
-    inline os_int elems_per_block() {if (m_elemsz) return m_buf_alloc_sz/m_elemsz; else return 0;}
+    /* How many element we can fit in memory block?
+     */
+    os_int elems_per_block();
 
     /** Matrix data type.
      */
@@ -366,14 +368,6 @@ protected:
     /** Number of columns.
      */
     os_int m_ncolumns;
-
-    /** Number of elements per block.
-     */
-    // os_short m_elems_per_block;
-
-    /** Buffer allocation size.
-     */
-    os_int m_buf_alloc_sz;
 
     /*@}*/
 };
