@@ -98,7 +98,7 @@ public:
      */
     virtual void configure(
         eContainer *configuration,
-        os_int tflags)
+        os_int tflags = 0)
     {}
 
     /* Insert rows into table.
@@ -106,7 +106,7 @@ public:
      */
     virtual void insert(
         eContainer *rows,
-        os_int tflags)
+        os_int tflags = 0)
     {}
 
     /* Update a row or rows of a table or insert a row to the table.
@@ -114,21 +114,21 @@ public:
     virtual void update(
         eVariable *where,
         eContainer *row,
-        os_int tflags)
+        os_int tflags = 0)
     {}
 
     /* Remove rows from table.
      */
     virtual void remove(
         eVariable *where,
-        os_int tflags)
+        os_int tflags = 0)
     {}
 
     /* Select rows from table.
      */
     virtual void select(
         eVariable *where,
-        os_int tflags)
+        os_int tflags = 0)
     {}
 
     /*@}*/

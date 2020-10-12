@@ -33,13 +33,15 @@ class eBuffer;
 #define EMTXP_DATATYPE 20
 #define EMTXP_NROWS 21
 #define EMTXP_NCOLUMNS 22
+#define EMTXP_CONFIGURATION 30
 
 /* Matrix property names.
  */
 extern const os_char
     emtxp_datatype[],
     emtxp_nrows[],
-    emtxp_ncolumns[];
+    emtxp_ncolumns[],
+    emtxp_configuration[];
 
 
 /**
@@ -162,15 +164,14 @@ public:
      */
     virtual void configure(
         eContainer *configuration,
-        os_int tflags)
-    {}
+        os_int tflags = 0);
 
     /* Insert rows into table.
      * Row can be one row or container with multiple rows.
      */
     virtual void insert(
         eContainer *rows,
-        os_int tflags)
+        os_int tflags = 0)
     {}
 
     /* Update a row or rows of a table.
@@ -178,21 +179,21 @@ public:
     virtual void update(
         eVariable *where,
         eContainer *row,
-        os_int tflags)
+        os_int tflags = 0)
     {}
 
     /* Remove rows from table.
      */
     virtual void remove(
         eVariable *where,
-        os_int tflags)
+        os_int tflags = 0)
     {}
 
     /* Select rows from table.
      */
     virtual void select(
         eVariable *where,
-        os_int tflags)
+        os_int tflags = 0)
     {}
     /*@}*/
 
@@ -344,10 +345,6 @@ protected:
         os_int flags,
         eBuffer **pbuffer = OS_NULL);
 
-    /* Set number of elements per block.
-     */
-    // void set_element_sz();
-
     /* Get or allocate eBuffer by buffer number (oid).
      */
     eBuffer *getbuffer(
@@ -391,6 +388,10 @@ protected:
     /** Number of columns.
      */
     os_int m_ncolumns;
+
+    /** Matrix configuration, OS_NULL if not set.
+     */
+    eContainer *m_configuration;
 
     /** To prevent recursive resizing.
      */

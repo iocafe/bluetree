@@ -284,8 +284,8 @@ eStatus eContainer::json_writer(
     {
         if (!started)
         {
-            if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE /* , &comma */)) goto failed;
-            if (json_puts(stream, "\"children\": [")) goto failed;
+            // if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE /* , &comma */)) goto failed;
+            if (json_puts(stream, "[")) goto failed;
             started = OS_TRUE;
         }
 

@@ -21,7 +21,8 @@
 const os_char
     emtxp_datatype[] = "type",
     emtxp_nrows[] = "nrows",
-    emtxp_ncolumns[] = "ncolumns";
+    emtxp_ncolumns[] = "ncolumns",
+    emtxp_configuration[] = "configuration";
 
 /* Approximate size for one eBuffer, adjusted to memory allocation block.
  */
@@ -67,6 +68,7 @@ eMatrix::eMatrix(
      */
     m_nrows = m_ncolumns = 0;
 
+    m_configuration = OS_NULL;
     m_own_change = 0;
 }
 
@@ -103,9 +105,11 @@ void eMatrix::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eMatrix");
-    addproperty (cls, EMTXP_DATATYPE, emtxp_datatype, "data type", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addproperty (cls, EMTXP_NROWS, emtxp_nrows, "nro rows", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addproperty (cls, EMTXP_NCOLUMNS, emtxp_ncolumns, "nro columns", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, EMTXP_DATATYPE, emtxp_datatype, "data type", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, EMTXP_NROWS, emtxp_nrows, "nro rows", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, EMTXP_NCOLUMNS, emtxp_ncolumns, "nro columns", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EMTXP_CONFIGURATION, emtxp_configuration, "configuration",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();
 
@@ -193,6 +197,7 @@ eStatus eMatrix::onpropertychange(
     eVariable *x,
     os_int flags)
 {
+    eObject *configuration;
     os_long v;
 
     switch (propertynr)
@@ -217,6 +222,16 @@ eStatus eMatrix::onpropertychange(
                 resize(m_datatype, m_nrows, v);
             }
             break;
+
+        case EMTXP_CONFIGURATION:
+            if (m_own_change == 0) {
+                configuration = x->geto();
+                if (configuration) if (configuration->classid() == ECLASSID_CONTAINER) {
+                    configure((eContainer*)configuration);
+                }
+            }
+            break;
+
 
         default:
             return eObject::onpropertychange(propertynr, x, flags);
@@ -257,6 +272,10 @@ eStatus eMatrix::simpleproperty(
 
         case EMTXP_NCOLUMNS:
             x->setl(m_ncolumns);
+            break;
+
+        case EMTXP_CONFIGURATION:
+            x->seto(m_configuration);
             break;
 
         default:

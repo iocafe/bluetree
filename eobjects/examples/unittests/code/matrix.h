@@ -17,3 +17,4 @@
 */
 
 void matrix_example1();
+void matrix_as_table_example2();

@@ -78,10 +78,15 @@
  */
 #define EOID_PROPERTIES -33
 
-/* Object's bindings container.
+/** Object's bindings container.
  */
 #define EOID_BINDINGS -35
 
+/** Table/matrix related identifiers.
+ */
+#define EOID_TABLE_CONFIGURATION -40
+#define EOID_TABLE_COLUMNS -41
+#define EOID_TABLE_CONTENT -42
 
 /** This is special object identifier that can be given as argument to object hierarchy
     functions, like first(). The EOID_CHILD specifies to get a child object,
