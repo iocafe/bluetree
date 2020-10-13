@@ -77,14 +77,6 @@ class ePointer;
  */
 #define EPRO_NO_ERRORS EMSG_NO_ERRORS
 
-/* Flags for adopt(), clone() and clonegeeric() functions.
- */
-#define EOBJ_NO_AFLAGS 0
-#define EOBJ_BEFORE_THIS 1
-#define EOBJ_NO_MAP 2
-#define EOBJ_CLONE_ALL_CHILDREN 4
-#define EOBJ_NO_CLONED_NAMES 8
-
 /* Serialization flags eObject::write(), eObject::read() and clonegeeric() functions.
  */
 #define EOBJ_SERIALIZE_DEFAULT 0
@@ -179,12 +171,25 @@ public:
      */
     virtual ~eObject();
 
-    /** Cloning, adopting and copying.
+    /* Cloning object.
      */
     virtual eObject *clone(
         eObject *parent,
         e_oid id = EOID_CHILD,
-        os_int aflags = 0);
+        os_int aflags = EOBJ_DEFAULT);
+
+    /* Adopting object as child of this object.
+     */
+    void adopt(
+        eObject *child,
+        e_oid id = EOID_CHILD,
+        os_int aflags = EOBJ_DEFAULT);
+
+    /* Adopting object as child of this object.
+     */
+    void adoptat(
+        eObject *beforethis,
+        e_oid id = EOID_CHILD);
 
     /* Helper function for clone functionality.
      */
@@ -441,17 +446,6 @@ public:
     /* Get previous object identified by oid.
      */
     eObject *prev(
-        e_oid id = EOID_CHILD);
-
-    /** Adopting object as child of this object.
-     */
-    void adopt(
-        eObject *child,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0);
-
-    void adoptat(
-        eObject *beforethis,
         e_oid id = EOID_CHILD);
 
     /* Verify whole object tree.

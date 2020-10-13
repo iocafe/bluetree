@@ -45,6 +45,17 @@ void matrix_as_table_example2()
 
     mtx.configure(configuration);
 
+
+for (eObject *o = mtx.first(); o; o = o->next())
+{
+    if (o->classid() != ECLASSID_BUFFER) {
+    osal_debug_error("HERE");
+    if (o->flags() & EOBJ_IS_ATTACHMENT) {
+    osal_debug_error("HERE2");
+    }
+    }
+}
+
     /* Set up matrix to store any data type and store strings to it. Data type OS_OBJECT
        is the default data type if mtx.allocate() is not called: Each element has it's
        own type and data types can be mixed within matrix.

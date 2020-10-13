@@ -68,6 +68,13 @@ X...
 #define EOBJ_CUST_FLAG7    0x00000400
 #define EOBJ_CUST_FLAG8    0x00000800
 
+/** Flags for adopt(), clone() and clonegeeric() functions.
+ */
+#define EOBJ_BEFORE_THIS        0x02000000
+#define EOBJ_NO_MAP             0x04000000
+#define EOBJ_CLONE_ALL_CHILDREN 0x08000000
+#define EOBJ_NO_CLONED_NAMES    0x10000000
+
 /** Flag EOBJ_FAST_DELETE is used internallly to speed up deletion: When an object is being deleted,
 there is no need to detach it's children from red/black of the object. The EOBJ_FAST_DELETE
 flag is set by delete_children() to child object, so child object doesn't need to preserve
@@ -82,6 +89,11 @@ the treee structure after deletion. This changes deleting object trees from Nlog
 /** Custom flags mask.
  */
 #define EOBJ_CUST_FLAGS_MASK 0x000FF0
+
+/** Cloned aflag argument mask for flags for adopt(), clone() and clonegeeric() functions ..
+ */
+#define EOBJ_CLONE_ARG_AFLAGS_MASK (EOBJ_CUST_FLAGS_MASK | EOBJ_IS_ATTACHMENT | \
+    EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE)
 
 /** Serialization mask, which bits to save.
  */

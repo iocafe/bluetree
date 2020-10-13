@@ -224,7 +224,7 @@ eStatus eObject::json_write(
      */
     if (json_indent(stream, --indent)) goto failed;
     if (json_puts(stream, "}")) goto failed;
-    if (comma || end_with_nl) if (json_indent(stream, 0, EJSON_NEW_LINE_ONLY)) goto failed;
+    if (end_with_nl) if (json_indent(stream, 0, EJSON_NEW_LINE_ONLY)) goto failed;
 
     /* Object succesfully written.
      */

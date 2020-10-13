@@ -202,10 +202,14 @@ eObject::~eObject()
   @param  parent Parent for the clone.
   @param  id Object identifier for the clone. Set EOID_CHILD to use the same indentifier as the
           original object.
-  @param  aflags EOBJ_NO_AFLAGS (0) for default operation.
+  @param  aflags
           - EOBJ_NO_MAP not to map names.
           - EOBJ_CLONE_ALL_CHILDREN to clone all children, not just attachments.
           - EOBJ_NO_CLONED_NAMES Do not clone object names.
+          - EOBJ_CUST_FLAGSx Set a custom flag.
+          - EOBJ_IS_ATTACHMENT Mark cloned object as attachment.
+          - EOBJ_NOT_CLONABLE Mark cloned object as not clonable.
+          - EOBJ_NOT_SERIALIZABLE Mark cloned object as not serializable.
   @return Pointer to the new clone.
 
 ****************************************************************************************************
@@ -229,10 +233,14 @@ eObject *eObject::clone(
   or all child objects and maps names to name space. This depends on flags.
 
   @param  clonedobj Pointer to cloned object being created.
-  @param  aflags EOBJ_NO_AFLAGS (0) for default operation.
+  @param  aflags
           - EOBJ_NO_MAP not to map names.
           - EOBJ_CLONE_ALL_CHILDREN to clone all children, not just attachments.
           - EOBJ_NO_CLONED_NAMES Do not clone object names.
+          - EOBJ_CUST_FLAGSx Set a custom flag.
+          - EOBJ_IS_ATTACHMENT Mark cloned object as attachment.
+          - EOBJ_NOT_CLONABLE Mark cloned object as not clonable.
+          - EOBJ_NOT_SERIALIZABLE Mark cloned object as not serializable.
 
   @return None.
 
@@ -270,6 +278,13 @@ void eObject::clonegeneric(
     if ((aflags & EOBJ_NO_MAP) == 0)
     {
         map(E_ATTACH_NAMES);
+    }
+
+    /* If flags have been specified for top level object.
+     */
+    aflags &= EOBJ_CLONE_ARG_AFLAGS_MASK;
+    if (aflags) {
+        clonedobj->setflags(aflags);
     }
 }
 
@@ -937,8 +952,14 @@ void eObject::adopt(
 
 // mm_root->mm_handle->verify_whole_tree();
 
-
         if (sync) os_unlock();
+    }
+
+    /* If flags have been specified for top level object.
+     */
+    aflags &= EOBJ_CLONE_ARG_AFLAGS_MASK;
+    if (aflags) {
+        setflags(aflags);
     }
 }
 
@@ -1561,8 +1582,10 @@ void eObject::mapone(
 
     if ((mflags & E_ATTACH_NAMES))
     {
-        osal_debug_assert(ns);
-        if (ns) name->mapname2(ns, info);
+        if (ns) {
+            osal_debug_assert(ns);
+            name->mapname2(ns, info);
+        }
     }
 
     if (mflags & E_DETACH_FROM_NAMESPACES_ABOVE)
