@@ -484,8 +484,8 @@ public:
         os_int sflags);
 
     /* Called by write() to write class specific object content.
-        The eObject base class provides just dummy place holder
-        function for classes which do not need serialization.
+       The eObject base class provides just dummy place holder
+       function for classes which do not need serialization.
      */
     virtual eStatus writer(
         eStream *stream,
@@ -539,6 +539,14 @@ public:
     /* Print object as JSON to console.
      */
     void print_json();
+
+    /* Called to check if object has class specific content. If there is no class
+       specific JSON content, json_writer or json_reader should not be called.
+     */
+    virtual os_boolean has_json_content()
+    {
+        return OS_FALSE;
+    }
 
     /* Class specific part of JSON writer.
      */

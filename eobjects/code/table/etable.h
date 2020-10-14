@@ -18,6 +18,28 @@
 #define ETABLE_H_
 #include "eobjects.h"
 
+class eTable;
+class eMatrix;
+
+/**
+****************************************************************************************************
+  Defines
+****************************************************************************************************
+*/
+/*@{*/
+
+/* Table property numbers.
+ */
+#define ETABLEP_CONFIGURATION 30
+
+/* Table property names.
+ */
+extern const os_char
+    etablep_configuration[];
+
+typedef void etable_select_callback(eTable *t, eMatrix *data);
+
+
 /**
 ****************************************************************************************************
 
@@ -85,11 +107,7 @@ public:
 
     /**
     ************************************************************************************************
-
-      @name Table functions.
-
-      X...
-
+      Table functions.
     ************************************************************************************************
     */
     /*@{*/
@@ -99,7 +117,9 @@ public:
     virtual void configure(
         eContainer *configuration,
         os_int tflags = 0)
-    {}
+    {
+        osal_debug_error("eTable::configure is not overloaded");
+    }
 
     /* Insert rows into table.
      * Row can be one row or container with multiple rows.
@@ -107,31 +127,56 @@ public:
     virtual void insert(
         eContainer *rows,
         os_int tflags = 0)
-    {}
+    {
+        osal_debug_error("eTable::insert is not overloaded");
+    }
 
     /* Update a row or rows of a table or insert a row to the table.
      */
-    virtual void update(
-        eVariable *where,
+    virtual eStatus update(
+        os_char *whereclause,
         eContainer *row,
         os_int tflags = 0)
-    {}
+    {
+        osal_debug_error("eTable::update is not overloaded");
+        return ESTATUS_FAILED;
+    }
 
     /* Remove rows from table.
      */
     virtual void remove(
-        eVariable *where,
+        os_char *whereclause,
         os_int tflags = 0)
-    {}
+    {
+        osal_debug_error("eTable::remove is not overloaded");
+    }
 
     /* Select rows from table.
      */
-    virtual void select(
-        eVariable *where,
+    virtual eStatus select(
+        os_char *whereclause,
+        etable_select_callback *callback,
         os_int tflags = 0)
-    {}
+    {
+        osal_debug_error("eTable::select is not overloaded");
+        return ESTATUS_FAILED;
+    }
 
     /*@}*/
+
+    /**
+    ************************************************************************************************
+      Helper function to implement table.
+    ************************************************************************************************
+    */
+    eContainer *process_configuration(
+        eContainer *configuration,
+        os_int *nro_columns);
+
+    eWhere *set_where(
+        os_char *whereclause);
+
+    /* eWhere *get_where(); */
 };
 
 #endif

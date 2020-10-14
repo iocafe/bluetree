@@ -1718,38 +1718,6 @@ failed:
 }
 
 
-#if E_SUPPROT_JSON
-/**
-****************************************************************************************************
-
-  @brief Write container specific content to stream as JSON.
-
-  The eVariable::json_writer() function writes class specific object content to stream as JSON.
-
-  @param  stream The stream to write to.
-  @param  sflags Serialization flags. Typically EOBJ_SERIALIZE_DEFAULT.
-  @param  indent Indentation depth, 0, 1... Writes 2x this spaces at beginning of a line.
-
-  @return If successfull the function returns ESTATUS_SUCCESS (0). If writing object to stream
-          fails, value ESTATUS_WRITING_OBJ_FAILED is returned. Assume that all nonzero values
-          indicate an error.
-
-****************************************************************************************************
-*/
-eStatus eVariable::json_writer(
-    eStream *stream,
-    os_int sflags,
-    os_int indent)
-{
-    if (json_putqs(stream, gets())) goto failed;
-    return ESTATUS_SUCCESS;
-
-failed:
-    return ESTATUS_FAILED;
-}
-#endif
-
-
 /**
 ****************************************************************************************************
 

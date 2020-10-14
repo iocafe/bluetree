@@ -15,6 +15,11 @@
 */
 #include "eobjects.h"
 
+/* Table property names.
+ */
+const os_char
+    emtxp_configuration[] = "configuration";
+
 
 /**
 ****************************************************************************************************
@@ -73,3 +78,89 @@ void eTable::setupclass()
     eclasslist_add(cls, (eNewObjFunc)newobj, "eTable");
     os_unlock();
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Process configuration to make sure it is in useful format.
+
+  The eTable::process_configuration processes configuration so that object identifier is
+  column number for each column variable, and row data is stripped. The function ensures
+  that name spaces are present and names are mapped into these.
+
+  @param   configuration Configuration input. The configuration returned by this function
+           is almost same as conguraration here, just with modification listed above.
+           nro_columns Pointer to integer where to store number of colums.
+
+  @return  Pointer to the modified configuratiion stored as temporary attachment to this object
+           (identifier EOID_TABLE_CONFIGURATION).
+
+****************************************************************************************************
+*/
+eContainer *eTable::process_configuration(
+    eContainer *configuration,
+    os_int *nro_columns)
+{
+    eContainer *dst_configuration;
+    eContainer *src_columns, *dst_columns;
+    eVariable *src_column;
+    os_int column_nr0;
+
+    *nro_columns = 0;
+
+    dst_configuration = new eContainer(this, EOID_TABLE_CONFIGURATION, EOBJ_TEMPORARY_ATTACHMENT);
+    dst_configuration->ns_create();
+
+    src_columns = configuration->firstc(EOID_TABLE_COLUMNS);
+    if (src_columns == OS_NULL) {
+        src_columns = eContainer::cast(configuration->byname("columns"));
+    }
+
+    if (src_columns) {
+        dst_columns = new eContainer(dst_configuration, EOID_TABLE_COLUMNS);
+        dst_columns->ns_create();
+
+        for (src_column = src_columns->firstv(), column_nr0 = 0;
+             src_column;
+             src_column = src_column->nextv(), column_nr0++)
+        {
+            src_column->clone(dst_columns, column_nr0);
+        }
+        *nro_columns = column_nr0;
+    }
+
+    return dst_configuration;
+}
+
+
+/* Alloctaes eWhere object as child of this object. Set where clause. Compiles it.
+  @return ESTATUS_SUCCESS if ok.
+ */
+eWhere *eTable::set_where(
+    os_char *whereclause)
+{
+    eObject *o;
+    eWhere *w;
+
+    o = first(EOID_TABLE_WHERE);
+    if (o) delete o;
+
+    w = new eWhere(this, EOID_TABLE_WHERE, EOBJ_TEMPORARY_ATTACHMENT);
+    if (w->compile(whereclause))
+    {
+        osal_debug_error_str("Where clause syntax error: ", whereclause);
+        delete w;
+        return OS_NULL;
+    }
+
+    return w;
+}
+
+
+/* Get pointer to eWhere object, set by setwhere() function.
+ */
+/* eWhere *eTable::get_where()
+{
+    return eWhere::cast(first(EOID_TABLE_WHERE));
+} */

@@ -82,6 +82,15 @@ public:
         e_oid id = EOID_RITEM,
         os_int flags = EOBJ_DEFAULT);
 
+    /* Casting eObject pointer to eWhere pointer.
+     */
+    inline static eWhere *cast(
+        eObject *o)
+    {
+        e_assert_type(o, ECLASSID_VARIABLE)
+        return (eWhere*)o;
+    }
+
     /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_WHERE; }
@@ -158,7 +167,6 @@ protected:
     eStatus evalunaryop(os_short op);
     eStatus evalbinaryop(os_short op);
     void changedatatype(eStackItem *item, osalTypeId datatype);
-
 
     /** Container for variables, exists always, has name space.
      */

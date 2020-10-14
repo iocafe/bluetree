@@ -87,6 +87,7 @@
 #define EOID_TABLE_CONFIGURATION -40
 #define EOID_TABLE_COLUMNS -41
 #define EOID_TABLE_CONTENT -42
+#define EOID_TABLE_WHERE -43
 
 /** This is special object identifier that can be given as argument to object hierarchy
     functions, like first(). The EOID_CHILD specifies to get a child object,

@@ -59,6 +59,7 @@ void eobjects_shutdown();
 #include "code/binding/epropertybinding.h"
 #include "code/envelope/eenvelope.h"
 #include "code/table/ewhere.h"
+#include "code/table/erange.h"
 #include "code/table/etable.h"
 #include "code/matrix/ematrix.h"
 #include "code/thread/ethreadhandle.h"

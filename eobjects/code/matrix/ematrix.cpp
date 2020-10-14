@@ -21,8 +21,7 @@
 const os_char
     emtxp_datatype[] = "type",
     emtxp_nrows[] = "nrows",
-    emtxp_ncolumns[] = "ncolumns",
-    emtxp_configuration[] = "configuration";
+    emtxp_ncolumns[] = "ncolumns";
 
 /* Approximate size for one eBuffer, adjusted to memory allocation block.
  */
@@ -68,7 +67,6 @@ eMatrix::eMatrix(
      */
     m_nrows = m_ncolumns = 0;
 
-    m_configuration = OS_NULL;
     m_own_change = 0;
 }
 
@@ -205,21 +203,27 @@ eStatus eMatrix::onpropertychange(
         case EMTXP_DATATYPE:
             if (m_own_change == 0) {
                 v = x->getl();
+                m_own_change++;
                 resize((osalTypeId)v, m_nrows, m_ncolumns);
+                m_own_change--;
             }
             break;
 
         case EMTXP_NROWS:
             if (m_own_change == 0) {
                 v = x->getl();
+                m_own_change++;
                 resize(m_datatype, v, m_ncolumns);
+                m_own_change--;
             }
             break;
 
         case EMTXP_NCOLUMNS:
             if (m_own_change == 0) {
                 v = x->getl();
+                m_own_change++;
                 resize(m_datatype, m_nrows, v);
+                m_own_change--;
             }
             break;
 
@@ -227,7 +231,9 @@ eStatus eMatrix::onpropertychange(
             if (m_own_change == 0) {
                 configuration = x->geto();
                 if (configuration) if (configuration->classid() == ECLASSID_CONTAINER) {
+                    m_own_change++;
                     configure((eContainer*)configuration);
+                    m_own_change--;
                 }
             }
             break;
@@ -260,6 +266,8 @@ eStatus eMatrix::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
+    eContainer *c;
+
     switch (propertynr)
     {
         case EMTXP_DATATYPE:
@@ -275,7 +283,8 @@ eStatus eMatrix::simpleproperty(
             break;
 
         case EMTXP_CONFIGURATION:
-            x->seto(m_configuration);
+            c = firstc(EOID_TABLE_CONFIGURATION);
+            x->seto(c);
             break;
 
         default:
@@ -757,12 +766,21 @@ eStatus eMatrix::json_writer(
     os_boolean comma1, comma2;
     eVariable tmp;
     os_int row, column, type_id;
+    os_boolean has_value;
 
-    if (json_indent(stream, indent++, EJSON_NO_NEW_LINE /* , &comma */)) goto failed;
+    indent++;
     if (json_puts(stream, "[")) goto failed;
     comma1 = OS_FALSE;
     for (row = 0; row < m_nrows; row++)
     {
+        /* If this is a table, skip rows without "row ok" flag.
+         */
+        if (m_columns) {
+            if ((getl(row, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) {
+                continue;
+            }
+        }
+
         if (comma1) {
             if (json_puts(stream, ",")) goto failed;
         }
@@ -779,7 +797,18 @@ eStatus eMatrix::json_writer(
             }
             comma2 = OS_TRUE;
 
-            if (getv(row, column, &tmp))
+            /* If this is a table, we want to show row number instead of flags column.
+             */
+            if (m_columns && column == EMTX_FLAGS_COLUMN_NR) {
+                // setl(row_nr, EMTX_FLAGS_COLUMN_NR, EMTX_FLAGS_ROW_OK);
+                tmp.setl(row + 1);
+                has_value = OS_TRUE;
+            }
+            else {
+                has_value = getv(row, column, &tmp);
+            }
+
+            if (has_value)
             {
                 type_id = tmp.type();
                 if (OSAL_IS_BOOLEAN_TYPE(type_id) ||
@@ -1789,11 +1818,13 @@ void eMatrix::resize(
     m_nrows = nrows;
     m_ncolumns =ncolumns;
 
-    m_own_change++;
-    setpropertyl(EMTXP_DATATYPE, m_datatype);
-    setpropertyl(EMTXP_NROWS, m_nrows);
-    setpropertyl(EMTXP_NCOLUMNS, m_ncolumns);
-    m_own_change--;
+    if (m_own_change == 0) {
+        m_own_change++;
+        setpropertyl(EMTXP_DATATYPE, m_datatype);
+        setpropertyl(EMTXP_NROWS, m_nrows);
+        setpropertyl(EMTXP_NCOLUMNS, m_ncolumns);
+        m_own_change--;
+    }
 }
 
 

@@ -33,15 +33,33 @@ class eBuffer;
 #define EMTXP_DATATYPE 20
 #define EMTXP_NROWS 21
 #define EMTXP_NCOLUMNS 22
-#define EMTXP_CONFIGURATION 30
+#define EMTXP_CONFIGURATION ETABLEP_CONFIGURATION
 
 /* Matrix property names.
  */
 extern const os_char
     emtxp_datatype[],
     emtxp_nrows[],
-    emtxp_ncolumns[],
-    emtxp_configuration[];
+    emtxp_ncolumns[];
+
+#define emtxp_configuration etablep_configuration
+
+/* Column number used as flags when matrix is table.
+ */
+#define EMTX_FLAGS_COLUMN_NR 0
+
+/* "Row exists" flag.
+ */
+#define EMTX_FLAGS_ROW_OK 1
+
+/* Operation argument for select_update_remove() function.
+ */
+typedef enum {
+    EMTX_UPDATE,
+    EMTX_REMOVE,
+    EMTX_SELECT,
+}
+eMtxOp;
 
 
 /**
@@ -139,6 +157,14 @@ public:
         os_int flags);
 
 #if E_SUPPROT_JSON
+    /* Called to check if object has class specific content. If there is no class
+       specific JSON content, json_writer or json_reader should not be called.
+     */
+    virtual os_boolean has_json_content()
+    {
+        return OS_TRUE;
+    }
+
     /* Write matrix specific content to stream as JSON.
      */
     virtual eStatus json_writer(
@@ -171,30 +197,27 @@ public:
      */
     virtual void insert(
         eContainer *rows,
-        os_int tflags = 0)
-    {}
+        os_int tflags = 0);
 
     /* Update a row or rows of a table.
      */
-    virtual void update(
-        eVariable *where,
+    virtual eStatus update(
+        os_char *whereclause,
         eContainer *row,
-        os_int tflags = 0)
-    {}
+        os_int tflags = 0);
 
     /* Remove rows from table.
      */
     virtual void remove(
-        eVariable *where,
-        os_int tflags = 0)
-    {}
+        os_char *whereclause,
+        os_int tflags = 0);
 
     /* Select rows from table.
      */
-    virtual void select(
-        eVariable *where,
-        os_int tflags = 0)
-    {}
+    virtual eStatus select(
+        os_char *whereclause,
+        etable_select_callback *callback,
+        os_int tflags = 0);
     /*@}*/
 
 
@@ -369,6 +392,23 @@ protected:
      */
     os_int elems_per_block();
 
+    /* ematrix_as_table.cpp: Insert single row to table.
+     */
+    void insert_one_row(eContainer *row);
+
+    /* ematrix_as_table.cpp: Insert row to table.
+     */
+    eVariable *find_index_element(
+        eContainer *row);
+
+    /* ematrix_as_table.cpp: select, update or remove operation.
+     */
+    eStatus select_update_remove(
+        eMtxOp op,
+        os_char *whereclause,
+        etable_select_callback *callback,
+        os_int tflags);
+
     /** Matrix data type.
      */
     osalTypeId m_datatype;
@@ -389,13 +429,14 @@ protected:
      */
     os_int m_ncolumns;
 
-    /** Matrix configuration, OS_NULL if not set.
+    /** Matrix columns configuration, column list, OS_NULL if not set.
+        Index column is always first column on list.
      */
-    eContainer *m_configuration;
+    eContainer *m_columns;
 
     /** To prevent recursive resizing.
      */
-    os_int m_own_change;
+    os_short m_own_change;
 
     /*@}*/
 };

@@ -98,6 +98,14 @@ public:
         os_int flags);
 
 #if E_SUPPROT_JSON
+    /* Called to check if object has class specific content. If there is no class
+       specific JSON content, json_writer or json_reader should not be called.
+     */
+    virtual os_boolean has_json_content()
+    {
+        return OS_TRUE;
+    }
+
     /* Write container specific content to stream as JSON.
      */
     virtual eStatus json_writer(

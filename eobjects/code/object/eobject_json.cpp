@@ -216,9 +216,12 @@ eStatus eObject::json_write(
 
     /* Write content (children, etc)
      */
-    if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma1)) goto failed;
-    if (json_puts(stream, "\"content\": ")) goto failed;
-    if (json_writer(stream, sflags, indent)) goto failed;
+    if (has_json_content())
+    {
+        if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma1)) goto failed;
+        if (json_puts(stream, "\"content\": ")) goto failed;
+        if (json_writer(stream, sflags, indent)) goto failed;
+    }
 
     /* Write terminating '}'
      */
