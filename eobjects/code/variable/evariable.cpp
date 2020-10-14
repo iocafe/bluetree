@@ -1136,6 +1136,7 @@ os_pointer eVariable::getp()
     return OS_NULL;
 }
 
+
 /**
 ****************************************************************************************************
 
@@ -1155,6 +1156,29 @@ void eVariable::appends(
     if (x == OS_NULL) x = "";
 
     appends_internal(x, os_strlen(x)-1);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Convert integer ro string and append it to variable.
+
+  The appendl() function appends an integer number to variable. After this
+  call the variable always contains a string.
+
+  @param   x Value to append.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eVariable::appendl(
+    os_long x)
+{
+    os_char nbuf[OSAL_NBUF_SZ];
+
+    osal_int_to_str(nbuf, sizeof(nbuf), x);
+    appends_internal(nbuf, os_strlen(nbuf)-1);
 }
 
 

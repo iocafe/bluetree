@@ -54,8 +54,12 @@ os_memsz e_parse_index_range(
     while (osal_char_isspace(*p)) p++;
     if (*p == ',') p++;
     *maxix = osal_str_to_int(p, &count);
-    if (count <= 0) return 0;
-    p += count;
+    if (count <= 0) {
+        *maxix = *minix;
+    }
+    else {
+        p += count;
+    }
     while (osal_char_isspace(*p)) p++;
     if (*(p++) != ']') return 0;
     while (osal_char_isspace(*p)) p++;

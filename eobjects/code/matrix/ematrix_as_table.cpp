@@ -211,7 +211,7 @@ eStatus eMatrix::select_update_remove(
     etable_select_callback *callback,
     os_int tflags)
 {
-    eWhere *w;
+    eWhere *w = OS_NULL;
     eMatrix *col_mtx;
     os_long minix, maxix;
     os_int row;
@@ -232,7 +232,12 @@ eStatus eMatrix::select_update_remove(
 
     /* Compile where clause and set column index for each varible in where clause
      */
-    w = set_where(whereclause);
+    if (whereclause) if (*whereclause) {
+        w = set_where(whereclause);
+        if (w == OS_NULL) {
+            return ESTATUS_FAILED;
+        }
+    }
     col_mtx = new eMatrix(this, EOID_RITEM, EOBJ_TEMPORARY_ATTACHMENT);
     col_mtx->allocate(OS_SHORT, 1, 10);
 

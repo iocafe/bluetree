@@ -23,15 +23,24 @@ static void configure_columns(
     eMatrix& mtx);
 
 static void insert_row(
-    eMatrix& mtx);
+    eMatrix& mtx,
+    os_int rownr,
+    const os_char *text);
 
+static void remove_row(
+    eMatrix& mtx,
+    os_int rownr);
 
 void matrix_as_table_example2()
 {
     eMatrix mtx;
 
     configure_columns(mtx);
-    insert_row(mtx);
+    insert_row(mtx, 3, "Mechanical Tiger");
+    insert_row(mtx, 4, "Jack the Bouncer");
+
+    remove_row(mtx, 4);
+
 
     osal_console_write("\n\nMatrix as JSON:\n\n");
     mtx.print_json();
@@ -68,14 +77,16 @@ static void configure_columns(
 
 
 static void insert_row(
-    eMatrix& mtx)
+    eMatrix& mtx,
+    os_int rownr,
+    const os_char *text)
 {
     eContainer row;
     eVariable *element;
 
     element = new eVariable(&row);
     element->addname("ix", ENAME_NO_MAP);
-    element->setl(5);
+    element->setl(rownr);
 
     element = new eVariable(&row);
     element->addname("connected", ENAME_NO_MAP);
@@ -83,7 +94,19 @@ static void insert_row(
 
     element = new eVariable(&row);
     element->addname("connectto", ENAME_NO_MAP);
-    element->sets("wall socket");
+    element->sets(text);
 
     mtx.insert(&row);
+}
+
+static void remove_row(
+    eMatrix& mtx,
+    os_int rownr)
+{
+    eVariable where;
+
+    where = "[";
+    where += rownr;
+    where += "]";
+    mtx.remove(where.gets());
 }
