@@ -33,7 +33,7 @@
 /**
 ****************************************************************************************************
 
-  @brief Configure matrix as table.
+  @brief Configure matrix as table (Table interface function).
 
   The eMatrix::configure() function configures matrix as table. This function
   - Stores column configuration.
@@ -81,7 +81,7 @@ void eMatrix::configure(
 /**
 ****************************************************************************************************
 
-  @brief Insert rows into table.
+  @brief Insert rows into table (Table interface function).
 
   The eMatrix::insert() function inserts one or more new rows to table.
 
@@ -136,7 +136,7 @@ void eMatrix::insert(
 */
 void eMatrix::insert_one_row(
     eContainer *row,
-    os_int use_row_nr /* -1 if row number is in row data */)
+    os_int use_row_nr)
 {
     eVariable *element, *index_element, *column;
     eName *name;
@@ -212,6 +212,17 @@ void eMatrix::insert_one_row(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Find index column eVariable from row to insert (helper function).
+
+  @param   row eContainer holding a eVariables for each element.
+  @return  Pointer to eVariable within row which contains index value, if any.
+           OS_NULL if row doesn't contain index.
+
+****************************************************************************************************
+*/
 eVariable *eMatrix::find_index_element(
     eContainer *row)
 {
@@ -242,8 +253,21 @@ eVariable *eMatrix::find_index_element(
 }
 
 
-/* Update a row or rows of a table.
- */
+/**
+****************************************************************************************************
+
+  @brief Update a row or rows of a table (Table interface function).
+
+  @param   whereclause String containing range and/or actual where clause. This selects which
+           rows are updated.
+  @param   row A row of updated data. eContainer holding an eVariable for each element (column)
+           to update. eVariable name is column name.
+  @param   tflags Reserved for future, set 0 for now.
+
+  @return  OSAL_SUCCESS if ok.
+
+****************************************************************************************************
+*/
 eStatus eMatrix::update(
     const os_char *whereclause,
     eContainer *row,
@@ -253,8 +277,17 @@ eStatus eMatrix::update(
 }
 
 
-/* Remove rows from table.
- */
+/**
+****************************************************************************************************
+
+  @brief Remove rows from the table (Table interface function).
+
+  @param   whereclause String containing range and/or actual where clause. This selects which
+           rows are to be removed.
+  @param   tflags Reserved for future, set 0 for now.
+
+****************************************************************************************************
+*/
 void eMatrix::remove(
     const os_char *whereclause,
     os_int tflags)
@@ -263,8 +296,30 @@ void eMatrix::remove(
 }
 
 
-/* Select rows from table.
- */
+/**
+****************************************************************************************************
+
+  @brief Select rows from table (Table interface function).
+
+  Selects data from table according. Rows to be selected are specified by where clause.
+  Column which to get are listed in "columns" list. The selected data is returned trough
+  the callback function.
+
+  @param   whereclause String containing range and/or actual where clause. This selects which
+           rows are updated.
+  @param   columns List of columns to get. eContainer holding an eVariable for each column
+           to select. eVariable name is column name, or column name can also be stored as
+           variable value.
+  @param   callback Pointer to callback function which will receive the data. The
+           callback function may be called multiple times to receive data as matrices with
+           N data rows in each. N is chosen for efficiency.
+  @param   context Application specific context pointer to pass to callback function.
+  @param   tflags Reserved for future, set 0 for now.
+
+  @return  OSAL_SUCCESS if ok.
+
+****************************************************************************************************
+*/
 eStatus eMatrix::select(
     const os_char *whereclause,
     eContainer *columns,
@@ -276,8 +331,24 @@ eStatus eMatrix::select(
 }
 
 
-/* Select, update or remove rows from table (internal).
- */
+/**
+****************************************************************************************************
+
+  @brief Select, update or remove rows from table (internal).
+
+  @param   op What to do: EMTX_UPDATE, EMTX_REMOVE or EMTX_SELECT.
+  @param   whereclause String containing range and/or actual where clause.
+  @param   cont A row of updated data or eContainer holding columns to select.
+  @param   callback Pointer to callback function which will receive the data. The
+           callback function may be called multiple times to receive data as matrices with
+           N data rows in each. N is chosen for efficiency.
+  @param   context Application specific context pointer to pass to callback function.
+  @param   tflags Reserved for future, set 0 for now.
+
+  @return  OSAL_SUCCESS if ok.
+
+****************************************************************************************************
+*/
 eStatus eMatrix::select_update_remove(
     eMtxOp op,
     const os_char *whereclause,
@@ -497,4 +568,3 @@ eStatus eMatrix::select_update_remove(
     delete tmp;
     return ESTATUS_SUCCESS;
 }
-

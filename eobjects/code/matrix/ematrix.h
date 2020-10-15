@@ -409,7 +409,7 @@ protected:
      */
     void insert_one_row(
         eContainer *row,
-        os_int use_row_nr /* -1 if row number is in row data */);
+        os_int use_row_nr);
 
     /* ematrix_as_table.cpp: Insert row to table.
      */
