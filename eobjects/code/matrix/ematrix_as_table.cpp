@@ -1,10 +1,25 @@
 /**
 
   @file    ematrix_as_table.cpp
-  @brief   Matrix class.
+  @brief   Table API for the eMatrix class.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    10.10.2020
+
+  eMatrix class code to implement table API. Direct use as table may seem unnecessary,
+  but the table interface to matrix makes sense once table is accessed over message transport.
+
+  The table API:
+  - configure: Configure table columns, initial rows, etc.
+  - insert: Insert a row or rows to table.
+  - remove: Remove rows from table.
+  - update: Update table row or rows.
+  - select: Select data from table.
+
+  Notes:
+  - flags column Is always the first matrix column. It is used to mark which matrix rows contain
+    data and which are to be treated as empty. It is invisible to upper level of code. The
+    matrix row number 1... is presented to upper levels as colum 0.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -15,16 +30,18 @@
 */
 #include "eobjects.h"
 
-
-
 /**
 ****************************************************************************************************
 
   @brief Configure matrix as table.
 
-  The eMatrix::configure() function ...
+  The eMatrix::configure() function configures matrix as table. This function
+  - Stores column configuration.
+  - Sets matrix size and data type - DATA TYPE IS NOW FIXED OS_OBJECT
+  - Adds initial data rows to empty matrix.
 
   @param   configuration Table configuration, columns.
+  @param   tflags Reserved for future, set 0 for now.
 
 ****************************************************************************************************
 */
@@ -50,7 +67,7 @@ void eMatrix::configure(
     if (c) {
         m_own_change++;
         resize(m_datatype, m_nrows, nro_columns);
-        setpropertyl(EMTXP_DATATYPE, OS_OBJECT); // WE WILL WANT TO HAVE OTHER DATA TYPES AS WELL
+        // setpropertyl(EMTXP_DATATYPE, OS_OBJECT); // WE WILL WANT TO HAVE OTHER DATA TYPES AS WELL
         setpropertyl(EMTXP_NCOLUMNS, nro_columns);
         if (m_own_change <= 1) {
             setpropertyo(EMTXP_CONFIGURATION, c);
@@ -66,10 +83,12 @@ void eMatrix::configure(
 
   @brief Insert rows into table.
 
-  The eMatrix::configure() function ...
-  Row can be one row or container with multiple rows.
+  The eMatrix::insert() function inserts one or more new rows to table.
 
-  @param   configuration
+  @param   rows For single for: eContainer holding a eVariables for each element to set.
+           Multiple rows: eContainer holding a eContainers for each row to insert. Each row
+           container contains eVariable for each element to set.
+  @param   tflags Reserved for future, set 0 for now.
 
 ****************************************************************************************************
 */
@@ -98,6 +117,23 @@ void eMatrix::insert(
     }
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Insert single rows into table (helper function).
+
+  This is a helper function for update and insert to actually set data to one single row
+  of the matrix.
+
+  @param   row eContainer holding a eVariables for each element to set.
+  @param   use_row_nr Row number to update. This tells the function which matrix row is being
+           updated. If "row" argument specifies new row number, then this row is moved.
+           Insert function sets here -1 to indicate that we are not updating a row.
+  @param   tflags Reserved for future, set 0 for now.
+
+****************************************************************************************************
+*/
 void eMatrix::insert_one_row(
     eContainer *row,
     os_int use_row_nr /* -1 if row number is in row data */)
@@ -141,6 +177,12 @@ void eMatrix::insert_one_row(
             copy_row(row_nr, use_row_nr);
             clear_row(use_row_nr);
         }
+    }
+
+    /* If we insert new row, clear any old data
+     */
+    if (use_row_nr < 0) {
+        clear_row(row_nr);
     }
 
     for (element = row->firstv(); element; element = element->nextv())
@@ -207,7 +249,7 @@ eStatus eMatrix::update(
     eContainer *row,
     os_int tflags)
 {
-    return select_update_remove(EMTX_UPDATE, whereclause, row, OS_NULL, tflags);
+    return select_update_remove(EMTX_UPDATE, whereclause, row, OS_NULL, OS_NULL, tflags);
 }
 
 
@@ -217,7 +259,7 @@ void eMatrix::remove(
     const os_char *whereclause,
     os_int tflags)
 {
-    select_update_remove(EMTX_REMOVE, whereclause, OS_NULL, OS_NULL, tflags);
+    select_update_remove(EMTX_REMOVE, whereclause, OS_NULL, OS_NULL, OS_NULL, tflags);
 }
 
 
@@ -225,31 +267,39 @@ void eMatrix::remove(
  */
 eStatus eMatrix::select(
     const os_char *whereclause,
+    eContainer *columns,
     etable_select_callback *callback,
+    eObject *context,
     os_int tflags)
 {
-    return select_update_remove(EMTX_SELECT, whereclause, OS_NULL, callback, tflags);
+    return select_update_remove(EMTX_SELECT, whereclause, columns, callback, context, tflags);
 }
 
 
-/* Select rows from table.
+/* Select, update or remove rows from table (internal).
  */
 eStatus eMatrix::select_update_remove(
     eMtxOp op,
     const os_char *whereclause,
-    eContainer *row,
+    eContainer *cont,
     etable_select_callback *callback,
+    eObject *context,
     os_int tflags)
 {
     eWhere *w = OS_NULL;
-    os_int *col_mtx = OS_NULL;
-    os_memsz col_mtx_sz = 0;
+    os_int *col_mtx = OS_NULL, *sel_mtx = OS_NULL;
+    os_memsz col_mtx_sz = 0, sel_mtx_sz = 0;
     eContainer *vars = OS_NULL;
-    eVariable *v, *u;
+    eVariable *v, *u, *tmp = OS_NULL;
     eName *name;
+    os_char *namestr;
+    eMatrix *m;
+    ePointer *ref = OS_NULL;
     os_long minix, maxix;
-    os_int row_nr, i, col_nr, nvars;
+    os_int row_nr, i, col_nr, nvars, nro_selected_cols;
     os_memsz count;
+    eStatus s;
+    os_boolean eval_error_reported = OS_FALSE;
 
     if (m_columns == OS_NULL) {
         osal_debug_error("eMatrix::select_update_remove: Not configured");
@@ -288,13 +338,53 @@ eStatus eMatrix::select_update_remove(
                     col_nr = -1;
                     name = v->primaryname();
                     if (name) {
-                        u = eVariable::cast(m_columns->byname(name->gets()));
+                        namestr = name->gets();
+                        u = eVariable::cast(m_columns->byname(namestr));
                         if (u) {
                             col_nr = u->oid();
+                        }
+                        else {
+                            osal_debug_error_str("Where clause contains column name: ", namestr);
                         }
                     }
                     col_mtx[i] = col_nr;
                 }
+            }
+        }
+    }
+
+    /* Set up for select.
+     */
+    nro_selected_cols = 0;
+    if (op == EMTX_SELECT) {
+        ref = new ePointer(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+        tmp = new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+
+        if (cont != NULL) {
+            for (v = cont->firstv(); v; v = v->nextv()) {
+                nro_selected_cols++;
+            }
+
+            if (nro_selected_cols) {
+                sel_mtx_sz = nro_selected_cols * sizeof(os_int);
+                sel_mtx = (os_int*)os_malloc(sel_mtx_sz, OS_NULL);
+            }
+
+            for (v = cont->firstv(), i = 0; v; v = v->nextv(), i++)
+            {
+                col_nr = -1;
+                name = v->primaryname();
+                if (name) {
+                    namestr = name->gets();
+                }
+                else {
+                    namestr = v->gets();
+                }
+                u = eVariable::cast(m_columns->byname(namestr));
+                if (u) {
+                    col_nr = u->oid();
+                }
+                sel_mtx[i] = col_nr;
             }
         }
     }
@@ -318,7 +408,7 @@ eStatus eMatrix::select_update_remove(
                 if (col_nr == EMTX_FLAGS_COLUMN_NR) {
                     v->setl(row_nr + 1);
                 }
-                else {
+                else if (col_nr >= 0) {
                     getv(row_nr, col_nr, v);
                 }
             }
@@ -326,7 +416,13 @@ eStatus eMatrix::select_update_remove(
         if (w) {
             /* Evaluate where clause, skip operation on row if no match.
              */
-            if (w->evaluate()) {
+            s = w->evaluate();
+            if (s) {
+                if (s != ESTATUS_FALSE && !eval_error_reported)
+                {
+                    osal_debug_error_str("Where clause failed: ", whereclause);
+                    eval_error_reported = OS_TRUE;
+                }
                 continue;
             }
         }
@@ -335,7 +431,7 @@ eStatus eMatrix::select_update_remove(
          */
         switch (op) {
             case EMTX_UPDATE:
-                insert_one_row(row, row_nr);
+                insert_one_row(cont, row_nr);
                 break;
 
             case EMTX_REMOVE:
@@ -343,6 +439,50 @@ eStatus eMatrix::select_update_remove(
                 break;
 
             case EMTX_SELECT:
+                m = new eMatrix(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+                ref->set(m);
+
+                /* Set values to selected row to return.
+                 */
+                if (nro_selected_cols > 0) {
+                    m->allocate(OS_OBJECT, 1, nro_selected_cols);
+
+                    for (i = 0; i < nro_selected_cols; i++) {
+                        col_nr = sel_mtx[i];
+                        if (col_nr == EMTX_FLAGS_COLUMN_NR) {
+                            m->setl(0, i, row_nr + 1);
+                        }
+                        else if (col_nr >= 0) {
+                            getv(row_nr, col_nr, tmp);
+                            m->setv(0, i, tmp);
+                        }
+                    }
+                }
+
+                /* No columns specified, return whole row.
+                 */
+                else {
+                    m->allocate(OS_OBJECT, 1, m_ncolumns);
+                    for (i = 0; i < m_ncolumns; i++) {
+                        if (i == EMTX_FLAGS_COLUMN_NR) {
+                            m->setl(0, i, row_nr + 1);
+                        }
+                        else {
+                            getv(row_nr, i, tmp);
+                            m->setv(0, i, tmp);
+                        }
+                    }
+                }
+
+                /* Callback.
+                 */
+                if (callback) {
+                    callback(this, m, context);
+                }
+
+                /* Clean up in case callback did not adopt the matrix.
+                 */
+                delete ref->get();
                 break;
         }
     }
@@ -350,6 +490,11 @@ eStatus eMatrix::select_update_remove(
     if (col_mtx_sz) {
         os_free(col_mtx, col_mtx_sz);
     }
+    if (sel_mtx_sz){
+        os_free(sel_mtx, sel_mtx_sz);
+    }
+    delete ref;
+    delete tmp;
     return ESTATUS_SUCCESS;
 }
 

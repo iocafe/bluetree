@@ -37,7 +37,10 @@ class eMatrix;
 extern const os_char
     etablep_configuration[];
 
-typedef void etable_select_callback(eTable *t, eMatrix *data);
+typedef void etable_select_callback(
+    eTable *t,
+    eMatrix *data,
+    eObject *context);
 
 
 /**
@@ -155,7 +158,9 @@ public:
      */
     virtual eStatus select(
         const os_char *whereclause,
+        eContainer *columns,
         etable_select_callback *callback,
+        eObject *context,
         os_int tflags = 0)
     {
         osal_debug_error("eTable::select is not overloaded");

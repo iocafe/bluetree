@@ -216,7 +216,9 @@ public:
      */
     virtual eStatus select(
         const os_char *whereclause,
+        eContainer *columns,
         etable_select_callback *callback,
+        eObject *context,
         os_int tflags = 0);
     /*@}*/
 
@@ -245,11 +247,11 @@ public:
 
     /* Get matrix width.
      */
-    os_int width();
+    inline os_int ncolumns() {return m_ncolumns; }
 
     /* Get matrix height.
      */
-    os_int height();
+    inline os_int nrows() {return m_nrows; }
 
     /* Store value into matrix.
      */
@@ -419,8 +421,9 @@ protected:
     eStatus select_update_remove(
         eMtxOp op,
         const os_char *whereclause,
-        eContainer *row,
+        eContainer *cont,
         etable_select_callback *callback,
+        eObject *context,
         os_int tflags);
 
     /** Matrix data type.

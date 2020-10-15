@@ -1,13 +1,20 @@
 /**
 
   @file    matrix_as_table2.cpp
-  @brief   Storing data as matrix.
+  @brief   Unit test, eMatrix class implementation of table API.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    10.10.2020
 
   This tests is about using matrix directly as a table. Direct use as table may seem unnecessary,
   but the table interface to matrix makes sense once table is accessed over message transport.
+
+  The table API:
+  - configure: Configure table columns, initial rows, etc.
+  - insert: Insert a row or rows to table.
+  - remove: Remove rows from table.
+  - update: Update table row or rows.
+  - select: Select data from table.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -39,6 +46,15 @@ static void update_row(
     os_int rownr,
     const os_char *text);
 
+static void select_rows(
+    eMatrix& mtx);
+
+static void select_callback(
+    eTable *t,
+    eMatrix *data,
+    eObject *context);
+
+
 
 void matrix_as_table_example2()
 {
@@ -47,6 +63,10 @@ void matrix_as_table_example2()
     configure_columns(mtx);
     insert_row(mtx, 3, "Mechanical Tiger");
     insert_row(mtx, 4, "Jack the Bouncer");
+    insert_row(mtx, 16, "Silly Creeper");
+    insert_row(mtx, 14, "Astounding Apple");
+
+    select_rows(mtx);
 
     remove_row(mtx, 14);
     remove_row2(mtx);
@@ -150,3 +170,41 @@ static void update_row(
 
     mtx.update(where.gets(), &row);
 }
+
+static void select_rows(
+    eMatrix& mtx)
+{
+    eVariable where;
+    eContainer columns;
+    eVariable *element;
+
+    element = new eVariable(&columns);
+    element->addname("connectto", ENAME_NO_MAP);
+
+    where = "[";
+    where += 10;
+    where += ",";
+    where += 20;
+    where += "]";
+    mtx.select(where.gets(), &columns, select_callback, OS_NULL);
+}
+
+static void select_callback(
+    eTable *t,
+    eMatrix *data,
+    eObject *context)
+{
+    eVariable tmp;
+    os_int ncols, nrows, c, r;
+
+    ncols = data->ncolumns();
+    nrows = data->nrows();
+
+    for (r = 0; r<nrows; r++) {
+        for (c = 0; c<ncols; c++) {
+            data->getv(r, c, &tmp);
+            osal_debug_error_str("Element: ", tmp.gets());
+        }
+    }
+}
+
