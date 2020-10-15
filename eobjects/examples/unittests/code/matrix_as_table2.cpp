@@ -34,6 +34,11 @@ static void remove_row(
 static void remove_row2(
     eMatrix& mtx);
 
+static void update_row(
+    eMatrix& mtx,
+    os_int rownr,
+    const os_char *text);
+
 
 void matrix_as_table_example2()
 {
@@ -43,8 +48,9 @@ void matrix_as_table_example2()
     insert_row(mtx, 3, "Mechanical Tiger");
     insert_row(mtx, 4, "Jack the Bouncer");
 
-    // remove_row(mtx, 4);
+    remove_row(mtx, 14);
     remove_row2(mtx);
+    update_row(mtx, 3, "Mighty Mechanical Squirrel");
 
     osal_console_write("\n\nMatrix as JSON:\n\n");
     mtx.print_json();
@@ -118,5 +124,29 @@ static void remove_row(
 static void remove_row2(
     eMatrix& mtx)
 {
-    mtx.remove("connectto>=\'Mechanical\'");
+    mtx.remove("connectto<\'Mechanical\'");
+}
+
+static void update_row(
+    eMatrix& mtx,
+    os_int rownr,
+    const os_char *text)
+{
+    eContainer row;
+    eVariable *element;
+    eVariable where;
+
+    where = "[";
+    where += rownr;
+    where += "]";
+
+    element = new eVariable(&row);
+    element->addname("connectto", ENAME_NO_MAP);
+    element->sets(text);
+
+    element = new eVariable(&row);
+    element->addname("ix", ENAME_NO_MAP);
+    element->setl(12);
+
+    mtx.update(where.gets(), &row);
 }

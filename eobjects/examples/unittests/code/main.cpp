@@ -52,7 +52,7 @@ eStatus emain(
     os_int argc,
     os_char *argv[])
 {
-    os_int test_nr = 81;
+    os_int test_nr = 82;
 
     switch (test_nr)
     {

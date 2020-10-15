@@ -296,8 +296,14 @@ public:
 
     /* Clear matrix row to be empty.
      */
-    void clear(
+    void clear_row(
         os_int row);
+
+    /* Copy a row.
+     */
+    void copy_row(
+        os_int dstrow,
+        os_int srcrow);
 
     /* Get value from matrix.
      */
@@ -399,7 +405,9 @@ protected:
 
     /* ematrix_as_table.cpp: Insert single row to table.
      */
-    void insert_one_row(eContainer *row);
+    void insert_one_row(
+        eContainer *row,
+        os_int use_row_nr /* -1 if row number is in row data */);
 
     /* ematrix_as_table.cpp: Insert row to table.
      */
@@ -411,6 +419,7 @@ protected:
     eStatus select_update_remove(
         eMtxOp op,
         const os_char *whereclause,
+        eContainer *row,
         etable_select_callback *callback,
         os_int tflags);
 

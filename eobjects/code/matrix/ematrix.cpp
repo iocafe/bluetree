@@ -1351,7 +1351,7 @@ void eMatrix::clear(
 
 ****************************************************************************************************
 */
-void eMatrix::clear(
+void eMatrix::clear_row(
     os_int row)
 {
     os_int col;
@@ -1364,6 +1364,41 @@ void eMatrix::clear(
     {
         clear(row, col);
     }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Copy matrix row.
+
+  @param  dstrow Destination row number, 0...
+  @param  srcrow Destination row number, 0...
+  @return None.
+
+****************************************************************************************************
+*/
+void eMatrix::copy_row(
+    os_int dstrow,
+    os_int srcrow)
+{
+    eVariable *v;
+    os_int col;
+
+    if (srcrow == dstrow) return;
+
+    if (srcrow < 0 || srcrow >= m_nrows) {
+        clear_row(dstrow);
+        return;
+    }
+
+    v = new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+    for (col = 0; col < m_ncolumns; col++)
+    {
+        getv(srcrow, col, v);
+        setv(dstrow, col, v);
+    }
+    delete v;
 }
 
 

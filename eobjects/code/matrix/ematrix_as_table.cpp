@@ -86,12 +86,12 @@ void eMatrix::insert(
 
     row = rows->firstc();
     if (row == OS_NULL) {
-        insert_one_row(rows);
+        insert_one_row(rows, -1);
     }
 
     else {
         do {
-            insert_one_row(row);
+            insert_one_row(row, -1);
             row = row->nextc();
         }
         while (row);
@@ -99,7 +99,8 @@ void eMatrix::insert(
 }
 
 void eMatrix::insert_one_row(
-    eContainer *row)
+    eContainer *row,
+    os_int use_row_nr /* -1 if row number is in row data */)
 {
     eVariable *element, *index_element, *column;
     eName *name;
@@ -109,11 +110,38 @@ void eMatrix::insert_one_row(
 
     index_element = find_index_element(row);
     if (index_element == OS_NULL) {
-        osal_debug_error("eMatrix::insert: Matrix index column is not set");
-        return;
+        /* If row number is unspecified, use first free
+         */
+        if (use_row_nr < 0) {
+            for (row_nr = 0; row_nr < m_nrows; row_nr++) {
+                if ((getl(row_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) {
+                    break;
+                }
+            }
+        }
+        else {
+            row_nr = use_row_nr;
+        }
     }
-
-    row_nr = index_element->getl();
+    else {
+        row_nr = index_element->getl() - 1;
+        if (row_nr < 0) {
+            if (use_row_nr < 0) {
+                for (row_nr = 0; row_nr < m_nrows; row_nr++) {
+                    if ((getl(row_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) {
+                        break;
+                    }
+                }
+            }
+            else {
+                row_nr = use_row_nr;
+            }
+        }
+        else if (use_row_nr >= 0 && row_nr != use_row_nr) {
+            copy_row(row_nr, use_row_nr);
+            clear_row(use_row_nr);
+        }
+    }
 
     for (element = row->firstv(); element; element = element->nextv())
     {
@@ -133,13 +161,14 @@ void eMatrix::insert_one_row(
         }
 
         column_nr = column->oid();
-        setv(row_nr - 1, column_nr, element);
+        setv(row_nr, column_nr, element);
     }
 
     /* Set flags column
      */
-    setl(row_nr - 1, EMTX_FLAGS_COLUMN_NR, EMTX_FLAGS_ROW_OK);
+    setl(row_nr, EMTX_FLAGS_COLUMN_NR, EMTX_FLAGS_ROW_OK);
 }
+
 
 eVariable *eMatrix::find_index_element(
     eContainer *row)
@@ -168,7 +197,6 @@ eVariable *eMatrix::find_index_element(
     }
 
     return element;
-
 }
 
 
@@ -179,8 +207,9 @@ eStatus eMatrix::update(
     eContainer *row,
     os_int tflags)
 {
-    return select_update_remove(EMTX_UPDATE, whereclause, OS_NULL, tflags);
+    return select_update_remove(EMTX_UPDATE, whereclause, row, OS_NULL, tflags);
 }
+
 
 /* Remove rows from table.
  */
@@ -188,8 +217,9 @@ void eMatrix::remove(
     const os_char *whereclause,
     os_int tflags)
 {
-    select_update_remove(EMTX_REMOVE, whereclause, OS_NULL, tflags);
+    select_update_remove(EMTX_REMOVE, whereclause, OS_NULL, OS_NULL, tflags);
 }
+
 
 /* Select rows from table.
  */
@@ -198,9 +228,8 @@ eStatus eMatrix::select(
     etable_select_callback *callback,
     os_int tflags)
 {
-    return select_update_remove(EMTX_SELECT, whereclause, callback, tflags);
+    return select_update_remove(EMTX_SELECT, whereclause, OS_NULL, callback, tflags);
 }
-
 
 
 /* Select rows from table.
@@ -208,6 +237,7 @@ eStatus eMatrix::select(
 eStatus eMatrix::select_update_remove(
     eMtxOp op,
     const os_char *whereclause,
+    eContainer *row,
     etable_select_callback *callback,
     os_int tflags)
 {
@@ -218,7 +248,7 @@ eStatus eMatrix::select_update_remove(
     eVariable *v, *u;
     eName *name;
     os_long minix, maxix;
-    os_int row, i, col_nr, nvars;
+    os_int row_nr, i, col_nr, nvars;
     os_memsz count;
 
     if (m_columns == OS_NULL) {
@@ -271,11 +301,11 @@ eStatus eMatrix::select_update_remove(
 
     /* Process rows by row.
      */
-    for (row = (os_int)minix; row <= maxix; row++)
+    for (row_nr = (os_int)minix; row_nr <= maxix; row_nr++)
     {
         /* If row has been deleted
          */
-        if ((getl(row, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0)
+        if ((getl(row_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0)
             continue;
 
         /* If we have where clause
@@ -284,13 +314,12 @@ eStatus eMatrix::select_update_remove(
             /* Set values to where from row.
              */
             for (v = vars->firstv(), i = 0; v; v = v->nextv(), i++) {
-
                 col_nr = col_mtx[i];
                 if (col_nr == EMTX_FLAGS_COLUMN_NR) {
-                    v->setl(row + 1);
+                    v->setl(row_nr + 1);
                 }
                 else {
-                    getv(row, col_nr, v);
+                    getv(row_nr, col_nr, v);
                 }
             }
         }
@@ -306,10 +335,11 @@ eStatus eMatrix::select_update_remove(
          */
         switch (op) {
             case EMTX_UPDATE:
+                insert_one_row(row, row_nr);
                 break;
 
             case EMTX_REMOVE:
-                clear(row);
+                clear_row(row_nr);
                 break;
 
             case EMTX_SELECT:
@@ -322,3 +352,4 @@ eStatus eMatrix::select_update_remove(
     }
     return ESTATUS_SUCCESS;
 }
+
