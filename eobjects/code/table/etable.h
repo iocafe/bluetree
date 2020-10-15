@@ -134,7 +134,7 @@ public:
     /* Update a row or rows of a table or insert a row to the table.
      */
     virtual eStatus update(
-        os_char *whereclause,
+        const os_char *whereclause,
         eContainer *row,
         os_int tflags = 0)
     {
@@ -145,7 +145,7 @@ public:
     /* Remove rows from table.
      */
     virtual void remove(
-        os_char *whereclause,
+        const os_char *whereclause,
         os_int tflags = 0)
     {
         osal_debug_error("eTable::remove is not overloaded");
@@ -154,7 +154,7 @@ public:
     /* Select rows from table.
      */
     virtual eStatus select(
-        os_char *whereclause,
+        const os_char *whereclause,
         etable_select_callback *callback,
         os_int tflags = 0)
     {
@@ -174,7 +174,7 @@ public:
         os_int *nro_columns);
 
     eWhere *set_where(
-        os_char *whereclause);
+        const os_char *whereclause);
 
     /* eWhere *get_where(); */
 };

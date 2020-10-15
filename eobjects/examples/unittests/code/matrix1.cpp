@@ -24,7 +24,6 @@ void matrix_example1()
     eMatrix mtx;
     eVariable value;
     os_int i, x, y;
-    os_char nbuf[OSAL_NBUF_SZ];
 
     const os_int w = 8, h = 12;
 
@@ -51,10 +50,8 @@ void matrix_example1()
     for (i = 0; i<1000; i++) {
         x = osal_rand(0, w - 1);
         y = osal_rand(0, h - 1);
-        osal_int_to_str(nbuf, sizeof(nbuf), osal_rand(0, 100));
-
         value = "s";
-        value += nbuf;
+        value.appendl(osal_rand(0, 100));
         mtx.setv(y, x, &value);
     }
 

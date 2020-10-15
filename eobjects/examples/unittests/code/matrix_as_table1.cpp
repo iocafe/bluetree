@@ -31,6 +31,10 @@ static void remove_row(
     eMatrix& mtx,
     os_int rownr);
 
+static void remove_row2(
+    eMatrix& mtx);
+
+
 void matrix_as_table_example2()
 {
     eMatrix mtx;
@@ -39,8 +43,8 @@ void matrix_as_table_example2()
     insert_row(mtx, 3, "Mechanical Tiger");
     insert_row(mtx, 4, "Jack the Bouncer");
 
-    remove_row(mtx, 4);
-
+    // remove_row(mtx, 4);
+    remove_row2(mtx);
 
     osal_console_write("\n\nMatrix as JSON:\n\n");
     mtx.print_json();
@@ -109,4 +113,10 @@ static void remove_row(
     where += rownr;
     where += "]";
     mtx.remove(where.gets());
+}
+
+static void remove_row2(
+    eMatrix& mtx)
+{
+    mtx.remove("ix>=4");
 }

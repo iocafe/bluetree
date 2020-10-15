@@ -488,8 +488,7 @@ void eConnection::run()
 void eConnection::accepted(
     eStream *stream)
 {
-    if (m_stream) delete m_stream;
-
+    delete m_stream;
     m_stream = stream;
     adopt(stream);
 

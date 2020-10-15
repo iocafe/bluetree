@@ -153,7 +153,7 @@ eWhere::eWhere(
 ****************************************************************************************************
 */
 eStatus eWhere::compile(
-    os_char *whereclause)
+    const os_char *whereclause)
 {
     m_vars->clear();
     m_nvars = 0;
@@ -524,7 +524,7 @@ os_boolean eWhere::element()
 */
 os_boolean eWhere::column_name()
 {
-    os_char *end;
+    const os_char *end;
 
     end = m_pos;
     while (*(++end) != '\"')
@@ -559,7 +559,8 @@ os_boolean eWhere::column_name()
 */
 os_boolean eWhere::number_or_column_name()
 {
-    os_char *end, c;
+    const os_char *end;
+    os_char c;
     os_memsz nbytes;
     os_double d;
     os_long l;
@@ -628,6 +629,8 @@ os_boolean eWhere::number_or_column_name()
         {
             code(adddouble(d));
         }
+
+        m_pos = end; // 14.10.2020
     }
 
     return OS_TRUE;
@@ -650,7 +653,7 @@ os_boolean eWhere::number_or_column_name()
 */
 os_boolean eWhere::string_constant()
 {
-    os_char *end;
+    const os_char *end;
 
     end = m_pos;
     while (*(++end) != '\'')
@@ -698,7 +701,7 @@ os_short eWhere::adddouble(
 }
 
 os_short eWhere::addstring(
-    os_char *str,
+    const os_char *str,
     os_memsz len)
 {
     eVariable *v;
@@ -741,7 +744,7 @@ os_short eWhere::addstring(
 ****************************************************************************************************
 */
 os_short eWhere::addvariable(
-    os_char *name,
+    const os_char *name,
     os_memsz len)
 {
     eVariable *v;
@@ -797,7 +800,7 @@ void eWhere::skipspace()
 */
 os_char *eWhere::getword()
 {
-    os_char *p;
+    const os_char *p;
 
     p = m_pos;
     while (osal_char_isaplha(*p) && *p != '\n') p++;

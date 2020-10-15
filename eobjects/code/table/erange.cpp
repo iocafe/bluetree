@@ -33,11 +33,11 @@
 ****************************************************************************************************
 */
 os_memsz e_parse_index_range(
-    os_char *whereclause,
+    const os_char *whereclause,
     os_long *minix,
     os_long *maxix)
 {
-    os_char *p;
+    const os_char *p;
     os_memsz count;
 
     if (whereclause == OS_NULL) {

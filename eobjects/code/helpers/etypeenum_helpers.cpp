@@ -61,28 +61,26 @@ void emake_type_enum_str(
     os_boolean append_it)
 {
     os_int i;
-    os_char nbuf[OSAL_NBUF_SZ];
 
     if (append_it) {
         if (str->isempty()) {
-            *str += ",";
+            str->appends(",");
         }
     }
     else {
         str->clear();
     }
 
-    *str += "enum=\"";
+    str->appends("enum=\"");
 
     /* Append regular types.
      */
     for (i = 0; i<EENUM_NRO_REGULAR_TYPES; i++) {
         if (i) *str += ",";
-        osal_int_to_str(nbuf, sizeof(nbuf), (os_long)regular_types[i].type_id);
-        *str += nbuf;
-        *str += ". ";
-        *str += regular_types[i].label;
+        str->appendl(regular_types[i].type_id);
+        str->appends(". ");
+        str->appends(regular_types[i].label);
     }
 
-    *str += "\"";
+    str->appends("\"");
 }

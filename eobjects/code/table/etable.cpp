@@ -138,13 +138,13 @@ eContainer *eTable::process_configuration(
   @return ESTATUS_SUCCESS if ok.
  */
 eWhere *eTable::set_where(
-    os_char *whereclause)
+    const os_char *whereclause)
 {
     eObject *o;
     eWhere *w;
 
     o = first(EOID_TABLE_WHERE);
-    if (o) delete o;
+    delete o;
 
     w = new eWhere(this, EOID_TABLE_WHERE, EOBJ_TEMPORARY_ATTACHMENT);
     if (w->compile(whereclause))

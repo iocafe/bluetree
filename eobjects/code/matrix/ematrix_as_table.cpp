@@ -175,7 +175,7 @@ eVariable *eMatrix::find_index_element(
 /* Update a row or rows of a table.
  */
 eStatus eMatrix::update(
-    os_char *whereclause,
+    const os_char *whereclause,
     eContainer *row,
     os_int tflags)
 {
@@ -185,7 +185,7 @@ eStatus eMatrix::update(
 /* Remove rows from table.
  */
 void eMatrix::remove(
-    os_char *whereclause,
+    const os_char *whereclause,
     os_int tflags)
 {
     select_update_remove(EMTX_REMOVE, whereclause, OS_NULL, tflags);
@@ -194,7 +194,7 @@ void eMatrix::remove(
 /* Select rows from table.
  */
 eStatus eMatrix::select(
-    os_char *whereclause,
+    const os_char *whereclause,
     etable_select_callback *callback,
     os_int tflags)
 {
@@ -207,15 +207,24 @@ eStatus eMatrix::select(
  */
 eStatus eMatrix::select_update_remove(
     eMtxOp op,
-    os_char *whereclause,
+    const os_char *whereclause,
     etable_select_callback *callback,
     os_int tflags)
 {
     eWhere *w = OS_NULL;
-    eMatrix *col_mtx;
+    os_int *col_mtx = OS_NULL;
+    os_memsz col_mtx_sz = 0;
+    eContainer *vars = OS_NULL;
+    eVariable *v, *u;
+    eName *name;
     os_long minix, maxix;
-    os_int row;
+    os_int row, i, col_nr, nvars;
     os_memsz count;
+
+    if (m_columns == OS_NULL) {
+        osal_debug_error("eMatrix::select_update_remove: Not configured");
+        return ESTATUS_FAILED;
+    }
 
     /* Get index range from beginning of where clause.
      */
@@ -237,20 +246,79 @@ eStatus eMatrix::select_update_remove(
         if (w == OS_NULL) {
             return ESTATUS_FAILED;
         }
-    }
-    col_mtx = new eMatrix(this, EOID_RITEM, EOBJ_TEMPORARY_ATTACHMENT);
-    col_mtx->allocate(OS_SHORT, 1, 10);
+        nvars = w->nvars();
+        if (nvars > 0) {
+            col_mtx_sz = nvars * sizeof(os_int);
+            col_mtx = (os_int*)os_malloc(col_mtx_sz, OS_NULL);
 
+            vars = w->variables();
+            if (vars) {
+                for (v = vars->firstv(), i = 0; v; v = v->nextv(), i++)
+                {
+                    col_nr = -1;
+                    name = v->primaryname();
+                    if (name) {
+                        u = eVariable::cast(m_columns->byname(name->gets()));
+                        if (u) {
+                            col_nr = u->oid();
+                        }
+                    }
+                    col_mtx[i] = col_nr;
+                }
+            }
+        }
+    }
+
+    /* Process rows by row.
+     */
     for (row = (os_int)minix; row <= maxix; row++)
     {
-        /* Set values to where from row.
+        /* If row has been deleted
          */
+        if ((getl(row, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0)
+            continue;
 
-        /* Evaluate where clause, skip row if no match.
+        /* If we have where clause
          */
+        if (vars) {
+            /* Set values to where from row.
+             */
+            for (v = vars->firstv(), i = 0; v; v = v->nextv(), i++) {
+
+                col_nr = col_mtx[i];
+                if (col_nr == EMTX_FLAGS_COLUMN_NR) {
+                    v->setl(row + 1);
+                }
+                else {
+                    getv(row, col_nr, v);
+                }
+            }
+        }
+        if (w) {
+            /* Evaluate where clause, skip operation on row if no match.
+             */
+            if (w->evaluate()) {
+                continue;
+            }
+        }
+
+        /* Do the operation.
+         */
+        switch (op) {
+            case EMTX_UPDATE:
+                break;
+
+            case EMTX_REMOVE:
+                clear(row);
+                break;
+
+            case EMTX_SELECT:
+                break;
+        }
     }
 
-    delete col_mtx;
-
+    if (col_mtx_sz) {
+        os_free(col_mtx, col_mtx_sz);
+    }
     return ESTATUS_SUCCESS;
 }

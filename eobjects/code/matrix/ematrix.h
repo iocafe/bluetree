@@ -202,20 +202,20 @@ public:
     /* Update a row or rows of a table.
      */
     virtual eStatus update(
-        os_char *whereclause,
+        const os_char *whereclause,
         eContainer *row,
         os_int tflags = 0);
 
     /* Remove rows from table.
      */
     virtual void remove(
-        os_char *whereclause,
+        const os_char *whereclause,
         os_int tflags = 0);
 
     /* Select rows from table.
      */
     virtual eStatus select(
-        os_char *whereclause,
+        const os_char *whereclause,
         etable_select_callback *callback,
         os_int tflags = 0);
     /*@}*/
@@ -293,6 +293,11 @@ public:
     void clear(
         os_int row,
         os_int column);
+
+    /* Clear matrix row to be empty.
+     */
+    void clear(
+        os_int row);
 
     /* Get value from matrix.
      */
@@ -405,7 +410,7 @@ protected:
      */
     eStatus select_update_remove(
         eMtxOp op,
-        os_char *whereclause,
+        const os_char *whereclause,
         etable_select_callback *callback,
         os_int tflags);
 

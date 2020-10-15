@@ -23,7 +23,7 @@
 /* Parse index range from beginning of where clause string.
  */
 os_memsz e_parse_index_range(
-    os_char *whereclause,
+    const os_char *whereclause,
     os_long *minix,
     os_long *maxix);
 

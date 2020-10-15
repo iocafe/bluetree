@@ -1312,9 +1312,9 @@ void eMatrix::seto(
 
   @brief Clear matrix element.
 
-  The eMatrix::clear removed value from matrix, so that elemet is empty. Row and column specify
-  position in matrix. The first row is 0 and first columns is 0. The matrix is expanded if
-  row/column specify position outside current matrix size.
+  The eMatrix::clear sets matrix element to empty. Row and column specify position in matrix.
+  The first row is 0 and first columns is 0. The matrix is expanded if row/column specify
+  position outside current matrix size.
 
   @param  row Row number, 0...
   @param  column Column number, 0...
@@ -1335,6 +1335,34 @@ void eMatrix::clear(
     /* Getptrs function is used to clear the elemenet.
      */
     getptrs(row, column, &typeptr, EMATRIX_CLEAR_ELEMENT);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Clear matrix row.
+
+  Calls clear(row, col) for all elements of matrix row.
+
+  @param  row Row number, 0...
+  @return None.
+
+****************************************************************************************************
+*/
+void eMatrix::clear(
+    os_int row)
+{
+    os_int col;
+
+    if (row < 0 || row >= m_nrows) {
+        return;
+    }
+
+    for (col = 0; col < m_ncolumns; col++)
+    {
+        clear(row, col);
+    }
 }
 
 

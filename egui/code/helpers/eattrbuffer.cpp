@@ -51,10 +51,8 @@ eAttrBuffer::~eAttrBuffer()
 */
 void eAttrBuffer::clear()
 {
-    if (m_drop_down_list) {
-        delete m_drop_down_list;
-        m_drop_down_list = OS_NULL;
-    }
+    delete m_drop_down_list;
+    m_drop_down_list = OS_NULL;
     m_initialized = false;
 }
 
@@ -255,9 +253,7 @@ void eAttrBuffer::setup_list(
     osalStatus s;
     os_int id;
 
-    if (m_drop_down_list) {
-        delete m_drop_down_list;
-    }
+    delete m_drop_down_list;
     m_drop_down_list = new eContainer();
 
     tmp.sets(value, value_sz);
