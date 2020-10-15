@@ -64,13 +64,7 @@ eMtxOp;
 
 /**
 ****************************************************************************************************
-
-  @brief Matrix class.
-
-  The eMatrix is base class for tables. Underlying table can be eMatrix, eSelection or database
-  table class.
-
-
+  Matrix class.
 ****************************************************************************************************
 */
 class eMatrix : public eTable
@@ -177,11 +171,7 @@ public:
 
     /**
     ************************************************************************************************
-
-      @name Table function overrides.
-
-      X...
-
+      Overloaded table interface functions.
     ************************************************************************************************
     */
     /*@{*/
@@ -396,7 +386,7 @@ protected:
         os_char *dataptr,
         os_char *typeptr);
 
-    /* How many bytes are needed for matrix datatype
+    /* How many bytes are needed for matrix datatype.
      */
     os_short typesz(
         osalTypeId datatype);
