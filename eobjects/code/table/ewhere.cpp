@@ -1205,6 +1205,7 @@ skipconv:
                     item1->value.d = (item1->value.d == item2->value.d);
                     break;
             }
+            item1->datatype = OS_LONG; // 14.10.2020
             break;
 
         case OS_STR:
@@ -1235,6 +1236,7 @@ skipconv:
                     item1->value.l = (sign == 0);
                     break;
             }
+            item1->datatype = OS_LONG; // 14.10.2020
             break;
 
         default:

@@ -1,6 +1,6 @@
 /**
 
-  @file    matrix_as_table.cpp
+  @file    matrix_as_table2.cpp
   @brief   Storing data as matrix.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -118,5 +118,5 @@ static void remove_row(
 static void remove_row2(
     eMatrix& mtx)
 {
-    mtx.remove("ix>=4");
+    mtx.remove("connectto>=\'Mechanical\'");
 }

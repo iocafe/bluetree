@@ -68,6 +68,7 @@ eMatrix::eMatrix(
     m_nrows = m_ncolumns = 0;
 
     m_own_change = 0;
+    m_columns = OS_NULL;
 }
 
 
