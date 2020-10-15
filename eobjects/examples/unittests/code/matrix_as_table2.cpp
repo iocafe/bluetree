@@ -4,7 +4,7 @@
   @brief   Unit test, eMatrix class implementation of table API.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    10.10.2020
+  @date    15.10.2020
 
   This tests is about using matrix directly as a table. Direct use as table may seem unnecessary,
   but the table interface to matrix makes sense once table is accessed over message transport.

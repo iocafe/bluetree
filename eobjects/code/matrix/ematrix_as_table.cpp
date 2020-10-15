@@ -4,7 +4,7 @@
   @brief   Table API for the eMatrix class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    10.10.2020
+  @date    15.10.2020
 
   eMatrix class code to implement table API. Direct use as table may seem unnecessary,
   but the table interface to matrix makes sense once table is accessed over message transport.
