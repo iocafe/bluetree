@@ -25,7 +25,7 @@ const os_char
 
 /* Approximate size for one eBuffer, adjusted to memory allocation block.
  */
-#define OEMATRIX_APPROX_BUF_SZ 256
+#define OEMATRIX_APPROX_BUF_SZ 128
 
 /* Flags for getptrs() function.
  */
