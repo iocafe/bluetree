@@ -26,7 +26,6 @@ class eBuffer;
   Defines
 ****************************************************************************************************
 */
-/*@{*/
 
 /* Matrix property numbers.
  */
@@ -234,6 +233,10 @@ public:
     /* Release all allocated data, empty the matrix.
      */
     void clear();
+
+    /* Get matrix data type.
+     */
+    inline osalTypeId datatype() {return m_datatype; }
 
     /* Get matrix width.
      */

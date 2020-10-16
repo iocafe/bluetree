@@ -235,7 +235,8 @@ eObject *eObject::clone(
   @param  clonedobj Pointer to cloned object being created.
   @param  aflags
           - EOBJ_NO_MAP not to map names.
-          - EOBJ_CLONE_ALL_CHILDREN to clone all children, not just attachments.
+          - EOBJ_CLONE_ALL_CHILDREN to clone all children, not just attachments. Except ones
+            specifically flagged EOBJ_NOT_CLONABLE.
           - EOBJ_NO_CLONED_NAMES Do not clone object names.
           - EOBJ_CUST_FLAGSx Set a custom flag.
           - EOBJ_IS_ATTACHMENT Mark cloned object as attachment.

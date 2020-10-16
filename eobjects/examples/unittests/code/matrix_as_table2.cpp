@@ -26,6 +26,8 @@
 #include "eobjects.h"
 #include "matrix.h"
 
+/* Prototypes of forward referred static functions.
+ */
 static void configure_columns(
     eMatrix& mtx);
 

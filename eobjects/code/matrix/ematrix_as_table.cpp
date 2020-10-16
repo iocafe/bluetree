@@ -516,7 +516,7 @@ eStatus eMatrix::select_update_remove(
                 /* Set values to selected row to return.
                  */
                 if (nro_selected_cols > 0) {
-                    m->allocate(OS_OBJECT, 1, nro_selected_cols);
+                    m->allocate(datatype(), 1, nro_selected_cols);
 
                     for (i = 0; i < nro_selected_cols; i++) {
                         col_nr = sel_mtx[i];
@@ -533,7 +533,7 @@ eStatus eMatrix::select_update_remove(
                 /* No columns specified, return whole row.
                  */
                 else {
-                    m->allocate(OS_OBJECT, 1, m_ncolumns);
+                    m->allocate(datatype(), 1, m_ncolumns);
                     for (i = 0; i < m_ncolumns; i++) {
                         if (i == EMTX_FLAGS_COLUMN_NR) {
                             m->setl(0, i, row_nr + 1);
