@@ -62,6 +62,7 @@ void eobjects_shutdown();
 #include "code/table/erange.h"
 #include "code/table/etable.h"
 #include "code/table/erowset.h"
+#include "code/table/edbm.h"
 #include "code/matrix/ematrix.h"
 #include "code/thread/ethreadhandle.h"
 #include "code/thread/ethread.h"

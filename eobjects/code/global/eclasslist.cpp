@@ -173,6 +173,7 @@ void eclasslist_initialize()
     eTable::setupclass();
     eMatrix::setupclass();
     eRowSet::setupclass();
+    eDBM::setupclass();
     eConnection::setupclass();
     eEndPoint::setupclass();
     eThread::setupclass();
