@@ -17,4 +17,5 @@
 */
 
 void matrix_example1();
-void matrix_as_table_example2();
+void matrix_as_table_2();
+void matrix_as_remote_table_3();

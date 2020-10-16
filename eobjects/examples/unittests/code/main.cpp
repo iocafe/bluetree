@@ -52,7 +52,7 @@ eStatus emain(
     os_int argc,
     os_char *argv[])
 {
-    os_int test_nr = 82;
+    os_int test_nr = 83;
 
     switch (test_nr)
     {
@@ -68,7 +68,8 @@ eStatus emain(
         case 61: connection_example_1(); break;
         case 71: endpoint_example_1(); break;
         case 81: matrix_example1(); break;
-        case 82: matrix_as_table_example2(); break;
+        case 82: matrix_as_table_2(); break;
+        case 83: matrix_as_remote_table_3(); break;
     }
 
     return ESTATUS_SUCCESS;

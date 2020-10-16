@@ -6,7 +6,7 @@
   @version 1.0
   @date    15.10.2020
 
-  This tests is about using matrix directly as a table. Direct use as table may seem unnecessary,
+  A matrix can be used directly as a table. Direct use as table may seem unnecessary,
   but the table interface to matrix makes sense once table is accessed over message transport.
 
   The table API:
@@ -58,7 +58,7 @@ static void select_callback(
 
 
 
-void matrix_as_table_example2()
+void matrix_as_table_2()
 {
     eMatrix mtx;
 

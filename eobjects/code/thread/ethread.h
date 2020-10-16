@@ -109,33 +109,51 @@ public:
 
     /**
     ************************************************************************************************
-
-      @name Thread message buffer
-
-      X...
-
+      Virtual functions to overload in derived thread class.
     ************************************************************************************************
     */
     /*@{*/
 
-    /* Create operating system thread and start running
+    /* Overload this function to perform thread specific initialization when thread starts.
+       This is called when a thread is started by start() function. Start function does not
+       return (waits for event) until initialize returns.
+     */
+    virtual void initialize(
+        eContainer *params = OS_NULL) {}
+
+    /* Default run function, which just calls alive (waits for thread events).
+       This function can be overloaded, for example to wait for received data from
+       socket. Timer mechanism should be used to implement periodic functionality
+       instead of overloading run for this purpose.
+     */
+    virtual void run();
+
+    /* Overload this function to perform thread specific cleanup when threa exists. This
+       is a "pair" to initialize function.
+     */
+    virtual void finish() {}
+
+    /*@}*/
+
+    /**
+    ************************************************************************************************
+      Thread class functions
+    ************************************************************************************************
+    */
+    /*@{*/
+
+    /* Create operating system thread to run the the eThread. T
      */
     void start(
         eThreadHandle *thandle = OS_NULL,
         eContainer *params = OS_NULL);
 
-    virtual void initialize(
-        eContainer *params = OS_NULL) {};
-
-    virtual void run();
-
-    virtual void finish() {};
-
-    /* Check if thread exit is requested.
+    /* Check if thread exit is requested. This can be called from derived thread class
+       implementetion to check if thread exit has been requested.
      */
     inline os_boolean exitnow()
     {
-        return m_exit_requested;
+        return m_exit_requested; /* SHOULD WE CHECK: OR GLOBAL EXIT FLAG ? */
     }
 
     /* Get next message to thread to process.
@@ -144,7 +162,8 @@ public:
         eEnvelope *envelope,
         os_boolean delete_envelope = OS_TRUE);
 
-    /* Get next message to thread to process.
+    /* Check for messages received by the thread and pass these on as onmessage() calls
+       to objects.
      */
     void alive(
         os_int flags = EALIVE_WAIT_FOR_EVENT);
