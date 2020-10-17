@@ -172,6 +172,45 @@ eObject *eMatrix::clone(
 /**
 ****************************************************************************************************
 
+  @brief Function to process incoming messages.
+
+  The eMatrix::onmessage function handles messages received by object. If this function
+  doesn't process message, it calls parent class'es onmessage function.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+
+****************************************************************************************************
+*/
+void eMatrix::onmessage(
+    eEnvelope *envelope)
+{
+    /* If at final destination for the message.
+     */
+    if (*envelope->target()=='\0')
+    {
+        switch (envelope->command())
+        {
+            case ECMD_CONFIGURE_TABLE:
+                dbm_message(envelope);
+                return;
+
+            default:
+                break;
+        }
+    }
+
+    /* Call parent class'es onmessage.
+     */
+    eTable::onmessage(envelope);
+}
+
+
+
+
+/**
+****************************************************************************************************
+
   @brief Called to inform the class about property value change (override).
 
   The onpropertychange() function is called when class'es property changes, unless the

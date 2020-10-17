@@ -124,6 +124,11 @@ public:
         return new eMatrix(parent, id, flags);
     }
 
+    /* Function to process incoming messages.
+     */
+    virtual void onmessage(
+        eEnvelope *envelope);
+
     /* Called when property value changes.
      */
     virtual eStatus onpropertychange(
@@ -418,6 +423,11 @@ protected:
         etable_select_callback *callback,
         eObject *context,
         os_int tflags);
+
+    /* ematrix_as_table.cpp: Pass messages to DBM object.
+     */
+    void dbm_message(
+        eEnvelope *envelope);
 
     /** Matrix data type.
      */

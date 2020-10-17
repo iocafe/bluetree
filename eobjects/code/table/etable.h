@@ -45,7 +45,7 @@ typedef void etable_select_callback(
 
 /* tflags - table flags */
 #define ETABLE_ADOPT_ARGUMENT         0x10000000
-#define ETABLE_SERIALIZABLE_FLAG_MASK 0x0000FFFF
+#define ETABLE_SERIALIZED_FLAGS_MASK  0x0000FFFF
 
 /**
 ****************************************************************************************************

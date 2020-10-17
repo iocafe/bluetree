@@ -66,6 +66,10 @@
  */
 #define EOID_APPENDIX -13
 
+/** Generic identifier for flags.
+ */
+#define EOID_FLAGS -15
+
 /** Content, used for envelopes, etc.
  */
 #define EOID_CONTENT -30
@@ -88,6 +92,7 @@
 #define EOID_TABLE_COLUMNS -41
 #define EOID_TABLE_CONTENT -42
 #define EOID_TABLE_WHERE -43
+#define EOID_DBM -50
 
 /** This is special object identifier that can be given as argument to object hierarchy
     functions, like first(). The EOID_CHILD specifies to get a child object,

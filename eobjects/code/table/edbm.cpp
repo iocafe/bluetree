@@ -92,3 +92,43 @@ eObject *eDBM::clone(
     clonegeneric(clonedobj, aflags);
     return clonedobj;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Function to process incoming messages.
+
+  The eDBM::onmessage function handles messages received by object. If this function
+  doesn't process message, it calls parent class'es onmessage function.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eDBM::onmessage(
+    eEnvelope *envelope)
+{
+    // eContainer *content;
+
+    /* If at final destination for the message.
+     */
+    if (*envelope->target()=='\0')
+    {
+        switch (envelope->command())
+        {
+            case ECMD_CONFIGURE_TABLE:
+
+                return;
+
+            default:
+                break;
+        }
+    }
+
+    /* Call parent class'es onmessage.
+     */
+    eObject::onmessage(envelope);
+}

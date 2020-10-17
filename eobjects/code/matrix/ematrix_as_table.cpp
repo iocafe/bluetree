@@ -570,3 +570,29 @@ eStatus eMatrix::select_update_remove(
     delete tmp;
     return ESTATUS_SUCCESS;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Pass messages to DBM object.
+
+  The function makes sure that DBM object exist as attachment to the matrix and passes
+  table related messages table to it. The DBM object manages the matrix trough table interface.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+
+****************************************************************************************************
+*/
+void eMatrix::dbm_message(
+    eEnvelope *envelope)
+{
+    eObject *dbm;
+
+    dbm = first(EOID_DBM);
+    if (dbm == OS_NULL) {
+        dbm = new eDBM(this, EOID_DBM, EOBJ_TEMPORARY_ATTACHMENT);
+    }
+    dbm->onmessage(envelope);
+}

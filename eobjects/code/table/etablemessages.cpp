@@ -16,20 +16,27 @@
 #include "eobjects.h"
 
 /* Configure the table.
+ * @param   tflags ETABLE_ADOPT_ARGUMENT Adopt or delete configuration.
  */
 void etable_configure(
     eObject *t,
-    const os_char *path,
+    const os_char *dbmpath,
     eContainer *configuration,
     os_int tflags)
 {
-    /* os_int mflags;
+    eContainer *content;
+    eVariable *f;
 
-    mflags = (tflags & ETABLE_ADOPT_ARGUMENT) ?
-
-    t->message(CONFIGURE, path, OS_NULL, mflags, context);
-    */
-    osal_debug_error("eTable::configure is not overloaded");
+    content = new eContainer(t, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+    if (tflags & ETABLE_ADOPT_ARGUMENT) {
+        configuration->adopt(content, EOID_TABLE_CONFIGURATION, EOBJ_NO_MAP);
+    }
+    else {
+        configuration->clone(content, EOID_TABLE_CONFIGURATION, EOBJ_NO_MAP);
+    }
+    f = new eVariable(content, EOID_FLAGS);
+    f->setl(tflags & ETABLE_SERIALIZED_FLAGS_MASK);
+    t->message(ECMD_CONFIGURE_TABLE, dbmpath, OS_NULL, content, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 }
 
 /* Insert rows into table.
@@ -37,7 +44,7 @@ void etable_configure(
  */
 void etable_insert(
     eObject *t,
-    const os_char *path,
+    const os_char *dbmpath,
     eContainer *rows,
     os_int tflags)
 {
@@ -48,7 +55,7 @@ void etable_insert(
  */
 eStatus etable_update(
     eObject *t,
-    const os_char *path,
+    const os_char *dbmpath,
     const os_char *whereclause,
     eContainer *row,
     os_int tflags)
@@ -61,7 +68,7 @@ eStatus etable_update(
  */
 void etable_remove(
     eObject *t,
-    const os_char *path,
+    const os_char *dbmpath,
     const os_char *whereclause,
     os_int tflags)
 {

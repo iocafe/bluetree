@@ -50,8 +50,6 @@ class eMyThread : public eThread
         while (!exitnow())
         {
             alive();
-
-
             osal_console_write("worker running\n");
         }
     }
@@ -82,7 +80,7 @@ class eMyThread : public eThread
 
 /**
 ****************************************************************************************************
-  Thread example 1.
+  Thread example 1 main.
 ****************************************************************************************************
 */
 void thread_example_1()

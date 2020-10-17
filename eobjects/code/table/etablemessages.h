@@ -22,7 +22,7 @@
  */
 void etable_configure(
     eObject *t,
-    const os_char *path,
+    const os_char *dbmpath,
     eContainer *configuration,
     os_int tflags = 0);
 
@@ -31,7 +31,7 @@ void etable_configure(
  */
 void etable_insert(
     eObject *t,
-    const os_char *path,
+    const os_char *dbmpath,
     eContainer *rows,
     os_int tflags = 0);
 
@@ -39,7 +39,7 @@ void etable_insert(
  */
 eStatus etable_update(
     eObject *t,
-    const os_char *path,
+    const os_char *dbmpath,
     const os_char *whereclause,
     eContainer *row,
     os_int tflags = 0);
@@ -48,7 +48,7 @@ eStatus etable_update(
  */
 void etable_remove(
     eObject *t,
-    const os_char *path,
+    const os_char *dbmpath,
     const os_char *whereclause,
     os_int tflags = 0);
 
@@ -56,7 +56,7 @@ void etable_remove(
  */
 eStatus etable_select(
     eObject *t,
-    const os_char *path,
+    const os_char *dbmpath,
     const os_char *whereclause,
     eContainer *columns,
     eDBM *dbm,

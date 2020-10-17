@@ -89,6 +89,11 @@ public:
         return new eDBM(parent, id, flags);
     }
 
+    /* Function to process incoming messages.
+     */
+    virtual void onmessage(
+        eEnvelope *envelope);
+
     /*@}*/
 
 

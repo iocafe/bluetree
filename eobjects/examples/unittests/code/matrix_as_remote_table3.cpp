@@ -37,15 +37,13 @@
  */
 #define MY_CLASS_ID (ECLASSID_APP_BASE + 1)
 
-static void configure_columns();
-
 
 /**
 ****************************************************************************************************
-  Example thread class.
+  Thread which exposes a matrix as table.
 ****************************************************************************************************
 */
-class ThreadExposingTableData : public eThread
+class ThreadExposingTheTable : public eThread
 {
 public:
     /* Get class identifier.
@@ -55,7 +53,7 @@ public:
     virtual void initialize(
         eContainer *params = OS_NULL)
     {
-        osal_console_write("initializing worker\n");
+        osal_console_write("ThreadExposingTheTable started\n");
 
         m_mtx = new eMatrix(this);
         m_mtx->addname("//mymtx");
@@ -98,6 +96,86 @@ protected:
 };
 
 
+
+/**
+****************************************************************************************************
+  Thread which used to matrix remotely trough messages.
+****************************************************************************************************
+*/
+class ThreadUsingTheTable: public eThread
+{
+public:
+    /* Get class identifier.
+     */
+    virtual os_int classid() {return MY_CLASS_ID;}
+
+    virtual void initialize(
+        eContainer *params = OS_NULL)
+    {
+        osal_console_write("ThreadUsingTheTable started\n");
+        configure_columns();
+    }
+
+    virtual void finish()
+    {
+    }
+
+    virtual void run()
+    {
+        while (!exitnow())
+        {
+            alive();
+            osal_console_write("worker running\n");
+        }
+    }
+
+    virtual void onmessage(
+        eEnvelope *envelope)
+    {
+        /* If at final destination for the message.
+         */
+        if (*envelope->target()=='\0' && envelope->command() == MY_COMMAND)
+        {
+            osal_console_write(envelope->source());
+            osal_console_write("\n");
+            return;
+        }
+
+        /* Default thread message processing.
+         */
+        eThread::onmessage(envelope);
+    }
+
+    void configure_columns()
+    {
+        eContainer *configuration, *columns;
+        eVariable *column;
+
+        configuration = new eContainer();
+        columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
+        columns->addname("columns", ENAME_NO_MAP);
+
+        /* For matrix as a table row number is always the first column in configuration.
+         */
+        column = new eVariable(columns);
+        column->addname("ix", ENAME_NO_MAP);
+        column->setpropertys(EVARP_TEXT, "rivi");
+
+        column = new eVariable(columns);
+        column->addname("connected", ENAME_NO_MAP);
+        column->setpropertyi(EVARP_TYPE, OS_STR);
+
+        column = new eVariable(columns);
+        column->addname("connectto", ENAME_NO_MAP);
+
+        /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
+         */
+        etable_configure(this, "//mymtx", configuration, ETABLE_ADOPT_ARGUMENT);
+    }
+
+protected:
+};
+
 /**
 ****************************************************************************************************
   Thread example 1.
@@ -105,66 +183,35 @@ protected:
 */
 void matrix_as_remote_table_3()
 {
-    eContainer
-        root;
-
-    eVariable
-        *txt;
-
     eThread
         *t;
 
     eThreadHandle
-        thandle;
+        thandle1, thandle2;
 
-    /* Create and start thread named "worker".
+    /* Create and start threads
      */
-    t = new ThreadExposingTableData();
-    t->addname("worker", ENAME_PROCESS_NS);
-    t->start(&thandle); /* After this t pointer is useless */
-
-    /* Setup matrix as table.
-     */
-    configure_columns();
+    t = new ThreadExposingTheTable();
+    t->start(&thandle1);
+    t = new ThreadUsingTheTable();
+    t->start(&thandle2); /* After this t pointer is useless */
 
     for (os_int i = 0; i<1000; i++)
     {
         osal_console_write("master running\n");
-        os_sleep(20);
+        os_sleep(2000);
 
-        txt = new eVariable(&root);
-        txt->sets("message content");
-        root.message (MY_COMMAND, "//worker", OS_NULL, txt, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
+        // txt = new eVariable(&root);
+        // txt->sets("message content");
+        // root.message (MY_COMMAND, "//worker", OS_NULL, txt, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
     }
 
     /* Wait for thread to terminate
      */
-    thandle.terminate();
-    thandle.join();
+    thandle2.terminate();
+    thandle2.join();
+    thandle1.terminate();
+    thandle1.join();
 }
 
 
-static void configure_columns()
-{
-    eContainer *configuration, *columns;
-    eVariable *column;
-
-    configuration = new eContainer();
-    columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
-    columns->addname("columns", ENAME_NO_MAP);
-
-    /* For matrix as a table row number is always the first column in configuration.
-     */
-    column = new eVariable(columns);
-    column->addname("ix", ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "rivi");
-
-    column = new eVariable(columns);
-    column->addname("connected", ENAME_NO_MAP);
-    column->setpropertyi(EVARP_TYPE, OS_STR);
-
-    column = new eVariable(columns);
-    column->addname("connectto", ENAME_NO_MAP);
-
-    etable_configure(OS_NULL /* thiso */ , "//mymtx", configuration, ETABLE_ADOPT_ARGUMENT);
-}

@@ -26,13 +26,24 @@
   The eObject::message() function sends message. The message will be recieved as onmessage call
   by another object.
 
-  @param   command
-  @param   target
-  @param   source
-  @param   content
+  @param   command Command identifier, see defs/ecommands.h for list of commands used by the
+           eobjects library.
+  @param   target Path to target object.
+  @param   source Source path.
+  @param   content Message content, any type of object
   @param   mflags
-  @param   context
-  @return  None.
+           - EMSG_DEFAULT (0)
+           - EMSG_NO_REPLIES
+           - EMSG_KEEP_CONTENT (0)
+           - EMSG_KEEP_CONTEXT (0)
+           - EMSG_NO_RESOLVE
+           - EMSG_NO_NEW_SOURCE_OIX
+           - EMSG_NO_ERRORS
+           - EMSG_DEL_CONTENT
+           - EMSG_DEL_CONTEXT
+
+  @param   context Message context, any type of object. To be returned with reply as is (if there
+           is a reply).
 
 ****************************************************************************************************
 */

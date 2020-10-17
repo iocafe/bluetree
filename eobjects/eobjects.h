@@ -42,6 +42,7 @@ void eobjects_shutdown();
 #include "code/defs/eclassid.h"
 #include "code/defs/emacros.h"
 #include "code/defs/etypes.h"
+#include "code/defs/ecommands.h"
 #include "code/object/ehandle.h"
 #include "code/object/eobject.h"
 #include "code/object/ehandletable.h"
