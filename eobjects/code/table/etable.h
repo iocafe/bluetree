@@ -43,6 +43,10 @@ typedef void etable_select_callback(
     eObject *context);
 
 
+/* tflags - table flags */
+#define ETABLE_ADOPT_ARGUMENT         0x10000000
+#define ETABLE_SERIALIZABLE_FLAG_MASK 0x0000FFFF
+
 /**
 ****************************************************************************************************
 
@@ -176,7 +180,8 @@ public:
     */
     eContainer *process_configuration(
         eContainer *configuration,
-        os_int *nro_columns);
+        os_int *nro_columns,
+        os_int tflags);
 
     eWhere *set_where(
         const os_char *whereclause);

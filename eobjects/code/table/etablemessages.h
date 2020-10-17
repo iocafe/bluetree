@@ -21,7 +21,7 @@
 /* Configure the table.
  */
 void etable_configure(
-    eObject *thiso,
+    eObject *t,
     const os_char *path,
     eContainer *configuration,
     os_int tflags = 0);
@@ -30,7 +30,7 @@ void etable_configure(
  * Row can be one row or container with multiple rows.
  */
 void etable_insert(
-    eObject *thiso,
+    eObject *t,
     const os_char *path,
     eContainer *rows,
     os_int tflags = 0);
@@ -38,7 +38,7 @@ void etable_insert(
 /* Update a row or rows of a table or insert a row to the table.
  */
 eStatus etable_update(
-    eObject *thiso,
+    eObject *t,
     const os_char *path,
     const os_char *whereclause,
     eContainer *row,
@@ -47,7 +47,7 @@ eStatus etable_update(
 /* Remove rows from table.
  */
 void etable_remove(
-    eObject *thiso,
+    eObject *t,
     const os_char *path,
     const os_char *whereclause,
     os_int tflags = 0);
@@ -55,7 +55,7 @@ void etable_remove(
 /* Select rows from table.
  */
 eStatus etable_select(
-    eObject *thiso,
+    eObject *t,
     const os_char *path,
     const os_char *whereclause,
     eContainer *columns,

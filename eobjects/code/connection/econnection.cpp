@@ -254,7 +254,7 @@ void eConnection::onmessage(
             {
                 if (envelope->flags() & EMSG_CAN_BE_ADOPTED)
                 {
-                    m_initbuffer->adopt(envelope);
+                    envelope->adopt(m_initbuffer);
                 }
                 else
                 {
@@ -490,7 +490,7 @@ void eConnection::accepted(
 {
     delete m_stream;
     m_stream = stream;
-    adopt(stream);
+    stream->adopt(this);
 
     connected();
 

@@ -51,6 +51,7 @@ class eMyThread : public eThread
         {
             alive();
 
+
             osal_console_write("worker running\n");
         }
     }
@@ -58,10 +59,15 @@ class eMyThread : public eThread
     virtual void onmessage(
         eEnvelope *envelope)
     {
+        eVariable *content;
+
         /* If at final destination for the message.
          */
         if (*envelope->target()=='\0' && envelope->command() == MY_COMMAND)
         {
+            content = eVariable::cast(envelope->content());
+            osal_console_write(content->gets());
+            osal_console_write(" ");
             osal_console_write(envelope->source());
             osal_console_write("\n");
             return;
@@ -102,11 +108,11 @@ void thread_example_1()
     for (os_int i = 0; i<1000; i++)
     {
         osal_console_write("master running\n");
-        os_sleep(20);
+        os_sleep(2000);
 
         txt = new eVariable(&root);
-        txt->sets("message content");
-        root.message (MY_COMMAND, "//worker", OS_NULL, txt, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
+        txt->sets("Swimming Dog");
+        root.message (MY_COMMAND, "//worker", OS_NULL, txt, EMSG_DEL_CONTENT);
     }
 
     /* Wait for thread to terminate

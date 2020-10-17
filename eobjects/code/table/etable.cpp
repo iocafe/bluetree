@@ -91,7 +91,10 @@ void eTable::setupclass()
 
   @param   configuration Configuration input. The configuration returned by this function
            is almost same as conguraration here, just with modification listed above.
-           nro_columns Pointer to integer where to store number of colums.
+  @param   nro_columns Pointer to integer where to store number of colums.
+  @param   tflags Set 0 for default configuration. Set ETABLE_ADOPT_ARGUMENT to adopt/delete
+           configuration. If set the confuguration object pointer myust not be used after the
+           function call returns;
 
   @return  Pointer to the modified configuratiion stored as temporary attachment to this object
            (identifier EOID_TABLE_CONFIGURATION).
@@ -100,11 +103,12 @@ void eTable::setupclass()
 */
 eContainer *eTable::process_configuration(
     eContainer *configuration,
-    os_int *nro_columns)
+    os_int *nro_columns,
+    os_int tflags)
 {
     eContainer *dst_configuration;
     eContainer *src_columns, *dst_columns;
-    eVariable *src_column;
+    eVariable *src_column, *next_src_column;
     os_int column_nr0;
 
     *nro_columns = 0;
@@ -123,11 +127,21 @@ eContainer *eTable::process_configuration(
 
         for (src_column = src_columns->firstv(), column_nr0 = 0;
              src_column;
-             src_column = src_column->nextv(), column_nr0++)
+             src_column = next_src_column, column_nr0++)
         {
-            src_column->clone(dst_columns, column_nr0);
+            next_src_column =  src_column->nextv();
+            if (tflags & ETABLE_ADOPT_ARGUMENT) {
+                src_column->adopt(dst_columns, column_nr0);
+            }
+            else {
+                src_column->clone(dst_columns, column_nr0);
+            }
         }
         *nro_columns = column_nr0;
+    }
+
+    if (tflags & ETABLE_ADOPT_ARGUMENT) {
+        delete configuration;
     }
 
     return dst_configuration;

@@ -296,7 +296,7 @@ void eThread::queue(
 {
     if (delete_envelope)
     {
-        m_message_queue->adopt(envelope, EOID_ITEM, EOBJ_NO_MAP);
+        envelope->adopt(m_message_queue, EOID_ITEM, EOBJ_NO_MAP);
     }
     else
     {
@@ -337,7 +337,7 @@ void eThread::alive(
         envelope = eEnvelope::cast(m_message_queue->first());
         if (envelope)
         {
-            adopt(envelope, EOID_CHILD, EOBJ_NO_MAP);
+            envelope->adopt(this, EOID_CHILD, EOBJ_NO_MAP);
 
             /* Flag that envelope has been moved from thread to another.
              */

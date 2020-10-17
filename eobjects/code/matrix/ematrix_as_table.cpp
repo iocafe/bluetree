@@ -41,7 +41,9 @@
   - Adds initial data rows to empty matrix.
 
   @param   configuration Table configuration, columns.
-  @param   tflags Reserved for future, set 0 for now.
+  @param   tflags Set 0 for default configuration. Set ETABLE_ADOPT_ARGUMENT to adopt/delete
+           configuration. If set the confuguration object pointer myust not be used after the
+           function call returns;
 
 ****************************************************************************************************
 */
@@ -62,7 +64,7 @@ void eMatrix::configure(
         osal_debug_error("eMatrix::configure: NULL configuration");
         return;
     }
-    c = process_configuration(configuration, &nro_columns);
+    c = process_configuration(configuration, &nro_columns, tflags);
 
     if (c) {
         m_own_change++;

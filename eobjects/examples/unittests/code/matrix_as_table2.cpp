@@ -105,6 +105,7 @@ static void configure_columns(
     column->addname("connectto", ENAME_NO_MAP);
 
     mtx.configure(configuration);
+    delete configuration;
 }
 
 

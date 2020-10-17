@@ -859,11 +859,18 @@ eObject *eObject::prev(
   an another.
 
   @param   id EOID_CHILD object identifier unchanged.
-  @param   aflags EOBJ_BEFORE_THIS Adopt before this object. EOBJ_NO_MAP not to map names.
+  @param   aflags
+          - EOBJ_BEFORE_THIS Adopt before this object.
+          - EOBJ_NO_MAP not to map names.
+          - EOBJ_CUST_FLAGSx Set a custom flag.
+          - EOBJ_IS_ATTACHMENT Mark cloned object as attachment.
+          - EOBJ_NOT_CLONABLE Mark cloned object as not clonable.
+          - EOBJ_NOT_SERIALIZABLE Mark cloned object as not serializable.
   @return  None.
 
 ****************************************************************************************************
 */
+#if 0
 void eObject::adopt(
     eObject *child,
     e_oid id,
@@ -949,6 +956,124 @@ void eObject::adopt(
         {
             childh->m_root = mm_handle->m_root;
             child->map(E_ATTACH_NAMES|E_SET_ROOT_POINTER);
+        }
+
+// mm_root->mm_handle->verify_whole_tree();
+
+        if (sync) os_unlock();
+    }
+
+    /* If flags have been specified for top level object.
+     */
+    aflags &= EOBJ_CLONE_ARG_AFLAGS_MASK;
+    if (aflags) {
+        setflags(aflags);
+    }
+}
+#endif
+
+
+/**
+****************************************************************************************************
+
+  @brief Adopt this eObject as child of parent.
+
+  The eObject::adopt() function moves on object from it's position in tree structure to
+  an another.
+
+  @param   parent Pointer to new parent object, or if EOBJ_BEFORE_THIS flags is given, the sibling.
+  @param   id EOID_CHILD object identifier unchanged.
+  @param   aflags
+          - EOBJ_BEFORE_THIS Adopt before this object.
+          - EOBJ_NO_MAP not to map names.
+          - EOBJ_CUST_FLAGSx Set a custom flag.
+          - EOBJ_IS_ATTACHMENT Mark cloned object as attachment.
+          - EOBJ_NOT_CLONABLE Mark cloned object as not clonable.
+          - EOBJ_NOT_SERIALIZABLE Mark cloned object as not serializable.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eObject::adopt(
+    eObject *parent,
+    e_oid id,
+    os_int aflags)
+{
+    os_boolean sync;
+    eHandle *childh, *parenth;
+    os_int mapflags;
+
+    /* Make sure that parent object is already part of tree structure.
+     */
+    if (parent->mm_handle == OS_NULL)
+    {
+        osal_debug_error("adopt(): parent object is not part of tree");
+        return;
+    }
+
+    if (mm_handle == OS_NULL)
+    {
+        sync = OS_FALSE; // || m_root->is_process ???????????????????????????????????????????????????????????????????????
+        if (sync) os_lock();
+
+        mm_parent = parent;
+        parent->mm_handle->m_root->newhandle(this, parent, id, 0);
+
+        if (sync) os_unlock();
+    }
+
+    else
+    {
+// child->mm_handle->verify_whole_tree();
+// mm_handle->verify_whole_tree();
+
+        // Detach names
+
+        childh = mm_handle;
+        parenth = parent->mm_handle;
+
+        /* Synchronize if adopting from three structure to another.
+         */
+        sync = (parenth->m_root != childh->m_root);
+
+        if (sync) {
+            os_lock();
+        }
+
+        /* Detach names of child object and it's childen from name spaces
+           above this object in tree structure.
+         */
+        map(E_DETACH_FROM_NAMESPACES_ABOVE);
+
+        if (mm_parent)
+        {
+            mm_parent->mm_handle->rbtree_remove(childh);
+        }
+
+        mm_parent = parent;
+
+        if (id != EOID_CHILD) childh->m_oid = id;
+        childh->m_oflags |= EOBJ_IS_RED;
+        childh->m_left = childh->m_right = childh->m_up = OS_NULL;
+        parenth->rbtree_insert(childh);
+        /* childh->m_parent = mm_handle; */
+
+        /* Map names back: If not disabled by user flag EOBJ_NO_MAP, then attach all names of
+           child object (this) and it's childen to name spaces. If a name is already mapped,
+           it is not remapped.
+           If we are adoprion from a=one tree structure to another (sync is on), we need to set
+           m_root pointer (pointer to eRoot of a tree structure)to all child objects.
+         */
+        mapflags = sync ? E_SET_ROOT_POINTER : 0;
+        if ((aflags & EOBJ_NO_MAP) == 0)
+        {
+            mapflags |= E_ATTACH_NAMES;
+        }
+
+        if (mapflags)
+        {
+            childh->m_root = parenth->m_root;
+            map(E_ATTACH_NAMES|E_SET_ROOT_POINTER);
         }
 
 // mm_root->mm_handle->verify_whole_tree();

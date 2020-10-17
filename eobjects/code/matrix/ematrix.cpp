@@ -1831,7 +1831,9 @@ void eMatrix::resize(
              buffer = nextbuffer)
         {
             nextbuffer = eBuffer::cast(buffer->next());
-            if (buffer->oid() > 0) adopt(buffer);
+            if (buffer->oid() > 0) {
+                buffer->adopt(this);
+            }
         }
 
         delete m;

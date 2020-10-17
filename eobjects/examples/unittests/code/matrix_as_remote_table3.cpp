@@ -37,6 +37,9 @@
  */
 #define MY_CLASS_ID (ECLASSID_APP_BASE + 1)
 
+static void configure_columns();
+
+
 /**
 ****************************************************************************************************
   Example thread class.
@@ -55,7 +58,7 @@ public:
         osal_console_write("initializing worker\n");
 
         m_mtx = new eMatrix(this);
-        configure_columns();
+        m_mtx->addname("//mymtx");
     }
 
     virtual void finish()
@@ -91,32 +94,6 @@ public:
 
 protected:
 
-    void configure_columns()
-    {
-        eContainer *configuration, *columns;
-        eVariable *column;
-
-        configuration = new eContainer();
-        columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
-        columns->addname("columns", ENAME_NO_MAP);
-
-        /* For matrix as a table row number is always the first column in configuration.
-         */
-        column = new eVariable(columns);
-        column->addname("ix", ENAME_NO_MAP);
-        column->setpropertys(EVARP_TEXT, "rivi");
-
-        column = new eVariable(columns);
-        column->addname("connected", ENAME_NO_MAP);
-        column->setpropertyi(EVARP_TYPE, OS_STR);
-
-        column = new eVariable(columns);
-        column->addname("connectto", ENAME_NO_MAP);
-
-        m_mtx->configure(configuration);
-    }
-
-
     eMatrix *m_mtx;
 };
 
@@ -146,6 +123,10 @@ void matrix_as_remote_table_3()
     t->addname("worker", ENAME_PROCESS_NS);
     t->start(&thandle); /* After this t pointer is useless */
 
+    /* Setup matrix as table.
+     */
+    configure_columns();
+
     for (os_int i = 0; i<1000; i++)
     {
         osal_console_write("master running\n");
@@ -160,4 +141,30 @@ void matrix_as_remote_table_3()
      */
     thandle.terminate();
     thandle.join();
+}
+
+
+static void configure_columns()
+{
+    eContainer *configuration, *columns;
+    eVariable *column;
+
+    configuration = new eContainer();
+    columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
+    columns->addname("columns", ENAME_NO_MAP);
+
+    /* For matrix as a table row number is always the first column in configuration.
+     */
+    column = new eVariable(columns);
+    column->addname("ix", ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "rivi");
+
+    column = new eVariable(columns);
+    column->addname("connected", ENAME_NO_MAP);
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+
+    column = new eVariable(columns);
+    column->addname("connectto", ENAME_NO_MAP);
+
+    etable_configure(OS_NULL /* thiso */ , "//mymtx", configuration, ETABLE_ADOPT_ARGUMENT);
 }

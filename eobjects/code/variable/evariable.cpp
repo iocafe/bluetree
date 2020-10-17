@@ -663,7 +663,9 @@ void eVariable::setv(
             if (move_value)
             {
                 m_value.valbuf.v.o = x->m_value.valbuf.v.o;
-                adopt(m_value.valbuf.v.o, EOID_ITEM);
+                if (x->m_value.valbuf.v.o) {
+                    m_value.valbuf.v.o->adopt(this, EOID_ITEM);
+                }
                 x->settype(OS_UNDEFINED_TYPE);
             }
             else
@@ -713,7 +715,7 @@ void eVariable::seto(
     if (adopt_x)
     {
         m_value.valbuf.v.o = x;
-        adopt(x, EOID_ITEM /* OID value */);
+        x->adopt(this, EOID_ITEM /* OID value */);
     }
     else
     {

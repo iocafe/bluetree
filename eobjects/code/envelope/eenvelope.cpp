@@ -634,7 +634,7 @@ void eEnvelope::setcontent(
     {
         if (flags & EMSG_DEL_CONTENT)
         {
-            adopt(o, EOID_CONTENT, EOBJ_NO_MAP);
+            o->adopt(this, EOID_CONTENT, EOBJ_NO_MAP);
         }
         else
         {
@@ -672,7 +672,7 @@ void eEnvelope::setcontext(
     {
         if (flags & EMSG_DEL_CONTEXT)
         {
-            adopt(o, EOID_CONTEXT, EOBJ_NO_MAP);
+            o->adopt(this, EOID_CONTEXT, EOBJ_NO_MAP);
         }
         else
         {

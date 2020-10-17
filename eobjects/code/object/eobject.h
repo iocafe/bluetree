@@ -181,7 +181,7 @@ public:
     /* Adopting object as child of this object.
      */
     void adopt(
-        eObject *child,
+        eObject *parent,
         e_oid id = EOID_CHILD,
         os_int aflags = EOBJ_DEFAULT);
 
