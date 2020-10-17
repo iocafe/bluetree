@@ -34,8 +34,11 @@ void etable_configure(
     else {
         configuration->clone(content, EOID_TABLE_CONFIGURATION, EOBJ_NO_MAP);
     }
-    f = new eVariable(content, EOID_FLAGS);
-    f->setl(tflags & ETABLE_SERIALIZED_FLAGS_MASK);
+    tflags &= ETABLE_SERIALIZED_FLAGS_MASK;
+    if (tflags) {
+        f = new eVariable(content, EOID_FLAGS);
+        f->setl(tflags & ETABLE_SERIALIZED_FLAGS_MASK);
+    }
     t->message(ECMD_CONFIGURE_TABLE, dbmpath, OS_NULL, content, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 }
 

@@ -123,6 +123,35 @@ protected:
     */
     /*@{*/
 
+    /* Get tflags from message content.
+     */
+    os_int get_tflags(
+        eObject *content);
+
+    /* Configure a table.
+     */
+    void configure(
+        eContainer *configuration,
+        os_int tflags);
+
+    /* Insert rows into table.
+     */
+    void insert(
+        eContainer *rows,
+        os_int tflags);
+
+    /* Update a row or rows of a table.
+     */
+    void update(
+        eVariable *whereclause,
+        eContainer *row,
+        os_int tflags);
+
+    /* Remove rows from the table.
+     */
+    void remove(
+        eVariable *whereclause,
+        os_int tflags);
 
     /*@}*/
 };

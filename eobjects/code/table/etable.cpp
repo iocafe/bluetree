@@ -93,7 +93,7 @@ void eTable::setupclass()
            is almost same as conguraration here, just with modification listed above.
   @param   nro_columns Pointer to integer where to store number of colums.
   @param   tflags Set 0 for default configuration. Set ETABLE_ADOPT_ARGUMENT to adopt/delete
-           configuration. If set the confuguration object pointer myust not be used after the
+           configuration. If set the configuration object pointer must not be used after the
            function call returns;
 
   @return  Pointer to the modified configuratiion stored as temporary attachment to this object

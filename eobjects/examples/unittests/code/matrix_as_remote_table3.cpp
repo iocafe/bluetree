@@ -82,6 +82,8 @@ public:
         {
             osal_console_write(envelope->source());
             osal_console_write("\n");
+
+            m_mtx->print_json();
             return;
         }
 
@@ -183,15 +185,15 @@ protected:
 */
 void matrix_as_remote_table_3()
 {
-    eThread
-        *t;
-
-    eThreadHandle
-        thandle1, thandle2;
+    eThread *t;
+    eThreadHandle thandle1, thandle2;
+    eContainer root;
+    eVariable *txt;
 
     /* Create and start threads
      */
     t = new ThreadExposingTheTable();
+    t->addname("//mythread1");
     t->start(&thandle1);
     t = new ThreadUsingTheTable();
     t->start(&thandle2); /* After this t pointer is useless */
@@ -201,9 +203,9 @@ void matrix_as_remote_table_3()
         osal_console_write("master running\n");
         os_sleep(2000);
 
-        // txt = new eVariable(&root);
-        // txt->sets("message content");
-        // root.message (MY_COMMAND, "//worker", OS_NULL, txt, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
+        txt = new eVariable(&root);
+        txt->sets("Do really print it");
+        root.message (MY_COMMAND, "//mythread1", OS_NULL, txt, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
     }
 
     /* Wait for thread to terminate

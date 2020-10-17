@@ -42,8 +42,8 @@
 
   @param   configuration Table configuration, columns.
   @param   tflags Set 0 for default configuration. Set ETABLE_ADOPT_ARGUMENT to adopt/delete
-           configuration. If set the confuguration object pointer myust not be used after the
-           function call returns;
+           configuration. If set the configuration object pointer must not be used after the
+           function call returns.
 
 ****************************************************************************************************
 */

@@ -56,6 +56,9 @@
 /* Tables.
  */
 #define ECMD_CONFIGURE_TABLE -30
+#define ECMD_INSERT_ROWS_TO_TABLE -31
+#define ECMD_REMOVE_ROWS_FROM_TABLE -32
+#define ECMD_UPDATE_TABLE_ROWS -33
 
 /* Timer commands (timer hit and set timer period).
  */

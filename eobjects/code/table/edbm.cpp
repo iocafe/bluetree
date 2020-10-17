@@ -104,14 +104,15 @@ eObject *eDBM::clone(
 
   @param   envelope Message envelope. Contains command, target and source paths and
            message content, etc.
-  @return  None.
 
 ****************************************************************************************************
 */
 void eDBM::onmessage(
     eEnvelope *envelope)
 {
-    // eContainer *content;
+    eObject *content;
+    eContainer *configuration, *rows, *row;
+    eVariable *whereclause;
 
     /* If at final destination for the message.
      */
@@ -120,8 +121,53 @@ void eDBM::onmessage(
         switch (envelope->command())
         {
             case ECMD_CONFIGURE_TABLE:
-
+                content = envelope->content();
+                if (content) {
+                    configuration = content->firstc(EOID_TABLE_CONFIGURATION);
+                    if (configuration) {
+                        configure(configuration, get_tflags(content));
+                        return;
+                    }
+                }
+                osal_debug_error("eDBM:Faulty ECMD_CONFIGURE_TABLE message received");
                 return;
+
+            case ECMD_INSERT_ROWS_TO_TABLE:
+                content = envelope->content();
+                if (content) {
+                    rows = content->firstc(EOID_TABLE_CONTENT);
+                    if (rows) {
+                        insert(rows, get_tflags(content));
+                        return;
+                    }
+                }
+                osal_debug_error("eDBM:Faulty ECMD_INSERT_ROWS_TO_TABLE message received");
+                return;
+
+            case ECMD_UPDATE_TABLE_ROWS:
+                content = envelope->content();
+                if (content) {
+                    whereclause = content->firstv(EOID_TABLE_WHERE);
+                    row = content->firstc(EOID_TABLE_CONTENT);
+                    if (whereclause && row) {
+                        update(whereclause, row, get_tflags(content));
+                        return;
+                    }
+                }
+                osal_debug_error("eDBM:Faulty ECMD_UPDATE_TABLE_ROWS message received");
+                return;
+
+
+            case ECMD_REMOVE_ROWS_FROM_TABLE:
+                content = envelope->content();
+                if (content) {
+                    whereclause = content->firstv(EOID_TABLE_WHERE);
+                    if (whereclause) {
+                        remove(whereclause, get_tflags(content));
+                        return;
+                    }
+                }
+                osal_debug_error("eDBM:Faulty ECMD_REMOVE_ROWS_FROM_TABLE message received");
 
             default:
                 break;
@@ -131,4 +177,123 @@ void eDBM::onmessage(
     /* Call parent class'es onmessage.
      */
     eObject::onmessage(envelope);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get tflags from message content.
+
+  @param   content Message content.
+  @return  tflags Value of tflags specified in content, 0 if not set.
+
+****************************************************************************************************
+*/
+os_int eDBM::get_tflags(
+    eObject *content)
+{
+    eVariable *f;
+    os_int tflags;
+
+    tflags = 0;
+    f = content->firstv(EOID_FLAGS);
+    if (f) tflags = f->geti();
+    return tflags;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Configure a table.
+
+  The eDBM::configure function configures an underlying table. This function
+  - Stores/modifies table column configuration.
+  - Adds initial data rows to empty matrix.
+
+  @param   configuration Table configuration, columns.
+  @param   tflags Set 0 for default configuration. Set ETABLE_ADOPT_ARGUMENT to adopt/delete
+           configuration. If set the configuration object pointer must not be used after the
+           function call returns.
+
+****************************************************************************************************
+*/
+void eDBM::configure(
+    eContainer *configuration,
+    os_int tflags)
+{
+    eTable *table;
+    table = eTable::cast(parent());
+    table->configure(configuration, tflags);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Insert rows into table.
+
+  The eDBM::insert() function inserts one or more new rows to table.
+
+  @param   rows For single for: eContainer holding a eVariables for each element to set.
+           Multiple rows: eContainer holding a eContainers for each row to insert. Each row
+           container contains eVariable for each element to set.
+  @param   tflags Reserved for future, set 0 for now.
+
+****************************************************************************************************
+*/
+void eDBM::insert(
+    eContainer *rows,
+    os_int tflags)
+{
+    eTable *table;
+    table = eMatrix::cast(parent());
+    table->insert(rows, tflags);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Update a row or rows of a table.
+
+  @param   whereclause String containing range and/or actual where clause. This selects which
+           rows are updated.
+  @param   row A row of updated data. eContainer holding an eVariable for each element (column)
+           to update. eVariable name is column name.
+  @param   tflags Reserved for future, set 0 for now.
+
+
+****************************************************************************************************
+*/
+void eDBM::update(
+    eVariable *whereclause,
+    eContainer *row,
+    os_int tflags)
+{
+    eTable *table;
+    table = eMatrix::cast(parent());
+    table->update(whereclause->gets(), row, tflags);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Remove rows from the table.
+
+  @param   whereclause String containing range and/or actual where clause. This selects which
+           rows are to be removed.
+  @param   tflags Reserved for future, set 0 for now.
+
+****************************************************************************************************
+*/
+void eDBM::remove(
+    eVariable *whereclause,
+    os_int tflags)
+{
+    eTable *table;
+    table = eMatrix::cast(parent());
+    table->remove(whereclause->gets(), tflags);
 }
