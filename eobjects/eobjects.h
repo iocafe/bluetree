@@ -58,6 +58,7 @@ void eobjects_shutdown();
 #include "code/name/enamespace.h"
 #include "code/binding/ebinding.h"
 #include "code/binding/epropertybinding.h"
+#include "code/binding/etablebinding.h"
 #include "code/envelope/eenvelope.h"
 #include "code/table/ewhere.h"
 #include "code/table/erange.h"

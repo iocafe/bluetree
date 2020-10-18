@@ -637,14 +637,13 @@ failed:
           - x = OS_NULL -> delete value
   @param  sflags Least signigican bit is either ESET_PERSISTENT (0) or ESET_TEMPORARY (1).
           Temporary values are not cloned or serialized.
-          Flag ESET_STORE_AS_VARIABLE (2) speciifed that value is always stored as variable
+          Flag ESET_STORE_AS_VARIABLE (2) specifies that value is always stored as variable
           and never packed in m_items buffer. If value changes often, and expecially
           if value byte size varies, storing as bariable is faster, but takes more memory.
           if this eSet is used to store object's properities, property flag
           EPRO_NOPACK will select this option.
 
   @return None.
-
 
 ****************************************************************************************************
 */
@@ -871,6 +870,53 @@ store_as_var:
     v = new eVariable(this, id, sflags & ESET_TEMPORARY
         ? EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
     v->setv(x);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Store object into set.
+
+  The eSet::seto function
+
+  @param  id Identification number (for example property number) for value to store.
+  @param  x Pointer to object to store
+          - x = OS_NULL -> delete value
+  @param  sflags sflags Least signigican bit is either ESET_PERSISTENT (0) or ESET_TEMPORARY (1).
+          Temporary values are not cloned or serialized.
+          Objects are are always stored as variable.
+
+  @return None.
+
+****************************************************************************************************
+*/
+void eSet::seto(
+    os_int id,
+    eObject *x,
+    os_int sflags)
+{
+    eVariable *v;
+    osal_debug_assert(id >= 0);
+
+    /* If we have variable with this id, use it.
+     */
+    v = firstv(id);
+    if (v) {
+        if (x)
+        {
+            v->seto(x);
+            return;
+        }
+        delete v;
+        return;
+    }
+
+    if (x) {
+        v = new eVariable(this, id, sflags & ESET_TEMPORARY
+            ? EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
+        v->seto(x);
+    }
 }
 
 

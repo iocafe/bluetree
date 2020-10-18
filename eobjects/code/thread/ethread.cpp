@@ -169,11 +169,8 @@ void eThread::start(
     eThreadHandle *thandle,
     eContainer *params)
 {
-    eThreadParameters
-        prmstruct;
-
-    osalThread
-        *handle;
+    eThreadParameters prmstruct;
+    osalThread *handle;
 
     /* Save unique name into handle for controlling thread trough handle.
      */
@@ -221,8 +218,7 @@ static void ethread_func(
     void *prm,
     osalEvent done)
 {
-    eThreadParameters
-        prmstruct;
+    eThreadParameters prmstruct;
 
     /* Copy parameters to local stack
      */
@@ -294,12 +290,10 @@ void eThread::queue(
     eEnvelope *envelope,
     os_boolean delete_envelope)
 {
-    if (delete_envelope)
-    {
+    if (delete_envelope) {
         envelope->adopt(m_message_queue, EOID_ITEM, EOBJ_NO_MAP);
     }
-    else
-    {
+    else {
         envelope->clone(m_message_queue, EOID_ITEM, EOBJ_NO_MAP);
     }
     osal_event_set(m_trigger);
@@ -321,8 +315,7 @@ void eThread::queue(
 void eThread::alive(
     os_int flags)
 {
-    eEnvelope
-        *envelope;
+    eEnvelope *envelope;
 
     /* Wait for thread to be trigged. Always clear the event, even we would not be writing.
      */

@@ -180,6 +180,7 @@ static void select_rows(
     eVariable where;
     eContainer columns;
     eVariable *element;
+    eSelectParameters prm;
 
     element = new eVariable(&columns);
     element->addname("connectto", ENAME_NO_MAP);
@@ -189,7 +190,10 @@ static void select_rows(
     where += ",";
     where += 20;
     where += "]";
-    mtx.select(where.gets(), &columns, select_callback, OS_NULL);
+
+    os_memclear(&prm, sizeof(prm));
+    prm.callback = select_callback;
+    mtx.select(where.gets(), &columns, &prm);
 }
 
 static void select_callback(

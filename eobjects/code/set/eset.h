@@ -143,11 +143,18 @@ public:
     */
     /*@{*/
 
-    /* Store value into set.
+    /* Store variable value into set.
      */
     void setv(
         os_int id,
         eVariable *x,
+        os_int sflags = 0);
+
+    /* Store object into set.
+     */
+    void seto(
+        os_int id,
+        eObject *x,
         os_int sflags = 0);
 
     /* Store value into set.

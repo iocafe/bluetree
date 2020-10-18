@@ -178,3 +178,46 @@ eWhere *eTable::set_where(
 {
     return eWhere::cast(first(EOID_TABLE_WHERE));
 } */
+
+
+
+/* Convert select parameters from c-struct to set.
+ */
+void eselect_struct_to_set(
+    eSet *set,
+    eSelectParameters *prm)
+{
+    if (prm->limit) {
+        set->setl(ESELECT_LIMIT, prm->limit);
+    }
+
+    if (prm->page_mode) {
+        set->setl(ESELECT_PAGE_MODE, prm->page_mode);
+    }
+
+    if (prm->row_mode) {
+        set->setl(ESELECT_ROW_MODE, prm->row_mode);
+    }
+
+    if (prm->tzone) {
+        set->seto(ESELECT_TZONE, prm->tzone);
+    }
+}
+
+/* Convert select parameters from set to c-struct.
+ */
+void eselect_struct_to_set(
+    eSelectParameters *prm,
+    eSet *set,
+    eObject *parent)
+{
+    eVariable *tzone_var;
+
+    prm->limit = set->getl(ESELECT_LIMIT);
+    prm->page_mode = set->getl(ESELECT_PAGE_MODE);
+    prm->row_mode = set->getl(ESELECT_ROW_MODE);
+
+    tzone_var = new eVariable(parent, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+    set->getv(ESELECT_TZONE, tzone_var);
+    prm->tzone = tzone_var->geto();
+}

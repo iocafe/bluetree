@@ -211,8 +211,7 @@ public:
     virtual eStatus select(
         const os_char *whereclause,
         eContainer *columns,
-        etable_select_callback *callback,
-        eObject *context,
+        eSelectParameters *prm,
         os_int tflags = 0);
     /*@}*/
 
@@ -420,8 +419,7 @@ protected:
         eMtxOp op,
         const os_char *whereclause,
         eContainer *cont,
-        etable_select_callback *callback,
-        eObject *context,
+        eSelectParameters *prm,
         os_int tflags);
 
     /* ematrix_as_table.cpp: Pass messages to DBM object.

@@ -52,14 +52,4 @@ void etable_remove(
     const os_char *whereclause,
     os_int tflags = 0);
 
-/* Select rows from table.
- */
-eStatus etable_select(
-    eObject *t,
-    const os_char *dbmpath,
-    const os_char *whereclause,
-    eContainer *columns,
-    eDBM *dbm,
-    os_int tflags = 0);
-
 #endif

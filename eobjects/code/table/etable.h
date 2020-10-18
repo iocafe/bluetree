@@ -37,15 +37,52 @@ class eMatrix;
 extern const os_char
     etablep_configuration[];
 
+/** Select callback function.
+ */
 typedef void etable_select_callback(
     eTable *t,
     eMatrix *data,
     eObject *context);
 
+/** Parameters for select function.
+ */
+typedef struct eSelectParameters {
+    /** Pointer to callback function which will receive the data. The callback function may be
+        called multiple times to receive data as matrices with N data rows in each. N is chosen
+        for efficiency.
+     */
+    etable_select_callback *callback;
+
+    /** Application specific context pointer to pass to callback function.
+     */
+    eObject *context;
+
+    /** Maximum number of rows to return with select. Positive number => return N first rows.
+        Negative number => return N last rows.
+     */
+    os_int limit;
+
+    os_int page_mode;
+    os_int row_mode;
+    eObject *tzone;
+}
+eSelectParameters;
+
+/* Enumeration of select parameters.
+ */
+typedef enum eSelectParametersEnum {
+    ESELECT_LIMIT = 1,
+    ESELECT_PAGE_MODE = 2,
+    ESELECT_ROW_MODE = 3,
+    ESELECT_TZONE = 4
+}
+eSelectParametersEnum;
+
 
 /* tflags - table flags */
 #define ETABLE_ADOPT_ARGUMENT         0x10000000
 #define ETABLE_SERIALIZED_FLAGS_MASK  0x0000FFFF
+
 
 /**
 ****************************************************************************************************
@@ -163,8 +200,7 @@ public:
     virtual eStatus select(
         const os_char *whereclause,
         eContainer *columns,
-        etable_select_callback *callback,
-        eObject *context,
+        eSelectParameters *prm,
         os_int tflags = 0)
     {
         osal_debug_error("eTable::select is not overloaded");
@@ -188,5 +224,20 @@ public:
 
     /* eWhere *get_where(); */
 };
+
+
+/* Convert select parameters from c-struct to set.
+ */
+void eselect_struct_to_set(
+    eSet *set,
+    eSelectParameters *prm);
+
+/* Convert select parameters from set to c-struct.
+ */
+void eselect_struct_to_set(
+    eSelectParameters *prm,
+    eSet *set,
+    eObject *parent);
+
 
 #endif

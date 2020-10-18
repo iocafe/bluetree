@@ -166,8 +166,7 @@ public:
     virtual eStatus select(
         const os_char *whereclause,
         eContainer *columns,
-        etable_select_callback *callback,
-        eObject *context,
+        eSelectParameters *prm,
         os_int tflags = 0);
     /*@}*/
 
@@ -182,6 +181,39 @@ public:
     ************************************************************************************************
     */
     /*@{*/
+
+    /* Set path to DBM.
+     */
+    eStatus set_dbm(
+        const os_char *dbm_path);
+
+    /* Set table name.
+     */
+    eStatus set_table(
+        const os_char *table_name);
+
+    /* Set page mode.
+     */
+    eStatus set_page_mode(
+        os_int page_mode);
+
+    /* Set row mode.
+     */
+    eStatus set_row_mode(
+        os_int row_mode);
+
+    /* Set row mode.
+     */
+    eStatus set_callback(
+        os_int func,
+        eObject *context);
+
+    /* Select rows from table.
+     */
+    eStatus select(
+        const os_char *whereclause,
+        eContainer *columns,
+        os_int limit = 0);
 
     /* Get rowset width.
      */

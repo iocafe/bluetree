@@ -56,6 +56,7 @@ void etable_insert(
         EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 }
 
+
 /* Update a row or rows of a table or insert a row to the table.
  */
 void etable_update(
@@ -76,6 +77,7 @@ void etable_update(
         EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 }
 
+
 /* Remove rows from table.
  */
 void etable_remove(
@@ -95,19 +97,6 @@ void etable_remove(
         EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 }
 
-/* Select rows from table.
- */
-eStatus etable_select(
-    eObject *t,
-    const os_char *path,
-    const os_char *whereclause,
-    eContainer *columns,
-    eDBM *dbm,
-    os_int tflags)
-{
-    osal_debug_error("eTable::select is not overloaded");
-    return ESTATUS_FAILED;
-}
 
 /* Prepare message to send.
  */

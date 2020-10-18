@@ -351,8 +351,7 @@ void eRowSet::remove(
 eStatus eRowSet::select(
     const os_char *whereclause,
     eContainer *columns,
-    etable_select_callback *callback,
-    eObject *context,
+    eSelectParameters *prm,
     os_int tflags)
 
 {

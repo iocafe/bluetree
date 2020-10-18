@@ -275,7 +275,7 @@ eStatus eMatrix::update(
     eContainer *row,
     os_int tflags)
 {
-    return select_update_remove(EMTX_UPDATE, whereclause, row, OS_NULL, OS_NULL, tflags);
+    return select_update_remove(EMTX_UPDATE, whereclause, row, OS_NULL, tflags);
 }
 
 
@@ -294,7 +294,7 @@ void eMatrix::remove(
     const os_char *whereclause,
     os_int tflags)
 {
-    select_update_remove(EMTX_REMOVE, whereclause, OS_NULL, OS_NULL, OS_NULL, tflags);
+    select_update_remove(EMTX_REMOVE, whereclause, OS_NULL, OS_NULL, tflags);
 }
 
 
@@ -312,10 +312,7 @@ void eMatrix::remove(
   @param   columns List of columns to get. eContainer holding an eVariable for each column
            to select. eVariable name is column name, or column name can also be stored as
            variable value.
-  @param   callback Pointer to callback function which will receive the data. The
-           callback function may be called multiple times to receive data as matrices with
-           N data rows in each. N is chosen for efficiency.
-  @param   context Application specific context pointer to pass to callback function.
+
   @param   tflags Reserved for future, set 0 for now.
 
   @return  OSAL_SUCCESS if ok.
@@ -325,11 +322,10 @@ void eMatrix::remove(
 eStatus eMatrix::select(
     const os_char *whereclause,
     eContainer *columns,
-    etable_select_callback *callback,
-    eObject *context,
+    eSelectParameters *prm,
     os_int tflags)
 {
-    return select_update_remove(EMTX_SELECT, whereclause, columns, callback, context, tflags);
+    return select_update_remove(EMTX_SELECT, whereclause, columns, prm, tflags);
 }
 
 
@@ -355,8 +351,7 @@ eStatus eMatrix::select_update_remove(
     eMtxOp op,
     const os_char *whereclause,
     eContainer *cont,
-    etable_select_callback *callback,
-    eObject *context,
+    eSelectParameters *prm,
     os_int tflags)
 {
     eWhere *w = OS_NULL;
@@ -549,8 +544,8 @@ eStatus eMatrix::select_update_remove(
 
                 /* Callback.
                  */
-                if (callback) {
-                    callback(this, m, context);
+                if (prm) if (prm->callback) {
+                    prm->callback(this, m, prm->context);
                 }
 
                 /* Clean up in case callback did not adopt the matrix.
