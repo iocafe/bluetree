@@ -184,35 +184,39 @@ public:
 
     /* Set path to DBM.
      */
-    eStatus set_dbm(
+    void set_dbm(
         const os_char *dbm_path);
 
     /* Set table name.
      */
-    eStatus set_table(
+    void set_table(
         const os_char *table_name);
 
     /* Set page mode.
      */
-    eStatus set_page_mode(
+    void set_page_mode(
         os_int page_mode);
 
     /* Set row mode.
      */
-    eStatus set_row_mode(
+    void set_row_mode(
         os_int row_mode);
 
-    /* Set row mode.
+    /* Set callback function, when data is received or updated.
      */
-    eStatus set_callback(
+    void set_callback(
         os_int func,
         eObject *context);
+
+    /* Set columns list to select. May contain wildcards.
+     */
+    void set_columns(
+        eContainer *columns);
 
     /* Select rows from table.
      */
     eStatus select(
         const os_char *whereclause,
-        eContainer *columns,
         os_int limit = 0);
 
     /* Get rowset width.

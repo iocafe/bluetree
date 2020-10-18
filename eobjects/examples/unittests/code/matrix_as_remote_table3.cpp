@@ -35,7 +35,9 @@
 /* Every class needs to have unique class identifier (classid). Class identifier is is 32 bit
    integer. Class identifiers starting from ECLASSID_APP_BASE are reserved for the application.
  */
-#define MY_CLASS_ID (ECLASSID_APP_BASE + 1)
+#define MY_CLASS_ID_1 (ECLASSID_APP_BASE + 1)
+#define MY_CLASS_ID_2 (ECLASSID_APP_BASE + 2)
+#define MY_CLASS_ID_3 (ECLASSID_APP_BASE + 3)
 
 
 /**
@@ -48,7 +50,7 @@ class ThreadExposingTheTable : public eThread
 public:
     /* Get class identifier.
      */
-    virtual os_int classid() {return MY_CLASS_ID;}
+    virtual os_int classid() {return MY_CLASS_ID_1;}
 
     virtual void initialize(
         eContainer *params = OS_NULL)
@@ -109,7 +111,7 @@ class ThreadUsingTheTable: public eThread
 public:
     /* Get class identifier.
      */
-    virtual os_int classid() {return MY_CLASS_ID;}
+    virtual os_int classid() {return MY_CLASS_ID_2;}
 
     virtual void initialize(
         eContainer *params = OS_NULL)
@@ -118,10 +120,6 @@ public:
         configure_columns();
         m_step = 0;
         timer(3000);
-    }
-
-    virtual void finish()
-    {
     }
 
     virtual void onmessage(
@@ -230,10 +228,46 @@ public:
         etable_update(this, "//mymtx", "connectto='Silly Creeper'", &row);
     }
 
-
 protected:
     os_int m_step;
 };
+
+
+/**
+****************************************************************************************************
+  Thread which selects data from table and monitors changes.
+****************************************************************************************************
+*/
+class ThreadMonitoringTheTable: public eThread
+{
+public:
+    /* Get class identifier.
+     */
+    virtual os_int classid() {return MY_CLASS_ID_3;}
+
+    virtual void initialize(
+        eContainer *params = OS_NULL)
+    {
+        eContainer columns;
+        eVariable *column;
+        osal_console_write("ThreadMonitoringTheTable started\n");
+
+        m_rowset = new eRowSet(this);
+        // m_rowset->set_dbm_path("//mymtx");
+        // m_rowset->set_callback();
+
+        column = new eVariable(&columns);
+        column->addname("*", ENAME_NO_MAP);
+        // m_rowset->set_columns(&columns);
+
+
+        // m_rowset->select("*");
+    }
+
+protected:
+    eRowSet *m_rowset;
+};
+
 
 /**
 ****************************************************************************************************
@@ -243,7 +277,7 @@ protected:
 void matrix_as_remote_table_3()
 {
     eThread *t;
-    eThreadHandle thandle1, thandle2;
+    eThreadHandle thandle1, thandle2, thandle3;
     eContainer root;
     eVariable *txt;
 
@@ -253,7 +287,9 @@ void matrix_as_remote_table_3()
     t->addname("//mythread1");
     t->start(&thandle1);
     t = new ThreadUsingTheTable();
-    t->start(&thandle2); /* After this t pointer is useless */
+    t->start(&thandle2);
+    t = new ThreadMonitoringTheTable();
+    t->start(&thandle3); /* After this t pointer is useless */
 
     for (os_int i = 0; i<1000; i++)
     {
@@ -267,6 +303,8 @@ void matrix_as_remote_table_3()
 
     /* Wait for thread to terminate
      */
+    thandle3.terminate();
+    thandle3.join();
     thandle2.terminate();
     thandle2.join();
     thandle1.terminate();
