@@ -73,6 +73,15 @@ extern const os_char
     evarp_conf[];
 
 
+/* Value to indicate that decimal digits is not set.
+ */
+#define EVARP_DIGS_UNDEFINED 15
+
+/* Default number of decimal digits for floating point number.
+ */
+#define EVARP_DEFAULT_DIGS 2
+
+
 /*@}*/
 
 

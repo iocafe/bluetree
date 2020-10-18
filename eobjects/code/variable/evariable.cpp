@@ -17,7 +17,6 @@
 */
 #include "eobjects.h"
 
-
 /* Variable property names.
  */
 const os_char
@@ -57,7 +56,7 @@ eVariable::eVariable(
 {
     /* No type, number 2 digits after decimal point for doubles.
      */
-    m_vflags = OS_UNDEFINED_TYPE|(2 << EVAR_DDIGS_SHIFT);
+    m_vflags = OS_UNDEFINED_TYPE|(EVARP_DIGS_UNDEFINED << EVAR_DDIGS_SHIFT);
     m_value.valbuf.tmpstr = OS_NULL;
 }
 
@@ -308,6 +307,8 @@ eStatus eVariable::onpropertychange(
     eVariable *x,
     os_int flags)
 {
+    os_int di;
+
     switch (propertynr)
     {
         case EVARP_VALUE:
@@ -315,7 +316,14 @@ eStatus eVariable::onpropertychange(
             break;
 
         case EVARP_DIGS:
-            setdigs((os_int)x->getl());
+
+            if (x->isempty()) {
+                di = EVARP_DIGS_UNDEFINED;
+            }
+            else {
+                di = (os_int)x->getl();
+            }
+            setdigs(di);
             break;
 
         default:
@@ -345,6 +353,8 @@ eStatus eVariable::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
+    os_int di;
+
     switch (propertynr)
     {
         case EVARP_VALUE:
@@ -352,7 +362,13 @@ eStatus eVariable::simpleproperty(
             break;
 
         case EVARP_DIGS:
-            x->setl(digs());
+            di = digs();
+            if (di == EVARP_DIGS_UNDEFINED) {
+                x->clear();
+            }
+            else {
+                x->setl(di);
+            }
             break;
 
         default:
@@ -944,6 +960,7 @@ os_char *eVariable::gets(
     os_char *str, *vstr, buf[64];
     eValueX *ex;
     os_memsz vsz;
+    os_int di;
 
     switch (type())
     {
@@ -995,8 +1012,12 @@ os_char *eVariable::gets(
             break;
 
         case OS_DOUBLE:
+            di = digs();
+            if (di == EVARP_DIGS_UNDEFINED) {
+                di = EVARP_DEFAULT_DIGS;
+            }
             vsz = osal_double_to_str(buf, sizeof(buf),
-                m_value.valbuf.v.d, digs(), OSAL_FLOAT_DEFAULT);
+                m_value.valbuf.v.d, di, OSAL_FLOAT_DEFAULT);
             break;
 
         case OS_OBJECT:
