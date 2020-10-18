@@ -37,7 +37,7 @@ void etable_insert(
 
 /* Update a row or rows of a table or insert a row to the table.
  */
-eStatus etable_update(
+void etable_update(
     eObject *t,
     const os_char *dbmpath,
     const os_char *whereclause,

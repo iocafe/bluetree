@@ -116,19 +116,12 @@ public:
     {
         osal_console_write("ThreadUsingTheTable started\n");
         configure_columns();
+        m_step = 0;
+        timer(3000);
     }
 
     virtual void finish()
     {
-    }
-
-    virtual void run()
-    {
-        while (!exitnow())
-        {
-            alive();
-            osal_console_write("worker running\n");
-        }
     }
 
     virtual void onmessage(
@@ -136,10 +129,10 @@ public:
     {
         /* If at final destination for the message.
          */
-        if (*envelope->target()=='\0' && envelope->command() == MY_COMMAND)
+        if (*envelope->target()=='\0' && envelope->command() == ECMD_TIMER)
         {
-            osal_console_write(envelope->source());
-            osal_console_write("\n");
+            osal_console_write("TIMER\n");
+            one_step_at_a_time();
             return;
         }
 
@@ -175,7 +168,71 @@ public:
         etable_configure(this, "//mymtx", configuration, ETABLE_ADOPT_ARGUMENT);
     }
 
+    void one_step_at_a_time()
+    {
+        switch (++m_step) {
+            case 1: insert_row(3, "Mechanical Tiger"); break;
+            case 2: insert_row(4, "Jack the Bouncer"); break;
+            case 3: insert_row(16, "Silly Creeper"); break;
+            case 4: insert_row(14, "Astounding Apple"); break;
+            case 5: remove_row(4); break;
+            case 6: update_row("No more creeper");
+        }
+    }
+
+    void insert_row(
+        os_int rownr,
+        const os_char *text)
+    {
+        eContainer row;
+        eVariable *element;
+
+        element = new eVariable(&row);
+        element->addname("ix", ENAME_NO_MAP);
+        element->setl(rownr);
+
+        element = new eVariable(&row);
+        element->addname("connected", ENAME_NO_MAP);
+        element->setl(OS_TRUE);
+
+        element = new eVariable(&row);
+        element->addname("connectto", ENAME_NO_MAP);
+        element->sets(text);
+
+        etable_insert(this, "//mymtx", &row);
+    }
+
+    void remove_row(
+        os_int rownr)
+    {
+        eVariable where;
+
+        where = "[";
+        where += rownr;
+        where += "]";
+        etable_remove(this, "//mymtx", where.gets());
+    }
+
+    void update_row(
+        const os_char *text)
+    {
+        eContainer row;
+        eVariable *element;
+
+        element = new eVariable(&row);
+        element->addname("connectto", ENAME_NO_MAP);
+        element->sets(text);
+
+        element = new eVariable(&row);
+        element->addname("ix", ENAME_NO_MAP);
+        element->setl(12);
+
+        etable_update(this, "//mymtx", "connectto='Silly Creeper'", &row);
+    }
+
+
 protected:
+    os_int m_step;
 };
 
 /**
