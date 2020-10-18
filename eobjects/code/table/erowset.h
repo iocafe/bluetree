@@ -28,13 +28,28 @@
  */
 #define ERSETP_NROWS 21
 #define ERSETP_NCOLUMNS 22
+#define ERSETP_DBM_PATH 23
+#define ERSETP_TABLE_NAME 24
+#define ERSETP_LIMIT 25
+#define ERSETP_PAGE_MODE 26
+#define ERSETP_ROW_MODE 27
+#define ERSETP_TZONE 28
+
+/* 30 */
 #define ERSETP_CONFIGURATION ETABLEP_CONFIGURATION
+
 
 /* Matrix property names.
  */
 extern const os_char
     ersetp_nrows[],
-    ersetp_ncolumns[];
+    ersetp_ncolumns[],
+    ersetp_dbm_path[],
+    ersetp_table_name[],
+    ersetp_limit[],
+    ersetp_page_mode[],
+    ersetp_row_mode[],
+    ersetp_tzone[];
 
 #define ersetp_configuration etablep_configuration
 
@@ -184,23 +199,43 @@ public:
 
     /* Set path to DBM.
      */
-    void set_dbm(
-        const os_char *dbm_path);
+    inline void set_dbm(
+        const os_char *dbm_path)
+    {
+        setpropertys(ERSETP_DBM_PATH, dbm_path);
+    }
 
     /* Set table name.
      */
-    void set_table(
-        const os_char *table_name);
+    inline void set_table(
+        const os_char *table_name)
+    {
+        setpropertys(ERSETP_TABLE_NAME, table_name);
+    }
 
     /* Set page mode.
      */
-    void set_page_mode(
-        os_int page_mode);
+    inline void set_page_mode(
+        os_int page_mode)
+    {
+        setpropertyl(ERSETP_PAGE_MODE, page_mode);
+    }
 
     /* Set row mode.
      */
-    void set_row_mode(
-        os_int row_mode);
+    inline void set_row_mode(
+        os_int row_mode)
+    {
+        setpropertyl(ERSETP_ROW_MODE, row_mode);
+    }
+
+    /* Set row mode.
+     */
+    inline void set_tzone(
+        eObject *tz)
+    {
+        setpropertyo(ERSETP_TZONE, tz);
+    }
 
     /* Set callback function, when data is received or updated.
      */
@@ -208,16 +243,13 @@ public:
         os_int func,
         eObject *context);
 
-    /* Set columns list to select. May contain wildcards.
-     */
-    void set_columns(
-        eContainer *columns);
-
     /* Select rows from table.
      */
-    eStatus select(
+    void select(
         const os_char *whereclause,
-        os_int limit = 0);
+        eContainer *columns,
+        os_int limit = 0,
+        os_int bflags = 0);
 
     /* Get rowset width.
      */
@@ -258,6 +290,14 @@ protected:
     /** Own change, prevent recursion.
      */
     os_short m_own_change;
+
+    /** DBM path
+     */
+    eVariable *m_dbm_path;
+
+    /** Select parameters.
+     */
+    eSelectParameters m_prm;
 
     /*@}*/
 };

@@ -101,23 +101,12 @@ public:
     inline static eBinding *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_BINDING)
         return (eBinding*)o;
     }
 
     /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_BINDING;}
-
-    /* Static constructor function for generating instance by class list.
-     */
-    /* static eBinding *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        osal_debug_error("ebinding, newobj(): Cannot create abstract class");
-    } */
 
     /* Write binding content to stream.
      */
@@ -235,12 +224,12 @@ protected:
     ************************************************************************************************
     */
     /*@{*/
-    /* Client: Path to object to bind to as given as argument to bind().
+    /** Client: Path to object to bind to as given as argument to bind().
         Server: Always OS_NULL.
      */
     os_char *m_objpath;
 
-    /* Unique path to eBinding which we are bound to.
+    /** Unique path to eBinding which we are bound to.
      */
     os_char *m_bindpath;
 
@@ -248,11 +237,11 @@ protected:
      */
     os_short m_bflags;
 
-    /* Size of object path allocation in bytes.
+    /** Size of object path allocation in bytes.
      */
     os_short m_objpathsz;
 
-    /* Size of bind path allocation in bytes.
+    /** Size of bind path allocation in bytes.
      */
     os_short m_bindpathsz;
 

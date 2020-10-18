@@ -253,15 +253,14 @@ public:
         osal_console_write("ThreadMonitoringTheTable started\n");
 
         m_rowset = new eRowSet(this);
-        // m_rowset->set_dbm_path("//mymtx");
+        m_rowset->set_dbm("//mymtx");
         // m_rowset->set_callback();
 
         column = new eVariable(&columns);
         column->addname("*", ENAME_NO_MAP);
-        // m_rowset->set_columns(&columns);
 
 
-        // m_rowset->select("*");
+        // m_rowset->select("*", &columns);
     }
 
 protected:

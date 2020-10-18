@@ -180,7 +180,7 @@ eWhere *eTable::set_where(
 } */
 
 
-
+#if 0
 /* Convert select parameters from c-struct to set.
  */
 void eselect_struct_to_set(
@@ -221,3 +221,4 @@ void eselect_struct_to_set(
     set->getv(ESELECT_TZONE, tzone_var);
     prm->tzone = tzone_var->geto();
 }
+#endif

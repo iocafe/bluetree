@@ -20,6 +20,9 @@
 #define ETABLEBINDING_H_
 #include "eobjects.h"
 
+struct eSelectParameters;
+
+
 /**
 ****************************************************************************************************
 
@@ -120,12 +123,13 @@ public:
     */
     /*@{*/
 
-    /* Bind property.
+    /* Bind row set to table (select).
      */
     void bind(
-        os_int localpropertynr,
-        const os_char *remotepath,
-        const os_char *remoteproperty,
+        eVariable *dbm_path,
+        const os_char *whereclause,
+        eContainer *columns,
+        eSelectParameters *prm,
         os_int bflags);
 
     void bind2(

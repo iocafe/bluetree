@@ -92,6 +92,9 @@
 #define EOID_TABLE_COLUMNS -41
 #define EOID_TABLE_CONTENT -42
 #define EOID_TABLE_WHERE -43
+
+#define EOID_TABLE_CLIENT_BINDING -46
+
 #define EOID_DBM -50
 
 /** This is special object identifier that can be given as argument to object hierarchy

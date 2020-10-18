@@ -57,6 +57,10 @@ typedef struct eSelectParameters {
      */
     eObject *context;
 
+    /** Table name
+     */
+    eVariable *table_name;
+
     /** Maximum number of rows to return with select. Positive number => return N first rows.
         Negative number => return N last rows.
      */
@@ -226,6 +230,7 @@ public:
 };
 
 
+#if 0
 /* Convert select parameters from c-struct to set.
  */
 void eselect_struct_to_set(
@@ -238,6 +243,6 @@ void eselect_struct_to_set(
     eSelectParameters *prm,
     eSet *set,
     eObject *parent);
-
+#endif
 
 #endif

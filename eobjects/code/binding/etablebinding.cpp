@@ -310,8 +310,6 @@ void eTableBinding::onmessage(
   @param  bflags Combination of EBIND_DEFAULT (0), EBIND_CLIENTINIT, EBIND_NOFLOWCLT
           and EBIND_METADATA.
           - EBIND_DEFAULT:  bind without special options.
-          - EBIND_CLIENTINIT: Local property value is used as initial value. Normally
-            remote end's value is used as initial value.
           - EBIND_NOFLOWCLT: Disable flow control. Normally if property value changes
             faster than it can be transferred, some values are skipped. If EBIND_NOFLOWCLT
             flag is given, it disables flow control and every value is transferred without
@@ -324,18 +322,19 @@ void eTableBinding::onmessage(
 ****************************************************************************************************
 */
 void eTableBinding::bind(
-    os_int localpropertynr,
-    const os_char *remotepath,
-    const os_char *remoteproperty,
+    eVariable *dbm_path,
+    const os_char *whereclause,
+    eContainer *columns,
+    eSelectParameters *prm,
     os_int bflags)
 {
     /* Save bind parameters and flags.
      */
-    set_propertyname(remoteproperty);
-    m_localpropertynr = localpropertynr;
+    // set_propertyname(remoteproperty);
+    // m_localpropertynr = localpropertynr;
     m_bflags = bflags | EBIND_CLIENT;
 
-    bind2(remotepath);
+    bind2(dbm_path->gets());
 }
 
 /* If remotepath is OS_NULL last used name will be preserved/
@@ -351,20 +350,6 @@ void eTableBinding::bind2(
     parameters = new eSet(this);
     parameters->setl(E_BINDPRM_FLAGS, m_bflags & EBIND_SER_MASK);
     parameters->sets(E_BINDPRM_PROPERTYNAME, m_propertyname);
-
-    /* If this client is master, get property value.
-     */
-    if (m_bflags & EBIND_CLIENTINIT)
-    {
-        if (!binding_getproperty(&x))
-        {
-#if OSAL_DEBUG
-            osal_debug_error("bind(): Unknown property number");
-#endif
-            return;
-        }
-        parameters->setv(E_BINDPRM_VALUE, &x);
-    }
 
     /* If we are binding attributes like "x.min", get these.
      */

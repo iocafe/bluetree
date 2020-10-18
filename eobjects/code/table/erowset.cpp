@@ -20,7 +20,13 @@
  */
 const os_char
     ersetp_nrows[] = "nrows",
-    ersetp_ncolumns[] = "ncolumns";
+    ersetp_ncolumns[] = "ncolumns",
+    ersetp_dbm_path[] = "dbmpath",
+    ersetp_table_name[] = "table",
+    ersetp_limit[] = "limit",
+    ersetp_page_mode[] = "pagemode",
+    ersetp_row_mode[] = "rowmode",
+    ersetp_tzone[] = "tzone";
 
 
 /**
@@ -40,6 +46,8 @@ eRowSet::eRowSet(
 
     m_columns = OS_NULL;
     m_own_change = 0;
+    m_dbm_path = OS_NULL;
+    os_memclear(&m_prm, sizeof(eSelectParameters));
 }
 
 
@@ -74,8 +82,17 @@ void eRowSet::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eRowSet");
-    addpropertyl(cls, ERSETP_NROWS, ersetp_nrows, "nro rows", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertyl(cls, ERSETP_NCOLUMNS, ersetp_ncolumns, "nro columns", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, ERSETP_NROWS, ersetp_nrows, "nro rows", EPRO_SIMPLE);
+    addpropertyl(cls, ERSETP_NCOLUMNS, ersetp_ncolumns, "nro columns", EPRO_SIMPLE);
+
+    addpropertys(cls, ERSETP_DBM_PATH, ersetp_dbm_path, "DBM path", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, ERSETP_TABLE_NAME, ersetp_table_name, "table", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, ERSETP_LIMIT, ersetp_limit, "limit", EPRO_PERSISTENT|EPRO_SIMPLE);
+
+    addpropertyl(cls, ERSETP_PAGE_MODE, ersetp_page_mode, "page", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, ERSETP_ROW_MODE, ersetp_row_mode, "row", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty(cls, ERSETP_TZONE, ersetp_tzone, "tzone", EPRO_PERSISTENT|EPRO_SIMPLE);
+
     addproperty (cls, ERSETP_CONFIGURATION, ersetp_configuration, "configuration",
         EPRO_PERSISTENT|EPRO_SIMPLE);
     propertysetdone(cls);
@@ -105,8 +122,21 @@ eObject *eRowSet::clone(
     eRowSet *clonedobj;
 
     clonedobj = new eRowSet(parent, id == EOID_CHILD ? oid() : id, flags());
-    clonedobj->m_ncolumns = m_ncolumns;
-    clonedobj->m_nrows = m_nrows;
+
+    if (m_dbm_path) {
+        clonedobj->m_dbm_path = eVariable::cast(m_dbm_path->clone(this,
+            EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT));
+    }
+    if (m_prm.table_name) {
+        clonedobj->m_prm.table_name = eVariable::cast(m_prm.table_name->clone(this,
+            EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT));
+    }
+    clonedobj->m_prm.limit = m_prm.limit;
+    clonedobj->m_prm.page_mode = m_prm.page_mode;
+    clonedobj->m_prm.row_mode = m_prm.row_mode;
+    if (m_prm.tzone) {
+        clonedobj->m_prm.tzone = m_prm.tzone->clone(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+    }
 
     clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
     return clonedobj;
@@ -140,7 +170,7 @@ eStatus eRowSet::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-    eObject *configuration;
+    eObject *configuration, *o;
 
     switch (propertynr)
     {
@@ -153,6 +183,41 @@ eStatus eRowSet::onpropertychange(
         case ERSETP_NCOLUMNS:
             if (m_own_change == 0) {
                 m_ncolumns = x->getl();
+            }
+            break;
+
+        case ERSETP_DBM_PATH:
+            if (m_dbm_path == OS_NULL) {
+                m_dbm_path =  new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+            }
+            m_dbm_path->setv(x);
+            break;
+
+        case ERSETP_TABLE_NAME:
+            if (m_prm.table_name == OS_NULL) {
+                m_prm.table_name =  new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+            }
+            m_prm.table_name->setv(x);
+            break;
+
+        case ERSETP_LIMIT:
+            m_prm.limit = x->geti();
+            break;
+
+        case ERSETP_PAGE_MODE:
+            m_prm.page_mode = x->geti();
+            break;
+
+        case ERSETP_ROW_MODE:
+            m_prm.row_mode = x->geti();
+            break;
+
+        case ERSETP_TZONE:
+            delete m_prm.tzone;
+            m_prm.tzone = OS_NULL;
+            o = x->geto();
+            if (o) {
+                m_prm.tzone = o->clone(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
             }
             break;
 
@@ -204,6 +269,30 @@ eStatus eRowSet::simpleproperty(
 
         case ERSETP_NCOLUMNS:
             x->setl(m_ncolumns);
+            break;
+
+        case ERSETP_DBM_PATH:
+            x->setv(m_dbm_path);
+            break;
+
+        case ERSETP_TABLE_NAME:
+            x->setv(m_prm.table_name);
+            break;
+
+        case ERSETP_LIMIT:
+            x->setl(m_prm.limit);
+            break;
+
+        case ERSETP_PAGE_MODE:
+            x->setl(m_prm.page_mode);
+            break;
+
+        case ERSETP_ROW_MODE:
+            x->setl(m_prm.row_mode);
+            break;
+
+        case ERSETP_TZONE:
+            x->seto(m_prm.tzone);
             break;
 
         case ERSETP_CONFIGURATION:
@@ -357,3 +446,76 @@ eStatus eRowSet::select(
 {
     return ESTATUS_FAILED;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Bind this object's property to remote property.
+
+  The eObject::bind() function creates binding to remote property. When two variables are bound
+  together, they have the same value. When the other changes, so does the another. Bindings
+  work over messaging, thus binding work as well between objects in same thread or objects in
+  different computers.
+
+  @param  localpropertyno This object's propery number to bind.
+  @param  remotepath Path to remote object to bind to.
+  @param  remoteproperty Name of remote property to bind. If OS_NULL variable value
+          is assumed.
+  @param  bflags Combination of EBIND_DEFAULT (0), EBIND_CLIENTINIT, EBIND_NOFLOWCLT
+          EBIND_METADATA and EBIND_TEMPORARY.
+          - EBIND_DEFAULT:  bind without special options.
+          - EBIND_NOFLOWCLT: Disable flow control. Normally if property value changes
+            faster than it can be transferred, some values are skipped. If EBIND_NOFLOWCLT
+            flag is given, it disables flow control and every value is transferred without
+            any limit to buffered memory use.
+          - EBIND_METADATA: If meta data, like text, unit, attributes, etc exists, it is
+            also transferred from remote object to local object.
+          - EBIND_TEMPORARY: Binding is temporary and will not be cloned nor serialized.
+  @param  envelope Used for server binding only. OS_NULL for clint binding.
+  @return None.
+
+****************************************************************************************************
+*/
+void eRowSet::select(
+    const os_char *whereclause,
+    eContainer *columns,
+    os_int limit,
+    os_int bflags)
+{
+    eContainer *bindings;
+    eTableBinding *binding;
+    eObject *o;
+
+    if (m_dbm_path == OS_NULL) {
+        osal_debug_error("eRowSet::select:DBM path not set");
+        return;
+    }
+
+    /* Limit is passed trugh parameter structure, set as property.
+     */
+    setpropertyl(ERSETP_LIMIT, limit);
+
+    /* Get or create bindings container.
+     */
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL)
+    {
+        bindings = new eContainer(this, EOID_BINDINGS, EOBJ_IS_ATTACHMENT);
+    }
+    else {
+        while ((o = bindings->first(EOID_TABLE_CLIENT_BINDING))) {
+            delete o;
+        }
+    }
+
+    /* Create binding
+     */
+    binding = new eTableBinding(bindings, EOID_TABLE_CLIENT_BINDING, (bflags & EBIND_TEMPORARY)
+         ? EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
+
+    /* Bind the row set to table. This function will send message to remote object to bind.
+     */
+    binding->bind(m_dbm_path, whereclause, columns, &m_prm, bflags);
+}
+
