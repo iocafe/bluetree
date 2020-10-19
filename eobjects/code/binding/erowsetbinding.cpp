@@ -36,9 +36,11 @@ eRowSetBinding::eRowSetBinding(
 {
     /* Clear member variables.
      */
-    // m_propertyname = OS_NULL;
-    // m_propertynamesz = 0;
     m_binding_data = OS_NULL;
+
+    /* Row set bindings cannot be cloned or serialized.
+     */
+    setflags(EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
 }
 
 
@@ -54,38 +56,6 @@ eRowSetBinding::eRowSetBinding(
 */
 eRowSetBinding::~eRowSetBinding()
 {
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Clone object
-
-  The eRowSetBinding::clone function clones and object including object's children.
-  Names will be left detached in clone.
-
-  @param  parent Parent for the clone.
-  @param  id Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
-  @return Pointer to the clone.
-
-****************************************************************************************************
-*/
-eObject *eRowSetBinding::clone(
-    eObject *parent,
-    e_oid id,
-    os_int aflags)
-{
-    eRowSetBinding
-        *clonedobj;
-
-    clonedobj = new eRowSetBinding(parent, id == EOID_CHILD ? oid() : id, flags());
-    if (m_binding_data) {
-        clonedobj->m_binding_data = eSet::cast(m_binding_data->clone(clonedobj));
-    }
-
-    return clonedobj;
 }
 
 
@@ -109,121 +79,16 @@ void eRowSetBinding::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eRowSetBinding");
+    addpropertys(cls, ERSETP_DBM_PATH, ersetp_dbm_path, "DBM path", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, ERSETP_TABLE_NAME, ersetp_table_name, "table", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, ERSETP_WHERE_CLAUSE, ersetp_where_clause, "where", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, ERSETP_REQUESTED_COLUMNS, ersetp_requested_columns, "requested", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, ERSETP_LIMIT, ersetp_limit, "limit", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, ERSETP_PAGE_MODE, ersetp_page_mode, "page", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, ERSETP_ROW_MODE, ersetp_row_mode, "row", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, ERSETP_TZONE, ersetp_tzone, "tzone", EPRO_PERSISTENT|EPRO_SIMPLE);
+    propertysetdone(cls);
     os_unlock();
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Write property binding content to stream.
-
-  The eRowSetBinding::writer() function serializes the property binding to stream. This writes
-  only the content, use eObject::write() to save also class information, attachements, etc.
-
-  @param  stream The stream to write to.
-  @param  flags Serialization flags.
-
-  @return If successfull the function returns ESTATUS_SUCCESS (0). If writing object to stream
-          fails, value ESTATUS_WRITING_OBJ_FAILED is returned. Assume that all nonzero values
-          indicate an error.
-
-****************************************************************************************************
-*/
-eStatus eRowSetBinding::writer(
-    eStream *stream,
-    os_int flags)
-{
-    /* Version number. Increment if new serialized items are added to the object,
-       and check for new version's items in read() function.
-     */
-    const os_int version = 0;
-    eObject *child;
-
-    /* Begin the object and write version number.
-     */
-    if (stream->write_begin_block(version)) goto failed;
-
-    /* Write child count to stream (no attachments).
-     */
-    if (*stream << childcount())  goto failed;
-
-    /* Write childern (no attachments).
-     */
-    for (child = first(); child; child = child->next())
-    {
-        child->write(stream, flags);
-    }
-
-    /* End the object.
-     */
-    if (stream->write_end_block()) goto failed;
-
-    /* Object succesfully written.
-     */
-    return ESTATUS_SUCCESS;
-
-    /* Writing object failed.
-     */
-failed:
-    return ESTATUS_WRITING_OBJ_FAILED;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Read property binding content from stream.
-
-  The eRowSetBinding::reader() function reads serialized rowsetbinding from stream.
-  This function reads only the object content. To read whole object including attachments,
-  names, etc, use eObject::read().
-
-  @param  stream The stream to read from.
-  @param  flags Serialization flags.
-
-  @return If successfull the function returns ESTATUS_SUCCESS (0). If writing object to stream
-          fails, value ESTATUS_READING_OBJ_FAILED is returned. Assume that all nonzero values
-          indicate an error.
-
-****************************************************************************************************
-*/
-eStatus eRowSetBinding::reader(
-    eStream *stream,
-    os_int flags)
-{
-    /* Version number. Used to check which versions item's are in serialized data.
-     */
-    os_int version;
-    os_long count;
-
-    /* Read object start mark and version number.
-     */
-    if (stream->read_begin_block(&version)) goto failed;
-
-    /* Read child count from (no attachments).
-     */
-    if (*stream >> count)  goto failed;
-
-    /* Read children.
-     */
-    while (count-- > 0)
-    {
-        read(stream, flags);
-    }
-
-    /* End the object.
-     */
-    if (stream->read_end_block()) goto failed;
-
-    /* Object succesfully read.
-     */
-    return ESTATUS_SUCCESS;
-
-    /* Reading object failed.
-     */
-failed:
-    return ESTATUS_READING_OBJ_FAILED;
 }
 
 
@@ -285,6 +150,75 @@ void eRowSetBinding::onmessage(
      */
     eBinding::onmessage(envelope);
 }
+
+
+
+/**
+****************************************************************************************************
+
+  @brief Get value of simple property (override).
+
+  The simpleproperty() function stores current value of simple property into variable x.
+
+  @param   propertynr Property number to get.
+  @param   x Variable into which to store the property value.
+  @return  If property with property number was stored in x, the function returns
+           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
+           given number was not among simple properties.
+
+****************************************************************************************************
+*/
+eStatus eRowSetBinding::simpleproperty(
+    os_int propertynr,
+    eVariable *x)
+{
+    eRowSetBinding *binding;
+
+    switch (propertynr)
+    {
+        case ERSETP_DBM_PATH:
+            if (m_objpath == OS_NULL) goto clear_x;
+            x->sets(m_objpath);
+            break;
+
+        case ERSETP_TABLE_NAME:
+            get_select_set_param(ESELECT_TABLE_NAME, x);
+            break;
+
+        case ERSETP_WHERE_CLAUSE:
+            get_select_set_param(ESELECT_WHERE_CLAUSE, x);
+            break;
+
+        case ERSETP_REQUESTED_COLUMNS:
+            get_select_set_param(ESELECT_COLUMNS, x);
+            break;
+
+        case ERSETP_LIMIT:
+            get_select_set_param(ESELECT_LIMIT, x);
+            break;
+
+        case ERSETP_PAGE_MODE:
+            get_select_set_param(ESELECT_PAGE_MODE, x);
+            break;
+
+        case ERSETP_ROW_MODE:
+            get_select_set_param(ESELECT_ROW_MODE, x);
+            break;
+
+        case ERSETP_TZONE:
+            get_select_set_param(ESELECT_TZONE, x);
+            break;
+
+        default:
+            return eBinding::simpleproperty(propertynr, x);
+    }
+    return ESTATUS_SUCCESS;
+
+clear_x:
+    x->clear();
+    return ESTATUS_SUCCESS;
+}
+
 
 
 /**
@@ -645,4 +579,19 @@ void eRowSetBinding::prm_struct_to_set(
     if (bflags) {
         set->setl(ESELECT_BFLAGS, bflags);
     }
+}
+
+
+/* Get parameter from select set (client binding).
+ * returns OS_TRUE if parameter has value
+ */
+os_boolean eRowSetBinding::get_select_set_param(
+    os_int param_nr,
+    eVariable *value)
+{
+    if (m_binding_data) {
+        return m_binding_data->getv(param_nr, value);
+    }
+
+    return OS_FALSE;
 }

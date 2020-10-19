@@ -23,10 +23,13 @@ const os_char
     ersetp_ncolumns[] = "ncolumns",
     ersetp_dbm_path[] = "dbmpath",
     ersetp_table_name[] = "table",
+    ersetp_where_clause[] = "where",
+    ersetp_requested_columns[] = "columns",
     ersetp_limit[] = "limit",
     ersetp_page_mode[] = "pagemode",
     ersetp_row_mode[] = "rowmode",
-    ersetp_tzone[] = "tzone";
+    ersetp_tzone[] = "tzone",
+    ersetp_has_callback[] = "callback";
 
 
 /**
@@ -87,11 +90,13 @@ void eRowSet::setupclass()
 
     addpropertys(cls, ERSETP_DBM_PATH, ersetp_dbm_path, "DBM path", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertys(cls, ERSETP_TABLE_NAME, ersetp_table_name, "table", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, ERSETP_WHERE_CLAUSE, ersetp_where_clause, "where", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, ERSETP_REQUESTED_COLUMNS, ersetp_requested_columns, "requested", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertyl(cls, ERSETP_LIMIT, ersetp_limit, "limit", EPRO_PERSISTENT|EPRO_SIMPLE);
-
     addpropertyl(cls, ERSETP_PAGE_MODE, ersetp_page_mode, "page", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertyl(cls, ERSETP_ROW_MODE, ersetp_row_mode, "row", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addproperty(cls, ERSETP_TZONE, ersetp_tzone, "tzone", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, ERSETP_TZONE, ersetp_tzone, "tzone", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyb(cls, ERSETP_HAS_CALLBACK, ersetp_has_callback, "callback", EPRO_PERSISTENT|EPRO_SIMPLE);
 
     addproperty (cls, ERSETP_CONFIGURATION, ersetp_configuration, "configuration",
         EPRO_PERSISTENT|EPRO_SIMPLE);
@@ -260,14 +265,17 @@ eStatus eRowSet::simpleproperty(
     eVariable *x)
 {
     eContainer *c;
+    eRowSetBinding *binding;
 
     switch (propertynr)
     {
         case ERSETP_NROWS:
+            if (m_nrows == 0) goto clear_x;
             x->setl(m_nrows);
             break;
 
         case ERSETP_NCOLUMNS:
+            if (m_ncolumns == 0) goto clear_x;
             x->setl(m_ncolumns);
             break;
 
@@ -279,20 +287,40 @@ eStatus eRowSet::simpleproperty(
             x->setv(m_prm.table_name);
             break;
 
+        case ERSETP_WHERE_CLAUSE:
+            binding = get_binding();
+            if (binding == OS_NULL) goto clear_x;
+            binding->get_select_set_param(ESELECT_WHERE_CLAUSE, x);
+            break;
+
+        case ERSETP_REQUESTED_COLUMNS:
+            binding = get_binding();
+            if (binding == OS_NULL) goto clear_x;
+            binding->get_select_set_param(ESELECT_COLUMNS, x);
+            break;
+
         case ERSETP_LIMIT:
+            if (m_prm.limit == 0) goto clear_x;
             x->setl(m_prm.limit);
             break;
 
         case ERSETP_PAGE_MODE:
+            if (m_prm.page_mode == 0) goto clear_x;
             x->setl(m_prm.page_mode);
             break;
 
         case ERSETP_ROW_MODE:
+            if (m_prm.row_mode == 0) goto clear_x;
             x->setl(m_prm.row_mode);
             break;
 
         case ERSETP_TZONE:
             x->seto(m_prm.tzone);
+            break;
+
+        case ERSETP_HAS_CALLBACK:
+            if (m_prm.callback == OS_NULL) goto clear_x;
+            x->setl(OS_TRUE);
             break;
 
         case ERSETP_CONFIGURATION:
@@ -301,8 +329,12 @@ eStatus eRowSet::simpleproperty(
             break;
 
         default:
-            return eObject::simpleproperty(propertynr, x);
+            return eTable::simpleproperty(propertynr, x);
     }
+    return ESTATUS_SUCCESS;
+
+clear_x:
+    x->clear();
     return ESTATUS_SUCCESS;
 }
 
@@ -330,17 +362,23 @@ eStatus eRowSet::json_writer(
     os_int sflags,
     os_int indent)
 {
-#if 0
     os_boolean comma1, comma2;
     eVariable tmp;
-    os_int row, column, type_id;
+    eMatrix *row;
+    eObject *o;
+    os_int column, type_id;
     os_boolean has_value;
 
     indent++;
     if (json_puts(stream, "[")) goto failed;
     comma1 = OS_FALSE;
-    for (row = 0; row < m_nrows; row++)
+
+    for (row = eMatrix::cast(first()); row; row = eMatrix::cast(row->next()))
     {
+        if (row->classid() != ECLASSID_MATRIX) {
+            osal_debug_error("Corrupted row set");
+            goto failed;
+        }
 
         if (comma1) {
             if (json_puts(stream, ",")) goto failed;
@@ -358,17 +396,7 @@ eStatus eRowSet::json_writer(
             }
             comma2 = OS_TRUE;
 
-            /* If this is a table, we want to show row number instead of flags column.
-             */
-            if (m_columns && column == ERSET_FLAGS_COLUMN_NR) {
-                // setl(row_nr, ERSET_FLAGS_COLUMN_NR, ERSET_FLAGS_ROW_OK);
-                tmp.setl(row + 1);
-                has_value = OS_TRUE;
-            }
-            else {
-                has_value = getv(row, column, &tmp);
-            }
-
+            has_value = row->getv(0, column, &tmp);
             if (has_value)
             {
                 type_id = tmp.type();
@@ -380,7 +408,13 @@ eStatus eRowSet::json_writer(
                 }
                 else if (type_id == OS_OBJECT)
                 {
-                    if (json_putqs(stream, "?")) goto failed;
+                    o = tmp.geto();
+                    if (o) {
+                        if (o->json_write(stream, sflags, indent)) goto failed;
+                    }
+                    else {
+                        if (json_putqs(stream, "")) goto failed;
+                    }
                 }
                 else
                 {
@@ -401,7 +435,6 @@ eStatus eRowSet::json_writer(
     return ESTATUS_SUCCESS;
 
 failed:
-#endif
     return ESTATUS_FAILED;
 }
 #endif
@@ -451,18 +484,16 @@ eStatus eRowSet::select(
 /**
 ****************************************************************************************************
 
-  @brief Bind this object's property to remote property.
+  @brief Bind this row set to a remote table.
 
-  The eObject::bind() function creates binding to remote property. When two variables are bound
+  The eRowSet::select() function creates binding to remote property. When two variables are bound
   together, they have the same value. When the other changes, so does the another. Bindings
   work over messaging, thus binding work as well between objects in same thread or objects in
   different computers.
 
-  @param  localpropertyno This object's propery number to bind.
   @param  remotepath Path to remote object to bind to.
-  @param  remoteproperty Name of remote property to bind. If OS_NULL variable value
-          is assumed.
-  @param  bflags Combination of EBIND_DEFAULT (0), EBIND_CLIENTINIT, EBIND_NOFLOWCLT
+
+  @param  bflags Combination of EBIND_DEFAULT (0), EBIND_NOFLOWCLT
           EBIND_METADATA and EBIND_TEMPORARY.
           - EBIND_DEFAULT:  bind without special options.
           - EBIND_NOFLOWCLT: Disable flow control. Normally if property value changes
@@ -519,5 +550,18 @@ void eRowSet::select(
     binding->bind(m_dbm_path, whereclause, columns, &m_prm, bflags);
 }
 
+
+/* Gets pointer to the table binding or OS_NULL if none.
+ */
+eRowSetBinding *eRowSet::get_binding()
+{
+    eContainer *bindings;
+
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings) {
+        return eRowSetBinding::cast(bindings->first(EOID_TABLE_CLIENT_BINDING));
+    }
+    return OS_NULL;
+}
 
 

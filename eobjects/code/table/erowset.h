@@ -18,6 +18,8 @@
 #define EROWSET_H_
 #include "eobjects.h"
 
+class eRowSetBinding;
+
 /**
 ****************************************************************************************************
   Defines
@@ -26,14 +28,17 @@
 
 /* Row set property numbers.
  */
-#define ERSETP_NROWS 21
-#define ERSETP_NCOLUMNS 22
-#define ERSETP_DBM_PATH 23
-#define ERSETP_TABLE_NAME 24
-#define ERSETP_LIMIT 25
-#define ERSETP_PAGE_MODE 26
-#define ERSETP_ROW_MODE 27
-#define ERSETP_TZONE 28
+#define ERSETP_NROWS 18
+#define ERSETP_NCOLUMNS 19
+#define ERSETP_DBM_PATH 20
+#define ERSETP_TABLE_NAME 21
+#define ERSETP_WHERE_CLAUSE 22
+#define ERSETP_REQUESTED_COLUMNS 23
+#define ERSETP_LIMIT 24
+#define ERSETP_PAGE_MODE 25
+#define ERSETP_ROW_MODE 26
+#define ERSETP_TZONE 27
+#define ERSETP_HAS_CALLBACK 28
 
 /* 30 */
 #define ERSETP_CONFIGURATION ETABLEP_CONFIGURATION
@@ -46,10 +51,13 @@ extern const os_char
     ersetp_ncolumns[],
     ersetp_dbm_path[],
     ersetp_table_name[],
+    ersetp_where_clause[],
+    ersetp_requested_columns[],
     ersetp_limit[],
     ersetp_page_mode[],
     ersetp_row_mode[],
-    ersetp_tzone[];
+    ersetp_tzone[],
+    ersetp_has_callback[];
 
 #define ersetp_configuration etablep_configuration
 
@@ -273,6 +281,10 @@ protected:
     ************************************************************************************************
     */
     /*@{*/
+
+    /* Gets pointer to the table binding or OS_NULL if none.
+     */
+    eRowSetBinding *get_binding();
 
     /** Number of rows.
      */

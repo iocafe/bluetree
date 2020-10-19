@@ -22,7 +22,6 @@
 
 struct eSelectParameters;
 
-
 /**
 ****************************************************************************************************
 
@@ -60,10 +59,10 @@ public:
 
     /* Clone object.
      */
-    virtual eObject *clone(
+/*     virtual eObject *clone(
         eObject *parent,
         e_oid id = EOID_CHILD,
-        os_int aflags = 0);
+        os_int aflags = 0); */
 
     /* Casting eObject pointer to eRowSetBinding pointer.
      */
@@ -92,17 +91,11 @@ public:
         return new eRowSetBinding(parent, id, flags);
     }
 
-    /* Write rowsetbinding content to stream.
+    /* Get value of simple property.
      */
-    virtual eStatus writer(
-        eStream *stream,
-        os_int flags);
-
-    /* Read rowsetbinding content from stream.
-     */
-    virtual eStatus reader(
-        eStream *stream,
-        os_int flags);
+    virtual eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
 
     /* Process received messages
      */
@@ -148,6 +141,12 @@ public:
         eVariable *x,
         os_boolean delete_x);
 
+    /* Get parameter from select set (client binding).
+     */
+    os_boolean get_select_set_param(
+        os_int param_nr,
+        eVariable *value);
+
 protected:
 
     /* Finish the client end of binding.
@@ -161,7 +160,6 @@ protected:
     virtual void forward(
         eVariable *x = OS_NULL,
         os_boolean delete_x = OS_FALSE);
-
 
     /* Update to property value has been received.
      */

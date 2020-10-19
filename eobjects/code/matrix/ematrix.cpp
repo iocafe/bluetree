@@ -808,6 +808,7 @@ eStatus eMatrix::json_writer(
 {
     os_boolean comma1, comma2;
     eVariable tmp;
+    eObject *o;
     os_int row, column, type_id;
     os_boolean has_value;
 
@@ -862,7 +863,13 @@ eStatus eMatrix::json_writer(
                 }
                 else if (type_id == OS_OBJECT)
                 {
-                    if (json_putqs(stream, "?")) goto failed;
+                    o = tmp.geto();
+                    if (o) {
+                        if (o->json_write(stream, sflags, indent)) goto failed;
+                    }
+                    else {
+                        if (json_putqs(stream, "")) goto failed;
+                    }
                 }
                 else
                 {

@@ -259,8 +259,8 @@ public:
         column = new eVariable(&columns);
         column->addname("*", ENAME_NO_MAP);
 
-
-        // m_rowset->select("*", &columns);
+        m_rowset->select("*", &columns);
+        // m_rowset->print_json();
     }
 
 protected:
