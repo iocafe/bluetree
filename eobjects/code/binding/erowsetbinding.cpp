@@ -172,8 +172,6 @@ eStatus eRowSetBinding::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
-    eRowSetBinding *binding;
-
     switch (propertynr)
     {
         case ERSETP_DBM_PATH:

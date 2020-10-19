@@ -447,7 +447,7 @@ void eRowSet::insert(
     eContainer *rows,
     os_int tflags)
 {
-
+    etable_insert(this, m_dbm_path->gets(), rows, tflags);
 }
 
 /* Update a row or rows of a table.
@@ -457,7 +457,8 @@ eStatus eRowSet::update(
     eContainer *row,
     os_int tflags)
 {
-    return ESTATUS_FAILED;
+    etable_update(this, m_dbm_path->gets(), whereclause, row, tflags);
+    return ESTATUS_SUCCESS;
 }
 
 /* Remove rows from table.
@@ -466,6 +467,7 @@ void eRowSet::remove(
     const os_char *whereclause,
     os_int tflags)
 {
+    etable_remove(this, m_dbm_path->gets(), whereclause, tflags);
 }
 
 /* Select rows from table.
