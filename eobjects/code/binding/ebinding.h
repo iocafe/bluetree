@@ -140,7 +140,8 @@ protected:
      */
     void bind_base(
         const os_char *objpath,
-        eSet *parameters);
+        eSet *parameters,
+        os_boolean adopt_parameters);
 
     /* Base classs function to bind the server end.
      */

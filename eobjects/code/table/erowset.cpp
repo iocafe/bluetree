@@ -484,7 +484,7 @@ void eRowSet::select(
     os_int bflags)
 {
     eContainer *bindings;
-    eTableBinding *binding;
+    eRowSetBinding *binding;
     eObject *o;
 
     if (m_dbm_path == OS_NULL) {
@@ -492,7 +492,7 @@ void eRowSet::select(
         return;
     }
 
-    /* Limit is passed trugh parameter structure, set as property.
+    /* Limit is passed trough parameter structure, set as property.
      */
     setpropertyl(ERSETP_LIMIT, limit);
 
@@ -511,11 +511,13 @@ void eRowSet::select(
 
     /* Create binding
      */
-    binding = new eTableBinding(bindings, EOID_TABLE_CLIENT_BINDING, (bflags & EBIND_TEMPORARY)
+    binding = new eRowSetBinding(bindings, EOID_TABLE_CLIENT_BINDING, (bflags & EBIND_TEMPORARY)
          ? EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
 
     /* Bind the row set to table. This function will send message to remote object to bind.
      */
     binding->bind(m_dbm_path, whereclause, columns, &m_prm, bflags);
 }
+
+
 

@@ -185,7 +185,8 @@ eWhere *eTable::set_where(
  */
 void eselect_struct_to_set(
     eSet *set,
-    eSelectParameters *prm)
+    eSelectParameters *prm,
+    m_bflags & EBIND_SER_MASK)
 {
     if (prm->limit) {
         set->setl(ESELECT_LIMIT, prm->limit);

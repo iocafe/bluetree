@@ -227,7 +227,10 @@ failed:
 
   @param  objpath Path to object to bind to. If objpath is NULL, it or m_bflags is not changed.
           This is used for reactivating binding.
-  @param  parameters Parameters for binding, depends on binding use.
+  @param  parameters Parameters for binding, depends on binding use. If adopt parameters is set,
+          this function adopts parameters eSet, so it cannot be used after this call.
+  @param  adopt_parameters Set to true to adopt parameters argument, oe OS_FALSE to make a
+          copy.
 
   @return None.
 
@@ -235,7 +238,8 @@ failed:
 */
 void eBinding::bind_base(
     const os_char *objpath,
-    eSet *parameters)
+    eSet *parameters,
+    os_boolean adopt_parameters)
 {
     /* Clear state variables only?
      */
@@ -251,7 +255,7 @@ void eBinding::bind_base(
     /* Send ECMD_BIND message to object to bind to.
      */
     message(ECMD_BIND, m_objpath, OS_NULL, parameters,
-        EMSG_DEL_CONTENT /* EMSG_NO_ERROR_MSGS */);
+        adopt_parameters ? EMSG_DEL_CONTENT : EMSG_KEEP_CONTENT /* EMSG_NO_ERROR_MSGS */);
 
     /* Set that we are binding now
      */

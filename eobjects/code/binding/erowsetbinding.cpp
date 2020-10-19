@@ -1,12 +1,12 @@
 /**
 
-  @file    eptablebinding.cpp
-  @brief   Simple object ptablebinding.
+  @file    erowsetbinding.cpp
+  @brief   Simple object rowsetbinding.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
 
-  The ptablebinding object is like a box holding a set of child objects.
+  The rowsetbinding object is like a box holding a set of child objects.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -28,7 +28,7 @@
 
 ****************************************************************************************************
 */
-eTableBinding::eTableBinding(
+eRowSetBinding::eRowSetBinding(
     eObject *parent,
     e_oid id,
     os_int flags)
@@ -36,8 +36,9 @@ eTableBinding::eTableBinding(
 {
     /* Clear member variables.
      */
-    m_propertyname = OS_NULL;
-    m_propertynamesz = 0;
+    // m_propertyname = OS_NULL;
+    // m_propertynamesz = 0;
+    m_binding_data = OS_NULL;
 }
 
 
@@ -51,9 +52,8 @@ eTableBinding::eTableBinding(
 
 ****************************************************************************************************
 */
-eTableBinding::~eTableBinding()
+eRowSetBinding::~eRowSetBinding()
 {
-    set_propertyname(OS_NULL);
 }
 
 
@@ -62,7 +62,7 @@ eTableBinding::~eTableBinding()
 
   @brief Clone object
 
-  The eTableBinding::clone function clones and object including object's children.
+  The eRowSetBinding::clone function clones and object including object's children.
   Names will be left detached in clone.
 
   @param  parent Parent for the clone.
@@ -72,23 +72,17 @@ eTableBinding::~eTableBinding()
 
 ****************************************************************************************************
 */
-eObject *eTableBinding::clone(
+eObject *eRowSetBinding::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
-    eObject
-        *clonedobj,
-        *child;
+    eRowSetBinding
+        *clonedobj;
 
-    clonedobj = new eTableBinding(parent, id == EOID_CHILD ? oid() : id, flags());
-
-    for (child = first(EOID_ALL); child; child = child->next(EOID_ALL))
-    {
-        if (child->isclonable())
-        {
-            child->clone(clonedobj, child->oid(), aflags);
-        }
+    clonedobj = new eRowSetBinding(parent, id == EOID_CHILD ? oid() : id, flags());
+    if (m_binding_data) {
+        clonedobj->m_binding_data = eSet::cast(m_binding_data->clone(clonedobj));
     }
 
     return clonedobj;
@@ -107,14 +101,14 @@ eObject *eTableBinding::clone(
 
 ****************************************************************************************************
 */
-void eTableBinding::setupclass()
+void eRowSetBinding::setupclass()
 {
-    const os_int cls = ECLASSID_TABLE_BINDING;
+    const os_int cls = ECLASSID_ROW_SET_BINDING;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eTableBinding");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eRowSetBinding");
     os_unlock();
 }
 
@@ -124,7 +118,7 @@ void eTableBinding::setupclass()
 
   @brief Write property binding content to stream.
 
-  The eTableBinding::writer() function serializes the property binding to stream. This writes
+  The eRowSetBinding::writer() function serializes the property binding to stream. This writes
   only the content, use eObject::write() to save also class information, attachements, etc.
 
   @param  stream The stream to write to.
@@ -136,7 +130,7 @@ void eTableBinding::setupclass()
 
 ****************************************************************************************************
 */
-eStatus eTableBinding::writer(
+eStatus eRowSetBinding::writer(
     eStream *stream,
     os_int flags)
 {
@@ -181,7 +175,7 @@ failed:
 
   @brief Read property binding content from stream.
 
-  The eTableBinding::reader() function reads serialized ptablebinding from stream.
+  The eRowSetBinding::reader() function reads serialized rowsetbinding from stream.
   This function reads only the object content. To read whole object including attachments,
   names, etc, use eObject::read().
 
@@ -194,7 +188,7 @@ failed:
 
 ****************************************************************************************************
 */
-eStatus eTableBinding::reader(
+eStatus eRowSetBinding::reader(
     eStream *stream,
     os_int flags)
 {
@@ -238,7 +232,7 @@ failed:
 
   @brief Function to process incoming messages.
 
-  The eTableBinding::onmessage function handles messages received by object. If this function
+  The eRowSetBinding::onmessage function handles messages received by object. If this function
   doesn't process message, it calls parent class'es onmessage function.
 
   @param   envelope Message envelope. Contains command, target and source paths and
@@ -247,7 +241,7 @@ failed:
 
 ****************************************************************************************************
 */
-void eTableBinding::onmessage(
+void eRowSetBinding::onmessage(
     eEnvelope *envelope)
 {
     /* If at final destination for the message.
@@ -321,7 +315,7 @@ void eTableBinding::onmessage(
 
 ****************************************************************************************************
 */
-void eTableBinding::bind(
+void eRowSetBinding::bind(
     eVariable *dbm_path,
     const os_char *whereclause,
     eContainer *columns,
@@ -330,40 +324,24 @@ void eTableBinding::bind(
 {
     /* Save bind parameters and flags.
      */
-    // set_propertyname(remoteproperty);
-    // m_localpropertynr = localpropertynr;
     m_bflags = bflags | EBIND_CLIENT;
+    if (m_binding_data == OS_NULL) {
+        m_binding_data = new eSet(this);
+    }
+    m_binding_data->clear();
+    prm_struct_to_set(m_binding_data, whereclause, columns, prm, bflags);
 
     bind2(dbm_path->gets());
 }
 
 /* If remotepath is OS_NULL last used name will be preserved/
 */
-void eTableBinding::bind2(
+void eRowSetBinding::bind2(
     const os_char *remotepath)
 {
-    eSet *parameters;
-    eVariable x;
-
-    /* Get parameters from derived class and add flags to parameters.
-     */
-    parameters = new eSet(this);
-    parameters->setl(E_BINDPRM_FLAGS, m_bflags & EBIND_SER_MASK);
-    parameters->sets(E_BINDPRM_PROPERTYNAME, m_propertyname);
-
-    /* If we are binding attributes like "x.min", get these.
-     */
-    if (m_bflags & EBIND_ATTR)
-    {
-        if (listattr(m_localpropertynr, &x))
-        {
-            parameters->setv(E_BINDPRM_ATTRLIST, &x);
-        }
-    }
-
     /* Call base class to do binding.
      */
-    eBinding::bind_base(remotepath, parameters);
+    eBinding::bind_base(remotepath, m_binding_data, OS_FALSE);
 }
 
 
@@ -372,14 +350,14 @@ void eTableBinding::bind2(
 
   @brief Create server end property binding.
 
-  The eTableBinding::srvbind() function...
+  The eRowSetBinding::srvbind() function...
 
   @param  envelope Recetved ECMD_BIND command envelope.
   @return None.
 
 ****************************************************************************************************
 */
-void eTableBinding::srvbind(
+void eRowSetBinding::srvbind(
     eObject *obj,
     eEnvelope *envelope)
 {
@@ -391,28 +369,6 @@ void eTableBinding::srvbind(
     {
 #if OSAL_DEBUG
         osal_debug_error("srvbind() failed: no content");
-#endif
-        goto notarget;
-    }
-
-    /* Get property name.
-     */
-    if (!parameters->getv(E_BINDPRM_PROPERTYNAME, &v))
-    {
-#if OSAL_DEBUG
-        osal_debug_error("srvbind() failed: Property name missing");
-#endif
-        goto notarget;
-    }
-
-    /* Convert property name to property number (-1 = unknown property).
-     */
-    m_localpropertynr = obj->propertynr(v.gets());
-    if (m_localpropertynr < 0)
-    {
-#if OSAL_DEBUG
-        osal_debug_error("srvbind() failed: Property name unknwon");
-        osal_debug_error(v.gets());
 #endif
         goto notarget;
     }
@@ -436,18 +392,8 @@ xxxx
 
     } */
 
-    /* If this client is nor master at initialization, get property value.
-     */
-    if ((m_bflags & EBIND_CLIENTINIT) == 0)
-    {
-        binding_getproperty(&v);
-        reply->setv(E_BINDPRM_VALUE, &v);
-    }
-    else
-    {
-        parameters->getv(E_BINDPRM_VALUE, &v);
-        binding_setproperty(&v);
-    }
+//        binding_getproperty(&v);
+//        reply->setv(E_BINDPRM_VALUE, &v);
 
     /* Complete the server end of binding and return.
      */
@@ -470,7 +416,7 @@ notarget:
 
   @brief Complete property binding at client end.
 
-  The eTableBinding::cbindok() function...
+  The eRowSetBinding::cbindok() function...
 
   @param  obj Pointer to object being bound.
   @param  envelope The enveloped returned from server end as ECMD_BIND_REPLY.
@@ -478,7 +424,7 @@ notarget:
 
 ****************************************************************************************************
 */
-void eTableBinding::cbindok(
+void eRowSetBinding::cbindok(
     eObject *obj,
     eEnvelope *envelope)
 {
@@ -496,11 +442,8 @@ void eTableBinding::cbindok(
 
     /* If this server side is master at initialization, get property value.
      */
-    if ((m_bflags & EBIND_CLIENTINIT) == 0)
-    {
-        parameters->getv(E_BINDPRM_VALUE, &v);
-        binding_setproperty(&v);
-    }
+//        parameters->getv(E_BINDPRM_VALUE, &v);
+//        binding_setproperty(&v);
 
 notarget:
 
@@ -515,7 +458,7 @@ notarget:
 
   @brief Mark property value changed.
 
-  The eTableBinding::changed function marks a property value changed, so that it needs
+  The eRowSetBinding::changed function marks a property value changed, so that it needs
   to forwarded. The function forwards the property value immediately, if flow control allows.
   Otherwise the property just remain marked to be forwarded.
   If property number given as argument is not for this binding, do nothing.
@@ -527,14 +470,14 @@ notarget:
 
 ****************************************************************************************************
 */
-void eTableBinding::changed(
+void eRowSetBinding::changed(
     os_int propertynr,
     eVariable *x,
     os_boolean delete_x)
 {
     /* If not for this property, do nothing.
      */
-    if (propertynr != m_localpropertynr) return;
+//    if (propertynr != m_localpropertynr) return;
 
     /* Mark property value, etc changed. Forward immediately, if binding if flow
        control does not block it.
@@ -557,7 +500,7 @@ void eTableBinding::changed(
 
 ****************************************************************************************************
 */
-void eTableBinding::forward(
+void eRowSetBinding::forward(
     eVariable *x,
     os_boolean delete_x)
 {
@@ -569,7 +512,7 @@ void eTableBinding::forward(
         if (x == OS_NULL)
         {
             tmp = new eVariable;
-            binding_getproperty(tmp);
+  //          binding_getproperty(tmp);
 
             message(ECMD_FWRD, m_bindpath, OS_NULL, tmp,
                 EMSG_DEL_CONTENT /* EMSG_NO_ERROR_MSGS */);
@@ -600,18 +543,18 @@ void eTableBinding::forward(
 
   @brief Property value has been received from binding.
 
-  The eTableBinding::update function...
+  The eRowSetBinding::update function...
   @return None.
 
 ****************************************************************************************************
 */
-void eTableBinding::update(
+void eRowSetBinding::update(
     eEnvelope *envelope)
 {
-    eVariable *x;
+    // eVariable *x;
 
-    x = eVariable::cast(envelope->content());
-    binding_setproperty(x);
+    // x = eVariable::cast(envelope->content());
+    // binding_setproperty(x);
     sendack(envelope);
 }
 
@@ -628,7 +571,7 @@ void eTableBinding::update(
 
 ****************************************************************************************************
 */
-void eTableBinding::sendack(
+void eRowSetBinding::sendack(
     eEnvelope *envelope)
 {
     sendack_base(envelope);
@@ -654,136 +597,52 @@ void eTableBinding::sendack(
 
 ****************************************************************************************************
 */
-void eTableBinding::ack(
+void eRowSetBinding::ack(
     eEnvelope *envelope)
 {
     ack_base(envelope);
 }
 
 
-/**
-****************************************************************************************************
-
-  @brief Save remote property name.
-
-  The eTableBinding::set_propertyname() releases current m_propertyname and stores
-  propertyname given as argument. If propertyname is OS_NULL, memory is just freeed.
-
-  @param  propertyname Pointer to object path.
-  @return None.
-
-****************************************************************************************************
-*/
-void eTableBinding::set_propertyname(
-    const os_char *propertyname)
+/* Store select parameters as eSet.
+ */
+void eRowSetBinding::prm_struct_to_set(
+    eSet *set,
+    const os_char *whereclause,
+    eContainer *columns,
+    eSelectParameters *prm,
+    os_int bflags)
 {
-    if (m_propertyname)
-    {
-        os_free(m_propertyname, m_propertynamesz);
-        m_propertyname = OS_NULL;
-        m_propertynamesz = 0;
+    if (whereclause) {
+        set->sets(ESELECT_WHERE_CLAUSE, whereclause);
     }
 
-    if (propertyname)
-    {
-        m_propertynamesz = (os_short)os_strlen(propertyname);
-        m_propertyname = os_malloc(m_propertynamesz, OS_NULL);
-        os_memcpy(m_propertyname, propertyname, m_propertynamesz);
+    if (columns) {
+        set->seto(ESELECT_COLUMNS, columns);
     }
-}
 
+    if (prm->table_name) {
+        set->setv(ESELECT_TABLE_NAME, prm->table_name);
+    }
 
-/**
-****************************************************************************************************
+    if (prm->limit) {
+        set->setl(ESELECT_LIMIT, prm->limit);
+    }
 
-  @brief Save property value.
+    if (prm->page_mode) {
+        set->setl(ESELECT_PAGE_MODE, prm->page_mode);
+    }
 
-  The binding_setproperty() is used to set a property of bound object.
+    if (prm->row_mode) {
+        set->setl(ESELECT_ROW_MODE, prm->row_mode);
+    }
 
-  @param  x Variable holding property value to set.
-  @return OS_TRUE if successfull.
+    if (prm->tzone) {
+        set->seto(ESELECT_TZONE, prm->tzone);
+    }
 
-****************************************************************************************************
-*/
-os_boolean eTableBinding::binding_setproperty(
-    eVariable *x)
-{
-    eObject *obj;
-
-    obj = grandparent();
-    if (obj == OS_NULL) return OS_FALSE;
-
-    /* Set property value.
-     */
-    obj->setpropertyv(m_localpropertynr, x, this);
-
-    return OS_TRUE;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Get property value.
-
-  The binding_getproperty() function gets property value of bound object.
-
-  @param  x Variable where to store property value.
-  @return OS_TRUE if successfull.
-
-****************************************************************************************************
-*/
-os_boolean eTableBinding::binding_getproperty(
-    eVariable *x)
-{
-    eObject *obj;
-
-    obj = grandparent();
-    if (obj == OS_NULL) return OS_FALSE;
-
-    /* Set property value.
-     */
-    obj->propertyv(m_localpropertynr, x);
-
-    return OS_TRUE;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief List attributes (subproperties like "x.min") for the property.
-
-  The eTableBinding::listattr() function...
-
-  @param  x Variable where to store attribute list.
-  @return OS_TRUE if successfull.
-
-****************************************************************************************************
-*/
-os_boolean eTableBinding::listattr(
-    os_int propertynr,
-    eVariable *x)
-{
-    eContainer *propertyset;
-    eVariable *propertyvar;
-    eObject *obj;
-
-    /* Get property set for the class.
-     */
-    obj = grandparent();
-    if (obj == OS_NULL) return OS_FALSE;
-    os_lock();
-    propertyset = eglobal->propertysets->firstc(obj->classid());
-    os_unlock();
-
-    /* Get property var
-     */
-    propertyvar = propertyset->firstv(propertynr);
-    if (propertyvar == OS_NULL) return OS_FALSE;
-
-    /* Get subproperty list
-     */
-    propertyvar->propertyv(EVARP_CONF, x);
-    return !x->isempty();
+    bflags &= EBIND_SER_MASK;
+    if (bflags) {
+        set->setl(ESELECT_BFLAGS, bflags);
+    }
 }

@@ -1,12 +1,12 @@
 /**
 
-  @file    eptablebinding.h
-  @brief   Simple object ptablebinding.
+  @file    erowsetbinding.h
+  @brief   Simple object rowsetbinding.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
 
-  The ptablebinding object is like a box holding a set of child objects.
+  The rowsetbinding object is like a box holding a set of child objects.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -16,8 +16,8 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef ETABLEBINDING_H_
-#define ETABLEBINDING_H_
+#ifndef EROWSETBINDING_H_
+#define EROWSETBINDING_H_
 #include "eobjects.h"
 
 struct eSelectParameters;
@@ -28,13 +28,13 @@ struct eSelectParameters;
 
   @brief Table binding class.
 
-  The eTableBinding is class derived from eBinding. It implements property binding specific
+  The eRowSetBinding is class derived from eBinding. It implements property binding specific
   functionality.
 
 
 ****************************************************************************************************
 */
-class eTableBinding : public eBinding
+class eRowSetBinding : public eBinding
 {
     /**
     ************************************************************************************************
@@ -49,14 +49,14 @@ class eTableBinding : public eBinding
 public:
     /* Constructor.
      */
-    eTableBinding(
+    eRowSetBinding(
         eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eTableBinding();
+    virtual ~eRowSetBinding();
 
     /* Clone object.
      */
@@ -65,18 +65,18 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to eTableBinding pointer.
+    /* Casting eObject pointer to eRowSetBinding pointer.
      */
-    inline static eTableBinding *cast(
+    inline static eRowSetBinding *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_TABLE_BINDING)
-        return (eTableBinding*)o;
+        e_assert_type(o, ECLASSID_ROW_SET_BINDING)
+        return (eRowSetBinding*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_TABLE_BINDING; }
+    virtual os_int classid() {return ECLASSID_ROW_SET_BINDING; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -84,21 +84,21 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eTableBinding *newobj(
+    static eRowSetBinding *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eTableBinding(parent, id, flags);
+        return new eRowSetBinding(parent, id, flags);
     }
 
-    /* Write ptablebinding content to stream.
+    /* Write rowsetbinding content to stream.
      */
     virtual eStatus writer(
         eStream *stream,
         os_int flags);
 
-    /* Read ptablebinding content from stream.
+    /* Read rowsetbinding content from stream.
      */
     virtual eStatus reader(
         eStream *stream,
@@ -174,26 +174,14 @@ protected:
     void ack(
         eEnvelope *envelope);
 
-    /* Set object's property from binding.
+    /* Store select parameters as eSet.
      */
-    os_boolean binding_setproperty(
-        eVariable *x);
-
-    /* Get object's property value from binding.
-     */
-    os_boolean binding_getproperty(
-        eVariable *x);
-
-    /* List attributes (subproperties like "x.min") for the property.
-     */
-    os_boolean listattr(
-        os_int propertynr,
-        eVariable *x);
-
-    /* Save property name.
-     */
-    void set_propertyname(
-        const os_char *propertyname);
+    void prm_struct_to_set(
+        eSet *set,
+        const os_char *whereclause,
+        eContainer *columns,
+        eSelectParameters *prm,
+        os_int bflags);
 
     /*@}*/
 
@@ -209,19 +197,7 @@ protected:
     */
     /*@{*/
 
-    /** Client: Path to peropery name on remote object to bind to.
-        Server: Always OS_NULL.
-     */
-    os_char *m_propertyname;
-
-    /** Size of property name allocation in bytes.
-     */
-    os_short m_propertynamesz;
-
-    /** Which property of local object is bound.
-     */
-    os_int m_localpropertynr;
-
+    eSet *m_binding_data;
 
     /*@}*/
 

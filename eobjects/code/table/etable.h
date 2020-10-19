@@ -75,10 +75,14 @@ eSelectParameters;
 /* Enumeration of select parameters.
  */
 typedef enum eSelectParametersEnum {
-    ESELECT_LIMIT = 1,
-    ESELECT_PAGE_MODE = 2,
-    ESELECT_ROW_MODE = 3,
-    ESELECT_TZONE = 4
+    ESELECT_WHERE_CLAUSE,
+    ESELECT_COLUMNS,
+    ESELECT_TABLE_NAME,
+    ESELECT_LIMIT,
+    ESELECT_PAGE_MODE,
+    ESELECT_ROW_MODE,
+    ESELECT_TZONE,
+    ESELECT_BFLAGS
 }
 eSelectParametersEnum;
 

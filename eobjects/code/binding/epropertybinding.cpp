@@ -378,7 +378,7 @@ void ePropertyBinding::bind2(
 
     /* Call base class to do binding.
      */
-    eBinding::bind_base(remotepath, parameters);
+    eBinding::bind_base(remotepath, parameters, OS_TRUE);
 }
 
 
