@@ -1,12 +1,14 @@
 /**
 
   @file    eset.cpp
-  @brief   Simple set.
+  @brief   Set of enumerated values.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
 
-  The set stores enumerated collection of values.
+  A set stores key, value pairs. Key is always integer and value can be an primitive type
+  or object of any type. The eSet is efficient when smallish set of mostly primitive values
+  needs to be kept. Typical use is storing object's properties.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
