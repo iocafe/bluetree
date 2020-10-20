@@ -126,10 +126,6 @@ void eComponent::setupproperties(
         addpropertyd(cls, ECOMP_OFFSET, ecomp_offset, "offset", EPRO_METADATA);
     }
 
-    if (flags & ECOMP_CONF_PROPERITES) {
-        addproperty (cls, ECOMP_CONF, ecomp_conf, "conf", EPRO_METADATA);
-    }
-
     addpropertyb(cls, ECOMP_SELECT, ecomp_select, "select", EPRO_SIMPLE);
     addpropertyl(cls, ECOMP_COMMAND, ecomp_command, "command");
 }

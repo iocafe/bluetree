@@ -72,19 +72,6 @@ typedef struct eSelectParameters {
 }
 eSelectParameters;
 
-/* Enumeration of select parameters.
- */
-typedef enum eSelectParametersEnum {
-    ESELECT_WHERE_CLAUSE,
-    ESELECT_COLUMNS,
-    ESELECT_TABLE_NAME,
-    ESELECT_LIMIT,
-    ESELECT_PAGE_MODE,
-    ESELECT_ROW_MODE,
-    ESELECT_TZONE,
-    ESELECT_BFLAGS
-}
-eSelectParametersEnum;
 
 
 /* tflags - table flags */

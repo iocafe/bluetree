@@ -21,33 +21,28 @@
 #define EBINDING_H_
 #include "eobjects.h"
 
-/* Binding flags.
+/* Binding flags (used by both ePropertyBinding and eRowSetBinding).
  */
-#define EBIND_DEFAULT 0
-#define EBIND_ATTR 2
-#define EBIND_CLIENTINIT 8
-#define EBIND_NOFLOWCLT 16
-#define EBIND_METADATA 32
-#define EBIND_TEMPORARY 256
-#define EBIND_CLIENT 1024       /* do not give as argument */
-#define EBIND_CHANGED 2048      /* do not give as argument */
-#define EBIND_INTERTHREAD 4096  /* do not give as argument */
+#define EBIND_DEFAULT       0
+#define EBIND_ATTR          0x0001
+#define EBIND_CLIENTINIT    0x0002
+#define EBIND_NOFLOWCLT     0x0004
+#define EBIND_METADATA      0x0008
 
-#define EBIND_TYPE_MASK 7
-#define EBIND_SER_MASK (EBIND_TYPE_MASK|EBIND_CLIENTINIT|EBIND_NOFLOWCLT|EBIND_METADATA|EBIND_ATTR)
+#define EBIND_CLIENT        0x0010  /* do not give as argument */
+#define EBIND_TEMPORARY     0x0020
+#define EBIND_BIND_ROWSET   0x0040  /* This is eRowSetBinding. do not give as argument */
+#define EBIND_CHANGED       0x0400  /* do not give as argument */
+#define EBIND_INTERTHREAD   0x0800  /* do not give as argument */
+
+#define EBIND_TYPE_MASK     EBIND_BIND_ROWSET
+#define EBIND_SER_MASK     (EBIND_TYPE_MASK|EBIND_CLIENTINIT|EBIND_NOFLOWCLT|EBIND_METADATA|EBIND_ATTR)
 
 /* Binding states.
  */
-#define E_BINDING_UNUSED 0
-#define E_BINDING_NOW 1
-#define E_BINDING_OK 2
-
-/* Enumeration of binding parameters.
- */
-#define E_BINDPRM_FLAGS 1
-#define E_BINDPRM_PROPERTYNAME 2
-#define E_BINDPRM_VALUE 3
-#define E_BINDPRM_ATTRLIST 4
+#define E_BINDING_UNUSED    0
+#define E_BINDING_NOW       1
+#define E_BINDING_OK        2
 
 /* Maximum number of forwards befoew waiting for acknowledge.
  */
@@ -120,6 +115,23 @@ public:
         eStream *stream,
         os_int flags);
 
+    /* Bind the server end.
+     */
+    virtual void srvbind(
+        eObject *obj,
+        eEnvelope *envelope) {}
+
+    /* Get binding flags.
+     */
+    inline os_int bflags()
+    {
+        return m_bflags;
+    }
+
+    /* Get bind path.
+     */
+    inline const os_char *bindpath() {return m_bindpath; }
+
     /*@}*/
 
 
@@ -169,7 +181,7 @@ protected:
         m_ackcount++;
     }
 
-    /* Check if property value should be fowrarded now?
+    /* Check if property value should be forwarded now?
      */
     inline os_int forwardnow()
     {
@@ -180,7 +192,7 @@ protected:
                  (m_bflags & EBIND_INTERTHREAD) == 0);
     }
 
-    /* Cirtual function to forward property value trough binding.
+    /* Virtual function to forward property value trough binding.
      */
     virtual void forward(
         eVariable *x = OS_NULL,

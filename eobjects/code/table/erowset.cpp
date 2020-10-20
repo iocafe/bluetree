@@ -290,13 +290,13 @@ eStatus eRowSet::simpleproperty(
         case ERSETP_WHERE_CLAUSE:
             binding = get_binding();
             if (binding == OS_NULL) goto clear_x;
-            binding->get_select_set_param(ESELECT_WHERE_CLAUSE, x);
+            binding->get_select_set_param(ERSET_BINDING_WHERE_CLAUSE, x);
             break;
 
         case ERSETP_REQUESTED_COLUMNS:
             binding = get_binding();
             if (binding == OS_NULL) goto clear_x;
-            binding->get_select_set_param(ESELECT_COLUMNS, x);
+            binding->get_select_set_param(ERSET_BINDING_COLUMNS, x);
             break;
 
         case ERSETP_LIMIT:

@@ -934,7 +934,7 @@ void eSet::seto(
           - x = OS_NULL -> delete value
           - x = empty var -> store empty mark;
   @param  sflags Pointer to integer where to store flags. If not needed, set OS_NULL.
-          Either ESET_PERSISTENT (0) or ESET_TEMPORARY (1). Temporary values are not
+          Set to either ESET_PERSISTENT (0) or ESET_TEMPORARY (1). Temporary values are not
           cloned or serialized.
 
   @return Return value can be used between empty value and unset value. This is needed for

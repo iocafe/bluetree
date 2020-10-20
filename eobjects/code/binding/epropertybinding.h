@@ -18,6 +18,16 @@
 #define EPROPERTYBINDING_H_
 #include "eobjects.h"
 
+/* Enumeration of binding parameters. Flags must be parameter 1 and match with ERSET_BINDING_FLAGS.
+ */
+typedef enum ePrBindingParamEnum {
+    EPR_BINDING_FLAGS = 1,
+    EPR_BINDING_PROPERTYNAME,
+    EPR_BINDING_VALUE,
+    EPR_BINDING_ATTRLIST
+}
+ePrBindingParamEnum;
+
 /**
 ****************************************************************************************************
 
@@ -104,6 +114,10 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
+    /* Get property nr.
+     */
+    /* inline os_int bound_propertynr() {return m_localpropertynr;} */
+
     /*@}*/
 
 
@@ -131,7 +145,7 @@ public:
 
     /* Bind the server end.
      */
-    void srvbind(
+    virtual void srvbind(
         eObject *obj,
         eEnvelope *envelope);
 
@@ -203,7 +217,7 @@ protected:
     */
     /*@{*/
 
-    /** Client: Path to peropery name on remote object to bind to.
+    /** Client: property name on remote object to bind to.
         Server: Always OS_NULL.
      */
     os_char *m_propertyname;

@@ -53,7 +53,6 @@ class ePopup;
 #define ECOMP_OFFSET EVARP_OFFSET
 #define ECOMP_ABBR EVARP_ABBR
 #define ECOMP_TTIP EVARP_TTIP
-#define ECOMP_CONF EVARP_CONF
 
 #define ECOMP_TARGET 30
 #define ECOMP_SETVALUE 31
@@ -71,7 +70,6 @@ class ePopup;
 #define ECOMP_NO_OPTIONAL_PROPERITES 0
 #define ECOMP_VALUE_PROPERITES 1
 #define ECOMP_EXTRA_UI_PROPERITES 4
-#define ECOMP_CONF_PROPERITES 32 /* Is this really needed? */
 
 /* GUI component property names. Many of these map directly eVariable's property names
  */
@@ -89,7 +87,6 @@ class ePopup;
 #define ecomp_group evarp_group
 #define ecomp_gain evarp_gain
 #define ecomp_offset evarp_offset
-#define ecomp_conf evarp_conf
 extern const os_char ecomp_target[];
 extern const os_char ecomp_setvalue[];
 extern const os_char ecomp_path[];

@@ -347,8 +347,8 @@ void ePropertyBinding::bind2(
     /* Get parameters from derived class and add flags to parameters.
      */
     parameters = new eSet(this);
-    parameters->setl(E_BINDPRM_FLAGS, m_bflags & EBIND_SER_MASK);
-    parameters->sets(E_BINDPRM_PROPERTYNAME, m_propertyname);
+    parameters->setl(EPR_BINDING_FLAGS, m_bflags & EBIND_SER_MASK);
+    parameters->sets(EPR_BINDING_PROPERTYNAME, m_propertyname);
 
     /* If this client is master, get property value.
      */
@@ -361,7 +361,7 @@ void ePropertyBinding::bind2(
 #endif
             return;
         }
-        parameters->setv(E_BINDPRM_VALUE, &x);
+        parameters->setv(EPR_BINDING_VALUE, &x);
     }
 
     /* If we are binding attributes like "x.min", get these.
@@ -370,7 +370,7 @@ void ePropertyBinding::bind2(
     {
         if (listattr(m_localpropertynr, &x))
         {
-            parameters->setv(E_BINDPRM_ATTRLIST, &x);
+            parameters->setv(EPR_BINDING_ATTRLIST, &x);
         }
     }
 
@@ -410,7 +410,7 @@ void ePropertyBinding::srvbind(
 
     /* Get property name.
      */
-    if (!parameters->getv(E_BINDPRM_PROPERTYNAME, &v))
+    if (!parameters->getv(EPR_BINDING_PROPERTYNAME, &v))
     {
 #if OSAL_DEBUG
         osal_debug_error("srvbind() failed: Property name missing");
@@ -432,7 +432,7 @@ void ePropertyBinding::srvbind(
 
     /* Set flags. Set EBIND_INTERTHREAD if envelope has not been moved from thread to another.
      */
-    m_bflags = (os_short)parameters->getl(E_BINDPRM_FLAGS);
+    m_bflags = (os_short)parameters->getl(EPR_BINDING_FLAGS);
     if (envelope->mflags() & EMSG_INTERTHREAD)
     {
         m_bflags |= EBIND_INTERTHREAD;
@@ -454,11 +454,11 @@ xxxx
     if ((m_bflags & EBIND_CLIENTINIT) == 0)
     {
         binding_getproperty(&v);
-        reply->setv(E_BINDPRM_VALUE, &v);
+        reply->setv(EPR_BINDING_VALUE, &v);
     }
     else
     {
-        parameters->getv(E_BINDPRM_VALUE, &v);
+        parameters->getv(EPR_BINDING_VALUE, &v);
         binding_setproperty(&v);
     }
 
@@ -511,7 +511,7 @@ void ePropertyBinding::cbindok(
      */
     if ((m_bflags & EBIND_CLIENTINIT) == 0)
     {
-        parameters->getv(E_BINDPRM_VALUE, &v);
+        parameters->getv(EPR_BINDING_VALUE, &v);
         binding_setproperty(&v);
     }
 

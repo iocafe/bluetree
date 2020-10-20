@@ -172,28 +172,63 @@ void eObject::srvbind(
     eEnvelope *envelope)
 {
     eContainer *bindings;
-    ePropertyBinding *binding;
+    eBinding *binding;
+    eVariable *tmp;
+    eSet *set;
+    os_char *source;
+    os_int cid, bf, pnr;
 
     /* Get or create bindings container.
      */
     bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL)
-    {
+    if (bindings == OS_NULL) {
         bindings = new eContainer(this, EOID_BINDINGS, EOBJ_IS_ATTACHMENT);
     }
 
-    /* Verify that same binding dows not already exist ?? How to modify bindings ????
+    /* Decide on binding class.
      */
+    cid = ECLASSID_PROPERTY_BINDING;
+    set = eSet::cast(envelope->content());
+    if (set == OS_NULL) {
+        osal_debug_error("srvbind without parameters");
+        return;
+    }
+    bf = set->getl(ERSET_BINDING_FLAGS);
+    if (bf & EBIND_BIND_ROWSET) {
+        cid = ECLASSID_ROW_SET_BINDING;
+        pnr = EOID_TABLE_SERVER_BINDING;
+    }
+    else {
+        tmp = new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+        if (!set->getv(EPR_BINDING_PROPERTYNAME, tmp)) {
+            osal_debug_error_str("srcbind: Unknown property: ", tmp->gets());
+        }
+        pnr = propertynr(tmp->gets());
+        delete tmp;
+    }
+
+    /* Verify that same binding dows not already exist. If we have old binding, delete
+     * it before creating new so we never have a duplicate.
+     */
+    source = envelope->source();
+    bf &= (EBIND_ATTR|EBIND_CLIENT|EBIND_BIND_ROWSET);
+    for (binding = eBinding::cast(bindings->first(pnr));
+         binding;
+         binding = eBinding::cast(binding->next(pnr)))
+    {
+        if ((binding->bflags() & (EBIND_ATTR|EBIND_CLIENT|EBIND_BIND_ROWSET)) != bf) continue;
+        if (os_strcmp(binding->bindpath(), source)) continue;
+    }
+    if (binding) {
+        delete binding;
+    }
 
     /* Create binding
      */
-    binding = new ePropertyBinding(bindings, EOID_ITEM,
-         EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
+    binding = eBinding::cast(newobject(bindings, cid, pnr,
+         EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE));
 
-    /* Bind properties.
-     */
-    if (binding)
-    {
-        binding->srvbind(this,  envelope);
-    }
+    binding->srvbind(this,  envelope);
+
 }
+

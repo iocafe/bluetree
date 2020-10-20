@@ -20,6 +20,22 @@
 
 struct eSelectParameters;
 
+
+/* Enumeration of binding parameters. Flags must be parameter 1 and match with EPR_BINDING_FLAGS.
+ */
+typedef enum eRsetBindingParamEnum {
+    ERSET_BINDING_FLAGS = EPR_BINDING_FLAGS,
+    ERSET_BINDING_WHERE_CLAUSE,
+    ERSET_BINDING_COLUMNS,
+    ERSET_BINDING_TABLE_NAME,
+    ERSET_BINDING_LIMIT,
+    ERSET_BINDING_PAGE_MODE,
+    ERSET_BINDING_ROW_MODE,
+    ERSET_BINDING_TZONE
+}
+eRsetBindingParamEnum;
+
+
 /**
 ****************************************************************************************************
 
@@ -128,7 +144,7 @@ public:
 
     /* Bind the server end.
      */
-    void srvbind(
+    virtual void srvbind(
         eObject *obj,
         eEnvelope *envelope);
 

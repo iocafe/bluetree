@@ -189,19 +189,19 @@ void eselect_struct_to_set(
     m_bflags & EBIND_SER_MASK)
 {
     if (prm->limit) {
-        set->setl(ESELECT_LIMIT, prm->limit);
+        set->setl(ERSET_BINDING_LIMIT, prm->limit);
     }
 
     if (prm->page_mode) {
-        set->setl(ESELECT_PAGE_MODE, prm->page_mode);
+        set->setl(ERSET_BINDING_PAGE_MODE, prm->page_mode);
     }
 
     if (prm->row_mode) {
-        set->setl(ESELECT_ROW_MODE, prm->row_mode);
+        set->setl(ERSET_BINDING_ROW_MODE, prm->row_mode);
     }
 
     if (prm->tzone) {
-        set->seto(ESELECT_TZONE, prm->tzone);
+        set->seto(ERSET_BINDING_TZONE, prm->tzone);
     }
 }
 
@@ -214,12 +214,12 @@ void eselect_struct_to_set(
 {
     eVariable *tzone_var;
 
-    prm->limit = set->getl(ESELECT_LIMIT);
-    prm->page_mode = set->getl(ESELECT_PAGE_MODE);
-    prm->row_mode = set->getl(ESELECT_ROW_MODE);
+    prm->limit = set->getl(ERSET_BINDING_LIMIT);
+    prm->page_mode = set->getl(ERSET_BINDING_PAGE_MODE);
+    prm->row_mode = set->getl(ERSET_BINDING_ROW_MODE);
 
     tzone_var = new eVariable(parent, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
-    set->getv(ESELECT_TZONE, tzone_var);
+    set->getv(ERSET_BINDING_TZONE, tzone_var);
     prm->tzone = tzone_var->geto();
 }
 #endif

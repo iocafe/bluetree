@@ -178,31 +178,31 @@ eStatus eRowSetBinding::simpleproperty(
             break;
 
         case ERSETP_TABLE_NAME:
-            get_select_set_param(ESELECT_TABLE_NAME, x);
+            get_select_set_param(ERSET_BINDING_TABLE_NAME, x);
             break;
 
         case ERSETP_WHERE_CLAUSE:
-            get_select_set_param(ESELECT_WHERE_CLAUSE, x);
+            get_select_set_param(ERSET_BINDING_WHERE_CLAUSE, x);
             break;
 
         case ERSETP_REQUESTED_COLUMNS:
-            get_select_set_param(ESELECT_COLUMNS, x);
+            get_select_set_param(ERSET_BINDING_COLUMNS, x);
             break;
 
         case ERSETP_LIMIT:
-            get_select_set_param(ESELECT_LIMIT, x);
+            get_select_set_param(ERSET_BINDING_LIMIT, x);
             break;
 
         case ERSETP_PAGE_MODE:
-            get_select_set_param(ESELECT_PAGE_MODE, x);
+            get_select_set_param(ERSET_BINDING_PAGE_MODE, x);
             break;
 
         case ERSETP_ROW_MODE:
-            get_select_set_param(ESELECT_ROW_MODE, x);
+            get_select_set_param(ERSET_BINDING_ROW_MODE, x);
             break;
 
         case ERSETP_TZONE:
-            get_select_set_param(ESELECT_TZONE, x);
+            get_select_set_param(ERSET_BINDING_TZONE, x);
             break;
 
         default:
@@ -305,7 +305,7 @@ void eRowSetBinding::srvbind(
 
     /* Set flags. Set EBIND_INTERTHREAD if envelope has not been moved from thread to another.
      */
-    m_bflags = (os_short)parameters->getl(E_BINDPRM_FLAGS);
+    m_bflags = (os_short)parameters->getl(EPR_BINDING_FLAGS);
     if (envelope->mflags() & EMSG_INTERTHREAD)
     {
         m_bflags |= EBIND_INTERTHREAD;
@@ -323,7 +323,7 @@ xxxx
     } */
 
 //        binding_getproperty(&v);
-//        reply->setv(E_BINDPRM_VALUE, &v);
+//        reply->setv(EPR_BINDING_VALUE, &v);
 
     /* Complete the server end of binding and return.
      */
@@ -372,7 +372,7 @@ void eRowSetBinding::cbindok(
 
     /* If this server side is master at initialization, get property value.
      */
-//        parameters->getv(E_BINDPRM_VALUE, &v);
+//        parameters->getv(EPR_BINDING_VALUE, &v);
 //        binding_setproperty(&v);
 
 notarget:
@@ -543,37 +543,35 @@ void eRowSetBinding::prm_struct_to_set(
     eSelectParameters *prm,
     os_int bflags)
 {
+    bflags &= EBIND_SER_MASK;
+    set->setl(ERSET_BINDING_FLAGS, bflags|EBIND_BIND_ROWSET);
+
     if (whereclause) {
-        set->sets(ESELECT_WHERE_CLAUSE, whereclause);
+        set->sets(ERSET_BINDING_WHERE_CLAUSE, whereclause);
     }
 
     if (columns) {
-        set->seto(ESELECT_COLUMNS, columns);
+        set->seto(ERSET_BINDING_COLUMNS, columns);
     }
 
     if (prm->table_name) {
-        set->setv(ESELECT_TABLE_NAME, prm->table_name);
+        set->setv(ERSET_BINDING_TABLE_NAME, prm->table_name);
     }
 
     if (prm->limit) {
-        set->setl(ESELECT_LIMIT, prm->limit);
+        set->setl(ERSET_BINDING_LIMIT, prm->limit);
     }
 
     if (prm->page_mode) {
-        set->setl(ESELECT_PAGE_MODE, prm->page_mode);
+        set->setl(ERSET_BINDING_PAGE_MODE, prm->page_mode);
     }
 
     if (prm->row_mode) {
-        set->setl(ESELECT_ROW_MODE, prm->row_mode);
+        set->setl(ERSET_BINDING_ROW_MODE, prm->row_mode);
     }
 
     if (prm->tzone) {
-        set->seto(ESELECT_TZONE, prm->tzone);
-    }
-
-    bflags &= EBIND_SER_MASK;
-    if (bflags) {
-        set->setl(ESELECT_BFLAGS, bflags);
+        set->seto(ERSET_BINDING_TZONE, prm->tzone);
     }
 }
 

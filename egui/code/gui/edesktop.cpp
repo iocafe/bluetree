@@ -98,7 +98,6 @@ void eGui::setup_desktop_application()
 #define ECOMP_DEFAULT EVARP_DEFAULT
 #define ECOMP_GAIN EVARP_GAIN
 #define ECOMP_OFFSET EVARP_OFFSET
-#define ECOMP_CONF EVARP_CONF
 #define ECOMP_PATH 30
 */
 
