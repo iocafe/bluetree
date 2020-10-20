@@ -260,7 +260,7 @@ public:
         column->addname("*", ENAME_NO_MAP);
 
         m_rowset->select("*", &columns);
-        // m_rowset->print_json();
+//        m_rowset->print_json();
     }
 
     void callback(

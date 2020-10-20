@@ -220,20 +220,4 @@ public:
     /* eWhere *get_where(); */
 };
 
-
-#if 0
-/* Convert select parameters from c-struct to set.
- */
-void eselect_struct_to_set(
-    eSet *set,
-    eSelectParameters *prm);
-
-/* Convert select parameters from set to c-struct.
- */
-void eselect_struct_to_set(
-    eSelectParameters *prm,
-    eSet *set,
-    eObject *parent);
-#endif
-
 #endif

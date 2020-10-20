@@ -34,7 +34,9 @@ eRowSetBinding::eRowSetBinding(
 {
     /* Clear member variables.
      */
-    m_binding_data = OS_NULL;
+    m_pset = OS_NULL;
+    os_memclear(&m_pstruct, sizeof(eSelectParameters));
+    m_where_clause = OS_NULL;
 
     /* Row set bindings cannot be cloned or serialized.
      */
@@ -178,31 +180,31 @@ eStatus eRowSetBinding::simpleproperty(
             break;
 
         case ERSETP_TABLE_NAME:
-            get_select_set_param(ERSET_BINDING_TABLE_NAME, x);
+            x->setv(m_pstruct.table_name);
             break;
 
         case ERSETP_WHERE_CLAUSE:
-            get_select_set_param(ERSET_BINDING_WHERE_CLAUSE, x);
+            x->sets(m_where_clause);
             break;
 
         case ERSETP_REQUESTED_COLUMNS:
-            get_select_set_param(ERSET_BINDING_COLUMNS, x);
+            x->seto(m_requested_columns);
             break;
 
         case ERSETP_LIMIT:
-            get_select_set_param(ERSET_BINDING_LIMIT, x);
+            x->setl(m_pstruct.limit);
             break;
 
         case ERSETP_PAGE_MODE:
-            get_select_set_param(ERSET_BINDING_PAGE_MODE, x);
+            x->setl(m_pstruct.page_mode);
             break;
 
         case ERSETP_ROW_MODE:
-            get_select_set_param(ERSET_BINDING_ROW_MODE, x);
+            x->setl(m_pstruct.row_mode);
             break;
 
         case ERSETP_TZONE:
-            get_select_set_param(ERSET_BINDING_TZONE, x);
+            x->seto(m_pstruct.tzone);
             break;
 
         default:
@@ -255,11 +257,14 @@ void eRowSetBinding::bind(
     /* Save bind parameters and flags.
      */
     m_bflags = bflags | EBIND_CLIENT;
-    if (m_binding_data == OS_NULL) {
-        m_binding_data = new eSet(this);
+    if (m_pset) {
+        m_pset->clear();
     }
-    m_binding_data->clear();
-    prm_struct_to_set(m_binding_data, whereclause, columns, prm, bflags);
+    else {
+        m_pset = new eSet(this);
+    }
+    prm_struct_to_set(whereclause, columns, prm, bflags);
+    prm_set_to_struct();
 
     bind2(dbm_path->gets());
 }
@@ -271,7 +276,7 @@ void eRowSetBinding::bind2(
 {
     /* Call base class to do binding.
      */
-    eBinding::bind_base(remotepath, m_binding_data, OS_FALSE);
+    eBinding::bind_base(remotepath, m_pset, OS_FALSE);
 }
 
 
@@ -294,7 +299,6 @@ void eRowSetBinding::srvbind(
     eSet *parameters, *reply;
     eDBM *dbm;
     eContainer *localvars;
-    eVariable *table_name, *requested_columns;
 
     localvars = new eContainer(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
 
@@ -307,9 +311,12 @@ void eRowSetBinding::srvbind(
         goto notarget;
     }
 
-    /* Set flags. Set EBIND_INTERTHREAD if envelope has not been moved from thread to another.
+    m_pset = OS_NULL;
+    m_pset = eSet::cast(parameters->clone(this));
+    prm_set_to_struct();
+
+    /* Set EBIND_INTERTHREAD if envelope has not been moved from thread to another.
      */
-    m_bflags = (os_short)parameters->getl(ERSET_BINDING_FLAGS);
     if (envelope->mflags() & EMSG_INTERTHREAD)
     {
         m_bflags |= EBIND_INTERTHREAD;
@@ -320,13 +327,8 @@ void eRowSetBinding::srvbind(
      */
     reply = new eSet(this);
 
-    table_name = new eVariable(localvars);
-    parameters->getv(ERSET_BINDING_TABLE_NAME, table_name);
-    requested_columns = new eVariable(localvars);
-    parameters->getv(ERSET_BINDING_COLUMNS, requested_columns);
-
     dbm = eDBM::cast(obj);
-//     dbm->evaluate_columns(requested_columns);
+    // dbm->evaluate_columns(this, requested_columns);
 
 // reply->setv(EPR_BINDING_VALUE, &v, ESET_DELETE_X);
 
@@ -551,55 +553,61 @@ void eRowSetBinding::ack(
 /* Store select parameters as eSet.
  */
 void eRowSetBinding::prm_struct_to_set(
-    eSet *set,
     const os_char *whereclause,
     eContainer *columns,
     eSelectParameters *prm,
     os_int bflags)
 {
     bflags &= EBIND_SER_MASK;
-    set->setl(ERSET_BINDING_FLAGS, bflags|EBIND_BIND_ROWSET);
+    m_pset->setl(ERSET_BINDING_FLAGS, bflags|EBIND_BIND_ROWSET);
 
     if (whereclause) {
-        set->sets(ERSET_BINDING_WHERE_CLAUSE, whereclause);
+        m_pset->sets(ERSET_BINDING_WHERE_CLAUSE, whereclause, ESET_STORE_AS_VARIABLE);
     }
 
     if (columns) {
-        set->seto(ERSET_BINDING_COLUMNS, columns);
+        m_pset->seto(ERSET_BINDING_REQUESTED_COLUMNS, columns, ESET_STORE_AS_VARIABLE);
     }
 
     if (prm->table_name) {
-        set->setv(ERSET_BINDING_TABLE_NAME, prm->table_name);
+        m_pset->setv(ERSET_BINDING_TABLE_NAME, prm->table_name, ESET_STORE_AS_VARIABLE);
     }
 
     if (prm->limit) {
-        set->setl(ERSET_BINDING_LIMIT, prm->limit);
+        m_pset->setl(ERSET_BINDING_LIMIT, prm->limit);
     }
 
     if (prm->page_mode) {
-        set->setl(ERSET_BINDING_PAGE_MODE, prm->page_mode);
+        m_pset->setl(ERSET_BINDING_PAGE_MODE, prm->page_mode);
     }
 
     if (prm->row_mode) {
-        set->setl(ERSET_BINDING_ROW_MODE, prm->row_mode);
+        m_pset->setl(ERSET_BINDING_ROW_MODE, prm->row_mode);
     }
 
     if (prm->tzone) {
-        set->seto(ERSET_BINDING_TZONE, prm->tzone);
+        m_pset->seto(ERSET_BINDING_TZONE, prm->tzone, ESET_STORE_AS_VARIABLE);
     }
 }
 
 
-/* Get parameter from select set (client binding).
- * returns OS_TRUE if parameter has value
- */
-os_boolean eRowSetBinding::get_select_set_param(
-    os_int param_nr,
-    eVariable *value)
+void eRowSetBinding::prm_set_to_struct()
 {
-    if (m_binding_data) {
-        return m_binding_data->getv(param_nr, value);
+    eObject *o;
+
+    m_bflags = m_pset->geti(ERSET_BINDING_FLAGS);
+    m_pstruct.limit = m_pset->geti(ERSET_BINDING_LIMIT);
+    m_pstruct.page_mode = m_pset->geti(ERSET_BINDING_PAGE_MODE);
+    m_pstruct.row_mode = m_pset->geti(ERSET_BINDING_ROW_MODE);
+    m_pstruct.tzone = m_pset->geto_ptr(ERSET_BINDING_TZONE);
+    m_pstruct.table_name = m_pset->getv_ptr(ERSET_BINDING_TABLE_NAME);
+
+    m_requested_columns = OS_NULL;
+    o = m_pset->geto_ptr(ERSET_BINDING_REQUESTED_COLUMNS);
+    if (o) if (o->classid() == ECLASSID_CONTAINER) {
+        m_requested_columns = (eContainer*)o;
     }
 
-    return OS_FALSE;
+    m_where_clause = m_pset->gets_ptr(ERSET_BINDING_WHERE_CLAUSE);
 }
+

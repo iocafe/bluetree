@@ -26,12 +26,13 @@ struct eSelectParameters;
 typedef enum eRsetBindingParamEnum {
     ERSET_BINDING_FLAGS = EPR_BINDING_FLAGS,
     ERSET_BINDING_WHERE_CLAUSE,
-    ERSET_BINDING_COLUMNS,
+    ERSET_BINDING_REQUESTED_COLUMNS,
+    ERSET_BINDING_FINAL_COLUMNS,
     ERSET_BINDING_TABLE_NAME,
     ERSET_BINDING_LIMIT,
     ERSET_BINDING_PAGE_MODE,
     ERSET_BINDING_ROW_MODE,
-    ERSET_BINDING_TZONE
+    ERSET_BINDING_TZONE,
 }
 eRsetBindingParamEnum;
 
@@ -155,12 +156,6 @@ public:
         eVariable *x,
         os_boolean delete_x);
 
-    /* Get parameter from select set (client binding).
-     */
-    os_boolean get_select_set_param(
-        os_int param_nr,
-        eVariable *value);
-
 protected:
 
     /* Finish the client end of binding.
@@ -189,11 +184,12 @@ protected:
     /* Store select parameters as eSet.
      */
     void prm_struct_to_set(
-        eSet *set,
         const os_char *whereclause,
         eContainer *columns,
         eSelectParameters *prm,
         os_int bflags);
+
+     void prm_set_to_struct();
 
     /*@}*/
 
@@ -209,7 +205,21 @@ protected:
     */
     /*@{*/
 
-    eSet *m_binding_data;
+    /* Select parameters as set.
+     */
+    eSet *m_pset;
+
+    /* Select parameters as structure, pointers to values within m_pset. Set by prm_set_to_struct().
+     */
+    eSelectParameters m_pstruct;
+
+    /* Requested columns, pointer to eContainer within m_pset. Set by prm_set_to_struct().
+     */
+    eContainer *m_requested_columns;
+
+    /* Where clause, pointer to within m_pset. Set by prm_set_to_struct().
+     */
+    const os_char *m_where_clause;
 
     /*@}*/
 

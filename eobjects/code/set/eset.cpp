@@ -521,22 +521,6 @@ eStatus eSet::json_writer(
     os_uchar iid, ibytes, itype;
     os_boolean comma = OS_TRUE;
 
-#if 0
-    /* Try first if this value is stored in separate variable.
-     */
-     v = firstv(id);
-    if (v)
-    {
-        x->setv(v);
-        return OS_TRUE;
-    }
-
-
-    /* If this ID cannot be presented as unsigned char.
-     */
-    if (id < 0 || id > 255) goto getout;
-#endif
-
     /* Prepare to go trough items.
      */
     p = m_items;
@@ -593,7 +577,6 @@ eStatus eSet::json_writer(
             }
         }
 
-        // if (json_puts(stream, ",\n")) goto failed;
         if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma)) goto failed;
 
         if (json_puts(stream, "\"i")) goto failed;
@@ -639,12 +622,12 @@ failed:
           - x = OS_NULL -> delete value
   @param  sflags Least signigican bit is either ESET_PERSISTENT (0) or ESET_TEMPORARY (1).
           Temporary values are not cloned or serialized.
-          Flag ESET_STORE_AS_VARIABLE (2) specifies that value is always stored as variable
+          Flag ESET_STORE_AS_VARIABLE specifies that value is always stored as variable
           and never packed in m_items buffer. If value changes often, and expecially
-          if value byte size varies, storing as bariable is faster, but takes more memory.
+          if value byte size varies, setting is faster, but takes more memory.
           if this eSet is used to store object's properities, property flag
           EPRO_NOPACK will select this option.
-          - ESET_ADOPT_X_CONTEXT: Content of variable X may be adopted by this function.
+          - ESET_ADOPT_X_CONTENT: Content of variable X may be adopted by this function.
             x may or may not be emty variable after this call.
           - ESET_DELETE_X: Argument x will be deleted by this function and x pointer will
             be invalid after function returns.
@@ -878,7 +861,7 @@ store_as_var:
     v = new eVariable(this, id, sflags & ESET_TEMPORARY
         ? EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
 
-    v->setv(x, (sflags & (ESET_ADOPT_X_CONTEXT|ESET_DELETE_X)) ? OS_TRUE : OS_FALSE);
+    v->setv(x, (sflags & (ESET_ADOPT_X_CONTENT|ESET_DELETE_X)) ? OS_TRUE : OS_FALSE);
 
 getout:
     if (sflags & ESET_DELETE_X) {
@@ -902,6 +885,8 @@ getout:
           Objects are are always stored as variable.
           - ESET_DELETE_X: Argument x will be deleted by this function and x pointer will
             be invalid after function returns.
+          Flag ESET_STORE_AS_VARIABLE can be given, but unnecessary: objects are always
+          stored in variables within a eSet.
 
   @return None.
 
@@ -1057,6 +1042,118 @@ os_boolean eSet::getv(
 getout:
     x->clear();
     return OS_FALSE;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get pointer to variable within the set, which is used to store a value.
+
+  The eSet::getv returns pointer to variable within the set used to store the value. If none found
+  the function returns OS_NULL.
+
+  if this function is used, the value should be stored into set using ESET_STORE_AS_VARIABLE
+  flag (without this it may or may not work). if this eSet is used to store object's properities,
+  property flag EPRO_NOPACK will select this option (use ESET_STORE_AS_VARIABLE).
+
+  @param  id Identification number (for example property number) for value to store.
+  @param  sflags Pointer to integer where to store flags. If not needed, set OS_NULL.
+          Set to either ESET_PERSISTENT (0) or ESET_TEMPORARY (1). Temporary values are not
+          cloned or serialized.
+
+  @return Return pointer to variable holding the value within the set. No copy is made. If
+          variable storing the value is not found, the function returns OS_NULL.
+
+****************************************************************************************************
+*/
+eVariable *eSet::getv_ptr(
+    os_int id,
+    os_int *sflags)
+{
+    eVariable *v;
+
+    if (sflags) {
+        *sflags = ESET_PERSISTENT;
+    }
+
+    /* Try first if this value is stored in separate variable.
+     */
+    v = firstv(id);
+    if (v) {
+        if (sflags && (v->flags() & EOBJ_NOT_CLONABLE)) {
+            *sflags = ESET_TEMPORARY;
+        }
+
+        return v;
+    }
+
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get pointer to value object.
+
+  The eSet::geto returns pointer to object stored as property value. If none found
+  the function returns OS_NULL.
+
+  @param  id Identification number (for example property number) for value to store.
+  @param  sflags Pointer to integer where to store flags. If not needed, set OS_NULL.
+          Set to either ESET_PERSISTENT (0) or ESET_TEMPORARY (1). Temporary values are not
+          cloned or serialized.
+
+  @return Return pointer to object within set, by id number given as argument. If
+          no object is found, the function returns OS_NULL.
+
+****************************************************************************************************
+*/
+eObject *eSet::geto_ptr(
+    os_int id,
+    os_int *sflags)
+{
+    eVariable *v;
+
+    v = getv_ptr(id, sflags);
+    if (v) return v->geto();
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get pointer to string value stored within a variable in set.
+
+  The eSet::getv returns pointer to string variable within the set. If none found
+  the function returns OS_NULL.
+
+  if this function is used, the value should be stored into set using ESET_STORE_AS_VARIABLE
+  flag (without this it may or may not work). if this eSet is used to store object's properities,
+  property flag EPRO_NOPACK will select this option (use ESET_STORE_AS_VARIABLE).
+
+  @param  id Identification number (for example property number) for value to store.
+  @param  sflags Pointer to integer where to store flags. If not needed, set OS_NULL.
+          Set to either ESET_PERSISTENT (0) or ESET_TEMPORARY (1). Temporary values are not
+          cloned or serialized.
+
+  @return Return pointer to string stored within variable, or OS_NULL if none found.  Notice that
+          if value is string, but not stored as variable, this function will return OS_NULL.
+
+****************************************************************************************************
+*/
+const os_char *eSet::gets_ptr(
+    os_int id,
+    os_int *sflags)
+{
+    eVariable *v;
+
+    v = getv_ptr(id, sflags);
+    if (v) return v->gets();
+
+    return OS_NULL;
 }
 
 

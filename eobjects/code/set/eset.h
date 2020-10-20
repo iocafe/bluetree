@@ -27,7 +27,7 @@
 #define ESET_PERSISTENT 0
 #define ESET_TEMPORARY 1
 #define ESET_STORE_AS_VARIABLE 2
-#define ESET_ADOPT_X_CONTEXT 64
+#define ESET_ADOPT_X_CONTENT 64
 #define ESET_DELETE_X 128
 
 /**
@@ -183,15 +183,16 @@ public:
         setv(id, &v);
     }
 
-    /* Store value into set.
+    /* Store value into set (sflags may have ESET_STORE_AS_VARIABLE).
      */
     inline void sets(
         os_int id,
-        const os_char *x)
+        const os_char *x,
+        os_int sflags = 0)
     {
         eVariable v;
         v.sets(x);
-        setv(id, &v);
+        setv(id, &v, sflags|ESET_ADOPT_X_CONTENT);
     }
 
     /* Get value from set.
@@ -200,6 +201,16 @@ public:
         os_int id,
         eVariable *x,
         os_int *sflags = OS_NULL);
+
+    /* Get value as integer.
+     */
+    inline os_int geti(
+        os_int id)
+    {
+        eVariable v;
+        getv(id, &v);
+        return (os_int)v.getl();
+    }
 
     /* Get value as integer.
      */
@@ -220,6 +231,24 @@ public:
         getv(id, &v);
         return v.getd();
     }
+
+    /* Get pointer to variable within the set, which is used to store a value.
+     */
+    eVariable *getv_ptr(
+        os_int id,
+        os_int *sflags = OS_NULL);
+
+    /* Get pointer to value object.
+     */
+    eObject *geto_ptr(
+        os_int id,
+        os_int *sflags = OS_NULL);
+
+    /* Get pointer to string value stored within a variable in set.
+     */
+    const os_char *gets_ptr(
+        os_int id,
+        os_int *sflags = OS_NULL);
 
     /* Clear the set.
      */
