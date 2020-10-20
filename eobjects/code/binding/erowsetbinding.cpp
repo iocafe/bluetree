@@ -282,7 +282,7 @@ void eRowSetBinding::bind2(
 
   The eRowSetBinding::srvbind() function...
 
-  @param  envelope Recetved ECMD_BIND command envelope.
+  @param  envelope Receecived ECMD_BIND_RS command envelope.
   @return None.
 
 ****************************************************************************************************
@@ -292,7 +292,11 @@ void eRowSetBinding::srvbind(
     eEnvelope *envelope)
 {
     eSet *parameters, *reply;
-    eVariable v;
+    eDBM *dbm;
+    eContainer *localvars;
+    eVariable *table_name, *requested_columns;
+
+    localvars = new eContainer(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
 
     parameters = eSet::cast(envelope->content());
     if (parameters == OS_NULL)
@@ -305,7 +309,7 @@ void eRowSetBinding::srvbind(
 
     /* Set flags. Set EBIND_INTERTHREAD if envelope has not been moved from thread to another.
      */
-    m_bflags = (os_short)parameters->getl(EPR_BINDING_FLAGS);
+    m_bflags = (os_short)parameters->getl(ERSET_BINDING_FLAGS);
     if (envelope->mflags() & EMSG_INTERTHREAD)
     {
         m_bflags |= EBIND_INTERTHREAD;
@@ -315,19 +319,28 @@ void eRowSetBinding::srvbind(
        Store initial property value, unless clientmaster.
      */
     reply = new eSet(this);
-    /* if (m_flags & ATTR)
-    {
 
-xxxx
+    table_name = new eVariable(localvars);
+    parameters->getv(ERSET_BINDING_TABLE_NAME, table_name);
+    requested_columns = new eVariable(localvars);
+    parameters->getv(ERSET_BINDING_COLUMNS, requested_columns);
 
-    } */
+    dbm = eDBM::cast(obj);
+//     dbm->evaluate_columns(requested_columns);
 
+// reply->setv(EPR_BINDING_VALUE, &v, ESET_DELETE_X);
+
+// ETABLEP_CONFIGURATION
 //        binding_getproperty(&v);
 //        reply->setv(EPR_BINDING_VALUE, &v);
 
     /* Complete the server end of binding and return.
      */
     srvbind_base(envelope, reply);
+
+    print_json();
+
+    delete localvars;
     return;
 
 notarget:
@@ -338,6 +351,7 @@ notarget:
         message (ECMD_NO_TARGET, envelope->source(),
             envelope->target(), OS_NULL, EMSG_DEFAULT);
     }
+    delete localvars;
 }
 
 

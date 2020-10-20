@@ -387,7 +387,7 @@ void ePropertyBinding::bind2(
 
   The ePropertyBinding::srvbind() function...
 
-  @param  envelope Recetved ECMD_BIND command envelope.
+  @param  envelope Received ECMD_BIND command envelope.
   @return None.
 
 ****************************************************************************************************

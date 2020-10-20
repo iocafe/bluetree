@@ -644,6 +644,10 @@ failed:
           if value byte size varies, storing as bariable is faster, but takes more memory.
           if this eSet is used to store object's properities, property flag
           EPRO_NOPACK will select this option.
+          - ESET_ADOPT_X_CONTEXT: Content of variable X may be adopted by this function.
+            x may or may not be emty variable after this call.
+          - ESET_DELETE_X: Argument x will be deleted by this function and x pointer will
+            be invalid after function returns.
 
   @return None.
 
@@ -676,10 +680,10 @@ void eSet::setv(
         if (x) if (!x->isempty())
         {
             v->setv(x);
-            return;
+            goto getout;
         }
         delete v;
-        return;
+        goto getout;
     }
 
     /* If this id cannot be presented as uchar, use variable.
@@ -819,7 +823,7 @@ void eSet::setv(
                 if (ibytes) {
                     os_memcpy(p, iptr, ibytes);
                 }
-                return;
+                goto getout;
             }
 
             /* Different length, remove this entry form m_items buffer.
@@ -837,7 +841,9 @@ void eSet::setv(
 
     /* If no value.
      */
-    if (ibytes == 0) return;
+    if (ibytes == 0) {
+        goto getout;
+    }
 
     /* If we need to allocate more memory?
      */
@@ -866,12 +872,18 @@ void eSet::setv(
         p += ibytes;
     }
     m_used = (os_int)(p - m_items);
-    return;
+    goto getout;
 
 store_as_var:
     v = new eVariable(this, id, sflags & ESET_TEMPORARY
         ? EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
-    v->setv(x);
+
+    v->setv(x, (sflags & (ESET_ADOPT_X_CONTEXT|ESET_DELETE_X)) ? OS_TRUE : OS_FALSE);
+
+getout:
+    if (sflags & ESET_DELETE_X) {
+        delete x;
+    }
 }
 
 
@@ -888,6 +900,8 @@ store_as_var:
   @param  sflags sflags Least signigican bit is either ESET_PERSISTENT (0) or ESET_TEMPORARY (1).
           Temporary values are not cloned or serialized.
           Objects are are always stored as variable.
+          - ESET_DELETE_X: Argument x will be deleted by this function and x pointer will
+            be invalid after function returns.
 
   @return None.
 
@@ -905,9 +919,8 @@ void eSet::seto(
      */
     v = firstv(id);
     if (v) {
-        if (x)
-        {
-            v->seto(x);
+        if (x) {
+            v->seto(x, (sflags & ESET_DELETE_X) ? OS_TRUE : OS_FALSE);
             return;
         }
         delete v;
@@ -917,8 +930,10 @@ void eSet::seto(
     if (x) {
         v = new eVariable(this, id, sflags & ESET_TEMPORARY
             ? EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
-        v->seto(x);
+        v->seto(x, (sflags & ESET_DELETE_X) ? OS_TRUE : OS_FALSE);
     }
+    return;
+
 }
 
 

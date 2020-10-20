@@ -163,7 +163,7 @@ void eObject::bind(
 
   The eObject::srvbind() function
 
-  @param  envelope Message envelope, COMMAND ECMD_BIND.
+  @param  envelope Message envelope, COMMAND ECMD_BIND or ECMD_BIND_RS.
   @return None.
 
 ****************************************************************************************************
@@ -229,6 +229,5 @@ void eObject::srvbind(
          EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE));
 
     binding->srvbind(this,  envelope);
-
 }
 

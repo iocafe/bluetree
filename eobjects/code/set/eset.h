@@ -27,6 +27,8 @@
 #define ESET_PERSISTENT 0
 #define ESET_TEMPORARY 1
 #define ESET_STORE_AS_VARIABLE 2
+#define ESET_ADOPT_X_CONTEXT 64
+#define ESET_DELETE_X 128
 
 /**
 ****************************************************************************************************

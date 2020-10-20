@@ -616,6 +616,7 @@ void eObject::onmessage(
             switch (command)
             {
               case ECMD_BIND:
+              case ECMD_BIND_RS:
                 srvbind(envelope);
                 return;
 

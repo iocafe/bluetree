@@ -241,6 +241,8 @@ void eBinding::bind_base(
     eSet *parameters,
     os_boolean adopt_parameters)
 {
+    os_int cmd;
+
     /* Clear state variables only?
      */
     disconnect(OS_TRUE);
@@ -252,9 +254,11 @@ void eBinding::bind_base(
         set_objpath(objpath);
     }
 
-    /* Send ECMD_BIND message to object to bind to.
+
+    /* Send ECMD_BIND or ECMD_BIND_RS (row set) message to object to bind to.
      */
-    message(ECMD_BIND, m_objpath, OS_NULL, parameters,
+    cmd = (classid() == ECLASSID_ROW_SET_BINDING) ? ECMD_BIND_RS : ECMD_BIND;
+    message(cmd, m_objpath, OS_NULL, parameters,
         adopt_parameters ? EMSG_DEL_CONTENT : EMSG_KEEP_CONTENT /* EMSG_NO_ERROR_MSGS */);
 
     /* Set that we are binding now

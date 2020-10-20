@@ -46,12 +46,13 @@
 /* Binding related commands.
  */
 #define ECMD_BIND -20
-#define ECMD_BIND_REPLY -21
-#define ECMD_UNBIND -22
-#define ECMD_SRV_UNBIND -23
-#define ECMD_REBIND -24
-#define ECMD_FWRD -25
-#define ECMD_ACK -26
+#define ECMD_BIND_RS -21
+#define ECMD_BIND_REPLY -22
+#define ECMD_UNBIND -23
+#define ECMD_SRV_UNBIND -24
+#define ECMD_REBIND -25
+#define ECMD_FWRD -26
+#define ECMD_ACK -27
 
 /* Tables.
  */

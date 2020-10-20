@@ -525,6 +525,10 @@ void eRowSet::select(
         return;
     }
 
+    if (m_callback == OS_NULL) {
+        osal_debug_error("eRowSet::select:Row set callback function not set");
+    }
+
     /* Limit is passed trough parameter structure, set as property.
      */
     setpropertyl(ERSETP_LIMIT, limit);

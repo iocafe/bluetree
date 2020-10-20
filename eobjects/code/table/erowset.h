@@ -19,6 +19,7 @@
 #include "eobjects.h"
 
 class eRowSetBinding;
+class eRowSet;
 
 /**
 ****************************************************************************************************
@@ -60,6 +61,36 @@ extern const os_char
     ersetp_has_callback[];
 
 #define ersetp_configuration etablep_configuration
+
+
+/* Enumeration of row set callback reasons.
+ */
+typedef enum ersetCallbackReason
+{
+    ERSET_INITIAL_DATA_RECEIVED,
+    ERSET_INSERT,
+    ERSET_UPDATE,
+    ERSET_REMOVE
+}
+ersetCallbackReason;
+
+/* Row set callback information.
+ */
+typedef struct ersetCallbackInfo
+{
+    ersetCallbackReason reason;
+
+    os_long first_ix, last_ix;
+    os_boolean sortorder_changed;
+}
+ersetCallbackInfo;
+
+/* Row set callback function
+ */
+typedef void erset_callback_func(
+    eRowSet *rset,
+    ersetCallbackInfo *info,
+    eObject *context);
 
 
 /**
@@ -248,8 +279,12 @@ public:
     /* Set callback function, when data is received or updated.
      */
     void set_callback(
-        os_int func,
-        eObject *context);
+        erset_callback_func *func,
+        eObject *context)
+    {
+        m_callback = func;
+        m_context = context;
+    }
 
     /* Select rows from table.
      */
@@ -310,6 +345,14 @@ protected:
     /** Select parameters.
      */
     eSelectParameters m_prm;
+
+    /** Pointer to row set callback function.
+     */
+    erset_callback_func *m_callback;
+
+    /** Pointer to row set callback context.
+     */
+    eObject *m_context;
 
     /*@}*/
 };

@@ -254,13 +254,30 @@ public:
 
         m_rowset = new eRowSet(this);
         m_rowset->set_dbm("//mymtx");
-        // m_rowset->set_callback();
+        m_rowset->set_callback(ThreadMonitoringTheTable::static_callback, this);
 
         column = new eVariable(&columns);
         column->addname("*", ENAME_NO_MAP);
 
         m_rowset->select("*", &columns);
         // m_rowset->print_json();
+    }
+
+    void callback(
+        eRowSet *rset,
+        ersetCallbackInfo *info)
+    {
+        osal_console_write("eRowSet callback\n");
+    }
+
+    static void static_callback(
+        eRowSet *rset,
+        ersetCallbackInfo *info,
+        eObject *context)
+    {
+        ThreadMonitoringTheTable *t;
+        t = (ThreadMonitoringTheTable*)context;
+        t->callback(rset, info);
     }
 
 protected:

@@ -724,11 +724,12 @@ void eConnection::monitor_binds(
         /* Bind request sent by Client binding, or client binding deleted.
          */
         case ECMD_BIND:
+        case ECMD_BIND_RS:
         case ECMD_UNBIND:
             bindings = m_client_bindings;
             break;
 
-        /* Server binding reply to ECMD_BIND, or server binding deleted.
+        /* Server binding reply to ECMD_BIND/ECMD_BIND_RS , or server binding deleted.
          */
         case ECMD_BIND_REPLY:
         case ECMD_SRV_UNBIND:
@@ -743,7 +744,9 @@ void eConnection::monitor_binds(
     mark = eContainer::cast(bindings->byname(source));
     if (mark)
     {
-        if (command == ECMD_BIND || command == ECMD_BIND_REPLY) return;
+        if (command == ECMD_BIND || command == ECMD_BIND_RS || command == ECMD_BIND_REPLY) {
+            return;
+        }
         delete mark;
     }
     else
