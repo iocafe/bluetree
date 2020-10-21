@@ -554,6 +554,8 @@ void eRowSet::select(
     /* Bind the row set to table. This function will send message to remote object to bind.
      */
     binding->bind(m_dbm_path, whereclause, columns, &m_prm, bflags);
+
+binding->print_json();
 }
 
 

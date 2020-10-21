@@ -357,7 +357,7 @@ void eRowSetBinding::srvbind(
      */
     srvbind_base(envelope, reply);
 
-    print_json();
+    // print_json();
 
     delete localvars;
     return;
@@ -611,8 +611,11 @@ void eRowSetBinding::prm_struct_to_set(
 void eRowSetBinding::prm_set_to_struct()
 {
     eObject *o;
+    os_int bflags;
 
-    m_bflags = m_pset->geti(ERSET_BINDING_FLAGS);
+    bflags = m_pset->geti(ERSET_BINDING_FLAGS);
+    m_bflags = ((m_bflags & ~EBIND_SER_MASK) | bflags);
+
     m_pstruct.limit = m_pset->geti(ERSET_BINDING_LIMIT);
     m_pstruct.page_mode = m_pset->geti(ERSET_BINDING_PAGE_MODE);
     m_pstruct.row_mode = m_pset->geti(ERSET_BINDING_ROW_MODE);
