@@ -1,18 +1,10 @@
 /**
 
   @file    esyncconnector.h
-  @brief   Flow control of potentially large data amounts.
+  @brief   Synchronized transfer helper object in eProcess tree.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
-
-  When transferring large amount of data, it is sometimes necessary to divide the data
-  into pieces and transfer these as received. Typically thread sending the data is
-  in loop to collect the data, and should not process messages.
-
-  To make this work, an intermediate eSyncConnector object created under eProcess.
-  Data will be sent and received data acknowledged by this object. This provides
-  flow controlled data transfer.
+  @date    21.10.2020
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,

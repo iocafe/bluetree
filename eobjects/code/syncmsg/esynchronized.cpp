@@ -4,7 +4,7 @@
   @brief   Synchronized data exchange.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    21.10.2020
 
   When transferring large amount of data, it is sometimes necessary to divide the data
   into pieces and transfer these as received. Typically thread sending the data is

@@ -4,7 +4,7 @@
   @brief   Synchronized data exchange.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    21.10.2020
 
   When transferring large amount of data, it is sometimes necessary to divide the data
   into pieces and transfer these as received. Typically thread sending the data is
@@ -49,7 +49,6 @@ class eSynchronized : public eObject
 
     ************************************************************************************************
     */
-    /*@{*/
 public:
     /* Constructor.
      */
@@ -100,8 +99,6 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
@@ -112,27 +109,41 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
 
     /**
     ************************************************************************************************
 
-      @name Global acknowledge functions
+      @name Synchchronized
 
     ************************************************************************************************
     */
 
-    /* static os_long start_controlled_transfer();
-    static os_long send(envelpoe);
-    static os_long receive(envelpoe);
-    static os_long unacknowledged_count(envelpoe);
-    static os_long finish_controlled_transfer(envelpoe);
-    */
+    void initialize_synch_transfer(
+        const os_char *path);
+
+    void finish_sync_transfer();
+
+    /* Send message.
+     */
+    eStatus synch_send(
+        eEnvelope *envelope);
+
+    eStatus sync_receive(
+        eEnvelope *envelope);
+
+    /* Get number of messages send minus number of messages received.
+     */
+    os_int sync_in_air_count();
+
+    /* Wait until "in air count" is less or equal than argument.
+     */
+    eStatus sync_wait(
+        os_int in_air_count,
+        os_long timeout_ms);
 
 protected:
 
-    /*@}*/
 
     /**
     ************************************************************************************************
@@ -144,17 +155,10 @@ protected:
 
     ************************************************************************************************
     */
-    /*@{*/
 
+    eVariable m_path;
 
-
-
-
-    /*@}*/
-
-
-
-
+    osalEvent m_event;
 };
 
 #endif
