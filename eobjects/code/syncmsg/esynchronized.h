@@ -1,7 +1,7 @@
 /**
 
-  @file    eacknowledge.h
-  @brief   Flow control of potentially large data amounts.
+  @file    esynchronized.h
+  @brief   Synchronized data exchange.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -10,7 +10,7 @@
   into pieces and transfer these as received. Typically thread sending the data is
   in loop to collect the data, and should not process messages.
 
-  To make this work, an intermediate eAcknowledge object created under eProcess.
+  To make this work, an intermediate eSynchronized object created under eProcess.
   Data will be sent and received data acknowledged by this object. This provides
   flow controlled data transfer.
 
@@ -22,8 +22,8 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EACKNOWLEDGE_H_
-#define EACKNOWLEDGE_H_
+#ifndef ESYNCHRONIZED_H_
+#define ESYNCHRONIZED_H_
 #include "eobjects.h"
 
 
@@ -32,13 +32,13 @@
 
   @brief Table binding class.
 
-  The eAcknowledge is class derived from eBinding. It implements property binding specific
+  The eSynchronized is class derived from eBinding. It implements property binding specific
   functionality.
 
 
 ****************************************************************************************************
 */
-class eAcknowledge : public eObject
+class eSynchronized : public eObject
 {
     /**
     ************************************************************************************************
@@ -53,27 +53,27 @@ class eAcknowledge : public eObject
 public:
     /* Constructor.
      */
-    eAcknowledge(
+    eSynchronized(
         eObject *parent = OS_NULL,
         e_oid id = EOID_RITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eAcknowledge();
+    virtual ~eSynchronized();
 
-    /* Casting eObject pointer to eAcknowledge pointer.
+    /* Casting eObject pointer to eSynchronized pointer.
      */
-    inline static eAcknowledge *cast(
+    inline static eSynchronized *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_ACKNOWLEDGE)
-        return (eAcknowledge*)o;
+        e_assert_type(o, ECLASSID_SYNCHRONIZED)
+        return (eSynchronized*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_ACKNOWLEDGE; }
+    virtual os_int classid() {return ECLASSID_SYNCHRONIZED; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -81,12 +81,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eAcknowledge *newobj(
+    static eSynchronized *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eAcknowledge(parent, id, flags);
+        return new eSynchronized(parent, id, flags);
     }
 
     /* Get value of simple property.

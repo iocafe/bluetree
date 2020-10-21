@@ -1,7 +1,7 @@
 /**
 
-  @file    eacknowledge.cpp
-  @brief   Flow control of potentially large data amounts.
+  @file    esynchronized.cpp
+  @brief   Synchronized data exchange.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -10,7 +10,7 @@
   into pieces and transfer these as received. Typically thread sending the data is
   in loop to collect the data, and should not process messages.
 
-  To make this work, an intermediate eAcknowledge object created under eProcess.
+  To make this work, an intermediate eSynchronized object created under eProcess.
   Data will be sent and received data acknowledged by this object. This provides
   flow controlled data transfer.
 
@@ -34,7 +34,7 @@
 
 ****************************************************************************************************
 */
-eAcknowledge::eAcknowledge(
+eSynchronized::eSynchronized(
     eObject *parent,
     e_oid id,
     os_int flags)
@@ -56,7 +56,7 @@ eAcknowledge::eAcknowledge(
 
 ****************************************************************************************************
 */
-eAcknowledge::~eAcknowledge()
+eSynchronized::~eSynchronized()
 {
 }
 
@@ -73,14 +73,14 @@ eAcknowledge::~eAcknowledge()
 
 ****************************************************************************************************
 */
-void eAcknowledge::setupclass()
+void eSynchronized::setupclass()
 {
-    const os_int cls = ECLASSID_ACKNOWLEDGE;
+    const os_int cls = ECLASSID_SYNCHRONIZED;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eAcknowledge");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eSynchronized");
     //propertysetdone(cls);
     os_unlock();
 }
@@ -91,7 +91,7 @@ void eAcknowledge::setupclass()
 
   @brief Function to process incoming messages.
 
-  The eAcknowledge::onmessage function handles messages received by object. If this function
+  The eSynchronized::onmessage function handles messages received by object. If this function
   doesn't process message, it calls parent class'es onmessage function.
 
   @param   envelope Message envelope. Contains command, target and source paths and
@@ -100,7 +100,7 @@ void eAcknowledge::setupclass()
 
 ****************************************************************************************************
 */
-void eAcknowledge::onmessage(
+void eSynchronized::onmessage(
     eEnvelope *envelope)
 {
     /* If at final destination for the message.
@@ -150,7 +150,7 @@ void eAcknowledge::onmessage(
 
 ****************************************************************************************************
 */
-eStatus eAcknowledge::simpleproperty(
+eStatus eSynchronized::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
@@ -177,12 +177,12 @@ eStatus eAcknowledge::simpleproperty(
 
   @brief Property value has been received from binding.
 
-  The eAcknowledge::update function...
+  The eSynchronized::update function...
   @return None.
 
 ****************************************************************************************************
 */
-/* void eAcknowledge::update(
+/* void eSynchronized::update(
     eEnvelope *envelope)
 {
     // eVariable *x;
@@ -206,7 +206,7 @@ eStatus eAcknowledge::simpleproperty(
 
 ****************************************************************************************************
 */
-/* void eAcknowledge::sendack(
+/* void eSynchronized::sendack(
     eEnvelope *envelope)
 {
     sendack_base(envelope);
@@ -221,7 +221,7 @@ eStatus eAcknowledge::simpleproperty(
 /**
 ****************************************************************************************************
 
-  @brief Acknowledge received.
+  @brief Synchronized received.
 
   The ack function decrements acknowledge wait count and tries to send again.
 
@@ -230,7 +230,7 @@ eStatus eAcknowledge::simpleproperty(
 
 ****************************************************************************************************
 */
-/* void eAcknowledge::ack(
+/* void eSynchronized::ack(
     eEnvelope *envelope)
 {
     ack_base(envelope);
