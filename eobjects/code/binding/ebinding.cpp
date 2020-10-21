@@ -18,6 +18,11 @@
 */
 #include "eobjects.h"
 
+/* Some shared property names for ePropertyBinding and eRowSetBinding.
+ */
+const os_char ebindp_bflags[] = "bflags";
+const os_char ebindp_state[] = "state";
+
 
 /**
 ****************************************************************************************************

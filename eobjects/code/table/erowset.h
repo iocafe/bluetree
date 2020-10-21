@@ -27,7 +27,9 @@ class eRowSet;
 ****************************************************************************************************
 */
 
-/* Row set property numbers.
+/* eRowSet property numbers. These are used also for eRowSetBinding.
+   Make sure that EBINDP_BFLAGS, EBINDP_STATE and ETABLEP_CONFIGURATION
+   do not overlap with these numbers.
  */
 #define ERSETP_NROWS 18
 #define ERSETP_NCOLUMNS 19

@@ -21,6 +21,21 @@
 #define EBINDING_H_
 #include "eobjects.h"
 
+
+/**
+****************************************************************************************************
+  Defines
+****************************************************************************************************
+*/
+
+/* Property numbers for ePropertyBinding and eRowSetBinding.
+ */
+#define EBINDP_BFLAGS 40
+#define EBINDP_STATE 41
+
+extern const os_char ebindp_bflags[];
+extern const os_char ebindp_state[];
+
 /* Binding flags (used by both ePropertyBinding and eRowSetBinding).
  */
 #define EBIND_DEFAULT       0
@@ -47,6 +62,7 @@
 /* Maximum number of forwards befoew waiting for acknowledge.
  */
 #define EBIND_MAX_ACK_COUNT 3
+
 
 
 /**

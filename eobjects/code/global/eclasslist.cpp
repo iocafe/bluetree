@@ -168,6 +168,7 @@ void eclasslist_initialize()
     eEnvelope::setupclass();
     ePropertyBinding::setupclass();
     eRowSetBinding::setupclass();
+    eAcknowledge::setupclass();
     eTimer::setupclass();
     eQueue::setupclass();
     eBuffer::setupclass();

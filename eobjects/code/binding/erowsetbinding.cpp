@@ -87,6 +87,8 @@ void eRowSetBinding::setupclass()
     addpropertyl(cls, ERSETP_PAGE_MODE, ersetp_page_mode, "page", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertyl(cls, ERSETP_ROW_MODE, ersetp_row_mode, "row", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty (cls, ERSETP_TZONE, ersetp_tzone, "tzone", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, EBINDP_BFLAGS, ebindp_bflags, "b_flags", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, EBINDP_STATE, ebindp_state, "state", EPRO_PERSISTENT|EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();
 }
@@ -174,6 +176,23 @@ eStatus eRowSetBinding::simpleproperty(
 {
     switch (propertynr)
     {
+        case EBINDP_BFLAGS:
+            x->sets((m_bflags & EBIND_BIND_ROWSET) ? "rowset" : "property");
+            x->appends((m_bflags & EBIND_CLIENT) ? ",client" : ",server");
+            if (m_bflags & EBIND_INTERTHREAD) x->appends(",interthread");
+            x->appends((m_bflags & EBIND_TEMPORARY) ? ",temporary" : ",pesistent");
+            break;
+
+        case EBINDP_STATE:
+            switch (m_state)
+            {
+                case E_BINDING_UNUSED: x->sets("disconnected"); break;
+                case E_BINDING_NOW: x->sets("connecting"); break;
+                case E_BINDING_OK: x->sets("connected"); break;
+                default: x->sets("?"); break;
+            }
+            break;
+
         case ERSETP_DBM_PATH:
             if (m_objpath == OS_NULL) goto clear_x;
             x->sets(m_objpath);
@@ -192,14 +211,17 @@ eStatus eRowSetBinding::simpleproperty(
             break;
 
         case ERSETP_LIMIT:
+            if (m_pstruct.limit == 0) goto clear_x;
             x->setl(m_pstruct.limit);
             break;
 
         case ERSETP_PAGE_MODE:
+            if (m_pstruct.page_mode == 0) goto clear_x;
             x->setl(m_pstruct.page_mode);
             break;
 
         case ERSETP_ROW_MODE:
+            if (m_pstruct.row_mode == 0) goto clear_x;
             x->setl(m_pstruct.row_mode);
             break;
 
@@ -233,16 +255,9 @@ clear_x:
   @param  remotepath Path to remote object to bind to.
   @param  remoteproperty Name of remote property to bind. If OS_NULL variable value
           is assumed.
-  @param  bflags Combination of EBIND_DEFAULT (0), EBIND_CLIENTINIT, EBIND_NOFLOWCLT
-          and EBIND_METADATA.
+  @param  bflags Combination of EBIND_DEFAULT (0), EBIND_NOFLOWCLT
           - EBIND_DEFAULT:  bind without special options.
-          - EBIND_NOFLOWCLT: Disable flow control. Normally if property value changes
-            faster than it can be transferred, some values are skipped. If EBIND_NOFLOWCLT
-            flag is given, it disables flow control and every value is transferred without
-            any limit to buffered memory use.
-          - EBIND_METADATA: If meta data, like text, unit, attributes, etc exists, it is
-            also transferred from remote object to local object.
-          - EBIND_ATTR: Bind also attributes (subproperties like "x.min").
+          - EBIND_NOFLOWCLT: Disable flow control.
   @return None.
 
 ****************************************************************************************************
@@ -315,8 +330,10 @@ void eRowSetBinding::srvbind(
     m_pset = eSet::cast(parameters->clone(this));
     prm_set_to_struct();
 
-    /* Set EBIND_INTERTHREAD if envelope has not been moved from thread to another.
+    /* Set EBIND_TEMPORARY, and EBIND_INTERTHREAD if envelope has been moved
+       from thread to another.
      */
+    m_bflags |= EBIND_TEMPORARY;
     if (envelope->mflags() & EMSG_INTERTHREAD)
     {
         m_bflags |= EBIND_INTERTHREAD;

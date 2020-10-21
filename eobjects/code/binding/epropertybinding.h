@@ -164,7 +164,7 @@ protected:
         eObject *obj,
         eEnvelope *envelope);
 
-    /* Cirtual function to forward property value trough binding.
+    /* Virtual function to forward property value trough binding.
      */
     virtual void forward(
         eVariable *x = OS_NULL,
