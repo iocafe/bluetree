@@ -122,19 +122,22 @@ public:
     void initialize_synch_transfer(
         const os_char *path);
 
-    void finish_sync_transfer();
+    void finish_sync_transfer(
+        os_boolean abort);
 
-    /* Send message.
+    /* Send message with syncronization.
      */
     eStatus synch_send(
         eEnvelope *envelope);
 
-    eStatus sync_receive(
-        eEnvelope *envelope);
+    /* Check for received reply messages.
+     */
+    eEnvelope *sync_receive(
+        eObject *parent);
 
     /* Get number of messages send minus number of messages received.
      */
-    os_int sync_in_air_count();
+    os_int in_air_count();
 
     /* Wait until "in air count" is less or equal than argument.
      */
@@ -156,8 +159,8 @@ protected:
     ************************************************************************************************
     */
 
-    eVariable m_path;
-
+    eVariable *m_path;
+    ePointer *m_ref;
     osalEvent m_event;
 };
 

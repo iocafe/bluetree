@@ -84,13 +84,15 @@ void eObject::message(
 /**
 ****************************************************************************************************
 
-  @brief Send message.
+  @brief Send a message.
 
-  The eObject::message() function sends message. The message will be recieved as onmessage call
-  by another object.
+  The eObject::message() function sends an envelope as message. The message envelope (or clone
+  of it) will be recieved as onmessage call by another object.
+
+  The envelope object given as argument is adopted/deleted by this function.
 
   @param   envelope Message envelope to send. Contains command, target and source paths and
-           message content, etc.
+           message content, etc. Envelope pointer will not be valid after this function call.
   @return  None.
 
 ****************************************************************************************************
@@ -190,7 +192,7 @@ void eObject::message(
   to and places message to that thread's message queue.
 
   @param   envelope Message envelope to send. Contains command, target and source paths and
-           message content, etc.
+           message content, etc. Envelope pointer will not be valid after this function call.
   @return  None.
 
 ****************************************************************************************************

@@ -110,17 +110,19 @@ public:
     /**
     ************************************************************************************************
 
-      @name Global acknowledge functions
+      @name functions
 
     ************************************************************************************************
     */
 
-    /* static os_long start_controlled_transfer();
-    os_long send(envelpoe);
-    os_long receive(envelpoe);
-    os_long unacknowledged_count(envelpoe);
-    os_long finish_controlled_transfer(envelpoe);
-    */
+    /* Get number of unacknowledged messages (number of messages send - number of messages received)
+     */
+    inline os_int in_air_count() {return m_in_air_count;}
+
+    /* Increment "in air count", called when message has been sent.
+     */
+    inline void increment_in_air_count() {m_in_air_count++;}
+
 
 protected:
 
@@ -144,7 +146,7 @@ protected:
 
     /*@}*/
 
-
+    os_int m_in_air_count;
 
 
 };

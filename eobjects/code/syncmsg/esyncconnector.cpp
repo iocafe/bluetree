@@ -35,6 +35,7 @@ eSyncConnector::eSyncConnector(
     /* Cannot be cloned or serialized.
      */
     setflags(EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
+    m_in_air_count = 0;
 }
 
 
