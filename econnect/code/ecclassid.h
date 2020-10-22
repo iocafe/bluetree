@@ -27,13 +27,10 @@
 
 ****************************************************************************************************
 */
-/*@{*/
-
 #define ECONNCLASSID_BASE 196
 
 #define ECONNCLASSID_ROOT        (ECONNCLASSID_BASE + 1)
 #define ECONNCLASSID_CONNECT     (ECONNCLASSID_BASE + 2)
 
-/*@}*/
 
 #endif

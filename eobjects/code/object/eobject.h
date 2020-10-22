@@ -119,12 +119,7 @@ extern const os_char eobj_no_ns[];
 
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
+  The eObject is base class for all the library objects.
 ****************************************************************************************************
 */
 class eObject
@@ -135,14 +130,9 @@ class eObject
 
     /**
     ************************************************************************************************
-
-      @name Constructors and destructor
-
-      When object is constructed it may be placed within thread's.
-
+      Constructors and destructor
     ************************************************************************************************
     */
-    /*@{*/
 
 protected:
     /* Private constructor for new eObject.
@@ -237,8 +227,6 @@ public:
     void timer(
         os_long period_ms);
 
-    /*@}*/
-
 
 #if EOVERLOAD_NEW_AND_DELETE
     /**
@@ -251,7 +239,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Overloaded new operator calls os_malloc().
      */
@@ -263,7 +250,6 @@ public:
     void operator delete(
         void *buf);
 
-    /*@}*/
 #endif
 
     /**
@@ -275,7 +261,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /** Get object flags.
      */
@@ -325,20 +310,12 @@ public:
         return OS_FALSE;
     }
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Object hierarcy
-
-      X...
-
+      Object hierarcy
     ************************************************************************************************
     */
-    /*@{*/
-
     /** Get object identifier.
      */
     inline os_int oid()
@@ -455,21 +432,15 @@ public:
 #endif
 
 
-    /*@}*/
-
-
     /**
     ************************************************************************************************
-
-      @name Serialization
+      Serialization
 
       Writing object to stream or reading it from strem. Application should use read() and write
       functions to read and write objects with additional information. writer() and reader()
       are class specific implementations for class content only.
-
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Write object to stream.
      */
@@ -507,7 +478,6 @@ public:
         return ESTATUS_FAILED;
     }
 
-    /*@}*/
 
 #if E_SUPPROT_JSON
     /**
@@ -520,7 +490,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Write object to stream as JSON.
      */
@@ -565,7 +534,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Create name space for this object.
      */
@@ -651,9 +619,6 @@ public:
         const os_char *name);
 
 
-    /*@}*/
-
-
     /**
     ************************************************************************************************
 
@@ -664,7 +629,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Send message.
      */
@@ -713,8 +677,6 @@ public:
         const os_char *x,
         const os_char *propertyname = OS_NULL);
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
@@ -726,7 +688,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Add property to property set (any type).
      */
@@ -919,7 +880,6 @@ public:
         os_int propertynr,
         eVariable *x);
 
-    /*@}*/
 
     /**
     ************************************************************************************************
@@ -931,8 +891,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Bind properties.
      */
     void bind(
@@ -950,7 +908,6 @@ public:
 
     /* virtual void onmessagefrombinding() {}
     void messagetobinding(); */
-    /*@}*/
 
     /**
     ************************************************************************************************
@@ -962,12 +919,10 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
     virtual eStatus oncallback()
     {
         return ESTATUS_SUCCESS;
     }
-    /*@}*/
 
 protected:
     void message_within_thread(

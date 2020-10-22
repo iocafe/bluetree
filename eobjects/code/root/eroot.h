@@ -27,14 +27,9 @@ class eRoot : public eObject
 {
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
 public:
     /* Constructor.
      */
@@ -73,19 +68,13 @@ public:
     {
         return new eRoot(parent, id, flags);
     } */
-    /*@}*/
 
 
     /**
     ************************************************************************************************
-
-      @name eRoot specific
-
-      X...
-
+      eRoot specific
     ************************************************************************************************
     */
-    /*@{*/
     /* Reserve and initialize handle for object obj.
      */
     void newhandle(
@@ -98,9 +87,15 @@ public:
      */
     void freehandle(
         eHandle *handle);
-    /*@}*/
+
 
 protected:
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
     /** Pointer to first free handle.
      */
     eHandle *m_first_free_handle;

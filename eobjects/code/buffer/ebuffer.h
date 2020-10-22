@@ -22,11 +22,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Buffer Class.
-
   The eBuffer class is flat byte buffer, which can also be used as a stream.
-
 ****************************************************************************************************
 */
 class eBuffer : public eStream
@@ -34,15 +30,9 @@ class eBuffer : public eStream
 public:
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Constructor.
      */
     eBuffer(
@@ -117,19 +107,12 @@ public:
         os_int indent);
 #endif
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Queue functions.
-      Open, close, read, write, select soecke, etc. These implement eStream functionality.
-
+      eStream functionality.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Open the queue.
      */
     virtual eStatus open(
@@ -165,7 +148,6 @@ public:
     virtual os_int readchar();
 
 
-    /*@}*/
 
     /**
     ************************************************************************************************
@@ -175,7 +157,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Allocate/reallocate memory buffer.
      */
@@ -216,15 +197,11 @@ public:
      */
     void clear();
 
-    /*@}*/
 
 private:
     /**
     ************************************************************************************************
-
-      @name Internal for the class.
-      Member variables and protected functions.
-
+      Member variables.
     ************************************************************************************************
     */
 

@@ -27,7 +27,6 @@ class eValueX;
   Defines
 ****************************************************************************************************
 */
-/*@{*/
 
 /** Internal string buffer size. Maximum size of string which can be stored within eVariable
     without separate memory allocation.
@@ -82,23 +81,16 @@ extern const os_char
 #define EVARP_DEFAULT_DIGS 2
 
 
-/*@}*/
-
-
 /**
 ****************************************************************************************************
-
-  @name Internal flags.
+  Internal flags.
 
   The m_vflags contains variable type, plus additional information:
   - Lowest 8 bits are reserved for variable type, EVAR_TYPE_MASK is used to mask type out.
   - Next 8 bits are reserved for number of digits after decimal point. Used with variable
     type OS_DOUBLE to convert variable value to string.
-
 ****************************************************************************************************
 */
-/*@{*/
-
 #define EVAR_TYPE_MASK   0x001F
 #define EVAR_DDIGS_MASK  0x03E0
 #define EVAR_DDIGS_SHIFT 5
@@ -112,32 +104,21 @@ extern const os_char
  */
 #define EVAR_IS_RED 0x4000
 
-/*@}*/
-
 
 /**
 ****************************************************************************************************
-
-  @brief eVariable class.
-
-  The eVariable is dynamically typed variable, which can store integers, floating point values
-  and strings.
-
+  The eVariable is dynamically typed variable, which can store numbers, string and objects.
 ****************************************************************************************************
 */
 class eVariable : public eObject
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name eVariable overrides for eObject base class functions.
-
-      X...
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eVariable(
@@ -211,20 +192,23 @@ public:
         os_int propertynr,
         eVariable *x);
 
-    /*@}*/
+    /* Write variable to stream.
+     */
+    virtual eStatus writer(
+        eStream *stream,
+        os_int flags);
 
+    /* Read variable from stream.
+     */
+    virtual eStatus reader(
+        eStream *stream,
+        os_int flags);
 
     /**
     ************************************************************************************************
-
-      @name Get variable type info.
-
-      X...
-
+      Get variable type info.
     ************************************************************************************************
     */
-    /*@{*/
-
     /** Get value data type.
      */
     inline osalTypeId type() const
@@ -243,23 +227,16 @@ public:
      */
     void setdigs(os_int ddigs);
 
-    /*@}*/
-
-
 
     /**
     ************************************************************************************************
-
-      @name Set variable value
+      Set variable value
 
       The set*() functions set variable value. The variable type is set when value is set,
       for example setl() sets variable type to be an integer, or sets() to be a string.
       The clear() function makes variable empty.
-
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Empty the variable value.
      */
     void clear();
@@ -298,22 +275,15 @@ public:
         os_pointer x);
 
 
-    /*@}*/
-
-
     /**
     ************************************************************************************************
-
-      @name Get variable value
+      Get variable value
 
       The get*() functions return variable value as specific data type, type conversion is
       done as needed. The isempty() function checks if variable is empty.
       The variable type or value is not modified by these functions.
-
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Check if variable is empty.
      */
     os_boolean isempty();
@@ -359,19 +329,12 @@ public:
     os_char *allocate(
         os_memsz nchars);
 
-    /*@}*/
 
     /**
     ************************************************************************************************
-
-      @name Appending to variable value
-
-      X...
-
+      Appending to variable value
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Append string to variable.
      */
     void appends(
@@ -385,20 +348,12 @@ public:
     void appendv(
         eVariable *x);
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Micellenous
-
-      X...
-
+      Micellenous
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Compare two variables.
      */
     os_int compare(
@@ -431,20 +386,24 @@ public:
      */
     os_boolean clean_to_append_oix();
 
-    /*@}*/
+    /** Check if temporary string buffer has been allocated.
+     */
+    inline os_boolean tmpstrallocated()
+    {
+        return (type() != OS_STR && m_value.valbuf.tmpstr)
+            ? OS_TRUE : OS_FALSE;
+    }
+
 
     /**
     ************************************************************************************************
-
-      @name Operator overloads
+      Operator overloads
 
       The operator overloads are implemented for convinience, and map to the member functions.
       Using operator overloads may lead to more readable code, but may also confuse the
       reader.
-
     ************************************************************************************************
     */
-    /*@{*/
 
     /** Operator "=", setting variable value.
      */
@@ -466,46 +425,13 @@ public:
     inline void operator+=(eVariable& x) { appendv(&x); }
     inline void operator+=(long x) { appendl(x); } // MORE CONFUSING THAN USEFUL?
 
-    /*@}*/
-
-    /**
-    ************************************************************************************************
-
-      @name eObject virtual function implementations
-
-      Serialization means writing object to stream or reading it from strem.
-
-    ************************************************************************************************
-    */
-    /*@{*/
-    /* Write variable to stream.
-     */
-    virtual eStatus writer(
-        eStream *stream,
-        os_int flags);
-
-    /* Read variable from stream.
-     */
-    virtual eStatus reader(
-        eStream *stream,
-        os_int flags);
-
-    /* Message to or trough this object.
-     */
-    /* virtual void onmessage(); */
-
-    /*@}*/
-
-
-    /** Check if temporary string buffer has been allocated.
-     */
-    inline os_boolean tmpstrallocated()
-    {
-        return (type() != OS_STR && m_value.valbuf.tmpstr)
-            ? OS_TRUE : OS_FALSE;
-    }
 
 protected:
+    /**
+    ************************************************************************************************
+      Internal functions
+    ************************************************************************************************
+    */
     /* Collect information about this object for tree browser.
      */
     virtual void object_info(
@@ -533,6 +459,11 @@ protected:
         os_memsz nchars);
 
 
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
     /** Internal flags. Contains variable data type, number of digits after decimal
         point and string allocation information.
      */

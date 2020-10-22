@@ -27,7 +27,6 @@
 
 ****************************************************************************************************
 */
-/*@{*/
 
 /* Enumeration of GUI object properties.
  */
@@ -65,10 +64,6 @@ extern const os_char
     ecrootp_conf[];
 
 
-/*@}*/
-
-
-
 /**
 ****************************************************************************************************
 
@@ -80,17 +75,12 @@ extern const os_char
 */
 class ecRoot : public eObject
 {
+public:
     /**
     ************************************************************************************************
-
-      @name ecRoot overrides for eObject base class functions.
-
-      X...
-
+      ecRoot overrides for eObject base class functions.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     ecRoot(
@@ -156,10 +146,6 @@ public:
     virtual eStatus simpleproperty(
         os_int propertynr,
         eVariable *x);
-
-    /*@}*/
-
-
 
     /* Message to or trough this object.
      */

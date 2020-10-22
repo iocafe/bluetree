@@ -23,13 +23,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
-
+  eContainer is like a box of objects.
 ****************************************************************************************************
 */
 class eContainer : public eObject

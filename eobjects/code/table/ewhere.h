@@ -53,12 +53,10 @@ eStackItem;
 
 /**
 ****************************************************************************************************
-
-  @brief Where clause interpenter.
+  Where clause interpenter.
 
   The eWhere class interprents and evaluates a where clause. The where clause here is simplified
   SQL where clause.
-
 ****************************************************************************************************
 */
 class eWhere : public eObject
@@ -66,15 +64,9 @@ class eWhere : public eObject
 public:
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using this class as generic eObject.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Constructor.
      */
     eWhere(
@@ -95,7 +87,6 @@ public:
      */
     virtual os_int classid() {return ECLASSID_WHERE; }
 
-    /*@}*/
 
     /**
     ************************************************************************************************
@@ -107,7 +98,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Compile where clause. Generates byte code and variables.
      */
@@ -132,19 +122,13 @@ public:
      */
     eStatus evaluate();
 
-    /*@}*/
 
 protected:
     /**
     ************************************************************************************************
-
-      @name Internal to where clause interprenter.
-
-      Protected functions and member variables.
-
+      Internal functions of the where clause interprenter.
     ************************************************************************************************
     */
-    /*@{*/
     os_boolean expression();
     os_boolean simple_expression();
     os_boolean element();
@@ -168,6 +152,12 @@ protected:
     eStatus evalbinaryop(os_short op);
     void changedatatype(eStackItem *item, osalTypeId datatype);
 
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
     /** Container for variables, exists always, has name space.
      */
     eContainer *m_vars;
@@ -215,8 +205,6 @@ protected:
     /** Temporary variables during execution, used to stores strings.
      */
     eContainer *m_exec_tmp;
-
-    /*@}*/
 };
 
 #endif

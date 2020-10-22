@@ -27,7 +27,6 @@
 
 ****************************************************************************************************
 */
-/*@{*/
 
 /* Enumeration of object properties.
  */
@@ -65,7 +64,6 @@
 #define ecconp_conf evarp_conf
 extern const os_char ecconp_path[];
 
-/*@}*/
 
 
 /**
@@ -89,7 +87,6 @@ class ecConnect : public eObject
 
     ************************************************************************************************
     */
-    /*@{*/
 public:
     /* Constructor.
      */
@@ -153,8 +150,6 @@ public:
     virtual eStatus simpleproperty(
         os_int propertynr,
         eVariable *x);
-
-    /*@}*/
 
     /* Message to or trough this object.
      */

@@ -31,7 +31,6 @@
 
 ****************************************************************************************************
 */
-/*@{*/
 
 #define ECLASSID_EGUI_BASE 64
 
@@ -61,7 +60,5 @@
 #define EGUICLASSID_TERRAIN3D      (ECLASSID_EGUI_3D_BASE + 4)
 #define EGUICLASSID_WORLD3D        (ECLASSID_EGUI_3D_BASE + 5)
 */
-
-/*@}*/
 
 #endif

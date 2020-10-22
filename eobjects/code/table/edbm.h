@@ -35,14 +35,9 @@ class eDBM : public eObject
 {
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
 public:
     /* Constructor.
      */
@@ -94,35 +89,13 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
-    /*@}*/
-
-
-    /**
-    ************************************************************************************************
-
-      @name DBM functions.
-
-      These function treat dbm as organized to rows and columns.
-
-    ************************************************************************************************
-    */
-    /*@{*/
-
-    /*@}*/
-
 
 protected:
     /**
     ************************************************************************************************
-
-      @name Internal to DBM.
-
-      Protected functions and member variables.
-
+      Internal to DBM.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Get tflags from message content.
      */
     os_int get_tflags(
@@ -152,8 +125,6 @@ protected:
     void remove(
         eVariable *whereclause,
         os_int tflags);
-
-    /*@}*/
 };
 
 #endif

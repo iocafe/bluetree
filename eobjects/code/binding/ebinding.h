@@ -78,17 +78,13 @@ extern const os_char ebindp_state[];
 */
 class eBinding : public eObject
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eBinding(
@@ -148,20 +144,15 @@ public:
      */
     inline const os_char *bindpath() {return m_bindpath; }
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Binding related functionality for the class.
+      Binding related functionality for the class.
 
       These are either implementations of common binding functionality, or virtual fuctions
       to be overridden by specific binding class.
-
     ************************************************************************************************
     */
-    /*@{*/
 protected:
 
     /* Connect client eBinding to server eBinding.
@@ -239,20 +230,15 @@ protected:
     void disconnect(
         os_boolean keep_objpath = OS_FALSE);
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Member variables.
+      Member variables.
 
       The member variables hold information where to bind (for client binding) and current
       binding state.
-
     ************************************************************************************************
     */
-    /*@{*/
     /** Client: Path to object to bind to as given as argument to bind().
         Server: Always OS_NULL.
      */
@@ -281,8 +267,6 @@ protected:
     /** Binding state, one of: E_BINDING_UNUSED (0), E_BINDING_NOW (1) or E_BINDING_OK.
      */
     os_char m_state;
-
-    /*@}*/
 };
 
 #endif

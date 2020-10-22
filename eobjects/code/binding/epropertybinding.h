@@ -41,17 +41,12 @@ ePrBindingParamEnum;
 */
 class ePropertyBinding : public eBinding
 {
+public:
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     ePropertyBinding(
@@ -118,7 +113,6 @@ public:
      */
     /* inline os_int bound_propertynr() {return m_localpropertynr;} */
 
-    /*@}*/
 
 
     /**
@@ -130,8 +124,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Bind property.
      */
     void bind(
@@ -203,7 +195,6 @@ protected:
     void set_propertyname(
         const os_char *propertyname);
 
-    /*@}*/
 
     /**
     ************************************************************************************************
@@ -215,7 +206,6 @@ protected:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /** Client: property name on remote object to bind to.
         Server: Always OS_NULL.
@@ -230,8 +220,6 @@ protected:
      */
     os_int m_localpropertynr;
 
-
-    /*@}*/
 
 };
 

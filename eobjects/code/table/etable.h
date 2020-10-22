@@ -26,7 +26,6 @@ class eMatrix;
   Defines
 ****************************************************************************************************
 */
-/*@{*/
 
 /* Table property numbers.
  */
@@ -81,13 +80,8 @@ eSelectParameters;
 
 /**
 ****************************************************************************************************
-
-  @brief Table interface.
-
   The eTable is base class for tables. Underlying table can be eMatrix, eSelection or database
   table class.
-
-
 ****************************************************************************************************
 */
 class eTable : public eObject
@@ -95,15 +89,9 @@ class eTable : public eObject
 public:
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Constructor.
      */
     eTable(
@@ -142,15 +130,12 @@ public:
         return new eTable(parent, id, flags);
     }
 
-    /*@}*/
 
     /**
     ************************************************************************************************
       Table functions.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Configure the table.
      */
     virtual void configure(
@@ -202,7 +187,6 @@ public:
         return ESTATUS_FAILED;
     }
 
-    /*@}*/
 
     /**
     ************************************************************************************************

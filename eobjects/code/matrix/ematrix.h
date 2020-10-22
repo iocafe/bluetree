@@ -68,17 +68,13 @@ eMtxOp;
 */
 class eMatrix : public eTable
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eMatrix(
@@ -171,14 +167,12 @@ public:
         os_int indent);
 #endif
 
-    /*@}*/
 
     /**
     ************************************************************************************************
       Overloaded table interface functions.
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Configure the table.
      */
@@ -213,7 +207,6 @@ public:
         eContainer *columns,
         eSelectParameters *prm,
         os_int tflags = 0);
-    /*@}*/
 
 
     /**
@@ -225,8 +218,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Allocate matrix.
      */
     void allocate(
@@ -325,20 +316,13 @@ public:
         os_int column,
         os_boolean *hasvalue = OS_NULL);
 
-    /*@}*/
-
 
 protected:
     /**
     ************************************************************************************************
-
-      @name Internal to matrix.
-
-      Protected functions and member variables.
-
+      Internal functions.
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Make sure that neither row or column number is negative.
      */
@@ -427,6 +411,12 @@ protected:
     void dbm_message(
         eEnvelope *envelope);
 
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
     /** Matrix data type.
      */
     osalTypeId m_datatype;
@@ -455,8 +445,6 @@ protected:
     /** To prevent recursive resizing.
      */
     os_short m_own_change;
-
-    /*@}*/
 };
 
 #endif

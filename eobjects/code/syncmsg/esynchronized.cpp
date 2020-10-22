@@ -233,6 +233,7 @@ eStatus eSynchronized::synch_send(
     eEnvelope *envelope)
 {
     eSyncConnector *connector;
+    eStatus s;
 
     /* Make sure that this has been initialize_synch_transfer() has been called.
      */
@@ -258,13 +259,13 @@ eStatus eSynchronized::synch_send(
 
      /* Make sure that this has been initialize_synch_transfer() has been called.
      */
-    connector->send_message(envelope);
+    s = connector->send_message(envelope);
 
     /* End thread sync.
      */
     os_unlock();
 
-    return ESTATUS_SUCCESS;
+    return s;
 }
 
 
@@ -329,7 +330,7 @@ eEnvelope *eSynchronized::sync_receive(
   - To check if a reply has been received from remote object.
 
   @return  "In air count": Number of synchronized data transfer messages which have been sent
-           but not yet acknowledged or replied.
+           but not yet acknowledged or replied. -1 if failed.
 
 ****************************************************************************************************
 */
@@ -337,12 +338,13 @@ os_int eSynchronized::in_air_count()
 {
     eSyncConnector *connector;
     os_int count;
+    os_boolean failed;
 
     /* Make sure that this has been initialize_synch_transfer() has been called.
      */
     if (m_ref == OS_NULL) {
         osal_debug_error("in_air_count: not initialized");
-        return 0;
+        return -1;
     }
 
     /* Start thread sync.
@@ -353,21 +355,21 @@ os_int eSynchronized::in_air_count()
        has been deleted under process?
      */
     connector = eSyncConnector::cast(m_ref->get());
-    if (connector == OS_NULL)
-    {
+    if (connector == OS_NULL) {
         osal_debug_error("in_air_count: connector object has been deleted?");
         os_unlock();
-        return 0;
+        return -1;
     }
 
     /* Get "in air count".
      */
     count = connector->in_air_count();
+    failed = connector->failed();
 
     /* End thread sync and return count.
      */
     os_unlock();
-    return count;
+    return failed ? -1 : count;
 }
 
 
@@ -385,8 +387,8 @@ os_int eSynchronized::in_air_count()
   @param  timeout_ms Wait timeout. To wait infinetly give OSAL_EVENT_INFINITE (-1) here.
           To check "in air count" without waiting set timeout_ms to 0.
 
-  @return ESTATUS_SUCCESS when "in air count" is less or equal to count, or ESTATUS_TIMEOUT
-          if the function timed out.
+  @return ESTATUS_SUCCESS when "in air count" is less or equal to count, ESTATUS_TIMEOUT
+          if the function timed out, or ESTATUS_FAILED if the operation has failed.
 
 ****************************************************************************************************
 */
@@ -394,8 +396,13 @@ eStatus eSynchronized::sync_wait(
     os_int count,
     os_long timeout_ms)
 {
-    while (in_air_count() <= count)
-    {
+    os_int c;
+
+    while (OS_TRUE) {
+        c = in_air_count();
+        if (c == -1) return ESTATUS_FAILED;
+        if (in_air_count() <= count) break;
+
         if (osal_event_wait(m_event, timeout_ms)) {
             return ESTATUS_TIMEOUT;
         }

@@ -20,13 +20,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
-
+  eProcess is special thread which can be used to share data within process (mutex lock required)
 ****************************************************************************************************
 */
 class eProcess : public eThread
@@ -69,7 +63,6 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
-    /*@}*/
 
     /**
     ************************************************************************************************

@@ -39,10 +39,6 @@ public:
         e_oid id = EOID_RITEM,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Virtual destructor.
-     */
-    virtual ~eSyncConnector();
-
     /* Casting eObject pointer to eSyncConnector pointer.
      */
     inline static eSyncConnector *cast(
@@ -99,7 +95,11 @@ public:
      */
     inline void increment_in_air_count() {m_in_air_count++;}
 
-    void send_message(
+    /* Check if this operation has failed.
+     */
+    inline os_boolean failed() {return m_failed;}
+
+    eStatus send_message(
         eEnvelope *envelope);
 
     /* Check for received reply messages.
@@ -116,8 +116,9 @@ protected:
     */
     osalEvent m_event;
     eContainer *m_queue;
-    os_int m_in_air_count;
-    os_boolean m_failed;
+    volatile os_int m_in_air_count;
+    volatile os_boolean m_failed;
+    eVariable *m_context;
 };
 
 #endif

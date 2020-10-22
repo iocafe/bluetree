@@ -39,28 +39,18 @@ eRsetBindingParamEnum;
 
 /**
 ****************************************************************************************************
-
-  @brief Table binding class.
-
-  The eRowSetBinding is class derived from eBinding. It implements property binding specific
-  functionality.
-
-
+  Bind row set to dbm (table) binding class.
 ****************************************************************************************************
 */
 class eRowSetBinding : public eBinding
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eRowSetBinding(
@@ -117,8 +107,6 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
@@ -129,7 +117,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Bind row set to table (select).
      */
@@ -191,20 +178,12 @@ protected:
 
      void prm_set_to_struct();
 
-    /*@}*/
 
     /**
     ************************************************************************************************
-
-      @name Member variables.
-
-      The member variables hold information where to bind (for client binding) and current
-      binding state.
-
+      Member variables.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Select parameters as set.
      */
     eSet *m_pset;
@@ -220,9 +199,6 @@ protected:
     /* Where clause, pointer to within m_pset. Set by prm_set_to_struct().
      */
     const os_char *m_where_clause;
-
-    /*@}*/
-
 };
 
 #endif

@@ -6,6 +6,8 @@
   @version 1.0
   @date    21.10.2020
 
+  Process mutext must be locked when sync connector objects are accessed.
+
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
   or distribute this file you indicate that you have read the license and understand and accept
@@ -38,21 +40,10 @@ eSyncConnector::eSyncConnector(
     m_in_air_count = 0;
     m_queue = new eContainer(this);
     m_failed = OS_FALSE;
-}
 
-
-/**
-****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  If connected, disconnect binding. Release all resources allocated for the binging.
-  @return  None.
-
-****************************************************************************************************
-*/
-eSyncConnector::~eSyncConnector()
-{
+    m_context = new eVariable(this);
+    m_context->sets("sc");
+    m_context->appendl(osal_rand(1, 100000));
 }
 
 
@@ -98,35 +89,41 @@ void eSyncConnector::setupclass()
 void eSyncConnector::onmessage(
     eEnvelope *envelope)
 {
+    eObject *context;
+
     /* If at final destination for the message.
      */
-    if (*envelope->target()=='\0')
+    context = envelope->context();
+    if (*envelope->target()=='\0' && context)
     {
-        switch (envelope->command())
+        /* Make sure that this is reply to request sent out by this object.
+         */
+        if (context->classid() == ECLASSID_VARIABLE) if (!m_context->compare((eVariable*)context))
         {
-            case ECMD_BIND_REPLY:
-                return;
-
-            case ECMD_UNBIND:
-            case ECMD_SRV_UNBIND:
+          switch (envelope->command())
+          {
             case ECMD_NO_TARGET:
+            case ECMD_INTERRUPT:
+            case ECMD_ERROR:
+                m_failed = OS_TRUE;
+                osal_event_set(m_event);
                 return;
 
-            case ECMD_FWRD:
-                return;
+            default:
+                envelope->clone(m_queue, EOID_ITEM);
+                /* continues as ECMD_ACK...
+                 */
 
             case ECMD_ACK:
                 m_in_air_count--;
                 osal_event_set(m_event);
 #if OSAL_DEBUG
                 if (m_in_air_count == -1) {
-                    osal_debug_error("sync connector received more ACKs than it sent messages");
+                    osal_debug_error("sync connector received more replies than it sent messages");
                 }
 #endif
                 return;
-
-            case ECMD_REBIND:
-                return;
+          }
         }
     }
 
@@ -191,14 +188,23 @@ eStatus eSyncConnector::simpleproperty(
 
 ****************************************************************************************************
 */
-void eSyncConnector::send_message(
+eStatus eSyncConnector::send_message(
     eEnvelope *envelope)
 {
+    if (m_failed) {
+        return ESTATUS_FAILED;
+    }
+
+    /* Set context to make sure that replies are messages sent by this object.
+     */
+    envelope->setcontext(m_context);
     message(envelope);
 
     /* Increment in air count.
      */
     increment_in_air_count();
+
+    return ESTATUS_SUCCESS;
 }
 
 
@@ -218,6 +224,10 @@ eEnvelope *eSyncConnector::get_received_message(
     eObject *parent)
 {
     eEnvelope *envelope;
+
+    if (m_failed) {
+        return OS_NULL;
+    }
 
     envelope = eEnvelope::cast(m_queue->first());
     if (envelope) {

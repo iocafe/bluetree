@@ -33,11 +33,18 @@
 
 ****************************************************************************************************
 */
-/*@{*/
 
 /* Messaging, no target.
  */
 #define ECMD_NO_TARGET -1
+
+/* Generic error.
+ */
+#define ECMD_ERROR -2
+
+/* Interrupt current operation.
+ */
+#define ECMD_INTERRUPT -3
 
 /* Set property by message
  */
@@ -74,9 +81,6 @@
 /* Thread control, exit thread.
  */
 #define ECMD_EXIT_THREAD -999
-
-
-/*@}*/
 
 
 #endif

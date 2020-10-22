@@ -35,29 +35,20 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
+  eNameSpace is like an index. Named objects can be mapped to a name space on higer level.
 ****************************************************************************************************
 */
 class eNameSpace : public eObject
 {
     friend class eName;
 
+public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as a generic eObject.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Construct new eObject.
      */
     eNameSpace(
@@ -103,19 +94,13 @@ public:
         return new eNameSpace(parent, id, flags);
     }
 
-    /*@}*/
 
 
     /**
     ************************************************************************************************
-
-      @name Name space specific functions
-
-      X...
-
+      Namespace specific functions
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Get name space id, OS_NULL if none.
      */
@@ -134,7 +119,6 @@ public:
     eName *findname(
         eVariable *x = OS_NULL);
 
-    /*@}*/
 
 protected:
     /** Pointer to root object of indexed variables.

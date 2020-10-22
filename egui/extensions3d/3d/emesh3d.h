@@ -8,9 +8,9 @@
 
   Mesh base class. Mesh consists of vertices and triangles? texture?
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -39,7 +39,7 @@ typedef struct
 
 // Change to GL_INT_2_10_10_10_REV
     os_float nx, ny, nz;
-} 
+}
 e3VertexAttrs;
 
 
@@ -56,76 +56,73 @@ e3VertexAttrs;
 */
 class eMesh3D : public eObject
 {
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Constructors and destructor
+      @name Constructors and destructor
 
-	  X...
+      X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
 
 public:
         /* Constructor.
-		 */
-		eMesh3D(
-			eObject *parent,
-			os_int oid = EOID_ITEM,
+         */
+        eMesh3D(
+            eObject *parent,
+            os_int oid = EOID_ITEM,
             os_int flags = EOBJ_DEFAULT);
 
-		/* Virtual destructor.
-		 */
-		virtual ~eMesh3D();
+        /* Virtual destructor.
+         */
+        virtual ~eMesh3D();
 
         /* Casting eObject pointer to eMesh3D pointer.
          */
-		inline static eMesh3D *cast(
-			eObject *o) 
-		{ 
+        inline static eMesh3D *cast(
+            eObject *o)
+        {
             e_assert_type(o, EGUICLASSID_MESH3D)
             return (eMesh3D*)o;
-		}
+        }
 
-		/* Get class identifier.
+        /* Get class identifier.
          */
-		virtual os_int getclassid() 
-        { 
-            return EGUICLASSID_MESH3D; 
+        virtual os_int getclassid()
+        {
+            return EGUICLASSID_MESH3D;
         }
 
         /* Static function to add class to propertysets and class list.
          */
         static void setupclass();
 
-		/* Static constructor function for generating instance by class list.
+        /* Static constructor function for generating instance by class list.
          */
-		static eMesh3D *newobj(
-			eObject *parent,
-			os_int oid = EOID_ITEM,
-			os_int flags = EOBJ_DEFAULT)
-		{
-			return new eMesh3D(parent, oid, flags);
-		}
+        static eMesh3D *newobj(
+            eObject *parent,
+            os_int oid = EOID_ITEM,
+            os_int flags = EOBJ_DEFAULT)
+        {
+            return new eMesh3D(parent, oid, flags);
+        }
 
         void calculate_bounding_box_mesh(
             glm::fvec4 *bb_1,
             glm::fvec4 *bb_2,
             bool *initialized);
 
-    /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Mesh data
+      @name Mesh data
 
-	  Vertices, triangles?
+      Vertices, triangles?
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
         /* Mesh vertices.
          */
         e3VertexAttrs *m_vertices;
@@ -161,7 +158,6 @@ public:
         /** Pointer to the next mesh for this object.
          */
         eMesh3D *m_next_mesh;
-    /*@}*/
 };
 
 /* Allocate new empty mesh from the mesh container.

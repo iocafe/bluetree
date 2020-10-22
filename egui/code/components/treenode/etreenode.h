@@ -20,44 +20,27 @@
 
 /**
 ****************************************************************************************************
-
-  @name Defines
-
-  X...
-
+  Defines
 ****************************************************************************************************
 */
-/*@{*/
 
 #define ETREENODE_TOOLTIPS_FOR_DEBUG 1
 
 
-/*@}*/
-
-
 /**
 ****************************************************************************************************
-
-  @brief eTreeNode class.
-
-  The eTreeNode is dynamically typed variable, which can store integers, floating point values
-  and strings.
-
+  eTreeNode class is used to implement object tree browser.
 ****************************************************************************************************
 */
 class eTreeNode : public eComponent
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name eTreeNode overrides for eObject base class functions.
-
-      X...
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eTreeNode(
@@ -115,18 +98,12 @@ public:
         return new eTreeNode(parent, id, flags);
     }
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Base class functions to implement component functionality
-
+      Base class functions to implement component functionality
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Draw the component.
      */
     virtual eStatus draw(
@@ -141,10 +118,12 @@ public:
     virtual ePopup *right_click_popup(
         eDrawParams& prm);
 
-    /*@}*/
-
-
 protected:
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
     void draw_underline(os_int y);
     void draw_state_bits(os_int x);
     void draw_tooltip();

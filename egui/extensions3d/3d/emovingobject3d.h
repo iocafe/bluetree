@@ -6,15 +6,15 @@
   @version 1.0
   @date    8.9.2016
 
-  Base class for objects in 3D object tree. Like "car" could be child of world and "car door" 
-  child of car. 
+  Base class for objects in 3D object tree. Like "car" could be child of world and "car door"
+  child of car.
   - Holds current object position, speed, rotation, rotational speed, scale.
   - References to mesh which contains vertices.
   - References to code related to object?
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -35,38 +35,37 @@
 */
 class eMovingObject3D : public eObject3D
 {
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Constructors and destructor
+      @name Constructors and destructor
 
-	  X...
+      X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
 public:
         /* Constructor.
-		 */
-		eMovingObject3D(
-			eObject *parent,
-			os_int oid = EOID_ITEM,
-			os_int flags = EOBJ_DEFAULT);
+         */
+        eMovingObject3D(
+            eObject *parent,
+            os_int oid = EOID_ITEM,
+            os_int flags = EOBJ_DEFAULT);
 
         /* Virtual destructor.
-		 */
-		virtual ~eMovingObject3D();
+         */
+        virtual ~eMovingObject3D();
 
         /* Casting eObject pointer to eMovingObject3D pointer.
          */
-		inline static eMovingObject3D *cast(
-			eObject *o) 
-		{ 
+        inline static eMovingObject3D *cast(
+            eObject *o)
+        {
             e_assert_type(o, EGUICLASSID_MOVINGOBJECT3D)
             return (eMovingObject3D*)o;
-		}
+        }
 
-		/* Get class identifier.
+        /* Get class identifier.
          */
         virtual os_int getclassid()
         {
@@ -77,52 +76,44 @@ public:
          */
         static void setupclass();
 
-		/* Static constructor function for generating instance by class list.
+        /* Static constructor function for generating instance by class list.
          */
-		static eMovingObject3D *newobj(
-			eObject *parent,
-			os_int oid = EOID_ITEM,
-			os_int flags = EOBJ_DEFAULT)
-		{
-			return new eMovingObject3D(parent, oid, flags);
-		}
+        static eMovingObject3D *newobj(
+            eObject *parent,
+            os_int oid = EOID_ITEM,
+            os_int flags = EOBJ_DEFAULT)
+        {
+            return new eMovingObject3D(parent, oid, flags);
+        }
 
         /* Get object flags, like is object camera, etc.
          */
-		virtual os_int flags();
-
-    /*@}*/
+        virtual os_int flags();
 
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Other functions
+      @name Other functions
 
-	  Current object position, speed, rotation, rotational speed, scale.
+      Current object position, speed, rotation, rotational speed, scale.
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
         virtual void update_game(
             eWorld3D *world,
             eKeyboardCtrl *kbctrl,
             os_double elapsed);
-    /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Generic properties
+      @name Generic properties
 
-	  Current object position, speed, rotation, rotational speed, scale.
+      Current object position, speed, rotation, rotational speed, scale.
 
-	************************************************************************************************
-	*/
-	/*@{*/
-
-
-    /*@}*/
+    ************************************************************************************************
+    */
 };
 
 #endif

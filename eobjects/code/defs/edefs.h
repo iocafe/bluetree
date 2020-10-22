@@ -28,14 +28,13 @@
 
 ****************************************************************************************************
 */
-/*@{*/
 
 /** Object index.
-    */
+ */
 typedef os_uint e_oix;
 
 /** Object identifier.
-    */
+ */
 typedef os_int e_oid;
 
 
@@ -53,9 +52,8 @@ typedef os_int e_oid;
 
 ****************************************************************************************************
 */
-/*@{*/
 
-/** Sopport JSON format object serialization. Enables reading and writing object trees as JSON.
+/** Support JSON format object serialization. Enables reading and writing object trees as JSON.
  */
 #ifndef E_SUPPROT_JSON
 #define E_SUPPROT_JSON 0
@@ -69,6 +67,5 @@ typedef os_int e_oid;
 #endif
 #endif
 
-/*@}*/
 
 #endif

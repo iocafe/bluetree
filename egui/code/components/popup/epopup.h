@@ -27,34 +27,20 @@
 
 ****************************************************************************************************
 */
-/*@{*/
-
-/*@}*/
-
 
 /**
 ****************************************************************************************************
-
-  @brief ePopup class.
-
-  The ePopup is dynamically typed variable, which can store integers, floating point values
-  and strings.
-
+  GUI popup window like drop down menu.
 ****************************************************************************************************
 */
 class ePopup : public eComponent
 {
+public:
     /**
     ************************************************************************************************
-
-      @name ePopup overrides for eObject base class functions.
-
-      X...
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     ePopup(
@@ -117,26 +103,25 @@ public:
      */
     virtual os_long make_autolabel();
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Base class functions to implement component functionality
-
+      Base class functions to implement component functionality
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Draw the component.
      */
     virtual eStatus draw(
         eDrawParams& prm);
 
-    /*@}*/
 
 protected:
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
     os_boolean m_open_popup_called;
 
     eAutoLabel m_label_title;

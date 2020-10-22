@@ -50,13 +50,7 @@ eQueueBlock;
 
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
-
+  Queue stream data.
 ****************************************************************************************************
 */
 class eQueue : public eStream
@@ -64,15 +58,9 @@ class eQueue : public eStream
 public:
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Constructor.
      */
     eQueue(
@@ -111,19 +99,12 @@ public:
         return new eQueue(parent, id, flags);
     }
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Queue functions.
-      Open, close, read, write, select soecke, etc. These implement eStream functionality.
-
+      eStream functionality.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Open the queue.
      */
     virtual eStatus open(
@@ -168,17 +149,13 @@ public:
         return m_flush_count;
     }
 
-    /*@}*/
+private:
 
     /**
     ************************************************************************************************
-
-      @name Internal for the class.
-      Member variables and protected functions.
-
+      Internal functions.
     ************************************************************************************************
     */
-private:
     /* Allocate new block and join it to queue.
      */
     void newblock();
@@ -275,6 +252,12 @@ private:
 
         return c;
     }
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
 
     /** Oldest block in the queue.
      */

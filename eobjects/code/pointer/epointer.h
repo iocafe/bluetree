@@ -42,35 +42,27 @@ ePointerRef;
 
 /**
 ****************************************************************************************************
-
-  @brief Object pointer class.
-
-  X..
-
+  Object pointer class - chanes to OS_NULL if pointer target is deleted.
 ****************************************************************************************************
 */
 class ePointer : public eObject
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
-        */
+     */
     ePointer(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
-        */
+     */
     virtual ~ePointer();
 
     /* Casting eObject pointer to ePointer pointer.
@@ -100,20 +92,12 @@ public:
         return new ePointer(parent, id, flags);
     }
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name ePointer specific functions
-
-      X...
-
+      ePointer specific functions
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Set object pointer.
      */
     void set(eObject *ptr);
@@ -137,7 +121,6 @@ public:
         return m_ref.undef;
     }
 
-    /*@}*/
 
 protected:
     /* Undefined pointer or index/use count reference to object.

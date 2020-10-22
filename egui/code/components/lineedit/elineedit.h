@@ -20,41 +20,25 @@
 
 /**
 ****************************************************************************************************
-
-  @name Defines
-
-  X...
-
+  Defines
 ****************************************************************************************************
 */
-/*@{*/
-
-/*@}*/
 
 
 /**
 ****************************************************************************************************
-
-  @brief eLineEdit class.
-
-  The eLineEdit is dynamically typed variable, which can store integers, floating point values
-  and strings.
-
+  The eLineEdit is GUI component to display and modify variable value.
 ****************************************************************************************************
 */
 class eLineEdit : public eComponent
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name eLineEdit overrides for eObject base class functions.
-
-      X...
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eLineEdit(
@@ -107,20 +91,12 @@ public:
         return new eLineEdit(parent, id, flags);
     }
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Base class functions to implement component functionality
-
-      CreaSerialization means writing object to stream or reading it from strem.
-
+      eComponent functionality
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Draw the component.
      */
     virtual eStatus draw(
@@ -130,10 +106,13 @@ public:
      */
     virtual void activate();
 
-    /*@}*/
-
-
 protected:
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
     void draw_state_bits(os_int x);
     void draw_tooltip();
 

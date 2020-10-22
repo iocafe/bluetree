@@ -66,7 +66,6 @@ eHandleRoot;
 
 ****************************************************************************************************
 */
-/*@{*/
 
 /* Initialize handle tables.
  */
@@ -88,7 +87,6 @@ eHandle *ehandleroot_releasehandles(
     e_oix nro_handles);
 
 
-/*@}*/
 
 #endif
 

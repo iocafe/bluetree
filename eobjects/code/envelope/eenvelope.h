@@ -62,28 +62,18 @@ void eenvelope_clear_path(
 
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
-
+  eEnvelope wraps message content, target and source as a signle object.
 ****************************************************************************************************
 */
 class eEnvelope : public eObject
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eEnvelope(
@@ -154,18 +144,12 @@ public:
         eStream *stream,
         os_int flags);
 
-    /*@}*/
 
     /**
     ************************************************************************************************
-
-      @name Envelope functions
-
-      X...
-
+      Envelope functions
     ************************************************************************************************
     */
-    /*@{*/
 
 /* COMMAND AND FLAGS ***************************************************************************** */
 
@@ -298,11 +282,11 @@ public:
 
     void setcontent(
         eObject *o,
-        os_int mflags);
+        os_int mflags = EMSG_KEEP_CONTENT);
 
     void setcontext(
         eObject *o,
-        os_int mflags);
+        os_int mflags = EMSG_KEEP_CONTEXT);
 
     inline eObject *content()
     {
@@ -314,7 +298,6 @@ public:
         return first(EOID_CONTEXT);
     }
 
-    /*@}*/
 
 private:
     /** Command.

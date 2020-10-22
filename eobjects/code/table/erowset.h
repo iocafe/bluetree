@@ -102,17 +102,12 @@ typedef void erset_callback_func(
 */
 class eRowSet : public eTable
 {
+public:
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eRowSet(
@@ -188,17 +183,12 @@ public:
         os_int indent);
 #endif
 
-    /*@}*/
-
     /**
     ************************************************************************************************
       Overloaded table interface functions.
     ************************************************************************************************
     */
-    /*@{*/
-
-    /* Insert rows into table.
-     * Row can be one row or container with multiple rows.
+    /* Insert rows into table. Row can be one row or container with multiple rows.
      */
     virtual void insert(
         eContainer *rows,
@@ -224,20 +214,13 @@ public:
         eContainer *columns,
         eSelectParameters *prm,
         os_int tflags = 0);
-    /*@}*/
 
 
     /**
     ************************************************************************************************
-
-      @name RowSet functions.
-
-      These function treat rowset as organized to rows and columns.
-
+      RowSet functions - these function treat rowset as organized to rows and columns.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Set path to DBM.
      */
     inline void set_dbm(
@@ -304,25 +287,23 @@ public:
      */
     inline os_int nrows() {return m_nrows; }
 
-    /*@}*/
-
 
 protected:
     /**
     ************************************************************************************************
-
-      @name Internal to rowset.
-
-      Protected functions and member variables.
-
+      Internal functions.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Gets pointer to the table binding or OS_NULL if none.
      */
     eRowSetBinding *get_binding();
 
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
     /** Number of rows.
      */
     os_int m_nrows;
@@ -355,8 +336,6 @@ protected:
     /** Pointer to row set callback context.
      */
     eObject *m_context;
-
-    /*@}*/
 };
 
 #endif

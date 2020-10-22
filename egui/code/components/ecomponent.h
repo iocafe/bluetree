@@ -33,7 +33,6 @@ class ePopup;
 
 ****************************************************************************************************
 */
-/*@{*/
 
 /* Enumeration of common GUI component properties. These often match eobject library eVariable
    property numbers and names, but a specific eComponent may not need to implement all.
@@ -97,7 +96,6 @@ extern const os_char ecomp_all[];
 extern const os_char ecomp_select[];
 extern const os_char ecomp_command[];
 
-/*@}*/
 
 /* More specific info about click position, returned by check_click() function.
  */
@@ -217,29 +215,20 @@ eCompoCommand;
 
 /**
 ****************************************************************************************************
-
-  @brief eComponent class.
-
-  The eComponent is dynamically typed variable, which can store integers, floating point values
-  and strings.
-
+  GUI component base class.
 ****************************************************************************************************
 */
 class eComponent : public eObject
 {
     friend class eWindow;
 
+public:
+
     /**
     ************************************************************************************************
-
-      @name eComponent overrides for eObject base class functions.
-
-      X...
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eComponent(
@@ -340,8 +329,6 @@ public:
         os_int propertynr,
         eVariable *x);
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
@@ -354,7 +341,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /** Operator "=", setting variable value.
      */
@@ -375,7 +361,6 @@ public:
     /* inline const os_char *operator+=(const os_char *x) { appends(x); return x; }
     inline void operator+=(eComponent& x) { appendv(&x); } */
 
-    /*@}*/
 
     /**
     ************************************************************************************************
@@ -386,7 +371,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Write variable to stream.
      */
@@ -414,7 +398,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Determine size, position of component and it's subcomponents. Setup Z order for draing.
      */
@@ -446,19 +429,12 @@ public:
     void add_popup_edit_mode_items(eDrawParams& prm, ePopup *p);
     void close_popup();
 
-    /*@}*/
 
     /**
     ************************************************************************************************
-
-      @name Component functionality (base class only)
-
-      X...
-
+      Component functionality (base class only)
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Set redo layout flag.
      */
     void redo_layout();
@@ -527,10 +503,15 @@ public:
      */
     void on_delete();
 
-    /*@}*/
-
 
 protected:
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
+
     /* Current component rectangle (screen coordinates).
      */
     eRect m_rect;

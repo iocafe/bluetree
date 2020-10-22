@@ -22,13 +22,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
-
+  eThread handle can be used to request child thread to exit and wait for it to join.
 ****************************************************************************************************
 */
 class eThreadHandle : public eObject
@@ -36,16 +30,12 @@ class eThreadHandle : public eObject
     friend class eThread;
 
 public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Constructor.
      */
@@ -81,18 +71,12 @@ public:
         return new eThreadHandle(parent, id, flags);
     }
 
-    /*@}*/
 
     /**
     ************************************************************************************************
-
-      @name X...
-
-      X...
-
+      Thread functions.
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Request to terminate a thread.
      */
@@ -107,9 +91,13 @@ public:
         return m_unique_thread_name;
     }
 
-    /*@}*/
 
 private:
+    /**
+    ************************************************************************************************
+      Internal functions
+    ************************************************************************************************
+    */
     inline void set_osal_handle(
         osalThread *h)
     {
@@ -119,6 +107,12 @@ private:
     void save_unique_thread_name(
         eThread *thread);
 
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
     osalThread *m_osal_handle;
 
     os_char m_unique_thread_name[E_OIXSTR_BUF_SZ];

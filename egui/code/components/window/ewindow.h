@@ -31,27 +31,18 @@ eWindowSelect;
 
 /**
 ****************************************************************************************************
-
-  @brief eWindow class.
-
-  The eWindow is dynamically typed variable, which can store integers, floating point values
-  and strings.
-
+  eWindow class.
 ****************************************************************************************************
 */
 class eWindow : public eComponent
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name eWindow overrides for eObject base class functions.
-
-      X...
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eWindow(
@@ -124,25 +115,17 @@ public:
      */
     virtual os_long make_autolabel();
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Base class functions to implement component functionality
-
+      Base class functions to implement component functionality
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Draw the component.
      */
     virtual eStatus draw(
         eDrawParams& prm);
-
-    /*@}*/
-
 
     /* Get/set edit mode.
      */
@@ -173,6 +156,12 @@ protected:
         eDrawParams& prm,
         os_int mouse_button_nr);
 
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
     /* Pointers to selected components.
      */
     eContainer *m_select_list;
@@ -186,8 +175,6 @@ protected:
     /* This component is in edit mode.
      */
     os_boolean m_edit_mode;
-
 };
-
 
 #endif

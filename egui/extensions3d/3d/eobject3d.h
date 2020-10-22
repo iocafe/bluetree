@@ -6,15 +6,15 @@
   @version 1.0
   @date    8.9.2016
 
-  Base class for objects in 3D object tree. Like "car" could be child of world and "car door" 
-  child of car. 
+  Base class for objects in 3D object tree. Like "car" could be child of world and "car door"
+  child of car.
   - Holds current object position, speed, rotation, rotational speed, scale.
   - References to mesh which contains vertices.
   - References to code related to object?
 
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
@@ -44,7 +44,7 @@ typedef struct
     bool down;
     bool left;
     bool right;
-} 
+}
 eKeyboardCtrl;
 
 class eWorld3D;
@@ -64,29 +64,28 @@ class eMesh3D;
 */
 class eObject3D : public eObject
 {
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Constructors and destructor
+      @name Constructors and destructor
 
-	  X...
+      X...
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
 
 public:
         /* Constructor.
-		 */
-		eObject3D(
-			eObject *parent,
-			os_int oid = EOID_ITEM,
-			os_int flags = EOBJ_DEFAULT);
+         */
+        eObject3D(
+            eObject *parent,
+            os_int oid = EOID_ITEM,
+            os_int flags = EOBJ_DEFAULT);
 
 
-		/* Virtual destructor.
-		 */
-		virtual ~eObject3D();
+        /* Virtual destructor.
+         */
+        virtual ~eObject3D();
 
         /* Clone object.
          */
@@ -97,11 +96,11 @@ public:
 
         /* Casting eObject pointer to eObject3D pointer.
          */
-		inline static eObject3D *cast(
-			eObject *o) 
-		{ 
+        inline static eObject3D *cast(
+            eObject *o)
+        {
             return (eObject3D*)o;
-		}
+        }
 
         /* Get class identifier.
         */
@@ -114,33 +113,30 @@ public:
          */
         /* static void setupclass(); */
 
-		/* Static constructor function.
-		*/
-		static eObject3D *newobj(
-			eObject *parent,
-			os_int oid = EOID_ITEM,
-			os_int flags = EOBJ_DEFAULT)
-		{
-			return new eObject3D(parent, oid, flags);
-		}
+        /* Static constructor function.
+        */
+        static eObject3D *newobj(
+            eObject *parent,
+            os_int oid = EOID_ITEM,
+            os_int flags = EOBJ_DEFAULT)
+        {
+            return new eObject3D(parent, oid, flags);
+        }
 
         /* Get object flags, like is object camera, etc.
          */
-		virtual os_int flags();
-
-    /*@}*/
+        virtual os_int flags();
 
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Other functions
+      @name Other functions
 
-	  Current object position, speed, rotation, rotational speed, scale.
+      Current object position, speed, rotation, rotational speed, scale.
 
-	************************************************************************************************
-	*/
-	/*@{*/
+    ************************************************************************************************
+    */
         void import(
             const os_char *path,
             eContainer *meshes,
@@ -184,19 +180,17 @@ public:
         virtual void set_mesh(
             eMesh3D *mesh); */
 
-    /*@}*/
 
-	/** 
-	************************************************************************************************
+    /**
+    ************************************************************************************************
 
-	  @name Generic properties
+      @name Generic properties
 
-	  Current object position, speed, rotation, rotational speed, scale.
+      Current object position, speed, rotation, rotational speed, scale.
 
-	************************************************************************************************
-	*/
-	/*@{*/
-        /* Additional flags for flags() function. By default non moving object, like example 
+    ************************************************************************************************
+    */
+        /* Additional flags for flags() function. By default non moving object, like example
            terrain can be made moving in most ways by setting EOBJ3D_MOVING flag.
          */
         os_int m_flags;
@@ -233,7 +227,7 @@ public:
            -0.20 = shrink 20% per second.
          */
         os_double m_growth_rate;
-        
+
         /* Rotation matrix.
          */
         glm::dmat4 m_rotation_x_mtx;
@@ -241,15 +235,15 @@ public:
         glm::dmat4 m_rotation_z_mtx;
         glm::dmat4 m_rotation_mtx;
 
-        /* Transformation of content to coordinates of the parent 3d object. 
+        /* Transformation of content to coordinates of the parent 3d object.
          */
         glm::dmat4 m_local_mtx;
 
-        /* Transformation of normals content to coordinates system of the parent 3d object. 
+        /* Transformation of normals content to coordinates system of the parent 3d object.
          */
         glm::dmat4 m_norm_local_mtx;
 
-        /* Transformation of content to world coordinates. 
+        /* Transformation of content to world coordinates.
          */
         glm::dmat4 m_world_mtx;
 
@@ -257,7 +251,7 @@ public:
          */
         glm::dmat4 m_inv_word_mtx;
 
-        /* Transformation of normals to world coordinate space. 
+        /* Transformation of normals to world coordinate space.
          */
         glm::dmat4 m_norm_world_mtx;
 
@@ -269,8 +263,8 @@ public:
          */
         glm::fvec4 m_bb_1_mesh;
         glm::fvec4 m_bb_2_mesh;
-        bool m_bb_ok_mesh;       
-    
+        bool m_bb_ok_mesh;
+
         /* Bounding box in world coordinates.
          */
         glm::fvec4 m_bb_1_world;
@@ -280,10 +274,9 @@ public:
         /* Bounding box in camera coordinates.
          */
         glm::fvec4 m_bb_1_cam;
-        glm::fvec4 m_bb_2_cam; 
+        glm::fvec4 m_bb_2_cam;
         bool m_bb_ok_cam;
 
-    /*@}*/
 };
 
 #endif

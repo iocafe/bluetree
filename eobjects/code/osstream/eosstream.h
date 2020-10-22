@@ -22,13 +22,7 @@ class eQueue;
 
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
-
+  EOSAL library stream as eobjects stream.
 ****************************************************************************************************
 */
 class eOsStream : public eStream
@@ -36,15 +30,9 @@ class eOsStream : public eStream
 public:
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Constructor.
      */
     eOsStream(
@@ -83,19 +71,12 @@ public:
         return new eOsStream(parent, id, flags);
     }
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Socket functions.
-      Open, close, read, write, select soecke, etc. These implement eStream functionality.
-
+      eStream functionality.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Open socket.
      */
     virtual eStatus open(
@@ -126,7 +107,7 @@ public:
         os_memsz *nread = OS_NULL,
         os_int flags = 0);
 
-    /** Write character, typically control code.
+    /* Write character, typically control code.
      */
     virtual eStatus writechar(
         os_int c);
@@ -135,7 +116,7 @@ public:
      */
     virtual os_int readchar();
 
-    /** Number of incoming flush controls in queue at the moment.
+    /* Number of incoming flush controls in queue at the moment.
      */
     /* virtual os_int flushcount()
     {
@@ -164,18 +145,14 @@ public:
         eStream *newstream,
         os_int flags) {return ESTATUS_FAILED;}
 
-    /*@}*/
 
+protected:
 
     /**
     ************************************************************************************************
-
-      @name Internal for the class.
-      Member variables and protected functions.
-
+      Member variables.
     ************************************************************************************************
     */
-protected:
     /* EOSAL stream
      */
     osalStream m_stream;

@@ -31,7 +31,6 @@
 
 ****************************************************************************************************
 */
-/*@{*/
 
 /** Main control character, starts control sequence while any other character in data is passed
     as is. This value is selected so that three most significant bits are 1 and rest are ramdom.
@@ -71,7 +70,6 @@
  */
 #define E_STREAM_COUNT_MASK 0x1F
 
-/*@}*/
 
 /**
 ****************************************************************************************************
@@ -84,7 +82,6 @@
 
 ****************************************************************************************************
 */
-/*@{*/
 
 /** Control codes start from here to be above 8 bit range
  */
@@ -118,8 +115,6 @@
  */
 #define E_STREAM_CTRL_MASK 0xFFE0
 
-/*@}*/
-
 
 /**
 ****************************************************************************************************
@@ -131,7 +126,6 @@
 
 ****************************************************************************************************
 */
-/*@{*/
 
 /** eQueue specific flag: Encode data when writing into queue. If not set, data is written to
     queue as is.
@@ -149,19 +143,9 @@
 #define OSAL_FLUSH_CTRL_COUNT 0x0400000
 
 
-/*@}*/
-
-
-
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
-
+  eStream base class.
 ****************************************************************************************************
 */
 class eStream : public eObject
@@ -169,15 +153,9 @@ class eStream : public eObject
 public:
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Constructor.
      */
     eStream(
@@ -212,19 +190,12 @@ public:
         return new eStream(parent, id, flags);
     }
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Functions for writing to and reading from stream.
-
-      X...
-
+      eStream functionality - writing and reading stream.
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Open the stream.
      */
@@ -391,8 +362,6 @@ public:
     eStatus gets(
         eVariable *x);
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
@@ -405,7 +374,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
 
     /** Operator "<<", storing values to stream.
      */
@@ -433,8 +401,6 @@ public:
     inline eStatus operator>>(os_float& x) { return getf(&x); }
     inline eStatus operator>>(os_double& x) { return getd(&x); }
     inline eStatus operator>>(eVariable& x) { return gets(&x); }
-
-    /*@}*/
 };
 
 #endif

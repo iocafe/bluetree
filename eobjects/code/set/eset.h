@@ -32,28 +32,18 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
-
+  eSet stored set of values with integer keys.
 ****************************************************************************************************
 */
 class eSet : public eObject
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eSet(
@@ -133,8 +123,6 @@ public:
         os_int indent);
 #endif
 
-    /*@}*/
-
     /**
     ************************************************************************************************
 
@@ -145,8 +133,6 @@ public:
 
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Store variable value into set.
      */
     void setv(
@@ -254,9 +240,14 @@ public:
      */
     void clear();
 
-    /*@}*/
 
 protected:
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
     /* Buffer containing items
      */
     os_uchar *m_items;

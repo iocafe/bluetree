@@ -28,13 +28,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Object base class.
-
-  The eObject is base class for all eobject library objects. It defines basic functionality for
-  networked objects.
-
-
+  eThread is top of the tread's object tree.
 ****************************************************************************************************
 */
 class eThread : public eObject
@@ -42,15 +36,9 @@ class eThread : public eObject
 public:
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Constructor.
      */
     eThread(
@@ -105,14 +93,12 @@ public:
 
     inline osalEvent trigger() {return m_trigger;}
 
-    /*@}*/
 
     /**
     ************************************************************************************************
       Virtual functions to overload in derived thread class.
     ************************************************************************************************
     */
-    /*@{*/
 
     /* Overload this function to perform thread specific initialization when thread starts.
        This is called when a thread is started by start() function. Start function does not
@@ -133,15 +119,12 @@ public:
      */
     virtual void finish() {}
 
-    /*@}*/
 
     /**
     ************************************************************************************************
       Thread class functions
     ************************************************************************************************
     */
-    /*@{*/
-
     /* Create operating system thread to run the the eThread. T
      */
     void start(
@@ -168,9 +151,15 @@ public:
     void alive(
         os_int flags = EALIVE_WAIT_FOR_EVENT);
 
-    /*@}*/
 
 protected:
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
+
     /* Thread triggger.
      */
     osalEvent m_trigger;

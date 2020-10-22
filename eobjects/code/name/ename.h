@@ -43,28 +43,20 @@
 
 /**
 ****************************************************************************************************
-
-  @brief eName class.
-
   The eName is a class derived from eVariable. It adds capability to map to eNameSpace.
-
 ****************************************************************************************************
 */
 class eName : public eVariable
 {
     friend class eNameSpace;
 
+public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as a generic eObject.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eName(
@@ -141,8 +133,6 @@ public:
     virtual eStatus reader(
         eStream *stream,
         os_int flags);
-
-    /*@}*/
 
 
     /**

@@ -37,11 +37,7 @@ extern const os_char
 
 /**
 ****************************************************************************************************
-
-  @brief eValueX class.
-
   The eValueX is a class derived from eVariable. It adds time stamp and state bits.
-
 ****************************************************************************************************
 */
 class eValueX : public eVariable
@@ -50,14 +46,9 @@ class eValueX : public eVariable
 
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as a generic eObject.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
 public:
     /* Constructor.
      */
@@ -117,7 +108,6 @@ public:
         return new eValueX(parent, id, flags);
     }
 
-
     /* Write name to stream.
      */
     virtual eStatus writer(
@@ -130,21 +120,16 @@ public:
         eStream *stream,
         os_int flags);
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Operator overloads
+      Operator overloads
 
       The operator overloads are implemented for convinience, and map to the member functions.
       Using operator overloads may lead to more readable code, but may also confuse the
       reader.
-
     ************************************************************************************************
     */
-    /*@{*/
 
     /** Operator "=", setting variable value.
      */
@@ -165,7 +150,6 @@ public:
     inline const os_char *operator+=(const os_char *x) { appends(x); return x; }
     inline void operator+=(eVariable& x) { appendv(&x); }
 
-    /*@}*/
 
     /**
     ************************************************************************************************

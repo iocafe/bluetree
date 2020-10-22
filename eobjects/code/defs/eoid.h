@@ -31,7 +31,6 @@
 
 ****************************************************************************************************
 */
-/*@{*/
 
 /** This is default object identifier, which specifies object simply as list item.
     If used without parent object, indicates primitive object, typically eVariable, which
@@ -115,6 +114,5 @@
  */
 #define EOID_INTERNAL -1003
 
-/*@}*/
 
 #endif
