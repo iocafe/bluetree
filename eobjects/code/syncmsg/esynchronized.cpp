@@ -8,11 +8,19 @@
 
   When transferring large amount of data, it is sometimes necessary to divide the data
   into pieces and transfer these as received. Typically thread sending the data is
-  in loop to collect the data, and should not process messages.
+  in loop to collect the data, and should not process messages (not able to receive
+  acknowledge as regular message).
 
-  To make this work, an intermediate eSynchronized object created under eProcess.
-  Data will be sent and received data acknowledged by this object. This provides
-  flow controlled data transfer.
+  To make this work, an intermediate eSyncConnector object created under eProcess.
+  Data will be sent and received data acknowledged tough the eSyncConnector object.
+  This provides flow controlled data transfer.
+
+  The eSynchronized object is created on in thread sending messages. It is used to manage
+  the eSyncConnector in process memory tree, pass data to/from ir and take care of
+  thread synchronization.
+
+  The same mechanism can be used to implement "function calls" trough messaging. A thread
+  sending a message to other thread, process, etc, and halting until reply is received.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -64,6 +72,7 @@ eSynchronized::eSynchronized(
 */
 eSynchronized::~eSynchronized()
 {
+    finish_sync_transfer(OS_TRUE);
 }
 
 
@@ -90,55 +99,6 @@ void eSynchronized::setupclass()
     //propertysetdone(cls);
     os_unlock();
 }
-
-
-/**
-****************************************************************************************************
-
-  @brief Function to process incoming messages.
-
-  The eSynchronized::onmessage function handles messages received by object. If this function
-  doesn't process message, it calls parent class'es onmessage function.
-
-  @param   envelope Message envelope. Contains command, target and source paths and
-           message content, etc.
-  @return  None.
-
-****************************************************************************************************
-*/
-void eSynchronized::onmessage(
-    eEnvelope *envelope)
-{
-    /* If at final destination for the message.
-     */
-    if (*envelope->target()=='\0')
-    {
-        switch (envelope->command())
-        {
-            case ECMD_BIND_REPLY:
-                return;
-
-            case ECMD_UNBIND:
-            case ECMD_SRV_UNBIND:
-            case ECMD_NO_TARGET:
-                return;
-
-            case ECMD_FWRD:
-                return;
-
-            case ECMD_ACK:
-                return;
-
-            case ECMD_REBIND:
-                return;
-        }
-    }
-
-    /* Call parent class'es onmessage.
-     */
-    eObject::onmessage(envelope);
-}
-
 
 
 /**
@@ -181,7 +141,7 @@ eStatus eSynchronized::simpleproperty(
 /**
 ****************************************************************************************************
 
-  @brief Initialize synchronized transfer object.
+  @brief Initialize eSynchronized for data transfer.
 
   The eSynchronized::initialize_synch_transfer function.
 
@@ -193,6 +153,9 @@ eStatus eSynchronized::simpleproperty(
 void eSynchronized::initialize_synch_transfer(
     const os_char *path)
 {
+    eContainer *connectors;
+    eSyncConnector *connector;
+
     if (m_ref) {
         osal_debug_error("initialize_synch_transfer: Function called twice");
         finish_sync_transfer(OS_TRUE);
@@ -205,8 +168,9 @@ void eSynchronized::initialize_synch_transfer(
 
     os_lock();
 
-    // connector = new eSyncConnector(process?);
-    // m_ref->set(connector);
+    connectors = eProcess::sync_connectors();
+    connector = new eSyncConnector(connectors);
+    m_ref->set(connector);
 
     os_unlock();
 }
@@ -225,13 +189,12 @@ void eSynchronized::initialize_synch_transfer(
 ****************************************************************************************************
 */
 void eSynchronized::finish_sync_transfer(
-        os_boolean abort)
+    os_boolean abort)
 {
     eObject *connector;
 
     if (m_ref == OS_NULL) {
-        osal_debug_error("finish_sync_transfer: Sync transfer has bit been initialized");
-        finish_sync_transfer(OS_TRUE);
+        return;
     }
 
     os_lock();
@@ -242,6 +205,9 @@ void eSynchronized::finish_sync_transfer(
     delete m_path;
     delete m_ref;
     osal_event_delete(m_event);
+    m_path = OS_NULL;
+    m_ref = OS_NULL;
+    m_event = OS_NULL;
 }
 
 
@@ -291,9 +257,10 @@ eStatus eSynchronized::synch_send(
 
      /* Make sure that this has been initialize_synch_transfer() has been called.
      */
-    // connector->message();
+    connector->message(envelope);
 
-    // Increment in air count.
+    /* Increment in air count.
+     */
     connector->increment_in_air_count();
 
     /* End thread sync.
@@ -307,7 +274,7 @@ eStatus eSynchronized::synch_send(
 
   @brief Check for received reply messages.
 
-  The sync_receive function.
+  The sync_receive function
 
   @return envelope Message envelope.
 
@@ -316,6 +283,38 @@ eStatus eSynchronized::synch_send(
 eEnvelope *eSynchronized::sync_receive(
     eObject *parent)
 {
+    eSyncConnector *connector;
+
+    /* Make sure that this has been initialize_synch_transfer() has been called.
+     */
+    if (m_ref == OS_NULL) {
+        osal_debug_error("sync_receive: not initialized");
+        return OS_NULL;
+    }
+
+    /* Start thread sync.
+     */
+    os_lock();
+
+    /* Get pointer to sync connector object within process. If we do not have it, it
+       has been deleted under process?
+     */
+    connector = eSyncConnector::cast(m_ref->get());
+    if (connector == OS_NULL)
+    {
+        osal_debug_error("sync_receive: connector object has been deleted?");
+        os_unlock();
+        return OS_NULL;
+    }
+
+    /* Get "in air count".
+     */
+    // count = connector->in_air_count();
+
+    /* End thread sync and return count.
+     */
+    os_unlock();
+
     return OS_NULL;
 }
 
@@ -325,9 +324,12 @@ eEnvelope *eSynchronized::sync_receive(
 
   @brief Get number of messages send minus number of messages received.
 
-  The
+  The function is used:
+  - To check if remote object has acknowledged N enough received envelopes to send more data.
+  - To check if a reply has been received from remote object.
 
-  @return "In air count".
+  @return  "In air count": Number of synchronized data transfer messages which have been sent
+           but not yet acknowledged or replied.
 
 ****************************************************************************************************
 */
@@ -369,25 +371,37 @@ os_int eSynchronized::in_air_count()
 }
 
 
-
 /**
 ****************************************************************************************************
 
-  @brief Wait until "in air count" is less or equal than argument.
+  @brief Wait until "in air count" is less or equal than argument count.
 
-  The
+  The functions wait until "in air count" is less or equal than argument "count", or timeout
+  elapses. This function is used:
+  - To wait until remote object has acknowledged N enough received envelopes to send more data.
+  - To wait until a reply has been received from remote object.
 
-  @param  in_air_count
-  @param  timeout_ms
-  @return None.
+  @param  count "in air count to wait for".
+  @param  timeout_ms Wait timeout. To wait infinetly give OSAL_EVENT_INFINITE (-1) here.
+          To check "in air count" without waiting set timeout_ms to 0.
+
+  @return ESTATUS_SUCCESS when "in air count" is less or equal to count, or ESTATUS_TIMEOUT
+          if the function timed out.
 
 ****************************************************************************************************
 */
 eStatus eSynchronized::sync_wait(
-    os_int in_air_count,
+    os_int count,
     os_long timeout_ms)
 {
-    return ESTATUS_FAILED;
+    while (in_air_count() <= count)
+    {
+        if (osal_event_wait(m_event, timeout_ms)) {
+            return ESTATUS_TIMEOUT;
+        }
+    }
+
+    return ESTATUS_SUCCESS;
 }
 
 

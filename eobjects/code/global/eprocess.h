@@ -31,17 +31,13 @@
 */
 class eProcess : public eThread
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eProcess(
@@ -70,29 +66,39 @@ public:
      */
     static void setupclass();
 
-    /*@}*/
-
-    /**
-    ************************************************************************************************
-
-      @name Thread functionality
-
-      X...
-
-    ************************************************************************************************
-    */
-    /*@{*/
-
-    virtual void initialize(
-        eContainer *params = OS_NULL);
-
-    virtual void run();
-
     virtual void onmessage(
         eEnvelope *envelope);
 
     /*@}*/
 
+    /**
+    ************************************************************************************************
+      eThread functionality
+    ************************************************************************************************
+    */
+    virtual void initialize(
+        eContainer *params = OS_NULL);
+
+    virtual void run();
+
+
+    /**
+    ************************************************************************************************
+      eProcess specific functions
+    ************************************************************************************************
+    */
+    /* Get pointer to eSyncConnector objects for synchronized data transfers.
+     */
+    static eContainer *sync_connectors();
+
+
+protected:
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
+    eContainer *m_sync_connectors;
 };
 
 

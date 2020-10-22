@@ -93,7 +93,11 @@ typedef enum
         the flush count to zero (no more whole objects buffered in stream).
         Only returned by eEnvelope::reader().
      */
-    ESTATUS_NO_WHOLE_MESSAGES_TO_READ = 540
+    ESTATUS_NO_WHOLE_MESSAGES_TO_READ = 540,
+
+    /** Generic timeout code.
+     */
+    ESTATUS_TIMEOUT = 550
 }
 eStatus;
 

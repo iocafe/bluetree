@@ -8,11 +8,19 @@
 
   When transferring large amount of data, it is sometimes necessary to divide the data
   into pieces and transfer these as received. Typically thread sending the data is
-  in loop to collect the data, and should not process messages.
+  in loop to collect the data, and should not process messages (not able to receive
+  acknowledge as regular message).
 
-  To make this work, an intermediate eSynchronized object created under eProcess.
-  Data will be sent and received data acknowledged by this object. This provides
-  flow controlled data transfer.
+  To make this work, an intermediate eSyncConnector object created under eProcess.
+  Data will be sent and received data acknowledged tough the eSyncConnector object.
+  This provides flow controlled data transfer.
+
+  The eSynchronized object is created on in thread sending messages. It is used to manage
+  the eSyncConnector in process memory tree, pass data to/from ir and take care of
+  thread synchronization.
+
+  The same mechanism can be used to implement "function calls" trough messaging. A thread
+  sending a message to other thread, process, etc, and halting until reply is received.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -26,30 +34,20 @@
 #define ESYNCHRONIZED_H_
 #include "eobjects.h"
 
-
 /**
 ****************************************************************************************************
-
-  @brief Table binding class.
-
-  The eSynchronized is class derived from eBinding. It implements property binding specific
-  functionality.
-
-
+  Synchronized data transfer object for application.
 ****************************************************************************************************
 */
 class eSynchronized : public eObject
 {
+public:
+
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-public:
     /* Constructor.
      */
     eSynchronized(
@@ -94,34 +92,19 @@ public:
         os_int propertynr,
         eVariable *x);
 
-    /* Process received messages
+
+    /**
+    ************************************************************************************************
+      Synchronized data transfer functions.
+    ************************************************************************************************
+    */
+    /* Initialize eSynchronized for data transfer.
      */
-    virtual void onmessage(
-        eEnvelope *envelope);
-
-
-    /**
-    ************************************************************************************************
-
-      @name Property binding functions
-
-      These functions implement property finding functionality.
-
-    ************************************************************************************************
-    */
-
-
-    /**
-    ************************************************************************************************
-
-      @name Synchchronized
-
-    ************************************************************************************************
-    */
-
     void initialize_synch_transfer(
         const os_char *path);
 
+    /* Finished with synchronized transfer object, clean up.
+     */
     void finish_sync_transfer(
         os_boolean abort);
 
@@ -147,18 +130,11 @@ public:
 
 protected:
 
-
     /**
     ************************************************************************************************
-
-      @name Member variables.
-
-      The member variables hold information where to bind (for client binding) and current
-      binding state.
-
+      Member variables.
     ************************************************************************************************
     */
-
     eVariable *m_path;
     ePointer *m_ref;
     osalEvent m_event;
