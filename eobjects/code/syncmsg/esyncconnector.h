@@ -21,28 +21,17 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Table binding class.
-
-  The eSyncConnector is class derived from eBinding. It implements property binding specific
-  functionality.
-
-
+  Synchronized connector in process'es memory tree.
 ****************************************************************************************************
 */
 class eSyncConnector : public eObject
 {
+public:
     /**
     ************************************************************************************************
-
-      @name Generic object functionality.
-
-      These functions enable using objects of this class as generic eObjects.
-
+      Generic eObject functionality.
     ************************************************************************************************
     */
-    /*@{*/
-public:
     /* Constructor.
      */
     eSyncConnector(
@@ -92,28 +81,15 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
-    /*@}*/
-
 
     /**
     ************************************************************************************************
-
-      @name Property binding functions
-
-      These functions implement property finding functionality.
-
+      Synchronized data transfer connector functions
     ************************************************************************************************
     */
-    /*@{*/
-
-
-    /**
-    ************************************************************************************************
-
-      @name functions
-
-    ************************************************************************************************
-    */
+    /* Set synchronization event.
+     */
+    void set_sync_event(osalEvent e) {m_event = e;}
 
     /* Get number of unacknowledged messages (number of messages send - number of messages received)
      */
@@ -123,32 +99,25 @@ public:
      */
     inline void increment_in_air_count() {m_in_air_count++;}
 
+    void send_message(
+        eEnvelope *envelope);
+
+    /* Check for received reply messages.
+     */
+    eEnvelope *get_received_message(
+        eObject *parent);
 
 protected:
 
-    /*@}*/
-
     /**
     ************************************************************************************************
-
-      @name Member variables.
-
-      The member variables hold information where to bind (for client binding) and current
-      binding state.
-
+      Member variables.
     ************************************************************************************************
     */
-    /*@{*/
-
-
-
-
-
-    /*@}*/
-
+    osalEvent m_event;
+    eContainer *m_queue;
     os_int m_in_air_count;
-
-
+    os_boolean m_failed;
 };
 
 #endif

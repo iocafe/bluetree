@@ -170,6 +170,7 @@ void eSynchronized::initialize_synch_transfer(
 
     connectors = eProcess::sync_connectors();
     connector = new eSyncConnector(connectors);
+    connector->set_sync_event(m_event);
     m_ref->set(connector);
 
     os_unlock();
@@ -214,7 +215,7 @@ void eSynchronized::finish_sync_transfer(
 /**
 ****************************************************************************************************
 
-  @brief Send a message usint synchnronization.
+  @brief Send a message usint synchronization.
 
   The eSynchronized::synch_send() function sends an envelope as message. The message envelope
   (or clone of it) will be recieved as onmessage call by remote object.
@@ -257,15 +258,13 @@ eStatus eSynchronized::synch_send(
 
      /* Make sure that this has been initialize_synch_transfer() has been called.
      */
-    connector->message(envelope);
-
-    /* Increment in air count.
-     */
-    connector->increment_in_air_count();
+    connector->send_message(envelope);
 
     /* End thread sync.
      */
     os_unlock();
+
+    return ESTATUS_SUCCESS;
 }
 
 
@@ -284,6 +283,7 @@ eEnvelope *eSynchronized::sync_receive(
     eObject *parent)
 {
     eSyncConnector *connector;
+    eEnvelope *envelope;
 
     /* Make sure that this has been initialize_synch_transfer() has been called.
      */
@@ -307,15 +307,15 @@ eEnvelope *eSynchronized::sync_receive(
         return OS_NULL;
     }
 
-    /* Get "in air count".
+    /* Check for received reply messages.
      */
-    // count = connector->in_air_count();
+    envelope = connector->get_received_message(parent);
 
     /* End thread sync and return count.
      */
     os_unlock();
 
-    return OS_NULL;
+    return envelope;
 }
 
 

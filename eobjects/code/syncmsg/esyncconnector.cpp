@@ -1,7 +1,7 @@
 /**
 
   @file    esyncconnector.cpp
-  @brief   Synchronized transfer helper object in eProcess tree.
+  @brief   Synchronized transfer helper object in eProcess memory tree.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    21.10.2020
@@ -36,6 +36,8 @@ eSyncConnector::eSyncConnector(
      */
     setflags(EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
     m_in_air_count = 0;
+    m_queue = new eContainer(this);
+    m_failed = OS_FALSE;
 }
 
 
@@ -114,6 +116,13 @@ void eSyncConnector::onmessage(
                 return;
 
             case ECMD_ACK:
+                m_in_air_count--;
+                osal_event_set(m_event);
+#if OSAL_DEBUG
+                if (m_in_air_count == -1) {
+                    osal_debug_error("sync connector received more ACKs than it sent messages");
+                }
+#endif
                 return;
 
             case ECMD_REBIND:
@@ -168,66 +177,51 @@ eStatus eSyncConnector::simpleproperty(
 /**
 ****************************************************************************************************
 
-  @brief Property value has been received from binding.
+  @brief Send a message usint synchronization.
 
-  The eSyncConnector::update function...
-  @return None.
+  The eSyncConnector::send_message function sends an envelope as message. The message envelope
+  (or clone of it) will be recieved as onmessage call by remote object.
+
+  The envelope object given as argument is adopted/deleted by this function.
+
+  @param   envelope Message envelope to send. Contains command, target and source paths and
+           message content, etc. Envelope pointer will not be valid after this function call.
+  @return  The function returns ESTATUS_SUCCESS if all is fine. Other return values indicate
+           that there is no connection to the receiving object.
 
 ****************************************************************************************************
 */
-/* void eSyncConnector::update(
+void eSyncConnector::send_message(
     eEnvelope *envelope)
 {
-    // eVariable *x;
+    message(envelope);
 
-    // x = eVariable::cast(envelope->content());
-    // binding_setproperty(x);
-    sendack(envelope);
+    /* Increment in air count.
+     */
+    increment_in_air_count();
 }
-*/
 
 
 /**
 ****************************************************************************************************
 
-  @brief Send acknowledge.
+  @brief Check for received reply messages.
 
-  The sendack function.
+  The function gets oldest received message from queue.
 
-  @param  envelope Message envelope from server binding.
-  @return None.
+  @param  parent Received message (if any) is adopted from queue as child of this object.
+  @return Pointer to received message envelope, or OS_NULL if no received messages in queue.
 
 ****************************************************************************************************
 */
-/* void eSyncConnector::sendack(
-    eEnvelope *envelope)
+eEnvelope *eSyncConnector::get_received_message(
+    eObject *parent)
 {
-    sendack_base(envelope);
+    eEnvelope *envelope;
 
-    if ((m_bflags & EBIND_CLIENT) == 0 && m_ackcount)
-    {
-        setchanged();
+    envelope = eEnvelope::cast(m_queue->first());
+    if (envelope) {
+        envelope->adopt(parent, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT | EOBJ_NO_MAP);
     }
+    return envelope;
 }
-*/
-
-/**
-****************************************************************************************************
-
-  @brief SyncConnector received.
-
-  The ack function decrements acknowledge wait count and tries to send again.
-
-  @param  envelope Message envelope from server binding.
-  @return None.
-
-****************************************************************************************************
-*/
-/* void eSyncConnector::ack(
-    eEnvelope *envelope)
-{
-    ack_base(envelope);
-}
-
-
-*/
