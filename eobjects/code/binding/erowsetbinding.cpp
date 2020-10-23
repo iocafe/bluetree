@@ -37,6 +37,8 @@ eRowSetBinding::eRowSetBinding(
     m_pset = OS_NULL;
     os_memclear(&m_pstruct, sizeof(eSelectParameters));
     m_where_clause = OS_NULL;
+    m_requested_columns = OS_NULL;
+    m_table_configuration = OS_NULL;
 
     /* Row set bindings cannot be cloned or serialized.
      */
@@ -310,11 +312,9 @@ void eRowSetBinding::srvbind(
     eObject *obj,
     eEnvelope *envelope)
 {
-    eSet *parameters, *reply;
+    eSet *parameters;
     eDBM *dbm;
-    eContainer *localvars;
-
-    localvars = new eContainer(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+    eContainer *reply;
 
     parameters = eSet::cast(envelope->content());
     if (parameters == OS_NULL)
@@ -341,16 +341,29 @@ void eRowSetBinding::srvbind(
     /* If subproperties are requested, list ones matching in both ends.
        Store initial property value, unless clientmaster.
      */
-    reply = new eSet(this);
+    reply = new eContainer(this);
 
     dbm = eDBM::cast(obj);
-    // dbm->evaluate_columns(this, requested_columns);
 
-// reply->setv(EPR_BINDING_VALUE, &v, ESET_DELETE_X);
+    /* Solve wild cards in requested columns -> resolved_columns
+     */
+    if (m_table_configuration == OS_NULL) {
+        m_table_configuration = new eContainer(this, EOID_TABLE_CONFIGURATION);
+        m_table_configuration->ns_create();
+    }
+    dbm->solve_table_configuration(m_table_configuration, m_requested_columns);
 
-// ETABLEP_CONFIGURATION
-//        binding_getproperty(&v);
-//        reply->setv(EPR_BINDING_VALUE, &v);
+    if (1) { /* If we need send table congiguration */
+        m_table_configuration->clone(reply);
+    }
+
+    // m_table_configuration->print_json();
+
+    /* If we need data, select it.
+     */
+    if (1) {
+        srvselect();
+    }
 
     /* Complete the server end of binding and return.
      */
@@ -358,7 +371,6 @@ void eRowSetBinding::srvbind(
 
     // print_json();
 
-    delete localvars;
     return;
 
 notarget:
@@ -369,7 +381,39 @@ notarget:
         message (ECMD_NO_TARGET, envelope->source(),
             envelope->target(), OS_NULL, EMSG_DEFAULT);
     }
-    delete localvars;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Select data.
+
+  The eRowSetBinding::srvselect() function...
+
+
+****************************************************************************************************
+*/
+void eRowSetBinding::srvselect()
+{
+#if 0
+    eDBM *dbm;
+    eStatus s;
+
+    dbm = eDBM::cast(grandparent());
+    if (dbm == OS_NULL) goto getout;
+    if (dbm->classid() = OS_NULL) goto getout;
+
+    /* Select rows from table.
+     */
+    s = dbm->select(m_where_clause,
+        m_requested_columns, // ** ??  eContainer *columns,
+        m_pstruct,
+        0 /* tflags = 0 */);
+
+getout:
+    return;
+#endif
 }
 
 

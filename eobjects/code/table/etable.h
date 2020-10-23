@@ -145,6 +145,10 @@ public:
         osal_debug_error("eTable::configure is not overloaded");
     }
 
+    /* Get pointer to table configuration (eContainer).
+     */
+    virtual eContainer *configuration() {return OS_NULL;}
+
     /* Insert rows into table.
      * Row can be one row or container with multiple rows.
      */

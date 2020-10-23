@@ -79,6 +79,13 @@ void eMatrix::configure(
     }
 }
 
+/* Get pointer to table configuration (eContainer).
+ */
+eContainer *eMatrix::configuration()
+{
+    return firstc(EOID_TABLE_CONFIGURATION);
+}
+
 
 /**
 ****************************************************************************************************

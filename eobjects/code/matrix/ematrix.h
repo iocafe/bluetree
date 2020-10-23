@@ -180,6 +180,10 @@ public:
         eContainer *configuration,
         os_int tflags = 0);
 
+    /* Get pointer to table configuration (eContainer).
+     */
+    virtual eContainer *configuration();
+
     /* Insert rows into table.
      * Row can be one row or container with multiple rows.
      */

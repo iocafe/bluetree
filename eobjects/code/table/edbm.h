@@ -33,6 +33,8 @@
 */
 class eDBM : public eObject
 {
+    friend class eRowSetBinding;
+
     /**
     ************************************************************************************************
       Generic eObject functionality.
@@ -125,6 +127,20 @@ protected:
     void remove(
         eVariable *whereclause,
         os_int tflags);
+
+    /* Solve column wildcards, requested_columns -> resolved_columns.
+     */
+    void solve_table_configuration(
+        eContainer *resolved_configuration,
+        eContainer *requested_columns);
+
+    /* Select data from table.
+     */
+/*    eStatus select(
+        const os_char *whereclause,
+        eContainer *columns,
+        eSelectParameters *prm,
+        os_int tflags); */
 };
 
 #endif

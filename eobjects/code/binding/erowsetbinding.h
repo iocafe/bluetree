@@ -144,6 +144,7 @@ public:
         os_boolean delete_x);
 
 protected:
+    void srvselect();
 
     /* Finish the client end of binding.
      */
@@ -193,8 +194,13 @@ protected:
     eSelectParameters m_pstruct;
 
     /* Requested columns, pointer to eContainer within m_pset. Set by prm_set_to_struct().
+       This may contain wildcards.
      */
     eContainer *m_requested_columns;
+
+    /* Table structure, includes list of columns, without wildcards.
+     */
+    eContainer *m_table_configuration;
 
     /* Where clause, pointer to within m_pset. Set by prm_set_to_struct().
      */

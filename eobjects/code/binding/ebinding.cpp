@@ -277,7 +277,7 @@ void eBinding::bind_base(
 
   @brief Complete server end of binding.
 
-  The srvbind function...
+  The srvbind_base function...
 
   @return None.
 

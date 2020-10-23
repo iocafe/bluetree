@@ -297,3 +297,78 @@ void eDBM::remove(
     table = eMatrix::cast(parent());
     table->remove(whereclause->gets(), tflags);
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Solve column wildcards, requested_columns -> resolved_columns.
+
+  This generates table configuration tree as "resolved congufuration" which includes
+  expilicetly the table columns matching to the requested configuration.
+
+  Order specified in requested columns is preserved in resolved configuration.
+
+  @param   resolved_configuration Pointer to eContainer into which to store the resulting
+           table configuration.
+  @param   requested_columns Pointer to eContainer holding selected columns.
+
+****************************************************************************************************
+*/
+void eDBM::solve_table_configuration(
+    eContainer *resolved_configuration,
+    eContainer *requested_columns)
+{
+    eTable *table;
+    eContainer *sconfiguration, *scolumns, *dcolumns, *sitem;
+    eVariable *reqcol, *scol, *dcol, *name;
+    os_char *namestr;
+
+    table = eMatrix::cast(parent());
+    resolved_configuration->clear();
+
+    sconfiguration = table->configuration();
+    scolumns = sconfiguration->firstc(EOID_TABLE_COLUMNS);
+
+    for (sitem = sconfiguration->firstc(); sitem; sitem = sitem->nextc())
+    {
+        if (sitem != scolumns && sitem->oid() != EOID_TABLE_CONTENT) {
+            sitem->clone(resolved_configuration);
+        }
+    }
+
+    if (scolumns) {
+        dcolumns = new eContainer(resolved_configuration, EOID_TABLE_COLUMNS);
+        dcolumns->ns_create();
+
+        for (reqcol = requested_columns->firstv(); reqcol; reqcol = reqcol->nextv()) {
+            name = (eVariable*)reqcol->primaryname();
+            if (name == OS_NULL) {
+                name = reqcol;
+            }
+            namestr = name->gets();
+
+            if (!os_strcmp(namestr, "*")) {
+                for (scol = scolumns->firstv(); scol; scol = scol->nextv())
+                {
+                    if (dcolumns->byname(namestr) == OS_NULL) {
+                        scol->clone(dcolumns, EOID_ITEM);
+                    }
+                }
+
+            }
+            else if (dcolumns->byname(namestr) == OS_NULL)
+            {
+                scol = eVariable::cast(scolumns->byname(namestr));
+                if (scol) {
+                    scol->clone(dcolumns, EOID_ITEM);
+                }
+                else
+                {
+                    dcol = new eVariable(dcolumns, EOID_ITEM);
+                    dcol->addname(namestr);
+                }
+            }
+        }
+    }
+}
