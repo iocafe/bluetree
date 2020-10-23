@@ -412,3 +412,24 @@ eTable *eDBM::get_table(
     osal_debug_assert(table != OS_NULL);
     return table;
 }
+
+
+/* Select data from table.
+ */
+eStatus eDBM::select(
+    const os_char *where_clause,
+    eContainer *columns,
+    eSelectParameters *prm,
+    os_int tflags)
+{
+    eTable *table;
+
+    table = get_table(prm->table_name);
+    if (table == OS_NULL) {
+        return ESTATUS_FAILED;
+    }
+
+    table->select(where_clause, columns, prm, tflags);
+
+    return ESTATUS_SUCCESS;
+}

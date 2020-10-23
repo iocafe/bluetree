@@ -197,20 +197,20 @@ public:
     /* Update a row or rows of a table.
      */
     virtual eStatus update(
-        const os_char *whereclause,
+        const os_char *where_clause,
         eContainer *row,
         os_int tflags = 0);
 
     /* Remove rows from table.
      */
     virtual void remove(
-        const os_char *whereclause,
+        const os_char *where_clause,
         os_int tflags = 0);
 
     /* Select rows from table.
      */
     virtual eStatus select(
-        const os_char *whereclause,
+        const os_char *where_clause,
         eContainer *columns,
         eSelectParameters *prm,
         os_int tflags = 0);
@@ -274,7 +274,7 @@ public:
     /* Select rows from table.
      */
     void select(
-        const os_char *whereclause,
+        const os_char *where_clause,
         eContainer *columns,
         os_int limit = 0,
         os_int bflags = 0);
@@ -328,6 +328,10 @@ protected:
     /** Select parameters.
      */
     eSelectParameters m_prm;
+
+    /** Flag indicating that DBM path or table name has changed and row set needs to be rebound.
+     */
+    os_boolean m_rebind;
 
     /** Pointer to row set callback function.
      */

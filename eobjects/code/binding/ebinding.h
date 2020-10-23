@@ -47,6 +47,7 @@ extern const os_char ebindp_state[];
 #define EBIND_CLIENT        0x0010  /* do not give as argument */
 #define EBIND_TEMPORARY     0x0020
 #define EBIND_BIND_ROWSET   0x0040  /* This is eRowSetBinding. do not give as argument */
+
 #define EBIND_CHANGED       0x0400  /* do not give as argument */
 #define EBIND_INTERTHREAD   0x0800  /* do not give as argument */
 

@@ -265,7 +265,6 @@ clear_x:
 */
 void eRowSetBinding::bind(
     eVariable *dbm_path,
-    const os_char *whereclause,
     eContainer *columns,
     eSelectParameters *prm,
     os_int bflags)
@@ -273,17 +272,67 @@ void eRowSetBinding::bind(
     /* Save bind parameters and flags.
      */
     m_bflags = bflags | EBIND_CLIENT;
+    prm_struct_to_set(OS_NULL, columns, prm, bflags);
+    prm_set_to_struct();
+
+    bind2(dbm_path->gets());
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Select data from table (client).
+
+  The select function request selected data from a table and initiatializes a selection.
+  The row set (grandparent of this binding) will receive updates for.
+
+  @param  where_clause Which rows to select.
+  @param  remotepath Path to remote object to bind to.
+  @param  prm Parameter structure, limit, page_mode, row_mode;
+.
+  @return None.
+
+****************************************************************************************************
+*/
+void eRowSetBinding::select(
+    const os_char *where_clause,
+    os_int limit,
+    os_int page_mode,
+    os_int row_mode,
+    eObject *tzone)
+{
+    /* Save bind parameters and flags.
+     */
     if (m_pset) {
         m_pset->clear();
     }
     else {
         m_pset = new eSet(this);
     }
-    prm_struct_to_set(whereclause, columns, prm, bflags);
-    prm_set_to_struct();
 
-    bind2(dbm_path->gets());
+    if (m_pstruct.limit != limit)
+    {
+        m_pstruct.limit = limit;
+        m_pset->setl(ERSET_BINDING_LIMIT, m_pstruct.limit);
+    }
+
+    if (page_mode >= 0 && page_mode != m_pstruct.page_mode) {
+        m_pstruct.page_mode = page_mode;
+        m_pset->setl(ERSET_BINDING_PAGE_MODE, m_pstruct.page_mode);
+    }
+    if (row_mode >= 0 && row_mode != m_pstruct.row_mode) {
+        m_pstruct.row_mode = row_mode;
+        m_pset->setl(ERSET_BINDING_ROW_MODE, m_pstruct.row_mode);
+    }
+    if (tzone) {
+        m_pstruct.tzone = tzone;
+        m_pset->seto(ERSET_BINDING_TZONE, m_pstruct.tzone, ESET_STORE_AS_VARIABLE);
+    }
+
+    m_pset->sets(ERSET_BINDING_WHERE_CLAUSE, where_clause, ESET_STORE_AS_VARIABLE);
 }
+
 
 /* If remotepath is OS_NULL last used name will be preserved/
 */
@@ -396,24 +445,23 @@ notarget:
 */
 void eRowSetBinding::srvselect()
 {
-#if 0
     eDBM *dbm;
-    eStatus s;
+    // eStatus s;
 
     dbm = eDBM::cast(grandparent());
     if (dbm == OS_NULL) goto getout;
-    if (dbm->classid() = OS_NULL) goto getout;
+    if (dbm->classid() != ECLASSID_DBM) goto getout;
 
     /* Select rows from table.
      */
-    s = dbm->select(m_where_clause,
+    /*s = */
+    dbm->select(m_where_clause,
         m_requested_columns, // ** ??  eContainer *columns,
-        m_pstruct,
-        0 /* tflags = 0 */);
+        &m_pstruct,
+        0 /* tflags = 0 ???????????????? */);
 
 getout:
     return;
-#endif
 }
 
 
@@ -613,16 +661,23 @@ void eRowSetBinding::ack(
 /* Store select parameters as eSet.
  */
 void eRowSetBinding::prm_struct_to_set(
-    const os_char *whereclause,
+    const os_char *where_clause,
     eContainer *columns,
     eSelectParameters *prm,
     os_int bflags)
 {
+    if (m_pset) {
+        m_pset->clear();
+    }
+    else {
+        m_pset = new eSet(this);
+    }
+
     bflags &= EBIND_SER_MASK;
     m_pset->setl(ERSET_BINDING_FLAGS, bflags|EBIND_BIND_ROWSET);
 
-    if (whereclause) {
-        m_pset->sets(ERSET_BINDING_WHERE_CLAUSE, whereclause, ESET_STORE_AS_VARIABLE);
+    if (where_clause) {
+        m_pset->sets(ERSET_BINDING_WHERE_CLAUSE, where_clause, ESET_STORE_AS_VARIABLE);
     }
 
     if (columns) {

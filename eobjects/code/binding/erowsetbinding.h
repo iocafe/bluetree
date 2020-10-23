@@ -118,17 +118,22 @@ public:
     ************************************************************************************************
     */
 
-    /* Bind row set to table (select).
+    /* Bind row set to table (client).
      */
     void bind(
         eVariable *dbm_path,
-        const os_char *whereclause,
         eContainer *columns,
         eSelectParameters *prm,
         os_int bflags);
 
-    void bind2(
-        const os_char *remotepath);
+    /* Select data from table (client).
+     */
+    void select(
+        const os_char *where_clause,
+        os_int limit,
+        os_int page_mode = -1,
+        os_int row_mode = -1,
+        eObject *tzone = OS_NULL);
 
     /* Bind the server end.
      */
@@ -144,6 +149,9 @@ public:
         os_boolean delete_x);
 
 protected:
+    void bind2(
+        const os_char *remotepath);
+
     void srvselect();
 
     /* Finish the client end of binding.
@@ -172,7 +180,7 @@ protected:
     /* Store select parameters as eSet.
      */
     void prm_struct_to_set(
-        const os_char *whereclause,
+        const os_char *where_clause,
         eContainer *columns,
         eSelectParameters *prm,
         os_int bflags);

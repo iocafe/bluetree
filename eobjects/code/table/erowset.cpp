@@ -50,6 +50,7 @@ eRowSet::eRowSet(
     m_columns = OS_NULL;
     m_own_change = 0;
     m_dbm_path = OS_NULL;
+    m_rebind = OS_FALSE;
     os_memclear(&m_prm, sizeof(eSelectParameters));
 }
 
@@ -193,16 +194,18 @@ eStatus eRowSet::onpropertychange(
 
         case ERSETP_DBM_PATH:
             if (m_dbm_path == OS_NULL) {
-                m_dbm_path =  new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+                m_dbm_path = new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
             }
             m_dbm_path->setv(x);
+            m_rebind = OS_TRUE;
             break;
 
         case ERSETP_TABLE_NAME:
             if (m_prm.table_name == OS_NULL) {
-                m_prm.table_name =  new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+                m_prm.table_name = new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
             }
             m_prm.table_name->setv(x);
+            m_rebind = OS_TRUE;
             break;
 
         case ERSETP_LIMIT:
@@ -457,7 +460,7 @@ void eRowSet::insert(
 /* Update a row or rows of a table.
  */
 eStatus eRowSet::update(
-    const os_char *whereclause,
+    const os_char *where_clause,
     eContainer *row,
     os_int tflags)
 {
@@ -465,27 +468,27 @@ eStatus eRowSet::update(
     if (m_prm.table_name) {
         table_name = m_prm.table_name->gets();
     }
-    etable_update(this, m_dbm_path->gets(), table_name, whereclause, row, tflags);
+    etable_update(this, m_dbm_path->gets(), table_name, where_clause, row, tflags);
     return ESTATUS_SUCCESS;
 }
 
 /* Remove rows from table.
  */
 void eRowSet::remove(
-    const os_char *whereclause,
+    const os_char *where_clause,
     os_int tflags)
 {
     const os_char *table_name = OS_NULL;
     if (m_prm.table_name) {
         table_name = m_prm.table_name->gets();
     }
-    etable_remove(this, m_dbm_path->gets(), table_name, whereclause, tflags);
+    etable_remove(this, m_dbm_path->gets(), table_name, where_clause, tflags);
 }
 
 /* Select rows from table.
  */
 eStatus eRowSet::select(
-    const os_char *whereclause,
+    const os_char *where_clause,
     eContainer *columns,
     eSelectParameters *prm,
     os_int tflags)
@@ -500,37 +503,31 @@ eStatus eRowSet::select(
 
   @brief Bind this row set to a remote table.
 
-  The eRowSet::select() function creates binding to remote property. When two variables are bound
-  together, they have the same value. When the other changes, so does the another. Bindings
-  work over messaging, thus binding work as well between objects in same thread or objects in
-  different computers.
+  The select() function creates binding to remote table and selects initial data.
+  - Binding is recreated only if dbm path or table name have changed.
 
-  @param  remotepath Path to remote object to bind to.
-
+  @param  where_clause Where clause to select rows. If OS_NULL, no data is selected.
+  @param  columns eContainer holding eVariable for each column to select.
   @param  bflags Combination of EBIND_DEFAULT (0), EBIND_NOFLOWCLT
-          EBIND_METADATA and EBIND_TEMPORARY.
           - EBIND_DEFAULT:  bind without special options.
           - EBIND_NOFLOWCLT: Disable flow control. Normally if property value changes
             faster than it can be transferred, some values are skipped. If EBIND_NOFLOWCLT
             flag is given, it disables flow control and every value is transferred without
             any limit to buffered memory use.
-          - EBIND_METADATA: If meta data, like text, unit, attributes, etc exists, it is
-            also transferred from remote object to local object.
-          - EBIND_TEMPORARY: Binding is temporary and will not be cloned nor serialized.
-  @param  envelope Used for server binding only. OS_NULL for clint binding.
-  @return None.
+  @param  limit
+  @param  bflags
 
 ****************************************************************************************************
 */
 void eRowSet::select(
-    const os_char *whereclause,
+    const os_char *where_clause,
     eContainer *columns,
     os_int limit,
     os_int bflags)
 {
     eContainer *bindings;
-    eRowSetBinding *binding;
-    eObject *o;
+    eRowSetBinding *binding = OS_NULL;
+    // eObject *o;
 
     if (m_dbm_path == OS_NULL) {
         osal_debug_error("eRowSet::select:DBM path not set");
@@ -548,26 +545,39 @@ void eRowSet::select(
     /* Get or create bindings container.
      */
     bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL)
-    {
+    if (bindings == OS_NULL) {
         bindings = new eContainer(this, EOID_BINDINGS, EOBJ_IS_ATTACHMENT);
     }
     else {
-        while ((o = bindings->first(EOID_TABLE_CLIENT_BINDING))) {
-            delete o;
+        binding = eRowSetBinding::cast(bindings->first(EOID_TABLE_CLIENT_BINDING));
+        if (m_rebind && binding)
+        {
+            delete binding;
+            binding = OS_NULL;
+
         }
     }
+    m_rebind = OS_FALSE;
 
-    /* Create binding
+    if (binding == OS_NULL)
+    {
+        /* Create binding
+         */
+        binding = new eRowSetBinding(bindings, EOID_TABLE_CLIENT_BINDING, (bflags & EBIND_TEMPORARY)
+             ? EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
+
+        /* Bind the row set to table. This function will send message to remote object to bind.
+         */
+        binding->bind(m_dbm_path, columns, &m_prm, bflags);
+    }
+
+    /* If where clause is given as argument, initial data is wanted. Get it.
      */
-    binding = new eRowSetBinding(bindings, EOID_TABLE_CLIENT_BINDING, (bflags & EBIND_TEMPORARY)
-         ? EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
+    if (where_clause) {
+        binding->select(where_clause, m_prm.limit, m_prm.page_mode, m_prm.row_mode, m_prm.tzone);
+    }
 
-    /* Bind the row set to table. This function will send message to remote object to bind.
-     */
-    binding->bind(m_dbm_path, whereclause, columns, &m_prm, bflags);
-
-binding->print_json();
+    //binding->print_json();
 }
 
 

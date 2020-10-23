@@ -152,7 +152,7 @@ eContainer *eTable::process_configuration(
   @return ESTATUS_SUCCESS if ok.
  */
 eWhere *eTable::set_where(
-    const os_char *whereclause)
+    const os_char *where_clause)
 {
     eObject *o;
     eWhere *w;
@@ -161,9 +161,9 @@ eWhere *eTable::set_where(
     delete o;
 
     w = new eWhere(this, EOID_TABLE_WHERE, EOBJ_TEMPORARY_ATTACHMENT);
-    if (w->compile(whereclause))
+    if (w->compile(where_clause))
     {
-        osal_debug_error_str("Where clause syntax error: ", whereclause);
+        osal_debug_error_str("Where clause syntax error: ", where_clause);
         delete w;
         return OS_NULL;
     }

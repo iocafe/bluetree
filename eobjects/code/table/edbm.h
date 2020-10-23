@@ -140,11 +140,11 @@ protected:
 
     /* Select data from table.
      */
-/*    eStatus select(
+    eStatus select(
         const os_char *where_clause,
         eContainer *columns,
         eSelectParameters *prm,
-        os_int tflags); */
+        os_int tflags);
 
     /* Get pointer to table object derived from eTable.
      */
