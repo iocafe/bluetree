@@ -39,6 +39,8 @@
 #define MY_CLASS_ID_2 (ECLASSID_APP_BASE + 2)
 #define MY_CLASS_ID_3 (ECLASSID_APP_BASE + 3)
 
+const os_char *table_name = OS_NULL; /* Not needed for eMatrix */
+
 
 /**
 ****************************************************************************************************
@@ -197,7 +199,7 @@ public:
         element->addname("connectto", ENAME_NO_MAP);
         element->sets(text);
 
-        etable_insert(this, "//mymtx", &row);
+        etable_insert(this, "//mymtx", table_name, &row);
     }
 
     void remove_row(
@@ -208,7 +210,7 @@ public:
         where = "[";
         where += rownr;
         where += "]";
-        etable_remove(this, "//mymtx", where.gets());
+        etable_remove(this, "//mymtx", table_name, where.gets());
     }
 
     void update_row(
@@ -225,7 +227,7 @@ public:
         element->addname("ix", ENAME_NO_MAP);
         element->setl(12);
 
-        etable_update(this, "//mymtx", "connectto='Silly Creeper'", &row);
+        etable_update(this, "//mymtx", table_name, "connectto='Silly Creeper'", &row);
     }
 
 protected:

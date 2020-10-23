@@ -447,7 +447,11 @@ void eRowSet::insert(
     eContainer *rows,
     os_int tflags)
 {
-    etable_insert(this, m_dbm_path->gets(), rows, tflags);
+    const os_char *table_name = OS_NULL;
+    if (m_prm.table_name) {
+        table_name = m_prm.table_name->gets();
+    }
+    etable_insert(this, m_dbm_path->gets(), table_name, rows, tflags);
 }
 
 /* Update a row or rows of a table.
@@ -457,7 +461,11 @@ eStatus eRowSet::update(
     eContainer *row,
     os_int tflags)
 {
-    etable_update(this, m_dbm_path->gets(), whereclause, row, tflags);
+    const os_char *table_name = OS_NULL;
+    if (m_prm.table_name) {
+        table_name = m_prm.table_name->gets();
+    }
+    etable_update(this, m_dbm_path->gets(), table_name, whereclause, row, tflags);
     return ESTATUS_SUCCESS;
 }
 
@@ -467,7 +475,11 @@ void eRowSet::remove(
     const os_char *whereclause,
     os_int tflags)
 {
-    etable_remove(this, m_dbm_path->gets(), whereclause, tflags);
+    const os_char *table_name = OS_NULL;
+    if (m_prm.table_name) {
+        table_name = m_prm.table_name->gets();
+    }
+    etable_remove(this, m_dbm_path->gets(), table_name, whereclause, tflags);
 }
 
 /* Select rows from table.

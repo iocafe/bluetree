@@ -113,6 +113,7 @@ protected:
      */
     void insert(
         eContainer *rows,
+        eVariable *table_name,
         os_int tflags);
 
     /* Update a row or rows of a table.
@@ -132,7 +133,8 @@ protected:
      */
     void solve_table_configuration(
         eContainer *resolved_configuration,
-        eContainer *requested_columns);
+        eContainer *requested_columns,
+        eVariable *table_name);
 
     /* Select data from table.
      */
@@ -141,6 +143,11 @@ protected:
         eContainer *columns,
         eSelectParameters *prm,
         os_int tflags); */
+
+    /* Get pointer to table object derived from eTable.
+     */
+    eTable *get_table(
+        eVariable *table_name);
 };
 
 #endif

@@ -351,7 +351,7 @@ void eRowSetBinding::srvbind(
         m_table_configuration = new eContainer(this, EOID_TABLE_CONFIGURATION);
         m_table_configuration->ns_create();
     }
-    dbm->solve_table_configuration(m_table_configuration, m_requested_columns);
+    dbm->solve_table_configuration(m_table_configuration, m_requested_columns, m_pstruct.table_name);
 
     if (1) { /* If we need send table congiguration */
         m_table_configuration->clone(reply);

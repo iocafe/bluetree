@@ -21,6 +21,7 @@ static eContainer *etable_prepare_msg(
     eObject *t,
     eContainer *item,
     e_oid id,
+    const os_char *table_name,
     os_int tflags);
 
 
@@ -35,7 +36,7 @@ void etable_configure(
 {
     eContainer *content;
 
-    content = etable_prepare_msg(t, configuration, EOID_TABLE_CONFIGURATION, tflags);
+    content = etable_prepare_msg(t, configuration, EOID_TABLE_CONFIGURATION, OS_NULL, tflags);
     t->message(ECMD_CONFIGURE_TABLE, dbmpath, OS_NULL, content,
         EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 }
@@ -46,12 +47,13 @@ void etable_configure(
 void etable_insert(
     eObject *t,
     const os_char *dbmpath,
+    const os_char *tablename,
     eContainer *rows,
     os_int tflags)
 {
     eContainer *content;
 
-    content = etable_prepare_msg(t, rows, EOID_TABLE_CONTENT, tflags);
+    content = etable_prepare_msg(t, rows, EOID_TABLE_CONTENT, tablename, tflags);
     t->message(ECMD_INSERT_ROWS_TO_TABLE, dbmpath, OS_NULL, content,
         EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 }
@@ -62,6 +64,7 @@ void etable_insert(
 void etable_update(
     eObject *t,
     const os_char *dbmpath,
+    const os_char *tablename,
     const os_char *whereclause,
     eContainer *row,
     os_int tflags)
@@ -69,7 +72,7 @@ void etable_update(
     eContainer *content;
     eVariable *v;
 
-    content = etable_prepare_msg(t, row, EOID_TABLE_CONTENT, tflags);
+    content = etable_prepare_msg(t, row, EOID_TABLE_CONTENT, tablename, tflags);
     v = new eVariable(content, EOID_TABLE_WHERE);
     v->sets(whereclause);
 
@@ -83,13 +86,14 @@ void etable_update(
 void etable_remove(
     eObject *t,
     const os_char *dbmpath,
+    const os_char *tablename,
     const os_char *whereclause,
     os_int tflags)
 {
     eContainer *content;
     eVariable *v;
 
-    content = etable_prepare_msg(t, OS_NULL, 0, tflags);
+    content = etable_prepare_msg(t, OS_NULL, 0, tablename, tflags);
     v = new eVariable(content, EOID_TABLE_WHERE);
     v->sets(whereclause);
 
@@ -104,10 +108,11 @@ static eContainer *etable_prepare_msg(
     eObject *t,
     eContainer *item,
     e_oid id,
+    const os_char *table_name,
     os_int tflags)
 {
     eContainer *content;
-    eVariable *f;
+    eVariable *f, *n;
 
     content = new eContainer(t, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
     if (item) {
@@ -123,6 +128,11 @@ static eContainer *etable_prepare_msg(
     if (tflags) {
         f = new eVariable(content, EOID_FLAGS);
         f->setl(tflags & ETABLE_SERIALIZED_FLAGS_MASK);
+    }
+
+    if (table_name) {
+        n = new eVariable(content, EOID_TABLE_NAME);
+        n->sets(table_name);
     }
 
     return content;

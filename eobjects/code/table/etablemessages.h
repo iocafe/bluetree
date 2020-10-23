@@ -32,6 +32,7 @@ void etable_configure(
 void etable_insert(
     eObject *t,
     const os_char *dbmpath,
+    const os_char *tablename,
     eContainer *rows,
     os_int tflags = 0);
 
@@ -40,6 +41,7 @@ void etable_insert(
 void etable_update(
     eObject *t,
     const os_char *dbmpath,
+    const os_char *tablename,
     const os_char *whereclause,
     eContainer *row,
     os_int tflags = 0);
@@ -49,6 +51,7 @@ void etable_update(
 void etable_remove(
     eObject *t,
     const os_char *dbmpath,
+    const os_char *tablename,
     const os_char *whereclause,
     os_int tflags = 0);
 

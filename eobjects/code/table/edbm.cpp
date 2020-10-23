@@ -111,6 +111,7 @@ void eDBM::onmessage(
     eEnvelope *envelope)
 {
     eObject *content;
+    eVariable *table_name;
     eContainer *configuration, *rows, *row;
     eVariable *whereclause;
 
@@ -135,9 +136,10 @@ void eDBM::onmessage(
             case ECMD_INSERT_ROWS_TO_TABLE:
                 content = envelope->content();
                 if (content) {
+                    table_name = firstv(EOID_TABLE_NAME);
                     rows = content->firstc(EOID_TABLE_CONTENT);
                     if (rows) {
-                        insert(rows, get_tflags(content));
+                        insert(rows, table_name, get_tflags(content));
                         return;
                     }
                 }
@@ -245,11 +247,14 @@ void eDBM::configure(
 */
 void eDBM::insert(
     eContainer *rows,
+    eVariable *table_name,
     os_int tflags)
 {
     eTable *table;
-    table = eMatrix::cast(parent());
-    table->insert(rows, tflags);
+    table = get_table(table_name);
+    if (table) {
+        table->insert(rows, tflags);
+    }
 }
 
 
@@ -302,7 +307,7 @@ void eDBM::remove(
 /**
 ****************************************************************************************************
 
-  @brief Solve column wildcards, requested_columns -> resolved_columns.
+  @brief Solve column wildcards, requested_columns -> resolved_configuration.
 
   This generates table configuration tree as "resolved congufuration" which includes
   expilicetly the table columns matching to the requested configuration.
@@ -317,20 +322,23 @@ void eDBM::remove(
 */
 void eDBM::solve_table_configuration(
     eContainer *resolved_configuration,
-    eContainer *requested_columns)
+    eContainer *requested_columns,
+    eVariable *table_name)
 {
     eTable *table;
-    eContainer *sconfiguration, *scolumns, *dcolumns, *sitem;
+    eContainer *sconfiguration, *scolumns, *dcolumns;
+    eObject *sitem;
     eVariable *reqcol, *scol, *dcol, *name;
     os_char *namestr;
 
-    table = eMatrix::cast(parent());
-    resolved_configuration->clear();
+    table = get_table(table_name);
+    if (table == OS_NULL) return;
 
+    resolved_configuration->clear();
     sconfiguration = table->configuration();
     scolumns = sconfiguration->firstc(EOID_TABLE_COLUMNS);
 
-    for (sitem = sconfiguration->firstc(); sitem; sitem = sitem->nextc())
+    for (sitem = sconfiguration->first(); sitem; sitem = sitem->next())
     {
         if (sitem != scolumns && sitem->oid() != EOID_TABLE_CONTENT) {
             sitem->clone(resolved_configuration);
@@ -371,4 +379,25 @@ void eDBM::solve_table_configuration(
             }
         }
     }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get pointer to table object derived from eTable.
+
+  @param   table_name eVariable holding table name. Can be OS_NULL if not needed (eMatrix)
+  @return  pointer to object derived from eTable or OS_NULL if none mches to table name.
+
+****************************************************************************************************
+*/
+eTable *eDBM::get_table(
+    eVariable *table_name)
+{
+    eTable *table;
+    table = eMatrix::cast(parent());
+
+    osal_debug_assert(table != OS_NULL);
+    return table;
 }
