@@ -113,7 +113,7 @@ void eDBM::onmessage(
     eObject *content;
     eVariable *table_name;
     eContainer *configuration, *rows, *row;
-    eVariable *whereclause;
+    eVariable *where_clause;
 
     /* If at final destination for the message.
      */
@@ -139,7 +139,7 @@ void eDBM::onmessage(
                     table_name = firstv(EOID_TABLE_NAME);
                     rows = content->firstc(EOID_TABLE_CONTENT);
                     if (rows) {
-                        insert(rows, table_name, get_tflags(content));
+                        insert(table_name, rows, get_tflags(content));
                         return;
                     }
                 }
@@ -149,10 +149,11 @@ void eDBM::onmessage(
             case ECMD_UPDATE_TABLE_ROWS:
                 content = envelope->content();
                 if (content) {
-                    whereclause = content->firstv(EOID_TABLE_WHERE);
+                    table_name = firstv(EOID_TABLE_NAME);
+                    where_clause = content->firstv(EOID_TABLE_WHERE);
                     row = content->firstc(EOID_TABLE_CONTENT);
-                    if (whereclause && row) {
-                        update(whereclause, row, get_tflags(content));
+                    if (where_clause && row) {
+                        update(table_name, where_clause, row, get_tflags(content));
                         return;
                     }
                 }
@@ -163,9 +164,10 @@ void eDBM::onmessage(
             case ECMD_REMOVE_ROWS_FROM_TABLE:
                 content = envelope->content();
                 if (content) {
-                    whereclause = content->firstv(EOID_TABLE_WHERE);
-                    if (whereclause) {
-                        remove(whereclause, get_tflags(content));
+                    table_name = firstv(EOID_TABLE_NAME);
+                    where_clause = content->firstv(EOID_TABLE_WHERE);
+                    if (where_clause) {
+                        remove(table_name, where_clause, get_tflags(content));
                         return;
                     }
                 }
@@ -238,6 +240,7 @@ void eDBM::configure(
 
   The eDBM::insert() function inserts one or more new rows to table.
 
+  @param   table_name Name of the table, can be OS_NULL for matrix.
   @param   rows For single for: eContainer holding a eVariables for each element to set.
            Multiple rows: eContainer holding a eContainers for each row to insert. Each row
            container contains eVariable for each element to set.
@@ -246,8 +249,8 @@ void eDBM::configure(
 ****************************************************************************************************
 */
 void eDBM::insert(
-    eContainer *rows,
     eVariable *table_name,
+    eContainer *rows,
     os_int tflags)
 {
     eTable *table;
@@ -263,7 +266,8 @@ void eDBM::insert(
 
   @brief Update a row or rows of a table.
 
-  @param   whereclause String containing range and/or actual where clause. This selects which
+  @param   table_name Name of the table, can be OS_NULL for matrix.
+  @param   where_clause String containing range and/or actual where clause. This selects which
            rows are updated.
   @param   row A row of updated data. eContainer holding an eVariable for each element (column)
            to update. eVariable name is column name.
@@ -273,13 +277,16 @@ void eDBM::insert(
 ****************************************************************************************************
 */
 void eDBM::update(
-    eVariable *whereclause,
+    eVariable *table_name,
+    eVariable *where_clause,
     eContainer *row,
     os_int tflags)
 {
     eTable *table;
-    table = eMatrix::cast(parent());
-    table->update(whereclause->gets(), row, tflags);
+    table = get_table(table_name);
+    if (table) {
+        table->update(where_clause->gets(), row, tflags);
+    }
 }
 
 
@@ -288,19 +295,23 @@ void eDBM::update(
 
   @brief Remove rows from the table.
 
-  @param   whereclause String containing range and/or actual where clause. This selects which
+  @param   table_name Name of the table, can be OS_NULL for matrix.
+  @param   where_clause String containing range and/or actual where clause. This selects which
            rows are to be removed.
   @param   tflags Reserved for future, set 0 for now.
 
 ****************************************************************************************************
 */
 void eDBM::remove(
-    eVariable *whereclause,
+    eVariable *table_name,
+    eVariable *where_clause,
     os_int tflags)
 {
     eTable *table;
-    table = eMatrix::cast(parent());
-    table->remove(whereclause->gets(), tflags);
+    table = get_table(table_name);
+    if (table) {
+        table->remove(where_clause->gets(), tflags);
+    }
 }
 
 

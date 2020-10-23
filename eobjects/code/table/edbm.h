@@ -112,21 +112,23 @@ protected:
     /* Insert rows into table.
      */
     void insert(
-        eContainer *rows,
         eVariable *table_name,
+        eContainer *rows,
         os_int tflags);
 
     /* Update a row or rows of a table.
      */
     void update(
-        eVariable *whereclause,
+        eVariable *table_name,
+        eVariable *where_clause,
         eContainer *row,
         os_int tflags);
 
     /* Remove rows from the table.
      */
     void remove(
-        eVariable *whereclause,
+        eVariable *table_name,
+        eVariable *where_clause,
         os_int tflags);
 
     /* Solve column wildcards, requested_columns -> resolved_columns.
@@ -139,7 +141,7 @@ protected:
     /* Select data from table.
      */
 /*    eStatus select(
-        const os_char *whereclause,
+        const os_char *where_clause,
         eContainer *columns,
         eSelectParameters *prm,
         os_int tflags); */
