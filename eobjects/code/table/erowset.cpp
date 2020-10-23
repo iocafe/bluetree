@@ -563,8 +563,8 @@ void eRowSet::select(
     {
         /* Create binding
          */
-        binding = new eRowSetBinding(bindings, EOID_TABLE_CLIENT_BINDING, (bflags & EBIND_TEMPORARY)
-             ? EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE : EOBJ_DEFAULT);
+        binding = new eRowSetBinding(bindings, EOID_TABLE_CLIENT_BINDING,
+             EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
 
         /* Bind the row set to table. This function will send message to remote object to bind.
          */
