@@ -91,13 +91,16 @@ void eRowSet::setupclass()
 
     addpropertys(cls, ERSETP_DBM_PATH, ersetp_dbm_path, "DBM path", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertys(cls, ERSETP_TABLE_NAME, ersetp_table_name, "table", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertys(cls, ERSETP_WHERE_CLAUSE, ersetp_where_clause, "where", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addproperty (cls, ERSETP_REQUESTED_COLUMNS, ersetp_requested_columns, "requested", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, ERSETP_WHERE_CLAUSE, ersetp_where_clause, "where",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, ERSETP_REQUESTED_COLUMNS, ersetp_requested_columns, "requested",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertyl(cls, ERSETP_LIMIT, ersetp_limit, "limit", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertyl(cls, ERSETP_PAGE_MODE, ersetp_page_mode, "page", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertyl(cls, ERSETP_ROW_MODE, ersetp_row_mode, "row", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty (cls, ERSETP_TZONE, ersetp_tzone, "tzone", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertyb(cls, ERSETP_HAS_CALLBACK, ersetp_has_callback, "callback", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyb(cls, ERSETP_HAS_CALLBACK, ersetp_has_callback, "callback",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
 
     addproperty (cls, ERSETP_CONFIGURATION, ersetp_configuration, "configuration",
         EPRO_PERSISTENT|EPRO_SIMPLE);

@@ -196,6 +196,7 @@ void eMatrix::onmessage(
             case ECMD_REMOVE_ROWS_FROM_TABLE:
             case ECMD_UPDATE_TABLE_ROWS:
             case ECMD_BIND_RS:
+            case ECMD_RSET_SELECT:
                 dbm_message(envelope);
                 return;
 

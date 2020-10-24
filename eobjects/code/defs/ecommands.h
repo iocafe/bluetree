@@ -60,13 +60,15 @@
 #define ECMD_REBIND -25
 #define ECMD_FWRD -26
 #define ECMD_ACK -27
+#define ECMD_RSET_SELECT -30
+
 
 /* Tables.
  */
-#define ECMD_CONFIGURE_TABLE -30
-#define ECMD_INSERT_ROWS_TO_TABLE -31
-#define ECMD_REMOVE_ROWS_FROM_TABLE -32
-#define ECMD_UPDATE_TABLE_ROWS -33
+#define ECMD_CONFIGURE_TABLE -40
+#define ECMD_INSERT_ROWS_TO_TABLE -41
+#define ECMD_REMOVE_ROWS_FROM_TABLE -42
+#define ECMD_UPDATE_TABLE_ROWS -43
 
 /* Timer commands (timer hit and set timer period).
  */

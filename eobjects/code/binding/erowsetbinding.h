@@ -62,13 +62,6 @@ public:
      */
     virtual ~eRowSetBinding();
 
-    /* Clone object.
-     */
-/*     virtual eObject *clone(
-        eObject *parent,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0); */
-
     /* Casting eObject pointer to eRowSetBinding pointer.
      */
     inline static eRowSetBinding *cast(
@@ -152,7 +145,8 @@ protected:
     void bind2(
         const os_char *remotepath);
 
-    void srvselect();
+    void srvselect(
+        eEnvelope *envelope);
 
     /* Finish the client end of binding.
      */
@@ -177,31 +171,17 @@ protected:
     void ack(
         eEnvelope *envelope);
 
-    /* Store select parameters as eSet.
-     */
-    void prm_struct_to_set(
-        const os_char *where_clause,
-        eContainer *columns,
-        eSelectParameters *prm,
-        os_int bflags);
-
-     void prm_set_to_struct();
-
 
     /**
     ************************************************************************************************
       Member variables.
     ************************************************************************************************
     */
-    /* Select parameters as set.
-     */
-    eSet *m_pset;
-
-    /* Select parameters as structure, pointers to values within m_pset. Set by prm_set_to_struct().
+    /* Select parameters as structure, pointers to values within m_pset.
      */
     eSelectParameters m_pstruct;
 
-    /* Requested columns, pointer to eContainer within m_pset. Set by prm_set_to_struct().
+    /* Requested columns, pointer to eContainer within m_pset.
        This may contain wildcards.
      */
     eContainer *m_requested_columns;
@@ -212,7 +192,7 @@ protected:
 
     /* Where clause, pointer to within m_pset. Set by prm_set_to_struct().
      */
-    const os_char *m_where_clause;
+    eVariable *m_where_clause;
 };
 
 #endif

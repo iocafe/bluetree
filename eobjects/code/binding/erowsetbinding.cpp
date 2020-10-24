@@ -34,7 +34,7 @@ eRowSetBinding::eRowSetBinding(
 {
     /* Clear member variables.
      */
-    m_pset = OS_NULL;
+    // m_pset = OS_NULL;
     os_memclear(&m_pstruct, sizeof(eSelectParameters));
     m_where_clause = OS_NULL;
     m_requested_columns = OS_NULL;
@@ -126,13 +126,17 @@ void eRowSetBinding::onmessage(
             case ECMD_UNBIND:
             case ECMD_SRV_UNBIND:
             case ECMD_NO_TARGET:
-                if (m_bflags & EBIND_CLIENT)
-                {
-                    disconnect(OS_TRUE);
+                if (m_bflags & EBIND_CLIENT) {
+                    disconnect();
                 }
-                else
-                {
+                else {
                     delete this;
+                }
+                return;
+
+            case ECMD_RSET_SELECT:
+                if (m_state == E_BINDING_OK) {
+                    srvselect(envelope);
                 }
                 return;
 
@@ -204,7 +208,7 @@ eStatus eRowSetBinding::simpleproperty(
             break;
 
         case ERSETP_WHERE_CLAUSE:
-            x->sets(m_where_clause);
+            x->setv(m_where_clause);
             break;
 
         case ERSETP_REQUESTED_COLUMNS:
@@ -241,7 +245,6 @@ clear_x:
 }
 
 
-
 /**
 ****************************************************************************************************
 
@@ -269,68 +272,36 @@ void eRowSetBinding::bind(
     eSelectParameters *prm,
     os_int bflags)
 {
-    /* Save bind parameters and flags.
+    /* Free memory allocated, if any
+     */
+    delete m_pstruct.table_name;
+    delete m_pstruct.tzone;
+
+    /* Save bind parameters.
+     */
+    os_memcpy(&m_pstruct, prm, sizeof(eSelectParameters));
+    if (m_pstruct.table_name) {
+        m_pstruct.table_name = eVariable::cast(m_pstruct.table_name->clone(this));
+    }
+    if (m_pstruct.tzone) {
+        m_pstruct.tzone = m_pstruct.tzone->clone(this);
+    }
+
+    /* Store columns
+     */
+    delete m_requested_columns;
+    m_requested_columns = OS_NULL;
+    if (columns) {
+        m_requested_columns = eContainer::cast(columns->clone(this));
+    }
+
+    /* Save flags and mark as client end.
      */
     m_bflags = bflags | EBIND_CLIENT;
-    prm_struct_to_set(OS_NULL, columns, prm, bflags);
-    prm_set_to_struct();
 
-    bind2(dbm_path->gets());
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Select data from table (client).
-
-  The select function request selected data from a table and initiatializes a selection.
-  The row set (grandparent of this binding) will receive updates for.
-
-  @param  where_clause Which rows to select.
-  @param  remotepath Path to remote object to bind to.
-  @param  prm Parameter structure, limit, page_mode, row_mode;
-.
-  @return None.
-
-****************************************************************************************************
-*/
-void eRowSetBinding::select(
-    const os_char *where_clause,
-    os_int limit,
-    os_int page_mode,
-    os_int row_mode,
-    eObject *tzone)
-{
-    /* Save bind parameters and flags.
+    /* Initiate binding.
      */
-    if (m_pset) {
-        m_pset->clear();
-    }
-    else {
-        m_pset = new eSet(this);
-    }
-
-    if (m_pstruct.limit != limit)
-    {
-        m_pstruct.limit = limit;
-        m_pset->setl(ERSET_BINDING_LIMIT, m_pstruct.limit);
-    }
-
-    if (page_mode >= 0 && page_mode != m_pstruct.page_mode) {
-        m_pstruct.page_mode = page_mode;
-        m_pset->setl(ERSET_BINDING_PAGE_MODE, m_pstruct.page_mode);
-    }
-    if (row_mode >= 0 && row_mode != m_pstruct.row_mode) {
-        m_pstruct.row_mode = row_mode;
-        m_pset->setl(ERSET_BINDING_ROW_MODE, m_pstruct.row_mode);
-    }
-    if (tzone) {
-        m_pstruct.tzone = tzone;
-        m_pset->seto(ERSET_BINDING_TZONE, m_pstruct.tzone, ESET_STORE_AS_VARIABLE);
-    }
-
-    m_pset->sets(ERSET_BINDING_WHERE_CLAUSE, where_clause, ESET_STORE_AS_VARIABLE);
+    bind2(dbm_path->gets());
 }
 
 
@@ -339,9 +310,22 @@ void eRowSetBinding::select(
 void eRowSetBinding::bind2(
     const os_char *remotepath)
 {
+    eSet *parameters;
+
+    /* Generate eSet to hold select parameters.
+     */
+    parameters = new eSet(this);
+    parameters->setl(ERSET_BINDING_FLAGS, (m_bflags & EBIND_SER_MASK) | EBIND_BIND_ROWSET);
+    if (m_pstruct.table_name) {
+        parameters->setv(ERSET_BINDING_TABLE_NAME, m_pstruct.table_name);
+    }
+    if (m_requested_columns) {
+        parameters->seto(ERSET_BINDING_REQUESTED_COLUMNS, m_requested_columns, ESET_STORE_AS_VARIABLE);
+    }
+
     /* Call base class to do binding.
      */
-    eBinding::bind_base(remotepath, m_pset, OS_FALSE);
+    eBinding::bind_base(remotepath, parameters, OS_TRUE);
 }
 
 
@@ -368,15 +352,29 @@ void eRowSetBinding::srvbind(
     parameters = eSet::cast(envelope->content());
     if (parameters == OS_NULL)
     {
-#if OSAL_DEBUG
-        osal_debug_error("srvbind() failed: no content");
-#endif
+        osal_debug_error("srvbind() failed: no parameters");
         goto notarget;
     }
 
-    m_pset = OS_NULL;
-    m_pset = eSet::cast(parameters->clone(this));
-    prm_set_to_struct();
+    /* Free memory allocated, if any
+     */
+    delete m_pstruct.table_name;
+    delete m_pstruct.tzone;
+
+    /* Store parameters.
+     */
+    os_memclear(&m_pstruct, sizeof(eSelectParameters));
+    m_bflags = parameters->geti(ERSET_BINDING_FLAGS);
+    m_pstruct.table_name = new eVariable(this);
+    parameters->getv(ERSET_BINDING_TABLE_NAME, m_pstruct.table_name);
+
+    /* Store columns
+     */
+    delete m_requested_columns;
+    m_requested_columns = eContainer::cast(parameters->geto_ptr(ERSET_BINDING_REQUESTED_COLUMNS));
+    if (m_requested_columns) {
+        m_requested_columns = eContainer::cast(m_requested_columns->clone(this, EOID_ITEM));
+    }
 
     /* Set EBIND_TEMPORARY, and EBIND_INTERTHREAD if envelope has been moved
        from thread to another.
@@ -402,17 +400,10 @@ void eRowSetBinding::srvbind(
     }
     dbm->solve_table_configuration(m_table_configuration, m_requested_columns, m_pstruct.table_name);
 
-    if (1) { /* If we need send table congiguration */
-        m_table_configuration->clone(reply);
-    }
+    /* Send table congiguration */
+    m_table_configuration->clone(reply);
 
-    // m_table_configuration->print_json();
-
-    /* If we need data, select it.
-     */
-    if (1) {
-        srvselect();
-    }
+m_table_configuration->print_json();
 
     /* Complete the server end of binding and return.
      */
@@ -436,6 +427,77 @@ notarget:
 /**
 ****************************************************************************************************
 
+  @brief Select data from table (client).
+
+  The select function request selected data from a table and initiatializes a selection.
+  The row set (grandparent of this binding) will receive updates for.
+
+  @param  where_clause Which rows to select.
+  @param  remotepath Path to remote object to bind to.
+  @param  prm Parameter structure, limit, page_mode, row_mode;
+.
+  @return None.
+
+****************************************************************************************************
+*/
+void eRowSetBinding::select(
+    const os_char *where_clause,
+    os_int limit,
+    os_int page_mode,
+    os_int row_mode,
+    eObject *tzone)
+{
+    eSet *parameters;
+
+    /* Save select parameters.
+     */
+    if (m_pstruct.limit != limit)
+    {
+        m_pstruct.limit = limit;
+    }
+    if (page_mode >= 0 && page_mode != m_pstruct.page_mode) {
+        m_pstruct.page_mode = page_mode;
+    }
+    if (row_mode >= 0 && row_mode != m_pstruct.row_mode) {
+        m_pstruct.row_mode = row_mode;
+    }
+    if (tzone) {
+        delete m_pstruct.tzone;
+        m_pstruct.tzone = tzone->clone(this);
+    }
+
+    /* Generate eSet to hold select parameters.
+     */
+    parameters = new eSet(this);
+    if (m_pstruct.limit) {
+        parameters->setl(ERSET_BINDING_LIMIT, m_pstruct.limit);
+    }
+    if (m_pstruct.page_mode) {
+        parameters->setl(ERSET_BINDING_PAGE_MODE, m_pstruct.page_mode);
+    }
+    if (m_pstruct.row_mode) {
+        parameters->setl(ERSET_BINDING_ROW_MODE, m_pstruct.row_mode);
+    }
+    if (m_pstruct.tzone) {
+        parameters->seto(ERSET_BINDING_TZONE, m_pstruct.tzone);
+    }
+    if (where_clause) {
+        parameters->sets(ERSET_BINDING_WHERE_CLAUSE, where_clause);
+    }
+    if (m_pstruct.table_name) {
+        parameters->setv(ERSET_BINDING_TABLE_NAME, m_pstruct.table_name);
+    }
+
+    /* Send select command with parameter (memory allocated for parameters released by this call)
+     */
+    message(ECMD_RSET_SELECT, m_bindpath ? m_bindpath : m_objpath,
+        OS_NULL, parameters, EMSG_DEL_CONTENT);
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Select data.
 
   The eRowSetBinding::srvselect() function...
@@ -443,19 +505,41 @@ notarget:
 
 ****************************************************************************************************
 */
-void eRowSetBinding::srvselect()
+void eRowSetBinding::srvselect(
+    eEnvelope *envelope)
 {
     eDBM *dbm;
+    eVariable v;
+    eSet *parameters;
     // eStatus s;
+
+    parameters = eSet::cast(envelope->content());
+    if (parameters == OS_NULL)
+    {
+        osal_debug_error("srvselect() failed: no parameters");
+        goto getout;
+    }
 
     dbm = eDBM::cast(grandparent());
     if (dbm == OS_NULL) goto getout;
     if (dbm->classid() != ECLASSID_DBM) goto getout;
 
+    m_pstruct.limit = parameters->geti(ERSET_BINDING_LIMIT);
+    m_pstruct.page_mode = parameters->geti(ERSET_BINDING_PAGE_MODE);
+    m_pstruct.row_mode = parameters->geti(ERSET_BINDING_ROW_MODE);
+    m_pstruct.tzone = parameters->geto_ptr(ERSET_BINDING_TZONE);
+    if (m_pstruct.tzone) {
+        m_pstruct.tzone = m_pstruct.tzone->clone(this, EOID_ITEM);
+    }
+
+    delete m_where_clause;
+    m_where_clause = new eVariable(this);
+    parameters->getv(ERSET_BINDING_WHERE_CLAUSE, m_where_clause);
+
     /* Select rows from table.
      */
     /*s = */
-    dbm->select(m_where_clause,
+    dbm->select(m_where_clause->gets(),
         m_requested_columns, // ** ??  eContainer *columns,
         &m_pstruct,
         0 /* tflags = 0 ???????????????? */);
@@ -656,76 +740,3 @@ void eRowSetBinding::ack(
 {
     ack_base(envelope);
 }
-
-
-/* Store select parameters as eSet.
- */
-void eRowSetBinding::prm_struct_to_set(
-    const os_char *where_clause,
-    eContainer *columns,
-    eSelectParameters *prm,
-    os_int bflags)
-{
-    if (m_pset) {
-        m_pset->clear();
-    }
-    else {
-        m_pset = new eSet(this);
-    }
-
-    bflags &= EBIND_SER_MASK;
-    m_pset->setl(ERSET_BINDING_FLAGS, bflags|EBIND_BIND_ROWSET);
-
-    if (where_clause) {
-        m_pset->sets(ERSET_BINDING_WHERE_CLAUSE, where_clause, ESET_STORE_AS_VARIABLE);
-    }
-
-    if (columns) {
-        m_pset->seto(ERSET_BINDING_REQUESTED_COLUMNS, columns, ESET_STORE_AS_VARIABLE);
-    }
-
-    if (prm->table_name) {
-        m_pset->setv(ERSET_BINDING_TABLE_NAME, prm->table_name, ESET_STORE_AS_VARIABLE);
-    }
-
-    if (prm->limit) {
-        m_pset->setl(ERSET_BINDING_LIMIT, prm->limit);
-    }
-
-    if (prm->page_mode) {
-        m_pset->setl(ERSET_BINDING_PAGE_MODE, prm->page_mode);
-    }
-
-    if (prm->row_mode) {
-        m_pset->setl(ERSET_BINDING_ROW_MODE, prm->row_mode);
-    }
-
-    if (prm->tzone) {
-        m_pset->seto(ERSET_BINDING_TZONE, prm->tzone, ESET_STORE_AS_VARIABLE);
-    }
-}
-
-
-void eRowSetBinding::prm_set_to_struct()
-{
-    eObject *o;
-    os_int bflags;
-
-    bflags = m_pset->geti(ERSET_BINDING_FLAGS);
-    m_bflags = ((m_bflags & ~EBIND_SER_MASK) | bflags);
-
-    m_pstruct.limit = m_pset->geti(ERSET_BINDING_LIMIT);
-    m_pstruct.page_mode = m_pset->geti(ERSET_BINDING_PAGE_MODE);
-    m_pstruct.row_mode = m_pset->geti(ERSET_BINDING_ROW_MODE);
-    m_pstruct.tzone = m_pset->geto_ptr(ERSET_BINDING_TZONE);
-    m_pstruct.table_name = m_pset->getv_ptr(ERSET_BINDING_TABLE_NAME);
-
-    m_requested_columns = OS_NULL;
-    o = m_pset->geto_ptr(ERSET_BINDING_REQUESTED_COLUMNS);
-    if (o) if (o->classid() == ECLASSID_CONTAINER) {
-        m_requested_columns = (eContainer*)o;
-    }
-
-    m_where_clause = m_pset->gets_ptr(ERSET_BINDING_WHERE_CLAUSE);
-}
-

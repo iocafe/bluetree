@@ -121,6 +121,10 @@ void eDBM::onmessage(
     {
         switch (envelope->command())
         {
+            case ECMD_RSET_SELECT:
+                rset_select(envelope);
+                return;
+
             case ECMD_CONFIGURE_TABLE:
                 content = envelope->content();
                 if (content) {
@@ -181,6 +185,46 @@ void eDBM::onmessage(
     /* Call parent class'es onmessage.
      */
     eObject::onmessage(envelope);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Forward select sent early to binding.
+
+  When binding a row set, the first select is typically called at client before binding is
+  complete done bedone often before the binding reply has been received. Thus select
+  client can send ECMD_RSET_SELECT to DBM path instead of binding path. In that case,
+  this function forwards ECMD_RSET_SELECT to binding.
+
+  @param  envelope Message envelope, command ECMD_RSET_SELECT.
+  @return None.
+
+****************************************************************************************************
+*/
+void eDBM::rset_select(
+    eEnvelope *envelope)
+{
+    eContainer *bindings;
+    eBinding *binding;
+    os_char *source;
+
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL) return;
+    source = envelope->source();
+
+    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+         binding;
+         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+    {
+        if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
+        if (!os_strcmp(binding->bindpath(), source)) break;
+    }
+
+    if (binding) {
+        binding->onmessage(envelope);
+    }
 }
 
 

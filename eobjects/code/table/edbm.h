@@ -98,6 +98,11 @@ protected:
       Internal to DBM.
     ************************************************************************************************
     */
+    /* Forward select sent early to binding.
+     */
+    void rset_select(
+        eEnvelope *envelope);
+
     /* Get tflags from message content.
      */
     os_int get_tflags(

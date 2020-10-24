@@ -228,8 +228,7 @@ protected:
 
     /* Disconnect the binding and release allocated memory.
      */
-    void disconnect(
-        os_boolean keep_objpath = OS_FALSE);
+    void disconnect();
 
 
     /**

@@ -65,6 +65,7 @@ eBinding::~eBinding()
     /* Disconnect and clear all allocated memory
      */
     disconnect();
+    set_objpath(OS_NULL);
 }
 
 
@@ -250,15 +251,14 @@ void eBinding::bind_base(
 
     /* Clear state variables only?
      */
-    disconnect(OS_TRUE);
+    disconnect();
 
     /* Save objpath. If objpath is NULL, this is skipped for reactivating binding.
      */
-    if (objpath)
-    {
+    if (objpath) {
         set_objpath(objpath);
     }
-
+    set_bindpath(OS_NULL);
 
     /* Send ECMD_BIND or ECMD_BIND_RS (row set) message to object to bind to.
      */
@@ -461,19 +461,15 @@ void eBinding::set_bindpath(
   @brief Disconnect the binding and release allocated memory.
 
   The eBinding::disconnects() disconnects and clears allocated memory.
-
-  @param  keep_objpath If set, parth to remote object is not changed. This preserved path may be
-          is used for reactivating bindings later.
   @return None.
 
 ****************************************************************************************************
 */
-void eBinding::disconnect(
-    os_boolean keep_objpath)
+void eBinding::disconnect()
 {
     /* Send disconnect message
      */
-    if (!keep_objpath) switch (m_state)
+    switch (m_state)
     {
         case E_BINDING_UNUSED:
             break;
@@ -489,13 +485,8 @@ void eBinding::disconnect(
             break;
     }
 
-    if (m_objpath && !keep_objpath)
-    {
-        set_objpath(OS_NULL);
-    }
 
-    if (m_bindpath)
-    {
+    if (m_bindpath) {
         set_bindpath(OS_NULL);
     }
 
