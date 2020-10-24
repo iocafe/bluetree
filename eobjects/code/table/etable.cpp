@@ -15,11 +15,6 @@
 */
 #include "eobjects.h"
 
-/* Table property names.
- */
-const os_char
-    emtxp_configuration[] = "configuration";
-
 
 /**
 ****************************************************************************************************

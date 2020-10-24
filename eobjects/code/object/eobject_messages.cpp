@@ -558,6 +558,7 @@ void eObject::message_oix(
     }
     else
     {
+        osal_debug_error("Message to object which is not in eThread tree");
         delete envelope;
     }
 
@@ -636,7 +637,7 @@ void eObject::onmessage(
                 return;
             }
             osal_debug_error("onmessage(): Message not processed");
-            goto getout;
+            goto getout2;
 
         /* Messages to internal names
          */
@@ -696,17 +697,6 @@ void eObject::onmessage(
     return;
 
 getout:
-    /* Send "no target" reply message to indicate that recipient was not found.
-     */
-    command = envelope->command();
-    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0 &&
-        command != ECMD_NO_TARGET &&
-        command != ECMD_ERROR)
-    {
-        message (ECMD_NO_TARGET, envelope->source(),
-            envelope->target(), OS_NULL, EMSG_KEEP_CONTENT, envelope->context());
-    }
-
 #if OSAL_DEBUG
     /* Show error message.
      */
@@ -715,6 +705,19 @@ getout:
         osal_debug_error("onmessage() failed: target not found");
     }
 #endif
+
+    /* Send "no target" reply message to indicate that recipient was not found.
+     */
+getout2:
+    command = envelope->command();
+    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0 &&
+        command != ECMD_NO_TARGET &&
+        command != ECMD_ERROR)
+    {
+        message (ECMD_NO_TARGET, envelope->source(),
+            envelope->target(), OS_NULL, EMSG_KEEP_CONTEXT, envelope->context());
+    }
+
 }
 
 
@@ -1017,7 +1020,7 @@ getout:
     if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
     {
         message (ECMD_NO_TARGET, envelope->source(),
-            envelope->target(), OS_NULL, EMSG_DEL_CONTEXT, envelope->context());
+            envelope->target(), OS_NULL, EMSG_KEEP_CONTEXT, envelope->context());
     }
 }
 

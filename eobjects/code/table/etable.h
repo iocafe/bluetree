@@ -27,15 +27,6 @@ class eMatrix;
 ****************************************************************************************************
 */
 
-/* Table property numbers.
- */
-#define ETABLEP_CONFIGURATION 30
-
-/* Table property names.
- */
-extern const os_char
-    etablep_configuration[];
-
 /** Select callback function.
  */
 typedef eStatus etable_select_callback(

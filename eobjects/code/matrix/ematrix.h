@@ -32,16 +32,15 @@ class eBuffer;
 #define EMTXP_DATATYPE 20
 #define EMTXP_NROWS 21
 #define EMTXP_NCOLUMNS 22
-#define EMTXP_CONFIGURATION ETABLEP_CONFIGURATION
+#define EMTXP_CONFIGURATION 30
 
 /* Matrix property names.
  */
 extern const os_char
     emtxp_datatype[],
     emtxp_nrows[],
-    emtxp_ncolumns[];
-
-#define emtxp_configuration etablep_configuration
+    emtxp_ncolumns[],
+    emtxp_configuration[];
 
 /* Column number used as flags when matrix is table.
  */

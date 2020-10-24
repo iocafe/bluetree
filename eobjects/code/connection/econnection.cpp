@@ -850,6 +850,6 @@ void eConnection::notarget(
     if ((envelope->flags() & EMSG_NO_REPLIES) == 0)
     {
         message(ECMD_NO_TARGET, envelope->source(), OS_NULL,
-            OS_NULL, EMSG_NO_REPLIES, envelope->context());
+            OS_NULL, EMSG_DEFAULT, envelope->context());
     }
 }

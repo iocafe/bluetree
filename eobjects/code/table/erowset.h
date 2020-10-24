@@ -42,9 +42,7 @@ class eRowSet;
 #define ERSETP_ROW_MODE 26
 #define ERSETP_TZONE 27
 #define ERSETP_HAS_CALLBACK 28
-
-/* 30 */
-#define ERSETP_CONFIGURATION ETABLEP_CONFIGURATION
+#define ERSETP_CONFIGURATION 30
 
 
 /* Matrix property names.
@@ -60,9 +58,8 @@ extern const os_char
     ersetp_page_mode[],
     ersetp_row_mode[],
     ersetp_tzone[],
-    ersetp_has_callback[];
-
-#define ersetp_configuration etablep_configuration
+    ersetp_has_callback[],
+    ersetp_configuration[];
 
 
 /* Enumeration of row set callback reasons.

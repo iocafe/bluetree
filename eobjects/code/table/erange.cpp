@@ -41,7 +41,7 @@ os_memsz e_parse_index_range(
     os_memsz count;
 
     if (whereclause == OS_NULL) {
-        osal_debug_error("NULL where clause");
+        *minix = *maxix = 0;
         return 0;
     }
 

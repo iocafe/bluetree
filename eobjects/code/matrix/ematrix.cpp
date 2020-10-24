@@ -21,7 +21,8 @@
 const os_char
     emtxp_datatype[] = "type",
     emtxp_nrows[] = "nrows",
-    emtxp_ncolumns[] = "ncolumns";
+    emtxp_ncolumns[] = "ncolumns",
+    emtxp_configuration[] = "configuration";
 
 /* Approximate size for one eBuffer, adjusted to memory allocation block.
  */

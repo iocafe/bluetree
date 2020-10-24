@@ -29,8 +29,8 @@ const os_char
     ersetp_page_mode[] = "pagemode",
     ersetp_row_mode[] = "rowmode",
     ersetp_tzone[] = "tzone",
-    ersetp_has_callback[] = "callback";
-
+    ersetp_has_callback[] = "callback",
+    ersetp_configuration[] = "configuration";
 
 /**
 ****************************************************************************************************

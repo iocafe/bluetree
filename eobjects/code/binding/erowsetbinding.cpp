@@ -92,6 +92,7 @@ void eRowSetBinding::setupclass()
     addproperty (cls, ERSETP_TZONE, ersetp_tzone, "tzone", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertys(cls, EBINDP_BFLAGS, ebindp_bflags, "b_flags", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertys(cls, EBINDP_STATE, ebindp_state, "state", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, ERSETP_CONFIGURATION, ersetp_configuration, "configuration", EPRO_PERSISTENT|EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();
 }
@@ -629,11 +630,11 @@ void eRowSetBinding::cbindok(
     eObject *obj,
     eEnvelope *envelope)
 {
-    eSet *parameters;
+    eContainer *reply;
     eVariable v;
 
-    parameters = eSet::cast(envelope->content());
-    if (parameters == OS_NULL)
+    reply = eContainer::cast(envelope->content());
+    if (reply == OS_NULL)
     {
 #if OSAL_DEBUG
         osal_debug_error("cbindok() failed: no content");
