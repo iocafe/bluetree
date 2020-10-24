@@ -39,6 +39,7 @@ eRowSetBinding::eRowSetBinding(
     m_where_clause = OS_NULL;
     m_requested_columns = OS_NULL;
     m_table_configuration = OS_NULL;
+    m_sync_transfer = OS_NULL;
 
     /* Row set bindings cannot be cloned or serialized.
      */
@@ -536,6 +537,16 @@ void eRowSetBinding::srvselect(
     m_where_clause = new eVariable(this);
     parameters->getv(ERSET_BINDING_WHERE_CLAUSE, m_where_clause);
 
+    /* Setup synchronized transfer.
+     */
+    m_sync_transfer = new eSynchronized(this);
+    m_sync_transfer->initialize_synch_transfer(m_bindpath);
+
+    /* Set callback function to process select results.
+     */
+    m_pstruct.callback = srvselect_callback;
+    m_pstruct.context = this;
+
     /* Select rows from table.
      */
     /*s = */
@@ -544,8 +555,60 @@ void eRowSetBinding::srvselect(
         &m_pstruct,
         0 /* tflags = 0 ???????????????? */);
 
+    /* Wait for rest of messages (to avoid notarget warnings on acknowledges), and cleanup.
+     */
+    m_sync_transfer->sync_wait(0, m_timeout_ms);
+    delete (m_sync_transfer);
+    m_sync_transfer = OS_NULL;
+
 getout:
     return;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Callback to process srvselect() results.
+
+  The eRowSetBinding::srvselect() function...
+
+  @return  The function returns ESTATUS_SUCCESS is all is fine. Other return values indicate
+           an error and transfer is interrupted.
+
+****************************************************************************************************
+*/
+eStatus eRowSetBinding::srvselect_callback(
+    eTable *t,
+    eMatrix *data,
+    eObject *context)
+{
+    eEnvelope *envelope;
+    eSynchronized *sync;
+    eStatus s;
+
+    eRowSetBinding *b;
+    b = (eRowSetBinding*)context;
+    sync = b->m_sync_transfer;
+
+    /* Wait until we have received acknolegement for all but three packages sent.
+     * If timeout or other error, interrupt the transfer.
+     */
+    s = sync->sync_wait(3, m_timeout_ms);
+    if (s != ESTATUS_SUCCESS) {
+        return s;
+    }
+
+    /* Generate envelope for this to send.
+     */
+    envelope = new eEnvelope(b);
+    envelope->setcontent(data, EMSG_DEL_CONTENT);
+
+    /* The envelope object given as argument is adopted/deleted by the synch_send function.
+     */
+    s = sync->synch_send(envelope);
+
+    return s;
 }
 
 

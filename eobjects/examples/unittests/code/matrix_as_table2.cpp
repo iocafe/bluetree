@@ -51,7 +51,7 @@ static void update_row(
 static void select_rows(
     eMatrix& mtx);
 
-static void select_callback(
+static eStatus select_callback(
     eTable *t,
     eMatrix *data,
     eObject *context);
@@ -196,7 +196,7 @@ static void select_rows(
     mtx.select(where.gets(), &columns, &prm);
 }
 
-static void select_callback(
+static eStatus select_callback(
     eTable *t,
     eMatrix *data,
     eObject *context)
@@ -213,5 +213,6 @@ static void select_callback(
             osal_debug_error_str("Element: ", tmp.gets());
         }
     }
+    return ESTATUS_SUCCESS;
 }
 

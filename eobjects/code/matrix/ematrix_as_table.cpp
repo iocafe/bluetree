@@ -350,7 +350,7 @@ eStatus eMatrix::select(
   @param   context Application specific context pointer to pass to callback function.
   @param   tflags Reserved for future, set 0 for now.
 
-  @return  OSAL_SUCCESS if ok.
+  @return  OSAL_SUCCESS if ok. Other return values indicate an error or interrupted data transfer.
 
 ****************************************************************************************************
 */
@@ -373,12 +373,18 @@ eStatus eMatrix::select_update_remove(
     os_long minix, maxix;
     os_int row_nr, i, col_nr, nvars, nro_selected_cols;
     os_memsz count;
-    eStatus s;
+    eStatus s, rval = ESTATUS_SUCCESS;
     os_boolean eval_error_reported = OS_FALSE;
 
     if (m_columns == OS_NULL) {
         osal_debug_error("eMatrix::select_update_remove: Not configured");
         return ESTATUS_FAILED;
+    }
+
+    /* Asterix '*' as where clause is all rows, same as empty where clause.
+     */
+    if (!os_strcmp(whereclause, "*")) {
+        whereclause = OS_NULL;
     }
 
     /* Get index range from beginning of where clause.
@@ -495,6 +501,7 @@ eStatus eMatrix::select_update_remove(
             if (s) {
                 if (s != ESTATUS_FALSE && !eval_error_reported)
                 {
+                    rval = s;
                     osal_debug_error_str("Where clause failed: ", whereclause);
                     eval_error_reported = OS_TRUE;
                 }
@@ -552,7 +559,8 @@ eStatus eMatrix::select_update_remove(
                 /* Callback.
                  */
                 if (prm) if (prm->callback) {
-                    prm->callback(this, m, prm->context);
+                    rval = prm->callback(this, m, prm->context);
+                    if (rval) goto getout;
                 }
 
                 /* Clean up in case callback did not adopt the matrix.
@@ -562,6 +570,7 @@ eStatus eMatrix::select_update_remove(
         }
     }
 
+getout:
     if (col_mtx_sz) {
         os_free(col_mtx, col_mtx_sz);
     }
@@ -570,7 +579,7 @@ eStatus eMatrix::select_update_remove(
     }
     delete ref;
     delete tmp;
-    return ESTATUS_SUCCESS;
+    return rval;
 }
 
 

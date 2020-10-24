@@ -242,6 +242,10 @@ eStatus eSynchronized::synch_send(
         return ESTATUS_FAILED;
     }
 
+    /* Set target path.
+     */
+    envelope->settarget(m_path);
+
     /* Start thread sync.
      */
     os_lock();
@@ -257,7 +261,12 @@ eStatus eSynchronized::synch_send(
         return ESTATUS_FAILED;
     }
 
-     /* Make sure that this has been initialize_synch_transfer() has been called.
+    if (connector->failed()) {
+        os_unlock();
+        return ESTATUS_FAILED;
+    }
+
+    /* Send message trough connector.
      */
     s = connector->send_message(envelope);
 
@@ -304,6 +313,11 @@ eEnvelope *eSynchronized::sync_receive(
     if (connector == OS_NULL)
     {
         osal_debug_error("sync_receive: connector object has been deleted?");
+        os_unlock();
+        return OS_NULL;
+    }
+
+    if (connector->failed()) {
         os_unlock();
         return OS_NULL;
     }
@@ -357,6 +371,11 @@ os_int eSynchronized::in_air_count()
     connector = eSyncConnector::cast(m_ref->get());
     if (connector == OS_NULL) {
         osal_debug_error("in_air_count: connector object has been deleted?");
+        os_unlock();
+        return -1;
+    }
+
+    if (connector->failed()) {
         os_unlock();
         return -1;
     }

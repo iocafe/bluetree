@@ -497,7 +497,7 @@ void eObject::message_oix(
     eHandle *handle;
     eThread *thread;
     e_oix oix;
-    os_int ucnt;
+    os_int ucnt, command;
     os_short count;
 
     /* Parse object index and use count from string.
@@ -569,7 +569,10 @@ void eObject::message_oix(
 getout:
     /* Send "no target" reply message to indicate that recipient was not found.
      */
-    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
+    command = envelope->command();
+    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0 &&
+        command != ECMD_NO_TARGET &&
+        command != ECMD_ERROR)
     {
         message (ECMD_NO_TARGET, envelope->source(),
             envelope->target(), OS_NULL, EMSG_DEL_CONTEXT, envelope->context());
@@ -625,14 +628,15 @@ void eObject::onmessage(
               case ECMD_UNBIND:
                 /* THIS IS TRICKY: WE NEED TO FIND BINDING BY SOURCE
                     PATH AND FORWARD THIS TO IT */
-                break;
+                osal_debug_error("onmessage(): Not implemented");
+                return;
 
               case ECMD_INFO_REQUEST:
                 send_browse_info(envelope);
                 return;
             }
             osal_debug_error("onmessage(): Message not processed");
-            break;
+            goto getout;
 
         /* Messages to internal names
          */
@@ -694,7 +698,10 @@ void eObject::onmessage(
 getout:
     /* Send "no target" reply message to indicate that recipient was not found.
      */
-    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
+    command = envelope->command();
+    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0 &&
+        command != ECMD_NO_TARGET &&
+        command != ECMD_ERROR)
     {
         message (ECMD_NO_TARGET, envelope->source(),
             envelope->target(), OS_NULL, EMSG_KEEP_CONTENT, envelope->context());

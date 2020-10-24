@@ -121,7 +121,7 @@ public:
         osal_console_write("ThreadUsingTheTable started\n");
         configure_columns();
         m_step = 0;
-        timer(3000);
+        timer(1000);
     }
 
     virtual void onmessage(
@@ -261,9 +261,35 @@ public:
         column = new eVariable(&columns);
         column->addname("*", ENAME_NO_MAP);
 
-        m_rowset->select("*", &columns);
+//        m_rowset->select("*", &columns);
         // m_rowset->print_json();
+        timer(3000);
     }
+
+    virtual void onmessage(
+        eEnvelope *envelope)
+    {
+        /* If at final destination for the message.
+         */
+        if (*envelope->target()=='\0' && envelope->command() == ECMD_TIMER)
+        {
+            osal_console_write("TIMER\n");
+
+eContainer columns;
+eVariable *column;
+column = new eVariable(&columns);
+column->addname("*", ENAME_NO_MAP);
+m_rowset->select("*", &columns);
+m_rowset->print_json();
+
+            return;
+        }
+
+        /* Default thread message processing.
+         */
+        eThread::onmessage(envelope);
+    }
+
 
     void callback(
         eRowSet *rset,

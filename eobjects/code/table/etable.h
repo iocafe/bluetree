@@ -38,7 +38,7 @@ extern const os_char
 
 /** Select callback function.
  */
-typedef void etable_select_callback(
+typedef eStatus etable_select_callback(
     eTable *t,
     eMatrix *data,
     eObject *context);

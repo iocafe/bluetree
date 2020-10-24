@@ -148,6 +148,13 @@ protected:
     void srvselect(
         eEnvelope *envelope);
 
+    /* Callback to process srvselect() results.
+     */
+    static eStatus srvselect_callback(
+        eTable *t,
+        eMatrix *data,
+        eObject *context);
+
     /* Finish the client end of binding.
      */
     void cbindok(
@@ -193,6 +200,13 @@ protected:
     /* Where clause, pointer to within m_pset. Set by prm_set_to_struct().
      */
     eVariable *m_where_clause;
+
+    /* Synchronized transfer of the results.
+     */
+    eSynchronized *m_sync_transfer;
+
+    static const os_long m_timeout_ms = 30000;
+
 };
 
 #endif
