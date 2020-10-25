@@ -19,7 +19,6 @@
 /* RowSet property names.
  */
 const os_char
-    ersetp_nrows[] = "nrows",
     ersetp_ncolumns[] = "ncolumns",
     ersetp_dbm_path[] = "dbmpath",
     ersetp_table_name[] = "table",
@@ -43,11 +42,10 @@ eRowSet::eRowSet(
     os_int flags)
     : eTable(parent, id, flags)
 {
-    /** Initial size is 0, 0
+    /** Clear member variable
      */
-    m_nrows = m_ncolumns = 0;
-
-    m_columns = OS_NULL;
+    m_ncolumns = 0;
+    m_configuration = OS_NULL;
     m_own_change = 0;
     m_dbm_path = OS_NULL;
     m_rebind = OS_FALSE;
@@ -86,7 +84,6 @@ void eRowSet::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eRowSet");
-    addpropertyl(cls, ERSETP_NROWS, ersetp_nrows, "nro rows", EPRO_SIMPLE);
     addpropertyl(cls, ERSETP_NCOLUMNS, ersetp_ncolumns, "nro columns", EPRO_SIMPLE);
 
     addpropertys(cls, ERSETP_DBM_PATH, ersetp_dbm_path, "DBM path", EPRO_PERSISTENT|EPRO_SIMPLE);
@@ -179,20 +176,11 @@ eStatus eRowSet::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-    eObject *configuration, *o;
+    eObject *o;
 
     switch (propertynr)
     {
-        case ERSETP_NROWS:
-            if (m_own_change == 0) {
-                m_nrows = x->getl();
-            }
-            break;
-
-        case ERSETP_NCOLUMNS:
-            if (m_own_change == 0) {
-                m_ncolumns = x->getl();
-            }
+        case ERSETP_NCOLUMNS: /* read only */
             break;
 
         case ERSETP_DBM_PATH:
@@ -232,15 +220,7 @@ eStatus eRowSet::onpropertychange(
             }
             break;
 
-        case ERSETP_CONFIGURATION:
-            if (m_own_change == 0) {
-                configuration = x->geto();
-                if (configuration) if (configuration->classid() == ECLASSID_CONTAINER) {
-                    m_own_change++;
-                    configure((eContainer*)configuration);
-                    m_own_change--;
-                }
-            }
+        case ERSETP_CONFIGURATION: /* read only */
             break;
 
         default:
@@ -270,16 +250,10 @@ eStatus eRowSet::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
-    eContainer *c;
     eRowSetBinding *binding;
 
     switch (propertynr)
     {
-        case ERSETP_NROWS:
-            if (m_nrows == 0) goto clear_x;
-            x->setl(m_nrows);
-            break;
-
         case ERSETP_NCOLUMNS:
             if (m_ncolumns == 0) goto clear_x;
             x->setl(m_ncolumns);
@@ -330,8 +304,7 @@ eStatus eRowSet::simpleproperty(
             break;
 
         case ERSETP_CONFIGURATION:
-            c = firstc(EOID_TABLE_CONFIGURATION);
-            x->seto(c);
+            x->seto(m_configuration);
             break;
 
         default:
@@ -577,7 +550,8 @@ void eRowSet::select(
     /* If where clause is given as argument, initial data is wanted. Get it.
      */
     if (where_clause) {
-        binding->select(where_clause, m_prm.limit, m_prm.page_mode, m_prm.row_mode, m_prm.tzone);
+        binding->select(where_clause, m_prm.limit,
+            m_prm.page_mode, m_prm.row_mode, m_prm.tzone);
     }
 
     //binding->print_json();
@@ -589,10 +563,32 @@ void eRowSet::select(
 void eRowSet::client_binding_complete(
     eContainer *cont)
 {
-    eContainer *table_configuration;
+    eContainer *configuration, *columns;
+    ersetCallbackInfo info;
+
+    delete m_configuration;
+    m_configuration = OS_NULL;
+    m_ncolumns = 0;
 
     if (cont) {
-        table_configuration = cont->firstc(EOID_TABLE_CONFIGURATION);
+        configuration = cont->firstc(EOID_TABLE_CONFIGURATION);
+        if (configuration) {
+            m_configuration = eContainer::cast(configuration->clone(this,
+                EOID_TABLE_CONFIGURATION, EOBJ_TEMPORARY_ATTACHMENT));
+
+            columns = m_configuration->firstc(EOID_TABLE_COLUMNS);
+            if (columns) {
+                m_ncolumns = columns->childcount();
+            }
+        }
+    }
+
+    /* Callback to inform application that binding is complete.
+     */
+    if (m_callback) {
+        os_memclear(&info, sizeof(info));
+        info.reason = ERSET_TABLE_BINDING_COMPLETE;
+        m_callback(this, &info, m_context);
     }
 }
 
@@ -604,7 +600,19 @@ void eRowSet::initial_data_complete(
     eContainer *sync_storage)
 {
     eObject *o, *next_o;
+    ersetCallbackInfo info;
 
+    /* Delete old data
+     */
+    for (o = first(); o; o = next_o) {
+        next_o = o->next();
+        if (o->classid() == ECLASSID_MATRIX) {
+            delete o;
+        }
+    }
+
+    /* Adopt new data.
+     */
     if (sync_storage) {
         for (o = sync_storage->first(); o; o = next_o) {
             next_o = o->next();
@@ -612,6 +620,14 @@ void eRowSet::initial_data_complete(
                 o->adopt(this, EOID_ITEM);
             }
         }
+    }
+
+    /* Callback to inform application about initial data.
+     */
+    if (m_callback) {
+        os_memclear(&info, sizeof(info));
+        info.reason = ERSET_INITIAL_DATA_RECEIVED;
+        m_callback(this, &info, m_context);
     }
 
 print_json();

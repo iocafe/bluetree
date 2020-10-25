@@ -73,8 +73,8 @@ eStatus eObject::json_write(
     eVariable list, *p, value;
     eName *name;
     eContainer *propertyset, *bindings;
-    eBinding *b;
-    os_boolean comma1 = OS_FALSE, comma2 = OS_FALSE, property_listed;
+    eBinding *b, *first_b;
+    os_boolean comma1 = OS_FALSE, comma2 = OS_FALSE, comma3, property_listed;
     os_boolean end_with_nl = OS_FALSE;
 
     if (indent < 0) {
@@ -202,9 +202,18 @@ eStatus eObject::json_write(
     bindings = firstc(EOID_BINDINGS);
     if (bindings)
     {
-        for (b = eBinding::cast(first()); b; b = eBinding::cast(b->next()))
-        {
-            b->json_write(stream, sflags, indent);
+        first_b = eBinding::cast(bindings->first());
+        if (first_b) {
+            comma3 = OS_FALSE;
+            if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma1)) goto failed;
+            if (json_puts(stream, "\"bindings\": [")) goto failed;
+
+            for (b = first_b; b; b = eBinding::cast(b->next()))
+            {
+                b->json_write(stream, sflags, indent + 1, &comma3);
+            }
+            if (json_indent(stream, indent)) goto failed;
+            if (json_puts(stream, "]")) goto failed;
         }
     }
 

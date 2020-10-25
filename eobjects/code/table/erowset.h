@@ -31,7 +31,6 @@ class eRowSet;
    Make sure that EBINDP_BFLAGS, EBINDP_STATE and ETABLEP_CONFIGURATION
    do not overlap with these numbers.
  */
-#define ERSETP_NROWS 18
 #define ERSETP_NCOLUMNS 19
 #define ERSETP_DBM_PATH 20
 #define ERSETP_TABLE_NAME 21
@@ -48,7 +47,6 @@ class eRowSet;
 /* Matrix property names.
  */
 extern const os_char
-    ersetp_nrows[],
     ersetp_ncolumns[],
     ersetp_dbm_path[],
     ersetp_table_name[],
@@ -66,7 +64,7 @@ extern const os_char
  */
 typedef enum ersetCallbackReason
 {
-    ERSET_TABLE_CONFIGURATION_RECEIVED,
+    ERSET_TABLE_BINDING_COMPLETE,
     ERSET_INITIAL_DATA_RECEIVED,
     ERSET_INSERT,
     ERSET_UPDATE,
@@ -283,11 +281,6 @@ public:
      */
     inline os_int ncolumns() {return m_ncolumns; }
 
-    /* Get rowset height.
-     */
-    inline os_int nrows() {return m_nrows; }
-
-
 protected:
     /**
     ************************************************************************************************
@@ -315,16 +308,15 @@ protected:
     */
     /** Number of rows.
      */
-    os_int m_nrows;
+    // os_int m_nrows;
 
     /** Number of columns.
      */
     os_int m_ncolumns;
 
-    /** RowSet columns configuration, column list, OS_NULL if not set.
-        Index column is always first column on list.
+    /** Table configuration (as selected).
      */
-    eContainer *m_columns;
+    eContainer *m_configuration;
 
     /** Own change, prevent recursion.
      */
