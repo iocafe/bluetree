@@ -364,12 +364,11 @@ eStatus eMatrix::select_update_remove(
     eWhere *w = OS_NULL;
     os_int *col_mtx = OS_NULL, *sel_mtx = OS_NULL;
     os_memsz col_mtx_sz = 0, sel_mtx_sz = 0;
-    eContainer *vars = OS_NULL;
+    eContainer *vars = OS_NULL, *mc;
     eVariable *v, *u, *tmp = OS_NULL;
     eName *name;
     os_char *namestr;
     eMatrix *m;
-    ePointer *ref = OS_NULL;
     os_long minix, maxix;
     os_int row_nr, i, col_nr, nvars, nro_selected_cols;
     os_memsz count;
@@ -438,7 +437,6 @@ eStatus eMatrix::select_update_remove(
      */
     nro_selected_cols = 0;
     if (op == EMTX_SELECT) {
-        ref = new ePointer(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
         tmp = new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
 
         if (cont != NULL) {
@@ -521,8 +519,8 @@ eStatus eMatrix::select_update_remove(
                 break;
 
             case EMTX_SELECT:
-                m = new eMatrix(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
-                ref->set(m);
+                mc = new eContainer(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+                m = new eMatrix(mc, EOID_ITEM);
 
                 /* Set values to selected row to return.
                  */
@@ -565,7 +563,7 @@ eStatus eMatrix::select_update_remove(
 
                 /* Clean up in case callback did not adopt the matrix.
                  */
-                delete ref->get();
+                delete mc;
                 break;
         }
     }
@@ -577,7 +575,6 @@ getout:
     if (sel_mtx_sz){
         os_free(sel_mtx, sel_mtx_sz);
     }
-    delete ref;
     delete tmp;
     return rval;
 }

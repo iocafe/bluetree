@@ -87,7 +87,7 @@ public:
             osal_console_write(envelope->source());
             osal_console_write("\n");
 
-            m_mtx->print_json();
+            // m_mtx->print_json();
             return;
         }
 
@@ -280,7 +280,7 @@ eVariable *column;
 column = new eVariable(&columns);
 column->addname("*", ENAME_NO_MAP);
 m_rowset->select("*", &columns);
-m_rowset->print_json();
+// m_rowset->print_json();
 
             return;
         }

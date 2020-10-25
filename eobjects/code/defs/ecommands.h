@@ -62,13 +62,13 @@
 #define ECMD_ACK -27
 #define ECMD_RSET_SELECT -30
 
-
 /* Tables.
  */
 #define ECMD_CONFIGURE_TABLE -40
 #define ECMD_INSERT_ROWS_TO_TABLE -41
 #define ECMD_REMOVE_ROWS_FROM_TABLE -42
 #define ECMD_UPDATE_TABLE_ROWS -43
+#define ECMD_TABLE_DATA_TRANSFER -44
 
 /* Timer commands (timer hit and set timer period).
  */

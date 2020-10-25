@@ -161,6 +161,9 @@ protected:
         eObject *obj,
         eEnvelope *envelope);
 
+    void table_data_received(
+        eEnvelope *envelope);
+
     /* Virtual function to forward property value trough binding.
      */
     virtual void forward(
@@ -184,27 +187,37 @@ protected:
       Member variables.
     ************************************************************************************************
     */
-    /* Select parameters as structure, pointers to values within m_pset.
+    /** Select parameters as structure, pointers to values within m_pset.
      */
     eSelectParameters m_pstruct;
 
-    /* Requested columns, pointer to eContainer within m_pset.
-       This may contain wildcards.
+    /** Requested columns, pointer to eContainer within m_pset.
+        This may contain wildcards.
      */
     eContainer *m_requested_columns;
 
-    /* Table structure, includes list of columns, without wildcards.
+    /** Table structure, includes list of columns, without wildcards.
      */
     eContainer *m_table_configuration;
 
-    /* Where clause, pointer to within m_pset. Set by prm_set_to_struct().
+    /** Where clause, pointer to within m_pset. Set by prm_set_to_struct().
      */
     eVariable *m_where_clause;
 
-    /* Synchronized transfer of the results.
+    /** Synchronized transfer of the results (server).
      */
     eSynchronized *m_sync_transfer;
 
+    /** Synchronized transfer, matrix number 0... (server)
+     */
+    os_int m_sync_transfer_mtx_nr;
+
+    /** Partly received synchronized transfer data, oid = matrix number 0... (client)
+     */
+    eContainer *m_sync_storage;
+
+    /** Synchronized transfer timeout.
+     */
     static const os_long m_timeout_ms = 30000;
 
 };

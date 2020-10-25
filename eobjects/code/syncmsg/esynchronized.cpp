@@ -215,7 +215,7 @@ void eSynchronized::finish_sync_transfer(
 /**
 ****************************************************************************************************
 
-  @brief Send a message usint synchronization.
+  @brief Send a message, synchronization.
 
   The eSynchronized::synch_send() function sends an envelope as message. The message envelope
   (or clone of it) will be recieved as onmessage call by remote object.
@@ -224,6 +224,7 @@ void eSynchronized::finish_sync_transfer(
 
   @param   envelope Message envelope to send. Contains command, target and source paths and
            message content, etc. Envelope pointer will not be valid after this function call.
+           Contexxt and target will be set by this function.
   @return  The function returns ESTATUS_SUCCESS if all is fine. Other return values indicate
            that there is no connection to the receiving object.
 

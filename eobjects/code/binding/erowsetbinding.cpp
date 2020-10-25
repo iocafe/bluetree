@@ -40,6 +40,8 @@ eRowSetBinding::eRowSetBinding(
     m_requested_columns = OS_NULL;
     m_table_configuration = OS_NULL;
     m_sync_transfer = OS_NULL;
+    m_sync_transfer_mtx_nr = 0;
+    m_sync_storage = OS_NULL;
 
     /* Row set bindings cannot be cloned or serialized.
      */
@@ -140,6 +142,10 @@ void eRowSetBinding::onmessage(
                 if (m_state == E_BINDING_OK) {
                     srvselect(envelope);
                 }
+                return;
+
+            case ECMD_TABLE_DATA_TRANSFER:
+                table_data_received(envelope);
                 return;
 
             case ECMD_FWRD:
@@ -322,7 +328,8 @@ void eRowSetBinding::bind2(
         parameters->setv(ERSET_BINDING_TABLE_NAME, m_pstruct.table_name);
     }
     if (m_requested_columns) {
-        parameters->seto(ERSET_BINDING_REQUESTED_COLUMNS, m_requested_columns, ESET_STORE_AS_VARIABLE);
+        parameters->seto(ERSET_BINDING_REQUESTED_COLUMNS,
+            m_requested_columns, ESET_STORE_AS_VARIABLE);
     }
 
     /* Call base class to do binding.
@@ -404,8 +411,7 @@ void eRowSetBinding::srvbind(
 
     /* Send table congiguration */
     m_table_configuration->clone(reply);
-
-m_table_configuration->print_json();
+    // m_table_configuration->print_json();
 
     /* Complete the server end of binding and return.
      */
@@ -490,6 +496,11 @@ void eRowSetBinding::select(
         parameters->setv(ERSET_BINDING_TABLE_NAME, m_pstruct.table_name);
     }
 
+    /* If we have storage for synchronized data transfer, empty it */
+    if (m_sync_storage) {
+        m_sync_storage->clear();
+    }
+
     /* Send select command with parameter (memory allocated for parameters released by this call)
      */
     message(ECMD_RSET_SELECT, m_bindpath ? m_bindpath : m_objpath,
@@ -513,6 +524,7 @@ void eRowSetBinding::srvselect(
     eDBM *dbm;
     eVariable v;
     eSet *parameters;
+    eContainer *columns;
     // eStatus s;
 
     parameters = eSet::cast(envelope->content());
@@ -525,6 +537,9 @@ void eRowSetBinding::srvselect(
     dbm = eDBM::cast(grandparent());
     if (dbm == OS_NULL) goto getout;
     if (dbm->classid() != ECLASSID_DBM) goto getout;
+    if (m_table_configuration == OS_NULL) goto getout;
+    columns = m_table_configuration->firstc(EOID_TABLE_COLUMNS);
+    if (columns == OS_NULL) goto getout;
 
     m_pstruct.limit = parameters->geti(ERSET_BINDING_LIMIT);
     m_pstruct.page_mode = parameters->geti(ERSET_BINDING_PAGE_MODE);
@@ -542,6 +557,7 @@ void eRowSetBinding::srvselect(
      */
     m_sync_transfer = new eSynchronized(this);
     m_sync_transfer->initialize_synch_transfer(m_bindpath);
+    m_sync_transfer_mtx_nr = 0;
 
     /* Set callback function to process select results.
      */
@@ -550,11 +566,8 @@ void eRowSetBinding::srvselect(
 
     /* Select rows from table.
      */
-    /*s = */
     dbm->select(m_where_clause->gets(),
-        m_requested_columns, // ** ??  eContainer *columns,
-        &m_pstruct,
-        0 /* tflags = 0 ???????????????? */);
+        columns, &m_pstruct, 0 /* tflags = 0 ???????????????? */);
 
     /* Wait for rest of messages (to avoid notarget warnings on acknowledges), and cleanup.
      */
@@ -574,6 +587,8 @@ getout:
 
   The eRowSetBinding::srvselect() function...
 
+  @param data eMatrix holding one or more rows of matrix data. Deleted by this function.
+
   @return  The function returns ESTATUS_SUCCESS is all is fine. Other return values indicate
            an error and transfer is interrupted.
 
@@ -586,6 +601,7 @@ eStatus eRowSetBinding::srvselect_callback(
 {
     eEnvelope *envelope;
     eSynchronized *sync;
+    eContainer *cont;
     eStatus s;
 
     eRowSetBinding *b;
@@ -603,7 +619,10 @@ eStatus eRowSetBinding::srvselect_callback(
     /* Generate envelope for this to send.
      */
     envelope = new eEnvelope(b);
-    envelope->setcontent(data, EMSG_DEL_CONTENT);
+    envelope->setcommand(ECMD_TABLE_DATA_TRANSFER);
+    cont = new eContainer(b);
+    data->adopt(cont, b->m_sync_transfer_mtx_nr++);
+    envelope->setcontent(cont, EMSG_DEL_CONTENT);
 
     /* The envelope object given as argument is adopted/deleted by the synch_send function.
      */
@@ -652,6 +671,64 @@ notarget:
     /* Call base class to complete the binding.
      */
     cbindok_base(envelope);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Partial or all matrix data received, save it.
+
+  The table_data_received function...
+
+****************************************************************************************************
+*/
+void eRowSetBinding::table_data_received(
+    eEnvelope *envelope)
+{
+    eObject *o;
+    eVariable *tmp;
+    eContainer *cont;
+    eMatrix *mtx, *m;
+    os_int nrows, ncols, r, c;
+    osalTypeId dtype;
+
+    if (m_sync_storage == OS_NULL) {
+        m_sync_storage = new eContainer(this);
+    }
+
+    cont = eContainer::cast(envelope->content());
+    if (cont == OS_NULL) goto getout;
+
+    tmp = new eVariable(this);
+    for (o = cont->first(); o; o = o->next()) {
+        if (o->classid() != ECLASSID_MATRIX) {
+            continue;
+        }
+        mtx = eMatrix::cast(o);
+
+        if (o->oid() == 0) {
+            m_sync_storage->clear();
+        }
+
+        nrows = mtx->nrows();
+        ncols = mtx->ncolumns();
+        dtype = mtx->datatype();
+
+        for (r = 0; r < nrows; r++) {
+            m = new eMatrix(m_sync_storage);
+            m->allocate(dtype, 1, ncols);
+            for (c = 0; c < ncols; c++) {
+                mtx->getv(r, c, tmp);
+                m->setv(0, c, tmp);
+            }
+        }
+    }
+    delete tmp;
+
+getout:
+    message (ECMD_ACK, envelope->source(), envelope->target(),
+        OS_NULL, EMSG_KEEP_CONTEXT, envelope->context());
 }
 
 
@@ -738,6 +815,8 @@ void eRowSetBinding::forward(
         delete x;
     }
 }
+
+
 
 
 /**

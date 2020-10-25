@@ -174,7 +174,7 @@ eStatus eSyncConnector::simpleproperty(
 /**
 ****************************************************************************************************
 
-  @brief Send a message usint synchronization.
+  @brief Send a message, synchronization.
 
   The eSyncConnector::send_message function sends an envelope as message. The message envelope
   (or clone of it) will be recieved as onmessage call by remote object.
