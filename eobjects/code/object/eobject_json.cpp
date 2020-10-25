@@ -43,7 +43,6 @@ eStatus eObject::json_writer(
 }
 
 
-
 /**
 ****************************************************************************************************
 
@@ -78,14 +77,12 @@ eStatus eObject::json_write(
     os_boolean comma1 = OS_FALSE, comma2 = OS_FALSE, property_listed;
     os_boolean end_with_nl = OS_FALSE;
 
-    if (indent < 0)
-    {
+    if (indent < 0) {
         indent = 0;
         end_with_nl = OS_TRUE;
     }
 
-    if (comma)
-    {
+    if (comma) {
         if (*comma)
         {
             if (json_puts(stream, ",")) return ESTATUS_FAILED;
@@ -103,8 +100,7 @@ eStatus eObject::json_write(
     /* Class name.
      */
     str = eclasslist_classname(classid());
-    if (str)
-    {
+    if (str) {
         if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma1)) goto failed;
         if (json_puts(stream, "\"class\": ")) goto failed;
         if (json_putqs(stream, str)) goto failed;
@@ -116,13 +112,11 @@ eStatus eObject::json_write(
     for (name = firstn(EOID_NAME); name; name = name->nextn(EOID_NAME))
     {
         cstr = name->namespaceid();
-        if (cstr)
-        {
+        if (cstr) {
             value = cstr;
             value += "/";
         }
-        else
-        {
+        else {
             value = "";
         }
         value += *name;
@@ -318,10 +312,8 @@ eStatus eObject::json_indent(
 
     if (iflags & (EJSON_NEW_LINE_BEFORE|EJSON_NEW_LINE_ONLY))
     {
-        if (comma)
-        {
-            if (*comma)
-            {
+        if (comma) {
+            if (*comma) {
                 if (json_puts(stream, ",")) return ESTATUS_FAILED;
             }
             *comma = OS_TRUE;
@@ -461,25 +453,21 @@ eStatus eObject::json_putv(
     /* Select weather to qute the value
      */
     quote = OS_TRUE;
-    if (p)
-    {
+    if (p) {
         typ = p->propertyl(EVARP_TYPE);
     }
-    else
-    {
+    else {
         typ = OS_UNDEFINED_TYPE;
     }
 
     switch (typ)
     {
         default:
-            if (value->isempty())
-            {
+            if (value->isempty()) {
                 value->sets("null");
                 quote = OS_FALSE;
             }
-            else
-            {
+            else {
                 if (p) value->autotype(OS_TRUE);
                 if (value->type() == OS_LONG || value->type() == OS_DOUBLE)
                 {

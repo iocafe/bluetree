@@ -30,13 +30,11 @@ class eHandleTable;
 
 /**
 ****************************************************************************************************
-
-  @brief Handle root class.
+  Handle root class.
 
   The handle eHandleRoot object manages holds pointers to allocated handle tables and maintains
   list of free handles, which are not reserved for any root object. There is one handle root
   object per process.
-
 ****************************************************************************************************
 */
 typedef struct eHandleRoot
@@ -49,7 +47,7 @@ typedef struct eHandleRoot
      */
     os_int m_nrotables;
 
-    /* First free common handle (not reserved for any root object) in handle tables.
+    /** First free common handle (not reserved for any root object) in handle tables.
      */
     eHandle *m_first_free;
 }
@@ -58,15 +56,12 @@ eHandleRoot;
 
 /**
 ****************************************************************************************************
-
-  @name Handle root functions.
+  Handle root functions.
 
   Function of the handle root is to allocate and manage handle tables, and allow (thread) root
   objects to reserve/release handles for use.
-
 ****************************************************************************************************
 */
-
 /* Initialize handle tables.
  */
 void ehandleroot_initialize();
@@ -86,9 +81,4 @@ eHandle *ehandleroot_releasehandles(
     eHandle *h,
     e_oix nro_handles);
 
-
-
 #endif
-
-
-

@@ -470,11 +470,7 @@ xxxx
 notarget:
     /* Send "no target" reply message to indicate that recipient was not found.
      */
-    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
-    {
-        message (ECMD_NO_TARGET, envelope->source(),
-            envelope->target(), OS_NULL, EMSG_DEFAULT);
-    }
+    notarget(envelope);
 }
 
 

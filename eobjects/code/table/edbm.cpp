@@ -404,7 +404,8 @@ void eDBM::solve_table_configuration(
         dcolumns = new eContainer(resolved_configuration, EOID_TABLE_COLUMNS);
         dcolumns->ns_create();
 
-        for (reqcol = requested_columns->firstv(); reqcol; reqcol = reqcol->nextv()) {
+        for (reqcol = requested_columns->firstv(); reqcol; reqcol = reqcol->nextv())
+        {
             name = (eVariable*)reqcol->primaryname();
             if (name == OS_NULL) {
                 name = reqcol;
@@ -458,8 +459,27 @@ eTable *eDBM::get_table(
 }
 
 
-/* Select data from table.
- */
+/**
+****************************************************************************************************
+
+  @brief Select data from table.
+
+  Selects data from underlying table, at simplest table can be eMatrix. Rows to be selected are
+  specified by where clause. Column which to get are listed in "columns" list. The selected data
+  is returned trough the callback function.
+
+  @param   whereclause String containing range and/or actual where clause. Asterik "*" selects
+           all rows.
+  @param   columns List of columns to get. eContainer holding an eVariable for each column
+           to select. eVariable name is column name, or column name can also be stored as
+           variable value. Column name "*" is wildcard which selects all columns.
+  @param   prm Select parameters. Includes pointer to callback function.
+  @param   tflags Reserved for future, set 0 for now.
+
+  @return  OSAL_SUCCESS if ok. Other values indicate an error.
+
+****************************************************************************************************
+*/
 eStatus eDBM::select(
     const os_char *where_clause,
     eContainer *columns,
@@ -473,7 +493,5 @@ eStatus eDBM::select(
         return ESTATUS_FAILED;
     }
 
-    table->select(where_clause, columns, prm, tflags);
-
-    return ESTATUS_SUCCESS;
+    return table->select(where_clause, columns, prm, tflags);
 }

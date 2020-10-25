@@ -44,7 +44,6 @@ class eConsole;
 
   X...
 
-
 ****************************************************************************************************
 */
 typedef struct eGlobal
@@ -146,7 +145,7 @@ inline eNameSpace *eglobal_process_ns()
     return eglobal->process_ns;
 }
 
-/* THIS MUST BE AS FAST FUNCTION AS POSSIBLE                NOT USED YET
+/* THIS MUST BE AS FAST FUNCTION AS POSSIBLE
  */
 inline eHandle *eget_handle(
     e_oix oix)

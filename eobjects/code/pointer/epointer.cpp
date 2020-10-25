@@ -110,7 +110,7 @@ void ePointer::set(
     if (handle == OS_NULL)
     {
         ptr->makeroot(EOID_ITEM, EOBJ_DEFAULT);
-        handle  = ptr->handle();
+        handle = ptr->handle();
     }
 
     m_ref.ref.oix = handle->oix();

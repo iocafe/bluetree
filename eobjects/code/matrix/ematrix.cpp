@@ -15,7 +15,6 @@
 */
 #include "eobjects.h"
 
-
 /* Matrix property names.
  */
 const os_char
@@ -283,7 +282,6 @@ eStatus eMatrix::onpropertychange(
                 }
             }
             break;
-
 
         default:
             return eObject::onpropertychange(propertynr, x, flags);

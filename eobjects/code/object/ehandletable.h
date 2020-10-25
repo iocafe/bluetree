@@ -32,11 +32,9 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Handle table class.
+  Handle table class.
 
   The eHandleTable contains fixed length array of eHandle object.
-
 ****************************************************************************************************
 */
 class eHandleTable

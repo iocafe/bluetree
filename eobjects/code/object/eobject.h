@@ -645,6 +645,13 @@ public:
         os_int mflags = EMSG_DEFAULT,
         eObject *context = OS_NULL);
 
+    /* Reply with ECMD_NO_TARGET to indicate that target object was not found.
+     */
+    void notarget(
+        eEnvelope *envelope);
+
+    /* Process an incoming message.
+     */
     virtual void onmessage(
         eEnvelope *envelope);
 

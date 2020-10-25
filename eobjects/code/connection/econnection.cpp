@@ -831,25 +831,3 @@ eStatus eConnection::read()
     return ESTATUS_SUCCESS;
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Not connected and connection has failed once, reply with notarget.
-
-  The eConnection::notarget() function sends notarget message. The notarget messages can be use
-  by object which sent the message to detect it did not go trough.
-
-  @return  None.
-
-****************************************************************************************************
-*/
-void eConnection::notarget(
-    eEnvelope *envelope)
-{
-    if ((envelope->flags() & EMSG_NO_REPLIES) == 0)
-    {
-        message(ECMD_NO_TARGET, envelope->source(), OS_NULL,
-            OS_NULL, EMSG_DEFAULT, envelope->context());
-    }
-}

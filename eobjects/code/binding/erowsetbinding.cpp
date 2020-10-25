@@ -365,7 +365,7 @@ void eRowSetBinding::srvbind(
         goto notarget;
     }
 
-    /* Free memory allocated, if any
+    /* Free memory allocated for table name and time zone, if any.
      */
     delete m_pstruct.table_name;
     delete m_pstruct.tzone;
@@ -417,18 +417,12 @@ void eRowSetBinding::srvbind(
      */
     srvbind_base(envelope, reply);
 
-    // print_json();
-
     return;
 
 notarget:
     /* Send "no target" reply message to indicate that recipient was not found.
      */
-    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
-    {
-        message (ECMD_NO_TARGET, envelope->source(),
-            envelope->target(), OS_NULL, EMSG_DEFAULT);
-    }
+    notarget(envelope);
 }
 
 
@@ -511,7 +505,7 @@ void eRowSetBinding::select(
 /**
 ****************************************************************************************************
 
-  @brief Select data.
+  @brief Select data (server).
 
   The eRowSetBinding::srvselect() function...
 
@@ -569,6 +563,11 @@ void eRowSetBinding::srvselect(
     dbm->select(m_where_clause->gets(),
         columns, &m_pstruct, 0 /* tflags = 0 ???????????????? */);
 
+    /* Send ECMD_OK as reply to indicate that the selection has completed.
+     */
+    message(ECMD_OK, envelope->source(),
+        envelope->target(), OS_NULL, EMSG_DEFAULT, envelope->context());
+
     /* Wait for rest of messages (to avoid notarget warnings on acknowledges), and cleanup.
      */
     m_sync_transfer->sync_wait(0, m_timeout_ms);
@@ -583,7 +582,7 @@ getout:
 /**
 ****************************************************************************************************
 
-  @brief Callback to process srvselect() results.
+  @brief Callback to process srvselect() results (server).
 
   The eRowSetBinding::srvselect() function...
 
@@ -635,7 +634,7 @@ eStatus eRowSetBinding::srvselect_callback(
 /**
 ****************************************************************************************************
 
-  @brief Complete property binding at client end.
+  @brief Complete property binding at client end (client).
 
   The eRowSetBinding::cbindok() function...
 

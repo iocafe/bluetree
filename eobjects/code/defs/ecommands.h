@@ -34,7 +34,7 @@
 ****************************************************************************************************
 */
 
-/* Messaging, no target.
+/* Messaging, no target, generic.
  */
 #define ECMD_NO_TARGET -1
 
@@ -42,9 +42,13 @@
  */
 #define ECMD_ERROR -2
 
-/* Interrupt current operation.
+/* Interrupt current operation, generic.
  */
 #define ECMD_INTERRUPT -3
+
+/* Operation successfull, generic.
+ */
+#define ECMD_OK -4
 
 /* Set property by message
  */

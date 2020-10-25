@@ -234,13 +234,7 @@ getout:
 
     /* Send "no target" reply message to indicate that recipient was not found.
      */
-    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
-    {
-        message (ECMD_NO_TARGET, envelope->source(),
-            envelope->target(), OS_NULL,
-            EMSG_DEL_CONTEXT,
-            envelope->context());
-    }
+    notarget(envelope);
 
 #if OSAL_DEBUG
     /* Report "no target: error
@@ -464,11 +458,7 @@ void eObject::message_process_ns(
 getout:
     /* Send "no target" reply message to indicate that recipient was not found.
      */
-    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
-    {
-        message (ECMD_NO_TARGET, envelope->source(),
-            envelope->target(), OS_NULL, EMSG_DEL_CONTEXT, envelope->context());
-    }
+    notarget(envelope);
 
     delete envelope;
 }
@@ -497,14 +487,13 @@ void eObject::message_oix(
     eHandle *handle;
     eThread *thread;
     e_oix oix;
-    os_int ucnt, command;
+    os_int ucnt;
     os_short count;
 
     /* Parse object index and use count from string.
      */
     count = oixparse(envelope->target(), &oix, &ucnt);
-    if (count == 0)
-    {
+    if (count == 0) {
 #if OSAL_DEBUG
         if ((envelope->flags() & EMSG_NO_ERRORS) == 0)
         {
@@ -570,15 +559,7 @@ void eObject::message_oix(
 getout:
     /* Send "no target" reply message to indicate that recipient was not found.
      */
-    command = envelope->command();
-    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0 &&
-        command != ECMD_NO_TARGET &&
-        command != ECMD_ERROR)
-    {
-        message (ECMD_NO_TARGET, envelope->source(),
-            envelope->target(), OS_NULL, EMSG_DEL_CONTEXT, envelope->context());
-    }
-
+    notarget(envelope);
     delete envelope;
 }
 
@@ -586,7 +567,34 @@ getout:
 /**
 ****************************************************************************************************
 
-  @brief Function to process incoming messages.
+  @brief Reply with ECMD_NO_TARGET to indicate that target object was not found.
+
+  The notarget() function sends ECMD_NO_TARGET message as a reply to a received message.
+  The notarget messages are used by object which sent the message to detect if the message
+  was not received or processed.
+
+  @param  envelope Pointer to received envelope.
+
+****************************************************************************************************
+*/
+void eObject::notarget(
+    eEnvelope *envelope)
+{
+    os_int command = envelope->command();
+
+    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0 &&
+        command != ECMD_NO_TARGET)
+    {
+        message(ECMD_NO_TARGET, envelope->source(), envelope->target(),
+            OS_NULL, EMSG_DEFAULT, envelope->context());
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Process an incoming message.
 
   The eObject::onmessage function handles messages received by object.
 
@@ -629,15 +637,20 @@ void eObject::onmessage(
               case ECMD_UNBIND:
                 /* THIS IS TRICKY: WE NEED TO FIND BINDING BY SOURCE
                     PATH AND FORWARD THIS TO IT */
-                osal_debug_error("onmessage(): Not implemented");
+                osal_debug_error("onmessage(): ECMD_UNBIND Not implemented");
                 return;
 
               case ECMD_INFO_REQUEST:
                 send_browse_info(envelope);
                 return;
             }
-            osal_debug_error("onmessage(): Message not processed");
-            goto getout2;
+
+#if OSAL_DEBUG
+            if ((envelope->mflags() & EMSG_NO_ERRORS) == 0) {
+                osal_debug_error_int("onmessage(): Message not processed, command=", command);
+            }
+#endif
+            return; /* We must return here */
 
         /* Messages to internal names
          */
@@ -697,27 +710,16 @@ void eObject::onmessage(
     return;
 
 getout:
+
 #if OSAL_DEBUG
-    /* Show error message.
-     */
-    if ((envelope->mflags() & EMSG_NO_ERRORS) == 0)
-    {
-        osal_debug_error("onmessage() failed: target not found");
+    if ((envelope->mflags() & EMSG_NO_ERRORS) == 0) {
+        osal_debug_error_str("onmessage() failed: target not found, target=", envelope->target());
     }
 #endif
 
     /* Send "no target" reply message to indicate that recipient was not found.
      */
-getout2:
-    command = envelope->command();
-    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0 &&
-        command != ECMD_NO_TARGET &&
-        command != ECMD_ERROR)
-    {
-        message (ECMD_NO_TARGET, envelope->source(),
-            envelope->target(), OS_NULL, EMSG_KEEP_CONTEXT, envelope->context());
-    }
-
+    notarget(envelope);
 }
 
 
@@ -1015,12 +1017,6 @@ void eObject::onmessage_oix(
     return;
 
 getout:
-    /* Send "no target" reply message to indicate that recipient was not found.
-     */
-    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0)
-    {
-        message (ECMD_NO_TARGET, envelope->source(),
-            envelope->target(), OS_NULL, EMSG_KEEP_CONTEXT, envelope->context());
-    }
+    notarget(envelope);
 }
 

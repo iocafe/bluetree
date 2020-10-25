@@ -314,15 +314,14 @@ void eMatrix::remove(
   Column which to get are listed in "columns" list. The selected data is returned trough
   the callback function.
 
-  @param   whereclause String containing range and/or actual where clause. This selects which
-           rows are updated.
+  @param   whereclause String containing range and/or actual where clause.
   @param   columns List of columns to get. eContainer holding an eVariable for each column
            to select. eVariable name is column name, or column name can also be stored as
            variable value.
-
+  @param   prm Select parameters. Includes pointer to callback function.
   @param   tflags Reserved for future, set 0 for now.
 
-  @return  OSAL_SUCCESS if ok.
+  @return  OSAL_SUCCESS if ok. Other values indicate an error.
 
 ****************************************************************************************************
 */

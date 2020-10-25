@@ -154,11 +154,6 @@ protected:
      */
     eStatus read();
 
-    /* Not connected and connection has failed once, reply with notarget.
-     */
-    void notarget(
-        eEnvelope *envelope);
-
     /** Stream class identifier. Specifies stream class to use.
      */
     os_int m_stream_classid;
