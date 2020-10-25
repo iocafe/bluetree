@@ -55,7 +55,7 @@ public:
     eValueX(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_EROOT_OPTIONAL);
 
     /* Virtual destructor.
      */

@@ -45,22 +45,26 @@ class ePointer;
   Object flag defines
 ****************************************************************************************************
 */
-#define EOBJ_DEFAULT       0x00000000
-#define EOBJ_IS_ATTACHMENT 0x00000001
-#define EOBJ_HAS_NAMESPACE 0x00000002
-#define EOBJ_NOT_CLONABLE  0x00000004
-#define EOBJ_NOT_SERIALIZABLE  0x00000008
+#define EOBJ_DEFAULT            0x00000000
+#define EOBJ_IS_ATTACHMENT      0x00000001
+#define EOBJ_HAS_NAMESPACE      0x00000002
+#define EOBJ_NOT_CLONABLE       0x00000004
+#define EOBJ_NOT_SERIALIZABLE   0x00000008
 
 #define EOBJ_TEMPORARY_ATTACHMENT  (EOBJ_IS_ATTACHMENT | EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE)
 
-#define EOBJ_CUST_FLAG1    0x00000010
-#define EOBJ_CUST_FLAG2    0x00000020
-#define EOBJ_CUST_FLAG3    0x00000040
-#define EOBJ_CUST_FLAG4    0x00000080
-#define EOBJ_CUST_FLAG5    0x00000100
-#define EOBJ_CUST_FLAG6    0x00000200
-#define EOBJ_CUST_FLAG7    0x00000400
-#define EOBJ_CUST_FLAG8    0x00000800
+#define EOBJ_CUST_FLAG1         0x00000010
+#define EOBJ_CUST_FLAG2         0x00000020
+#define EOBJ_CUST_FLAG3         0x00000040
+#define EOBJ_CUST_FLAG4         0x00000080
+#define EOBJ_CUST_FLAG5         0x00000100
+#define EOBJ_CUST_FLAG6         0x00000200
+#define EOBJ_CUST_FLAG7         0x00000400
+#define EOBJ_CUST_FLAG8         0x00000800
+
+/** Special flag to allocate eVariable, eValueEx, eThreadHandle without eRoot.
+ */
+#define EOBJ_EROOT_OPTIONAL     0x01000000
 
 /** Flags for adopt(), clone() and clonegeeric() functions.
  */
@@ -74,15 +78,15 @@ there is no need to detach it's children from red/black of the object. The EOBJ_
 flag is set by delete_children() to child object, so child object doesn't need to preserve
 the treee structure after deletion. This changes deleting object trees from NlogN to N algorithm.
  */
-#define EOBJ_FAST_DELETE   0x20000000
+#define EOBJ_FAST_DELETE        0x20000000
 
 /** Red/black tree's red or black node bit.
  */
-#define EOBJ_IS_RED        0x40000000
+#define EOBJ_IS_RED             0x40000000
 
 /** Custom flags mask.
  */
-#define EOBJ_CUST_FLAGS_MASK 0x000FF0
+#define EOBJ_CUST_FLAGS_MASK    0x00000FF0
 
 /** Cloned aflag argument mask for flags for adopt(), clone() and clonegeeric() functions ..
  */

@@ -81,7 +81,7 @@ public:
         eObject *obj,
         eObject *parent,
         e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT);
+        os_int flags = EOBJ_EROOT_OPTIONAL);
 
     /* Free handle of object obj.
      */

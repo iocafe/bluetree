@@ -43,7 +43,7 @@
 /** This is default object identifier for containers, threads and also specifies object as
     list item. But if used without parent object, indicates top of new object tree.
  */
-#define EOID_RITEM -2
+/* #define EOID_RITEM -2 */
 
 /** This object is root helper of object tree.
  */
