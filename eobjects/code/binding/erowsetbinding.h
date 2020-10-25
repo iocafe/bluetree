@@ -18,6 +18,7 @@
 #define EROWSETBINDING_H_
 #include "eobjects.h"
 
+class eDBM;
 struct eSelectParameters;
 
 
@@ -134,53 +135,46 @@ public:
         eObject *obj,
         eEnvelope *envelope);
 
-    /* Mark property value changed (may forward it immediately).
-     */
-    void changed(
-        os_int propertynr,
-        eVariable *x,
-        os_boolean delete_x);
-
 protected:
+    /* Send first message to initiate row set binding (client)
+     */
     void bind2(
         const os_char *remotepath);
 
+    /* Select data from underlying table (server).
+     */
     void srvselect(
         eEnvelope *envelope);
 
-    /* Callback to process srvselect() results.
+    /* Callback to process srvselect() results (server).
      */
     static eStatus srvselect_callback(
         eTable *t,
         eMatrix *data,
         eObject *context);
 
-    /* Finish the client end of binding.
+    /* Finish the client end of binding (client).
      */
     void cbindok(
         eObject *obj,
         eEnvelope *envelope);
 
+    /* Some or all selected data data received, save it (client).
+     */
     void table_data_received(
         eEnvelope *envelope);
 
-    /* Virtual function to forward property value trough binding.
+    /* Inform row set that all initial data has been received (client).
      */
-    virtual void forward(
-        eVariable *x = OS_NULL,
-        os_boolean delete_x = OS_FALSE);
+    void initial_data_complete();
 
-    /* Update to property value has been received.
+    /* Get pointer to eDBM object (server)
      */
-    void update(
-        eEnvelope *envelope);
+    eDBM *srv_dbm();
 
-    void sendack(
-        eEnvelope *envelope);
-
-    void ack(
-        eEnvelope *envelope);
-
+    /* Get pointer to eRowSet object (client)
+     */
+    eRowSet *client_rowset();
 
     /**
     ************************************************************************************************

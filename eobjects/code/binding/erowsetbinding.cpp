@@ -148,12 +148,8 @@ void eRowSetBinding::onmessage(
                 table_data_received(envelope);
                 return;
 
-            case ECMD_FWRD:
-                update(envelope);
-                return;
-
-            case ECMD_ACK:
-                ack(envelope);
+            case ECMD_OK:
+                initial_data_complete();
                 return;
 
             case ECMD_REBIND:
@@ -313,7 +309,8 @@ void eRowSetBinding::bind(
 }
 
 
-/* If remotepath is OS_NULL last used name will be preserved/
+/* Send first message to initiate row set binding (client)
+ * If remotepath is OS_NULL last used name will be preserved
 */
 void eRowSetBinding::bind2(
     const os_char *remotepath)
@@ -505,7 +502,7 @@ void eRowSetBinding::select(
 /**
 ****************************************************************************************************
 
-  @brief Select data (server).
+  @brief Select data from underlying table (server).
 
   The eRowSetBinding::srvselect() function...
 
@@ -528,9 +525,8 @@ void eRowSetBinding::srvselect(
         goto getout;
     }
 
-    dbm = eDBM::cast(grandparent());
+    dbm = srv_dbm();
     if (dbm == OS_NULL) goto getout;
-    if (dbm->classid() != ECLASSID_DBM) goto getout;
     if (m_table_configuration == OS_NULL) goto getout;
     columns = m_table_configuration->firstc(EOID_TABLE_COLUMNS);
     if (columns == OS_NULL) goto getout;
@@ -649,23 +645,15 @@ void eRowSetBinding::cbindok(
     eEnvelope *envelope)
 {
     eContainer *reply;
-    eVariable v;
+    eRowSet *rset;
 
     reply = eContainer::cast(envelope->content());
-    if (reply == OS_NULL)
-    {
-#if OSAL_DEBUG
-        osal_debug_error("cbindok() failed: no content");
-#endif
-        goto notarget;
+    osal_debug_assert(reply != OS_NULL);
+
+    rset = client_rowset();
+    if (rset && reply) {
+        rset->client_binding_complete(reply);
     }
-
-    /* If this server side is master at initialization, get property value.
-     */
-//        parameters->getv(EPR_BINDING_VALUE, &v);
-//        binding_setproperty(&v);
-
-notarget:
 
     /* Call base class to complete the binding.
      */
@@ -676,7 +664,7 @@ notarget:
 /**
 ****************************************************************************************************
 
-  @brief Partial or all matrix data received, save it.
+  @brief Some or all selected data data received, save it (client).
 
   The table_data_received function...
 
@@ -734,151 +722,58 @@ getout:
 /**
 ****************************************************************************************************
 
-  @brief Mark property value changed.
+  @brief Inform row set that all initial data has been received (client).
 
-  The eRowSetBinding::changed function marks a property value changed, so that it needs
-  to forwarded. The function forwards the property value immediately, if flow control allows.
-  Otherwise the property just remain marked to be forwarded.
-  If property number given as argument is not for this binding, do nothing.
-
-  @param propertynr Property number of the changed property.
-  @param x Optional property value, used to save requerying it in common case.
-
-  @return None.
+  The initial_data_complete function...
 
 ****************************************************************************************************
 */
-void eRowSetBinding::changed(
-    os_int propertynr,
-    eVariable *x,
-    os_boolean delete_x)
+void eRowSetBinding::initial_data_complete()
 {
-    /* If not for this property, do nothing.
-     */
-//    if (propertynr != m_localpropertynr) return;
+    eRowSet *rset;
 
-    /* Mark property value, etc changed. Forward immediately, if binding if flow
-       control does not block it.
-     */
-    setchanged();
-    forward(x, delete_x);
+    rset = client_rowset();
+    if (rset) {
+        rset->initial_data_complete(m_sync_storage);
+    }
 }
 
 
-/**
-****************************************************************************************************
-
-  @brief Forward property value trough binding.
-
-  The forward function sends value of a property if flow control allows.
-
-  @param  x Variable containing value, if available.
-  @param  delete_x Flag weather value should be deleted.
-  @return None.
-
-****************************************************************************************************
-*/
-void eRowSetBinding::forward(
-    eVariable *x,
-    os_boolean delete_x)
+/* Get pointer to eDBM object (server)
+ */
+eDBM *eRowSetBinding::srv_dbm()
 {
-    eVariable *tmp;
+    eDBM *dbm;
+    os_int cid;
 
-    if (forwardnow())
-    {
-
-        if (x == OS_NULL)
-        {
-            tmp = new eVariable;
-  //          binding_getproperty(tmp);
-
-            message(ECMD_FWRD, m_bindpath, OS_NULL, tmp,
-                EMSG_DEL_CONTENT /* EMSG_NO_ERROR_MSGS */);
+    dbm = (eDBM*)grandparent();
+    if (dbm) {
+        cid = dbm->classid();
+        if (cid == ECLASSID_DBM || cid == ECLASSID_MATRIX) {
+            return dbm;
         }
-        else
-        {
-            /* Send data as ECMD_FWRD message.
-             */
-            message(ECMD_FWRD, m_bindpath, OS_NULL, x,
-                delete_x ? EMSG_DEL_CONTENT : EMSG_DEFAULT  /* EMSG_NO_ERROR_MSGS */);
-            x = OS_NULL;
+    }
+
+    osal_debug_error("srv_dbm: Grandparent is not eDBM");
+    return OS_NULL;
+}
+
+
+/* Get pointer to eRowSet object (client)
+ */
+eRowSet *eRowSetBinding::client_rowset()
+{
+    eRowSet *rowset;
+    os_int cid;
+
+    rowset = (eRowSet*)grandparent();
+    if (rowset) {
+        cid = rowset->classid();
+        if (cid == ECLASSID_ROWSET) {
+            return rowset;
         }
-
-        /* Clear changed bit and increment acknowledge count.
-         */
-        forwarddone();
     }
 
-    if (delete_x && x)
-    {
-        delete x;
-    }
-}
-
-
-
-
-/**
-****************************************************************************************************
-
-  @brief Property value has been received from binding.
-
-  The eRowSetBinding::update function...
-  @return None.
-
-****************************************************************************************************
-*/
-void eRowSetBinding::update(
-    eEnvelope *envelope)
-{
-    // eVariable *x;
-
-    // x = eVariable::cast(envelope->content());
-    // binding_setproperty(x);
-    sendack(envelope);
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Send acknowledge.
-
-  The sendack function.
-
-  @param  envelope Message envelope from server binding.
-  @return None.
-
-****************************************************************************************************
-*/
-void eRowSetBinding::sendack(
-    eEnvelope *envelope)
-{
-    sendack_base(envelope);
-
-    /* If this is server, if m_ackcount is not zero, mark changed.
-     */
-    if ((m_bflags & EBIND_CLIENT) == 0 && m_ackcount)
-    {
-        setchanged();
-    }
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Acknowledge received.
-
-  The ack function decrements acknowledge wait count and tries to send again.
-
-  @param  envelope Message envelope from server binding.
-  @return None.
-
-****************************************************************************************************
-*/
-void eRowSetBinding::ack(
-    eEnvelope *envelope)
-{
-    ack_base(envelope);
+    osal_debug_error("client_rowset: Grandparent is not eRowSet");
+    return OS_NULL;
 }

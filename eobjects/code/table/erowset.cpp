@@ -584,6 +584,40 @@ void eRowSet::select(
 }
 
 
+/* Table structure has been received, store it and do callback.
+ */
+void eRowSet::client_binding_complete(
+    eContainer *cont)
+{
+    eContainer *table_configuration;
+
+    if (cont) {
+        table_configuration = cont->firstc(EOID_TABLE_CONFIGURATION);
+    }
+}
+
+
+/* All initial data has been received, move it from temporary sync storage to this row set
+ * and do call back.
+ */
+void eRowSet::initial_data_complete(
+    eContainer *sync_storage)
+{
+    eObject *o, *next_o;
+
+    if (sync_storage) {
+        for (o = sync_storage->first(); o; o = next_o) {
+            next_o = o->next();
+            if (o->classid() == ECLASSID_MATRIX) {
+                o->adopt(this, EOID_ITEM);
+            }
+        }
+    }
+
+print_json();
+}
+
+
 /* Gets pointer to the table binding or OS_NULL if none.
  */
 eRowSetBinding *eRowSet::get_binding()

@@ -66,6 +66,7 @@ extern const os_char
  */
 typedef enum ersetCallbackReason
 {
+    ERSET_TABLE_CONFIGURATION_RECEIVED,
     ERSET_INITIAL_DATA_RECEIVED,
     ERSET_INSERT,
     ERSET_UPDATE,
@@ -99,6 +100,8 @@ typedef void erset_callback_func(
 */
 class eRowSet : public eTable
 {
+    friend class eRowSetBinding;
+
 public:
     /**
     ************************************************************************************************
@@ -295,6 +298,15 @@ protected:
      */
     eRowSetBinding *get_binding();
 
+    /* Table structure has been received, store it and do callback.
+     */
+    void client_binding_complete(
+        eContainer *cont);
+
+    /* All initial data has been received
+     */
+    void initial_data_complete(
+        eContainer *sync_storage);
 
     /**
     ************************************************************************************************
