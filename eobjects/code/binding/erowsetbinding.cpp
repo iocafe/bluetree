@@ -134,7 +134,10 @@ void eRowSetBinding::onmessage(
                     disconnect();
                 }
                 else {
+                    // dbm = get_dbm();
                     delete this;
+
+                    // dbm->refresh_trigger_data()
                 }
                 return;
 
@@ -311,7 +314,7 @@ void eRowSetBinding::bind(
 
 /* Send first message to initiate row set binding (client)
  * If remotepath is OS_NULL last used name will be preserved
-*/
+ */
 void eRowSetBinding::bind2(
     const os_char *remotepath)
 {
@@ -413,6 +416,8 @@ void eRowSetBinding::srvbind(
     /* Complete the server end of binding and return.
      */
     srvbind_base(envelope, reply);
+
+    // dbm->refresh_trigger_data()
 
     return;
 

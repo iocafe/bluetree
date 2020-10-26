@@ -21,11 +21,11 @@
 
 /* Print object as JSON to console.
  */
-void eObject::print_json()
+void eObject::print_json(os_int sflags)
 {
     eBuffer buf;
 
-    json_write(&buf);
+    json_write(&buf, sflags);
     buf.writechar('\0');
 
     osal_console_write(buf.ptr());
@@ -51,7 +51,9 @@ eStatus eObject::json_writer(
   The eObject::json_write() function writes object to stream as JSON.
 
   @param  stream The stream to write to.
-  @param  sflags Serialization flags. EOBJ_SERIALIZE_DEFAULT
+  @param  sflags Serialization flags.
+            - EOBJ_SERIALIZE_DEFAULT (0) Default
+            - EOBJ_SERIALIZE_ONLY_CONTENT Serialze only content, no metadata.
   @param  indent Indentation depth, 0, 1... Writes 2x this spaces at beginning of a line.
           -1 is same as 0, but with extra new line at the end.
 
@@ -96,6 +98,13 @@ eStatus eObject::json_write(
     if (comma) if (json_indent(stream, indent, EJSON_NO_NEW_LINE)) goto failed;
     indent++;
     if (json_puts(stream, "{")) goto failed;
+
+    /* If we are serializing only content (EOBJ_SERIALIZE_ONLY_CONTENT flag).
+     */
+    if (sflags & EOBJ_SERIALIZE_ONLY_CONTENT) {
+        sflags &= ~ EOBJ_SERIALIZE_ONLY_CONTENT;
+        goto serialze_content;
+    }
 
     /* Class name.
      */
@@ -217,6 +226,7 @@ eStatus eObject::json_write(
         }
     }
 
+serialze_content:
     /* Write content (children, etc)
      */
     if (has_json_content())
@@ -252,7 +262,9 @@ failed:
   child object and reads child object content and attachments.
 
   @param  stream The stream to write to.
-  @param  sflags Serialization flags. EOBJ_SERIALIZE_DEFAULT
+  @param  sflags Serialization flags.
+            - EOBJ_SERIALIZE_DEFAULT (0) Default
+            - EOBJ_SERIALIZE_ONLY_CONTENT Serialze only content, no metadata.
 
   @return If successfull the function returns pointer to te new child object.
           If reading object from stream fails, value OS_NULL is returned.

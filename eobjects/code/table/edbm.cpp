@@ -122,7 +122,7 @@ void eDBM::onmessage(
         switch (envelope->command())
         {
             case ECMD_RSET_SELECT:
-                rset_select(envelope);
+                forward_select_message_to_binding(envelope);
                 return;
 
             case ECMD_CONFIGURE_TABLE:
@@ -203,7 +203,7 @@ void eDBM::onmessage(
 
 ****************************************************************************************************
 */
-void eDBM::rset_select(
+void eDBM::forward_select_message_to_binding(
     eEnvelope *envelope)
 {
     eContainer *bindings;
@@ -495,3 +495,98 @@ eStatus eDBM::select(
 
     return table->select(where_clause, columns, prm, tflags);
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Merge selection of all binding to this DBM.
+
+  Called when eRowSet binding is added, deleted or changed to keep merged binding data up
+  to data.
+
+  Merge all selections currently valid selections and get list of columns used in where
+  clauses and in columns list. Get also minimum and maximum index value which covers all
+  selections.
+
+  This information is passed to table below when insert, update or remove is called with
+  data columns for insert and update to trigger dynamic updates.
+
+  @param
+  @return
+
+****************************************************************************************************
+*/
+/* eStatus eDBM::refresh_trigger_data(
+{
+    // Setup reactive data.
+}
+*/
+
+
+/**
+****************************************************************************************************
+
+  @brief Get current trigger data.
+
+  returns trigger data set by refresh_trigger_data().
+
+  Called by insert, update and remove in this C file.
+
+  @param
+  @return
+
+****************************************************************************************************
+*/
+/* eStatus eDBM::get_trigger_data(
+{
+    Clear all trigged data messages in bindings
+
+    Return trigger data.
+}
+*/
+
+
+/**
+****************************************************************************************************
+
+  @brief X
+
+  Callback from table implementation (eMatrix, etc) when trigger update matching to trigger
+  period has been changed.
+
+  @param   table_name eVariable holding table name. Can be OS_NULL if not needed (eMatrix)
+  @return  pointer to object derived from eTable or OS_NULL if none mches to table name.
+
+****************************************************************************************************
+*/
+/* eStatus eDBM::trigger_callback(Row *xx)
+{
+    // * Loop trough the active selections
+
+        // If index range matces
+
+        // If where clause evaluates ok
+
+        // Append information about insert, update or remove to up. to tigged data message
+}
+
+*/
+
+
+/**
+****************************************************************************************************
+
+  @brief X
+
+  Send trigged data messages to clients.
+
+
+****************************************************************************************************
+*/
+/* eStatus eDBM::send_trigged_data()
+ *
+ * {
+ * }
+
+*/

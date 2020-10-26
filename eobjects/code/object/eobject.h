@@ -80,6 +80,7 @@ class ePointer;
 /* Serialization flags eObject::write(), eObject::read() and clonegeeric() functions.
  */
 #define EOBJ_SERIALIZE_DEFAULT 0
+#define EOBJ_SERIALIZE_ONLY_CONTENT 1
 
 /* Flags for json_indent()
  */
@@ -507,7 +508,7 @@ public:
 
     /* Print object as JSON to console.
      */
-    void print_json();
+    void print_json(os_int sflags = EOBJ_SERIALIZE_DEFAULT);
 
     /* Called to check if object has class specific content. If there is no class
        specific JSON content, json_writer or json_reader should not be called.

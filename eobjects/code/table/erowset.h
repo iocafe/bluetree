@@ -70,13 +70,13 @@ typedef enum ersetCallbackReason
     ERSET_UPDATE,
     ERSET_REMOVE
 }
-ersetCallbackReason;
+ersetCallbackEvent;
 
 /* Row set callback information.
  */
 typedef struct ersetCallbackInfo
 {
-    ersetCallbackReason reason;
+    ersetCallbackEvent event;
 
     os_long first_ix, last_ix;
     os_boolean sortorder_changed;

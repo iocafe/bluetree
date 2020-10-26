@@ -177,6 +177,8 @@ public:
             case 4: insert_row(14, "Astounding Apple"); break;
             case 5: remove_row(4); break;
             case 6: update_row("No more creeper");
+            case 7: insert_row(1, "Duudleli"); break;
+            case 8: insert_row(2, "Puudleli"); break;
         }
     }
 
@@ -293,19 +295,32 @@ m_rowset->select("*", &columns);
 
     void callback(
         eRowSet *rset,
-        ersetCallbackInfo *info)
+        ersetCallbackInfo *ci)
     {
+        switch (ci->event) {
+            case ERSET_TABLE_BINDING_COMPLETE:
+                osal_console_write("binding done");
+                break;
+
+            case ERSET_INITIAL_DATA_RECEIVED:
+            case ERSET_INSERT:
+            case ERSET_UPDATE:
+            case ERSET_REMOVE:
+                rset->print_json(EOBJ_SERIALIZE_ONLY_CONTENT);
+                break;
+        }
+
         osal_console_write("eRowSet callback\n");
     }
 
     static void static_callback(
         eRowSet *rset,
-        ersetCallbackInfo *info,
+        ersetCallbackInfo *ci,
         eObject *context)
     {
-        ThreadMonitoringTheTable *t;
-        t = (ThreadMonitoringTheTable*)context;
-        t->callback(rset, info);
+        if (rset) {
+            ((ThreadMonitoringTheTable*)context)->callback(rset, ci);
+        }
     }
 
 protected:

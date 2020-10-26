@@ -564,7 +564,7 @@ void eRowSet::client_binding_complete(
     eContainer *cont)
 {
     eContainer *configuration, *columns;
-    ersetCallbackInfo info;
+    ersetCallbackInfo ci;
 
     delete m_configuration;
     m_configuration = OS_NULL;
@@ -586,9 +586,9 @@ void eRowSet::client_binding_complete(
     /* Callback to inform application that binding is complete.
      */
     if (m_callback) {
-        os_memclear(&info, sizeof(info));
-        info.reason = ERSET_TABLE_BINDING_COMPLETE;
-        m_callback(this, &info, m_context);
+        os_memclear(&ci, sizeof(ci));
+        ci.event = ERSET_TABLE_BINDING_COMPLETE;
+        m_callback(this, &ci, m_context);
     }
 }
 
@@ -600,7 +600,7 @@ void eRowSet::initial_data_complete(
     eContainer *sync_storage)
 {
     eObject *o, *next_o;
-    ersetCallbackInfo info;
+    ersetCallbackInfo ci;
 
     /* Delete old data
      */
@@ -625,12 +625,12 @@ void eRowSet::initial_data_complete(
     /* Callback to inform application about initial data.
      */
     if (m_callback) {
-        os_memclear(&info, sizeof(info));
-        info.reason = ERSET_INITIAL_DATA_RECEIVED;
-        m_callback(this, &info, m_context);
+        os_memclear(&ci, sizeof(ci));
+        ci.event = ERSET_INITIAL_DATA_RECEIVED;
+        m_callback(this, &ci, m_context);
     }
 
-print_json();
+// print_json();
 }
 
 

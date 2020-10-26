@@ -100,7 +100,7 @@ protected:
     */
     /* Forward select sent early to binding.
      */
-    void rset_select(
+    void forward_select_message_to_binding(
         eEnvelope *envelope);
 
     /* Get tflags from message content.
