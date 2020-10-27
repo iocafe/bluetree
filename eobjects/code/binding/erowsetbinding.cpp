@@ -45,6 +45,7 @@ eRowSetBinding::eRowSetBinding(
     m_sync_transfer = OS_NULL;
     m_sync_transfer_mtx_nr = 0;
     m_sync_storage = OS_NULL;
+    m_trigged_changes = OS_NULL;
 
     /* Row set bindings cannot be cloned or serialized.
      */
@@ -831,4 +832,74 @@ eRowSet *eRowSetBinding::client_rowset()
 
     osal_debug_error("client_rowset: Grandparent is not eRowSet");
     return OS_NULL;
+}
+
+/* Append "remove row" to trig data to send to row set.
+ */
+void eRowSetBinding::trigdata_append_remove(
+    os_char *ix_column_name,
+    os_long ix_value)
+{
+
+}
+
+/* Append "insert or update row" to trig data to send to row set.
+ */
+void eRowSetBinding::trigdata_append_insert_or_update(
+    os_char *ix_column_name,
+    os_long ix_value,
+    eContainer *trigger_columns,
+    eDBM *dbm)
+{
+    eContainer *vars, *list;
+    eVariable *v, *tc;
+    eName *n;
+    eMatrix *m;
+    os_int col_nr;
+
+    if (m_where) {
+        vars = m_where->variables();
+        if (vars && trigger_columns)
+        {
+            for (v = vars->firstv(); v; v = v->nextv()) {
+                n = v->primaryname();
+                if (n == OS_NULL) continue;
+                tc = eVariable::cast(trigger_columns->byname(n->gets()));
+                if (tc) {
+                    v->setv(tc);
+                }
+                else {
+                    v->clear();
+                }
+            }
+
+            if (m_where->evaluate()) {
+                return;
+            }
+        }
+    }
+
+    if (m_trigged_changes == OS_NULL)
+    {
+        m_trigged_changes = new eContainer(this);
+        v = new eVariable(m_trigged_changes, 110);
+        v->sets(ix_column_name);
+        v = new eVariable(m_trigged_changes, 111);
+        v->setl(ix_value);
+    }
+
+    m = new eMatrix(m_trigged_changes, 112);
+    list = columns();
+    m->allocate(OS_OBJECT, 1, list->childcount()); // ??????????????????? CHECK CAN DATA TYPE BE OPTIMIZED
+    if (list) {
+        for (v = list->firstv(), col_nr = 0; v; v = v->nextv(), col_nr++) {
+            n = v->primaryname();
+            if (n == OS_NULL) continue;
+
+            tc = eVariable::cast(trigger_columns->byname(n->gets()));
+            if (tc) {
+                m->setv(0, col_nr, tc);
+            }
+        }
+    }
 }

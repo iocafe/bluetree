@@ -122,11 +122,7 @@ public:
 
     /**
     ************************************************************************************************
-
-      @name Property binding functions
-
-      These functions implement property finding functionality.
-
+      Row set binding functions
     ************************************************************************************************
     */
 
@@ -153,7 +149,27 @@ public:
         eObject *obj,
         eEnvelope *envelope);
 
+    /* Append "remove row" to trig data to send to row set.
+     */
+    void trigdata_append_remove(
+        os_char *ix_column_name,
+        os_long ix_value);
+
+    /* Append "insert or update row" to trig data to send to row set.
+     */
+    void trigdata_append_insert_or_update(
+        os_char *ix_column_name,
+        os_long ix_value,
+        eContainer *trigger_columns,
+        eDBM *dbm);
+
 protected:
+
+    /**
+    ************************************************************************************************
+      Internal functions
+    ************************************************************************************************
+    */
     /* Send first message to initiate row set binding (client)
      */
     void bind2(
@@ -225,6 +241,10 @@ protected:
     /** Index range of select, OS_LONG_MIN, OS_LONG_MAX if not limited.
      */
     os_long m_minix, m_maxix;
+
+    /** trigged "remove row" and "insert/update row" data for the binding.
+     */
+    eContainer *m_trigged_changes;
 
     /** Synchronized transfer of the results (server).
      */

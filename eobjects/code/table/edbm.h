@@ -109,13 +109,13 @@ public:
 
     /* Trigger remove row (append to trig data to send to row set)
      */
-    void trigdata_remove(
+    void trigdata_append_remove(
         os_char *ix_column_name,
         os_long ix_value);
 
     /* Trigger insert or update row (append to trig data to send to row set)
      */
-    void trigdata_insert_or_update(
+    void trigdata_append_insert_or_update(
         os_char *ix_column_name,
         os_long ix_value);
 
@@ -186,6 +186,14 @@ protected:
     /* Generate merged trigged data based on all server side row set bindings.
      */
     void generate_trigger_data();
+
+    /* Clear trigged "remove row" and "insert/update row" data in bindings.
+     */
+    void trigdata_clear();
+
+    /* Send trigged "remove row" and "insert/update row" data to bindings.
+     */
+    void trigdata_send();
 
     /**
     ************************************************************************************************

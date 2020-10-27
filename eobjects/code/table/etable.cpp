@@ -231,7 +231,7 @@ void eTable::trigger_remove(
 
         name = find_index_column_name();
         if (name) {
-            dbm->trigdata_remove(name->gets(), ix_value);
+            dbm->trigdata_append_remove(name->gets(), ix_value);
         }
     }
 }
@@ -258,7 +258,7 @@ void eTable::trigger_insert_or_update(
 
         name = find_index_column_name();
         if (name) {
-            dbm->trigdata_insert_or_update(name->gets(), ix_value);
+            dbm->trigdata_append_insert_or_update(name->gets(), ix_value);
         }
     }
 }

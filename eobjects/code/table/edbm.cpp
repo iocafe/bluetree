@@ -275,8 +275,10 @@ void eDBM::configure(
     os_int tflags)
 {
     eTable *table;
-    table = eTable::cast(parent());
-    table->configure(configuration, tflags);
+    table = get_table(OS_NULL); // ?????????????????????????????? WE NEED TABLE NAME HERE
+    if (table) {
+        table->configure(configuration, tflags);
+    }
 }
 
 
@@ -303,7 +305,9 @@ void eDBM::insert(
     eTable *table;
     table = get_table(table_name);
     if (table) {
+        trigdata_clear();
         table->insert(rows, tflags, this);
+        trigdata_send();
     }
 }
 
@@ -332,7 +336,9 @@ void eDBM::update(
     eTable *table;
     table = get_table(table_name);
     if (table) {
+        trigdata_clear();
         table->update(where_clause->gets(), row, tflags, this);
+        trigdata_send();
     }
 }
 
@@ -357,7 +363,9 @@ void eDBM::remove(
     eTable *table;
     table = get_table(table_name);
     if (table) {
+        trigdata_clear();
         table->remove(where_clause->gets(), tflags, this);
+        trigdata_send();
     }
 }
 
@@ -607,66 +615,103 @@ void eDBM::generate_trigger_data()
 */
 
 
+/* Clear trigged "remove row" and "insert/update row" data in bindings.
+ */
+void eDBM::trigdata_clear()
+{
+    eContainer *bindings;
+    eBinding *binding;
+    eRowSetBinding *rbinding;
+
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL) return ;
+    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+         binding;
+         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+    {
+        if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
+        rbinding = eRowSetBinding::cast(binding);
+
+        // clear
+    }
+}
+
+
 /* Trigger remove row (append to trig data to send to row set)
  */
-void eDBM::trigdata_remove(
+void eDBM::trigdata_append_remove(
     os_char *ix_column_name,
     os_long ix_value)
 {
+    eContainer *bindings;
+    eBinding *binding;
+    eRowSetBinding *rbinding;
 
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL) return ;
+    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+         binding;
+         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+    {
+        if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
+        rbinding = eRowSetBinding::cast(binding);
+
+        if (ix_value < rbinding->minix() || ix_value > rbinding->maxix()) {
+            continue;
+        }
+
+        rbinding->trigdata_append_remove(ix_column_name, ix_value);
+    }
 }
 
 /* Trigger insert or update row (append to trig data to send to row set)
  */
-void eDBM::trigdata_insert_or_update(
+void eDBM::trigdata_append_insert_or_update(
     os_char *ix_column_name,
     os_long ix_value)
 {
+    eContainer *bindings;
+    eBinding *binding;
+    eRowSetBinding *rbinding;
 
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL) return ;
+    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+         binding;
+         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+    {
+        if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
+        rbinding = eRowSetBinding::cast(binding);
+
+        if (ix_value < rbinding->minix() || ix_value > rbinding->maxix()) {
+            continue;
+        }
+
+        rbinding->trigdata_append_insert_or_update(ix_column_name,
+            ix_value, m_trigger_columns, this);
+    }
 }
 
 
-
-/**
-****************************************************************************************************
-
-  @brief X
-
-  Callback from table implementation (eMatrix, etc) when trigger update matching to trigger
-  period has been changed.
-
-  @param   table_name eVariable holding table name. Can be OS_NULL if not needed (eMatrix)
-  @return  pointer to object derived from eTable or OS_NULL if none mches to table name.
-
-****************************************************************************************************
-*/
-/* eStatus eDBM::trigger_callback(Row *xx)
+/* Send trigged "remove row" and "insert/update row" data to bindings.
+ */
+void eDBM::trigdata_send()
 {
-    // * Loop trough the active selections
+    eContainer *bindings;
+    eBinding *binding;
+    eRowSetBinding *rbinding;
 
-        // If index range matces
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL) return ;
+    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+         binding;
+         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+    {
+        if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
+        rbinding = eRowSetBinding::cast(binding);
 
-        // If where clause evaluates ok
-
-        // Append information about insert, update or remove to up. to tigged data message
+        // send
+    }
 }
 
-*/
 
-
-/**
-****************************************************************************************************
-
-  @brief X
-
-  Send trigged data messages to clients.
-
-
-****************************************************************************************************
-*/
-/* eStatus eDBM::send_trigged_data()
- *
- * {
- * }
-
-*/
