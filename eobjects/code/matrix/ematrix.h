@@ -210,7 +210,7 @@ public:
      */
     virtual eStatus select(
         const os_char *where_clause,
-        eContainer *columns,
+        eContainer *cols,
         eSelectParameters *prm,
         os_int tflags = 0);
 
@@ -396,12 +396,12 @@ protected:
      */
     void insert_one_row(
         eContainer *row,
-        os_int use_row_nr);
+        os_int use_row_nr,
+        eDBM *dbm);
 
-    /* ematrix_as_table.cpp: Insert row to table.
+    /* ematrix_as_table.cpp: Get pointer to name of index column (helper function).
      */
-    eVariable *find_index_element(
-        eContainer *row);
+    virtual eName *find_index_column_name();
 
     /* ematrix_as_table.cpp: select, update or remove operation.
      */
@@ -410,7 +410,8 @@ protected:
         const os_char *where_clause,
         eContainer *cont,
         eSelectParameters *prm,
-        os_int tflags);
+        os_int tflags,
+        eDBM *dbm);
 
     /* ematrix_as_table.cpp: Pass messages to DBM object.
      */

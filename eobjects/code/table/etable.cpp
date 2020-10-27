@@ -173,3 +173,92 @@ eWhere *eTable::set_where(
     return eWhere::cast(first(EOID_TABLE_WHERE));
 } */
 
+
+/**
+****************************************************************************************************
+
+  @brief Find index column eVariable from row to insert (helper function).
+
+  @param   row eContainer holding a eVariables for each element.
+  @return  Pointer to eVariable within row which contains index value, if any.
+           OS_NULL if row doesn't contain index.
+
+****************************************************************************************************
+*/
+eVariable *eTable::find_index_element(
+    eContainer *row)
+{
+    eVariable *element;
+    eName *index_column_name, *column_name;
+
+    /* Get index column name from configuration.
+     */
+    index_column_name = find_index_column_name();
+    if (index_column_name == OS_NULL) {
+        return OS_NULL;
+    }
+
+    for (element = row->firstv(); element; element = element->nextv())
+    {
+        column_name = element->primaryname();
+        if (!index_column_name->compare(column_name)) {
+            break;
+        }
+    }
+
+    return element;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Trigger removing a row with specific index value.
+
+  @param   ix_value Index value to remove
+  @param   dbm Pointer to DBM.
+
+****************************************************************************************************
+*/
+void eTable::trigger_remove(
+    os_long ix_value,
+    eDBM *dbm)
+{
+    eName *name;
+
+    if (dbm) {
+        if (ix_value < dbm->minix() || ix_value > dbm->maxix()) return;
+
+        name = find_index_column_name();
+        if (name) {
+            dbm->trigdata_remove(name->gets(), ix_value);
+        }
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Trigger row insert or update with specific index value.
+
+  @param   ix_value Index value to remove
+  @param   dbm Pointer to DBM.
+
+****************************************************************************************************
+*/
+void eTable::trigger_insert_or_update(
+    os_long ix_value,
+    eDBM *dbm)
+{
+    eName *name;
+
+    if (dbm) {
+        if (ix_value < dbm->minix() || ix_value > dbm->maxix()) return;
+
+        name = find_index_column_name();
+        if (name) {
+            dbm->trigdata_insert_or_update(name->gets(), ix_value);
+        }
+    }
+}

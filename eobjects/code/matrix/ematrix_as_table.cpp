@@ -116,12 +116,12 @@ void eMatrix::insert(
 
     row = rows->firstc();
     if (row == OS_NULL) {
-        insert_one_row(rows, -1);
+        insert_one_row(rows, -1, dbm);
     }
 
     else {
         do {
-            insert_one_row(row, -1);
+            insert_one_row(row, -1, dbm);
             row = row->nextc();
         }
         while (row);
@@ -147,12 +147,14 @@ void eMatrix::insert(
 */
 void eMatrix::insert_one_row(
     eContainer *row,
-    os_int use_row_nr)
+    os_int use_row_nr,
+    eDBM *dbm)
 {
-    eVariable *element, *index_element, *column;
+    eVariable *element, *index_element, *column, *tcolumn;
     eName *name;
     os_char *namestr;
-    os_long row_nr;
+    eContainer *trig_cols;
+    os_long row_nr, ix_value;
     os_int column_nr;
 
     index_element = find_index_element(row);
@@ -187,6 +189,7 @@ void eMatrix::insert_one_row(
         else if (use_row_nr >= 0 && row_nr != use_row_nr) {
             copy_row(row_nr, use_row_nr);
             clear_row(use_row_nr);
+            trigger_remove(use_row_nr + 1, dbm);
         }
     }
 
@@ -220,47 +223,60 @@ void eMatrix::insert_one_row(
     /* Set flags column
      */
     setl(row_nr, EMTX_FLAGS_COLUMN_NR, EMTX_FLAGS_ROW_OK);
+
+    /* Stored data related to trigged row into eDBM object.
+     */
+    if (dbm == OS_NULL || m_columns == OS_NULL) return;
+    ix_value = row_nr + 1;
+    if (ix_value < dbm->minix() || ix_value > dbm->maxix()) return;
+    trig_cols = dbm->trigger_columns();
+    if (trig_cols == OS_NULL) return;
+    for (tcolumn = trig_cols->firstv(); tcolumn; tcolumn = tcolumn->nextv())
+    {
+        name = tcolumn->primaryname();
+        if (name == OS_NULL) continue;
+
+        column = eVariable::cast(m_columns->byname(name->gets()));
+        if (column) {
+            column_nr = column->oid();
+            if (column_nr == EMTX_FLAGS_COLUMN_NR) {
+                tcolumn->setl(ix_value);
+            }
+            else {
+                getv(row_nr, column_nr, tcolumn);
+            }
+        }
+        else {
+            tcolumn->clear();
+        }
+    }
+
+    trigger_insert_or_update(ix_value, dbm);
+
 }
 
 
 /**
 ****************************************************************************************************
 
-  @brief Find index column eVariable from row to insert (helper function).
+  @brief Get pointer to name of index column (helper function).
 
-  @param   row eContainer holding a eVariables for each element.
-  @return  Pointer to eVariable within row which contains index value, if any.
-           OS_NULL if row doesn't contain index.
+  Get index column name from table configuration.
+
+  @return  Pointer to eName which holding index column name, for example "ix".
+           OS_NULL if not found.
 
 ****************************************************************************************************
 */
-eVariable *eMatrix::find_index_element(
-    eContainer *row)
+eName *eMatrix::find_index_column_name()
 {
-    eVariable *element, *index_column;
-    eName *index_column_name, *column_name;
+    eVariable *index_column;
 
     index_column = m_columns->firstv();
     if (index_column == OS_NULL) {
         return OS_NULL;
     }
-
-    /* Get index column name from configuration.
-     */
-    index_column_name = index_column->primaryname();
-    if (index_column_name == OS_NULL) {
-        return OS_NULL;
-    }
-
-    for (element = row->firstv(); element; element = element->nextv())
-    {
-        column_name = element->primaryname();
-        if (!index_column_name->compare(column_name)) {
-            break;
-        }
-    }
-
-    return element;
+    return index_column->primaryname();
 }
 
 
@@ -286,7 +302,7 @@ eStatus eMatrix::update(
     os_int tflags,
     eDBM *dbm)
 {
-    return select_update_remove(EMTX_UPDATE, where_clause, row, OS_NULL, tflags);
+    return select_update_remove(EMTX_UPDATE, where_clause, row, OS_NULL, tflags, dbm);
 }
 
 
@@ -307,7 +323,7 @@ void eMatrix::remove(
     os_int tflags,
     eDBM *dbm)
 {
-    select_update_remove(EMTX_REMOVE, where_clause, OS_NULL, OS_NULL, tflags);
+    select_update_remove(EMTX_REMOVE, where_clause, OS_NULL, OS_NULL, tflags, dbm);
 }
 
 
@@ -333,11 +349,11 @@ void eMatrix::remove(
 */
 eStatus eMatrix::select(
     const os_char *where_clause,
-    eContainer *columns,
+    eContainer *cols,
     eSelectParameters *prm,
     os_int tflags)
 {
-    return select_update_remove(EMTX_SELECT, where_clause, columns, prm, tflags);
+    return select_update_remove(EMTX_SELECT, where_clause, cols, prm, tflags, OS_NULL);
 }
 
 
@@ -364,7 +380,8 @@ eStatus eMatrix::select_update_remove(
     const os_char *where_clause,
     eContainer *cont,
     eSelectParameters *prm,
-    os_int tflags)
+    os_int tflags,
+    eDBM *dbm)
 {
     eWhere *w = OS_NULL;
     os_int *col_mtx = OS_NULL, *sel_mtx = OS_NULL;
@@ -516,7 +533,7 @@ eStatus eMatrix::select_update_remove(
          */
         switch (op) {
             case EMTX_UPDATE:
-                insert_one_row(cont, row_nr);
+                insert_one_row(cont, row_nr, dbm);
                 break;
 
             case EMTX_REMOVE:

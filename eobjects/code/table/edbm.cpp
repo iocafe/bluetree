@@ -600,18 +600,31 @@ void eDBM::generate_trigger_data()
 
   Called by insert, update and remove in this C file.
 
-  @param
+  @param    cmd ECMD_INSERT_ROWS_TO_TABLE, ECMD_UPDATE_TABLE_ROWS, ECMD_REMOVE_ROWS_FROM_TABLE
   @return
 
 ****************************************************************************************************
 */
-/* eStatus eDBM::get_trigger_data(
-{
-    Clear all trigged data messages in bindings
 
-    Return trigger data.
+
+/* Trigger remove row (append to trig data to send to row set)
+ */
+void eDBM::trigdata_remove(
+    os_char *ix_column_name,
+    os_long ix_value)
+{
+
 }
-*/
+
+/* Trigger insert or update row (append to trig data to send to row set)
+ */
+void eDBM::trigdata_insert_or_update(
+    os_char *ix_column_name,
+    os_long ix_value)
+{
+
+}
+
 
 
 /**

@@ -107,6 +107,18 @@ public:
     inline os_long minix() {return m_minix;}
     inline os_long maxix() {return m_maxix;}
 
+    /* Trigger remove row (append to trig data to send to row set)
+     */
+    void trigdata_remove(
+        os_char *ix_column_name,
+        os_long ix_value);
+
+    /* Trigger insert or update row (append to trig data to send to row set)
+     */
+    void trigdata_insert_or_update(
+        os_char *ix_column_name,
+        os_long ix_value);
+
 protected:
     /**
     ************************************************************************************************

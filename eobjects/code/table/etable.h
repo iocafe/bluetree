@@ -134,6 +134,8 @@ public:
         eContainer *configuration,
         os_int tflags = 0)
     {
+        OSAL_UNUSED(configuration);
+        OSAL_UNUSED(tflags);
         osal_debug_error("eTable::configure is not overloaded");
     }
 
@@ -149,6 +151,9 @@ public:
         os_int tflags = 0,
         eDBM *dbm = OS_NULL)
     {
+        OSAL_UNUSED(rows);
+        OSAL_UNUSED(tflags);
+        OSAL_UNUSED(dbm);
         osal_debug_error("eTable::insert is not overloaded");
     }
 
@@ -160,6 +165,10 @@ public:
         os_int tflags = 0,
         eDBM *dbm = OS_NULL)
     {
+        OSAL_UNUSED(where_clause);
+        OSAL_UNUSED(row);
+        OSAL_UNUSED(tflags);
+        OSAL_UNUSED(dbm);
         osal_debug_error("eTable::update is not overloaded");
         return ESTATUS_FAILED;
     }
@@ -171,6 +180,9 @@ public:
         os_int tflags = 0,
         eDBM *dbm = OS_NULL)
     {
+        OSAL_UNUSED(where_clause);
+        OSAL_UNUSED(tflags);
+        OSAL_UNUSED(dbm);
         osal_debug_error("eTable::remove is not overloaded");
     }
 
@@ -178,14 +190,39 @@ public:
      */
     virtual eStatus select(
         const os_char *where_clause,
-        eContainer *columns,
+        eContainer *cols,
         eSelectParameters *prm,
         os_int tflags = 0)
     {
+        OSAL_UNUSED(where_clause);
+        OSAL_UNUSED(cols);
+        OSAL_UNUSED(prm);
+        OSAL_UNUSED(tflags);
         osal_debug_error("eTable::select is not overloaded");
         return ESTATUS_FAILED;
     }
 
+    /* Get pointer to name of index column (helper function). This needs to be overload
+       by implementing class.
+     */
+    virtual eName *find_index_column_name() {return OS_NULL; }
+
+    /* Find index column eVariable from row to insert (helper function).
+     */
+    eVariable *find_index_element(
+        eContainer *row);
+
+    /* Trigger removing a row with specific index value.
+     */
+    void trigger_remove(
+        os_long ix_value,
+        eDBM *dbm);
+
+    /* Trigger row insert or update with specific index value.
+     */
+    void trigger_insert_or_update(
+        os_long ix_value,
+        eDBM *dbm);
 
     /**
     ************************************************************************************************
