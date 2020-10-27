@@ -148,7 +148,7 @@ eWhere::eWhere(
   @param  whereclause Where clause, basically simplified SQL where clause, with added time stamp
           marking. This typically defines to which rows of a table a select, update or remove is
           applied.
-  @return None.
+  @return ESTATUS_SUCCESS if compilation succeeded. Other return values indicate an error.
 
 ****************************************************************************************************
 */
@@ -161,6 +161,7 @@ eStatus eWhere::compile(
     m_nconstants = 0;
     m_code->clear();
     m_pos = whereclause;
+    if (whereclause == OS_NULL) return ESTATUS_FAILED;
     return expression() ? ESTATUS_SUCCESS : ESTATUS_FAILED;
 }
 

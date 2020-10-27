@@ -98,12 +98,14 @@ eContainer *eMatrix::configuration()
            Multiple rows: eContainer holding a eContainers for each row to insert. Each row
            container contains eVariable for each element to set.
   @param   tflags Reserved for future, set 0 for now.
+  @param   dbm Pointer to eDBM to forward changes by trigger. OS_NULL if not needed.
 
 ****************************************************************************************************
 */
 void eMatrix::insert(
     eContainer *rows,
-    os_int tflags)
+    os_int tflags,
+    eDBM *dbm)
 {
     eContainer *row;
 
@@ -267,22 +269,24 @@ eVariable *eMatrix::find_index_element(
 
   @brief Update a row or rows of a table (Table interface function).
 
-  @param   whereclause String containing range and/or actual where clause. This selects which
+  @param   where_clause String containing range and/or actual where clause. This selects which
            rows are updated.
   @param   row A row of updated data. eContainer holding an eVariable for each element (column)
            to update. eVariable name is column name.
   @param   tflags Reserved for future, set 0 for now.
+  @param   dbm Pointer to eDBM to forward changes by trigger. OS_NULL if not needed.
 
   @return  OSAL_SUCCESS if ok.
 
 ****************************************************************************************************
 */
 eStatus eMatrix::update(
-    const os_char *whereclause,
+    const os_char *where_clause,
     eContainer *row,
-    os_int tflags)
+    os_int tflags,
+    eDBM *dbm)
 {
-    return select_update_remove(EMTX_UPDATE, whereclause, row, OS_NULL, tflags);
+    return select_update_remove(EMTX_UPDATE, where_clause, row, OS_NULL, tflags);
 }
 
 
@@ -291,17 +295,19 @@ eStatus eMatrix::update(
 
   @brief Remove rows from the table (Table interface function).
 
-  @param   whereclause String containing range and/or actual where clause. This selects which
+  @param   where_clause String containing range and/or actual where clause. This selects which
            rows are to be removed.
   @param   tflags Reserved for future, set 0 for now.
+  @param   dbm Pointer to eDBM to forward changes by trigger. OS_NULL if not needed.
 
 ****************************************************************************************************
 */
 void eMatrix::remove(
-    const os_char *whereclause,
-    os_int tflags)
+    const os_char *where_clause,
+    os_int tflags,
+    eDBM *dbm)
 {
-    select_update_remove(EMTX_REMOVE, whereclause, OS_NULL, OS_NULL, tflags);
+    select_update_remove(EMTX_REMOVE, where_clause, OS_NULL, OS_NULL, tflags);
 }
 
 
@@ -314,7 +320,7 @@ void eMatrix::remove(
   Column which to get are listed in "columns" list. The selected data is returned trough
   the callback function.
 
-  @param   whereclause String containing range and/or actual where clause.
+  @param   where_clause String containing range and/or actual where clause.
   @param   columns List of columns to get. eContainer holding an eVariable for each column
            to select. eVariable name is column name, or column name can also be stored as
            variable value.
@@ -326,12 +332,12 @@ void eMatrix::remove(
 ****************************************************************************************************
 */
 eStatus eMatrix::select(
-    const os_char *whereclause,
+    const os_char *where_clause,
     eContainer *columns,
     eSelectParameters *prm,
     os_int tflags)
 {
-    return select_update_remove(EMTX_SELECT, whereclause, columns, prm, tflags);
+    return select_update_remove(EMTX_SELECT, where_clause, columns, prm, tflags);
 }
 
 
@@ -341,7 +347,7 @@ eStatus eMatrix::select(
   @brief Select, update or remove rows from table (internal).
 
   @param   op What to do: EMTX_UPDATE, EMTX_REMOVE or EMTX_SELECT.
-  @param   whereclause String containing range and/or actual where clause.
+  @param   where_clause String containing range and/or actual where clause.
   @param   cont A row of updated data or eContainer holding columns to select.
   @param   callback Pointer to callback function which will receive the data. The
            callback function may be called multiple times to receive data as matrices with
@@ -355,7 +361,7 @@ eStatus eMatrix::select(
 */
 eStatus eMatrix::select_update_remove(
     eMtxOp op,
-    const os_char *whereclause,
+    const os_char *where_clause,
     eContainer *cont,
     eSelectParameters *prm,
     os_int tflags)
@@ -381,13 +387,13 @@ eStatus eMatrix::select_update_remove(
 
     /* Asterix '*' as where clause is all rows, same as empty where clause.
      */
-    if (!os_strcmp(whereclause, "*")) {
-        whereclause = OS_NULL;
+    if (!os_strcmp(where_clause, "*")) {
+        where_clause = OS_NULL;
     }
 
     /* Get index range from beginning of where clause.
      */
-    count = e_parse_index_range(whereclause, &minix, &maxix);
+    count = e_parse_index_range(where_clause, &minix, &maxix);
     if (count <= 0) {
         minix = 0;
         maxix = m_nrows - 1;
@@ -395,13 +401,13 @@ eStatus eMatrix::select_update_remove(
     else {
         minix--;
         maxix--;
-        whereclause += count;
+        where_clause += count;
     }
 
     /* Compile where clause and set column index for each varible in where clause
      */
-    if (whereclause) if (*whereclause) {
-        w = set_where(whereclause);
+    if (where_clause) if (*where_clause) {
+        w = set_where(where_clause);
         if (w == OS_NULL) {
             return ESTATUS_FAILED;
         }
@@ -499,7 +505,7 @@ eStatus eMatrix::select_update_remove(
                 if (s != ESTATUS_FALSE && !eval_error_reported)
                 {
                     rval = s;
-                    osal_debug_error_str("Where clause failed: ", whereclause);
+                    osal_debug_error_str("Where clause failed: ", where_clause);
                     eval_error_reported = OS_TRUE;
                 }
                 continue;
@@ -574,6 +580,7 @@ getout:
     if (sel_mtx_sz){
         os_free(sel_mtx, sel_mtx_sz);
     }
+    delete w;
     delete tmp;
     return rval;
 }

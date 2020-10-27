@@ -27,6 +27,9 @@ eDBM::eDBM(
     os_int flags)
     : eObject(parent, id, flags)
 {
+    m_trigger_columns = OS_NULL;
+    m_minix = OS_LONG_MIN;
+    m_maxix = OS_LONG_MAX;
 }
 
 
@@ -300,7 +303,7 @@ void eDBM::insert(
     eTable *table;
     table = get_table(table_name);
     if (table) {
-        table->insert(rows, tflags);
+        table->insert(rows, tflags, this);
     }
 }
 
@@ -329,7 +332,7 @@ void eDBM::update(
     eTable *table;
     table = get_table(table_name);
     if (table) {
-        table->update(where_clause->gets(), row, tflags);
+        table->update(where_clause->gets(), row, tflags, this);
     }
 }
 
@@ -354,7 +357,7 @@ void eDBM::remove(
     eTable *table;
     table = get_table(table_name);
     if (table) {
-        table->remove(where_clause->gets(), tflags);
+        table->remove(where_clause->gets(), tflags, this);
     }
 }
 
@@ -500,28 +503,92 @@ eStatus eDBM::select(
 /**
 ****************************************************************************************************
 
-  @brief Merge selection of all binding to this DBM.
+  @brief Generate merged trigged data based on all server side row set bindings.
 
-  Called when eRowSet binding is added, deleted or changed to keep merged binding data up
-  to data.
+  Called when data is selected by server side eRowSetBinding, server side binding is unbound.
 
-  Merge all selections currently valid selections and get list of columns used in where
-  clauses and in columns list. Get also minimum and maximum index value which covers all
-  selections.
+  Merge all currently valid selections and get list of used columns used (either in where clause
+  or in columns data). Save also minimum and maximum index value which covers all selections.
 
-  This information is passed to table below when insert, update or remove is called with
-  data columns for insert and update to trigger dynamic updates.
-
-  @param
-  @return
+  The trigger data is passed to table (holding the data) at insert, update or remove call.
+  This allows dynamic inserts, updates and removed to active selections without reselecting
+  the data.
 
 ****************************************************************************************************
 */
-/* eStatus eDBM::refresh_trigger_data(
+void eDBM::generate_trigger_data()
 {
+    eContainer *bindings;
+    eBinding *binding;
+    eRowSetBinding *rbinding;
+    eWhere *w;
+    eContainer *list;
+    eVariable *v, *u;
+    eName *n;
+    os_char *nstr;
+    os_long ix;
+
     // Setup reactive data.
+
+    delete m_trigger_columns;
+    m_trigger_columns = new eContainer(this);
+    m_trigger_columns->ns_create();
+
+    /* Set reversed to start with (no matches)
+     */
+    m_minix = OS_LONG_MAX;
+    m_maxix = OS_LONG_MIN;
+
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL) return ;
+    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+         binding;
+         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+    {
+        /* Only server side row set bindings.
+         */
+        if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
+        rbinding = eRowSetBinding::cast(binding);
+
+        /* Set smallest min, max range which includes all binding index ranges.
+         */
+        ix = rbinding->minix();
+        if (ix < m_minix) m_minix = ix;
+        ix = rbinding->maxix();
+        if (ix > m_maxix) m_maxix = ix;
+
+        w = rbinding->where();
+        if (w) {
+            list = w->variables();
+            if (list) {
+                for (v = list->firstv(); v; v = v->nextv()) {
+                    n = v->primaryname();
+                    if (n) {
+                        nstr = n->gets();
+                        if (m_trigger_columns->byname(nstr) == OS_NULL) {
+                            u = new eVariable(m_trigger_columns);
+                            u->addname(nstr);
+                        }
+                    }
+                }
+            }
+        }
+
+        list = rbinding->columns();
+        if (list) {
+            for (v = list->firstv(); v; v = v->nextv()) {
+                n = v->primaryname();
+                if (n) {
+                    nstr = n->gets();
+                    if (m_trigger_columns->byname(nstr) == OS_NULL) {
+                        u = new eVariable(m_trigger_columns);
+                        u->addname(nstr);
+                    }
+                }
+            }
+        }
+    }
 }
-*/
 
 
 /**

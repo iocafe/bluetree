@@ -91,11 +91,26 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
+    /**
+    ************************************************************************************************
+      eDBM function
+    ************************************************************************************************
+    */
+    /* Get pointer to to list of columns needed for trigger. Holds named eVariable
+       for each column.
+     */
+    inline eContainer *trigger_columns() {return m_trigger_columns; }
+
+    /** Get index range minimum and maximum. Functions return OS_LONG_MIN and OS_LONG_MAX
+        respectively if index range is not set.
+     */
+    inline os_long minix() {return m_minix;}
+    inline os_long maxix() {return m_maxix;}
 
 protected:
     /**
     ************************************************************************************************
-      Internal to DBM.
+      Internal functions and functions shared called from eRowSetBinding
     ************************************************************************************************
     */
     /* Forward select sent early to binding.
@@ -155,6 +170,27 @@ protected:
      */
     eTable *get_table(
         eVariable *table_name);
+
+    /* Generate merged trigged data based on all server side row set bindings.
+     */
+    void generate_trigger_data();
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
+
+    /** Trigger data: List of all columns used in any server side eRowSetBinding objects.
+       Includes both columns from where clause and columns list;
+     */
+    eContainer *m_trigger_columns;
+
+    /** Trigger data: Maximum index range from all selections, OS_LONG_MIN, OS_LONG_MAX if
+        not limited.
+     */
+    os_long m_minix, m_maxix;
+
 };
 
 #endif

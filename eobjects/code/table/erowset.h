@@ -20,6 +20,7 @@
 
 class eRowSetBinding;
 class eRowSet;
+class eDBM;
 
 /**
 ****************************************************************************************************
@@ -190,20 +191,23 @@ public:
      */
     virtual void insert(
         eContainer *rows,
-        os_int tflags = 0);
+        os_int tflags = 0,
+        eDBM *dbm = OS_NULL);
 
     /* Update a row or rows of a table.
      */
     virtual eStatus update(
         const os_char *where_clause,
         eContainer *row,
-        os_int tflags = 0);
+        os_int tflags = 0,
+        eDBM *dbm = OS_NULL);
 
     /* Remove rows from table.
      */
     virtual void remove(
         const os_char *where_clause,
-        os_int tflags = 0);
+        os_int tflags = 0,
+        eDBM *dbm = OS_NULL);
 
     /* Select rows from table.
      */

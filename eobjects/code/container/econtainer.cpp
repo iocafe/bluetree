@@ -282,8 +282,7 @@ eStatus eContainer::json_writer(
      */
     for (child = first(); child; child = child->next())
     {
-        if (!started)
-        {
+        if (!started) {
             if (json_puts(stream, "[")) goto failed;
             started = OS_TRUE;
         }
@@ -291,8 +290,7 @@ eStatus eContainer::json_writer(
         if (child->json_write(stream, sflags, indent+1, &comma)) goto failed;
     }
 
-    if (started)
-    {
+    if (started) {
         if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE)) goto failed;
         if (json_puts(stream, "]")) goto failed;
     }
@@ -319,8 +317,7 @@ void eContainer::clear()
 {
     eObject *o;
 
-    while ((o = first()))
-    {
+    while ((o = first())) {
         delete(o);
     }
 }

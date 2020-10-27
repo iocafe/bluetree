@@ -101,6 +101,24 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
+    /* Get pointer to columns list in table configuration, OS_NULL if none (server).
+       This is list with real names, no wildcards.
+     */
+    inline eContainer *columns() {
+        if (m_table_configuration == OS_NULL) return OS_NULL;
+        return m_table_configuration->firstc(EOID_TABLE_COLUMNS);
+    }
+
+    /* Get pointer to compiled where object, OS_NULL if none (server).
+     */
+    inline eWhere *where() {return m_where; }
+
+    /** Get index range minimum and maximum. Functions return OS_LONG_MIN and OS_LONG_MAX
+        respectively if index range is not set.
+     */
+    inline os_long minix() {return m_minix;}
+    inline os_long maxix() {return m_maxix;}
+
 
     /**
     ************************************************************************************************
@@ -176,6 +194,8 @@ protected:
      */
     eRowSet *client_rowset();
 
+
+
     /**
     ************************************************************************************************
       Member variables.
@@ -194,9 +214,17 @@ protected:
      */
     eContainer *m_table_configuration;
 
-    /** Where clause, pointer to within m_pset. Set by prm_set_to_struct().
+    /** eVariable holding where clause as string, OS_NULL if not server select.
      */
     eVariable *m_where_clause;
+
+    /** Compiled where clause including variables, OS_NULL if not server select
+     */
+    eWhere *m_where;
+
+    /** Index range of select, OS_LONG_MIN, OS_LONG_MAX if not limited.
+     */
+    os_long m_minix, m_maxix;
 
     /** Synchronized transfer of the results (server).
      */
@@ -213,7 +241,6 @@ protected:
     /** Synchronized transfer timeout.
      */
     static const os_long m_timeout_ms = 30000;
-
 };
 
 #endif

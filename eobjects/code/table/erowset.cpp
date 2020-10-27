@@ -424,9 +424,11 @@ failed:
  */
 void eRowSet::insert(
     eContainer *rows,
-    os_int tflags)
+    os_int tflags,
+    eDBM *dbm)
 {
     const os_char *table_name = OS_NULL;
+    OSAL_UNUSED(dbm);
     if (m_prm.table_name) {
         table_name = m_prm.table_name->gets();
     }
@@ -438,9 +440,11 @@ void eRowSet::insert(
 eStatus eRowSet::update(
     const os_char *where_clause,
     eContainer *row,
-    os_int tflags)
+    os_int tflags,
+    eDBM *dbm)
 {
     const os_char *table_name = OS_NULL;
+    OSAL_UNUSED(dbm);
     if (m_prm.table_name) {
         table_name = m_prm.table_name->gets();
     }
@@ -452,9 +456,11 @@ eStatus eRowSet::update(
  */
 void eRowSet::remove(
     const os_char *where_clause,
-    os_int tflags)
+    os_int tflags,
+    eDBM *dbm)
 {
     const os_char *table_name = OS_NULL;
+    OSAL_UNUSED(dbm);
     if (m_prm.table_name) {
         table_name = m_prm.table_name->gets();
     }

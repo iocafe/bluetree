@@ -43,7 +43,7 @@ eMatrixDataItem;
 
 static const os_short emtx_no_short_value = OS_SHORT_MIN;
 static const os_int emtx_no_int_value = OS_INT_MIN;
-static const os_int emtx_no_long_value = OS_LONG_MIN;
+static const os_long emtx_no_long_value = OS_LONG_MIN;
 
 
 /**
@@ -424,7 +424,7 @@ eStatus eMatrix::writer(
                     break;
 
                 case OS_CHAR:
-                    isempty = (os_boolean)((os_char*)dataptr == OS_CHAR_MIN);
+                    isempty = (os_boolean)(*(os_char*)dataptr == OS_CHAR_MIN);
                     break;
 
                 case OS_SHORT:

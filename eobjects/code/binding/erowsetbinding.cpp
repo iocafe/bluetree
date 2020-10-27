@@ -37,6 +37,9 @@ eRowSetBinding::eRowSetBinding(
     // m_pset = OS_NULL;
     os_memclear(&m_pstruct, sizeof(eSelectParameters));
     m_where_clause = OS_NULL;
+    m_where = OS_NULL;
+    m_minix = OS_LONG_MIN;
+    m_maxix = OS_LONG_MAX;
     m_requested_columns = OS_NULL;
     m_table_configuration = OS_NULL;
     m_sync_transfer = OS_NULL;
@@ -117,6 +120,8 @@ void eRowSetBinding::setupclass()
 void eRowSetBinding::onmessage(
     eEnvelope *envelope)
 {
+    eDBM *dbm;
+
     /* If at final destination for the message.
      */
     if (*envelope->target()=='\0')
@@ -130,14 +135,19 @@ void eRowSetBinding::onmessage(
             case ECMD_UNBIND:
             case ECMD_SRV_UNBIND:
             case ECMD_NO_TARGET:
+                /* Client side: Disconnect this eRowSetBinding but do not delete it from memory
+                 * so it can be reconnected.
+                 */
                 if (m_bflags & EBIND_CLIENT) {
                     disconnect();
                 }
-                else {
-                    // dbm = get_dbm();
-                    delete this;
 
-                    // dbm->refresh_trigger_data()
+                /* Server side: Delete this eRowSetBinding and refresh trigger data.
+                 */
+               else {
+                    dbm = srv_dbm();
+                    delete this;
+                    dbm->generate_trigger_data();
                 }
                 return;
 
@@ -417,8 +427,6 @@ void eRowSetBinding::srvbind(
      */
     srvbind_base(envelope, reply);
 
-    // dbm->refresh_trigger_data()
-
     return;
 
 notarget:
@@ -520,8 +528,10 @@ void eRowSetBinding::srvselect(
     eDBM *dbm;
     eVariable v;
     eSet *parameters;
+    os_char *where_clause;
     eContainer *columns;
-    // eStatus s;
+    os_memsz count;
+    eStatus s;
 
     parameters = eSet::cast(envelope->content());
     if (parameters == OS_NULL)
@@ -544,9 +554,49 @@ void eRowSetBinding::srvselect(
         m_pstruct.tzone = m_pstruct.tzone->clone(this, EOID_ITEM);
     }
 
-    delete m_where_clause;
-    m_where_clause = new eVariable(this);
+    if (m_where_clause == OS_NULL) {
+        m_where_clause = new eVariable(this);
+    }
     parameters->getv(ERSET_BINDING_WHERE_CLAUSE, m_where_clause);
+
+    /* Asterix '*' as where clause is all rows, same as empty where clause.
+     */
+    where_clause = m_where_clause->gets();
+    if (!os_strcmp(where_clause, "*") || *where_clause == '\0') {
+        where_clause = OS_NULL;
+    }
+
+    /* Get index range from beginning of where clause.
+     */
+    count = e_parse_index_range(where_clause, &m_minix, &m_minix);
+    if (count <= 0) {
+        m_minix = OS_LONG_MIN;
+        m_maxix = OS_LONG_MAX;
+    }
+    else {
+        where_clause += count;
+    }
+
+    if (where_clause) {
+        if (m_where == OS_NULL) {
+            m_where = new eWhere(this);
+        }
+
+        s = m_where->compile(where_clause);
+        if (s) {
+            osal_debug_error_str("Where clause syntax error: ", where_clause);
+            delete m_where;
+            m_where = OS_NULL;
+        }
+    }
+    else {
+        delete m_where;
+        m_where = OS_NULL;
+    }
+
+    /* Refresh eDBM trigger data with updated where clause, etc.
+     */
+    dbm->generate_trigger_data();
 
     /* Setup synchronized transfer.
      */

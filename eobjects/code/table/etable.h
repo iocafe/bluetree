@@ -20,6 +20,7 @@
 
 class eTable;
 class eMatrix;
+class eDBM;
 
 /**
 ****************************************************************************************************
@@ -145,7 +146,8 @@ public:
      */
     virtual void insert(
         eContainer *rows,
-        os_int tflags = 0)
+        os_int tflags = 0,
+        eDBM *dbm = OS_NULL)
     {
         osal_debug_error("eTable::insert is not overloaded");
     }
@@ -155,7 +157,8 @@ public:
     virtual eStatus update(
         const os_char *where_clause,
         eContainer *row,
-        os_int tflags = 0)
+        os_int tflags = 0,
+        eDBM *dbm = OS_NULL)
     {
         osal_debug_error("eTable::update is not overloaded");
         return ESTATUS_FAILED;
@@ -165,7 +168,8 @@ public:
      */
     virtual void remove(
         const os_char *where_clause,
-        os_int tflags = 0)
+        os_int tflags = 0,
+        eDBM *dbm = OS_NULL)
     {
         osal_debug_error("eTable::remove is not overloaded");
     }
