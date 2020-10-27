@@ -152,13 +152,11 @@ public:
     /* Append "remove row" to trig data to send to row set.
      */
     void trigdata_append_remove(
-        os_char *ix_column_name,
         os_long ix_value);
 
     /* Append "insert or update row" to trig data to send to row set.
      */
     void trigdata_append_insert_or_update(
-        os_char *ix_column_name,
         os_long ix_value,
         eContainer *trigger_columns,
         eDBM *dbm);

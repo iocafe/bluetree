@@ -640,7 +640,6 @@ void eDBM::trigdata_clear()
 /* Trigger remove row (append to trig data to send to row set)
  */
 void eDBM::trigdata_append_remove(
-    os_char *ix_column_name,
     os_long ix_value)
 {
     eContainer *bindings;
@@ -660,14 +659,13 @@ void eDBM::trigdata_append_remove(
             continue;
         }
 
-        rbinding->trigdata_append_remove(ix_column_name, ix_value);
+        rbinding->trigdata_append_remove(ix_value);
     }
 }
 
 /* Trigger insert or update row (append to trig data to send to row set)
  */
 void eDBM::trigdata_append_insert_or_update(
-    os_char *ix_column_name,
     os_long ix_value)
 {
     eContainer *bindings;
@@ -687,7 +685,7 @@ void eDBM::trigdata_append_insert_or_update(
             continue;
         }
 
-        rbinding->trigdata_append_insert_or_update(ix_column_name,
+        rbinding->trigdata_append_insert_or_update(
             ix_value, m_trigger_columns, this);
     }
 }

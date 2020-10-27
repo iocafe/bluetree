@@ -189,7 +189,10 @@ void eMatrix::insert_one_row(
         else if (use_row_nr >= 0 && row_nr != use_row_nr) {
             copy_row(row_nr, use_row_nr);
             clear_row(use_row_nr);
-            trigger_remove(use_row_nr + 1, dbm);
+
+            if (dbm) {
+                dbm->trigdata_append_remove(use_row_nr + 1);
+            }
         }
     }
 
@@ -251,8 +254,7 @@ void eMatrix::insert_one_row(
         }
     }
 
-    trigger_insert_or_update(ix_value, dbm);
-
+    dbm->trigdata_append_insert_or_update(ix_value);
 }
 
 

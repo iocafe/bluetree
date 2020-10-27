@@ -212,18 +212,6 @@ public:
     eVariable *find_index_element(
         eContainer *row);
 
-    /* Trigger removing a row with specific index value.
-     */
-    void trigger_remove(
-        os_long ix_value,
-        eDBM *dbm);
-
-    /* Trigger row insert or update with specific index value.
-     */
-    void trigger_insert_or_update(
-        os_long ix_value,
-        eDBM *dbm);
-
     /**
     ************************************************************************************************
       Helper function to implement table.

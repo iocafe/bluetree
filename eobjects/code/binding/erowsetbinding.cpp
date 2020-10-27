@@ -837,7 +837,6 @@ eRowSet *eRowSetBinding::client_rowset()
 /* Append "remove row" to trig data to send to row set.
  */
 void eRowSetBinding::trigdata_append_remove(
-    os_char *ix_column_name,
     os_long ix_value)
 {
 
@@ -846,7 +845,6 @@ void eRowSetBinding::trigdata_append_remove(
 /* Append "insert or update row" to trig data to send to row set.
  */
 void eRowSetBinding::trigdata_append_insert_or_update(
-    os_char *ix_column_name,
     os_long ix_value,
     eContainer *trigger_columns,
     eDBM *dbm)
@@ -882,13 +880,9 @@ void eRowSetBinding::trigdata_append_insert_or_update(
     if (m_trigged_changes == OS_NULL)
     {
         m_trigged_changes = new eContainer(this);
-        v = new eVariable(m_trigged_changes, 110);
-        v->sets(ix_column_name);
-        v = new eVariable(m_trigged_changes, 111);
-        v->setl(ix_value);
     }
 
-    m = new eMatrix(m_trigged_changes, 112);
+    m = new eMatrix(m_trigged_changes);
     list = columns();
     m->allocate(OS_OBJECT, 1, list->childcount()); // ??????????????????? CHECK CAN DATA TYPE BE OPTIMIZED
     if (list) {
