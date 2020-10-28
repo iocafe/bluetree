@@ -37,6 +37,8 @@ class eStream;
 class eEnvelope;
 class eThread;
 class ePointer;
+class ePropertyBinding;
+class eRowSetBinding;
 
 /* Flags for message()
  */
@@ -913,6 +915,20 @@ public:
         os_int localpropertynr,
         const os_char *remotepath,
         os_int bflags);
+
+    /* Create bindings container for the object.
+     */
+    eContainer *bindings_container();
+
+    /* Get object's the first property binding.
+     */
+    ePropertyBinding *firstpb(
+        e_oid id = EOID_CHILD);
+
+    /* Get object's first row set binding.
+     */
+    eRowSetBinding *firstrb(
+        e_oid id);
 
     /* virtual void onmessagefrombinding() {}
     void messagetobinding(); */

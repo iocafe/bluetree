@@ -117,13 +117,15 @@ public:
 
     /**
     ************************************************************************************************
-
-      @name Property binding functions
-
-      These functions implement property finding functionality.
-
+      Property binding functions
     ************************************************************************************************
     */
+
+    /* Get the next property binding identified by oid.
+     */
+    ePropertyBinding *nextpb(
+        e_oid id = EOID_CHILD);
+
     /* Bind property.
      */
     void bind(
@@ -161,7 +163,6 @@ protected:
     virtual void forward(
         eVariable *x = OS_NULL,
         os_boolean delete_x = OS_FALSE);
-
 
     /* Update to property value has been received.
      */

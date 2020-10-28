@@ -39,19 +39,12 @@ void eObject::forwardproperty(
     eObject *source,
     os_int flags)
 {
-    eContainer *bindings;
-    eObject *b, *nextb;
+    ePropertyBinding *b, *nextb;
 
-    /* Get bindings container.
-     */
-    bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL) return;
-
-    for (b = bindings->first(); b; b = nextb)
+    for (b = firstpb(); b; b = nextb)
     {
-        nextb = b->next();
-        if (b->classid() == ECLASSID_PROPERTY_BINDING && b != source)
-        {
+        nextb = b->nextpb();
+        if (b != source) {
             ePropertyBinding::cast(b)->changed(propertynr, x, OS_FALSE);
         }
     }
@@ -100,11 +93,7 @@ void eObject::bind(
 
     /* Get or create bindings container.
      */
-    bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL)
-    {
-        bindings = new eContainer(this, EOID_BINDINGS, EOBJ_IS_ATTACHMENT);
-    }
+    bindings = bindings_container();
 
     /* Verify that same binding dows not already exist ?? How to modify bindings ????
      */
@@ -180,10 +169,7 @@ void eObject::srvbind(
 
     /* Get or create bindings container.
      */
-    bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL) {
-        bindings = new eContainer(this, EOID_BINDINGS, EOBJ_IS_ATTACHMENT);
-    }
+    bindings = bindings_container();
 
     /* Decide on binding class.
      */
@@ -231,3 +217,112 @@ void eObject::srvbind(
     binding->srvbind(this,  envelope);
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Create bindings container for the object or get pointer to it.
+
+  The eObject::bindings_container() function checks if bindings container identified as
+  EOID_BINDINGS already exists. If it doesn't, the container is created as attachment of
+  this object.
+
+  @return  Pointer to the bindings container.
+
+****************************************************************************************************
+*/
+eContainer *eObject::bindings_container()
+{
+    eContainer *bindings;
+
+    /* Get or create bindings container.
+     */
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL) {
+        bindings = new eContainer(this, EOID_BINDINGS, EOBJ_IS_ATTACHMENT);
+    }
+    return bindings;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get object's the first property binding.
+
+  The eObject::firstpb() function returns pointer to the first eRowSetBinding matching to oid.
+  The binding is searched from object's "bindings" container.
+
+  @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
+           child objects, regardless wether these are attachment or not. Other values
+           specify object identifier, only children with that specified object identifier
+           are searched for.
+
+  @return  Pointer to the first property binding, or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+ePropertyBinding *eObject::firstpb(
+    e_oid id)
+{
+    eContainer *bindings;
+    eHandle *h;
+
+    /* Get or create bindings container.
+     */
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL) {
+        return OS_NULL;
+    }
+
+    h = bindings->mm_handle->first(id);
+    while (h)
+    {
+        if (h->m_object->classid() == ECLASSID_PROPERTY_BINDING)
+            return ePropertyBinding::cast(h->m_object);
+
+        h = h->next(id);
+    }
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get object's first row set binding.
+
+  The eObject::firstrb() function returns pointer to the first eRowSetBinding matching to oid.
+  The binding is searched from object's "bindings" container.
+
+  @param   id EOID_TABLE_CLIENT_BINDING to loop trough client bindinds or EOID_TABLE_SERVER_BINDING
+           to loop trough server bindings.
+
+  @return  Pointer to the first row set binding, or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+eRowSetBinding *eObject::firstrb(
+    e_oid id)
+{
+    eContainer *bindings;
+    eHandle *h;
+
+    /* Get or create bindings container.
+     */
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL) {
+        return OS_NULL;
+    }
+
+    h = bindings->mm_handle->first(id);
+    while (h)
+    {
+        if (h->m_object->classid() == ECLASSID_ROW_SET_BINDING)
+            return eRowSetBinding::cast(h->m_object);
+
+        h = h->next(id);
+    }
+    return OS_NULL;
+}

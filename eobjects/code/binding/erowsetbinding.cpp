@@ -839,7 +839,10 @@ eRowSet *eRowSetBinding::client_rowset()
 void eRowSetBinding::trigdata_append_remove(
     os_long ix_value)
 {
-
+    if (m_trigged_changes == OS_NULL)
+    {
+        m_trigged_changes = new eContainer(this);
+    }
 }
 
 /* Append "insert or update row" to trig data to send to row set.
@@ -896,4 +899,42 @@ void eRowSetBinding::trigdata_append_insert_or_update(
             }
         }
     }
+}
+
+
+/* Send and clear trig data.
+ */
+void eRowSetBinding::trigdata_send()
+{
+
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get the next row set binding identified by oid.
+
+  The eRowSetBinding::nextrb() function returns pointer to the next row set binding.
+
+  @param   id EOID_TABLE_CLIENT_BINDING to loop trough client bindinds or EOID_TABLE_SERVER_BINDING
+           to loop trough server bindings.
+
+  @return  Pointer to the eRowSetBinding, or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+eRowSetBinding *eRowSetBinding::nextrb(
+    e_oid id)
+{
+    if (mm_handle == OS_NULL) return OS_NULL;
+    eHandle *h = mm_handle->next(id);
+    while (h)
+    {
+        if (h->object()->classid() == ECLASSID_ROW_SET_BINDING)
+            return eRowSetBinding::cast(h->object());
+
+        h = h->next(id);
+    }
+    return OS_NULL;
 }

@@ -268,13 +268,13 @@ eStatus eRowSet::simpleproperty(
             break;
 
         case ERSETP_WHERE_CLAUSE:
-            binding = get_binding();
+            binding = firstrb(EOID_TABLE_CLIENT_BINDING);
             if (binding == OS_NULL) goto clear_x;
             binding->propertyv(ERSETP_WHERE_CLAUSE, x);
             break;
 
         case ERSETP_REQUESTED_COLUMNS:
-            binding = get_binding();
+            binding = firstrb(EOID_TABLE_CLIENT_BINDING);
             if (binding == OS_NULL) goto clear_x;
             binding->propertyv(ERSETP_REQUESTED_COLUMNS, x);
             break;
@@ -526,18 +526,13 @@ void eRowSet::select(
 
     /* Get or create bindings container.
      */
-    bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL) {
-        bindings = new eContainer(this, EOID_BINDINGS, EOBJ_IS_ATTACHMENT);
-    }
-    else {
-        binding = eRowSetBinding::cast(bindings->first(EOID_TABLE_CLIENT_BINDING));
-        if (m_rebind && binding)
-        {
-            delete binding;
-            binding = OS_NULL;
+    bindings = bindings_container();
+    binding = eRowSetBinding::cast(bindings->first(EOID_TABLE_CLIENT_BINDING));
+    if (m_rebind && binding)
+    {
+        delete binding;
+        binding = OS_NULL;
 
-        }
     }
     m_rebind = OS_FALSE;
 
@@ -642,15 +637,10 @@ void eRowSet::initial_data_complete(
 
 /* Gets pointer to the table binding or OS_NULL if none.
  */
-eRowSetBinding *eRowSet::get_binding()
+/* eRowSetBinding *eRowSet::get_binding()
 {
-    eContainer *bindings;
-
-    bindings = firstc(EOID_BINDINGS);
-    if (bindings) {
-        return eRowSetBinding::cast(bindings->first(EOID_TABLE_CLIENT_BINDING));
-    }
-    return OS_NULL;
+    return firstrb(EOID_TABLE_CLIENT_BINDING);
 }
+*/
 
 

@@ -209,17 +209,14 @@ void eDBM::onmessage(
 void eDBM::forward_select_message_to_binding(
     eEnvelope *envelope)
 {
-    eContainer *bindings;
-    eBinding *binding;
+    eRowSetBinding *binding;
     os_char *source;
 
-    bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL) return;
     source = envelope->source();
 
-    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+    for (binding = firstrb(EOID_TABLE_SERVER_BINDING);
          binding;
-         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+         binding = binding->nextrb(EOID_TABLE_SERVER_BINDING))
     {
         if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
         if (!os_strcmp(binding->bindpath(), source)) break;
@@ -536,8 +533,6 @@ void eDBM::generate_trigger_data()
     os_char *nstr;
     os_long ix;
 
-    // Setup reactive data.
-
     delete m_trigger_columns;
     m_trigger_columns = new eContainer(this);
     m_trigger_columns->ns_create();
@@ -619,20 +614,14 @@ void eDBM::generate_trigger_data()
  */
 void eDBM::trigdata_clear()
 {
-    eContainer *bindings;
-    eBinding *binding;
-    eRowSetBinding *rbinding;
+    eRowSetBinding *binding;
 
-    bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL) return ;
-    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+    for (binding = firstrb(EOID_TABLE_SERVER_BINDING);
          binding;
-         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+         binding = binding->nextrb(EOID_TABLE_SERVER_BINDING))
     {
         if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
-        rbinding = eRowSetBinding::cast(binding);
-
-        // clear
+        binding->trigdata_clear();
     }
 }
 
@@ -642,24 +631,19 @@ void eDBM::trigdata_clear()
 void eDBM::trigdata_append_remove(
     os_long ix_value)
 {
-    eContainer *bindings;
-    eBinding *binding;
-    eRowSetBinding *rbinding;
+    eRowSetBinding *binding;
 
-    bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL) return ;
-    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+    for (binding = firstrb(EOID_TABLE_SERVER_BINDING);
          binding;
-         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+         binding = binding->nextrb(EOID_TABLE_SERVER_BINDING))
     {
         if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
-        rbinding = eRowSetBinding::cast(binding);
 
-        if (ix_value < rbinding->minix() || ix_value > rbinding->maxix()) {
+        if (ix_value < binding->minix() || ix_value > binding->maxix()) {
             continue;
         }
 
-        rbinding->trigdata_append_remove(ix_value);
+        binding->trigdata_append_remove(ix_value);
     }
 }
 
@@ -668,24 +652,19 @@ void eDBM::trigdata_append_remove(
 void eDBM::trigdata_append_insert_or_update(
     os_long ix_value)
 {
-    eContainer *bindings;
-    eBinding *binding;
-    eRowSetBinding *rbinding;
+    eRowSetBinding *binding;
 
-    bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL) return ;
-    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+    for (binding = firstrb(EOID_TABLE_SERVER_BINDING);
          binding;
-         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+         binding = binding->nextrb(EOID_TABLE_SERVER_BINDING))
     {
         if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
-        rbinding = eRowSetBinding::cast(binding);
 
-        if (ix_value < rbinding->minix() || ix_value > rbinding->maxix()) {
+        if (ix_value < binding->minix() || ix_value > binding->maxix()) {
             continue;
         }
 
-        rbinding->trigdata_append_insert_or_update(
+        binding->trigdata_append_insert_or_update(
             ix_value, m_trigger_columns, this);
     }
 }
@@ -695,20 +674,14 @@ void eDBM::trigdata_append_insert_or_update(
  */
 void eDBM::trigdata_send()
 {
-    eContainer *bindings;
-    eBinding *binding;
-    eRowSetBinding *rbinding;
+    eRowSetBinding *binding;
 
-    bindings = firstc(EOID_BINDINGS);
-    if (bindings == OS_NULL) return ;
-    for (binding = eBinding::cast(bindings->first(EOID_TABLE_SERVER_BINDING));
+    for (binding = firstrb(EOID_TABLE_SERVER_BINDING);
          binding;
-         binding = eBinding::cast(binding->next(EOID_TABLE_SERVER_BINDING)))
+         binding = binding->nextrb(EOID_TABLE_SERVER_BINDING))
     {
         if ((binding->bflags() & (EBIND_CLIENT|EBIND_BIND_ROWSET)) != EBIND_BIND_ROWSET) continue;
-        rbinding = eRowSetBinding::cast(binding);
-
-        // send
+        binding->trigdata_send();
     }
 }
 

@@ -796,3 +796,36 @@ os_boolean ePropertyBinding::listattr(
     propertyvar->propertyv(EVARP_CONF, x);
     return !x->isempty();
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Get the next property binding identified by oid.
+
+  The ePropertyBinding::nextpb() function returns pointer to the next property binding.
+
+  @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
+           child objects, regardless wether these are attachment or not. Other values
+           specify object identifier, only children with that specified object identifier
+           are searched for.
+
+  @return  Pointer to the ePropertyBinding, or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+ePropertyBinding *ePropertyBinding::nextpb(
+    e_oid id)
+{
+    if (mm_handle == OS_NULL) return OS_NULL;
+    eHandle *h = mm_handle->next(id);
+    while (h)
+    {
+        if (h->object()->classid() == ECLASSID_PROPERTY_BINDING)
+            return ePropertyBinding::cast(h->object());
+
+        h = h->next(id);
+    }
+    return OS_NULL;
+}

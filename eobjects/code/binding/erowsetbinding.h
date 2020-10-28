@@ -126,6 +126,11 @@ public:
     ************************************************************************************************
     */
 
+    /* Get the next row set binding identified by oid.
+     */
+    eRowSetBinding *nextrb(
+        e_oid id);
+
     /* Bind row set to table (client).
      */
     void bind(
@@ -149,6 +154,13 @@ public:
         eObject *obj,
         eEnvelope *envelope);
 
+    /* Clear trig data.
+     */
+    void trigdata_clear() {
+        delete m_trigged_changes;
+        m_trigged_changes = OS_NULL;
+    }
+
     /* Append "remove row" to trig data to send to row set.
      */
     void trigdata_append_remove(
@@ -160,6 +172,10 @@ public:
         os_long ix_value,
         eContainer *trigger_columns,
         eDBM *dbm);
+
+    /* Send and clear trig data.
+     */
+    void trigdata_send();
 
 protected:
 

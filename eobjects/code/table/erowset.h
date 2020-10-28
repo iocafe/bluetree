@@ -293,7 +293,7 @@ protected:
     */
     /* Gets pointer to the table binding or OS_NULL if none.
      */
-    eRowSetBinding *get_binding();
+    // eRowSetBinding *get_binding();
 
     /* Table structure has been received, store it and do callback.
      */
