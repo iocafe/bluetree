@@ -212,6 +212,11 @@ protected:
     void table_data_received(
         eEnvelope *envelope);
 
+    /* Trigged modifications have been received (client).
+     */
+    void table_modifications_received(
+        eEnvelope *envelope);
+
     /* Inform row set that all initial data has been received (client).
      */
     void initial_data_complete();

@@ -73,6 +73,7 @@
 #define ECMD_REMOVE_ROWS_FROM_TABLE -42
 #define ECMD_UPDATE_TABLE_ROWS -43
 #define ECMD_TABLE_DATA_TRANSFER -44
+#define ECMD_TABLE_TRIG_DATA -45
 
 /* Timer commands (timer hit and set timer period).
  */

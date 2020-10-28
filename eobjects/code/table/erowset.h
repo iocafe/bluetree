@@ -67,9 +67,10 @@ typedef enum ersetCallbackReason
 {
     ERSET_TABLE_BINDING_COMPLETE,
     ERSET_INITIAL_DATA_RECEIVED,
-    ERSET_INSERT,
+    ERSET_MODIFICATIONS_RECEIVED
+    /* ERSET_INSERT,
     ERSET_UPDATE,
-    ERSET_REMOVE
+    ERSET_REMOVE */
 }
 ersetCallbackEvent;
 
@@ -291,9 +292,6 @@ protected:
       Internal functions.
     ************************************************************************************************
     */
-    /* Gets pointer to the table binding or OS_NULL if none.
-     */
-    // eRowSetBinding *get_binding();
 
     /* Table structure has been received, store it and do callback.
      */

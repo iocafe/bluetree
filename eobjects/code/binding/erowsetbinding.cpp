@@ -162,6 +162,10 @@ void eRowSetBinding::onmessage(
                 table_data_received(envelope);
                 return;
 
+            case ECMD_TABLE_TRIG_DATA:
+                table_modifications_received(envelope);
+                return;
+
             case ECMD_OK:
                 initial_data_complete();
                 return;
@@ -778,6 +782,23 @@ getout:
 /**
 ****************************************************************************************************
 
+  @brief Trigged modifications have been received (client).
+
+  The table_modifications_received function is called when selected data in underlying table
+  is modified.
+
+****************************************************************************************************
+*/
+void eRowSetBinding::table_modifications_received(
+    eEnvelope *envelope)
+{
+
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Inform row set that all initial data has been received (client).
 
   The initial_data_complete function...
@@ -906,7 +927,13 @@ void eRowSetBinding::trigdata_append_insert_or_update(
  */
 void eRowSetBinding::trigdata_send()
 {
+    if (m_trigged_changes == OS_NULL) return;
 
+    /* Send trigged changes as message.
+     */
+    message(ECMD_TABLE_TRIG_DATA, m_bindpath,
+        OS_NULL, m_trigged_changes, EMSG_DEL_CONTENT, OS_NULL);
+    m_trigged_changes = OS_NULL;
 }
 
 

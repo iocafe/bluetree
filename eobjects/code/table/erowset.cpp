@@ -633,14 +633,3 @@ void eRowSet::initial_data_complete(
 
 // print_json();
 }
-
-
-/* Gets pointer to the table binding or OS_NULL if none.
- */
-/* eRowSetBinding *eRowSet::get_binding()
-{
-    return firstrb(EOID_TABLE_CLIENT_BINDING);
-}
-*/
-
-
