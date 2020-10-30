@@ -42,6 +42,7 @@ class eDBM;
 #define ERSETP_ROW_MODE 26
 #define ERSETP_TZONE 27
 #define ERSETP_HAS_CALLBACK 28
+#define ERSETP_IX_COLUMN_NAME 29
 #define ERSETP_CONFIGURATION 30
 
 
@@ -58,6 +59,7 @@ extern const os_char
     ersetp_row_mode[],
     ersetp_tzone[],
     ersetp_has_callback[],
+    ersetp_ix_column_name[],
     ersetp_configuration[];
 
 
@@ -286,6 +288,16 @@ public:
      */
     inline os_int ncolumns() {return m_ncolumns; }
 
+    /* Do trigged inserts and updates.
+     */
+    void trigged_insert_or_update(
+        eMatrix *m);
+
+    /* Do trigged removes on this row set.
+     */
+    void trigged_remove(
+        os_long ix_value);
+
 protected:
     /**
     ************************************************************************************************
@@ -308,10 +320,6 @@ protected:
       Member variables
     ************************************************************************************************
     */
-    /** Number of rows.
-     */
-    // os_int m_nrows;
-
     /** Number of columns.
      */
     os_int m_ncolumns;
@@ -319,6 +327,14 @@ protected:
     /** Table configuration (as selected).
      */
     eContainer *m_configuration;
+
+    /** Index column name, OS_NULL if not set.
+     */
+    eVariable *m_ix_column_name;
+
+    /** Index column number, 0...
+     */
+    os_int m_ix_column_nr;
 
     /** Own change, prevent recursion.
      */

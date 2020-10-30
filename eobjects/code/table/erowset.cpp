@@ -29,6 +29,7 @@ const os_char
     ersetp_row_mode[] = "rowmode",
     ersetp_tzone[] = "tzone",
     ersetp_has_callback[] = "callback",
+    ersetp_ix_column_name[] = "ixcolumn",
     ersetp_configuration[] = "configuration";
 
 /**
@@ -49,6 +50,10 @@ eRowSet::eRowSet(
     m_own_change = 0;
     m_dbm_path = OS_NULL;
     m_rebind = OS_FALSE;
+    m_ix_column_name = OS_NULL;
+    m_ix_column_nr = 0;
+    m_callback = OS_NULL;
+    m_context = OS_NULL;
     os_memclear(&m_prm, sizeof(eSelectParameters));
 }
 
@@ -97,6 +102,8 @@ void eRowSet::setupclass()
     addpropertyl(cls, ERSETP_ROW_MODE, ersetp_row_mode, "row", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty (cls, ERSETP_TZONE, ersetp_tzone, "tzone", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertyb(cls, ERSETP_HAS_CALLBACK, ersetp_has_callback, "callback",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, ERSETP_IX_COLUMN_NAME, ersetp_ix_column_name, "ix column",
         EPRO_PERSISTENT|EPRO_SIMPLE);
 
     addproperty (cls, ERSETP_CONFIGURATION, ersetp_configuration, "configuration",
@@ -220,6 +227,9 @@ eStatus eRowSet::onpropertychange(
             }
             break;
 
+        case ERSETP_IX_COLUMN_NAME: /* read only */
+            break;
+
         case ERSETP_CONFIGURATION: /* read only */
             break;
 
@@ -301,6 +311,10 @@ eStatus eRowSet::simpleproperty(
         case ERSETP_HAS_CALLBACK:
             if (m_prm.callback == OS_NULL) goto clear_x;
             x->setl(OS_TRUE);
+            break;
+
+        case ERSETP_IX_COLUMN_NAME:
+            x->setv(m_ix_column_name);
             break;
 
         case ERSETP_CONFIGURATION:
@@ -565,6 +579,9 @@ void eRowSet::client_binding_complete(
     eContainer *cont)
 {
     eContainer *configuration, *columns;
+    eName *n;
+    eVariable *v;
+    const os_char *ix_column_name;
     ersetCallbackInfo ci;
 
     delete m_configuration;
@@ -577,9 +594,27 @@ void eRowSet::client_binding_complete(
             m_configuration = eContainer::cast(configuration->clone(this,
                 EOID_TABLE_CONFIGURATION, EOBJ_TEMPORARY_ATTACHMENT));
 
+            ix_column_name = "ix";
+            v = m_configuration->firstv(EOID_TABLE_IX_COLUMN_NAME);
+            if (v) {
+                ix_column_name = v->gets();
+            }
+            if (m_ix_column_name == OS_NULL) {
+                m_ix_column_name = new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+            }
+            m_ix_column_name->sets(ix_column_name);
+            m_ix_column_nr = 0;
+
             columns = m_configuration->firstc(EOID_TABLE_COLUMNS);
             if (columns) {
                 m_ncolumns = columns->childcount();
+
+                for (v = columns->firstv(), m_ncolumns = 0; v; v = v->nextv(), m_ncolumns++) {
+                    n = v->primaryname();
+                    if (n) if (!n->compare(m_ix_column_name)) {
+                        m_ix_column_nr = m_ncolumns;
+                    }
+                }
             }
         }
     }
@@ -603,7 +638,7 @@ void eRowSet::initial_data_complete(
     eObject *o, *next_o;
     ersetCallbackInfo ci;
 
-    /* Delete old data
+    /* Delete old data.
      */
     for (o = first(); o; o = next_o) {
         next_o = o->next();
@@ -618,6 +653,8 @@ void eRowSet::initial_data_complete(
         for (o = sync_storage->first(); o; o = next_o) {
             next_o = o->next();
             if (o->classid() == ECLASSID_MATRIX) {
+
+            // ix_to_id
                 o->adopt(this, EOID_ITEM);
             }
         }
@@ -632,4 +669,19 @@ void eRowSet::initial_data_complete(
     }
 
 // print_json();
+}
+
+/* Do trigged inserts and updates.
+ */
+void eRowSet::trigged_insert_or_update(
+    eMatrix *m)
+{
+}
+
+/* Do trigged removes on this row set.
+ */
+void eRowSet::trigged_remove(
+    os_long ix_value)
+{
+    // ix_to_id
 }

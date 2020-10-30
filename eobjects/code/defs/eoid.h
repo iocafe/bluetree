@@ -92,12 +92,13 @@
 #define EOID_TABLE_CONTENT -42
 #define EOID_TABLE_WHERE -43
 #define EOID_TABLE_NAME -44
-#define EOID_TABLE_ATTR -45
+#define EOID_TABLE_IX_COLUMN_NAME -45
+#define EOID_TABLE_ATTR -46
 
-#define EOID_TABLE_CLIENT_BINDING -46
-#define EOID_TABLE_SERVER_BINDING -47
+#define EOID_TABLE_CLIENT_BINDING -55
+#define EOID_TABLE_SERVER_BINDING -56
 
-#define EOID_DBM -50
+#define EOID_DBM -60
 
 /** This is special object identifier that can be given as argument to object hierarchy
     functions, like first(). The EOID_CHILD specifies to get a child object,

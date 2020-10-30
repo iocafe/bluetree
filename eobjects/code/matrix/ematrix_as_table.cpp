@@ -79,8 +79,19 @@ void eMatrix::configure(
     }
 }
 
-/* Get pointer to table configuration (eContainer).
- */
+
+/**
+****************************************************************************************************
+
+  @brief Get pointer to table configuration (eContainer).
+
+  Table configuration list matrix columns and related metadata, generic table attributes, etc.
+
+  @return  Pointer to table configuration (eContainer) or OS_NULL if eMatrix is not configured
+           as a table.
+
+****************************************************************************************************
+*/
 eContainer *eMatrix::configuration()
 {
     return firstc(EOID_TABLE_CONFIGURATION);
@@ -539,6 +550,9 @@ eStatus eMatrix::select_update_remove(
                 break;
 
             case EMTX_REMOVE:
+                if (dbm) {
+                    dbm->trigdata_append_remove(row_nr + 1);
+                }
                 clear_row(row_nr);
                 break;
 

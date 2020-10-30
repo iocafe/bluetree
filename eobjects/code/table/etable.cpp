@@ -103,7 +103,8 @@ eContainer *eTable::process_configuration(
 {
     eContainer *dst_configuration;
     eContainer *src_columns, *dst_columns;
-    eVariable *src_column, *next_src_column;
+    eVariable *src_column, *next_src_column, *first_src_column, *v;
+    eName *n;
     os_int column_nr0;
 
     *nro_columns = 0;
@@ -120,11 +121,23 @@ eContainer *eTable::process_configuration(
         dst_columns = new eContainer(dst_configuration, EOID_TABLE_COLUMNS);
         dst_columns->ns_create();
 
-        for (src_column = src_columns->firstv(), column_nr0 = 0;
+        first_src_column = src_columns->firstv();
+        for (src_column = first_src_column, column_nr0 = 0;
              src_column;
              src_column = next_src_column, column_nr0++)
         {
             next_src_column =  src_column->nextv();
+
+            /* Index is always first column, at least for now.
+             */
+            if (src_column == first_src_column) {
+                n = src_column->primaryname();
+                if (n) {
+                    v = new eVariable(dst_configuration, EOID_TABLE_IX_COLUMN_NAME);
+                    v->setv(n);
+                }
+            }
+
             if (tflags & ETABLE_ADOPT_ARGUMENT) {
                 src_column->adopt(dst_columns, column_nr0);
             }

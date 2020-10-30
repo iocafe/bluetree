@@ -792,7 +792,30 @@ getout:
 void eRowSetBinding::table_modifications_received(
     eEnvelope *envelope)
 {
+    eContainer *trigged_changes;
+    eObject *item;
+    eRowSet *rset;
 
+    trigged_changes = envelope->firstc();
+    if (trigged_changes == OS_NULL) return;
+
+    rset = client_rowset();
+    for (item = trigged_changes->first(); item; item = item->next())
+    {
+        switch (item->classid())
+        {
+            case ECLASSID_MATRIX:
+                rset->trigged_insert_or_update((eMatrix*)item);
+                break;
+
+            case ECLASSID_VARIABLE:
+                rset->trigged_remove(((eVariable*)item)->getl());
+                break;
+
+            default:
+                break;
+        }
+    }
 }
 
 
@@ -860,10 +883,14 @@ eRowSet *eRowSetBinding::client_rowset()
 void eRowSetBinding::trigdata_append_remove(
     os_long ix_value)
 {
-    if (m_trigged_changes == OS_NULL)
-    {
+    eVariable *v;
+
+    if (m_trigged_changes == OS_NULL) {
         m_trigged_changes = new eContainer(this);
     }
+
+    v = new eVariable(m_trigged_changes);
+    v->setl(ix_value);
 }
 
 /* Append "insert or update row" to trig data to send to row set.
@@ -901,8 +928,7 @@ void eRowSetBinding::trigdata_append_insert_or_update(
         }
     }
 
-    if (m_trigged_changes == OS_NULL)
-    {
+    if (m_trigged_changes == OS_NULL) {
         m_trigged_changes = new eContainer(this);
     }
 
