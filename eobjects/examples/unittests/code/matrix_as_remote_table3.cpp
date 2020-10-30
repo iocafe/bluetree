@@ -265,7 +265,7 @@ public:
 
         m_rowset->select("*", &columns);
         // m_rowset->print_json();
-        timer(3000);
+        // timer(3000);
     }
 
 #if 0

@@ -795,6 +795,7 @@ void eRowSetBinding::table_modifications_received(
     eContainer *trigged_changes;
     eObject *item;
     eRowSet *rset;
+    os_boolean modified = OS_FALSE;
 
     trigged_changes = envelope->firstc();
     if (trigged_changes == OS_NULL) return;
@@ -806,15 +807,21 @@ void eRowSetBinding::table_modifications_received(
         {
             case ECLASSID_MATRIX:
                 rset->trigged_insert_or_update((eMatrix*)item);
+                modified = OS_TRUE;
                 break;
 
             case ECLASSID_VARIABLE:
                 rset->trigged_remove(((eVariable*)item)->getl());
+                modified = OS_TRUE;
                 break;
 
             default:
                 break;
         }
+    }
+
+    if (modified) {
+        rset->trigged_modifications_complete(trigged_changes);
     }
 }
 

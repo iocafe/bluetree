@@ -707,3 +707,19 @@ void eRowSet::trigged_remove(
         delete m;
     }
 }
+
+/* Do callback that trigged modifications have been completed.
+ */
+void eRowSet::trigged_modifications_complete(
+    eContainer *trigged_changes)
+{
+    ersetCallbackInfo ci;
+
+    /* Callback to inform application about initial data.
+     */
+    if (m_callback) {
+        os_memclear(&ci, sizeof(ci));
+        ci.event = ERSET_MODIFICATIONS_RECEIVED;
+        m_callback(this, &ci, m_context);
+    }
+}

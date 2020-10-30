@@ -288,15 +288,6 @@ public:
      */
     inline os_int ncolumns() {return m_ncolumns; }
 
-    /* Do trigged inserts and updates.
-     */
-    void trigged_insert_or_update(
-        eMatrix *m);
-
-    /* Do trigged removes on this row set.
-     */
-    void trigged_remove(
-        os_long ix_value);
 
 protected:
     /**
@@ -314,6 +305,21 @@ protected:
      */
     void initial_data_complete(
         eContainer *sync_storage);
+
+    /* Do trigged inserts and updates.
+     */
+    void trigged_insert_or_update(
+        eMatrix *m);
+
+    /* Do trigged removes on this row set.
+     */
+    void trigged_remove(
+        os_long ix_value);
+
+    /* Do callback that trigged modifications have been completed.
+     */
+    void trigged_modifications_complete(
+        eContainer *trigged_changes);
 
     /**
     ************************************************************************************************
