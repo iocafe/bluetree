@@ -55,6 +55,10 @@ eRowSet::eRowSet(
     m_callback = OS_NULL;
     m_context = OS_NULL;
     os_memclear(&m_prm, sizeof(eSelectParameters));
+
+    /* Create name space to index rows.
+     */
+//     ns_create();
 }
 
 
@@ -637,6 +641,7 @@ void eRowSet::initial_data_complete(
 {
     eObject *o, *next_o;
     ersetCallbackInfo ci;
+    os_long ix_value;
 
     /* Delete old data.
      */
@@ -653,9 +658,10 @@ void eRowSet::initial_data_complete(
         for (o = sync_storage->first(); o; o = next_o) {
             next_o = o->next();
             if (o->classid() == ECLASSID_MATRIX) {
-
-            // ix_to_id
                 o->adopt(this, EOID_ITEM);
+
+                ix_value = ((eMatrix*)o)->getl(0, m_ix_column_nr);
+                o->addintname(ix_value);
             }
         }
     }
@@ -676,6 +682,17 @@ void eRowSet::initial_data_complete(
 void eRowSet::trigged_insert_or_update(
     eMatrix *m)
 {
+    eObject *old_m;
+    os_long ix_value;
+
+    ix_value = m->getl(0, m_ix_column_nr);
+    old_m = byintname(ix_value);
+    if (old_m) {
+        delete old_m;
+    }
+
+    m->clone(this);
+    m->addintname(ix_value);
 }
 
 /* Do trigged removes on this row set.
@@ -683,5 +700,10 @@ void eRowSet::trigged_insert_or_update(
 void eRowSet::trigged_remove(
     os_long ix_value)
 {
-    // ix_to_id
+    eObject *m;
+
+    m = byintname(ix_value);
+    if (m) {
+        delete m;
+    }
 }

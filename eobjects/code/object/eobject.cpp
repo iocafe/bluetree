@@ -1580,6 +1580,39 @@ namespace_selected:
 }
 
 
+/* Adds integer value as name to parent name space.
+   This can be used to index large tables, typically by time stamp
+ */
+eName *eObject::addintname(
+    os_long x,
+    os_int flags)
+{
+    eName *n;
+
+    /* Create name object and set integer value to it.
+     */
+    n = new eName(this, EOID_NAME);
+    n->setl(x);
+
+    /* Set flags for name, like persistancy.
+     */
+    if (flags & ENAME_TEMPORARY) {
+        n->setflags(EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE);
+    }
+
+    /* Set name space identifier.
+     */
+    n->setnamespaceid(eobj_parent_ns);
+
+    /* Map name to namespace, unless disabled for now.
+     */
+    if ((flags & ENAME_NO_MAP) == 0)
+    {
+        n->mapname();
+    }
+
+    return n;
+}
 
 /**
 ****************************************************************************************************
@@ -1733,7 +1766,8 @@ void eObject::mapone(
   The eObject::byname() function looks for name in this object's name space.
 
   @param  name Name to look for.
-  @return If name is found, returns pointer to namef object. Otherwise the function returns OS_NULL.
+  @return If name is found, returns pointer to the named object. Otherwise if the function
+          it returns OS_NULL.
 
 ****************************************************************************************************
 */
@@ -1748,6 +1782,38 @@ eObject *eObject::byname(
     if (nspace)
     {
         namev.sets(name);
+        nobj = nspace->findname(&namev);
+        if (nobj) return nobj->parent();
+    }
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get object by integer name.
+
+  The eObject::byname() function looks for integer name in this object's name space.
+  Integer names are used to index data.
+
+  @param  x Integer name value to look for.
+  @return If name is found, returns pointer to "named" object. If name is not found, the function
+          returns OS_NULL.
+
+****************************************************************************************************
+*/
+eObject *eObject::byintname(
+    os_long x)
+{
+    eVariable namev;
+    eName *nobj;
+    eNameSpace *nspace;
+
+    nspace = eNameSpace::cast(first(EOID_NAMESPACE));
+    if (nspace)
+    {
+        namev.setl(x);
         nobj = nspace->findname(&namev);
         if (nobj) return nobj->parent();
     }

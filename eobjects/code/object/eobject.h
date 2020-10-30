@@ -597,6 +597,12 @@ public:
      */
     eName *primaryname();
 
+    /* Add integer value as name to parent namespace.
+     */
+    eName *addintname(
+        os_long x,
+        os_int flags = 0);
+
     /* Flags for map() function: Attach all names of child object (this) and it's childen to
        name spaces. If a name is already mapped, it is not remapped.
     */
@@ -620,6 +626,11 @@ public:
      */
     eObject *byname(
         const os_char *name);
+
+    /* Get object by name.
+     */
+    eObject *byintname(
+        os_long x);
 
 
     /**
