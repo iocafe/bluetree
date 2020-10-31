@@ -676,12 +676,12 @@ void eRowSet::initial_data_complete(
 // print_json();
 }
 
-/* Do trigged inserts and updates.
+/* Do trigged insert and update.
  */
 void eRowSet::trigged_insert_or_update(
     eMatrix *m)
 {
-    eObject *old_m;
+    eObject *old_m, *follower;
     os_long ix_value;
 
     ix_value = m->getl(0, m_ix_column_nr);
@@ -691,6 +691,13 @@ void eRowSet::trigged_insert_or_update(
     }
 
     m = eMatrix::cast(m->clone(this));
+
+    /* Maintain sort order and add "integer name" to search by index.
+     */
+    follower = byintname(ix_value + 1, OS_TRUE);
+    if (follower) {
+    //    m->adopt(follower, EOID_CHILD, EOBJ_BEFORE_THIS);
+    }
     m->addintname(ix_value);
 }
 

@@ -854,129 +854,6 @@ eObject *eObject::prev(
 /**
 ****************************************************************************************************
 
-  @brief Adopt obeject as child.
-
-  The eObject::adopt() function moves on object from it's position in tree structure to
-  an another.
-
-  @param   id EOID_CHILD object identifier unchanged.
-  @param   aflags
-          - EOBJ_BEFORE_THIS Adopt before this object.
-          - EOBJ_NO_MAP not to map names.
-          - EOBJ_CUST_FLAGSx Set a custom flag.
-          - EOBJ_IS_ATTACHMENT Mark cloned object as attachment.
-          - EOBJ_NOT_CLONABLE Mark cloned object as not clonable.
-          - EOBJ_NOT_SERIALIZABLE Mark cloned object as not serializable.
-  @return  None.
-
-****************************************************************************************************
-*/
-#if 0
-void eObject::adopt(
-    eObject *child,
-    e_oid id,
-    os_int aflags)
-{
-    os_boolean sync;
-    eHandle *childh;
-    os_int mapflags;
-
-    /* Make sure that parent object is already part of tree structure.
-     */
-    if (mm_handle == OS_NULL)
-    {
-        osal_debug_error("adopt(): parent object is not part of tree");
-        return;
-    }
-
-    if (child->mm_handle == OS_NULL)
-    {
-        sync = OS_FALSE; // || m_root->is_process ???????????????????????????????????????????????????????????????????????
-        if (sync) os_lock();
-
-        child->mm_parent = this;
-        mm_handle->m_root->newhandle(child, this, id, 0);
-
-        if (sync) os_unlock();
-    }
-
-    else
-    {
-// child->mm_handle->verify_whole_tree();
-// mm_handle->verify_whole_tree();
-
-        // Detach names
-
-        childh = child->mm_handle;
-
-        /* Synchronize if adopting from three structure to another.
-         */
-        sync = (mm_handle->m_root != childh->m_root);
-
-        if (sync)
-        {
-            os_lock();
-        }
-
-        /* Detach names of child object and it's childen from name spaces
-           above this object in tree structure.
-         */
-        child->map(E_DETACH_FROM_NAMESPACES_ABOVE);
-
-        /* if (childh->m_parent)
-        {
-            childh->m_parent->rbtree_remove(childh);
-        } */
-        if (child->mm_parent)
-        {
-            child->mm_parent->mm_handle->rbtree_remove(childh);
-
-        }
-
-        child->mm_parent = this;
-
-        if (id != EOID_CHILD) childh->m_oid = id;
-        childh->m_oflags |= EOBJ_IS_RED;
-        childh->m_left = childh->m_right = childh->m_up = OS_NULL;
-        mm_handle->rbtree_insert(childh);
-        /* childh->m_parent = mm_handle; */
-
-        /* Map names back: If not disabled by user flag EOBJ_NO_MAP, then attach all names of
-           child object (this) and it's childen to name spaces. If a name is already mapped,
-           it is not remapped.
-           If we are adoprion from a=one tree structure to another (sync is on), we need to set
-           m_root pointer (pointer to eRoot of a tree structure)to all child objects.
-         */
-        mapflags = sync ? E_SET_ROOT_POINTER : 0;
-        if ((aflags & EOBJ_NO_MAP) == 0)
-        {
-            mapflags |= E_ATTACH_NAMES;
-        }
-
-        if (mapflags)
-        {
-            childh->m_root = mm_handle->m_root;
-            child->map(E_ATTACH_NAMES|E_SET_ROOT_POINTER);
-        }
-
-// mm_root->mm_handle->verify_whole_tree();
-
-        if (sync) os_unlock();
-    }
-
-    /* If flags have been specified for top level object.
-     */
-    aflags &= EOBJ_CLONE_ARG_AFLAGS_MASK;
-    if (aflags) {
-        setflags(aflags);
-    }
-}
-#endif
-
-
-/**
-****************************************************************************************************
-
   @brief Adopt this eObject as child of parent.
 
   The eObject::adopt() function moves on object from it's position in tree structure to
@@ -1782,14 +1659,17 @@ void eObject::mapone(
 
   The eObject::byname() function looks for name in this object's name space.
 
-  @param  name Name to look for.
-  @return If name is found, returns pointer to the named object. Otherwise if the function
-          it returns OS_NULL.
+  @param   name Name to look for.
+  @param   name_match OS_TRUE (default) to get next object pointer only if name x given as argument
+           matches to name. OS_FALSE to get first object with name greater or equal to x argument.
+  @return  If name is found, returns pointer to the named object. Otherwise if the function
+           it returns OS_NULL.
 
 ****************************************************************************************************
 */
 eObject *eObject::byname(
-    const os_char *name)
+    const os_char *name,
+    os_boolean name_match)
 {
     eVariable namev;
     eName *nobj;
@@ -1799,7 +1679,7 @@ eObject *eObject::byname(
     if (nspace)
     {
         namev.sets(name);
-        nobj = nspace->findname(&namev);
+        nobj = nspace->findname(&namev, name_match);
         if (nobj) return nobj->parent();
     }
     return OS_NULL;
@@ -1814,14 +1694,17 @@ eObject *eObject::byname(
   The eObject::byname() function looks for integer name in this object's name space.
   Integer names are used to index data.
 
-  @param  x Integer name value to look for.
-  @return If name is found, returns pointer to "named" object. If name is not found, the function
-          returns OS_NULL.
+  @param   x Integer name value to look for.
+  @param   name_match OS_TRUE (default) to get next object pointer only if name x given as argument
+           matches to name. OS_FALSE to get first object with name greater or equal to x argument.
+  @return  If name is found, returns pointer to "named" object. If name is not found, the function
+           returns OS_NULL.
 
 ****************************************************************************************************
 */
 eObject *eObject::byintname(
-    os_long x)
+    os_long x,
+    os_boolean name_match)
 {
     eVariable namev;
     eName *nobj;
@@ -1831,7 +1714,7 @@ eObject *eObject::byintname(
     if (nspace)
     {
         namev.setl(x);
-        nobj = nspace->findname(&namev);
+        nobj = nspace->findname(&namev, name_match);
         if (nobj) return nobj->parent();
     }
     return OS_NULL;

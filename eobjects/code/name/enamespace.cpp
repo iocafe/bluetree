@@ -279,16 +279,20 @@ void eNameSpace::setnamespaceid(
   argument. The parent() of eName is the named object.
 
   @param   x Object name as variable. If OS_NULL, The function returns pointer to the first name.
+  @param   name_match OS_TRUE (default) to get next name pointer only if name x given as argument
+           matches to name. OS_FALSE to get first name greater or equal to x argument.
   @return  Pointer to name, or OS_NULL if no match was found.
 
 ****************************************************************************************************
 */
 eName *eNameSpace::findname(
-    eVariable *x)
+    eVariable *x,
+    os_boolean name_match)
 {
     eName
         *n,
-        *m;
+        *m,
+        *follower;
 
     os_int
         c;
@@ -316,6 +320,7 @@ eName *eNameSpace::findname(
     /* Handle normal case where child object is searched by exactly
        matching object identifier.
      */
+    follower = OS_NULL;
     while (n != OS_NULL)
     {
         c = x->compare(n);
@@ -329,13 +334,17 @@ eName *eNameSpace::findname(
             {
                 n = m;
             }
-            break;
+
+            /* Return object pointer
+             */
+            return n;
         }
 
         /* Smaller, search to the left.
          */
-        else if (c < 0)
+        if (c < 0)
         {
+            follower = n;
             n = n->m_ileft;
         }
 
@@ -347,9 +356,15 @@ eName *eNameSpace::findname(
         }
     }
 
-    /* Return object pointer or OS_NULL if none found.
+    /* If name match is not required, return pointer one which would follow x in order.
      */
-    return n;
+    if (!name_match) {
+        return follower;
+    }
+
+    /* Return OS_NULL, none found.
+     */
+    return OS_NULL;
 }
 
 

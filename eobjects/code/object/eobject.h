@@ -625,12 +625,14 @@ public:
     /* Get object by name.
      */
     eObject *byname(
-        const os_char *name);
+        const os_char *name,
+        os_boolean name_match = OS_TRUE);
 
     /* Get object by name.
      */
     eObject *byintname(
-        os_long x);
+        os_long x,
+        os_boolean name_match = OS_TRUE);
 
 
     /**

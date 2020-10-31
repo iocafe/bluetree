@@ -117,7 +117,8 @@ public:
     /* Get first child object with specific name.
      */
     eName *findname(
-        eVariable *x = OS_NULL);
+        eVariable *x = OS_NULL,
+        os_boolean name_match = OS_TRUE);
 
 
 protected:
