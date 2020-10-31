@@ -73,7 +73,6 @@ public:
         while (!exitnow())
         {
             alive();
-            osal_console_write("worker running\n");
         }
     }
 
@@ -131,7 +130,6 @@ public:
          */
         if (*envelope->target()=='\0' && envelope->command() == ECMD_TIMER)
         {
-            osal_console_write("TIMER\n");
             one_step_at_a_time();
             return;
         }
@@ -259,40 +257,10 @@ public:
         m_rowset = new eRowSet(this);
         m_rowset->set_dbm("//mymtx");
         m_rowset->set_callback(ThreadMonitoringTheTable::static_callback, this);
-
         column = new eVariable(&columns);
         column->addname("*", ENAME_NO_MAP);
-
         m_rowset->select("*", &columns);
-        // m_rowset->print_json();
-        // timer(3000);
     }
-
-#if 0
-    virtual void onmessage(
-        eEnvelope *envelope)
-    {
-        /* If at final destination for the message.
-         */
-        if (*envelope->target()=='\0' && envelope->command() == ECMD_TIMER)
-        {
-
-osal_console_write("TIMER\n");
-eContainer columns;
-eVariable *column;
-column = new eVariable(&columns);
-column->addname("*", ENAME_NO_MAP);
-m_rowset->select("*", &columns);
-// m_rowset->print_json();
-
-            return;
-        }
-
-        /* Default thread message processing.
-         */
-        eThread::onmessage(envelope);
-    }
-#endif
 
     void callback(
         eRowSet *rset,
@@ -305,9 +273,6 @@ m_rowset->select("*", &columns);
 
             case ERSET_INITIAL_DATA_RECEIVED:
             case ERSET_MODIFICATIONS_RECEIVED:
-            /* case ERSET_INSERT:
-            case ERSET_UPDATE:
-            case ERSET_REMOVE: */
                 rset->print_json(EOBJ_SERIALIZE_ONLY_CONTENT);
                 break;
         }
@@ -354,7 +319,6 @@ void matrix_as_remote_table_3()
 
     for (os_int i = 0; i<1000; i++)
     {
-        osal_console_write("master running\n");
         os_sleep(2000);
 
         txt = new eVariable(&root);

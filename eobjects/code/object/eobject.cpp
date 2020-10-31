@@ -1097,7 +1097,8 @@ void eObject::adopt(
   @brief Create name space for this object.
 
   The eObject::ns_create() function creates a name space for object. If object already
-  has name space...
+  has name space with matching ID, the function does nothing. If namespace with different
+  exists, old one is deleted and new one created.
 
   @param   namespace_id Identifier for the name space.
   @return  None.
@@ -1108,38 +1109,48 @@ void eObject::ns_create(
     const os_char *namespace_id)
 {
     eNameSpace *ns;
+    const os_char *nsid1, *nsid2;
 
     /* If object has already name space.
      */
     ns = eNameSpace::cast(first(EOID_NAMESPACE));
     if (ns)
     {
+        nsid1 = namespace_id;
+        if (nsid1 == OS_NULL) {
+            nsid1 = "";
+        }
+        nsid2 = "";
+        if (ns->namespaceid()) {
+            nsid2 = ns->namespaceid()->gets();
+        }
+
         /* If namespace identifier matches, just return.
          */
-        if (ns->namespaceid())
-        {
-            if (!os_strcmp(namespace_id, ns->namespaceid()->gets()))
-                return;
+        if (!os_strcmp(nsid1, nsid2)) {
+            return;
         }
 
         /* Delete old name space.
-           We should keep ot if we want to have multiple name spaces???
          */
         delete ns;
     }
 
     /* Create name space.
      */
-    // ns = eNameSpace::newobj(this, EOID_NAMESPACE);
     ns = new eNameSpace(this, EOID_NAMESPACE);
     if (namespace_id)
     {
         ns->setnamespaceid(namespace_id);
     }
 
-    /* Remap names in child objects ??? Do we need this. In practise name space is created
+    /* Remap names in child objects? Do we need this? In practise name space is created
        before placing children in?
      */
+    /* if ((aflags & EOBJ_NO_MAP) == 0)
+    {
+        map(E_ATTACH_NAMES);
+    } */
 }
 
 
@@ -1734,11 +1745,17 @@ void eObject::mapone(
 {
     eName *name;
     eNameSpace *ns;
+    eObject *namedobj;
     os_int info;
 
     name = eName::cast(handle->m_object);
-
-    ns = handle->m_object->findnamespace(name->namespaceid(), &info, this);
+    namedobj = name->parent();
+    if (namedobj) {
+        ns = namedobj->findnamespace(name->namespaceid(), &info, this);
+    }
+    else {
+        ns = OS_NULL;
+    }
 
     if ((mflags & E_ATTACH_NAMES))
     {

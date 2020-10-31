@@ -393,6 +393,7 @@ void eDBM::solve_table_configuration(
     eObject *sitem;
     eVariable *reqcol, *scol, *dcol, *name;
     os_char *namestr;
+    os_int column_nr;
 
     table = get_table(table_name);
     if (table == OS_NULL) return;
@@ -411,6 +412,7 @@ void eDBM::solve_table_configuration(
     if (scolumns) {
         dcolumns = new eContainer(resolved_configuration, EOID_TABLE_COLUMNS);
         dcolumns->ns_create();
+        column_nr = 0;
 
         for (reqcol = requested_columns->firstv(); reqcol; reqcol = reqcol->nextv())
         {
@@ -424,7 +426,7 @@ void eDBM::solve_table_configuration(
                 for (scol = scolumns->firstv(); scol; scol = scol->nextv())
                 {
                     if (dcolumns->byname(namestr) == OS_NULL) {
-                        scol->clone(dcolumns, EOID_ITEM);
+                        scol->clone(dcolumns, column_nr++);
                     }
                 }
 
@@ -433,11 +435,11 @@ void eDBM::solve_table_configuration(
             {
                 scol = eVariable::cast(scolumns->byname(namestr));
                 if (scol) {
-                    scol->clone(dcolumns, EOID_ITEM);
+                    scol->clone(dcolumns, column_nr++);
                 }
                 else
                 {
-                    dcol = new eVariable(dcolumns, EOID_ITEM);
+                    dcol = new eVariable(dcolumns, column_nr++);
                     dcol->addname(namestr);
                 }
             }

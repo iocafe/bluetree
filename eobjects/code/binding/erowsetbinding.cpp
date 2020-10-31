@@ -34,7 +34,6 @@ eRowSetBinding::eRowSetBinding(
 {
     /* Clear member variables.
      */
-    // m_pset = OS_NULL;
     os_memclear(&m_pstruct, sizeof(eSelectParameters));
     m_where_clause = OS_NULL;
     m_where = OS_NULL;
@@ -294,6 +293,8 @@ void eRowSetBinding::bind(
     eSelectParameters *prm,
     os_int bflags)
 {
+    eVariable *v;
+
     /* Free memory allocated, if any
      */
     delete m_pstruct.table_name;
@@ -314,7 +315,12 @@ void eRowSetBinding::bind(
     delete m_requested_columns;
     m_requested_columns = OS_NULL;
     if (columns) {
-        m_requested_columns = eContainer::cast(columns->clone(this));
+        m_requested_columns = new eContainer(this);
+        m_requested_columns->ns_create();
+        for (v = columns->firstv(); v; v = v->nextv())
+        {
+            v->clone(m_requested_columns);
+        }
     }
 
     /* Save flags and mark as client end.

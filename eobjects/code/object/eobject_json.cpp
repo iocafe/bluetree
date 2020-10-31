@@ -78,6 +78,7 @@ eStatus eObject::json_write(
     eBinding *b, *first_b;
     os_boolean comma1 = OS_FALSE, comma2 = OS_FALSE, comma3, property_listed;
     os_boolean end_with_nl = OS_FALSE;
+    os_boolean is_process;
 
     if (indent < 0) {
         indent = 0;
@@ -204,6 +205,37 @@ eStatus eObject::json_write(
             if (json_indent(stream, indent)) goto failed;
             if (json_puts(stream, "}")) goto failed;
         }
+    }
+
+    /* Write name space content (this could be optional,
+       not used for serialization but good for debug testing)
+     */
+    if (flags() & EOBJ_HAS_NAMESPACE)
+    {
+        if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma1)) goto failed;
+        if (json_puts(stream, "\"nspace\": [")) goto failed;
+
+        is_process = (classid() == ECLASSID_PROCESS);
+        if (is_process) {
+            os_lock();
+        }
+
+        comma3 = OS_FALSE;
+        for (name = ns_first(); name; name = name->ns_next(OS_FALSE)) {
+            if (json_indent(stream, indent + 1, EJSON_NEW_LINE_BEFORE, &comma3)) goto failed;
+            if (json_puts(stream, "{\"name\": ")) goto failed;
+            if (json_putqs(stream, name->gets())) goto failed;
+            if (json_puts(stream, ", \"object\": ")) goto failed;
+            name->parent()->json_write(stream, sflags, indent + 2, OS_NULL);
+            if (json_puts(stream, "}")) goto failed;
+        }
+
+        if (is_process) {
+            os_unlock();
+        }
+
+        if (json_indent(stream, indent)) goto failed;
+        if (json_puts(stream, "]")) goto failed;
     }
 
     /* Write bindings.

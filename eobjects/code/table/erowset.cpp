@@ -58,7 +58,7 @@ eRowSet::eRowSet(
 
     /* Create name space to index rows.
      */
-//     ns_create();
+    ns_create();
 }
 
 
@@ -527,7 +527,6 @@ void eRowSet::select(
 {
     eContainer *bindings;
     eRowSetBinding *binding = OS_NULL;
-    // eObject *o;
 
     if (m_dbm_path == OS_NULL) {
         osal_debug_error("eRowSet::select:DBM path not set");
@@ -691,7 +690,7 @@ void eRowSet::trigged_insert_or_update(
         delete old_m;
     }
 
-    m->clone(this);
+    m = eMatrix::cast(m->clone(this));
     m->addintname(ix_value);
 }
 
@@ -721,5 +720,8 @@ void eRowSet::trigged_modifications_complete(
         os_memclear(&ci, sizeof(ci));
         ci.event = ERSET_MODIFICATIONS_RECEIVED;
         m_callback(this, &ci, m_context);
+
+ print_json();
+
     }
 }

@@ -236,11 +236,11 @@ protected:
       Member variables.
     ************************************************************************************************
     */
-    /** Select parameters as structure, pointers to values within m_pset.
+    /** Select parameters as structure.
      */
     eSelectParameters m_pstruct;
 
-    /** Requested columns, pointer to eContainer within m_pset.
+    /** Requested columns, pointer to eContainer.
         This may contain wildcards.
      */
     eContainer *m_requested_columns;
