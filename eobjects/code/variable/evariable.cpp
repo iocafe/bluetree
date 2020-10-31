@@ -1254,7 +1254,7 @@ void eVariable::appendv(
 
   @param   x Variable to compare to.
 
-  @return  -1:thiso < x, 0:thiso==x,1:thiso>x.
+  @return  -1:this < x, 0:this == x,1:this > x.
 
 ****************************************************************************************************
 */
@@ -1284,13 +1284,13 @@ os_int eVariable::compare(
     /* Arrange by type id enum, so that type number of x is smaller than y's.
      */
     y = this;
-    reverse = -1;
+    reverse = 1;
     if (x->type() > y->type())
     {
         tmp = x;
         x = y;
         y = tmp;
-        reverse = 1;
+        reverse = -1;
     }
 
     switch (x->type())
@@ -1328,7 +1328,7 @@ os_int eVariable::compare(
                     else
                     {
                         osal_int_to_str(nbuf, sizeof(nbuf), x->m_value.valbuf.v.l);
-                        rval = os_strcmp(nbuf, y->gets());
+                        rval = os_strcmp(y->gets(), nbuf);
                     }
                     break;
 
@@ -1367,7 +1367,7 @@ os_int eVariable::compare(
                     }
                     else
                     {
-                        rval = os_strcmp(nbuf, y->gets());
+                        rval = os_strcmp(y->gets(), nbuf);
                     }
                     break;
 
@@ -1385,7 +1385,7 @@ os_int eVariable::compare(
             switch (y->type())
             {
                 case OS_STR:
-                    rval = os_strcmp(x->gets(), y->gets());
+                    rval = os_strcmp(y->gets(), x->gets());
                     break;
 
                 case OS_OBJECT:
