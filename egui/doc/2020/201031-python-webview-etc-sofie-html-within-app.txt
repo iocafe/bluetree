@@ -1,0 +1,103 @@
+Python Code: Flask + HTML/JS-based GUI in Python
+Inbox
+
+Sofie Lehtikoski
+2:39 PM (8 minutes ago)
+to me, Sofie
+
+from flask import Flask, jsonify, request, render_template
+#from .packages.flask import Flask, jsonify, request, render_template
+app = Flask(__name__.split('.')[0])
+
+# CORS (cross domain access, prevents access issues with routing to the server)
+from flask_cors import CORS, cross_origin
+#from packages.flask_cors import CORS, cross_origin
+
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+#
+# SERVER + NATIVE GUI FUNCTIONALITY
+#
+def runServer(environ='MANUAL'):
+    # Function to allow any python files that import this file to start the server
+    # with this call (e.g. import app\n app.runServer() would start the server)
+    if environ == 'MANUAL' or environ == 'SIM':
+        #runGUI()
+        # Note that you typically can't run a separate Process inside of the CAD
+        # system! This must be started up outside of the CAD
+        p = Process(target=runGUI,args=())
+        p.start()
+
+    app.run() # Defaults to http://localhost:5000
+
+    if environ == 'MANUAL' or environ == 'SIM':
+        p.join()
+
+import sys, random, os
+def runGUI(guiType='PYWEBVIEW'):
+    '''
+    Runs an HTML/JS-based GUI outside of the CAD system.
+
+    Inputs:
+        guiType (str):
+            "BROWSER"  : Opens the GUI in the end user's default browser.
+                         https://docs.python.org/3.7/library/webbrowser.html
+            "WX"       : Opens the GUI using python wx's native html features (low functionality)
+                         https://wiki.wxpython.org/
+            "CEF"      : Opens the GUI using the Chromium Embedded Framework (CEF) + a python
+                         wrapper. (Better functionality, low res, py wrapper module not fully mature)
+                         https://github.com/cztomczak/cefpython
+            "PYWEBVIEW": Opens the GUI using pywebview, which is a lightweight crossplatform
+                         python wrapper of WebKit (Best option, BSD license)
+                         https://pywebview.flowrl.com/guide/
+    '''
+    guiTitle = "DFR Evaluator"
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    long_url = dir_path+'\\..\\GUI.html'
+    crossp_url = '../GUI.html'
+    if guiType == "BROWSER":
+        # Opens the GUI in the default browser
+        import webbrowser
+        webbrowser.open(long_url)
+       
+    elif guiType == 'WX':
+        # Opens the GUI as an application in WX using WX HTML2. Has low functionality.
+        # ERROR: Doesn't work in Process() for some reason?
+        import wx, wx.html, wx.html2
+        guiApp = wx.App()
+        frame = wx.Frame(None,title=guiTitle)
+
+        #htmlWindow = wx.html.HtmlWindow(frame)
+        htmlWindow = wx.html2.WebView.New(frame)
+        htmlWindow.LoadURL(long_url) # for html2
+        #htmlWindow.LoadFile(long_url) # for html
+
+    elif guiType == "CEF":
+        # Opens the GUI as a CEF. Has good functionality, not best resolution. (+glitches)
+        from cefpython3 import cefpython as cef
+        settings = {"auto_zooming":"1.0"} # https://github.com/cztomczak/cefpython/blob/master/api/ApplicationSettings.md
+        cef.Initialize(settings=settings)
+        #cef.DpiAware.EnableHighDpiSupport() # Windows only, makes resolution better but has glitch
+        browser = cef.CreateBrowserSync(url=long_url,window_title=guiTitle)
+        cef.MessageLoop()
+        cef.Shutdown()
+
+    elif guiType == "PYWEBVIEW":
+        # Opens the GUI using PyWebVIEW, which wraps the base webkit and
+        # uses native OS GUI features (best option)
+        import webview
+        webview.create_window(guiTitle,crossp_url)#'http://www.google.com')
+        webview.start()
+
+
+Sofie Lehtikoski
+2:44 PM (3 minutes ago)
+to me, Sofie
+
+LAST PYTHON GUI OPTION, unexplored: https://python-gtk-3-tutorial.readthedocs.io/en/latest/gallery.html (don't know if html/js is natively supported in python gtk)
+
+And QT is completely left untouched, due to overextensive licensing and large computational space.
+
+You can find the "pip install" instructions for each of these modules on their respective web pages. They are all one-line installers.
+

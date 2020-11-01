@@ -991,8 +991,8 @@ void eHandle::replace_node(
 void eHandle::rbtree_insert(
     eHandle *inserted_node)
 {
-    eHandle
-            *n;
+    eHandle *n;
+    e_oid ins_oid;
 
     if (m_children == OS_NULL)
     {
@@ -1001,9 +1001,71 @@ void eHandle::rbtree_insert(
     else
     {
         n = m_children;
+        ins_oid = inserted_node->m_oid;
         while (1)
         {
-            if (inserted_node->m_oid < n->m_oid)
+            if (ins_oid < n->m_oid)
+            {
+                if (n->m_left == OS_NULL)
+                {
+                    n->m_left = inserted_node;
+                    break;
+                }
+                else
+                {
+                    n = n->m_left;
+                }
+            }
+            else
+            {
+                if (n->m_right == OS_NULL)
+                {
+                    n->m_right = inserted_node;
+                    break;
+                }
+                else
+                {
+                    n = n->m_right;
+                }
+            }
+        }
+        inserted_node->m_up = n;
+    }
+    insert_case1(inserted_node);
+
+#if EOBJECT_DBTREE_DEBUG
+    verify_properties();
+#endif
+}
+
+
+/* Inset before handle "before"
+ * - before must be child object of this object
+ * - inserted node should normally have same oid as before
+ */
+void eHandle::rbtree_insert_at(
+    eHandle *inserted_node,
+    eHandle *before)
+{
+    eHandle *n;
+    e_oid ins_oid;
+
+    if (before == OS_NULL) {
+        rbtree_insert(inserted_node);
+        return;
+    }
+
+    if (m_children == OS_NULL)
+    {
+        m_children = inserted_node;
+    }
+    else
+    {
+        n = before; // m_children;
+        ins_oid = inserted_node->m_oid;
+        while (1)
+        {
+            if (ins_oid <= n->m_oid)
             {
                 if (n->m_left == OS_NULL)
                 {

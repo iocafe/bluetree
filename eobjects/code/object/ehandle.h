@@ -420,6 +420,13 @@ protected:
     void rbtree_insert(
         eHandle *inserted_node);
 
+    /* Red/Black tree: Insert a node to red black tree at specific position
+       when there are multiple nodes with same key.
+     */
+    void rbtree_insert_at(
+        eHandle *inserted_node,
+        eHandle *before);
+
     /* Red/Black tree: Balance red/black tree after inserting node.
      */
     void insert_case1(

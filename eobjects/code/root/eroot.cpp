@@ -101,8 +101,8 @@ void eRoot::newhandle(
     e_oid id,
     os_int flags)
 {
-    eHandle
-        *handle;
+    eHandle *handle;
+    eObject *before;
 
     /* If we have no free handles, allocate more. Incse number of handles to
        allocate at once.
@@ -134,18 +134,23 @@ void eRoot::newhandle(
     /* Save object identifier, clear flags, mark new node as red,
        join to tree hierarchy, no children yet.
      */
-    handle->clear(obj, id, flags);
+    handle->clear(obj, id, flags & ~EOBJ_BEFORE_THIS);
     handle->m_root = this;
 
     obj->mm_handle = handle;
     if (parent)
     {
-        /* handle->m_parent = parent->mm_handle; */
-
-        /* Save parent object pointer. If parent object is given, join the new object
+        /* If parent object is given, join the new object
            to red black tree of parent's children.
          */
-        parent->mm_handle->rbtree_insert(handle);
+        if (flags & EOBJ_BEFORE_THIS) {
+            before = parent;
+            parent = before->parent();
+            parent->mm_handle->rbtree_insert_at(handle, before->mm_handle);
+        }
+        else {
+            parent->mm_handle->rbtree_insert(handle);
+        }
     }
 }
 

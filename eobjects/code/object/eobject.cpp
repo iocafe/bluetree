@@ -879,6 +879,7 @@ void eObject::adopt(
 {
     os_boolean sync;
     eHandle *childh, *parenth;
+    eObject *before = OS_NULL;
     os_int mapflags;
 
     /* Make sure that parent object is already part of tree structure.
@@ -889,13 +890,26 @@ void eObject::adopt(
         return;
     }
 
+    if (aflags & EOBJ_BEFORE_THIS)
+    {
+        before = parent;
+        parent = before->parent();
+        id = before->oid();
+    }
+
     if (mm_handle == OS_NULL)
     {
         sync = OS_FALSE; // || m_root->is_process ???????????????????????????????????????????????????????????????????????
         if (sync) os_lock();
 
         mm_parent = parent;
-        parent->mm_handle->m_root->newhandle(this, parent, id, 0);
+        if (before) {
+            parent->mm_handle->m_root->newhandle(this, before, id, EOBJ_BEFORE_THIS);
+        }
+
+        else {
+            parent->mm_handle->m_root->newhandle(this, parent, id, 0);
+        }
 
         if (sync) os_unlock();
     }
@@ -933,7 +947,13 @@ void eObject::adopt(
         if (id != EOID_CHILD) childh->m_oid = id;
         childh->m_oflags |= EOBJ_IS_RED;
         childh->m_left = childh->m_right = childh->m_up = OS_NULL;
-        parenth->rbtree_insert(childh);
+
+        if (before) {
+            parenth->rbtree_insert_at(childh, before->mm_handle);
+        }
+        else {
+            parenth->rbtree_insert(childh);
+        }
         /* childh->m_parent = mm_handle; */
 
         /* Map names back: If not disabled by user flag EOBJ_NO_MAP, then attach all names of
