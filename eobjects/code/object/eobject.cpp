@@ -916,10 +916,10 @@ void eObject::adopt(
 
     else
     {
-// child->mm_handle->verify_whole_tree();
-// mm_handle->verify_whole_tree();
-
-        // Detach names
+#if EOBJECT_DBTREE_DEBUG
+        verify_whole_tree();
+        parent->verify_whole_tree();
+#endif
 
         childh = mm_handle;
         parenth = parent->mm_handle;
@@ -932,29 +932,32 @@ void eObject::adopt(
             os_lock();
         }
 
-        /* Detach names of child object and it's childen from name spaces
-           above this object in tree structure.
+        /* If not already at right place?
          */
-        map(E_DETACH_FROM_NAMESPACES_ABOVE);
+        if (this != before) {
+            /* Detach names of child object and it's childen from name spaces
+               above this object in tree structure.
+             */
+            map(E_DETACH_FROM_NAMESPACES_ABOVE);
 
-        if (mm_parent)
-        {
-            mm_parent->mm_handle->rbtree_remove(childh);
+            if (mm_parent)
+            {
+                mm_parent->mm_handle->rbtree_remove(childh);
+            }
+
+            mm_parent = parent;
+
+            if (id != EOID_CHILD) childh->m_oid = id;
+            childh->m_oflags |= EOBJ_IS_RED;
+            childh->m_left = childh->m_right = childh->m_up = OS_NULL;
+
+            if (before) {
+                parenth->rbtree_insert_at(childh, before->mm_handle);
+            }
+            else {
+                parenth->rbtree_insert(childh);
+            }
         }
-
-        mm_parent = parent;
-
-        if (id != EOID_CHILD) childh->m_oid = id;
-        childh->m_oflags |= EOBJ_IS_RED;
-        childh->m_left = childh->m_right = childh->m_up = OS_NULL;
-
-        if (before) {
-            parenth->rbtree_insert_at(childh, before->mm_handle);
-        }
-        else {
-            parenth->rbtree_insert(childh);
-        }
-        /* childh->m_parent = mm_handle; */
 
         /* Map names back: If not disabled by user flag EOBJ_NO_MAP, then attach all names of
            child object (this) and it's childen to name spaces. If a name is already mapped,
@@ -974,7 +977,9 @@ void eObject::adopt(
             map(E_ATTACH_NAMES|E_SET_ROOT_POINTER);
         }
 
-// mm_root->mm_handle->verify_whole_tree();
+#if EOBJECT_DBTREE_DEBUG
+        parent->verify_whole_tree();
+#endif
 
         if (sync) os_unlock();
     }
@@ -1714,6 +1719,8 @@ eObject *eObject::byname(
   The eObject::byname() function looks for integer name in this object's name space.
   Integer names are used to index data.
 
+  String names are not mixed with integer names.
+
   @param   x Integer name value to look for.
   @param   name_match OS_TRUE (default) to get next object pointer only if name x given as argument
            matches to name. OS_FALSE to get first object with name greater or equal to x argument.
@@ -1735,7 +1742,15 @@ eObject *eObject::byintname(
     {
         namev.setl(x);
         nobj = nspace->findname(&namev, name_match);
-        if (nobj) return nobj->parent();
+
+        /* Move on until integer name found. Skip string names.
+         */
+        while (nobj) {
+            if (nobj->type() == OS_LONG) {
+                return nobj->parent();
+            }
+            nobj = nobj->ns_next(OS_FALSE);
+        }
     }
     return OS_NULL;
 }

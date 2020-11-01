@@ -696,8 +696,7 @@ void eRowSet::trigged_insert_or_update(
      */
     before = byintname(ix_value + 1, OS_FALSE);
     if (before) {
-        // m->adopt(before, EOID_CHILD, EOBJ_BEFORE_THIS);
-        m->adopt(this, EOID_CHILD);
+        m->adopt(before, EOID_ITEM, EOBJ_BEFORE_THIS);
     }
     m->addintname(ix_value);
 }

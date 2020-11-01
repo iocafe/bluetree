@@ -1063,9 +1063,20 @@ void eHandle::rbtree_insert_at(
     {
         n = before; // m_children;
         ins_oid = inserted_node->m_oid;
+
+        if (n->m_left == OS_NULL)
+        {
+            n->m_left = inserted_node;
+            goto goon;
+        }
+        else
+        {
+            n = n->m_left;
+        }
+
         while (1)
         {
-            if (ins_oid <= n->m_oid)
+            if (ins_oid < n->m_oid)
             {
                 if (n->m_left == OS_NULL)
                 {
@@ -1090,6 +1101,7 @@ void eHandle::rbtree_insert_at(
                 }
             }
         }
+goon:
         inserted_node->m_up = n;
     }
     insert_case1(inserted_node);
