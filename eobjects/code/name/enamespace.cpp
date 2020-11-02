@@ -210,6 +210,117 @@ void eNameSpace::setupclass()
 /**
 ****************************************************************************************************
 
+  @brief Write name space ID to stream.
+
+  The eNameSpace::writer() function writes name space identifier from stream. Notice that
+  typically name space serialization is called only if they have name space identified. If not
+  having a name space is indicated just by EOBJ_HAS_NAMESPACE flag.
+
+  @param  stream The stream to write to.
+  @param  flags Serialization flags.
+
+  @return If successfull the function returns ESTATUS_SUCCESS (0). If writing object to stream
+          fails, value ESTATUS_WRITING_OBJ_FAILED is returned. Assume that all nonzero values
+          indicate an error.
+
+****************************************************************************************************
+*/
+eStatus eNameSpace::writer(
+    eStream *stream,
+    os_int flags)
+{
+    /* Version number. Increment if new serialized items are to the object,
+       and check for new version's items in read() function.
+     */
+    const os_int version = 0;
+    os_int has_namespace_id;
+
+    /* Begin the object: write version number and "has namespace ID" flag.
+     */
+    has_namespace_id = m_namespace_id ? 1 : 0;
+    if (stream->write_begin_block((version << 1)|has_namespace_id)) goto failed;
+
+    /* Write name space ID, if we have one.
+     */
+    if (has_namespace_id) {
+        m_namespace_id->write(stream, flags);
+    }
+
+    /* End the object.
+     */
+    if (stream->write_end_block()) goto failed;
+
+    /* Object succesfully written.
+     */
+    return ESTATUS_SUCCESS;
+
+    /* Writing object failed.
+     */
+failed:
+    return ESTATUS_WRITING_OBJ_FAILED;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Read name space ID from streama.
+
+  The eNameSpace::reader() function reads name space identifier from stream. Notice that
+  typically name space serialization is called only if name space identified is set. If not
+  having a name space is indicated just by EOBJ_HAS_NAMESPACE flag.
+
+  @param  stream The stream to read from.
+  @param  flags Serialization flags.
+
+  @return If successfull the function returns ESTATUS_SUCCESS (0). If writing object to stream
+          fails, value ESTATUS_READING_OBJ_FAILED is returned. Assume that all nonzero values
+          indicate an error.
+
+****************************************************************************************************
+*/
+eStatus eNameSpace::reader(
+    eStream *stream,
+    os_int flags)
+{
+    /* Version number can be used to check which versions item's are in serialized data.
+     */
+    os_int version;
+    os_int has_namespace_id;
+
+    /* Read object start mark and version number and "has name space ID" flag.
+     */
+    if (stream->read_begin_block(&version)) goto failed;
+    has_namespace_id = (version & 1);
+
+    /* Read name space ID.
+     */
+    if (has_namespace_id) {
+        if (m_namespace_id == OS_NULL) {
+            m_namespace_id = new eVariable(this, EOBJ_TEMPORARY_ATTACHMENT);
+        }
+
+        m_namespace_id->read(stream, flags);
+    }
+
+    /* End the object.
+     */
+    if (stream->read_end_block()) goto failed;
+
+    /* Object succesfully read.
+     */
+    return ESTATUS_SUCCESS;
+
+    /* Reading object failed.
+     */
+failed:
+    return ESTATUS_READING_OBJ_FAILED;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Delete all child objects.
 
   The eNameSpace::unmap_all() function deletes all children of this object. This is faster code
@@ -262,11 +373,32 @@ void eNameSpace::unmap_all()
 void eNameSpace::setnamespaceid(
     const os_char *nsid)
 {
+    /* If we set NULL name space ID, there is no need to clone or
+     * serialze regular name space.
+     */
+    if (nsid == OS_NULL) {
+        if (m_namespace_id) {
+            if (oid() == EOID_NAMESPACE) {
+                setflags(EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
+            }
+            delete m_namespace_id;
+            m_namespace_id = OS_NULL;
+        }
+        return;
+    }
+
+    /* Save space ID allocated (allocate variable for it, if needed).
+     */
     if (m_namespace_id == OS_NULL) {
         m_namespace_id = new eVariable(this, EOBJ_TEMPORARY_ATTACHMENT);
     }
-
     m_namespace_id->sets(nsid);
+
+    /* Now we need to clone and serialize name space
+     */
+    if (oid() == EOID_NAMESPACE) {
+        clearflags(EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE);
+    }
 }
 
 

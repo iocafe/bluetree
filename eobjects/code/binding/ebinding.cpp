@@ -307,8 +307,8 @@ void eBinding::srvbind_base(
 
   @brief Complete client end of binding.
 
-  The cbindok function is called when client end of binding receives ECMD_BIND_REPLY message from
-  server end of binding.
+  The cbindok_base function is called when client end of binding receives ECMD_BIND_REPLY message
+  from server end of binding.
 
   @param  envelope Message envelope from server binding.
   @return None.

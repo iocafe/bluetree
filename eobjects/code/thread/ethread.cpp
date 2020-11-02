@@ -89,6 +89,7 @@ eThread::~eThread()
     /*Detete the message queue. Not child of the tread, so this needs to be deleted explicitely.
      */
     delete m_message_queue;
+    m_message_queue = OS_NULL;
 
     /* Release thread triggger.
      */

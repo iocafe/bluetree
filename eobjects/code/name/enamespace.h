@@ -94,6 +94,17 @@ public:
         return new eNameSpace(parent, id, flags);
     }
 
+    /* Write name space ID to stream.
+     */
+    virtual eStatus writer(
+        eStream *stream,
+        os_int flags);
+
+    /* Read name space ID from stream.
+     */
+    virtual eStatus reader(
+        eStream *stream,
+        os_int flags);
 
 
     /**

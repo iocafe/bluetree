@@ -688,6 +688,13 @@ void eVariable::setv(
             {
                 m_value.valbuf.v.o = x->m_value.valbuf.v.o->clone(this, EOID_ITEM);
             }
+
+            /* Variable value object cannot be attachment. It could be processed twice.
+               It also has to be clonable and serializable.
+             */
+            if (m_value.valbuf.v.o) {
+                m_value.valbuf.v.o->clearflags(EOBJ_TEMPORARY_ATTACHMENT);
+            }
             break;
 
         /* Other data types, just copy the value.
@@ -737,6 +744,11 @@ void eVariable::seto(
     {
         m_value.valbuf.v.o = x->clone(this, EOID_ITEM /* OID value */);
     }
+
+    /* Variable value object cannot be attachment. It could be processed twice.
+       It also has to be clonable and serializable.
+     */
+    m_value.valbuf.v.o->clearflags(EOBJ_TEMPORARY_ATTACHMENT);
 
     /* Set data type.
      */

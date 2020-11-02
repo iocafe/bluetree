@@ -325,7 +325,7 @@ void eRowSetBinding::bind(
 
     /* Save flags and mark as client end.
      */
-    m_bflags = bflags | EBIND_CLIENT;
+    m_bflags = bflags | (EBIND_CLIENT | EBIND_BIND_ROWSET);
 
     /* Initiate binding.
      */
