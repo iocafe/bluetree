@@ -33,6 +33,9 @@ eTableView::eTableView(
     os_int flags)
     : eComponent(parent, id, flags)
 {
+    m_rowset = OS_NULL;
+
+select();
 }
 
 
@@ -249,18 +252,38 @@ eStatus eTableView::draw(
             }
 
             ImGui::TableHeadersRow();
-            for (int row = 0; row < 20000; row++)
+
+            int nrows = 20000;
+            os_boolean first_row = OS_TRUE, visible[500];
+            ImGuiListClipper clipper;
+            clipper.Begin(nrows);
+            while (clipper.Step())
             {
-                ImGui::TableNextRow();
-                for (int column = 0; column < 7 + add_columns; column++)
+                for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
+
+            //     for (int row = 0; row < nrows; row++)
                 {
-                    // Both TableNextColumn() and TableSetColumnIndex() return false when a column is not visible, which can be used for clipping.
-                    if (!ImGui::TableSetColumnIndex(column))
-                        continue;
-                    if (column == 0)
-                        ImGui::Text("Line %d", row);
-                    else
-                        ImGui::Text("Hello world %d,%d", row, column);
+                    ImGui::TableNextRow();
+                    for (int column = 0; column < 7 + add_columns; column++)
+                    {
+                        // Both TableNextColumn() and TableSetColumnIndex() return false when a column is not visible, which can be used for clipping.
+                        if (first_row) {
+                            visible[column] = ImGui::TableSetColumnIndex(column);
+                        }
+                        else {
+                            if (!visible[column]) continue;
+
+                            if (!ImGui::TableSetColumnIndex(column)) {
+                                continue;
+                            }
+                        }
+
+                        if (column == 0)
+                            ImGui::Text("Line %d", row);
+                        else
+                            ImGui::Text("Hello world %d,%d", row, column);
+                    }
+                    first_row = OS_FALSE;
                 }
             }
             ImGui::EndTable();
@@ -413,18 +436,59 @@ void eTableView::draw_tooltip()
 /**
 ****************************************************************************************************
 
-  @brief Start editing value, toggle checkbox or show drop down list.
+  @brief Select the data to display.
 
-  The eTableView::activate() function is called when a value is clicked, or key (for example
-  spacebar) is hit to start editing the value. Actual operation depends on metadata, the
-  function can either start value edit, toggle a checkbox or show drop down list.
-
-  @return  None.
+  The eTableView::select() function..
 
 ****************************************************************************************************
 */
-void eTableView::activate()
+void eTableView::select()
 {
+    eContainer columns;
+    eVariable *column;
+
+    if (m_rowset == OS_NULL) {
+        m_rowset = new eRowSet(this);
+    }
+
+    m_rowset->set_dbm("//mymtx");
+    m_rowset->set_callback(eTableView::static_callback, this);
+    column = new eVariable(&columns);
+    column->addname("*", ENAME_NO_MAP);
+    m_rowset->select("*", &columns);
+}
+
+
+/* Callback when table data is received, etc.
+ */
+void eTableView::callback(
+    eRowSet *rset,
+    ersetCallbackInfo *ci)
+{
+    switch (ci->event) {
+        case ERSET_TABLE_BINDING_COMPLETE:
+            osal_console_write("binding done");
+            break;
+
+        case ERSET_INITIAL_DATA_RECEIVED:
+        case ERSET_MODIFICATIONS_RECEIVED:
+            rset->print_json(EOBJ_SERIALIZE_ONLY_CONTENT);
+            break;
+    }
+
+    osal_console_write("eRowSet callback\n");
+}
+
+/* Static callback function just firwards to callback(). This exists to have C function pointer.
+ */
+void eTableView::static_callback(
+    eRowSet *rset,
+    ersetCallbackInfo *ci,
+    eObject *context)
+{
+    if (rset) {
+        ((eTableView*)context)->callback(rset, ci);
+    }
 }
 
 

@@ -102,9 +102,9 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
-    /* Activate the component (start editing value, toggle checkbox, or show drop down list).
+    /* Select the data to display.
      */
-    virtual void activate();
+    void select();
 
 protected:
 
@@ -116,6 +116,19 @@ protected:
     void draw_state_bits(os_int x);
     void draw_tooltip();
 
+    /* Callback when table data is received, etc.
+     */
+    void callback(
+        eRowSet *rset,
+        ersetCallbackInfo *ci);
+
+    /* Static callback function just firwards to callback(). This exists to have C function pointer.
+     */
+    static void static_callback(
+        eRowSet *rset,
+        ersetCallbackInfo *ci,
+        eObject *context);
+
     /* Collect information about this object for tree browser.
      */
     virtual void object_info(
@@ -124,14 +137,10 @@ protected:
         eSet *appendix);
 
     /* Property values */
-//     eStrBuffer m_text;
 
-    /* Parsed attrbutes, digits, etc.
+    /* Row set (data selected from table)
      */
-//     eAttrBuffer m_attr;
-
-//    eAutoLabel m_label_edit;
-//    eAutoLabel m_label_value;
+    eRowSet *m_rowset;
 };
 
 

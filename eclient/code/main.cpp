@@ -4,16 +4,7 @@
   @brief   Program entry point, eclient.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    2.8.2020
-
-  Code here is general program setup code. It initializes iocom library to be used as automation
-  device controller. This example code uses eosal functions everywhere, including the program
-  entry point osal_main(). If you use iocom library from an existing program, just call library
-  iocom functions from C or C++ code and ignore "framework style" code here.
-
-  The Buster conroller example here uses static IO device configuration. This means that
-  communication signal map from IO board JSON files, etc, is compiled into Buster's code ->
-  run time matching IO signal at IO device and in Buster is by address and type, not by signal name.
+  @date    2.11.2020
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the iocom project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -23,6 +14,7 @@
 ****************************************************************************************************
 */
 #include "eclient.h"
+#include "tableview_test_data.h"
 
 int duudeli(void);
 
@@ -36,12 +28,9 @@ EMAIN_CONSOLE_ENTRY
 /**
 ****************************************************************************************************
 
-  @brief The controller program entry point.
+  @brief The eclient program entry point.
 
-  Initialize IOCOM and start the IO controller application.
-
-  - osal_simulated_loop: When emulating micro-controller on PC, run loop. Just save context
-    pointer on real micro-controller.
+  Initialize esal, eobjects and iocom. Start the eclient application.
 
   @oaran   argc Number of command line arguments (PC only)
   @oaran   argv Array of command line argument pointers (PC only)
@@ -58,6 +47,8 @@ eStatus emain(
     eStatus s;
 
 //    duudeli(); return ESTATUS_SUCCESS;
+
+    tableview_test_start();
 
     egui_initialize();
     s = eimgui_initialize();
@@ -81,5 +72,8 @@ eStatus emain(
     eimgui_shutdown();
     egui_shutdown();
 
+    tableview_test_end();
+
     return ESTATUS_SUCCESS;
 }
+

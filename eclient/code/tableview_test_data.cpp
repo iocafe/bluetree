@@ -1,38 +1,26 @@
 /**
 
-  @file    matrix_as_remote_table.cpp
-  @brief   Unit test, access to eTable (eMatrix here) over messages.
+  @file    tableview_test_data.cpp
+  @brief   Matrix as table for testing eTableView.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    15.10.2020
+  @date    2.11.2020
 
-  Matrix is used trough
-  - Application sens insert, remove, update and select command to eDBM object.
-  - When eDBM receives these, it calls eMatrix function (table API) to modify or get data from
-    the table.
-  - A eRowSet is needed to select data. It sends select message to eDBM and receives table
-    data back. The eDBM memorizes  the select as long as the eRowSet exists, so it can keep
-    the row informed about changes to table data which impact this selection.
-
-  NOTES:
-  - Update and remove callbacks with access to full row to inform selections ?
-
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
+  Copyright 2020 Pekka Lehtikoski. This file is part of the iocom project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
   or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
-#include "eobjects.h"
-#include "threads.h"
+#include "eclient.h"
+#include "tableview_test_data.h"
 
 /* Every class needs to have unique class identifier (classid). Class identifier is is 32 bit
    integer. Class identifiers starting from ECLASSID_APP_BASE are reserved for the application.
  */
 #define MY_CLASS_ID_1 (ECLASSID_APP_BASE + 1)
 #define MY_CLASS_ID_2 (ECLASSID_APP_BASE + 2)
-#define MY_CLASS_ID_3 (ECLASSID_APP_BASE + 3)
 
 const os_char *table_name = OS_NULL; /* Not needed for eMatrix */
 
@@ -211,99 +199,33 @@ protected:
 };
 
 
-/**
-****************************************************************************************************
-  Thread which selects data from table and monitors changes.
-****************************************************************************************************
-*/
-class ThreadMonitoringTheTable: public eThread
-{
-public:
-    /* Get class identifier.
-     */
-    virtual os_int classid() {return MY_CLASS_ID_3;}
-
-    virtual void initialize(
-        eContainer *params = OS_NULL)
-    {
-        eContainer columns;
-        eVariable *column;
-        osal_console_write("ThreadMonitoringTheTable started\n");
-
-        m_rowset = new eRowSet(this);
-        m_rowset->set_dbm("//mymtx");
-        m_rowset->set_callback(ThreadMonitoringTheTable::static_callback, this);
-        column = new eVariable(&columns);
-        column->addname("*", ENAME_NO_MAP);
-        m_rowset->select("*", &columns);
-    }
-
-    void callback(
-        eRowSet *rset,
-        ersetCallbackInfo *ci)
-    {
-        switch (ci->event) {
-            case ERSET_TABLE_BINDING_COMPLETE:
-                osal_console_write("binding done");
-                break;
-
-            case ERSET_INITIAL_DATA_RECEIVED:
-            case ERSET_MODIFICATIONS_RECEIVED:
-                rset->print_json(EOBJ_SERIALIZE_ONLY_CONTENT);
-                break;
-        }
-
-        osal_console_write("eRowSet callback\n");
-    }
-
-    static void static_callback(
-        eRowSet *rset,
-        ersetCallbackInfo *ci,
-        eObject *context)
-    {
-        if (rset) {
-            ((ThreadMonitoringTheTable*)context)->callback(rset, ci);
-        }
-    }
-
-protected:
-    eRowSet *m_rowset;
-};
+static eThreadHandle *thandle1, *thandle2;
 
 
-/**
-****************************************************************************************************
-  Thread example 1.
-****************************************************************************************************
-*/
-void matrix_as_remote_table_3()
+void tableview_test_start()
 {
     eThread *t;
-    eThreadHandle thandle1, thandle2, thandle3;
+
+    thandle1 = new eThreadHandle;
+    thandle2 = new eThreadHandle;
 
     /* Create and start threads
      */
     t = new ThreadExposingTheTable();
     t->addname("//mythread1");
-    t->start(&thandle1);
+    t->start(thandle1);
     t = new ThreadUsingTheTable();
-    t->start(&thandle2);
-    t = new ThreadMonitoringTheTable();
-    t->start(&thandle3); /* After this t pointer is useless */
-
-    for (os_int i = 0; i<30; i++)
-    {
-        os_sleep(2000);
-    }
-
-    /* Wait for thread to terminate
-     */
-    thandle3.terminate();
-    thandle3.join();
-    thandle2.terminate();
-    thandle2.join();
-    thandle1.terminate();
-    thandle1.join();
+    t->start(thandle2);
 }
 
+
+void tableview_test_end()
+{
+    /* Terminate threads and wait for them to finish.
+     */
+    thandle2->terminate();
+    thandle2->join();
+    thandle1->terminate();
+    thandle1->join();
+}
 
