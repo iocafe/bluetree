@@ -116,8 +116,6 @@ protected:
     void draw_state_bits(os_int x);
     void draw_tooltip();
 
-    void set_checked();
-
     /* Collect information about this object for tree browser.
      */
     virtual void object_info(
@@ -125,26 +123,15 @@ protected:
         eVariable *name,
         eSet *appendix);
 
-    bool m_edit_value;
-    bool m_prev_edit_value;
-
-    bool m_set_checked;
-    bool m_imgui_checked;
-
-    /* Buffer for editing value.
-     */
-    eEditBuffer m_edit_buf;
-
     /* Property values */
-    eStrBuffer m_text;
-    eStrBuffer m_unit;
+//     eStrBuffer m_text;
 
     /* Parsed attrbutes, digits, etc.
      */
-    eAttrBuffer m_attr;
+//     eAttrBuffer m_attr;
 
-    eAutoLabel m_label_edit;
-    eAutoLabel m_label_value;
+//    eAutoLabel m_label_edit;
+//    eAutoLabel m_label_value;
 };
 
 

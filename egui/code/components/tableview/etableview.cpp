@@ -33,10 +33,6 @@ eTableView::eTableView(
     os_int flags)
     : eComponent(parent, id, flags)
 {
-    m_edit_value = false;
-    m_prev_edit_value = false;
-    m_set_checked = true;
-    m_imgui_checked = false;
 }
 
 
@@ -137,27 +133,17 @@ eStatus eTableView::onpropertychange(
     switch (propertynr)
     {
         case ECOMP_VALUE: /* clear label to display new text and proceed */
-            m_label_value.clear();
-            m_set_checked = true;
+            // m_label_value.clear();
+            // m_set_checked = true;
             break;
 
         case ECOMP_TEXT:
-            m_text.clear();
+            // m_text.clear();
             break;
 
         case ECOMP_UNIT:
-            m_unit.clear();
-            m_attr.clear();
-            break;
-
-        case EVARP_DIGS:
-        case EVARP_MIN:
-        case EVARP_MAX:
-        case EVARP_TYPE:
-        case EVARP_ATTR:
-            m_label_value.clear();
-            m_attr.clear();
-            m_set_checked = true;
+            // m_unit.clear();
+            // m_attr.clear();
             break;
 
         default:
@@ -199,130 +185,30 @@ static void PopStyleCompact()
 eStatus eTableView::draw(
     eDrawParams& prm)
 {
-    os_int edit_w, unit_w, relative_x2, unit_spacer, total_w, total_h, h;
-    const os_char *value, *label, *unit;
-    ImGuiInputTextFlags eflags;
+    os_int relative_x2, total_w, total_h;
+
+    // const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
+    const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
     add_to_zorder(prm.window);
-    m_attr.for_variable(this);
+    // m_attr.for_variable(this);
 
     relative_x2 = ImGui::GetContentRegionMax().x;
     total_w = relative_x2 - ImGui::GetCursorPosX();
+    total_h = 100;
 
     ImVec2 cpos = ImGui::GetCursorScreenPos();
     m_rect.x1 = cpos.x;
     m_rect.y1 = cpos.y;
-
-    ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT));
-    total_h = ImGui::GetItemRectSize().y;
-
-    if (m_attr.showas() == E_SHOWAS_CHECKBOX) {
-        edit_w = ImGui::GetFrameHeight();
-    }
-    else {
-        edit_w = 200;
-    }
-    unit_w = 60;
-    unit_spacer = 6;
-
-    ImGui::SameLine(relative_x2 - edit_w - unit_spacer - unit_w);
-    ImGui::SetNextItemWidth(edit_w);
-
-    if (m_edit_value) {
-        label = m_label_edit.get(this);
-
-        switch (m_attr.showas())
-        {
-            case E_SHOWAS_INTEGER_NUMBER:
-            case E_SHOWAS_DECIMAL_NUMBER:
-                eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue;
-                break;
-
-            default:
-                eflags = ImGuiInputTextFlags_EnterReturnsTrue;
-                break;
-        }
-
-        ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
-        if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
-        {
-            eVariable value;
-            propertyv(ECOMP_VALUE, &value);
-            m_edit_value = false;
-            if (os_strcmp(m_edit_buf.ptr(), value.gets())) {
-                eVariable new_value;
-                new_value.sets(m_edit_buf.ptr());
-                enice_ui_value_to_internal_type(&value, &new_value, this, &m_attr);
-                setpropertyv(ECOMP_VALUE, &value);
-            }
-        }
-        else {
-            if (!m_prev_edit_value) {
-                ImGui::SetKeyboardFocusHere(-1);
-                m_prev_edit_value = true;
-            }
-        }
-
-        h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
-    }
-    else {
-        value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
-        switch (m_attr.showas())
-        {
-            case E_SHOWAS_CHECKBOX:
-                if (m_set_checked) {
-                    set_checked();
-                    m_set_checked = false;
-                }
-
-                label = m_label_edit.get(this);
-                if (ImGui::Checkbox(label, &m_imgui_checked))
-                {
-                    activate();
-                }
-                break;
-
-            default:
-                ImGui::Button(value, ImVec2(edit_w, 0));
-                if (ImGui::IsItemActive()) {
-                    activate();
-                }
-                break;
-        }
-        ImGui::PopStyleVar();
-        h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
-
-        /* Tool tip
-         */
-        if (ImGui::IsItemHovered()) {
-            draw_tooltip();
-        }
-    }
-
-    unit = m_unit.get(this, ECOMP_UNIT);
-    if (*unit != '\0') {
-        ImGui::SameLine(relative_x2 - unit_w);
-        ImGui::SetNextItemWidth(unit_w);
-        ImGui::TextUnformatted(unit);
-        h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
-    }
 
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
 
     /* Draw marker for state bits if we have an extended value.
      */
-    draw_state_bits(m_rect.x2 - edit_w - unit_spacer - unit_w);
+    draw_state_bits(m_rect.x2);
 
     // Using those as a base value to create width/height that are factor of the size of our font
-    // const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
-    const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
-
 
 
         static ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
@@ -341,7 +227,10 @@ eStatus eTableView::draw(
         // When using ScrollX or ScrollY we need to specify a size for our table container!
         // Otherwise by default the table will fit all available space, like a BeginChild() call.
         ImVec2 size = ImVec2(0, TEXT_BASE_HEIGHT * 8);
-        if (ImGui::BeginTable("##table1", 7, flags, size))
+        int add_columns = 405;
+        char bbb[128];
+        os_strncpy(bbb, "uke", sizeof(bbb));
+        if (ImGui::BeginTable("##table2", 7 + add_columns, flags, size))
         {
             ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
             ImGui::TableSetupColumn("Line #", ImGuiTableColumnFlags_NoHide); // Make the first column not hideable to match our use of TableSetupScrollFreeze()
@@ -351,11 +240,19 @@ eStatus eTableView::draw(
             ImGui::TableSetupColumn("Four", ImGuiTableColumnFlags_None);
             ImGui::TableSetupColumn("Five", ImGuiTableColumnFlags_None);
             ImGui::TableSetupColumn("Six", ImGuiTableColumnFlags_None);
+
+
+            for (int i=0; i<add_columns; i++) {
+                osal_int_to_str(bbb + 3, sizeof(bbb)-3, i+6);
+
+                ImGui::TableSetupColumn(bbb, ImGuiTableColumnFlags_None);
+            }
+
             ImGui::TableHeadersRow();
-            for (int row = 0; row < 20; row++)
+            for (int row = 0; row < 20000; row++)
             {
                 ImGui::TableNextRow();
-                for (int column = 0; column < 7; column++)
+                for (int column = 0; column < 7 + add_columns; column++)
                 {
                     // Both TableNextColumn() and TableSetColumnIndex() return false when a column is not visible, which can be used for clipping.
                     if (!ImGui::TableSetColumnIndex(column))
@@ -368,6 +265,13 @@ eStatus eTableView::draw(
             }
             ImGui::EndTable();
         }
+
+        /* Tool tip
+         */
+        if (ImGui::IsItemHovered()) {
+            draw_tooltip();
+        }
+
 
     /* Let base class implementation handle the rest.
      */
@@ -385,6 +289,7 @@ eStatus eTableView::draw(
 void eTableView::draw_state_bits(
     os_int x)
 {
+#if 0
     os_int state_bits;
     float circ_x, circ_y;
     const os_int rad = 8;
@@ -426,6 +331,7 @@ void eTableView::draw_state_bits(
         circ_y = m_rect.y1 + 0.5 * (m_rect.y2 - m_rect.y1 + 1);
         draw_list->AddCircleFilled(ImVec2(circ_x, circ_y), rad, col, 0);
     }
+#endif
 }
 
 
@@ -519,46 +425,6 @@ void eTableView::draw_tooltip()
 */
 void eTableView::activate()
 {
-    switch (m_attr.showas())
-    {
-        case E_SHOWAS_CHECKBOX:
-            setpropertyi(ECOMP_VALUE, m_imgui_checked);
-            m_set_checked = true;
-            break;
-
-        case E_SHOWAS_DROP_DOWN_ENUM:
-            drop_down_list(m_attr.get_list());
-            break;
-
-        default:
-            m_prev_edit_value = false;
-            m_edit_value = true;
-
-            eVariable value;
-            propertyv(ECOMP_VALUE, &value);
-            enice_value_for_ui(&value, this, &m_attr);
-            m_edit_buf.set(value.gets(), 256);
-            break;
-    }
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Set value for ImGui checkmark, when needed.
-
-  The set_checked() function is called when drawing to set value to determine value for
-  m_imgui_checked boolean. Pointer to this boolean is passed to the ImGui to inform wether
-  to draw a check mark in to indicate true or false state of boolean.
-
-  @return  None.
-
-****************************************************************************************************
-*/
-void eTableView::set_checked()
-{
-    m_imgui_checked = propertyi(ECOMP_VALUE) ? true : false;
 }
 
 

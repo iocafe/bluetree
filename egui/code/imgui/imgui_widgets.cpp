@@ -7370,7 +7370,7 @@ void ImGui::TabBarQueueReorder(ImGuiTabBar* tab_bar, const ImGuiTabItem* tab, in
     IM_ASSERT(dir == -1 || dir == +1);
     IM_ASSERT(tab_bar->ReorderRequestTabId == 0);
     tab_bar->ReorderRequestTabId = tab->ID;
-    tab_bar->ReorderRequestDir = (ImS8)dir;
+    tab_bar->ReorderRequestDir = (ImS16)dir; // PEKKA: ImS8->ImS16
 }
 
 bool ImGui::TabBarProcessReorder(ImGuiTabBar* tab_bar)
@@ -8561,7 +8561,7 @@ static void TableBeginInitMemory(ImGuiTable* table, int columns_count)
     // Allocate single buffer for our arrays
     ImSpanAllocator<3> span_allocator;
     span_allocator.ReserveBytes(0, columns_count * sizeof(ImGuiTableColumn));
-    span_allocator.ReserveBytes(1, columns_count * sizeof(ImS8));
+    span_allocator.ReserveBytes(1, columns_count * sizeof(ImS16)); // PEKKA: ImS8->ImS16
     span_allocator.ReserveBytes(2, columns_count * sizeof(ImGuiTableCellData));
     table->RawData.resize(span_allocator.GetArenaSizeInBytes());
     span_allocator.SetArenaBasePtr(table->RawData.Data);
@@ -8572,7 +8572,7 @@ static void TableBeginInitMemory(ImGuiTable* table, int columns_count)
     for (int n = 0; n < columns_count; n++)
     {
         table->Columns[n] = ImGuiTableColumn();
-        table->Columns[n].DisplayOrder = table->DisplayOrderToIndex[n] = (ImS8)n;
+        table->Columns[n].DisplayOrder = table->DisplayOrderToIndex[n] = (ImS16)n; // PEKKA: ImS8->ImS16
     }
     table->IsInitializing = table->IsSettingsRequestLoad = table->IsSortSpecsDirty = true;
 }
@@ -8792,15 +8792,15 @@ void ImGui::TableBeginUpdateColumns(ImGuiTable* table)
             IM_UNUSED(dst_column);
             const int src_order = src_column->DisplayOrder;
             const int dst_order = dst_column->DisplayOrder;
-            src_column->DisplayOrder = (ImS8)dst_order;
+            src_column->DisplayOrder = (ImS16)dst_order;  // PEKKA: ImS8->ImS16
             for (int order_n = src_order + reorder_dir; order_n != dst_order + reorder_dir; order_n += reorder_dir)
-                table->Columns[table->DisplayOrderToIndex[order_n]].DisplayOrder -= (ImS8)reorder_dir;
+                table->Columns[table->DisplayOrderToIndex[order_n]].DisplayOrder -= (ImS16)reorder_dir; //PEKKA: ImS8->ImS16
             IM_ASSERT(dst_column->DisplayOrder == dst_order - reorder_dir);
 
             // Display order is stored in both columns->IndexDisplayOrder and table->DisplayOrder[],
             // rebuild the later from the former.
             for (int column_n = 0; column_n < table->ColumnsCount; column_n++)
-                table->DisplayOrderToIndex[table->Columns[column_n].DisplayOrder] = (ImS8)column_n;
+                table->DisplayOrderToIndex[table->Columns[column_n].DisplayOrder] = (ImS16)column_n; // PEKKA: ImS8->ImS16
             table->ReorderColumnDir = 0;
             table->IsSettingsDirty = true;
         }
@@ -8810,7 +8810,7 @@ void ImGui::TableBeginUpdateColumns(ImGuiTable* table)
     if (table->IsResetDisplayOrderRequest)
     {
         for (int n = 0; n < table->ColumnsCount; n++)
-            table->DisplayOrderToIndex[n] = table->Columns[n].DisplayOrder = (ImS8)n;
+            table->DisplayOrderToIndex[n] = table->Columns[n].DisplayOrder = (ImS16)n; // PEKKA: ImS8->ImS16
         table->IsResetDisplayOrderRequest = false;
         table->IsSettingsDirty = true;
     }
@@ -8841,32 +8841,36 @@ void ImGui::TableBeginUpdateColumns(ImGuiTable* table)
         if (column->AutoFitQueue != 0x00)
             want_column_auto_fit = true;
 
-        ImU64 index_mask = (ImU64)1 << column_n;
-        ImU64 display_order_mask = (ImU64)1 << column->DisplayOrder;
+        ImU64 index_mask = (ImU64)1 << (column_n & 0x3F); // PEKKA
+        int ix_mask_pos = (column_n >> 6); // PEKKA
+        ImU64 display_order_mask = (ImU64)1 << (column->DisplayOrder & 0x3F); // PEKKA
+        int do_mask_pos = (column->DisplayOrder >> 6); // PEKKA
         if (column->IsVisible)
         {
             column->PrevVisibleColumn = column->NextVisibleColumn = -1;
             if (last_visible_column)
             {
-                last_visible_column->NextVisibleColumn = (ImS8)column_n;
-                column->PrevVisibleColumn = (ImS8)table->Columns.index_from_ptr(last_visible_column);
+                last_visible_column->NextVisibleColumn = (ImS16)column_n; // PEKKA: ImS8->ImS16
+                column->PrevVisibleColumn = (ImS16)table->Columns.index_from_ptr(last_visible_column); // PEKKA: ImS8->ImS16
             }
-            column->IndexWithinVisibleSet = (ImS8)table->ColumnsVisibleCount;
+            column->IndexWithinVisibleSet = (ImS16)table->ColumnsVisibleCount; // PEKKA: ImS8->ImS16
             table->ColumnsVisibleCount++;
-            table->VisibleMaskByIndex |= index_mask;
-            table->VisibleMaskByDisplayOrder |= display_order_mask;
+            table->VisibleMaskByIndex[ix_mask_pos] |= index_mask; // PEKKA
+            table->VisibleMaskByDisplayOrder[do_mask_pos] |= display_order_mask; // PEKKA
             last_visible_column = column;
         }
         else
         {
             column->IndexWithinVisibleSet = -1;
-            table->VisibleMaskByIndex &= ~index_mask;
-            table->VisibleMaskByDisplayOrder &= ~display_order_mask;
+            table->VisibleMaskByIndex[ix_mask_pos] &= ~index_mask; // PEKKA
+            table->VisibleMaskByDisplayOrder[do_mask_pos] &= ~display_order_mask; // PEKKA
         }
         IM_ASSERT(column->IndexWithinVisibleSet <= column->DisplayOrder);
     }
-    table->VisibleUnclippedMaskByIndex = table->VisibleMaskByIndex; // Columns will be masked out by TableUpdateLayout() when Clipped
-    table->RightMostVisibleColumn = (ImS8)(last_visible_column ? table->Columns.index_from_ptr(last_visible_column) : -1);
+    for (int i = 0; i < IMGUI_TABLE_MASK_N; i++) { // PEKKA
+        table->VisibleUnclippedMaskByIndex[i] = table->VisibleMaskByIndex[i]; // PEKKA Columns will be masked out by TableUpdateLayout() when Clipped
+    } // PEKKA
+    table->RightMostVisibleColumn = (ImS16)(last_visible_column ? table->Columns.index_from_ptr(last_visible_column) : -1); // PEKKA: ImS8->ImS16
 
     // Disable child window clipping while fitting columns. This is not strictly necessary but makes it possible to avoid
     // the column fitting to wait until the first visible frame of the child container (may or not be a good thing).
@@ -8953,7 +8957,8 @@ void    ImGui::TableUpdateLayout(ImGuiTable* table)
     table->LeftMostStretchedColumnDisplayOrder = -1;
     for (int order_n = 0; order_n < table->ColumnsCount; order_n++)
     {
-        if (!(table->VisibleMaskByDisplayOrder & ((ImU64)1 << order_n)))
+        int do_mask_pos = (order_n >> 6); // PEKKA
+        if (!(table->VisibleMaskByDisplayOrder[do_mask_pos] & ((ImU64)1 << (order_n & 0x3F)))) // PEKKA
             continue;
         const int column_n = table->DisplayOrderToIndex[order_n];
         ImGuiTableColumn* column = &table->Columns[column_n];
@@ -9010,7 +9015,7 @@ void    ImGui::TableUpdateLayout(ImGuiTable* table)
                 column->StretchWeight = 1.0f;
             sum_weights_stretched += column->StretchWeight;
             if (table->LeftMostStretchedColumnDisplayOrder == -1)
-                table->LeftMostStretchedColumnDisplayOrder = (ImS8)column->DisplayOrder;
+                table->LeftMostStretchedColumnDisplayOrder = (ImS16)column->DisplayOrder; // PEKKA: ImS8->ImS16
         }
         sum_width_fixed_requests += table->CellPaddingX * 2.0f;
     }
@@ -9032,7 +9037,8 @@ void    ImGui::TableUpdateLayout(ImGuiTable* table)
     table->ColumnsAutoFitWidth = width_spacings;
     for (int order_n = 0; order_n < table->ColumnsCount; order_n++)
     {
-        if (!(table->VisibleMaskByDisplayOrder & ((ImU64)1 << order_n)))
+        int do_mask_pos = (order_n >> 6); // PEKKA
+        if (!(table->VisibleMaskByDisplayOrder[do_mask_pos] & ((ImU64)1 << (order_n & 0x3F)))) // PEKKA
             continue;
         ImGuiTableColumn* column = &table->Columns[table->DisplayOrderToIndex[order_n]];
 
@@ -9098,7 +9104,8 @@ void    ImGui::TableUpdateLayout(ImGuiTable* table)
     if (width_remaining_for_stretched_columns >= 1.0f)
         for (int order_n = table->ColumnsCount - 1; sum_weights_stretched > 0.0f && width_remaining_for_stretched_columns >= 1.0f && order_n >= 0; order_n--)
         {
-            if (!(table->VisibleMaskByDisplayOrder & ((ImU64)1 << order_n)))
+            int do_mask_pos = (order_n >> 6); // PEKKA
+            if (!(table->VisibleMaskByDisplayOrder[do_mask_pos] & ((ImU64)1 << (order_n & 0x3F)))) // PEKKA
                 continue;
             ImGuiTableColumn* column = &table->Columns[table->DisplayOrderToIndex[order_n]];
             if (!(column->Flags & ImGuiTableColumnFlags_WidthStretch))
@@ -9127,7 +9134,8 @@ void    ImGui::TableUpdateLayout(ImGuiTable* table)
         if (table->FreezeColumnsCount > 0 && table->FreezeColumnsCount == visible_n)
             offset_x += work_rect.Min.x - table->OuterRect.Min.x;
 
-        if ((table->VisibleMaskByDisplayOrder & ((ImU64)1 << order_n)) == 0)
+        int do_mask_pos = (order_n >> 6); // PEKKA
+        if (!(table->VisibleMaskByDisplayOrder[do_mask_pos] & ((ImU64)1 << (order_n & 0x3F)))) // PEKKA
         {
             // Hidden column: clear a few fields and we are done with it for the remainder of the function.
             // We set a zero-width clip rect but set Min.y/Max.y properly to not interfere with the clipper.
@@ -9171,14 +9179,15 @@ void    ImGui::TableUpdateLayout(ImGuiTable* table)
         column->ClipRect.ClipWithFull(host_clip_rect);
 
         column->IsClipped = (column->ClipRect.Max.x <= column->ClipRect.Min.x) && (column->AutoFitQueue & 1) == 0 && (column->CannotSkipItemsQueue & 1) == 0;
-        if (column->IsClipped)
-            table->VisibleUnclippedMaskByIndex &= ~((ImU64)1 << column_n);  // Columns with the _WidthAlwaysAutoResize sizing policy will never be updated then.
-
+        if (column->IsClipped) { // PEKKA
+            int ix_mask_pos = (column_n >> 6); // PEKKA
+            table->VisibleUnclippedMaskByIndex[ix_mask_pos] &= ~((ImU64)1 << (column_n & 0x3F));  // PEKKA Columns with the _WidthAlwaysAutoResize sizing policy will never be updated then.
+        } // PEKKA
         column->SkipItems = !column->IsVisible || table->HostSkipItems;
 
         // Detect hovered column
         if (is_hovering_table && g.IO.MousePos.x >= column->ClipRect.Min.x && g.IO.MousePos.x < column->ClipRect.Max.x)
-            table->HoveredColumnBody = (ImS8)column_n;
+            table->HoveredColumnBody = (ImS16)column_n; // PEKKA: ImS8->ImS16
 
         // [DEBUG] Display overlay
 #if 0
@@ -9232,7 +9241,7 @@ void    ImGui::TableUpdateLayout(ImGuiTable* table)
         if (table->RightMostVisibleColumn != -1)
             unused_x1 = ImMax(unused_x1, table->Columns[table->RightMostVisibleColumn].ClipRect.Max.x);
         if (g.IO.MousePos.x >= unused_x1)
-            table->HoveredColumnBody = (ImS8)table->ColumnsCount;
+            table->HoveredColumnBody = (ImS16)table->ColumnsCount; // PEKKA: ImS8->ImS16
     }
 
     // Clear Resizable flag if none of our column are actually resizable (either via an explicit _NoResize flag,
@@ -9301,7 +9310,8 @@ void    ImGui::TableUpdateBorders(ImGuiTable* table)
 
     for (int order_n = 0; order_n < table->ColumnsCount; order_n++)
     {
-        if (!(table->VisibleMaskByDisplayOrder & ((ImU64)1 << order_n)))
+        int do_mask_pos = (order_n >> 6); // PEKKA
+        if (!(table->VisibleMaskByDisplayOrder[do_mask_pos] & ((ImU64)1 << (order_n & 0x3F)))) // PEKKA
             continue;
 
         const int column_n = table->DisplayOrderToIndex[order_n];
@@ -9330,12 +9340,12 @@ void    ImGui::TableUpdateBorders(ImGuiTable* table)
         }
         if (held)
         {
-            table->ResizedColumn = (ImS8)column_n;
+            table->ResizedColumn = (ImS16)column_n; // PEKKA: ImS8->ImS16
             table->InstanceInteracted = table->InstanceCurrent;
         }
         if ((hovered && g.HoveredIdTimer > TABLE_RESIZE_SEPARATOR_FEEDBACK_TIMER) || held)
         {
-            table->HoveredColumnBorder = (ImS8)column_n;
+            table->HoveredColumnBorder = (ImS16)column_n; // PEKKA: ImS8->ImS16
             SetMouseCursor(ImGuiMouseCursor_ResizeEW);
         }
     }
@@ -9495,7 +9505,8 @@ void ImGui::TableDrawBorders(ImGuiTable* table)
     {
         for (int order_n = 0; order_n < table->ColumnsCount; order_n++)
         {
-            if (!(table->VisibleMaskByDisplayOrder & ((ImU64)1 << order_n)))
+            int do_mask_pos = (order_n >> 6); // PEKKA
+            if (!(table->VisibleMaskByDisplayOrder[do_mask_pos] & ((ImU64)1 << (order_n & 0x3F)))) // PEKKA
                 continue;
 
             const int column_n = table->DisplayOrderToIndex[order_n];
@@ -9707,8 +9718,8 @@ void ImGui::TableUpdateDrawChannels(ImGuiTable* table)
     const int channels_for_dummy = (table->ColumnsVisibleCount < table->ColumnsCount || table->VisibleUnclippedMaskByIndex != table->VisibleMaskByIndex) ? +1 : 0;
     const int channels_total = channels_for_bg + (channels_for_row * freeze_row_multiplier) + channels_for_dummy;
     table->DrawSplitter.Split(table->InnerWindow->DrawList, channels_total);
-    table->DummyDrawChannel = (channels_for_dummy > 0) ? (ImS8)(channels_total - 1) : -1;
-    table->BgDrawChannelUnfrozen = (ImS8)((table->FreezeRowsCount > 0) ? channels_for_row + 1 : 0);
+    table->DummyDrawChannel = (channels_for_dummy > 0) ? (ImS16)(channels_total - 1) : -1; // PEKKA: ImS8->ImS16
+    table->BgDrawChannelUnfrozen = (ImS16)((table->FreezeRowsCount > 0) ? channels_for_row + 1 : 0); // PEKKA: ImS8->ImS16
 
     int draw_channel_current = 1;
     for (int column_n = 0; column_n < table->ColumnsCount; column_n++)
@@ -9716,8 +9727,8 @@ void ImGui::TableUpdateDrawChannels(ImGuiTable* table)
         ImGuiTableColumn* column = &table->Columns[column_n];
         if (!column->IsClipped)
         {
-            column->DrawChannelFrozen = (ImS8)(draw_channel_current);
-            column->DrawChannelUnfrozen = (ImS8)(draw_channel_current + (table->FreezeRowsCount > 0 ? channels_for_row + 1 : 0));
+            column->DrawChannelFrozen = (ImS16)(draw_channel_current); // PEKKA: ImS8->ImS16
+            column->DrawChannelUnfrozen = (ImS16)(draw_channel_current + (table->FreezeRowsCount > 0 ? channels_for_row + 1 : 0)); // PEKKA: ImS8->ImS16
             if (!(table->Flags & ImGuiTableFlags_NoClip))
                 draw_channel_current++;
         }
@@ -9779,7 +9790,8 @@ void    ImGui::TableReorderDrawChannelsForMerge(ImGuiTable* table)
     // 1. Scan channels and take note of those which can be merged
     for (int column_n = 0; column_n < table->ColumnsCount; column_n++)
     {
-        if (!(table->VisibleUnclippedMaskByIndex & ((ImU64)1 << column_n)))
+        int ix_mask_pos = (column_n >> 6); // PEKKA
+        if (!(table->VisibleUnclippedMaskByIndex[ix_mask_pos] & ((ImU64)1 << (column_n & 0x3F)))) // PEKKA
             continue;
         ImGuiTableColumn* column = &table->Columns[column_n];
 
@@ -10001,7 +10013,7 @@ void ImGui::TableSetupScrollFreeze(int columns, int rows)
     IM_ASSERT(columns >= 0 && columns < IMGUI_TABLE_MAX_COLUMNS);
     IM_ASSERT(rows >= 0 && rows < 128); // Arbitrary limit
 
-    table->FreezeColumnsRequest = (table->Flags & ImGuiTableFlags_ScrollX) ? (ImS8)columns : 0;
+    table->FreezeColumnsRequest = (table->Flags & ImGuiTableFlags_ScrollX) ? (ImS16)columns : 0; // PEKKA: ImS8->ImS16
     table->FreezeColumnsCount = (table->InnerWindow->Scroll.x != 0.0f) ? table->FreezeColumnsRequest : 0;
     table->FreezeRowsRequest = (table->Flags & ImGuiTableFlags_ScrollY) ? (ImS8)rows : 0;
     table->FreezeRowsCount = (table->InnerWindow->Scroll.y != 0.0f) ? table->FreezeRowsRequest : 0;
@@ -10283,7 +10295,9 @@ bool    ImGui::TableNextColumn()
 
     // FIXME-TABLE: it is likely to alter layout if user skips a columns contents based on clipping.
     int column_n = table->CurrentColumn;
-    return (table->VisibleUnclippedMaskByIndex & ((ImU64)1 << column_n)) != 0;
+
+    int ix_mask_pos = (column_n >> 6); // PEKKA
+    return (table->VisibleUnclippedMaskByIndex[ix_mask_pos] & ((ImU64)1 << (column_n & 0x3F))) != 0; // PEKKA
 }
 
 bool    ImGui::TableSetColumnIndex(int column_n)
@@ -10302,7 +10316,8 @@ bool    ImGui::TableSetColumnIndex(int column_n)
     }
 
     // FIXME-TABLE: it is likely to alter layout if user skips a columns contents based on clipping.
-    return (table->VisibleUnclippedMaskByIndex & ((ImU64)1 << column_n)) != 0;
+    int ix_mask_pos = (column_n >> 6); // PEKKA
+    return (table->VisibleUnclippedMaskByIndex[ix_mask_pos] & ((ImU64)1 << (column_n & 0x3F))) != 0; // PEKKA
 }
 
 int ImGui::TableGetColumnCount()
@@ -10332,7 +10347,8 @@ bool    ImGui::TableGetColumnIsVisible(int column_n)
         return false;
     if (column_n < 0)
         column_n = table->CurrentColumn;
-    return (table->VisibleUnclippedMaskByIndex & ((ImU64)1 << column_n)) != 0;
+    int ix_mask_pos = (column_n >> 6); // PEKKA
+    return (table->VisibleUnclippedMaskByIndex[ix_mask_pos] & ((ImU64)1 << (column_n & 0x3F))) != 0; // PEKKA
 }
 
 int     ImGui::TableGetColumnIndex()
@@ -10510,7 +10526,7 @@ void    ImGui::TableOpenContextMenu(int column_n)
     if (table->Flags & (ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable))
     {
         table->IsContextPopupOpen = true;
-        table->ContextPopupColumn = (ImS8)column_n;
+        table->ContextPopupColumn = (ImS16)column_n; // PEKKA: ImS8->ImS16
         table->InstanceInteracted = table->InstanceCurrent;
         const ImGuiID context_menu_id = ImHashStr("##ContextMenu", 0, table->ID);
         OpenPopupEx(context_menu_id, ImGuiPopupFlags_None);
@@ -10633,7 +10649,7 @@ void    ImGui::TableHeader(const char* label)
         RenderNavHighlight(bb, id, ImGuiNavHighlightFlags_TypeThin | ImGuiNavHighlightFlags_NoRounding);
     }
     if (held)
-        table->HeldHeaderColumn = (ImS8)column_n;
+        table->HeldHeaderColumn = (ImS16)column_n; // PEKKA: ImS8->ImS16
     window->DC.CursorPos.y -= g.Style.ItemSpacing.y * 0.5f;
 
     // Drag and drop to re-order columns.
@@ -10641,7 +10657,7 @@ void    ImGui::TableHeader(const char* label)
     if (held && (table->Flags & ImGuiTableFlags_Reorderable) && IsMouseDragging(0) && !g.DragDropActive)
     {
         // While moving a column it will jump on the other side of the mouse, so we also test for MouseDelta.x
-        table->ReorderColumn = (ImS8)column_n;
+        table->ReorderColumn = (ImS16)column_n; // PEKKA: ImS8->ImS16
         table->InstanceInteracted = table->InstanceCurrent;
 
         // We don't reorder: through the frozen<>unfrozen line, or through a column that is marked with ImGuiTableColumnFlags_NoReorder.
@@ -10728,13 +10744,13 @@ void ImGui::TableSetColumnSortDirection(ImGuiTable* table, int column_n, ImGuiSo
     if (!(table->Flags & ImGuiTableFlags_MultiSortable))
         append_to_sort_specs = false;
 
-    ImS8 sort_order_max = 0;
+    ImS16 sort_order_max = 0; // PEKKA
     if (append_to_sort_specs)
         for (int other_column_n = 0; other_column_n < table->ColumnsCount; other_column_n++)
             sort_order_max = ImMax(sort_order_max, table->Columns[other_column_n].SortOrder);
 
     ImGuiTableColumn* column = &table->Columns[column_n];
-    column->SortDirection = (ImS8)sort_direction;
+    column->SortDirection = (ImS16)sort_direction; // PEKKA
     if (column->SortOrder == -1 || !append_to_sort_specs)
         column->SortOrder = append_to_sort_specs ? sort_order_max + 1 : 0;
 
@@ -10808,13 +10824,15 @@ void ImGui::TableSetBgColor(ImGuiTableBgTarget bg_target, ImU32 color, int colum
             return;
         if (column_n == -1)
             column_n = table->CurrentColumn;
-        if ((table->VisibleUnclippedMaskByIndex & ((ImU64)1 << column_n)) == 0)
+
+        int ix_mask_pos = (column_n >> 6); // PEKKA
+        if ((table->VisibleUnclippedMaskByIndex[ix_mask_pos] & ((ImU64)1 << (column_n & 0x3F))) == 0)
             return;
         if (table->RowCellDataCurrent < 0 || table->RowCellData[table->RowCellDataCurrent].Column != column_n)
             table->RowCellDataCurrent++;
         ImGuiTableCellData* cell_data = &table->RowCellData[table->RowCellDataCurrent];
         cell_data->BgColor = color;
-        cell_data->Column = (ImS8)column_n;
+        cell_data->Column = (ImS16)column_n; // PEKKA: ImS8->ImS16
         break;
     }
     case ImGuiTableBgTarget_RowBg0:
@@ -10867,7 +10885,7 @@ void ImGui::TableSortSpecsSanitize(ImGuiTable* table)
                         column_with_smallest_sort_order = column_n;
             IM_ASSERT(column_with_smallest_sort_order != -1);
             fixed_mask |= ((ImU64)1 << column_with_smallest_sort_order);
-            table->Columns[column_with_smallest_sort_order].SortOrder = (ImS8)sort_n;
+            table->Columns[column_with_smallest_sort_order].SortOrder = (ImS16)sort_n; // PEKKA
 
             // Fix: Make sure only one column has a SortOrder if ImGuiTableFlags_MultiSortable is not set.
             if (need_fix_single_sort_order)
@@ -10895,7 +10913,7 @@ void ImGui::TableSortSpecsSanitize(ImGuiTable* table)
             }
         }
 
-    table->SortSpecsCount = (ImS8)sort_order_count;
+    table->SortSpecsCount = (ImS16)sort_order_count; // PEKKA
 }
 
 void ImGui::TableSortSpecsBuild(ImGuiTable* table)
@@ -10941,8 +10959,8 @@ static void InitTableSettings(ImGuiTableSettings* settings, ImGuiID id, int colu
     for (int n = 0; n < columns_count_max; n++, settings_column++)
         IM_PLACEMENT_NEW(settings_column) ImGuiTableColumnSettings();
     settings->ID = id;
-    settings->ColumnsCount = (ImS8)columns_count;
-    settings->ColumnsCountMax = (ImS8)columns_count_max;
+    settings->ColumnsCount = (ImS16)columns_count; // PEKKA: ImS8->ImS16
+    settings->ColumnsCountMax = (ImS16)columns_count_max; // PEKKA: ImS8->ImS16
     settings->WantApply = true;
 }
 
@@ -11000,8 +11018,7 @@ void ImGui::TableSaveSettings(ImGuiTable* table)
         settings = TableSettingsCreate(table->ID, table->ColumnsCount);
         table->SettingsOffset = g.SettingsTables.offset_from_ptr(settings);
     }
-    settings->ColumnsCount = (ImS8)table->ColumnsCount;
-
+    settings->ColumnsCount = (ImS16)table->ColumnsCount; // PEKKA: ImS8->ImS16
     // Serialize ImGuiTable/ImGuiTableColumn into ImGuiTableSettings/ImGuiTableColumnSettings
     IM_ASSERT(settings->ID == table->ID);
     IM_ASSERT(settings->ColumnsCount == table->ColumnsCount && settings->ColumnsCountMax >= settings->ColumnsCount);
@@ -11014,7 +11031,7 @@ void ImGui::TableSaveSettings(ImGuiTable* table)
     {
         const float width_or_weight = (column->Flags & ImGuiTableColumnFlags_WidthStretch) ? column->StretchWeight : column->WidthRequest;
         column_settings->WidthOrWeight = width_or_weight;
-        column_settings->Index = (ImS8)n;
+        column_settings->Index = (ImS16)n; // PEKKA: ImS8->ImS16
         column_settings->DisplayOrder = column->DisplayOrder;
         column_settings->SortOrder = column->SortOrder;
         column_settings->SortDirection = column->SortDirection;
@@ -11087,7 +11104,7 @@ void ImGui::TableLoadSettings(ImGuiTable* table)
         if (settings->SaveFlags & ImGuiTableFlags_Reorderable)
             column->DisplayOrder = column_settings->DisplayOrder;
         else
-            column->DisplayOrder = (ImS8)column_n;
+            column->DisplayOrder = (ImS16)column_n; // PEKKA: ImS8->ImS16
         column->IsVisible = column->IsVisibleNextFrame = column_settings->IsVisible;
         column->SortOrder = column_settings->SortOrder;
         column->SortDirection = column_settings->SortDirection;
@@ -11095,7 +11112,7 @@ void ImGui::TableLoadSettings(ImGuiTable* table)
 
     // FIXME-TABLE: Need to validate .ini data
     for (int column_n = 0; column_n < table->ColumnsCount; column_n++)
-        table->DisplayOrderToIndex[table->Columns[column_n].DisplayOrder] = (ImS8)column_n;
+        table->DisplayOrderToIndex[table->Columns[column_n].DisplayOrder] = (ImS16)column_n; // PEKKA: ImS8->ImS16
 }
 
 static void TableSettingsHandler_ClearAll(ImGuiContext* ctx, ImGuiSettingsHandler*)
@@ -11153,13 +11170,13 @@ static void TableSettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler*, 
         line = ImStrSkipBlank(line + r);
         char c = 0;
         ImGuiTableColumnSettings* column = settings->GetColumnSettings() + column_n;
-        column->Index = (ImS8)column_n;
+        column->Index = (ImS16)column_n; // PEKKA: ImS8->ImS16
         if (sscanf(line, "UserID=0x%08X%n", (ImU32*)&n, &r)==1) { line = ImStrSkipBlank(line + r); column->UserID = (ImGuiID)n; }
         if (sscanf(line, "Width=%d%n", &n, &r) == 1)            { line = ImStrSkipBlank(line + r); column->WidthOrWeight = (float)n; column->IsStretch = 0; settings->SaveFlags |= ImGuiTableFlags_Resizable; }
         if (sscanf(line, "Weight=%f%n", &f, &r) == 1)           { line = ImStrSkipBlank(line + r); column->WidthOrWeight = f; column->IsStretch = 1; settings->SaveFlags |= ImGuiTableFlags_Resizable; }
         if (sscanf(line, "Visible=%d%n", &n, &r) == 1)          { line = ImStrSkipBlank(line + r); column->IsVisible = (ImU8)n; settings->SaveFlags |= ImGuiTableFlags_Hideable; }
-        if (sscanf(line, "Order=%d%n", &n, &r) == 1)            { line = ImStrSkipBlank(line + r); column->DisplayOrder = (ImS8)n; settings->SaveFlags |= ImGuiTableFlags_Reorderable; }
-        if (sscanf(line, "Sort=%d%c%n", &n, &c, &r) == 2)       { line = ImStrSkipBlank(line + r); column->SortOrder = (ImS8)n; column->SortDirection = (c == '^') ? ImGuiSortDirection_Descending : ImGuiSortDirection_Ascending; settings->SaveFlags |= ImGuiTableFlags_Sortable; }
+        if (sscanf(line, "Order=%d%n", &n, &r) == 1)            { line = ImStrSkipBlank(line + r); column->DisplayOrder = (ImS16)n; settings->SaveFlags |= ImGuiTableFlags_Reorderable; } // PEKKA: ImS8->ImS16
+        if (sscanf(line, "Sort=%d%c%n", &n, &c, &r) == 2)       { line = ImStrSkipBlank(line + r); column->SortOrder = (ImS16)n; column->SortDirection = (c == '^') ? ImGuiSortDirection_Descending : ImGuiSortDirection_Ascending; settings->SaveFlags |= ImGuiTableFlags_Sortable; } // PEKKA
     }
 }
 
