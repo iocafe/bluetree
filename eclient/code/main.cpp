@@ -57,7 +57,7 @@ eStatus emain(
     eThreadHandle client_thread_handle;
     eStatus s;
 
-//    duudeli(); return OSAL_SUCCESS;
+//    duudeli(); return ESTATUS_SUCCESS;
 
     egui_initialize();
     s = eimgui_initialize();

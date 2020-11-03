@@ -136,7 +136,7 @@ public:
      */
     inline os_boolean exitnow()
     {
-        return m_exit_requested; /* SHOULD WE CHECK: OR GLOBAL EXIT FLAG ? */
+        return m_exit_requested || !osal_go();
     }
 
     /* Get next message to thread to process.

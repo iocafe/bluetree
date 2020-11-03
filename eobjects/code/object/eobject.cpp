@@ -143,6 +143,8 @@ void eObject::makeroot(
 */
 eObject::~eObject()
 {
+    eObject *bindings, *b, *next_b;
+
     /* if (m_parent)
     {
         m_parent->onchilddetach();
@@ -154,9 +156,14 @@ eObject::~eObject()
     {
         os_lock();
 
-        /* if (mm_handle->m_parent)
-        if (mm_parent)
-            */
+        bindings = first(EOID_BINDINGS);
+        if (bindings) {
+            for (b = bindings->first(); b; b = next_b) {
+                next_b = b->next();
+                delete b;
+            }
+        }
+
         if (mm_handle)
         {
             mm_handle->delete_children();

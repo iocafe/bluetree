@@ -67,6 +67,8 @@ void eGui::setup_desktop_application()
     e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
     e->setpropertyi(ECOMP_DIGS, 2);
 
+    new eTableView(w);
+
     w = new eWindow(this);
     w->setpropertys(ECOMP_VALUE, "Browseri");
 

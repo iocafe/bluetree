@@ -782,8 +782,8 @@ void eHandle::verify_node(
     if (m_left) osal_debug_assert(m_left->m_up == this);
     if (m_right) osal_debug_assert(m_right->m_up == this);
     if (m_up) osal_debug_assert(m_up->m_left == this || m_up->m_right == this);
-    if (m_children) osal_debug_assert(m_children->m_object->mm_parent == this->m_object);
-    /* if (m_object) */ osal_debug_assert(m_object->mm_handle == this);
+    if (m_children) if (m_children->m_object) osal_debug_assert(m_children->m_object->mm_parent == m_object);
+    if (m_object) osal_debug_assert(m_object->mm_handle == this);
     osal_debug_assert(m_root == root);
 }
 #endif

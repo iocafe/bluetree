@@ -86,7 +86,30 @@ addname("//thread");
 */
 eThread::~eThread()
 {
-    /*Detete the message queue. Not child of the tread, so this needs to be deleted explicitely.
+    eObject *o, *next_o, *bindings;
+
+    /* Delete children before deleting message queue. Delete first regular child objects,
+       then attachments. Leave eRoot to be for now.
+     */
+    bindings = first(EOID_BINDINGS);
+    if (bindings) {
+        for (o = bindings->first(); o; o = next_o) {
+            next_o = o->next();
+            delete o;
+        }
+    }
+    for (o = first(); o; o = next_o) {
+        next_o = o->next();
+        delete o;
+    }
+    for (o = first(EOID_ALL); o; o = next_o) {
+        next_o = o->next(EOID_ALL);
+        if (o->oid() != EOID_ROOT_HELPER) {
+            delete o;
+        }
+    }
+
+    /* Delete the message queue. Not child of the tread, so this needs to be deleted explicitely.
      */
     delete m_message_queue;
     m_message_queue = OS_NULL;
@@ -95,6 +118,7 @@ eThread::~eThread()
      */
     osal_event_delete(m_trigger);
 }
+
 
 /**
 ****************************************************************************************************
@@ -259,23 +283,6 @@ void eThread::run()
 /**
 ****************************************************************************************************
 
-  @brief Check if thread exit is requested.
-
-  Check if thread termination is requested.
-
-  @return  None.
-
-****************************************************************************************************
-*/
-/* os_boolean eThread::exitnow()
-{
-    return m_exit_requested;
-} */
-
-
-/**
-****************************************************************************************************
-
   @brief Place an envelope to thread's message queue
 
   The eThread::queue function...
@@ -323,7 +330,7 @@ void eThread::alive(
     osal_event_wait(m_trigger, flags & EALIVE_WAIT_FOR_EVENT
         ? OSAL_EVENT_INFINITE : OSAL_EVENT_NO_WAIT);
 
-    while (osal_go())
+    while (!exitnow())
     {
         /* Synchronize and get message (envelope) from queue.
          */

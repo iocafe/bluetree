@@ -39,6 +39,7 @@ void eguiclasslist_initialize()
     eLineEdit::setupclass();
     eTreeNode::setupclass();
     eButton::setupclass();
+    eTableView::setupclass();
 
     eiocCheckbox::setupclass();
 }

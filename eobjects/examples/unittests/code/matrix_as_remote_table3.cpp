@@ -317,7 +317,7 @@ void matrix_as_remote_table_3()
     t = new ThreadMonitoringTheTable();
     t->start(&thandle3); /* After this t pointer is useless */
 
-    for (os_int i = 0; i<1000; i++)
+    for (os_int i = 0; i<3; i++)
     {
         os_sleep(2000);
 

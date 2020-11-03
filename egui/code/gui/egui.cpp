@@ -287,7 +287,11 @@ void ShowExampleAppDockSpace(bool* p_open)
 
     // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
     // because it would be confusing to have two docking targets within each others.
+#ifdef UKEK
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+#else
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
+#endif
     if (opt_fullscreen)
     {
         ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -335,6 +339,7 @@ void ShowExampleAppDockSpace(bool* p_open)
         // ShowDockingDisabledMessage();
     }
 
+#ifdef UKEK
     if (ImGui::BeginMenuBar())
     {
         if (ImGui::BeginMenu("Options"))
@@ -370,6 +375,7 @@ void ShowExampleAppDockSpace(bool* p_open)
 
         ImGui::EndMenuBar();
     }
+#endif
 
     ImGui::End();
 }
