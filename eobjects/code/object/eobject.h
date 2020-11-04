@@ -29,6 +29,7 @@
 class eHandle;
 class eRoot;
 class eVariable;
+class eMatrix;
 class eSet;
 class eContainer;
 class eNameSpace;
@@ -396,6 +397,11 @@ public:
     /* Get the first child eVariable identified by oid.
      */
     eVariable *firstv(
+        e_oid id = EOID_CHILD);
+
+    /* Get the first child eMatrix identified by oid.
+     */
+    eMatrix *firstm(
         e_oid id = EOID_CHILD);
 
     /* Get the first child eSet identified by oid.

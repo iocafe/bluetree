@@ -40,6 +40,7 @@ void eguiclasslist_initialize()
     eTreeNode::setupclass();
     eButton::setupclass();
     eTableView::setupclass();
+    eTableColumn::setupclass();
 
     eiocCheckbox::setupclass();
 }

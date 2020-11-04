@@ -34,6 +34,8 @@ eTableView::eTableView(
     : eComponent(parent, id, flags)
 {
     m_rowset = OS_NULL;
+    m_row_to_m = OS_NULL;
+    m_row_to_m_sz = 0;
 
 select();
 }
@@ -52,6 +54,7 @@ select();
 */
 eTableView::~eTableView()
 {
+    os_free(m_row_to_m, m_row_to_m_sz);
 }
 
 
@@ -218,6 +221,8 @@ eStatus eTableView::draw(
     if (ncols <= 0) {
         goto skipit;
     }
+
+
 
     /* Draw marker for state bits if we have an extended value.
      */
@@ -478,16 +483,19 @@ void eTableView::callback(
     switch (ci->event) {
         case ERSET_TABLE_BINDING_COMPLETE:
             osal_console_write("binding done");
+            fill_row_to_m();
             break;
 
         case ERSET_INITIAL_DATA_RECEIVED:
         case ERSET_MODIFICATIONS_RECEIVED:
-            rset->print_json(EOBJ_SERIALIZE_ONLY_CONTENT);
+            // rset->print_json(EOBJ_SERIALIZE_ONLY_CONTENT);
+            fill_row_to_m();
             break;
     }
 
     osal_console_write("eRowSet callback\n");
 }
+
 
 /* Static callback function just firwards to callback(). This exists to have C function pointer.
  */
@@ -499,6 +507,46 @@ void eTableView::static_callback(
     if (rset) {
         ((eTableView*)context)->callback(rset, ci);
     }
+}
+
+
+/* Setup m_row_to_m array, converts row number 0... to eMatrix pointer.
+ */
+void eTableView::fill_row_to_m()
+{
+    eMatrix *m;
+    os_memsz sz;
+    os_int nrows, row;
+
+    if (m_rowset == OS_NULL) return;
+
+    nrows = m_rowset->nrows();
+    sz = nrows * sizeof(eMatrix*);
+
+    /* Fill in table to convert row number to eMatrix pointer.
+     */
+    if (m_row_to_m == OS_NULL || sz > m_row_to_m_sz)
+    {
+        os_free(m_row_to_m, m_row_to_m_sz);
+        if (sz < (os_memsz)(10 * sizeof(eMatrix *))) {
+            sz = 10 * sizeof(eMatrix *);
+        }
+        m_row_to_m = (eMatrix**)os_malloc(sz, &m_row_to_m_sz);
+    }
+
+    for (m = m_rowset->firstm(), row = 0; m && row < nrows; m = m->nextm(), row++)
+    {
+        m_row_to_m[row] = m;
+    }
+    osal_debug_assert(m == OS_NULL && row == nrows);
+}
+
+
+/* Setup column headers and other column info.
+ */
+void eTableView::setup_columns()
+{
+
 }
 
 

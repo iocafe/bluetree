@@ -119,6 +119,11 @@ public:
         return new eMatrix(parent, id, flags);
     }
 
+    /* Get next matrix identified by oid.
+     */
+    eMatrix *nextm(
+        e_oid id = EOID_CHILD);
+
     /* Function to process incoming messages.
      */
     virtual void onmessage(

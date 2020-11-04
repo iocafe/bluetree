@@ -678,6 +678,39 @@ eVariable *eObject::firstv(
 /**
 ****************************************************************************************************
 
+  @brief Get the first child matrix identified by oid.
+
+  The eObject::firstm() function returns pointer to the first child eMatrix.
+
+  @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
+           child objects, regardless wether these are attachment or not. Other values
+           specify object identifier, only children with that specified object identifier
+           are searched for.
+
+  @return  Pointer to the first child matrix. Or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+eMatrix *eObject::firstm(
+    e_oid id)
+{
+    if (mm_handle == OS_NULL) return OS_NULL;
+    eHandle *h = mm_handle->first(id);
+    while (h)
+    {
+        if (h->m_object->classid() == ECLASSID_MATRIX)
+            return eMatrix::cast(h->m_object);
+
+        h = h->next(id);
+    }
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Get the first child set by oid.
 
   The eObject::firsts() function returns pointer to the first child set (eSet) of this object.

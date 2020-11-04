@@ -291,6 +291,12 @@ public:
     inline os_int nrows() {return m_nrows; }
     inline os_int ncolumns() {return m_ncolumns; }
 
+    /* Get row set columns.
+     */
+    inline eContainer *columns() {
+        if (m_configuration) {return m_configuration->firstc(EOID_TABLE_COLUMNS); }
+        return OS_NULL;
+    }
 
 protected:
     /**

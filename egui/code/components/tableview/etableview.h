@@ -129,6 +129,12 @@ protected:
         ersetCallbackInfo *ci,
         eObject *context);
 
+    /* Setup m_row_to_m array, converts row number 0... to eMatrix pointer.
+     */
+    void fill_row_to_m();
+
+    void setup_columns();
+
     /* Collect information about this object for tree browser.
      */
     virtual void object_info(
@@ -141,6 +147,11 @@ protected:
     /* Row set (data selected from table)
      */
     eRowSet *m_rowset;
+
+    /* Converting row number to eMatrix pointer
+     */
+    eMatrix **m_row_to_m;
+    os_memsz m_row_to_m_sz;
 };
 
 

@@ -172,6 +172,39 @@ eObject *eMatrix::clone(
 /**
 ****************************************************************************************************
 
+  @brief Get next child matrix identified by oid.
+
+  The eMatrix::nextm() function returns pointer to the next object of the same class.
+
+  @param   id Object idenfifier. Default value EOID_CHILD specifies to count a child objects,
+           which are not flagged as an attachment. Value EOID_ALL specifies to get count all
+           child objects, regardless wether these are attachment or not. Other values
+           specify object identifier, only children with that specified object identifier
+           are searched for.
+
+  @return  Pointer to the next eMatrix, or OS_NULL if none found.
+
+****************************************************************************************************
+*/
+eMatrix *eMatrix::nextm(
+    e_oid id)
+{
+    if (mm_handle == OS_NULL) return OS_NULL;
+    eHandle *h = mm_handle->next(id);
+    while (h)
+    {
+        if (h->object()->classid() == ECLASSID_MATRIX)
+            return eMatrix::cast(h->object());
+
+        h = h->next(id);
+    }
+    return OS_NULL;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Function to process incoming messages.
 
   The eMatrix::onmessage function handles messages received by object. If this function

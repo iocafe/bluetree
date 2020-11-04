@@ -69,6 +69,7 @@ void egui_shutdown();
 #include "code/components/button/ebutton.h"
 #include "code/components/treenode/etreenode.h"
 #include "code/components/tableview/etableview.h"
+#include "code/components/tableview/etablecolumn.h"
 
 #include "code/ioc_components/eioc_checkbox.h"
 #include "code/gui/eguix.h"

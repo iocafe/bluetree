@@ -437,7 +437,7 @@ public:
     */
     /* Set redo layout flag.
      */
-    void redo_layout();
+    // void redo_layout();
 
     /* Invalidate current component rectangle.
      */
