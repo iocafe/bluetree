@@ -866,6 +866,11 @@ public:
         os_int propertynr,
         const os_char *x);
 
+    /* Forward simple property change to bindings.
+     */
+    void propertychanged(
+        os_int propertynr);
+
     /* Forward property change trough bindings.
      */
     void forwardproperty(

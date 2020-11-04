@@ -158,7 +158,7 @@ eStatus eTableView::onpropertychange(
 
 
 // Make the UI compact because there are so many fields
-static void PushStyleCompact()
+/* static void PushStyleCompact()
 {
     ImGuiStyle& style = ImGui::GetStyle();
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, (float)(int)(style.FramePadding.y * 0.70f)));
@@ -169,7 +169,7 @@ static void PopStyleCompact()
 {
     ImGui::PopStyleVar(2);
 }
-
+*/
 
 /**
 ****************************************************************************************************
@@ -188,7 +188,9 @@ static void PopStyleCompact()
 eStatus eTableView::draw(
     eDrawParams& prm)
 {
-    os_int relative_x2, total_w, total_h;
+    os_int nrows, ncols, relative_x2, total_w, total_h;
+    ImVec2 size;
+    ImGuiTableFlags flags;
 
     // const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
     const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
@@ -207,95 +209,103 @@ eStatus eTableView::draw(
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
 
+    if (m_rowset == OS_NULL) {
+        goto skipit;
+    }
+
+    nrows = m_rowset->nrows();
+    ncols = m_rowset->ncolumns();
+    if (ncols <= 0) {
+        goto skipit;
+    }
+
     /* Draw marker for state bits if we have an extended value.
      */
-    draw_state_bits(m_rect.x2);
+    // draw_state_bits(m_rect.x2);
 
     // Using those as a base value to create width/height that are factor of the size of our font
 
+    flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+    static int freeze_cols = 1;
+    static int freeze_rows = 1;
 
-        static ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
-        static int freeze_cols = 1;
-        static int freeze_rows = 1;
+    /* PushStyleCompact();
+    ImGui::CheckboxFlags("ImGuiTableFlags_ScrollX", (unsigned int*)&flags, ImGuiTableFlags_ScrollX);
+    ImGui::CheckboxFlags("ImGuiTableFlags_ScrollY", (unsigned int*)&flags, ImGuiTableFlags_ScrollY);
+    ImGui::SetNextItemWidth(ImGui::GetFrameHeight());
+    ImGui::DragInt("freeze_cols", &freeze_cols, 0.2f, 0, 9, NULL, ImGuiSliderFlags_NoInput);
+    ImGui::SetNextItemWidth(ImGui::GetFrameHeight());
+    ImGui::DragInt("freeze_rows", &freeze_rows, 0.2f, 0, 9, NULL, ImGuiSliderFlags_NoInput);
+    PopStyleCompact(); */
 
-        PushStyleCompact();
-        ImGui::CheckboxFlags("ImGuiTableFlags_ScrollX", (unsigned int*)&flags, ImGuiTableFlags_ScrollX);
-        ImGui::CheckboxFlags("ImGuiTableFlags_ScrollY", (unsigned int*)&flags, ImGuiTableFlags_ScrollY);
-        ImGui::SetNextItemWidth(ImGui::GetFrameHeight());
-        ImGui::DragInt("freeze_cols", &freeze_cols, 0.2f, 0, 9, NULL, ImGuiSliderFlags_NoInput);
-        ImGui::SetNextItemWidth(ImGui::GetFrameHeight());
-        ImGui::DragInt("freeze_rows", &freeze_rows, 0.2f, 0, 9, NULL, ImGuiSliderFlags_NoInput);
-        PopStyleCompact();
+    // When using ScrollX or ScrollY we need to specify a size for our table container!
+    // Otherwise by default the table will fit all available space, like a BeginChild() call.
+    size = ImVec2(0, TEXT_BASE_HEIGHT * 8);
+    char bbb[128];
+    os_strncpy(bbb, "uke", sizeof(bbb));
+    if (ImGui::BeginTable("##table2", ncols, flags, size))
+    {
+        ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
+        /* ImGui::TableSetupColumn("Line #", ImGuiTableColumnFlags_NoHide); // Make the first column not hideable to match our use of TableSetupScrollFreeze()
+        ImGui::TableSetupColumn("One", ImGuiTableColumnFlags_None);
+        ImGui::TableSetupColumn("Two", ImGuiTableColumnFlags_None);
+        ImGui::TableSetupColumn("Three", ImGuiTableColumnFlags_None);
+        ImGui::TableSetupColumn("Four", ImGuiTableColumnFlags_None);
+        ImGui::TableSetupColumn("Five", ImGuiTableColumnFlags_None);
+        ImGui::TableSetupColumn("Six", ImGuiTableColumnFlags_None); */
 
-        // When using ScrollX or ScrollY we need to specify a size for our table container!
-        // Otherwise by default the table will fit all available space, like a BeginChild() call.
-        ImVec2 size = ImVec2(0, TEXT_BASE_HEIGHT * 8);
-        int add_columns = 405;
-        char bbb[128];
-        os_strncpy(bbb, "uke", sizeof(bbb));
-        if (ImGui::BeginTable("##table2", 7 + add_columns, flags, size))
+
+        for (int i=0; i<ncols; i++) {
+            osal_int_to_str(bbb + 3, sizeof(bbb)-3, i+1);
+
+            ImGui::TableSetupColumn(bbb, i == 0 ? ImGuiTableColumnFlags_NoHide
+                : ImGuiTableColumnFlags_None);
+        }
+
+        ImGui::TableHeadersRow();
+
+        os_boolean first_row = OS_TRUE, visible[500];
+        ImGuiListClipper clipper;
+        clipper.Begin(nrows);
+        while (clipper.Step())
         {
-            ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
-            ImGui::TableSetupColumn("Line #", ImGuiTableColumnFlags_NoHide); // Make the first column not hideable to match our use of TableSetupScrollFreeze()
-            ImGui::TableSetupColumn("One", ImGuiTableColumnFlags_None);
-            ImGui::TableSetupColumn("Two", ImGuiTableColumnFlags_None);
-            ImGui::TableSetupColumn("Three", ImGuiTableColumnFlags_None);
-            ImGui::TableSetupColumn("Four", ImGuiTableColumnFlags_None);
-            ImGui::TableSetupColumn("Five", ImGuiTableColumnFlags_None);
-            ImGui::TableSetupColumn("Six", ImGuiTableColumnFlags_None);
+            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
 
-
-            for (int i=0; i<add_columns; i++) {
-                osal_int_to_str(bbb + 3, sizeof(bbb)-3, i+6);
-
-                ImGui::TableSetupColumn(bbb, ImGuiTableColumnFlags_None);
-            }
-
-            ImGui::TableHeadersRow();
-
-            int nrows = 20000;
-            os_boolean first_row = OS_TRUE, visible[500];
-            ImGuiListClipper clipper;
-            clipper.Begin(nrows);
-            while (clipper.Step())
+        //     for (int row = 0; row < nrows; row++)
             {
-                for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
-
-            //     for (int row = 0; row < nrows; row++)
+                ImGui::TableNextRow();
+                for (int column = 0; column < ncols; column++)
                 {
-                    ImGui::TableNextRow();
-                    for (int column = 0; column < 7 + add_columns; column++)
-                    {
-                        // Both TableNextColumn() and TableSetColumnIndex() return false when a column is not visible, which can be used for clipping.
-                        if (first_row) {
-                            visible[column] = ImGui::TableSetColumnIndex(column);
-                        }
-                        else {
-                            if (!visible[column]) continue;
-
-                            if (!ImGui::TableSetColumnIndex(column)) {
-                                continue;
-                            }
-                        }
-
-                        if (column == 0)
-                            ImGui::Text("Line %d", row);
-                        else
-                            ImGui::Text("Hello world %d,%d", row, column);
+                    // Both TableNextColumn() and TableSetColumnIndex() return false when a column is not visible, which can be used for clipping.
+                    if (first_row) {
+                        visible[column] = ImGui::TableSetColumnIndex(column);
                     }
-                    first_row = OS_FALSE;
+                    else {
+                        if (!visible[column]) continue;
+
+                        if (!ImGui::TableSetColumnIndex(column)) {
+                            continue;
+                        }
+                    }
+
+                    if (column == 0)
+                        ImGui::Text("Line %d", row);
+                    else
+                        ImGui::Text("Hello world %d,%d", row, column);
                 }
+                first_row = OS_FALSE;
             }
-            ImGui::EndTable();
         }
+        ImGui::EndTable();
+    }
 
-        /* Tool tip
-         */
-        if (ImGui::IsItemHovered()) {
-            draw_tooltip();
-        }
+    /* Tool tip
+     */
+    if (ImGui::IsItemHovered()) {
+        draw_tooltip();
+    }
 
-
+skipit:
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);

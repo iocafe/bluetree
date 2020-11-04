@@ -19,6 +19,7 @@
 /* RowSet property names.
  */
 const os_char
+    ersetp_nrows[] = "nrows",
     ersetp_ncolumns[] = "ncolumns",
     ersetp_dbm_path[] = "dbmpath",
     ersetp_table_name[] = "table",
@@ -93,6 +94,7 @@ void eRowSet::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eRowSet");
+    addpropertyl(cls, ERSETP_NROWS, ersetp_nrows, "nro rows", EPRO_SIMPLE);
     addpropertyl(cls, ERSETP_NCOLUMNS, ersetp_ncolumns, "nro columns", EPRO_SIMPLE);
 
     addpropertys(cls, ERSETP_DBM_PATH, ersetp_dbm_path, "DBM path", EPRO_PERSISTENT|EPRO_SIMPLE);
@@ -191,7 +193,8 @@ eStatus eRowSet::onpropertychange(
 
     switch (propertynr)
     {
-        case ERSETP_NCOLUMNS: /* read only */
+        case ERSETP_NROWS: /* read only */
+        case ERSETP_NCOLUMNS:
             break;
 
         case ERSETP_DBM_PATH:
@@ -268,6 +271,11 @@ eStatus eRowSet::simpleproperty(
 
     switch (propertynr)
     {
+        case ERSETP_NROWS:
+            if (m_nrows == 0) goto clear_x;
+            x->setl(m_nrows);
+            break;
+
         case ERSETP_NCOLUMNS:
             if (m_ncolumns == 0) goto clear_x;
             x->setl(m_ncolumns);
@@ -644,6 +652,7 @@ void eRowSet::initial_data_complete(
 
     /* Delete old data.
      */
+    m_nrows = 0;
     for (o = first(); o; o = next_o) {
         next_o = o->next();
         if (o->classid() == ECLASSID_MATRIX) {
@@ -658,9 +667,10 @@ void eRowSet::initial_data_complete(
             next_o = o->next();
             if (o->classid() == ECLASSID_MATRIX) {
                 o->adopt(this, EOID_ITEM);
-
                 ix_value = ((eMatrix*)o)->getl(0, m_ix_column_nr);
                 o->addintname(ix_value);
+                m_nrows++;
+                propertychanged(ERSETP_NROWS);
             }
         }
     }
@@ -683,11 +693,14 @@ void eRowSet::trigged_insert_or_update(
 {
     eObject *old_m, *before;
     os_long ix_value;
+    os_int nrows;
 
+    nrows = m_nrows;
     ix_value = m->getl(0, m_ix_column_nr);
     old_m = byintname(ix_value);
     if (old_m) {
         delete old_m;
+        nrows--;
     }
 
     m = eMatrix::cast(m->clone(this));
@@ -699,6 +712,12 @@ void eRowSet::trigged_insert_or_update(
         m->adopt(before, EOID_ITEM, EOBJ_BEFORE_THIS);
     }
     m->addintname(ix_value);
+    nrows++;
+
+    if (m_nrows != nrows) {
+        m_nrows = nrows;
+        propertychanged(ERSETP_NROWS);
+    }
 }
 
 /* Do trigged removes on this row set.
@@ -711,6 +730,8 @@ void eRowSet::trigged_remove(
     m = byintname(ix_value);
     if (m) {
         delete m;
+        m_nrows--;
+        propertychanged(ERSETP_NROWS);
     }
 }
 

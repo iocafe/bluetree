@@ -32,6 +32,7 @@ class eDBM;
    Make sure that EBINDP_BFLAGS, EBINDP_STATE and ETABLEP_CONFIGURATION
    do not overlap with these numbers.
  */
+#define ERSETP_NROWS 18
 #define ERSETP_NCOLUMNS 19
 #define ERSETP_DBM_PATH 20
 #define ERSETP_TABLE_NAME 21
@@ -49,6 +50,7 @@ class eDBM;
 /* Matrix property names.
  */
 extern const os_char
+    ersetp_nrows[],
     ersetp_ncolumns[],
     ersetp_dbm_path[],
     ersetp_table_name[],
@@ -284,8 +286,9 @@ public:
         os_int limit = 0,
         os_int bflags = 0);
 
-    /* Get rowset width.
+    /* Get rowset height and width.
      */
+    inline os_int nrows() {return m_nrows; }
     inline os_int ncolumns() {return m_ncolumns; }
 
 
@@ -326,6 +329,11 @@ protected:
       Member variables
     ************************************************************************************************
     */
+
+    /** Number of rows.
+     */
+    os_int m_nrows;
+
     /** Number of columns.
      */
     os_int m_ncolumns;

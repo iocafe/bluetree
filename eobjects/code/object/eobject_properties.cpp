@@ -647,8 +647,7 @@ void eObject::setpropertyv(
     }
     pflags = p->flags();
 
-    /* Empty x and x as null pointer are thes ame thing, handle these in
-       the same way.
+    /* Empty x and x as null pointer are the same thing, handled the same way.
      */
     if (x == OS_NULL)
     {
@@ -830,6 +829,39 @@ os_double eObject::propertyd(
     eVariable v;
     propertyv(propertynr, &v);
     return v.getd();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Forward simple property change to bindings.
+
+  The propertychanged() function is called when value of simple property has been changed
+  from within class. It forward changed value to bindings.
+
+  @param   propertynr Property number to forward.
+
+****************************************************************************************************
+*/
+void eObject::propertychanged(
+    os_int propertynr)
+{
+    ePropertyBinding *b, *nextb;
+    eVariable *v = OS_NULL;
+
+    for (b = firstpb(); b; b = nextb)
+    {
+        nextb = b->nextpb();
+
+        if (v == OS_NULL) {
+            v = new eVariable(this, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
+            propertyv(propertynr, v);
+        }
+
+        /* Notice that this deleted v at last loop */
+        b->changed(propertynr, v, nextb ? OS_FALSE : OS_TRUE);
+    }
 }
 
 

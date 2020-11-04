@@ -45,7 +45,7 @@ void eObject::forwardproperty(
     {
         nextb = b->nextpb();
         if (b != source) {
-            ePropertyBinding::cast(b)->changed(propertynr, x, OS_FALSE);
+            b->changed(propertynr, x, OS_FALSE);
         }
     }
 }
