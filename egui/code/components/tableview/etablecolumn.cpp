@@ -33,6 +33,7 @@ eTableColumn::eTableColumn(
     os_int flags)
     : eObject(parent, id, flags)
 {
+    m_visible = OS_FALSE;
 }
 
 
@@ -143,14 +144,74 @@ void eTableColumn::draw_value(
     enice_value_for_ui(value, this, &m_attr);
     text = value->gets();
 
-// Right align test
-ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x
-     /* - ImGui::GetStyle().CellPadding.x */);
+    // Right align test
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x
+        /* - ImGui::GetStyle().CellPadding.x */);
 
     ImGui::TextUnformatted(text);
-
-    // ImGui::InputText(label, view->m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
 }
 
 
+// Modifies value
+void eTableColumn::draw_edit(
+    eVariable *value,
+    eTableView *view)
+{
+    ImGuiInputTextFlags eflags;
 
+    switch (m_attr.showas())
+    {
+        case E_SHOWAS_INTEGER_NUMBER:
+        case E_SHOWAS_DECIMAL_NUMBER:
+            eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue;
+            break;
+
+        default:
+            eflags = ImGuiInputTextFlags_EnterReturnsTrue;
+            break;
+    }
+
+    const ImVec2 zero_pad(0, 0);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
+    ImGui::InputText(view->edit_label(), view->edit_buf(), view->edit_sz(), eflags);
+    ImGui::PopStyleVar();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Start editing value, toggle checkbox or show drop down list.
+
+  The eTableColumn::activate() function is called when a value is clicked, or key (for example
+  spacebar) is hit to start editing the value. Actual operation depends on metadata, the
+  function can either start value edit, toggle a checkbox or show drop down list.
+
+  @return  None.
+
+****************************************************************************************************
+*/
+void eTableColumn::activate(
+    eMatrix *focus_row,
+    os_int focus_column,
+    eTableView *view)
+{
+    switch (m_attr.showas())
+    {
+        case E_SHOWAS_CHECKBOX:
+            // setpropertyi(ECOMP_VALUE, m_imgui_checked);
+            // m_set_checked = true;
+            break;
+
+        case E_SHOWAS_DROP_DOWN_ENUM:
+            // drop_down_list(m_attr.get_list());
+            break;
+
+        default:
+            eVariable value;
+            focus_row->getv(0, focus_column, &value);
+            enice_value_for_ui(&value, this, &m_attr);
+            view->focus_cell(focus_row, focus_column, value.gets(), 256);
+            break;
+    }
+}

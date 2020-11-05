@@ -259,8 +259,6 @@ eStatus eWindow::draw(
             = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem|ImGuiHoveredFlags_ChildWindows);
     }
 
-osal_debug_error(wprm.mouse_over_window ? "OVER" : "NO");
-
     if (!wprm.mouse_over_window) {
         wprm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
         wprm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;

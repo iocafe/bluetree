@@ -33,6 +33,9 @@ eTableView::eTableView(
     m_row_to_m_len = 0;
     m_columns = OS_NULL;
 
+    m_focused_row = new ePointer(this);
+    m_focused_column = -1;;
+
 select();
 }
 
@@ -163,12 +166,13 @@ eStatus eTableView::draw(
     eDrawParams& prm)
 {
     eTableColumn *c;
-    eMatrix *m;
+    eMatrix *m, *focused_m;
     eVariable *value;
     os_int nrows, ncols, relative_x2, total_w, total_h;
     os_int row, column;
     ImVec2 size;
     ImGuiTableFlags flags;
+    os_boolean first_row;
 
     // const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
     const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
@@ -221,7 +225,8 @@ eStatus eTableView::draw(
 
         ImGui::TableHeadersRow();
 
-        os_boolean first_row = OS_TRUE, visible[500];
+        first_row = OS_TRUE;
+        focused_m = eMatrix::cast(m_focused_row->get());
         value = new eVariable(this);
         ImGuiListClipper clipper;
         clipper.Begin(nrows);
@@ -236,7 +241,7 @@ eStatus eTableView::draw(
                 if (row < 0 || row >= m_row_to_m_len) {
                     continue;
                 }
-                m = m_row_to_m[row];
+                m = m_row_to_m[row].m_row;
 
                 for (c = eTableColumn::cast(m_columns->first()), column=0;
                      c && column < ncols;
@@ -247,11 +252,12 @@ eStatus eTableView::draw(
                     // Both TableNextColumn() and TableSetColumnIndex() return false when
                     // a column is not visible, which can be used for clipping.
                     if (first_row) {
-                        visible[column] = ImGui::TableSetColumnIndex(column);
+                        c->set_visible(ImGui::TableSetColumnIndex(column));
+                        if (!c->visible()) continue;
                         if (value->isempty()) continue;
                     }
                     else {
-                        if (!visible[column]) continue;
+                        if (!c->visible()) continue;
                         if (value->isempty()) continue;
 
                         if (!ImGui::TableSetColumnIndex(column)) {
@@ -259,7 +265,14 @@ eStatus eTableView::draw(
                         }
                     }
 
-                    c->draw_value(value, this);
+                    if (m == focused_m &&
+                        column == m_focused_column)
+                    {
+                        c->draw_edit(value, this);
+                    }
+                    else {
+                        c->draw_value(value, this);
+                    }
                 }
                 first_row = OS_FALSE;
             }
@@ -268,10 +281,14 @@ eStatus eTableView::draw(
 
         if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
         {
-            int aa = ImGui::TableGetHoveredColumn();
-            if (aa != -1) {
-                int bb = ImGui::GetColumnWidth(aa);
-                int ccc = bb;
+            column = ImGui::TableGetHoveredColumn();
+            if (column >= 0 && column < m_row_to_m_len) {
+                c = eTableColumn::cast(m_columns->first(column));
+                row = (prm.mouse_pos.y - clipper.StartPosY) / TEXT_BASE_HEIGHT;
+                if (c && row >= 0 && row < nrows) {
+                    m = m_row_to_m[row].m_row;
+                    c->activate(m, column, this);
+                }
             }
         }
 
@@ -288,6 +305,25 @@ skipit:
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
+}
+
+/**
+****************************************************************************************************
+
+  @brief Draw tool tip, called when mouse is hovering over the value
+
+****************************************************************************************************
+*/
+void eTableView::focus_cell(
+    eMatrix *focus_row,
+    os_int focus_column,
+    const os_char *edit_str,
+    os_int edit_sz)
+{
+    m_focused_row->set(focus_row);
+    m_focused_column = focus_column;
+    m_edit_buf.set(edit_str, edit_sz);
+
 }
 
 
@@ -475,25 +511,26 @@ void eTableView::fill_row_to_m()
     if (m_rowset == OS_NULL) return;
 
     nrows = m_rowset->nrows();
-    sz = nrows * sizeof(eMatrix*);
+    sz = nrows * sizeof(eTableRow);
 
     /* Fill in table to convert row number to eMatrix pointer.
      */
     if (m_row_to_m == OS_NULL || sz > m_row_to_m_sz)
     {
         os_free(m_row_to_m, m_row_to_m_sz);
-        if (sz < (os_memsz)(10 * sizeof(eMatrix *))) {
-            sz = 10 * sizeof(eMatrix *);
+        if (sz < (os_memsz)(10 * sizeof(eTableRow))) {
+            sz = 10 * sizeof(eTableRow);
         }
         else {
             sz = 3 * sz / 2;
         }
-        m_row_to_m = (eMatrix**)os_malloc(sz, &m_row_to_m_sz);
+        m_row_to_m = (eTableRow*)os_malloc(sz, &m_row_to_m_sz);
     }
 
     for (m = m_rowset->firstm(), row = 0; m && row < nrows; m = m->nextm(), row++)
     {
-        m_row_to_m[row] = m;
+        os_memclear(&m_row_to_m[row], sizeof(eTableRow));
+        m_row_to_m[row].m_row = m;
     }
     osal_debug_assert(m == OS_NULL && row == nrows);
     m_row_to_m_len = row;

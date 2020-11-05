@@ -87,17 +87,33 @@ public:
     void setup_column(
         eVariable *col_conf);
 
+    inline void set_visible(bool visible) {m_visible = visible;}
+    inline bool visible() {return m_visible;}
+
     void draw_column_header();
 
     void draw_value(
         eVariable *value,
         eTableView *view);
 
-protected:
+    void draw_edit(
+        eVariable *value,
+        eTableView *view);
 
+    void activate(
+        eMatrix *focus_row,
+        os_int focus_column,
+        eTableView *view);
+
+protected:
     eStrBuffer m_text;
     eStrBuffer m_unit;
     eAttrBuffer m_attr;
+
+    /* Column is visible flag.
+     */
+    bool m_visible;
+
 };
 
 

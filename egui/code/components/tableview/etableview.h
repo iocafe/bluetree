@@ -24,6 +24,19 @@
 ****************************************************************************************************
 */
 
+typedef struct
+{
+    /* Pointer to row data matrix.
+     */
+    eMatrix *m_row;
+
+    /* Row pixel coordinates
+     */
+    // os_int m_y1;
+    // os_int m_y2;
+}
+eTableRow;
+
 
 /**
 ****************************************************************************************************
@@ -108,13 +121,26 @@ public:
      */
     void select();
 
+    /* eTableColumn to access edit buffer.
+     */
+    inline os_char *edit_buf() {return m_edit_buf.ptr(); }
+    inline os_memsz edit_sz() {return m_edit_buf.sz(); }
+    inline const os_char *edit_label() {return m_label_edit.get(this); }
+
+    void focus_cell(
+        eMatrix *focus_row,
+        os_int focus_column,
+        const os_char *edit_str,
+        os_int edit_sz);
+
 protected:
 
     /**
     ************************************************************************************************
-      Member variables.
+      Protected functions.
     ************************************************************************************************
     */
+
     void draw_tooltip();
 
     /* Callback when table data is received, etc.
@@ -145,6 +171,13 @@ protected:
         eVariable *name,
         eSet *appendix);
 
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
+
     /* Table columns, eTableColumn objects.
      */
     eContainer *m_columns;
@@ -155,13 +188,19 @@ protected:
 
     /* Converting row number to eMatrix pointer
      */
-    eMatrix **m_row_to_m;
+    eTableRow *m_row_to_m;
     os_memsz m_row_to_m_sz;
     os_int m_row_to_m_len;
+
+    /* Input focus
+     */
+    ePointer *m_focused_row;
+    os_int m_focused_column;
 
     /* Buffer for editing value.
      */
     eEditBuffer m_edit_buf;
+    eAutoLabel m_label_edit;
 };
 
 
