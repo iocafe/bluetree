@@ -97,11 +97,47 @@ void eTableColumn::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eTableColumn");
-    // setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
-    // propertysetdone(cls);
     os_unlock();
 }
 
+void eTableColumn::setup_column(
+    eVariable *col_conf)
+{
+    eName *n;
+
+    m_text.get(col_conf, EVARP_TEXT);
+    if (m_text.isempty()) {
+        n = col_conf->primaryname();
+        if (n) {
+            m_text.setv(n);
+        }
+    }
+
+    m_unit.get(col_conf, EVARP_UNIT);
+    m_attr.for_variable(col_conf);
+}
 
 
+void eTableColumn::draw_column_header()
+{
+    const os_char *text;
+    os_int col_nr;
+
+    col_nr = oid();
+
+    text = m_text.ptr();
+    if (text == OS_NULL) {
+        text = "?";
+    }
+    ImGui::TableSetupColumn(text, col_nr == 0 ? ImGuiTableColumnFlags_NoHide
+        : ImGuiTableColumnFlags_None);
+}
+
+// Modifies value
+void eTableColumn::draw_value(
+    eVariable *value)
+{
+    enice_value_for_ui(value, this, &m_attr);
+    ImGui::TextUnformatted(value->gets());
+}
 

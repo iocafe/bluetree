@@ -78,15 +78,15 @@ void eStrBuffer::setv(
 }
 
 /* This function is typically used only when drawing, etc to avoid buffer allocation when
-   inactive in memory. component pointer is used to get context for translation redirects, etc.
+   inactive in memory. obj pointer is used to get property value and context for translation redirects, etc.
  */
 const os_char *eStrBuffer::get(
-    eComponent *component,
+    eObject *obj,
     os_int propertynr)
 {
     if (m_buf_sz == 0) {
         eVariable tmp;
-        component->propertyv(propertynr, &tmp);
+        obj->propertyv(propertynr, &tmp);
 
         // Here we could do language translation !!!!!!!!!!!!!!!!
 

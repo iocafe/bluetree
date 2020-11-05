@@ -135,7 +135,6 @@ protected:
      */
     eEditBuffer m_edit_buf;
 
-    /* Property values */
     eStrBuffer m_text;
     eStrBuffer m_unit;
 

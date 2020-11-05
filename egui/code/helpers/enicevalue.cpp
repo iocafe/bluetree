@@ -19,7 +19,7 @@
  */
 void enice_value_for_ui(
     eVariable *value,
-    eComponent *component,
+    eObject *obj, // for redirs, etc
     eAttrBuffer *attr)
 {
     eVariable *item;
@@ -107,7 +107,7 @@ void enice_value_for_ui(
 void enice_ui_value_to_internal_type(
     eVariable *value,
     eVariable *new_value,
-    eComponent *component,
+    eObject *obj, // for redirs, etc
     eAttrBuffer *attr)
 {
     os_double d;

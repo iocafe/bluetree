@@ -65,13 +65,13 @@ public:
 
     void clear();
 
-    /* Set attributes for LineEdit, eTreeNode.
+    /* Set attributes for LineEdit, eTreeNode, eVariable, etc.
      */
     inline void for_variable(
-        eComponent *component)
+        eObject *obj)
     {
         if (!m_initialized) {
-            initialize_for_variable(component);
+            initialize_for_variable(obj);
         }
     }
 
@@ -98,7 +98,7 @@ protected:
     /* Set attributes for LineEdit, eTreeNode.
      */
     void initialize_for_variable(
-        eComponent *component);
+        eObject *obj);
 
     /* Set attributes as values of member variables.
      */

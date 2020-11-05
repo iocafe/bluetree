@@ -23,13 +23,13 @@
  */
 void enice_value_for_ui(
     eVariable *value,
-    eComponent *component,
+    eObject *obj,
     eAttrBuffer *attr);
 
 void enice_ui_value_to_internal_type(
     eVariable *value,
     eVariable *new_value,
-    eComponent *component,
+    eObject *obj,
     eAttrBuffer *attr);
 
 #endif

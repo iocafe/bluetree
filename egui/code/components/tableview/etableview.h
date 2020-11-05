@@ -113,7 +113,6 @@ protected:
       Member variables.
     ************************************************************************************************
     */
-    void draw_state_bits(os_int x);
     void draw_tooltip();
 
     /* Callback when table data is received, etc.
@@ -142,7 +141,9 @@ protected:
         eVariable *name,
         eSet *appendix);
 
-    /* Property values */
+    /* Table columns, eTableColumn objects.
+     */
+    eContainer *m_columns;
 
     /* Row set (data selected from table)
      */
@@ -152,6 +153,7 @@ protected:
      */
     eMatrix **m_row_to_m;
     os_memsz m_row_to_m_sz;
+    os_int m_row_to_m_len;
 };
 
 

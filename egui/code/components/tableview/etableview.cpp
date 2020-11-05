@@ -36,6 +36,9 @@ eTableView::eTableView(
     m_rowset = OS_NULL;
     m_row_to_m = OS_NULL;
     m_row_to_m_sz = 0;
+    m_row_to_m_len = 0;
+
+    m_columns = OS_NULL;
 
 select();
 }
@@ -191,7 +194,11 @@ static void PopStyleCompact()
 eStatus eTableView::draw(
     eDrawParams& prm)
 {
+    eTableColumn *c;
+    eMatrix *m;
+    eVariable *value;
     os_int nrows, ncols, relative_x2, total_w, total_h;
+    os_int row, column;
     ImVec2 size;
     ImGuiTableFlags flags;
 
@@ -199,7 +206,6 @@ eStatus eTableView::draw(
     const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
     add_to_zorder(prm.window);
-    // m_attr.for_variable(this);
 
     relative_x2 = ImGui::GetContentRegionMax().x;
     total_w = relative_x2 - ImGui::GetCursorPosX();
@@ -212,7 +218,7 @@ eStatus eTableView::draw(
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
 
-    if (m_rowset == OS_NULL) {
+    if (m_rowset == OS_NULL || m_columns == OS_NULL) {
         goto skipit;
     }
 
@@ -221,8 +227,6 @@ eStatus eTableView::draw(
     if (ncols <= 0) {
         goto skipit;
     }
-
-
 
     /* Draw marker for state bits if we have an extended value.
      */
@@ -234,73 +238,66 @@ eStatus eTableView::draw(
     static int freeze_cols = 1;
     static int freeze_rows = 1;
 
-    /* PushStyleCompact();
-    ImGui::CheckboxFlags("ImGuiTableFlags_ScrollX", (unsigned int*)&flags, ImGuiTableFlags_ScrollX);
-    ImGui::CheckboxFlags("ImGuiTableFlags_ScrollY", (unsigned int*)&flags, ImGuiTableFlags_ScrollY);
-    ImGui::SetNextItemWidth(ImGui::GetFrameHeight());
-    ImGui::DragInt("freeze_cols", &freeze_cols, 0.2f, 0, 9, NULL, ImGuiSliderFlags_NoInput);
-    ImGui::SetNextItemWidth(ImGui::GetFrameHeight());
-    ImGui::DragInt("freeze_rows", &freeze_rows, 0.2f, 0, 9, NULL, ImGuiSliderFlags_NoInput);
-    PopStyleCompact(); */
-
     // When using ScrollX or ScrollY we need to specify a size for our table container!
     // Otherwise by default the table will fit all available space, like a BeginChild() call.
     size = ImVec2(0, TEXT_BASE_HEIGHT * 8);
-    char bbb[128];
-    os_strncpy(bbb, "uke", sizeof(bbb));
     if (ImGui::BeginTable("##table2", ncols, flags, size))
     {
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
-        /* ImGui::TableSetupColumn("Line #", ImGuiTableColumnFlags_NoHide); // Make the first column not hideable to match our use of TableSetupScrollFreeze()
-        ImGui::TableSetupColumn("One", ImGuiTableColumnFlags_None);
-        ImGui::TableSetupColumn("Two", ImGuiTableColumnFlags_None);
-        ImGui::TableSetupColumn("Three", ImGuiTableColumnFlags_None);
-        ImGui::TableSetupColumn("Four", ImGuiTableColumnFlags_None);
-        ImGui::TableSetupColumn("Five", ImGuiTableColumnFlags_None);
-        ImGui::TableSetupColumn("Six", ImGuiTableColumnFlags_None); */
 
-
-        for (int i=0; i<ncols; i++) {
-            osal_int_to_str(bbb + 3, sizeof(bbb)-3, i+1);
-
-            ImGui::TableSetupColumn(bbb, i == 0 ? ImGuiTableColumnFlags_NoHide
-                : ImGuiTableColumnFlags_None);
+        for (c = eTableColumn::cast(m_columns->first()), column=0;
+             c && column < ncols;
+             c = eTableColumn::cast(c->next()), column++)
+        {
+            c->draw_column_header();
         }
 
         ImGui::TableHeadersRow();
 
         os_boolean first_row = OS_TRUE, visible[500];
+        value = new eVariable(this);
         ImGuiListClipper clipper;
         clipper.Begin(nrows);
         while (clipper.Step())
         {
-            for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
-
-        //     for (int row = 0; row < nrows; row++)
+            for (row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
             {
                 ImGui::TableNextRow();
-                for (int column = 0; column < ncols; column++)
+
+                /* Avoid crashing on program errors?
+                 */
+                if (row < 0 || row >= m_row_to_m_len) {
+                    continue;
+                }
+                m = m_row_to_m[row];
+
+                for (c = eTableColumn::cast(m_columns->first()), column=0;
+                     c && column < ncols;
+                     c = eTableColumn::cast(c->next()), column++)
                 {
-                    // Both TableNextColumn() and TableSetColumnIndex() return false when a column is not visible, which can be used for clipping.
+                    m->getv(0, column, value);
+
+                    // Both TableNextColumn() and TableSetColumnIndex() return false when
+                    // a column is not visible, which can be used for clipping.
                     if (first_row) {
                         visible[column] = ImGui::TableSetColumnIndex(column);
+                        if (value->isempty()) continue;
                     }
                     else {
                         if (!visible[column]) continue;
+                        if (value->isempty()) continue;
 
                         if (!ImGui::TableSetColumnIndex(column)) {
                             continue;
                         }
                     }
 
-                    if (column == 0)
-                        ImGui::Text("Line %d", row);
-                    else
-                        ImGui::Text("Hello world %d,%d", row, column);
+                    c->draw_value(value);
                 }
                 first_row = OS_FALSE;
             }
         }
+        delete value;
         ImGui::EndTable();
     }
 
@@ -317,60 +314,6 @@ skipit:
 }
 
 
-/**
-****************************************************************************************************
-
-  @brief Draw marker for state bits if we have extended value
-
-****************************************************************************************************
-*/
-void eTableView::draw_state_bits(
-    os_int x)
-{
-#if 0
-    os_int state_bits;
-    float circ_x, circ_y;
-    const os_int rad = 8;
-
-    if (!m_edit_value && m_label_value.isx())
-    {
-        ImVec4 colf;
-
-        state_bits = m_label_value.sbits();
-        colf = ImVec4(0.5f, 0.5f, 0.5f, 0.5f);
-        switch (state_bits & OSAL_STATE_ERROR_MASK)
-        {
-            case OSAL_STATE_YELLOW:
-                if (state_bits & OSAL_STATE_CONNECTED) {
-                    colf = ImVec4(0.8f, 0.8f, 0.2f, 0.5f /* alpha */);
-                }
-                break;
-
-            case OSAL_STATE_ORANGE:
-                if (state_bits & OSAL_STATE_CONNECTED) {
-                    colf = ImVec4(1.0f, 0.7f, 0.0f, 0.5f);
-                }
-                break;
-
-            case OSAL_STATE_RED:
-                colf = ImVec4(1.0f, 0.0f, 0.0f, 0.5f);
-                break;
-
-            default:
-                if (state_bits & OSAL_STATE_CONNECTED) {
-                    return;
-                }
-                break;
-        }
-
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImU32 col = ImColor(colf);
-        circ_x = (float)(x + 3*rad/2);
-        circ_y = m_rect.y1 + 0.5 * (m_rect.y2 - m_rect.y1 + 1);
-        draw_list->AddCircleFilled(ImVec2(circ_x, circ_y), rad, col, 0);
-    }
-#endif
-}
 
 
 /**
@@ -483,6 +426,7 @@ void eTableView::callback(
     switch (ci->event) {
         case ERSET_TABLE_BINDING_COMPLETE:
             osal_console_write("binding done");
+            setup_columns();
             fill_row_to_m();
             break;
 
@@ -531,6 +475,9 @@ void eTableView::fill_row_to_m()
         if (sz < (os_memsz)(10 * sizeof(eMatrix *))) {
             sz = 10 * sizeof(eMatrix *);
         }
+        else {
+            sz = 3 * sz / 2;
+        }
         m_row_to_m = (eMatrix**)os_malloc(sz, &m_row_to_m_sz);
     }
 
@@ -539,6 +486,7 @@ void eTableView::fill_row_to_m()
         m_row_to_m[row] = m;
     }
     osal_debug_assert(m == OS_NULL && row == nrows);
+    m_row_to_m_len = row;
 }
 
 
@@ -546,7 +494,27 @@ void eTableView::fill_row_to_m()
  */
 void eTableView::setup_columns()
 {
+    eContainer *rscols;
+    eVariable *v;
+    eTableColumn *c;
+    os_int col_nr;
 
+    if (m_rowset == OS_NULL) return;
+    rscols = m_rowset->columns();
+    if (rscols == OS_NULL) return;
+
+    if (m_columns == OS_NULL) {
+        m_columns = new eContainer(this);
+    }
+    else {
+        m_columns->clear();
+    }
+
+    for (v = rscols->firstv(), col_nr = 0; v; v = v->nextv(), col_nr++)
+    {
+        c = new eTableColumn(m_columns, col_nr);
+        c->setup_column(v);
+    }
 }
 
 

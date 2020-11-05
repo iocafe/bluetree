@@ -66,26 +66,26 @@ void eAttrBuffer::clear()
   attributes assuming that properties are same as for eLineEdit, eTreeNode, etc.
   The function calls eAttrBuffer::initialize().
 
-  @param   component Pointer to eLineEdit, eTreeNode, etc. GUI component whose properties are
-           similar to eVariable.
+  @param   obj Pointer to eLineEdit, eTreeNode, etc. GUI component whose properties are
+           similar to eVariable, or to eVariable holding column configuration.
   @return  None.
 
 ****************************************************************************************************
 */
 void eAttrBuffer::initialize_for_variable(
-    eComponent *component)
+    eObject *obj)
 {
     eVariable attr, unit;
     osalTypeId type;
     os_int digs;
     os_double min, max;
 
-    component->propertyv(EVARP_ATTR, &attr);
-    type = (osalTypeId)component->propertyi(EVARP_TYPE);
-    component->propertyv(EVARP_UNIT, &unit);
-    digs = component->propertyi(EVARP_DIGS);
-    min = component->propertyd(EVARP_MIN);
-    max = component->propertyd(EVARP_MAX);
+    obj->propertyv(EVARP_ATTR, &attr);
+    type = (osalTypeId)obj->propertyi(EVARP_TYPE);
+    obj->propertyv(EVARP_UNIT, &unit);
+    digs = obj->propertyi(EVARP_DIGS);
+    min = obj->propertyd(EVARP_MIN);
+    max = obj->propertyd(EVARP_MAX);
 
     initialize(&attr, type, &unit, digs, min, max);
 }

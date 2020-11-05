@@ -38,15 +38,18 @@ public:
     void clear();
 
     const os_char *get(
-        eComponent *component,
+        eObject *component,
         os_int propertynr);
+
+    void setv(
+        eVariable *value);
+
+    inline const os_char *ptr() {return m_buf; }
+    inline os_boolean isempty() {return (os_boolean)(m_buf == OS_NULL);}
 
 protected:
     void allocate(
         os_memsz sz);
-
-    void setv(
-        eVariable *value);
 
     os_char *m_buf;
     os_memsz m_buf_sz;

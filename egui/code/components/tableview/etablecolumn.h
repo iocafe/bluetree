@@ -84,11 +84,19 @@ public:
         return new eTableColumn(parent, id, flags);
     }
 
+    void setup_column(
+        eVariable *col_conf);
+
+    void draw_column_header();
+
+    void draw_value(
+        eVariable *value);
 
 protected:
 
+    eStrBuffer m_text;
+    eStrBuffer m_unit;
     eAttrBuffer m_attr;
-
 };
 
 
