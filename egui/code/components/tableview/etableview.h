@@ -121,7 +121,7 @@ protected:
         eRowSet *rset,
         ersetCallbackInfo *ci);
 
-    /* Static callback function just firwards to callback(). This exists to have C function pointer.
+    /* Static callback function to use underlying C code..
      */
     static void static_callback(
         eRowSet *rset,
@@ -132,6 +132,8 @@ protected:
      */
     void fill_row_to_m();
 
+    /* Create eTableColumn object for each column.
+     */
     void setup_columns();
 
     /* Collect information about this object for tree browser.

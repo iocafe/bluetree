@@ -18,13 +18,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor, clear member variables.
 ****************************************************************************************************
 */
 eTableView::eTableView(
@@ -37,7 +31,6 @@ eTableView::eTableView(
     m_row_to_m = OS_NULL;
     m_row_to_m_sz = 0;
     m_row_to_m_len = 0;
-
     m_columns = OS_NULL;
 
 select();
@@ -46,13 +39,7 @@ select();
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eTableView::~eTableView()
@@ -141,18 +128,13 @@ eStatus eTableView::onpropertychange(
 {
     switch (propertynr)
     {
-        case ECOMP_VALUE: /* clear label to display new text and proceed */
+        case ECOMP_VALUE: /* table name (always)  */
             // m_label_value.clear();
             // m_set_checked = true;
             break;
 
-        case ECOMP_TEXT:
+        case ECOMP_TEXT: /* Translatable table name */
             // m_text.clear();
-            break;
-
-        case ECOMP_UNIT:
-            // m_unit.clear();
-            // m_attr.clear();
             break;
 
         default:
@@ -162,20 +144,6 @@ eStatus eTableView::onpropertychange(
     return ESTATUS_SUCCESS;
 }
 
-
-// Make the UI compact because there are so many fields
-/* static void PushStyleCompact()
-{
-    ImGuiStyle& style = ImGui::GetStyle();
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, (float)(int)(style.FramePadding.y * 0.70f)));
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x, (float)(int)(style.ItemSpacing.y * 0.70f)));
-}
-
-static void PopStyleCompact()
-{
-    ImGui::PopStyleVar(2);
-}
-*/
 
 /**
 ****************************************************************************************************
@@ -228,13 +196,12 @@ eStatus eTableView::draw(
         goto skipit;
     }
 
-    /* Draw marker for state bits if we have an extended value.
-     */
-    // draw_state_bits(m_rect.x2);
-
     // Using those as a base value to create width/height that are factor of the size of our font
 
-    flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+    flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg |
+        ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable |
+        ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+
     static int freeze_cols = 1;
     static int freeze_rows = 1;
 
@@ -312,8 +279,6 @@ skipit:
      */
     return eComponent::draw(prm);
 }
-
-
 
 
 /**
@@ -417,8 +382,19 @@ void eTableView::select()
 }
 
 
-/* Callback when table data is received, etc.
- */
+/**
+****************************************************************************************************
+
+  @brief Callback when table data is received, etc.
+
+  The eTableView::callback() is called by row set when the row set received table configuration,
+  inital table data or modifications from table data eDBM.
+
+  @param   rset Pointer to the row set.
+  @param   ci A structure containing information about callback.
+
+****************************************************************************************************
+*/
 void eTableView::callback(
     eRowSet *rset,
     ersetCallbackInfo *ci)
@@ -432,7 +408,6 @@ void eTableView::callback(
 
         case ERSET_INITIAL_DATA_RECEIVED:
         case ERSET_MODIFICATIONS_RECEIVED:
-            // rset->print_json(EOBJ_SERIALIZE_ONLY_CONTENT);
             fill_row_to_m();
             break;
     }
@@ -441,8 +416,20 @@ void eTableView::callback(
 }
 
 
-/* Static callback function just firwards to callback(). This exists to have C function pointer.
- */
+/**
+****************************************************************************************************
+
+  @brief Static callback function to use underlying C code.
+
+  This function exists to have C compatible function pointer. The static callback function just
+  forwards the callback to eTableView::callback().
+
+  @param   rset Pointer to the row set.
+  @param   ci A structure containing information about callback.
+  @param   context Pointer to the eTableView object.
+
+****************************************************************************************************
+*/
 void eTableView::static_callback(
     eRowSet *rset,
     ersetCallbackInfo *ci,
@@ -454,8 +441,21 @@ void eTableView::static_callback(
 }
 
 
-/* Setup m_row_to_m array, converts row number 0... to eMatrix pointer.
- */
+/**
+****************************************************************************************************
+
+  @brief Set up an array for converting row number to row data matrix pointer.
+
+  Setup m_row_to_m array, converts row number 0... to eMatrix pointer.
+
+  Member variable m_row_to_m_len is set to number items in m_row_to_m array (number of rows),
+  mostly for catching program errors.
+
+  Current memory allocation for m_row_to_m is kept in m_row_to_m_sz. The m_row_to_m_sz array
+  is expanded as needed.
+
+****************************************************************************************************
+*/
 void eTableView::fill_row_to_m()
 {
     eMatrix *m;
@@ -490,8 +490,16 @@ void eTableView::fill_row_to_m()
 }
 
 
-/* Setup column headers and other column info.
- */
+/**
+****************************************************************************************************
+
+  @brief Create eTableColumn object for each column.
+
+  An eTableColumn is used to maintain information for column in format ready for rendering.
+  It contains translated column header, parsed column attributes, etc.
+
+****************************************************************************************************
+*/
 void eTableView::setup_columns()
 {
     eContainer *rscols;
@@ -540,11 +548,6 @@ void eTableView::object_info(
     eSet *appendix)
 {
     eVariable value;
-    os_int propertynr, i;
-
-    static os_int copy_property_list[] = {EVARP_VALUE, EVARP_TYPE, EVARP_UNIT, EVARP_ATTR,
-        EVARP_DEFAULT, EVARP_ABBR, EVARP_GROUP, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
-        EVARP_GAIN, EVARP_OFFSET, 0};
 
     eObject::object_info(item, name, appendix);
 
@@ -557,12 +560,6 @@ void eTableView::object_info(
         item->propertyv(EVARP_TEXT, &value);
         value2 += value;
         item->setpropertyv(EVARP_TEXT, &value2);
-    }
-
-    i = 0;
-    while ((propertynr = copy_property_list[i++])) {
-        propertyv(propertynr, &value);
-        item->setpropertyv(propertynr, &value);
     }
 }
 
