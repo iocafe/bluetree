@@ -248,15 +248,18 @@ eStatus eWindow::draw(
           | ImGuiWindowFlags_NoTitleBar); */
     }
 
-    wprm.mouse_over_window = ImGui::IsWindowHovered();
+// 5.11.2020 ImGuiHoveredFlags_ChildWindows flag added for tables TEST
+    wprm.mouse_over_window = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
     wprm.mouse_dragged_over_window = OS_FALSE;
 
     dm = wprm.gui->get_drag_mode();
     if (dm == EGUI_DRAG_TO_COPY_COMPONENT || dm == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT)
     {
         wprm.mouse_dragged_over_window
-            = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+            = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem|ImGuiHoveredFlags_ChildWindows);
     }
+
+osal_debug_error(wprm.mouse_over_window ? "OVER" : "NO");
 
     if (!wprm.mouse_over_window) {
         wprm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;

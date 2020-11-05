@@ -32,6 +32,8 @@
 */
 class eTableView : public eComponent
 {
+//    friend class eTableColumn;
+
 public:
 
     /**
@@ -156,6 +158,10 @@ protected:
     eMatrix **m_row_to_m;
     os_memsz m_row_to_m_sz;
     os_int m_row_to_m_len;
+
+    /* Buffer for editing value.
+     */
+    eEditBuffer m_edit_buf;
 };
 
 

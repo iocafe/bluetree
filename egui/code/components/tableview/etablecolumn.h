@@ -90,7 +90,8 @@ public:
     void draw_column_header();
 
     void draw_value(
-        eVariable *value);
+        eVariable *value,
+        eTableView *view);
 
 protected:
 

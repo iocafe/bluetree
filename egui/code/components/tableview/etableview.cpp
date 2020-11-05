@@ -259,12 +259,22 @@ eStatus eTableView::draw(
                         }
                     }
 
-                    c->draw_value(value);
+                    c->draw_value(value, this);
                 }
                 first_row = OS_FALSE;
             }
         }
         delete value;
+
+        if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
+        {
+            int aa = ImGui::TableGetHoveredColumn();
+            if (aa != -1) {
+                int bb = ImGui::GetColumnWidth(aa);
+                int ccc = bb;
+            }
+        }
+
         ImGui::EndTable();
     }
 

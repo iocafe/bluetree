@@ -135,9 +135,22 @@ void eTableColumn::draw_column_header()
 
 // Modifies value
 void eTableColumn::draw_value(
-    eVariable *value)
+    eVariable *value,
+    eTableView *view)
 {
+    const os_char *text;
+
     enice_value_for_ui(value, this, &m_attr);
-    ImGui::TextUnformatted(value->gets());
+    text = value->gets();
+
+// Right align test
+ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x
+     /* - ImGui::GetStyle().CellPadding.x */);
+
+    ImGui::TextUnformatted(text);
+
+    // ImGui::InputText(label, view->m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
 }
+
+
 
