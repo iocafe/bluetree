@@ -46,6 +46,7 @@ eRowSet::eRowSet(
 {
     /** Clear member variable
      */
+    m_nrows = 0;
     m_ncolumns = 0;
     m_configuration = OS_NULL;
     m_own_change = 0;
