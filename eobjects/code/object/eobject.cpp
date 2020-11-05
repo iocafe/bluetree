@@ -169,24 +169,15 @@ eObject::~eObject()
             mm_handle->delete_children();
         }
 
-        if ((flags() & EOBJ_FAST_DELETE) == 0)
+        if (mm_parent)
         {
-            /* If handle has parent, remove from parent's children.
-             */
-            /* if (mm_handle->m_parent)
-            {
-                mm_handle->m_parent->rbtree_remove(mm_handle);
-            } */
-            if (mm_parent)
-            {
-                mm_parent->mm_handle->rbtree_remove(mm_handle);
-            }
-
-            /* Handle no longer needed.
-             */
-            mm_handle->m_root->freehandle(mm_handle);
-
+            mm_parent->mm_handle->rbtree_remove(mm_handle);
         }
+
+        /* Handle no longer needed.
+         */
+        mm_handle->m_root->freehandle(mm_handle);
+
         os_unlock();
     }
 }

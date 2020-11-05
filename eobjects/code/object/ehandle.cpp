@@ -424,8 +424,7 @@ try_again:
 
   @brief Delete all child objects.
 
-  The eHandle::delete_children() function deletes all children of this object. This is faster code
-  to delete all children, balancing of the red/black tree is not maintained while deleting.
+  The eHandle::delete_children() function deletes all children of this object.
 
   @return  None.
 
@@ -433,48 +432,8 @@ try_again:
 */
 void eHandle::delete_children()
 {
-    eHandle
-        *n,
-        *p;
-
-    enum direc
-    {
-        EH_FROM_UP,
-        EH_FROM_LEFT,
-        EH_FROM_RIGHT
-    }
-    direc = EH_FROM_UP;
-
-    n = m_children;
-    if (n == OS_NULL) return;
-
-    while (OS_TRUE)
-    {
-        p = OS_NULL;
-        if (direc == EH_FROM_UP)
-        {
-            p = n->m_left;
-        }
-        if (direc != EH_FROM_RIGHT)
-        {
-            if (p == OS_NULL)
-            {
-                p = n->m_right;
-                direc = EH_FROM_UP;
-            }
-        }
-        if (p == OS_NULL)
-        {
-            p = n->m_up;
-
-            n->m_oflags |= EOBJ_FAST_DELETE;
-            delete n->m_object;
-            m_root->freehandle(n);
-
-            if (p == OS_NULL) return;
-            direc = (p->m_left == n) ? EH_FROM_LEFT : EH_FROM_RIGHT;
-        }
-        n = p;
+    while (m_children) {
+        delete m_children->m_object;
     }
 }
 

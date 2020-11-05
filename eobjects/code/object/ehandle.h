@@ -73,13 +73,6 @@ class ePointer;
 #define EOBJ_CLONE_ALL_CHILDREN 0x08000000
 #define EOBJ_NO_CLONED_NAMES    0x10000000
 
-/** Flag EOBJ_FAST_DELETE is used internallly to speed up deletion: When an object is being deleted,
-there is no need to detach it's children from red/black of the object. The EOBJ_FAST_DELETE
-flag is set by delete_children() to child object, so child object doesn't need to preserve
-the treee structure after deletion. This changes deleting object trees from NlogN to N algorithm.
- */
-#define EOBJ_FAST_DELETE        0x20000000
-
 /** Red/black tree's red or black node bit.
  */
 #define EOBJ_IS_RED             0x40000000
