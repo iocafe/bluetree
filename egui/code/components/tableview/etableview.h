@@ -127,6 +127,11 @@ public:
     inline os_memsz edit_sz() {return m_edit_buf.sz(); }
     inline const os_char *edit_label() {return m_label_edit.get(this); }
 
+    /* Keyboard focus set flag
+     */
+    inline void set_keyboard_focus_ok(os_boolean ok) {m_keyboard_focus_ok = ok;}
+    inline os_boolean keyboard_focus_ok() {return m_keyboard_focus_ok;}
+
     void focus_cell(
         eMatrix *focus_row,
         os_int focus_column,
@@ -196,6 +201,7 @@ protected:
      */
     ePointer *m_focused_row;
     os_int m_focused_column;
+    os_boolean m_keyboard_focus_ok;
 
     /* Buffer for editing value.
      */

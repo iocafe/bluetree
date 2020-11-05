@@ -221,11 +221,11 @@ eStatus eLineEdit::draw(
         {
             case E_SHOWAS_INTEGER_NUMBER:
             case E_SHOWAS_DECIMAL_NUMBER:
-                eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue;
+                eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll;
                 break;
 
             default:
-                eflags = ImGuiInputTextFlags_EnterReturnsTrue;
+                eflags = ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll;
                 break;
         }
 

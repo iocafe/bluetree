@@ -34,7 +34,8 @@ eTableView::eTableView(
     m_columns = OS_NULL;
 
     m_focused_row = new ePointer(this);
-    m_focused_column = -1;;
+    m_focused_column = -1;
+    m_keyboard_focus_ok = OS_FALSE;
 
 select();
 }
@@ -310,7 +311,7 @@ skipit:
 /**
 ****************************************************************************************************
 
-  @brief Draw tool tip, called when mouse is hovering over the value
+  @brief Switch a cell to edit mode and set keyboard focus to it
 
 ****************************************************************************************************
 */
@@ -320,10 +321,14 @@ void eTableView::focus_cell(
     const os_char *edit_str,
     os_int edit_sz)
 {
-    m_focused_row->set(focus_row);
-    m_focused_column = focus_column;
-    m_edit_buf.set(edit_str, edit_sz);
-
+    if (m_focused_row->get() != focus_row ||
+        m_focused_column != focus_column)
+    {
+        m_focused_row->set(focus_row);
+        m_focused_column = focus_column;
+        m_edit_buf.set(edit_str, edit_sz);
+        set_keyboard_focus_ok(OS_FALSE);
+    }
 }
 
 

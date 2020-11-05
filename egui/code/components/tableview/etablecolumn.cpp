@@ -163,17 +163,22 @@ void eTableColumn::draw_edit(
     {
         case E_SHOWAS_INTEGER_NUMBER:
         case E_SHOWAS_DECIMAL_NUMBER:
-            eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue;
+            eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll;
             break;
 
         default:
-            eflags = ImGuiInputTextFlags_EnterReturnsTrue;
+            eflags = ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll;
             break;
     }
 
     const ImVec2 zero_pad(0, 0);
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
     ImGui::InputText(view->edit_label(), view->edit_buf(), view->edit_sz(), eflags);
+    if (!view->keyboard_focus_ok()) {
+        // ImGui::SetItemDefaultFocus();
+        ImGui::SetKeyboardFocusHere();
+        view->set_keyboard_focus_ok(OS_TRUE);
+    }
     ImGui::PopStyleVar();
 }
 
