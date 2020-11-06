@@ -134,9 +134,16 @@ public:
 
     void focus_cell(
         eMatrix *focus_row,
-        os_int focus_column,
-        const os_char *edit_str,
-        os_int edit_sz);
+        os_int focus_column = -1,
+        const os_char *edit_str = "",
+        os_int edit_sz = 128);
+
+
+    void update_table_cell(
+        const os_char *ix_column_name,
+        os_long ix_value,
+        const os_char *column_name,
+        eVariable *column_value);
 
 protected:
 

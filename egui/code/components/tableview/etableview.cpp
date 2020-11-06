@@ -269,7 +269,8 @@ eStatus eTableView::draw(
                     if (m == focused_m &&
                         column == m_focused_column)
                     {
-                        c->draw_edit(value, this);
+                        c->draw_edit(value, m_rowset->ix_column_name(),
+                            m->getl(0, m_rowset->ix_column_nr()), this);
                     }
                     else {
                         c->draw_value(value, this);
@@ -329,6 +330,32 @@ void eTableView::focus_cell(
         m_edit_buf.set(edit_str, edit_sz);
         set_keyboard_focus_ok(OS_FALSE);
     }
+}
+
+/** Update table cell value
+    @param   ix_column_name Index column name, often "ix".
+    @param   ix_value Index value
+*/
+void eTableView::update_table_cell(
+    const os_char *ix_column_name,
+    os_long ix_value,
+    const os_char *column_name,
+    eVariable *column_value)
+{
+    eVariable where_clause, *element;
+    eContainer *row;
+    if (m_rowset == OS_NULL) return;
+
+    where_clause = "[";
+    where_clause += ix_value;
+    where_clause += "]";
+
+    row = new eContainer(this);
+    element = new eVariable(row);
+    element->addname(column_name, ENAME_NO_MAP);
+    element->setv(column_value);
+
+    m_rowset->update(where_clause.gets(), row, ETABLE_ADOPT_ARGUMENT);
 }
 
 

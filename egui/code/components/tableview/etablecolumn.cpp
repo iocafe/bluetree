@@ -106,12 +106,14 @@ void eTableColumn::setup_column(
 {
     eName *n;
 
+    n = col_conf->primaryname();
+    if (n) {
+        m_name.setv(n);
+    }
+
     m_text.get(col_conf, EVARP_TEXT);
     if (m_text.isempty()) {
-        n = col_conf->primaryname();
-        if (n) {
-            m_text.setv(n);
-        }
+        m_text.setv(n);
     }
 
     m_unit.get(col_conf, EVARP_UNIT);
@@ -141,7 +143,7 @@ void eTableColumn::draw_value(
 {
     const os_char *text;
 
-    enice_value_for_ui(value, this, &m_attr);
+    enice_value_for_ui(value, view, &m_attr);
     text = value->gets();
 
     // Right align test
@@ -152,12 +154,19 @@ void eTableColumn::draw_value(
 }
 
 
-// Modifies value
+/** Modifies value
+    @param   ix_column_name Index column name, often "ix".
+    @param   ix_value Index value
+*/
 void eTableColumn::draw_edit(
     eVariable *value,
+    const os_char *ix_column_name,
+    os_long ix_value,
     eTableView *view)
 {
+    const ImVec2 zero_pad(0, 0);
     ImGuiInputTextFlags eflags;
+    os_char *edit_buf;
 
     switch (m_attr.showas())
     {
@@ -171,13 +180,29 @@ void eTableColumn::draw_edit(
             break;
     }
 
-    const ImVec2 zero_pad(0, 0);
+    edit_buf = view->edit_buf();
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
-    ImGui::InputText(view->edit_label(), view->edit_buf(), view->edit_sz(), eflags);
-    if (!view->keyboard_focus_ok()) {
-        // ImGui::SetItemDefaultFocus();
-        ImGui::SetKeyboardFocusHere();
-        view->set_keyboard_focus_ok(OS_TRUE);
+    ImGui::InputText(view->edit_label(), edit_buf, view->edit_sz(), eflags);
+
+    if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && view->keyboard_focus_ok())
+    {
+        eVariable nice_value;
+        nice_value.setv(value);
+        enice_value_for_ui(&nice_value, view, &m_attr);
+
+        if (os_strcmp(edit_buf, nice_value.gets())) {
+            eVariable new_value;
+            new_value.sets(edit_buf);
+            enice_ui_value_to_internal_type(value, &new_value, this, &m_attr);
+            view->update_table_cell(ix_column_name, ix_value, m_name.ptr(), value);
+        }
+        view->focus_cell(OS_NULL);
+    }
+    else {
+        if (!view->keyboard_focus_ok()) {
+            ImGui::SetKeyboardFocusHere();
+            view->set_keyboard_focus_ok(OS_TRUE);
+        }
     }
     ImGui::PopStyleVar();
 }
@@ -215,7 +240,7 @@ void eTableColumn::activate(
         default:
             eVariable value;
             focus_row->getv(0, focus_column, &value);
-            enice_value_for_ui(&value, this, &m_attr);
+            enice_value_for_ui(&value, view, &m_attr);
             view->focus_cell(focus_row, focus_column, value.gets(), 256);
             break;
     }

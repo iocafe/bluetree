@@ -291,6 +291,12 @@ public:
     inline os_int nrows() {return m_nrows; }
     inline os_int ncolumns() {return m_ncolumns; }
 
+    /* Index column name and number.
+     */
+    inline const os_char *ix_column_name()
+        {if (m_ix_column_name) { return m_ix_column_name->gets(); } return OS_NULL; }
+    inline os_int ix_column_nr() {return m_ix_column_nr; }
+
     /* Get row set columns.
      */
     inline eContainer *columns() {

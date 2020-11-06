@@ -232,10 +232,13 @@ eStatus eLineEdit::draw(
         ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
         if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
         {
-            eVariable value;
+            eVariable value, nice_value;
             propertyv(ECOMP_VALUE, &value);
+            nice_value.setv(&value);
+            enice_value_for_ui(&nice_value, this, &m_attr);
+
             m_edit_value = false;
-            if (os_strcmp(m_edit_buf.ptr(), value.gets())) {
+            if (os_strcmp(m_edit_buf.ptr(), nice_value.gets())) {
                 eVariable new_value;
                 new_value.sets(m_edit_buf.ptr());
                 enice_ui_value_to_internal_type(&value, &new_value, this, &m_attr);

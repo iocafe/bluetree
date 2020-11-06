@@ -98,6 +98,8 @@ public:
 
     void draw_edit(
         eVariable *value,
+        const os_char *ix_column_name,
+        os_long ix_value,
         eTableView *view);
 
     void activate(
@@ -106,6 +108,7 @@ public:
         eTableView *view);
 
 protected:
+    eStrBuffer m_name;
     eStrBuffer m_text;
     eStrBuffer m_unit;
     eAttrBuffer m_attr;
