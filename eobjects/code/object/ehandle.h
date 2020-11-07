@@ -498,6 +498,3 @@ protected:
 };
 
 #endif
-
-
-

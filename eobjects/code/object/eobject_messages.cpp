@@ -636,7 +636,7 @@ void eObject::onmessage(
 
               case ECMD_UNBIND:
                 /* THIS IS TRICKY: WE NEED TO FIND BINDING BY SOURCE
-                    PATH AND FORWARD THIS TO IT */
+                   PATH AND FORWARD THIS TO IT */
                 osal_debug_error("onmessage(): ECMD_UNBIND Not implemented");
                 return;
 
