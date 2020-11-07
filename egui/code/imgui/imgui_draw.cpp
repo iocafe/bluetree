@@ -66,6 +66,7 @@ Index of this file:
 #pragma clang diagnostic ignored "-Wglobal-constructors"            // warning: declaration requires a global destructor         // similar to above, not sure what the exact difference is.
 #pragma clang diagnostic ignored "-Wsign-conversion"                // warning: implicit conversion changes signedness
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"  // warning: zero as null pointer constant                    // some standard header variations use #define NULL 0
+#pragma clang diagnostic ignored "-Walloca"                         // warning: use of function '__builtin_alloca' is discouraged
 #pragma clang diagnostic ignored "-Wcomma"                          // warning: possible misuse of comma operator here
 #pragma clang diagnostic ignored "-Wreserved-id-macro"              // warning: macro name is a reserved identifier
 #pragma clang diagnostic ignored "-Wdouble-promotion"               // warning: implicit conversion from 'float' to 'double' when passing argument to function  // using printf() is a misery with this as C++ va_arg ellipsis changes float to double.
@@ -365,21 +366,12 @@ void ImGui::StyleColorsLight(ImGuiStyle* dst)
 
 ImDrawListSharedData::ImDrawListSharedData()
 {
-    Font = NULL;
-    FontSize = 0.0f;
-    CurveTessellationTol = 0.0f;
-    CircleSegmentMaxError = 0.0f;
-    ClipRectFullscreen = ImVec4(-8192.0f, -8192.0f, +8192.0f, +8192.0f);
-    InitialFlags = ImDrawListFlags_None;
-
-    // Lookup tables
+    memset(this, 0, sizeof(*this));
     for (int i = 0; i < IM_ARRAYSIZE(ArcFastVtx); i++)
     {
         const float a = ((float)i * 2 * IM_PI) / (float)IM_ARRAYSIZE(ArcFastVtx);
         ArcFastVtx[i] = ImVec2(ImCos(a), ImSin(a));
     }
-    memset(CircleSegmentCounts, 0, sizeof(CircleSegmentCounts)); // This will be set by SetCircleSegmentMaxError()
-    TexUvLines = NULL;
 }
 
 void ImDrawListSharedData::SetCircleSegmentMaxError(float max_error)
@@ -1424,50 +1416,6 @@ void ImDrawList::AddImageRounded(ImTextureID user_texture_id, const ImVec2& p_mi
         PopTextureID();
 }
 
-// FIMXE-OPT: Once we have a bounding box stored in ImDrawCmd we can perform this for cheap and without a threshold.
-void ImDrawListMergeSmallDrawCmds(ImDrawList* draw_list, unsigned int max_vtx_for_merge)
-{
-    const ImDrawVert* vtx_buffer = draw_list->VtxBuffer.Data;
-    const ImDrawIdx* idx_buffer = draw_list->IdxBuffer.Data;
-    ImDrawCmd* cmd_start = draw_list->CmdBuffer.Data;
-    ImDrawCmd* cmd_end = draw_list->CmdBuffer.end();
-    for (ImDrawCmd* curr_cmd = cmd_start + 1; curr_cmd < cmd_end; curr_cmd++)
-    {
-        if (curr_cmd->ElemCount > max_vtx_for_merge || curr_cmd->UserCallback != NULL)
-            continue;
-
-        ImDrawCmd* prev_cmd = curr_cmd - 1;
-        ImRect prev_clip_rect = prev_cmd->ClipRect;
-        ImRect curr_clip_rect = curr_cmd->ClipRect;
-        if (!prev_clip_rect.Contains(curr_clip_rect) || prev_cmd->UserCallback != NULL)
-            continue;
-        if (curr_cmd->VtxOffset != prev_cmd->VtxOffset || curr_cmd->TextureId != prev_cmd->TextureId)
-            continue;
-
-        // First check first and last vertices as we are more likely to be able to early out with them.
-        unsigned int idx = curr_cmd->IdxOffset;
-        unsigned int idx_last = idx + curr_cmd->ElemCount - 1;
-        unsigned int vtx_offset = curr_cmd->VtxOffset;
-        if (!curr_clip_rect.Contains(vtx_buffer[vtx_offset + idx_buffer[idx++]].pos))
-            continue;
-        if (!curr_clip_rect.Contains(vtx_buffer[vtx_offset + idx_buffer[idx_last--]].pos))
-            continue;
-
-        // Check other vertices
-        // Will touch at most (max_vtx_for_merge * sizeof(ImDrawIdx)) + (max_vtx_for_merge / 1.75f * sizeof(ImDrawVert))
-        // For max_vtx_for_merge = 128 -> ~ (128*2) + (74*20) -> ~ 1.73 KB
-        for (; idx <= idx_last; idx++)
-            if (!curr_clip_rect.Contains(vtx_buffer[vtx_offset + idx_buffer[idx]].pos))
-                break;
-        if (idx <= idx_last)
-            continue;
-
-        // Merge
-        prev_cmd->ElemCount += curr_cmd->ElemCount;
-        curr_cmd = draw_list->CmdBuffer.erase(curr_cmd) - 1;
-        cmd_end = draw_list->CmdBuffer.end();
-    }
-}
 
 //-----------------------------------------------------------------------------
 // [SECTION] ImDrawListSplitter
@@ -1494,7 +1442,10 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
     IM_ASSERT(_Current == 0 && _Count <= 1 && "Nested channel splitting is not supported. Please use separate instances of ImDrawListSplitter.");
     int old_channels_count = _Channels.Size;
     if (old_channels_count < channels_count)
+    {
+        _Channels.reserve(channels_count); // Avoid over reserving since this is likely to stay stable
         _Channels.resize(channels_count);
+    }
     _Count = channels_count;
 
     // Channels[] (24/32 bytes each) hold storage that we'll swap with draw_list->_CmdBuffer/_IdxBuffer

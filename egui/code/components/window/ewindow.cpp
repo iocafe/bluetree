@@ -540,5 +540,6 @@ void eWindow::object_info(
     eObject::object_info(item, name, appendix);
 
     propertyv(ECOMP_VALUE, &tmp);
-    item->setv(&tmp, OS_TRUE);
+    item->setpropertyv(EVARP_VALUE, &tmp);
+
 }

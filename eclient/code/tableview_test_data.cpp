@@ -119,11 +119,25 @@ public:
         column->setpropertys(EVARP_TEXT, "rivi");
 
         column = new eVariable(columns);
+        column->addname("tstamp", ENAME_NO_MAP);
+
+/* char buf[128];
+buf[0] = 'C';
+for (int i = 0; i<150; i++) {
+    osal_int_to_str(buf+1, sizeof(buf)-1, i);
+    column = new eVariable(columns);
+    column->addname(buf, ENAME_NO_MAP);
+} */
+
+        column = new eVariable(columns);
         column->addname("connected", ENAME_NO_MAP);
-        column->setpropertyi(EVARP_TYPE, OS_STR);
+        column->setpropertyi(ECOMP_TYPE, OS_BOOLEAN);
 
         column = new eVariable(columns);
         column->addname("connectto", ENAME_NO_MAP);
+        column->setpropertys(ECOMP_UNIT, "ms");
+        column->setpropertyi(EVARP_TYPE, OS_STR);
+
 
         /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
          */

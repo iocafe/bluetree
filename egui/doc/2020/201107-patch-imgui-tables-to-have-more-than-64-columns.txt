@@ -1,0 +1,41 @@
+Creating a patch using Git
+
+General, creating path
+    The easiest way to create a patch for the last commit is
+
+    git show > patch.txt
+    or if you want to create a patch between 2 specific commits you can use git diff
+
+    git diff commitid1 commitid2 > patch.txt
+    There's also a tool, format-patch, for formatting a patch to send as an e-mail. You can create patches for the last n revisions like this:
+
+    git format-patch -n
+    which will create the patch in the current directory. The -o parameter allows you to specify a different output directory.
+
+
+Pekka, creating path
+    Create patch between commit IDs containing the modifications
+    cd /coderoot/bluetree
+    git diff 33cd34a97e4a299d899c7ac5ab88a3169bff87ef fdc0d3394ec5d6cda8c49b46c2f3fd6c47532d51 > patch.txt
+
+    Edit /coderoot/bluetree/patch.txt:  delete eTableView specific changes from patch.txt, leave only diff --git a/egui/code/imgui/imgui_internal.h b/egui/code/imgui/imgui_internal.h and
+    diff --git a/egui/code/imgui/imgui_widgets.cpp b/egui/code/imgui/imgui_widgets.cpp parts
+
+Applying patch
+    /coderoot/bluetree $ patch --dry-run -p1 < patch.txt
+
+Notes
+    Maximum number of column default: You may want to change this to 64
+    Some include paths are modified to compile in current location
+ 
+
+
+
+7.11.2020: docking and tables seem to be together
+    cd /coderoot
+    mkdir imgui3
+    cd imgui3
+    git clone https://github.com/ocornut/imgui.git
+    git checkout -b origin/docking (I did this with Kraken)
+    
+

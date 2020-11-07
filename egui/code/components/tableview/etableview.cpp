@@ -169,9 +169,10 @@ eStatus eTableView::draw(
     eTableColumn *c;
     eMatrix *m, *focused_m;
     eVariable *value;
-    os_int nrows, ncols, relative_x2, total_w, total_h;
+    os_int nrows, ncols, total_w, total_h;
     os_int row, column;
-    ImVec2 size;
+    ImVec2 size, rmax, origin;
+    ImVec2 cpos;
     ImGuiTableFlags flags;
     os_boolean first_row;
 
@@ -179,17 +180,6 @@ eStatus eTableView::draw(
     const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
     add_to_zorder(prm.window);
-
-    relative_x2 = ImGui::GetContentRegionMax().x;
-    total_w = relative_x2 - ImGui::GetCursorPosX();
-    total_h = 100;
-
-    ImVec2 cpos = ImGui::GetCursorScreenPos();
-    m_rect.x1 = cpos.x;
-    m_rect.y1 = cpos.y;
-
-    m_rect.x2 = m_rect.x1 + total_w - 1;
-    m_rect.y2 = m_rect.y1 + total_h - 1;
 
     if (m_rowset == OS_NULL || m_columns == OS_NULL) {
         goto skipit;
@@ -215,6 +205,31 @@ eStatus eTableView::draw(
     size = ImVec2(0, TEXT_BASE_HEIGHT * 8);
     if (ImGui::BeginTable("##table2", ncols, flags, size))
     {
+        rmax = ImGui::GetContentRegionMax();
+        origin = ImGui::GetCursorPos();
+        total_w = rmax.x - origin.x;
+        total_h = rmax.y - origin.y;
+
+        cpos = ImGui::GetCursorScreenPos();
+        m_rect.x1 = cpos.x;
+        m_rect.y1 = cpos.y;
+
+        m_rect.x2 = m_rect.x1 + total_w - 1;
+        m_rect.y2 = m_rect.y1 + total_h - 1;
+
+/* ImDrawList* draw_list;
+ImVec2 top_left, bottom_right;
+top_left.x = m_rect.x1;
+top_left.y = m_rect.y1;
+bottom_right.x = m_rect.x2;
+bottom_right.y = m_rect.y2;
+ImU32  col = IM_COL32(48, 48, 255, 250);
+
+draw_list = ImGui::GetWindowDrawList();
+draw_list->AddRect(top_left, bottom_right, col, 0,
+    ImDrawCornerFlags_All, 2); */
+
+
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
 
         for (c = eTableColumn::cast(m_columns->first()), column=0;
@@ -304,6 +319,9 @@ eStatus eTableView::draw(
     }
 
 skipit:
+
+
+
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
@@ -602,6 +620,50 @@ void eTableView::setup_columns()
         c = new eTableColumn(m_columns, col_nr);
         c->setup_column(v);
     }
+}
+
+
+
+/**
+****************************************************************************************************
+
+  @brief Generate right click popup menu.
+
+  Derived component class adds call the base class'es function to generate the right click
+  popup menu and then adds tree node specific items.
+
+  @return  Pointer to the new right click popup window.
+
+****************************************************************************************************
+*/
+ePopup *eTableView::right_click_popup(
+    eDrawParams& prm)
+{
+    ePopup *p;
+    eButton *item;
+    eVariable target;
+    os_char buf[E_OIXSTR_BUF_SZ];
+
+    p = eComponent::right_click_popup(prm);
+    oixstr(buf, sizeof(buf));
+
+    /* Generic component scope items: refresh and show all.
+     */
+    item = new eButton(p);
+    item->setpropertys(ECOMP_TEXT, "new row");
+    item->setpropertyl(ECOMP_VALUE, 0);
+    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_REFRESH);
+    target = buf; target += "/_p/_command";
+    item->setpropertyv(ECOMP_TARGET, &target);
+
+    item = new eButton(p);
+    item->setpropertys(ECOMP_TEXT, "delete row");
+    item->setpropertyl(ECOMP_VALUE, OS_FALSE);
+    //item->setpropertyl(ECOMP_SETVALUE, !m_all);
+    target = buf; target += "/_p/all";
+    item->setpropertyv(ECOMP_TARGET, &target);
+
+    return p;
 }
 
 

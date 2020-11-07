@@ -382,6 +382,7 @@ CODE
  - 2020/XX/XX (1.XX) - Moved IME support functions from io.ImeSetInputScreenPosFn, io.ImeWindowHandle to the PlatformIO api.
 
 
+ - 2020/11/03 (1.80) - renamed io.ConfigWindowsMemoryCompactTimer to io.ConfigMemoryCompactTimer as the feature will apply to other data structures
  - 2020/10/14 (1.80) - backends: moved all backends files (imgui_impl_XXXX.cpp, imgui_impl_XXXX.h) from examples/ to backends/.
  - 2020/10/12 (1.80) - removed redirecting functions/enums that were marked obsolete in 1.60 (April 2018):
                         - io.RenderDrawListsFn pointer        -> use ImGui::GetDrawData() value and call the render function of your backend
@@ -873,6 +874,7 @@ static float            NavUpdatePageUpPageDown();
 static inline void      NavUpdateAnyRequestFlag();
 static void             NavEndFrame();
 static bool             NavScoreItem(ImGuiNavMoveResult* result, ImRect cand);
+static void             NavApplyItemToResult(ImGuiNavMoveResult* result, ImGuiWindow* window, ImGuiID id, const ImRect& nav_bb_rel);
 static void             NavProcessItem(ImGuiWindow* window, const ImRect& nav_bb, ImGuiID id);
 static ImVec2           NavCalcPreferredRefPos();
 static void             NavSaveLastChildNavWindowIntoParent(ImGuiWindow* nav_window);
@@ -1078,7 +1080,7 @@ ImGuiIO::ImGuiIO()
     ConfigInputTextCursorBlink = true;
     ConfigWindowsResizeFromEdges = true;
     ConfigWindowsMoveFromTitleBarOnly = false;
-    ConfigWindowsMemoryCompactTimer = 60.0f;
+    ConfigMemoryCompactTimer = 60.0f;
 
     // Platform Functions
     BackendPlatformName = BackendRendererName = NULL;
@@ -1592,66 +1594,58 @@ void*   ImFileLoadToMemory(const char* filename, const char* mode, size_t* out_f
 //-----------------------------------------------------------------------------
 
 // Convert UTF-8 to 32-bit character, process single character input.
-// Based on stb_from_utf8() from github.com/nothings/stb/
+// A nearly-branchless UTF-8 decoder, based on work of Christopher Wellons (https://github.com/skeeto/branchless-utf8).
 // We handle UTF-8 decoding error by skipping forward.
 int ImTextCharFromUtf8(unsigned int* out_char, const char* in_text, const char* in_text_end)
 {
-    unsigned int c = (unsigned int)-1;
-    const unsigned char* str = (const unsigned char*)in_text;
-    if (!(*str & 0x80))
+    static const char lengths[32] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 4, 0 };
+    static const int masks[]  = { 0x00, 0x7f, 0x1f, 0x0f, 0x07 };
+    static const uint32_t mins[] = { 0x400000, 0, 0x80, 0x800, 0x10000 };
+    static const int shiftc[] = { 0, 18, 12, 6, 0 };
+    static const int shifte[] = { 0, 6, 4, 2, 0 };
+    int len = lengths[*(const unsigned char*)in_text >> 3];
+    int wanted = len + !len;
+
+    if (in_text_end == NULL)
+        in_text_end = in_text + wanted; // Max length, nulls will be taken into account.
+
+    // Copy at most 'len' bytes, stop copying at 0 or past in_text_end. Branch predictor does a good job here,
+    // so it is fast even with excessive branching.
+    unsigned char s[4];
+    s[0] = in_text + 0 < in_text_end ? in_text[0] : 0;
+    s[1] = in_text + 1 < in_text_end ? in_text[1] : 0;
+    s[2] = in_text + 2 < in_text_end ? in_text[2] : 0;
+    s[3] = in_text + 3 < in_text_end ? in_text[3] : 0;
+
+    // Assume a four-byte character and load four bytes. Unused bits are shifted out.
+    *out_char  = (uint32_t)(s[0] & masks[len]) << 18;
+    *out_char |= (uint32_t)(s[1] & 0x3f) << 12;
+    *out_char |= (uint32_t)(s[2] & 0x3f) <<  6;
+    *out_char |= (uint32_t)(s[3] & 0x3f) <<  0;
+    *out_char >>= shiftc[len];
+
+    // Accumulate the various error conditions.
+    int e = 0;
+    e  = (*out_char < mins[len]) << 6; // non-canonical encoding
+    e |= ((*out_char >> 11) == 0x1b) << 7;  // surrogate half?
+    e |= (*out_char > IM_UNICODE_CODEPOINT_MAX) << 8;  // out of range?
+    e |= (s[1] & 0xc0) >> 2;
+    e |= (s[2] & 0xc0) >> 4;
+    e |= (s[3]       ) >> 6;
+    e ^= 0x2a; // top two bits of each tail byte correct?
+    e >>= shifte[len];
+
+    if (e)
     {
-        c = (unsigned int)(*str++);
-        *out_char = c;
-        return 1;
+        // No bytes are consumed when *in_text == 0 || in_text == in_text_end.
+        // One byte is consumed in case of invalid first byte of in_text.
+        // All available bytes (at most `len` bytes) are consumed on incomplete/invalid second to last bytes.
+        // Invalid or incomplete input may consume less bytes than wanted, therefore every byte has to be inspected in s.
+        wanted = ImMin(wanted, !!s[0] + !!s[1] + !!s[2] + !!s[3]);
+        *out_char = IM_UNICODE_CODEPOINT_INVALID;
     }
-    if ((*str & 0xe0) == 0xc0)
-    {
-        *out_char = IM_UNICODE_CODEPOINT_INVALID; // will be invalid but not end of string
-        if (in_text_end && in_text_end - (const char*)str < 2) return 1;
-        if (*str < 0xc2) return 2;
-        c = (unsigned int)((*str++ & 0x1f) << 6);
-        if ((*str & 0xc0) != 0x80) return 2;
-        c += (*str++ & 0x3f);
-        *out_char = c;
-        return 2;
-    }
-    if ((*str & 0xf0) == 0xe0)
-    {
-        *out_char = IM_UNICODE_CODEPOINT_INVALID; // will be invalid but not end of string
-        if (in_text_end && in_text_end - (const char*)str < 3) return 1;
-        if (*str == 0xe0 && (str[1] < 0xa0 || str[1] > 0xbf)) return 3;
-        if (*str == 0xed && str[1] > 0x9f) return 3; // str[1] < 0x80 is checked below
-        c = (unsigned int)((*str++ & 0x0f) << 12);
-        if ((*str & 0xc0) != 0x80) return 3;
-        c += (unsigned int)((*str++ & 0x3f) << 6);
-        if ((*str & 0xc0) != 0x80) return 3;
-        c += (*str++ & 0x3f);
-        *out_char = c;
-        return 3;
-    }
-    if ((*str & 0xf8) == 0xf0)
-    {
-        *out_char = IM_UNICODE_CODEPOINT_INVALID; // will be invalid but not end of string
-        if (in_text_end && in_text_end - (const char*)str < 4) return 1;
-        if (*str > 0xf4) return 4;
-        if (*str == 0xf0 && (str[1] < 0x90 || str[1] > 0xbf)) return 4;
-        if (*str == 0xf4 && str[1] > 0x8f) return 4; // str[1] < 0x80 is checked below
-        c = (unsigned int)((*str++ & 0x07) << 18);
-        if ((*str & 0xc0) != 0x80) return 4;
-        c += (unsigned int)((*str++ & 0x3f) << 12);
-        if ((*str & 0xc0) != 0x80) return 4;
-        c += (unsigned int)((*str++ & 0x3f) << 6);
-        if ((*str & 0xc0) != 0x80) return 4;
-        c += (*str++ & 0x3f);
-        // utf-8 encodings of values used in surrogate pairs are invalid
-        if ((c & 0xFFFFF800) == 0xD800) return 4;
-        // If codepoint does not fit in ImWchar, use replacement character U+FFFD instead
-        if (c > IM_UNICODE_CODEPOINT_MAX) c = IM_UNICODE_CODEPOINT_INVALID;
-        *out_char = c;
-        return 4;
-    }
-    *out_char = 0;
-    return 0;
+
+    return wanted;
 }
 
 int ImTextStrFromUtf8(ImWchar* buf, int buf_size, const char* in_text, const char* in_text_end, const char** in_text_remaining)
@@ -3047,8 +3041,7 @@ static void SetCurrentWindow(ImGuiWindow* window)
         g.FontSize = g.DrawListSharedData.FontSize = window->CalcFontSize();
 }
 
-// Free up/compact internal window buffers, we can use this when a window becomes unused.
-// This is currently unused by the library, but you may call this yourself for easy GC.
+// Free up/compact internal Window buffers, for when it gets unsued.
 // Not freed:
 // - ImGuiWindow, ImGuiWindowSettings, Name
 // - StateStorage, ColumnsStorage (may hold useful data)
@@ -4126,7 +4119,7 @@ void ImGui::NewFrame()
 
     // Mark all windows as not visible and compact unused memory.
     IM_ASSERT(g.WindowsFocusOrder.Size == g.Windows.Size);
-    const float memory_compact_start_time = (g.IO.ConfigWindowsMemoryCompactTimer >= 0.0f) ? (float)g.Time - g.IO.ConfigWindowsMemoryCompactTimer : FLT_MAX;
+    const float memory_compact_start_time = (g.IO.ConfigMemoryCompactTimer >= 0.0f) ? (float)g.Time - g.IO.ConfigMemoryCompactTimer : FLT_MAX;
     for (int i = 0; i != g.Windows.Size; i++)
     {
         ImGuiWindow* window = g.Windows[i];
@@ -4139,6 +4132,11 @@ void ImGui::NewFrame()
         if (!window->WasActive && !window->MemoryCompacted && window->LastTimeActive < memory_compact_start_time)
             GcCompactTransientWindowBuffers(window);
     }
+
+    // Garbage collect transient buffers of recently unused tables
+    for (int i = 0; i < g.TablesLastTimeActive.Size; i++)
+        if (g.TablesLastTimeActive[i] >= 0.0f && g.TablesLastTimeActive[i] < memory_compact_start_time)
+            TableGcCompactTransientBuffers(g.Tables.GetByIndex(i));
 
     // Closing the focused window restore focus to the first active root window in descending z-order
     if (g.NavWindow && !g.NavWindow->WasActive)
@@ -4381,12 +4379,6 @@ static void AddDrawListToDrawData(ImVector<ImDrawList*>* out_list, ImDrawList* d
     //   the 64K limit to split your draw commands in multiple draw lists.
     if (sizeof(ImDrawIdx) == 2)
         IM_ASSERT(draw_list->_VtxCurrentIdx < (1 << 16) && "Too many vertices in ImDrawList using 16-bit indices. Read comment above");
-
-    // Merge small draw commands when possible
-    ImGuiContext& g = *GImGui;
-    //g.MergeSmallDrawCmdsMaxElem = g.IO.KeyShift ? 120 : 0; // [DEBUG]
-    if (g.FrameCountRendered < g.FrameCount && g.MergeSmallDrawCmdsMaxElem > 0)
-        ImDrawListMergeSmallDrawCmds(draw_list, g.MergeSmallDrawCmdsMaxElem);
 
     out_list->push_back(draw_list);
 }
@@ -4636,7 +4628,7 @@ void ImGui::Render()
 
     if (g.FrameCountEnded != g.FrameCount)
         EndFrame();
-
+    g.FrameCountRendered = g.FrameCount;
     g.IO.MetricsRenderWindows = 0;
 
     CallContextHooks(&g, ImGuiContextHookType_RenderPre);
@@ -4693,7 +4685,6 @@ void ImGui::Render()
         g.IO.MetricsRenderIndices += viewport->DrawData->TotalIdxCount;
     }
 
-    g.FrameCountRendered = g.FrameCount;
     CallContextHooks(&g, ImGuiContextHookType_RenderPost);
 }
 
@@ -9178,6 +9169,14 @@ static bool ImGui::NavScoreItem(ImGuiNavMoveResult* result, ImRect cand)
     return new_best;
 }
 
+static void ImGui::NavApplyItemToResult(ImGuiNavMoveResult* result, ImGuiWindow* window, ImGuiID id, const ImRect& nav_bb_rel)
+{
+    result->Window = window;
+    result->ID = id;
+    result->FocusScopeId = window->DC.NavFocusScopeIdCurrent;
+    result->RectRel = nav_bb_rel;
+}
+
 // We get there when either NavId == id, or when g.NavAnyRequest is set (which is updated by NavUpdateAnyRequestFlag above)
 static void ImGui::NavProcessItem(ImGuiWindow* window, const ImRect& nav_bb, const ImGuiID id)
 {
@@ -9218,25 +9217,14 @@ static void ImGui::NavProcessItem(ImGuiWindow* window, const ImRect& nav_bb, con
         bool new_best = g.NavMoveRequest && NavScoreItem(result, nav_bb);
 #endif
         if (new_best)
-        {
-            result->Window = window;
-            result->ID = id;
-            result->FocusScopeId = window->DC.NavFocusScopeIdCurrent;
-            result->RectRel = nav_bb_rel;
-        }
+            NavApplyItemToResult(result, window, id, nav_bb_rel);
 
         // Features like PageUp/PageDown need to maintain a separate score for the visible set of items.
         const float VISIBLE_RATIO = 0.70f;
         if ((g.NavMoveRequestFlags & ImGuiNavMoveFlags_AlsoScoreVisibleSet) && window->ClipRect.Overlaps(nav_bb))
             if (ImClamp(nav_bb.Max.y, window->ClipRect.Min.y, window->ClipRect.Max.y) - ImClamp(nav_bb.Min.y, window->ClipRect.Min.y, window->ClipRect.Max.y) >= (nav_bb.Max.y - nav_bb.Min.y) * VISIBLE_RATIO)
                 if (NavScoreItem(&g.NavMoveResultLocalVisibleSet, nav_bb))
-                {
-                    result = &g.NavMoveResultLocalVisibleSet;
-                    result->Window = window;
-                    result->ID = id;
-                    result->FocusScopeId = window->DC.NavFocusScopeIdCurrent;
-                    result->RectRel = nav_bb_rel;
-                }
+                    NavApplyItemToResult(&g.NavMoveResultLocalVisibleSet, window, id, nav_bb_rel);
     }
 
     // Update window-relative bounding box of navigated item
@@ -15635,7 +15623,7 @@ void ImGui::ShowMetricsWindow(bool* p_open)
     if (cfg->ShowWindowsRectsType < 0)
         cfg->ShowWindowsRectsType = WRT_WorkRect;
     if (cfg->ShowTablesRectsType < 0)
-        cfg->ShowWindowsRectsType = TRT_WorkRect;
+        cfg->ShowTablesRectsType = TRT_WorkRect;
 
     struct Funcs
     {
@@ -15645,13 +15633,13 @@ void ImGui::ShowMetricsWindow(bool* p_open)
             else if (rect_type == TRT_WorkRect)                 { return table->WorkRect; }
             else if (rect_type == TRT_HostClipRect)             { return table->HostClipRect; }
             else if (rect_type == TRT_InnerClipRect)            { return table->InnerClipRect; }
-            else if (rect_type == TRT_BackgroundClipRect)       { return table->BackgroundClipRect; }
+            else if (rect_type == TRT_BackgroundClipRect)       { return table->BgClipRect; }
             else if (rect_type == TRT_ColumnsRect)              { ImGuiTableColumn* c = &table->Columns[n]; return ImRect(c->MinX, table->InnerClipRect.Min.y, c->MaxX, table->InnerClipRect.Min.y + table->LastOuterHeight); }
             else if (rect_type == TRT_ColumnsClipRect)          { ImGuiTableColumn* c = &table->Columns[n]; return c->ClipRect; }
-            else if (rect_type == TRT_ColumnsContentHeadersUsed){ ImGuiTableColumn* c = &table->Columns[n]; return ImRect(c->ContentMinX, table->InnerClipRect.Min.y, c->ContentMaxXHeadersUsed, table->InnerClipRect.Min.y + table->LastFirstRowHeight); } // Note: y1/y2 not always accurate
-            else if (rect_type == TRT_ColumnsContentHeadersIdeal){ImGuiTableColumn* c = &table->Columns[n]; return ImRect(c->ContentMinX, table->InnerClipRect.Min.y, c->ContentMaxXHeadersIdeal, table->InnerClipRect.Min.y + table->LastFirstRowHeight); }
-            else if (rect_type == TRT_ColumnsContentFrozen)     { ImGuiTableColumn* c = &table->Columns[n]; return ImRect(c->ContentMinX, table->InnerClipRect.Min.y, c->ContentMaxXFrozen, table->InnerClipRect.Min.y + table->LastFirstRowHeight); }
-            else if (rect_type == TRT_ColumnsContentUnfrozen)   { ImGuiTableColumn* c = &table->Columns[n]; return ImRect(c->ContentMinX, table->InnerClipRect.Min.y + table->LastFirstRowHeight, c->ContentMaxXUnfrozen, table->InnerClipRect.Max.y); }
+            else if (rect_type == TRT_ColumnsContentHeadersUsed){ ImGuiTableColumn* c = &table->Columns[n]; return ImRect(c->WorkMinX, table->InnerClipRect.Min.y, c->ContentMaxXHeadersUsed, table->InnerClipRect.Min.y + table->LastFirstRowHeight); } // Note: y1/y2 not always accurate
+            else if (rect_type == TRT_ColumnsContentHeadersIdeal){ImGuiTableColumn* c = &table->Columns[n]; return ImRect(c->WorkMinX, table->InnerClipRect.Min.y, c->ContentMaxXHeadersIdeal, table->InnerClipRect.Min.y + table->LastFirstRowHeight); }
+            else if (rect_type == TRT_ColumnsContentFrozen)     { ImGuiTableColumn* c = &table->Columns[n]; return ImRect(c->WorkMinX, table->InnerClipRect.Min.y, c->ContentMaxXFrozen, table->InnerClipRect.Min.y + table->LastFirstRowHeight); }
+            else if (rect_type == TRT_ColumnsContentUnfrozen)   { ImGuiTableColumn* c = &table->Columns[n]; return ImRect(c->WorkMinX, table->InnerClipRect.Min.y + table->LastFirstRowHeight, c->ContentMaxXUnfrozen, table->InnerClipRect.Max.y); }
             IM_ASSERT(0);
             return ImRect();
         }
@@ -15714,6 +15702,7 @@ void ImGui::ShowMetricsWindow(bool* p_open)
                 if (IsItemHovered())
                     GetForegroundDrawList()->AddRect(table->OuterRect.Min - ImVec2(1, 1), table->OuterRect.Max + ImVec2(1, 1), IM_COL32(255, 255, 0, 255), 0.0f, ~0, 2.0f);
                 Indent();
+                char buf[128];
                 for (int rect_n = 0; rect_n < TRT_Count; rect_n++)
                 {
                     if (rect_n >= TRT_ColumnsRect)
@@ -15723,7 +15712,8 @@ void ImGui::ShowMetricsWindow(bool* p_open)
                         for (int column_n = 0; column_n < table->ColumnsCount; column_n++)
                         {
                             ImRect r = Funcs::GetTableRect(table, rect_n, column_n);
-                            Text("(%6.1f,%6.1f) (%6.1f,%6.1f) Size (%6.1f,%6.1f) Col %d %s", r.Min.x, r.Min.y, r.Max.x, r.Max.y, r.GetWidth(), r.GetHeight(), column_n, trt_rects_names[rect_n]);
+                            ImFormatString(buf, IM_ARRAYSIZE(buf), "(%6.1f,%6.1f) (%6.1f,%6.1f) Size (%6.1f,%6.1f) Col %d %s", r.Min.x, r.Min.y, r.Max.x, r.Max.y, r.GetWidth(), r.GetHeight(), column_n, trt_rects_names[rect_n]);
+                            Selectable(buf);
                             if (IsItemHovered())
                                 GetForegroundDrawList()->AddRect(r.Min - ImVec2(1, 1), r.Max + ImVec2(1, 1), IM_COL32(255, 255, 0, 255), 0.0f, ~0, 2.0f);
                         }
@@ -15731,7 +15721,8 @@ void ImGui::ShowMetricsWindow(bool* p_open)
                     else
                     {
                         ImRect r = Funcs::GetTableRect(table, rect_n, -1);
-                        Text("(%6.1f,%6.1f) (%6.1f,%6.1f) Size (%6.1f,%6.1f) %s", r.Min.x, r.Min.y, r.Max.x, r.Max.y, r.GetWidth(), r.GetHeight(), trt_rects_names[rect_n]);
+                        ImFormatString(buf, IM_ARRAYSIZE(buf), "(%6.1f,%6.1f) (%6.1f,%6.1f) Size (%6.1f,%6.1f) %s", r.Min.x, r.Min.y, r.Max.x, r.Max.y, r.GetWidth(), r.GetHeight(), trt_rects_names[rect_n]);
+                        Selectable(buf);
                         if (IsItemHovered())
                             GetForegroundDrawList()->AddRect(r.Min - ImVec2(1, 1), r.Max + ImVec2(1, 1), IM_COL32(255, 255, 0, 255), 0.0f, ~0, 2.0f);
                     }
@@ -15746,7 +15737,7 @@ void ImGui::ShowMetricsWindow(bool* p_open)
     // Contents
     DebugNodeWindowsList(&g.Windows, "Windows");
     //DebugNodeWindowsList(&g.WindowsFocusOrder, "WindowsFocusOrder");
-    if (TreeNode("Viewport", "Viewports (%d)", g.Viewports.Size))
+    if (TreeNode("Viewports", "Viewports (%d)", g.Viewports.Size))
     {
         Indent(GetTreeNodeToLabelSpacing());
         RenderViewportsThumbnails();
@@ -16050,15 +16041,15 @@ void ImGui::DebugNodeDockNode(ImGuiDockNode* node, const char* label)
             node->WantLockSizeOnce ? " WantLockSizeOnce" : "");
         if (TreeNode("flags", "LocalFlags: 0x%04X SharedFlags: 0x%04X", node->LocalFlags, node->SharedFlags))
         {
-            CheckboxFlags("LocalFlags: NoDocking", (ImU32*)&node->LocalFlags, ImGuiDockNodeFlags_NoDocking);
-            CheckboxFlags("LocalFlags: NoSplit", (ImU32*)&node->LocalFlags, ImGuiDockNodeFlags_NoSplit);
-            CheckboxFlags("LocalFlags: NoResize", (ImU32*)&node->LocalFlags, ImGuiDockNodeFlags_NoResize);
-            CheckboxFlags("LocalFlags: NoResizeX", (ImU32*)&node->LocalFlags, ImGuiDockNodeFlags_NoResizeX);
-            CheckboxFlags("LocalFlags: NoResizeY", (ImU32*)&node->LocalFlags, ImGuiDockNodeFlags_NoResizeY);
-            CheckboxFlags("LocalFlags: NoTabBar", (ImU32*)&node->LocalFlags, ImGuiDockNodeFlags_NoTabBar);
-            CheckboxFlags("LocalFlags: HiddenTabBar", (ImU32*)&node->LocalFlags, ImGuiDockNodeFlags_HiddenTabBar);
-            CheckboxFlags("LocalFlags: NoWindowMenuButton", (ImU32*)&node->LocalFlags, ImGuiDockNodeFlags_NoWindowMenuButton);
-            CheckboxFlags("LocalFlags: NoCloseButton", (ImU32*)&node->LocalFlags, ImGuiDockNodeFlags_NoCloseButton);
+            CheckboxFlags("LocalFlags: NoDocking", &node->LocalFlags, ImGuiDockNodeFlags_NoDocking);
+            CheckboxFlags("LocalFlags: NoSplit", &node->LocalFlags, ImGuiDockNodeFlags_NoSplit);
+            CheckboxFlags("LocalFlags: NoResize", &node->LocalFlags, ImGuiDockNodeFlags_NoResize);
+            CheckboxFlags("LocalFlags: NoResizeX", &node->LocalFlags, ImGuiDockNodeFlags_NoResizeX);
+            CheckboxFlags("LocalFlags: NoResizeY", &node->LocalFlags, ImGuiDockNodeFlags_NoResizeY);
+            CheckboxFlags("LocalFlags: NoTabBar", &node->LocalFlags, ImGuiDockNodeFlags_NoTabBar);
+            CheckboxFlags("LocalFlags: HiddenTabBar", &node->LocalFlags, ImGuiDockNodeFlags_HiddenTabBar);
+            CheckboxFlags("LocalFlags: NoWindowMenuButton", &node->LocalFlags, ImGuiDockNodeFlags_NoWindowMenuButton);
+            CheckboxFlags("LocalFlags: NoCloseButton", &node->LocalFlags, ImGuiDockNodeFlags_NoCloseButton);
             TreePop();
         }
         if (node->ParentNode)
@@ -16358,7 +16349,7 @@ void ImGui::DebugNodeWindowsList(ImVector<ImGuiWindow*>* windows, const char* la
 
 void ImGui::ShowMetricsWindow(bool*) {}
 void ImGui::DebugNodeColumns(ImGuiColumns*) {}
-void ImGui::DebugNodeDrawList(ImGuiWindow*, ImGuiViewportP* viewport, const ImDrawList*, const char*) {}
+void ImGui::DebugNodeDrawList(ImGuiWindow*, ImGuiViewportP*, const ImDrawList*, const char*) {}
 void ImGui::DebugNodeDrawCmdShowMeshAndBoundingBox(ImDrawList*, const ImDrawList*, const ImDrawCmd*, bool, bool) {}
 void ImGui::DebugNodeStorage(ImGuiStorage*, const char*) {}
 void ImGui::DebugNodeTabBar(ImGuiTabBar*, const char*) {}
