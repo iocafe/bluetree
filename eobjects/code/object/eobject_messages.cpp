@@ -70,7 +70,7 @@ void eObject::message(
         parent = this;
     }
 
-    envelope = new eEnvelope(parent, EOBJ_IS_ATTACHMENT);
+    envelope = new eEnvelope(parent, EOID_ITEM); // THIS SHOULD BE HERE, DOESN'T WORK, EOBJ_IS_ATTACHMENT);
     envelope->setcommand(command);
     envelope->setmflags(mflags & ~(EMSG_DEL_CONTENT|EMSG_DEL_CONTEXT));
     envelope->settarget(target);
@@ -269,6 +269,7 @@ void eObject::message_process_ns(
 {
     eNameSpace *process_ns;
     eName *name, *nextname;
+    eVariable *savedtarget, *mytarget, *objname = OS_NULL;
     eThread *thread;
     os_memsz sz;
     os_char buf[E_OIXSTR_BUF_SZ], *oname, c;
@@ -315,13 +316,13 @@ void eObject::message_process_ns(
      */
     else
     {
-        eVariable objname;
+        objname = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
 
         /* Get next object name in target path.
            Remember length of object name.
          */
-        envelope->nexttarget(&objname);
-        oname = objname.gets(&sz);
+        envelope->nexttarget(objname);
+        oname = objname->gets(&sz);
 
         /* Synchronize.
          */
@@ -329,7 +330,7 @@ void eObject::message_process_ns(
 
         /* Find the name in process name space.
          */
-        name = process_ns->findname(&objname);
+        name = process_ns->findname(objname);
 
         /* If name not found: End synchronization/clen up, reply with ECMD_NOTARGET
            and return.
@@ -410,8 +411,10 @@ void eObject::message_process_ns(
              */
             envelope->move_target_over_objname((os_short)sz - 1);
 
-            eVariable savedtarget, mytarget;
-            savedtarget.sets(envelope->target());
+            savedtarget = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+            mytarget = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+
+            savedtarget->sets(envelope->target());
 
             while (name)
             {
@@ -430,14 +433,16 @@ void eObject::message_process_ns(
                 if (thread != name->parent())
                 {
                     name->parent()->oixstr(buf, sizeof(buf));
-                    mytarget.sets(buf);
-                    if (!savedtarget.isempty()) mytarget.appends("/");
-                    mytarget.appendv(&savedtarget);
-                    envelope->settarget(mytarget.gets());
+                    mytarget->sets(buf);
+                    if (!savedtarget->isempty()) {
+                        mytarget->appends("/");
+                        mytarget->appendv(savedtarget);
+                    }
+                    envelope->settarget(mytarget->gets());
                 }
                 else
                 {
-                    envelope->settarget(savedtarget.gets());
+                    envelope->settarget(savedtarget->gets());
                 }
 
                 /* Queue the envelope and move on. If this is last target for
@@ -446,11 +451,15 @@ void eObject::message_process_ns(
                 thread->queue(envelope, nextname == OS_NULL);
                 name = nextname;
             }
+
+            delete savedtarget;
+            delete mytarget;
         }
 
         /* End synchronization
          */
         os_unlock();
+        delete objname;
     }
 
     return;
@@ -460,6 +469,7 @@ getout:
      */
     notarget(envelope);
 
+    delete objname;
     delete envelope;
 }
 

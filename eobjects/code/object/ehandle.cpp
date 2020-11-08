@@ -63,6 +63,22 @@
 #include "eobjects.h"
 
 
+/* eHandle::eHandle()
+{
+    m_oix = 0;
+    m_ucnt = 0;
+    m_oid = 0;
+    m_oflags = 0;
+    m_left = OS_NULL;
+    m_right = OS_NULL;
+    m_up = OS_NULL;
+    m_object = OS_NULL;
+    m_root = OS_NULL;
+    m_children = OS_NULL;
+}
+*/
+
+
 /**
 ****************************************************************************************************
 
@@ -426,14 +442,31 @@ try_again:
 
   The eHandle::delete_children() function deletes all children of this object.
 
+  Does not delete root helper object.
+
   @return  None.
 
 ****************************************************************************************************
 */
 void eHandle::delete_children()
 {
-    while (m_children) {
-        delete m_children->m_object;
+    eHandle *h;
+
+    while ((h = m_children)) {
+        if (h->m_oid == EOID_ROOT_HELPER)
+        {
+            if (h->m_left) {
+                h = h->m_left;
+            }
+            else if (h->m_right) {
+                h = h->m_right;
+            }
+            else {
+                break;
+            }
+        }
+
+        delete h->m_object;
     }
 }
 

@@ -66,7 +66,7 @@ eObject::eObject(
     /* If this if not primitive object?
      */
     /* WAS: if (id != EOID_ITEM || parent != OS_NULL) */
-    if ((flags & EOBJ_EROOT_OPTIONAL) == 0 || parent != OS_NULL)
+    if (/* (flags & EOBJ_EROOT_OPTIONAL) != 0 */ 1 || parent != OS_NULL)
     {
         /* No parent, allocate root object?
          */
@@ -143,7 +143,7 @@ void eObject::makeroot(
 */
 eObject::~eObject()
 {
-    eObject *bindings, *b, *next_b;
+    eObject *bindings, *b, *next_b, *root;
 
     /* if (m_parent)
     {
@@ -167,6 +167,11 @@ eObject::~eObject()
         if (mm_handle)
         {
             mm_handle->delete_children();
+        }
+
+        root = first(EOID_ROOT_HELPER);
+        if (root) {
+            delete root;
         }
 
         if (mm_parent)

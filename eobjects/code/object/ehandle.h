@@ -113,6 +113,7 @@ class eHandle
     friend class ePointer;
 
 public:
+    // eHandle();
 
     /**
     ************************************************************************************************
@@ -265,6 +266,8 @@ public:
         m_oflags = EOBJ_IS_RED | flags;
         m_object = obj;
         m_left = m_right = m_up = m_children = OS_NULL;
+
+        m_root = OS_NULL; /* Pekka, added */
     }
 
     /* Verify whole object tree.

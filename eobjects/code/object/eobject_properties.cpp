@@ -633,8 +633,7 @@ void eObject::setpropertyv(
     os_int flags)
 {
     eSet *properties;
-    eVariable *p;
-    eVariable v;
+    eVariable *p, *v;
     os_int pflags, sflags;
 
     /* Get global eVariable describing this property.
@@ -646,6 +645,8 @@ void eObject::setpropertyv(
         return;
     }
     pflags = p->flags();
+
+    v = new eVariable(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
 
     /* Empty x and x as null pointer are the same thing, handled the same way.
      */
@@ -662,8 +663,8 @@ void eObject::setpropertyv(
          */
         if (x->type() != OS_OBJECT)
         {
-            propertyv(propertynr, &v);
-            if (!v.compare(x)) return;
+            propertyv(propertynr, v);
+            if (!v->compare(x)) goto getout;
         }
 
         /* Call class'es onpropertychange function.
@@ -686,8 +687,8 @@ void eObject::setpropertyv(
 
         /* Find stored property value. If matches value to set, do nothing.
          */
-        properties->getv(propertynr, &v);
-        if (!v.compare(x)) return;
+        properties->getv(propertynr, v);
+        if (!v->compare(x)) goto getout;
 
         /* Early call class'es onpropertychange function.
          */
@@ -729,6 +730,10 @@ void eObject::setpropertyv(
     /* Forward property value to bindings, if any.
      */
     forwardproperty(propertynr, x, source, flags);
+
+getout:
+    delete v;
+    return;
 }
 
 

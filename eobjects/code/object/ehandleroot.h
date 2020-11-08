@@ -73,12 +73,12 @@ void ehandleroot_shutdown();
 /* Reserve handles for thread or another root object.
  */
 eHandle *ehandleroot_reservehandles(
-    e_oix nro_handles);
+    os_int nro_handles);
 
 /* Release handles from thread or another root object.
  */
 eHandle *ehandleroot_releasehandles(
     eHandle *h,
-    e_oix nro_handles);
+    os_int nro_handles);
 
 #endif

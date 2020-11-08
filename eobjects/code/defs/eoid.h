@@ -36,14 +36,12 @@
     If used without parent object, indicates primitive object, typically eVariable, which
     is not part of tree hierarchy. This makes object use less memory
     and to be faster to allocate and free, but it cannot be root or child object.
-    This flag is argument for costructore
  */
 #define EOID_ITEM -1
 
-/** This is default object identifier for containers, threads and also specifies object as
-    list item. But if used without parent object, indicates top of new object tree.
+/** This is temporary attachment which should be mostly igniored..
  */
-/* #define EOID_RITEM -2 */
+#define EOID_TEMPORARY -2
 
 /** This object is root helper of object tree.
  */

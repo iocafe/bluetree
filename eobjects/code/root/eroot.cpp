@@ -55,7 +55,7 @@ eRoot::eRoot(
 */
 eRoot::~eRoot()
 {
-    ehandleroot_releasehandles(m_first_free_handle, m_reserve_at_once);
+    ehandleroot_releasehandles(m_first_free_handle, -1);
 }
 
 

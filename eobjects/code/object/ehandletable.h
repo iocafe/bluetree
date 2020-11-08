@@ -44,7 +44,7 @@ public:
 
     inline eHandle *firsthandle() {return m_handle;}
 
-    /* Handle table xontent.
+    /* Handle table content.
      */
     eHandle m_handle[EHANDLE_HANDLE_MAX + 1];
 };
