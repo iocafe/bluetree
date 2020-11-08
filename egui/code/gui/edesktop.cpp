@@ -30,6 +30,7 @@
 void eGui::setup_desktop_application()
 {
     eWindow *w;
+    eParameterList *p;
     eLineEdit *e;
     eTreeNode *n;
     eValueX x;
@@ -51,17 +52,33 @@ void eGui::setup_desktop_application()
     x.set_tstamp(etime());
     e->setpropertyo(ECOMP_VALUE, &x);
 
-    e = new eLineEdit(w);
+    p = new eParameterList(w);
+
+    e = new eLineEdit(p);
+    e->setpropertys(ECOMP_TEXT, "Editti");
+    e->setpropertys(ECOMP_ATTR, "tstamp=\"yy,usec\"");
+    e->setpropertyl(ECOMP_VALUE, etime());
+    e->setpropertys(ECOMP_TTIP, "Minun helppo helppi");
+
+    e = new eLineEdit(p);
+    e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
+    e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
+    x = 1234.5;
+    x.set_sbits(OSAL_STATE_ORANGE|OSAL_STATE_CONNECTED);
+    x.set_tstamp(etime());
+    e->setpropertyo(ECOMP_VALUE, &x);
+
+    e = new eLineEdit(p);
     e->setpropertyi(ECOMP_VALUE, OS_FALSE);
     e->setpropertys(ECOMP_TEXT, "ENNUUPPI");
     e->setpropertys(ECOMP_ATTR, "enum=\"1.eka,2.toka\"");
 
-    e = new eLineEdit(w);
+    e = new eLineEdit(p);
     e->setpropertyi(ECOMP_VALUE, OS_TRUE);
     e->setpropertys(ECOMP_TEXT, "BOxI2");
     e->setpropertyi(ECOMP_TYPE, OS_BOOLEAN);
 
-    e = new eLineEdit(w);
+    e = new eLineEdit(p);
     e->setpropertyi(ECOMP_VALUE, OS_TRUE);
     e->setpropertys(ECOMP_TEXT, "floppia");
     e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);

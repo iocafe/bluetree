@@ -108,7 +108,7 @@ public:
         eContainer *configuration, *columns;
         eVariable *column;
 
-        configuration = new eContainer();
+        configuration = new eContainer(this);
         columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
         columns->addname("columns", ENAME_NO_MAP);
 
@@ -155,6 +155,10 @@ for (int i = 0; i<150; i++) {
             case 6: update_row("No more creeper");
             case 7: insert_row(1, "Duudleli"); break;
             case 8: insert_row(2, "Puudleli"); break;
+            case 9: insert_row(6, "KEPPO"); break;
+            case 11: insert_row(7, "kappo"); break;
+            case 14: insert_row(8, "sussu"); break;
+            case 17: insert_row(9, "deeku"); break;
         }
     }
 

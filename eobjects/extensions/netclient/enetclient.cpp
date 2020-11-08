@@ -41,7 +41,7 @@ eNetClient::eNetClient(
     m_connections = new eMatrix(this, EOID_ITEM);
     m_connections->addname("connections", ENAME_PARENT_NS|ENAME_TEMPORARY);
 
-    configuration = new eContainer();
+    configuration = new eContainer(this);
 
     columns = new eContainer(configuration);
     columns->addname("columns", ENAME_PARENT_NS|ENAME_NO_MAP);

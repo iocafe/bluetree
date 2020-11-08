@@ -41,6 +41,10 @@ eTreeNode::eTreeNode(
     m_node_type = 0;
     m_received_change = 0;
     m_all = OS_FALSE;
+
+#if ETREENODE_TOOLTIPS_FOR_DEBUG
+    m_object_flags = 0;
+#endif
 }
 
 
@@ -924,7 +928,7 @@ void eTreeNode::request_object_info()
     }
 
     if (!path.isempty()) {
-        content = new eContainer();
+        content = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
         item = new eVariable(content, EBROWSE_BROWSE_FLAGS);
         item->setl(browse_flags);
 

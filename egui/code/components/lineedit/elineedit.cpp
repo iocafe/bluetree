@@ -186,8 +186,7 @@ eStatus eLineEdit::draw(
     eDrawParams& prm)
 {
     os_int edit_w, unit_w, relative_x2, unit_spacer, total_w, total_h, h;
-    const os_char *value, *label, *unit;
-    ImGuiInputTextFlags eflags;
+    const os_char *unit;
 
     add_to_zorder(prm.window);
     m_attr.for_variable(this);
@@ -214,7 +213,70 @@ eStatus eLineEdit::draw(
     ImGui::SameLine(relative_x2 - edit_w - unit_spacer - unit_w);
     ImGui::SetNextItemWidth(edit_w);
 
+    draw_value(edit_w, &total_h);
+
+    unit = m_unit.get(this, ECOMP_UNIT);
+    if (*unit != '\0') {
+        ImGui::SameLine(relative_x2 - unit_w);
+        ImGui::SetNextItemWidth(unit_w);
+        ImGui::TextUnformatted(unit);
+        h = ImGui::GetItemRectSize().y;
+        if (h > total_h) total_h = h;
+    }
+
+    m_rect.x2 = m_rect.x1 + total_w - 1;
+    m_rect.y2 = m_rect.y1 + total_h - 1;
+
+    /* Draw marker for state bits if we have an extended value.
+     */
+    draw_state_bits(m_rect.x2 - edit_w - unit_spacer - unit_w);
+
+    /* Let base class implementation handle the rest.
+     */
+    return eComponent::draw(prm);
+}
+
+
+void eLineEdit::draw_in_parameter_list(
+    eDrawParams& prm)
+{
+    os_int edit_w = 200, total_h = 0;
+    const os_char *unit;
+
+    add_to_zorder(prm.window);
+    m_attr.for_variable(this);
+
+    if (ImGui::TableSetColumnIndex(0)) {
+        ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT));
+    }
+
+    if (ImGui::TableSetColumnIndex(1)) {
+        draw_value(edit_w, &total_h);
+    }
+
+    if (ImGui::TableSetColumnIndex(2)) {
+        unit = m_unit.get(this, ECOMP_UNIT);
+        if (*unit != '\0') {
+            ImGui::TextUnformatted(unit);
+        }
+    }
+
+    /* Let base class implementation handle the rest.
+     */
+    eComponent::draw(prm);
+}
+
+void eLineEdit::draw_value(
+    os_int edit_w,
+    os_int *total_h)
+{
+    const os_char *value, *label;
+    const ImVec2 zero_pad(0, 0);
+    ImGuiInputTextFlags eflags;
+    os_int h;
+
     if (m_edit_value) {
+
         label = m_label_edit.get(this);
 
         switch (m_attr.showas())
@@ -229,6 +291,7 @@ eStatus eLineEdit::draw(
                 break;
         }
 
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
         ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
         if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
         {
@@ -253,11 +316,14 @@ eStatus eLineEdit::draw(
         }
 
         h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
+        if (h > *total_h) *total_h = h;
+
+        ImGui::PopStyleVar();
     }
     else {
         value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
 
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
         switch (m_attr.showas())
         {
@@ -281,9 +347,10 @@ eStatus eLineEdit::draw(
                 }
                 break;
         }
-        ImGui::PopStyleVar();
         h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
+        if (h > *total_h) *total_h = h;
+
+        ImGui::PopStyleVar(2);
 
         /* Tool tip
          */
@@ -291,26 +358,6 @@ eStatus eLineEdit::draw(
             draw_tooltip();
         }
     }
-
-    unit = m_unit.get(this, ECOMP_UNIT);
-    if (*unit != '\0') {
-        ImGui::SameLine(relative_x2 - unit_w);
-        ImGui::SetNextItemWidth(unit_w);
-        ImGui::TextUnformatted(unit);
-        h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
-    }
-
-    m_rect.x2 = m_rect.x1 + total_w - 1;
-    m_rect.y2 = m_rect.y1 + total_h - 1;
-
-    /* Draw marker for state bits if we have an extended value.
-     */
-    draw_state_bits(m_rect.x2 - edit_w - unit_spacer - unit_w);
-
-    /* Let base class implementation handle the rest.
-     */
-    return eComponent::draw(prm);
 }
 
 

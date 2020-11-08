@@ -70,7 +70,7 @@ void egui_shutdown();
 #include "code/components/treenode/etreenode.h"
 #include "code/components/tableview/etableview.h"
 #include "code/components/tableview/etablecolumn.h"
-#include "code/components/parameterview/eparameterview.h"
+#include "code/components/parameterlist/eparameterlist.h"
 
 #include "code/ioc_components/eioc_checkbox.h"
 #include "code/gui/eguix.h"

@@ -41,7 +41,7 @@ void eguiclasslist_initialize()
     eButton::setupclass();
     eTableView::setupclass();
     eTableColumn::setupclass();
-    eParameterView::setupclass();
+    eParameterList::setupclass();
 
     eiocCheckbox::setupclass();
 }

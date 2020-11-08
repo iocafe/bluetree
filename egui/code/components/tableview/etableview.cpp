@@ -269,25 +269,30 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
                     // a column is not visible, which can be used for clipping.
                     if (first_row) {
                         c->set_visible(ImGui::TableSetColumnIndex(column));
-                        if (!c->visible()) continue;
-                        if (value->isempty()) continue;
                     }
-                    else {
-                        if (!c->visible()) continue;
-                        if (value->isempty()) continue;
 
-                        if (!ImGui::TableSetColumnIndex(column)) {
-                            continue;
-                        }
+                    if (!c->visible()) {
+                        continue;
                     }
 
                     if (m == focused_m &&
                         column == m_focused_column)
                     {
+                        if (!first_row) {
+                            if (!ImGui::TableSetColumnIndex(column)) {
+                                continue;
+                            }
+                        }
+
                         c->draw_edit(value, m_rowset->ix_column_name(),
                             m->getl(0, m_rowset->ix_column_nr()), this);
                     }
-                    else {
+                    else if (!value->isempty()) {
+                        if (!first_row) {
+                            if (!ImGui::TableSetColumnIndex(column)) {
+                                continue;
+                            }
+                        }
                         c->draw_value(value, this);
                     }
                 }

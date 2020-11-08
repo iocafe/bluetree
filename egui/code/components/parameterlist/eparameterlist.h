@@ -1,6 +1,6 @@
 /**
 
-  @file    eparameterview.h
+  @file    eparameterlist.h
   @brief   Display table data in GUI.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -14,8 +14,8 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EPARAMETERVIEW_H_
-#define EPARAMETERVIEW_H_
+#ifndef EPARAMETERLIST_H_
+#define EPARAMETERLIST_H_
 #include "egui.h"
 
 /**
@@ -24,14 +24,19 @@
 ****************************************************************************************************
 */
 
+typedef struct ePrmListComponent
+{
+    eComponent *m_ptr;
+}
+ePrmListComponent;
 
 
 /**
 ****************************************************************************************************
-  The eParameterView is GUI component to display and modify variable value.
+  The eParameterList is GUI component to display and modify variable value.
 ****************************************************************************************************
 */
-class eParameterView : public eComponent
+class eParameterList : public eComponent
 {
 public:
 
@@ -42,14 +47,14 @@ public:
     */
     /* Constructor.
      */
-    eParameterView(
+    eParameterList(
         eObject *parent = OS_NULL,
         e_oid id = EOID_GUI_COMPONENT,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eParameterView();
+    virtual ~eParameterList();
 
     /* Clone object.
      */
@@ -58,18 +63,18 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to eParameterView pointer.
+    /* Casting eObject pointer to eParameterList pointer.
      */
-    inline static eParameterView *cast(
+    inline static eParameterList *cast(
         eObject *o)
     {
-        e_assert_type(o, EGUICLASSID_PARAMETER_VIEW)
-        return (eParameterView*)o;
+        e_assert_type(o, EGUICLASSID_PARAMETER_LIST)
+        return (eParameterList*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return EGUICLASSID_PARAMETER_VIEW; }
+    virtual os_int classid() {return EGUICLASSID_PARAMETER_LIST; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -84,12 +89,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eParameterView *newobj(
+    static eParameterList *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eParameterView(parent, id, flags);
+        return new eParameterList(parent, id, flags);
     }
 
 
@@ -110,6 +115,9 @@ public:
 
 protected:
 
+    void generate_component_array();
+
+
     /**
     ************************************************************************************************
       Protected functions.
@@ -122,6 +130,11 @@ protected:
       Member variables.
     ************************************************************************************************
     */
+
+    ePrmListComponent *m_component;
+    os_int m_nro_components;
+    os_memsz m_component_array_sz;
+
 
 };
 

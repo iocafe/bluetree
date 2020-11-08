@@ -97,9 +97,15 @@ public:
       eComponent functionality
     ************************************************************************************************
     */
+
     /* Draw the component.
      */
     virtual eStatus draw(
+        eDrawParams& prm);
+
+    /* Special draw function for drawing within eParameterList.
+     */
+    void draw_in_parameter_list(
         eDrawParams& prm);
 
     /* Activate the component (start editing value, toggle checkbox, or show drop down list).
@@ -113,7 +119,13 @@ protected:
       Member variables.
     ************************************************************************************************
     */
-    void draw_state_bits(os_int x);
+    void draw_value(
+        os_int edit_w,
+        os_int *total_h);
+
+    void draw_state_bits(
+        os_int x);
+
     void draw_tooltip();
 
     void set_checked();

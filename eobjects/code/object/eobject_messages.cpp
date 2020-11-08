@@ -761,7 +761,7 @@ void eObject::send_browse_info(
 
     /* Created container for reply content.
      */
-    content = new eContainer;
+    content = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
 
     /* Store information about this object.
      */
@@ -822,7 +822,7 @@ void eObject::object_info(
     os_int browse_flags;
 
     if (name) {
-        text = *name;
+        text.setv(name);
         text += " [";
     }
     else {

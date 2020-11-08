@@ -1,6 +1,6 @@
 /**
 
-  @file    eparameterview.cpp
+  @file    eparameterlist.cpp
   @brief   Display table data in GUI.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -21,12 +21,15 @@
   Constructor, clear member variables.
 ****************************************************************************************************
 */
-eParameterView::eParameterView(
+eParameterList::eParameterList(
     eObject *parent,
     e_oid id,
     os_int flags)
     : eComponent(parent, id, flags)
 {
+    m_component = OS_NULL;
+    m_nro_components = 0;
+    m_component_array_sz = 0;
 }
 
 
@@ -35,8 +38,9 @@ eParameterView::eParameterView(
   Virtual destructor.
 ****************************************************************************************************
 */
-eParameterView::~eParameterView()
+eParameterList::~eParameterList()
 {
+    os_free(m_component, m_component_array_sz);
 }
 
 
@@ -55,13 +59,13 @@ eParameterView::~eParameterView()
 
 ****************************************************************************************************
 */
-eObject *eParameterView::clone(
+eObject *eParameterList::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
-    eParameterView *clonedobj;
-    clonedobj = new eParameterView(parent, id == EOID_CHILD ? oid() : id, flags());
+    eParameterList *clonedobj;
+    clonedobj = new eParameterList(parent, id == EOID_CHILD ? oid() : id, flags());
     clonegeneric(clonedobj, aflags);
     return clonedobj;
 }
@@ -70,21 +74,21 @@ eObject *eParameterView::clone(
 /**
 ****************************************************************************************************
 
-  @brief Add eParameterView to class list and class'es properties to it's property set.
+  @brief Add eParameterList to class list and class'es properties to it's property set.
 
-  The eParameterView::setupclass function adds eParameterView to class list and class'es properties to
+  The eParameterList::setupclass function adds eParameterList to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
 ****************************************************************************************************
 */
-void eParameterView::setupclass()
+void eParameterList::setupclass()
 {
-    const os_int cls = EGUICLASSID_PARAMETER_VIEW;
+    const os_int cls = EGUICLASSID_PARAMETER_LIST;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eParameterView");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eParameterList");
     setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     propertysetdone(cls);
     os_unlock();
@@ -113,7 +117,7 @@ void eParameterView::setupclass()
 
 ****************************************************************************************************
 */
-eStatus eParameterView::onpropertychange(
+eStatus eParameterList::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -142,7 +146,7 @@ eStatus eParameterView::onpropertychange(
 
   @brief Draw the component.
 
-  The eParameterView::draw() function calls ImGui API to render the component.
+  The eParameterList::draw() function calls ImGui API to render the component.
 
   @param   Prm Drawing parameters.
   @return  The function return ESTATUS_SUCCESS if all is fine. Other values indicate that the
@@ -151,34 +155,22 @@ eStatus eParameterView::onpropertychange(
 
 ****************************************************************************************************
 */
-eStatus eParameterView::draw(
+eStatus eParameterList::draw(
     eDrawParams& prm)
 {
-#if 0
-    eTableColumn *c;
-    eMatrix *m, *focused_m;
-    eVariable *value;
-    os_int nrows, ncols, total_w, total_h;
+    eComponent *c;
+    os_int total_w, total_h;
     os_int row, column;
     ImVec2 size, rmax, origin;
     ImVec2 cpos;
     ImGuiTableFlags flags;
-    os_boolean first_row;
 
     // const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
     const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
     add_to_zorder(prm.window);
 
-    if (m_rowset == OS_NULL || m_columns == OS_NULL) {
-        goto skipit;
-    }
-
-    nrows = m_rowset->nrows();
-    ncols = m_rowset->ncolumns();
-    if (ncols <= 0) {
-        goto skipit;
-    }
+    generate_component_array();
 
     // Using those as a base value to create width/height that are factor of the size of our font
 
@@ -188,11 +180,12 @@ eStatus eParameterView::draw(
 
     static int freeze_cols = 1;
     static int freeze_rows = 1;
+    static int ncols = 3;
 
     // When using ScrollX or ScrollY we need to specify a size for our table container!
     // Otherwise by default the table will fit all available space, like a BeginChild() call.
     size = ImVec2(0, TEXT_BASE_HEIGHT * 8);
-    if (ImGui::BeginTable("##table2", ncols, flags, size))
+    if (ImGui::BeginTable("##table3", ncols, flags, size))
     {
         rmax = ImGui::GetContentRegionMax();
         origin = ImGui::GetCursorPos();
@@ -221,20 +214,18 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
 
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
 
-        for (c = eTableColumn::cast(m_columns->first()), column=0;
-             c && column < ncols;
-             c = eTableColumn::cast(c->next()), column++)
+        for (column=0;
+             column < ncols;
+             column++)
         {
-            c->draw_column_header();
+            ImGui::TableSetupColumn("UKE", column == 0 ? ImGuiTableColumnFlags_NoHide
+                : ImGuiTableColumnFlags_None);
         }
 
         ImGui::TableHeadersRow();
 
-        first_row = OS_TRUE;
-        focused_m = eMatrix::cast(m_focused_row->get());
-        value = new eVariable(this);
         ImGuiListClipper clipper;
-        clipper.Begin(nrows);
+        clipper.Begin(m_nro_components);
         while (clipper.Step())
         {
             for (row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
@@ -243,49 +234,27 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
 
                 /* Avoid crashing on program errors?
                  */
-                if (row < 0 || row >= m_row_to_m_len) {
+                if (row < 0 || row >= m_nro_components) {
                     continue;
                 }
-                m = m_row_to_m[row].m_row;
+                c = m_component[row].m_ptr;
 
-                for (c = eTableColumn::cast(m_columns->first()), column=0;
-                     c && column < ncols;
-                     c = eTableColumn::cast(c->next()), column++)
+                if (c->classid() == EGUICLASSID_LINE_EDIT)
                 {
-                    m->getv(0, column, value);
-
-                    // Both TableNextColumn() and TableSetColumnIndex() return false when
-                    // a column is not visible, which can be used for clipping.
-                    if (first_row) {
-                        c->set_visible(ImGui::TableSetColumnIndex(column));
-                        if (!c->visible()) continue;
-                        if (value->isempty()) continue;
-                    }
-                    else {
-                        if (!c->visible()) continue;
-                        if (value->isempty()) continue;
-
-                        if (!ImGui::TableSetColumnIndex(column)) {
-                            continue;
-                        }
-                    }
-
-                    if (m == focused_m &&
-                        column == m_focused_column)
-                    {
-                        //c->draw_edit(value, m_rowset->ix_column_name(),
-//                            m->getl(0, m_rowset->ix_column_nr()), this);
-                    }
-                    else {
-  //                      c->draw_value(value, this);
-                    }
+                    ((eLineEdit*)c)->draw_in_parameter_list(prm);
                 }
-                first_row = OS_FALSE;
+                else {
+                    if (!ImGui::TableSetColumnIndex(0)) {
+                        continue;
+                    }
+
+                    c->draw(prm);
+                }
+
             }
         }
-        delete value;
 
-        if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
+/*        if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
         {
             column = ImGui::TableGetHoveredColumn();
             if (column >= 0 && column < m_row_to_m_len) {
@@ -296,25 +265,63 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
                     c->activate(m, column, this);
                 }
             }
-        }
+        } */
 
         ImGui::EndTable();
     }
 
     /* Tool tip
      */
-    if (ImGui::IsItemHovered()) {
+    /* if (ImGui::IsItemHovered()) {
         draw_tooltip();
-    }
+    } */
 
-skipit:
-
-
-#endif
 
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Generate array of child component pointers.
+
+****************************************************************************************************
+*/
+void eParameterList::generate_component_array()
+{
+    eComponent *c;
+    os_memsz sz;
+    os_int nro_components, max_components;
+
+    nro_components = 4;
+
+try_again:
+    max_components = m_component_array_sz / sizeof(ePrmListComponent);
+    if (m_component == OS_NULL || nro_components > max_components)
+    {
+        os_free(m_component, m_component_array_sz);
+        sz = (nro_components + 4) * sizeof(ePrmListComponent);
+        m_component = (ePrmListComponent*)os_malloc(sz, &m_component_array_sz);
+        max_components = m_component_array_sz / sizeof(ePrmListComponent);
+    }
+
+    /* Draw child components and setup Z order.
+     */
+    for (c = firstcomponent(EOID_GUI_COMPONENT), nro_components = 0;
+         c;
+         c = c->nextcomponent(EOID_GUI_COMPONENT), nro_components++)
+    {
+        if (nro_components < max_components) {
+            m_component[nro_components].m_ptr = c;
+        }
+    }
+    if (nro_components > max_components) {
+        goto try_again;
+    }
+    m_nro_components = nro_components;
 }
 
 
@@ -330,7 +337,7 @@ skipit:
 
 ****************************************************************************************************
 */
-ePopup *eParameterView::right_click_popup(
+ePopup *eParameterList::right_click_popup(
     eDrawParams& prm)
 {
     ePopup *p;
@@ -352,3 +359,5 @@ ePopup *eParameterView::right_click_popup(
 
     return p;
 }
+
+

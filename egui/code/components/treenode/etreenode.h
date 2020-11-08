@@ -165,8 +165,6 @@ protected:
     eStrBuffer m_path;
     eStrBuffer m_ipath;
 
-    eVariable m_bound_ipath;
-
     /* Parsed attrbutes, digits, etc.
      */
     eAttrBuffer m_attr;
