@@ -66,7 +66,7 @@ eObject::eObject(
     /* If this if not primitive object?
      */
     /* WAS: if (id != EOID_ITEM || parent != OS_NULL) */
-    if (/* (flags & EOBJ_EROOT_OPTIONAL) != 0 */ 1 || parent != OS_NULL)
+    if ((flags & EOBJ_EROOT_OPTIONAL) != 0 /*  1 */ || parent != OS_NULL)
     {
         /* No parent, allocate root object?
          */
@@ -886,8 +886,13 @@ void eObject::adopt(
      */
     if (parent->mm_handle == OS_NULL)
     {
+        /* Allocate root helper object hand two handles.
+         */
+        parent->makeroot(EOID_TEMPORARY, EOBJ_DEFAULT);
+
+        /* WAS:
         osal_debug_error("adopt(): parent object is not part of tree");
-        return;
+        return; */
     }
 
     if (aflags & EOBJ_BEFORE_THIS)
