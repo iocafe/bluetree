@@ -14,6 +14,7 @@
 ****************************************************************************************************
 */
 #include "egui.h"
+#include "imgui_internal.h"
 
 
 /**
@@ -139,29 +140,59 @@ void eTableColumn::draw_column_header()
 // Modifies value
 void eTableColumn::draw_value(
     eVariable *value,
+    eMatrix *m,
     eTableView *view)
 {
     const os_char *text;
+    bool checked;
 
-    enice_value_for_ui(value, view, &m_attr);
-    text = value->gets();
 
-    // Right align test
-    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x
-        /* - ImGui::GetStyle().CellPadding.x */);
+    switch (m_attr.showas())
+    {
+        case E_SHOWAS_CHECKBOX:
+            {
+                checked = (bool)value->getl();
 
-    ImGui::TextUnformatted(text);
+                const os_int pad = 2;
+                os_int square_sz = ImGui::GetFrameHeight();
+                square_sz -= 3 * pad;
+
+                ImVec2 pos = ImGui::GetCursorScreenPos();
+                pos.x += pad;
+                ImVec2 pos_max = pos;
+                pos_max.x += square_sz;
+                pos_max.y += square_sz;
+
+                ImU32 box_col = ImGui::GetColorU32(ImGuiCol_Border);
+                ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                draw_list->AddRect(pos, pos_max, box_col, 0);
+                if (checked) {
+                    ImU32 check_col = ImGui::GetColorU32(ImGuiCol_CheckMark);
+                    pos.x++;
+                    ImGui::RenderCheckMark(draw_list, pos, check_col, square_sz - pad);
+                }
+            }
+            break;
+
+        default:
+            enice_value_for_ui(value, view, &m_attr);
+            text = value->gets();
+
+            // Right align test
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x
+                /* - ImGui::GetStyle().CellPadding.x */);
+
+            ImGui::TextUnformatted(text);
+            break;
+    }
 }
 
 
 /** Modifies value
-    @param   ix_column_name Index column name, often "ix".
-    @param   ix_value Index value
 */
 void eTableColumn::draw_edit(
     eVariable *value,
-    const os_char *ix_column_name,
-    os_long ix_value,
+    eMatrix *m,
     eTableView *view)
 {
     const ImVec2 zero_pad(0, 0);
@@ -194,7 +225,7 @@ void eTableColumn::draw_edit(
             eVariable new_value;
             new_value.sets(edit_buf);
             enice_ui_value_to_internal_type(value, &new_value, this, &m_attr);
-            view->update_table_cell(ix_column_name, ix_value, m_name.ptr(), value);
+            view->update_table_cell(view->ix_column_name(), view->ix_value(m), m_name.ptr(), value);
         }
         view->focus_cell(OS_NULL);
     }
@@ -226,11 +257,14 @@ void eTableColumn::activate(
     os_int focus_column,
     eTableView *view)
 {
+    eVariable value;
+
     switch (m_attr.showas())
     {
         case E_SHOWAS_CHECKBOX:
-            // setpropertyi(ECOMP_VALUE, m_imgui_checked);
-            // m_set_checked = true;
+            focus_row->getv(0, focus_column, &value);
+            value.setl(!value.getl());
+            view->update_table_cell(view->ix_column_name(), view->ix_value(focus_row), m_name.ptr(), &value);
             break;
 
         case E_SHOWAS_DROP_DOWN_ENUM:
@@ -238,7 +272,6 @@ void eTableColumn::activate(
             break;
 
         default:
-            eVariable value;
             focus_row->getv(0, focus_column, &value);
             enice_value_for_ui(&value, view, &m_attr);
             view->focus_cell(focus_row, focus_column, value.gets(), 256);

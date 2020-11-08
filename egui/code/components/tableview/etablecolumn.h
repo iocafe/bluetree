@@ -94,18 +94,20 @@ public:
 
     void draw_value(
         eVariable *value,
+        eMatrix *m,
         eTableView *view);
 
     void draw_edit(
         eVariable *value,
-        const os_char *ix_column_name,
-        os_long ix_value,
+        eMatrix *m,
         eTableView *view);
 
     void activate(
         eMatrix *focus_row,
         os_int focus_column,
         eTableView *view);
+
+    inline eShowAs showas() {return m_attr.showas(); }
 
 protected:
     eStrBuffer m_name;

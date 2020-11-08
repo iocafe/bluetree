@@ -284,16 +284,15 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
                             }
                         }
 
-                        c->draw_edit(value, m_rowset->ix_column_name(),
-                            m->getl(0, m_rowset->ix_column_nr()), this);
+                        c->draw_edit(value, m, this);
                     }
-                    else if (!value->isempty()) {
+                    else if (!value->isempty() || c->showas() == E_SHOWAS_CHECKBOX) {
                         if (!first_row) {
                             if (!ImGui::TableSetColumnIndex(column)) {
                                 continue;
                             }
                         }
-                        c->draw_value(value, this);
+                        c->draw_value(value, m, this);
                     }
                 }
                 first_row = OS_FALSE;
@@ -325,12 +324,24 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
 
 skipit:
 
-
-
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
 }
+
+const os_char *eTableView::ix_column_name()
+{
+    if (m_rowset == OS_NULL) return OS_NULL;
+    return m_rowset->ix_column_name();
+}
+
+os_long eTableView::ix_value(eMatrix *m)
+{
+    if (m_rowset == OS_NULL) return -1;
+    return m->getl(0, m_rowset->ix_column_nr());
+}
+
+
 
 /**
 ****************************************************************************************************
@@ -391,69 +402,6 @@ void eTableView::update_table_cell(
 */
 void eTableView::draw_tooltip()
 {
-    eVariable text, item;
-    eValueX *ex;
-    os_long utc;
-    os_int state_bits;
-    os_boolean worth_showing = OS_FALSE;
-
-#define E_DEBUG_TOOLTIPS 0
-
-#if E_DEBUG_TOOLTIPS
-    text.sets(m_text.get(this, ECOMP_TEXT));
-#endif
-    propertyv(ECOMP_TTIP, &item);
-    if (!item.isempty()) {
-        if (!text.isempty()) text += "\n";
-        text += item;
-        worth_showing = OS_TRUE;
-    }
-
-    propertyv(ECOMP_VALUE, &item);
-    ex = item.getx();
-    if (ex) {
-        state_bits = ex->sbits();
-
-        utc = ex->tstamp();
-        if (etime_timestamp_str(utc, &item) == ESTATUS_SUCCESS)
-        {
-            if (!text.isempty()) text += "\n";
-            text += "updated ";
-            text += item;
-            worth_showing = OS_TRUE;
-        }
-
-        if ((state_bits & OSAL_STATE_CONNECTED) == 0) {
-            if (!text.isempty()) text += "\n";
-            text += "signal is disconnected";
-            worth_showing = OS_TRUE;
-        }
-        if (state_bits & OSAL_STATE_ERROR_MASK) {
-            if (state_bits & OSAL_STATE_CONNECTED) {
-                if (!text.isempty()) text += "\n";
-                text += "signal ";
-            }
-            else {
-                text += ", ";
-            }
-            switch (state_bits & OSAL_STATE_ERROR_MASK)
-            {
-                case OSAL_STATE_YELLOW: text += "warning"; break;
-                default:
-                case OSAL_STATE_ORANGE: text += "error"; break;
-                case OSAL_STATE_RED: text += "fault"; break;
-            }
-            worth_showing = OS_TRUE;
-        }
-    }
-
-    if (worth_showing) {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(text.gets());
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
 }
 
 

@@ -117,6 +117,11 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
+    /* Index column info
+     */
+    const os_char *ix_column_name();
+    os_long ix_value(eMatrix *m);
+
     /* Select the data to display.
      */
     void select();
