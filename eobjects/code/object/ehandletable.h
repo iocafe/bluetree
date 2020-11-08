@@ -6,7 +6,7 @@
   @version 1.0
   @date    8.9.2020
 
-  The handle table contains always EHANDLE_HANDLE_MAX+1 handles. Each handles is either in
+  The handle table contains always EHANDLE_TABLE_LEN handles. Each handles is either in
   linked list of global friee handles, or reserved by thread.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
@@ -21,13 +21,17 @@
 #define EHANDLETABLE_H_
 #include "eobjects.h"
 
-/** Number of bits in object index specifying handle index. This and EHANDLE_HANDLE_MAX must match.
+/** Number of bits in object index specifying handle index. This and EHANDLE_TABLE_LEN must match.
  */
 #define EHANDLE_HANDLE_BITS 14
 
 /** Maximum index for eHandle's m_handle array. s
  */
-#define EHANDLE_HANDLE_MAX 0x3FFF
+#define EHANDLE_TABLE_LEN 0x4000
+
+/** EHANDLE_TABLE_MASK, EHANDLE_TABLE_LEN and EHANDLE_HANDLE_BITS must match to each others.
+ */
+#define EHANDLE_TABLE_MASK 0x3FFF
 
 
 /**
@@ -44,9 +48,9 @@ public:
 
     inline eHandle *firsthandle() {return m_handle;}
 
-    /* Handle table content.
+    /** Handle array.
      */
-    eHandle m_handle[EHANDLE_HANDLE_MAX + 1];
+    eHandle m_handle[EHANDLE_TABLE_LEN];
 };
 
 #endif

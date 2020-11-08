@@ -26,7 +26,7 @@ class eHandleTable;
 
 /** Maximum index for eHandleRoot's m_table array.
  */
-#define EHANDLE_TABLE_MAX 0x1FFF
+#define EHANDLE_MAX_NRO_HANDLE_TABLES 0x2000
 
 /**
 ****************************************************************************************************
@@ -39,9 +39,9 @@ class eHandleTable;
 */
 typedef struct eHandleRoot
 {
-    /** Array of handle table pointers. Index is from 0 to EHANDLE_TABLE_MAX.
+    /** Array of handle table pointers. Index is from 0 to EHANDLE_MAX_NRO_HANDLE_TABLES - 1.
      */
-    eHandleTable *m_table[EHANDLE_TABLE_MAX+1];
+    eHandleTable *m_table[EHANDLE_MAX_NRO_HANDLE_TABLES];
 
     /** Number of allocated handle tables.
      */

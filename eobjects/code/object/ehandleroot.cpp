@@ -111,12 +111,12 @@ eHandle *ehandleroot_reservehandles(
     {
         if (hroot->m_first_free == OS_NULL)
         {
-            if (hroot->m_nrotables > EHANDLE_TABLE_MAX)
+            if (hroot->m_nrotables >= EHANDLE_MAX_NRO_HANDLE_TABLES)
             {
                 osal_debug_error("Maximum eHandle limit reached");
                 return OS_NULL;
             }
-            htable = new eHandleTable(hroot->m_nrotables * (EHANDLE_HANDLE_MAX + 1) /* + 1 */);
+            htable = new eHandleTable(hroot->m_nrotables * EHANDLE_TABLE_LEN);
             hroot->m_first_free = htable->firsthandle();
             hroot->m_table[hroot->m_nrotables++] = htable;
         }
@@ -128,12 +128,10 @@ eHandle *ehandleroot_reservehandles(
 
         /* Add to new chain
          */
-        if (newchain == OS_NULL)
-        {
+        if (newchain == OS_NULL) {
             newchain = h;
         }
-        else
-        {
+        else {
             last_h->setright(h);
         }
         last_h = h;

@@ -63,7 +63,7 @@
 #include "eobjects.h"
 
 
-/* eHandle::eHandle()
+eHandle::eHandle()
 {
     m_oix = 0;
     m_ucnt = 0;
@@ -76,7 +76,6 @@
     m_root = OS_NULL;
     m_children = OS_NULL;
 }
-*/
 
 
 /**

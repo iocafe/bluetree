@@ -150,7 +150,7 @@ inline eNameSpace *eglobal_process_ns()
 inline eHandle *eget_handle(
     e_oix oix)
 {
-    return eglobal->hroot.m_table[oix >> EHANDLE_HANDLE_BITS]->m_handle + (oix & EHANDLE_TABLE_MAX);
+    return eglobal->hroot.m_table[oix >> EHANDLE_HANDLE_BITS]->m_handle + (oix & EHANDLE_TABLE_MASK);
 }
 
 
