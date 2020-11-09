@@ -116,8 +116,12 @@ void eTableColumn::setup_column(
     if (m_text.isempty()) {
         m_text.setv(n);
     }
-
     m_unit.get(col_conf, EVARP_UNIT);
+    if (!m_unit.isempty()) {
+        m_text.appends("\n");
+        m_text.appends(m_unit.ptr());
+    }
+
     m_attr.for_variable(col_conf);
 }
 
@@ -201,6 +205,11 @@ void eTableColumn::draw_edit(
 
     switch (m_attr.showas())
     {
+        case E_SHOWAS_CHECKBOX:
+        case E_SHOWAS_DROP_DOWN_ENUM:
+            draw_value(value, m, view);
+            return;
+
         case E_SHOWAS_INTEGER_NUMBER:
         case E_SHOWAS_DECIMAL_NUMBER:
             eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll;
@@ -265,10 +274,13 @@ void eTableColumn::activate(
             focus_row->getv(0, focus_column, &value);
             value.setl(!value.getl());
             view->update_table_cell(view->ix_column_name(), view->ix_value(focus_row), m_name.ptr(), &value);
+            view->focus_cell(focus_row, focus_column, OS_NULL, 0);
             break;
 
         case E_SHOWAS_DROP_DOWN_ENUM:
-            // drop_down_list(m_attr.get_list());
+            focus_row->getv(0, focus_column, &value);
+            view->focus_cell(focus_row, focus_column, OS_NULL, 0);
+            view->drop_down_list(m_attr.get_list(), ecomp_drop_down_list_select, value.geti());
             break;
 
         default:

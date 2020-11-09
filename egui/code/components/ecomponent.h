@@ -59,6 +59,7 @@ class ePopup;
 #define ECOMP_IPATH 33
 #define ECOMP_EDIT 34
 #define ECOMP_ALL 35
+#define ECOMP_DROP_DOWN_LIST_SELECT 36
 
 #define ECOMP_SELECT 60
 #define ECOMP_COMMAND 61
@@ -92,6 +93,7 @@ extern const os_char ecomp_path[];
 extern const os_char ecomp_ipath[];
 extern const os_char ecomp_edit[];
 extern const os_char ecomp_all[];
+extern const os_char ecomp_drop_down_list_select[];
 
 extern const os_char ecomp_select[];
 extern const os_char ecomp_command[];
@@ -424,9 +426,18 @@ public:
 
     /* Generate right click popup menu.
      */
-    virtual ePopup *right_click_popup(eDrawParams& prm);
-    ePopup *drop_down_list(eContainer *list);
-    void add_popup_edit_mode_items(eDrawParams& prm, ePopup *p);
+    virtual ePopup *right_click_popup(
+        eDrawParams& prm);
+
+    ePopup *drop_down_list(
+        eContainer *list,
+        const os_char *propertyname = OS_NULL,
+        os_int value = OS_INT_MAX);
+
+    void add_popup_edit_mode_items(
+        eDrawParams& prm,
+        ePopup *p);
+
     void close_popup();
 
 

@@ -24,6 +24,10 @@
 
   @brief Object constructor.
 
+  See cache_aligned_allocator for possible future optimization. Practically L1 cache line
+  is 64 bytes. If m_handle table starts at memory address dividable by 64, things should be
+  a bit faster. Check cache_aligned_allocator.
+
   @param oix First object index.
 
   The eHandleTable constructor creates an empty table in which all handles are linked in order

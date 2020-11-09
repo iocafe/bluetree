@@ -44,6 +44,9 @@ public:
     void setv(
         eVariable *value);
 
+    void appends(
+        const os_char *value);
+
     inline const os_char *ptr() {return m_buf; }
     inline os_boolean isempty() {return (os_boolean)(m_buf == OS_NULL);}
 

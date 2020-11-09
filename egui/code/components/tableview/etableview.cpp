@@ -98,6 +98,9 @@ void eTableView::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eTableView");
     setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
+    addpropertyl(cls, ECOMP_DROP_DOWN_LIST_SELECT, ecomp_drop_down_list_select,
+        "drop down select", EPRO_SIMPLE);
+
     propertysetdone(cls);
     os_unlock();
 }
@@ -130,6 +133,9 @@ eStatus eTableView::onpropertychange(
     eVariable *x,
     os_int flags)
 {
+    eMatrix *focused_row;
+    eTableColumn *c;
+
     switch (propertynr)
     {
         case ECOMP_VALUE: /* table name (always)  */
@@ -139,6 +145,15 @@ eStatus eTableView::onpropertychange(
 
         case ECOMP_TEXT: /* Translatable table name */
             // m_text.clear();
+            break;
+
+        case ECOMP_DROP_DOWN_LIST_SELECT:
+            focused_row = eMatrix::cast(m_focused_row->get());
+            c = eTableColumn::cast(m_columns->first(m_focused_column));
+            if (focused_row && c) {
+                update_table_cell(ix_column_name(), ix_value(focused_row), c->name(), x);
+            }
+
             break;
 
         default:

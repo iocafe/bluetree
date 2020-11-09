@@ -26,6 +26,7 @@ const os_char
     ecomp_ipath[] = "ipath",
     ecomp_edit[] = "edit",
     ecomp_all[] = "all",
+    ecomp_drop_down_list_select[] = "dropselect",
     ecomp_select[] = "_select",
     ecomp_command[] = "_command";
 
@@ -732,12 +733,14 @@ void eComponent::add_popup_edit_mode_items(
 
 
 ePopup *eComponent::drop_down_list(
-    eContainer *list)
+    eContainer *list,
+    const os_char *propertyname,
+    os_int value)
 {
     ePopup *p;
     eVariable *v, target;
     eButton *b;
-    os_int propertynr, value;
+    os_int propertynr;
     os_char buf[E_OIXSTR_BUF_SZ];
 
     p = popup();
@@ -747,11 +750,19 @@ ePopup *eComponent::drop_down_list(
         return p;
     }
 
-    value = propertyi(ECOMP_VALUE);
+    if (value == OS_INT_MAX) {
+        value = propertyi(ECOMP_VALUE);
+    }
 
     oixstr(buf, sizeof(buf));
     target = buf;
-    target += "/_p/x";
+    if (propertyname) {
+        target += "/_p/";
+        target += propertyname;
+    }
+    else {
+        target += "/_p/x";
+    }
 
     for (v = list->firstv(); v; v = v->nextv())
     {

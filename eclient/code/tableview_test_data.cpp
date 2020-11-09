@@ -24,6 +24,7 @@
 
 const os_char *table_name = OS_NULL; /* Not needed for eMatrix */
 
+static eThreadHandle *thandle1, *thandle2;
 
 /**
 ****************************************************************************************************
@@ -120,6 +121,8 @@ public:
 
         column = new eVariable(columns);
         column->addname("tstamp", ENAME_NO_MAP);
+        column->setpropertys(EVARP_TEXT, "aika-\nleiska");
+        column->setpropertys(ECOMP_ATTR, "tstamp=\"yy,sec\"");
 
 /* char buf[128];
 buf[0] = 'C';
@@ -138,6 +141,10 @@ for (int i = 0; i<150; i++) {
         column->setpropertys(ECOMP_UNIT, "ms");
         column->setpropertyi(EVARP_TYPE, OS_STR);
 
+        column = new eVariable(columns);
+        column->addname("selectit", ENAME_NO_MAP);
+        column->setpropertyi(EVARP_TYPE, OS_CHAR);
+        column->setpropertys(ECOMP_ATTR, "enum=\"1.eka,2.toka,3.koka\"");
 
         /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
          */
@@ -175,11 +182,19 @@ for (int i = 0; i<150; i++) {
 
         element = new eVariable(&row);
         element->addname("connected", ENAME_NO_MAP);
-        element->setl(OS_TRUE);
+        element->setl(osal_rand(0, 1));
 
         element = new eVariable(&row);
         element->addname("connectto", ENAME_NO_MAP);
         element->sets(text);
+
+        element = new eVariable(&row);
+        element->addname("tstamp", ENAME_NO_MAP);
+        element->setl(etime());
+
+        element = new eVariable(&row);
+        element->addname("selectit", ENAME_NO_MAP);
+        element->setl(osal_rand(0, 3));
 
         etable_insert(this, "//mymtx", table_name, &row);
     }
@@ -215,9 +230,6 @@ for (int i = 0; i<150; i++) {
 protected:
     os_int m_step;
 };
-
-
-static eThreadHandle *thandle1, *thandle2;
 
 
 void tableview_test_start()

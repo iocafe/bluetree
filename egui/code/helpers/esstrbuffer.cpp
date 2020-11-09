@@ -39,11 +39,19 @@ eStrBuffer::~eStrBuffer()
 void eStrBuffer::allocate(
     os_memsz sz)
 {
-    if (sz > m_buf_sz) {
+    os_char *new_buf;
+    os_memsz new_buf_sz;
+
+    if (sz > m_buf_sz && sz > BUF_SZ_EMPTY_STR) {
+        new_buf = os_malloc(sz, &new_buf_sz);
+
         if (m_buf_sz > BUF_SZ_EMPTY_STR) {
+            os_memcpy(new_buf, m_buf, m_buf_sz);
             os_free(m_buf, m_buf_sz);
         }
-        m_buf = os_malloc(sz, &m_buf_sz);
+
+        m_buf = new_buf;
+        m_buf_sz = new_buf_sz;
     }
 }
 
@@ -76,6 +84,22 @@ void eStrBuffer::setv(
         os_memcpy(m_buf, ptr, sz);
     }
 }
+
+void eStrBuffer::appends(
+    const os_char *value)
+{
+    os_memsz sz, nsz;
+
+    nsz = os_strlen(value);
+    if (nsz <= 1) return;
+
+    if (m_buf_sz > BUF_SZ_EMPTY_STR) {
+        sz = os_strlen(m_buf);
+        allocate(sz + nsz - 1);
+        os_memcpy(m_buf + sz - 1, value, nsz);
+    }
+}
+
 
 /* This function is typically used only when drawing, etc to avoid buffer allocation when
    inactive in memory. obj pointer is used to get property value and context for translation redirects, etc.

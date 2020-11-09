@@ -63,6 +63,7 @@ void eGui::setup_desktop_application()
     e = new eLineEdit(p);
     e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
     e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
+    e->setpropertys(ECOMP_UNIT, "%");
     x = 1234.5;
     x.set_sbits(OSAL_STATE_ORANGE|OSAL_STATE_CONNECTED);
     x.set_tstamp(etime());

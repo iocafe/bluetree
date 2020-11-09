@@ -87,6 +87,8 @@ public:
     void setup_column(
         eVariable *col_conf);
 
+    inline const os_char *name() {return m_name.ptr();}
+
     inline void set_visible(bool visible) {m_visible = visible;}
     inline bool visible() {return m_visible;}
 
