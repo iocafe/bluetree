@@ -167,6 +167,8 @@ for (int i = 0; i<150; i++) {
             case 14: insert_row(8, "sussu"); break;
             case 17: insert_row(9, "deeku"); break;
         }
+
+        if (m_step > 16) m_step = 16;
     }
 
     void insert_row(

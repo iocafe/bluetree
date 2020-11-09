@@ -246,7 +246,9 @@ eComponent *eComponent::findcomponent(
     do {
         c = c->m_prev_z;
         if (erect_is_point_inside(c->visible_rect(), pos)) {
-            if (check_click(pos) != ECOMPO_CLICK_IGNORE) return c;
+            if (check_click(pos) != ECOMPO_CLICK_IGNORE) {
+                return c;
+            }
         }
     }
     while (c != w);

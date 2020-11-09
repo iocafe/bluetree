@@ -318,7 +318,7 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
         if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
         {
             column = ImGui::TableGetHoveredColumn();
-            if (column >= 0 && column < m_row_to_m_len) {
+            if (column >= 0) {
                 c = eTableColumn::cast(m_columns->first(column));
                 row = (prm.mouse_pos.y - clipper.StartPosY) / TEXT_BASE_HEIGHT;
                 if (c && row >= 0 && row < nrows) {

@@ -273,14 +273,16 @@ void eTableColumn::activate(
         case E_SHOWAS_CHECKBOX:
             focus_row->getv(0, focus_column, &value);
             value.setl(!value.getl());
-            view->update_table_cell(view->ix_column_name(), view->ix_value(focus_row), m_name.ptr(), &value);
+            view->update_table_cell(view->ix_column_name(),
+                view->ix_value(focus_row), m_name.ptr(), &value);
             view->focus_cell(focus_row, focus_column, OS_NULL, 0);
             break;
 
         case E_SHOWAS_DROP_DOWN_ENUM:
             focus_row->getv(0, focus_column, &value);
             view->focus_cell(focus_row, focus_column, OS_NULL, 0);
-            view->drop_down_list(m_attr.get_list(), ecomp_drop_down_list_select, value.geti());
+            view->drop_down_list(m_attr.get_list(),
+                ecomp_drop_down_list_select, value.geti());
             break;
 
         default:
