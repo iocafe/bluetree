@@ -45,6 +45,15 @@ typedef enum
 }
 eTimeStampFormat;
 
+typedef enum
+{
+    E_ALIGN_NONE,
+    E_ALIGN_LEFT,
+    E_ALIGN_CENTER,
+    E_ALIGN_RIGHT
+}
+eAlignment;
+
 
 /**
 ****************************************************************************************************
@@ -82,6 +91,11 @@ public:
     inline eShowAs showas()
         {return m_show_as; }
 
+    /* Get value alignment, left, center or right.
+     */
+    inline eAlignment alignment()
+        {return m_align; }
+
     inline os_short digs()
         {return m_digs; }
 
@@ -95,6 +109,13 @@ public:
         {return m_drop_down_list;}
 
 protected:
+
+    /**
+    ************************************************************************************************
+      Protected member functions.
+    ************************************************************************************************
+    */
+
     /* Set attributes for LineEdit, eTreeNode.
      */
     void initialize_for_variable(
@@ -108,7 +129,8 @@ protected:
         eVariable *unit,
         os_int digs,
         os_double min,
-        os_double max);
+        os_double max,
+        os_int cid);
 
     /* Make a drop-down list for the component.
      */
@@ -116,12 +138,24 @@ protected:
         const os_char *value,
         os_memsz value_sz);
 
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
+
     /* Flag indicating that the vValues stored in this class have been
        initailized and are up to date.
      */
     bool m_initialized;
 
+    /* What type of data we have, editable number/string, check box, drop down list, etc.
+     */
     eShowAs m_show_as;
+
+    /* Align value to E_ALIGN_LEFT, E_ALIGN_CENTER or E_ALIGN_RIGHT.
+     */
+    eAlignment m_align;
 
     /* Number of digits after decimal point, significant only for decimal numbers.
      */

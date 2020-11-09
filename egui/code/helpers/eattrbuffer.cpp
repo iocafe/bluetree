@@ -26,6 +26,7 @@ eAttrBuffer::eAttrBuffer()
     m_initialized = false;
     m_digs = 2;
     m_show_as = E_SHOWAS_STRING;
+    m_align = E_ALIGN_LEFT;
     m_drop_down_list = OS_NULL;
     m_tstr_flags = ETIMESTR_DISABLED;
     m_dstr_flags = EDATESTR_DISABLED;
@@ -87,7 +88,7 @@ void eAttrBuffer::initialize_for_variable(
     min = obj->propertyd(EVARP_MIN);
     max = obj->propertyd(EVARP_MAX);
 
-    initialize(&attr, type, &unit, digs, min, max);
+    initialize(&attr, type, &unit, digs, min, max, obj->classid());
 }
 
 
@@ -111,19 +112,55 @@ void eAttrBuffer::initialize(
     eVariable *unit,
     os_int digs,
     os_double min,
-    os_double max)
+    os_double max,
+    os_int cid)
 {
     const os_char *list_str, *value;
     os_char *p, *e;
     os_memsz value_sz;
+    eAlignment default_align;
+    os_boolean is_table_column;
 
+    is_table_column = (os_boolean)(cid == EGUICLASSID_TABLE_COLUMN);
+    default_align = is_table_column ? E_ALIGN_LEFT : E_ALIGN_RIGHT;
     m_digs = digs;
+    m_align = E_ALIGN_NONE;
 
     /* If this is drop down list, color selector, time stamp, etc.
        which selects type.
      */
     list_str = attr->gets();
     if (list_str) {
+        value = osal_str_get_item_value(list_str, "align", &value_sz, OSAL_STRING_DEFAULT);
+        if (value) {
+            eVariable tmp;
+            tmp.sets(value, value_sz);
+            p = tmp.gets();
+
+            if (is_table_column) {
+                if (!os_strcmp(p, "cleft")) {
+                    m_align = E_ALIGN_LEFT;
+                }
+                if (!os_strcmp(p, "ccenter")) {
+                    m_align = E_ALIGN_CENTER;
+                }
+                if (!os_strcmp(p, "cright")) {
+                    m_align = E_ALIGN_RIGHT;
+                }
+            }
+            else if (is_table_column) {
+                if (!os_strcmp(p, "left")) {
+                    m_align = E_ALIGN_LEFT;
+                }
+                if (!os_strcmp(p, "center")) {
+                    m_align = E_ALIGN_CENTER;
+                }
+                if (!os_strcmp(p, "right")) {
+                    m_align = E_ALIGN_RIGHT;
+                }
+            }
+        }
+
         value = osal_str_get_item_value(list_str, "enum", &value_sz, OSAL_STRING_DEFAULT);
         if (value) {
             m_show_as = E_SHOWAS_DROP_DOWN_ENUM;
@@ -199,30 +236,39 @@ void eAttrBuffer::initialize(
     {
         if (max > min) {
             type = OS_DOUBLE;
+            default_align = E_ALIGN_RIGHT;
         }
 
         else if (!unit->isempty()) {
             type = OS_DOUBLE;
+            default_align = E_ALIGN_RIGHT;
         }
     }
 
     if (OSAL_IS_BOOLEAN_TYPE(type))
     {
         m_show_as = E_SHOWAS_CHECKBOX;
+        if (is_table_column) default_align = E_ALIGN_CENTER;
     }
     else if (OSAL_IS_INTEGER_TYPE(type))
     {
         m_show_as = E_SHOWAS_INTEGER_NUMBER;
+        default_align = E_ALIGN_RIGHT;
     }
     else if (OSAL_IS_FLOAT_TYPE(type))
     {
         m_show_as = E_SHOWAS_DECIMAL_NUMBER;
+        default_align = E_ALIGN_RIGHT;
     }
     else {
         m_show_as = E_SHOWAS_STRING;
     }
 
 goon:
+    if (m_align == E_ALIGN_NONE) {
+        m_align = default_align;
+    }
+
     m_initialized = true;
 }
 
