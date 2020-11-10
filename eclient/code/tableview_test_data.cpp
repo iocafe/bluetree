@@ -118,6 +118,7 @@ public:
         column = new eVariable(columns);
         column->addname("ix", ENAME_NO_MAP);
         column->setpropertys(EVARP_TEXT, "rivi");
+        column->setpropertyi(ECOMP_TYPE, OS_INT);
 
         column = new eVariable(columns);
         column->addname("tstamp", ENAME_NO_MAP);

@@ -121,7 +121,7 @@ void eAttrBuffer::initialize(
     eAlignment default_align;
     os_boolean is_table_column;
 
-    is_table_column = (os_boolean)(cid == EGUICLASSID_TABLE_COLUMN);
+    is_table_column = (os_boolean)(cid == ECLASSID_VARIABLE);
     default_align = is_table_column ? E_ALIGN_LEFT : E_ALIGN_RIGHT;
     m_digs = digs;
     m_align = E_ALIGN_NONE;

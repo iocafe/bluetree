@@ -148,8 +148,11 @@ void eTableColumn::draw_value(
     eTableView *view)
 {
     const os_char *text;
+    ImVec2 pos, pos_max;
+    ImU32 box_col, check_col;
+    ImDrawList *draw_list;
+    int extra_w, x_pos;
     bool checked;
-
 
     switch (m_attr.showas())
     {
@@ -161,17 +164,26 @@ void eTableColumn::draw_value(
                 os_int square_sz = ImGui::GetFrameHeight();
                 square_sz -= 3 * pad;
 
-                ImVec2 pos = ImGui::GetCursorScreenPos();
+                pos = ImGui::GetCursorScreenPos();
                 pos.x += pad;
-                ImVec2 pos_max = pos;
+
+                if (m_attr.alignment() != E_ALIGN_LEFT) {
+                    extra_w = ImGui::GetColumnWidth() - (square_sz + 2 * pad);
+                    if (extra_w > 0) {
+                        if (m_attr.alignment() == E_ALIGN_CENTER) extra_w /= 2;
+                        pos.x += extra_w;
+                    }
+                }
+
+                pos_max = pos;
                 pos_max.x += square_sz;
                 pos_max.y += square_sz;
 
-                ImU32 box_col = ImGui::GetColorU32(ImGuiCol_Border);
-                ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                box_col = ImGui::GetColorU32(ImGuiCol_Border);
+                draw_list = ImGui::GetWindowDrawList();
                 draw_list->AddRect(pos, pos_max, box_col, 0);
                 if (checked) {
-                    ImU32 check_col = ImGui::GetColorU32(ImGuiCol_CheckMark);
+                    check_col = ImGui::GetColorU32(ImGuiCol_CheckMark);
                     pos.x++;
                     ImGui::RenderCheckMark(draw_list, pos, check_col, square_sz - pad);
                 }
@@ -182,9 +194,16 @@ void eTableColumn::draw_value(
             enice_value_for_ui(value, view, &m_attr);
             text = value->gets();
 
-            // Right align test
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x
-                /* - ImGui::GetStyle().CellPadding.x */);
+            /* Align left, center, or right.
+             */
+            if (m_attr.alignment() != E_ALIGN_LEFT) {
+                extra_w = ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x;
+                if (extra_w > 0) {
+                    x_pos = ImGui::GetCursorPosX();
+                    x_pos += (m_attr.alignment() == E_ALIGN_RIGHT) ? extra_w : extra_w/2;
+                    ImGui::SetCursorPosX(x_pos);
+                }
+            }
 
             ImGui::TextUnformatted(text);
             break;
