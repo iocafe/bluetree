@@ -208,9 +208,13 @@ eStatus eTableView::draw(
 
     // Using those as a base value to create width/height that are factor of the size of our font
 
-    flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg |
-        ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable |
-        ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+    flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
+        ImGuiTableFlags_BordersInner |
+        ImGuiTableFlags_NoPadOuterX |
+        // ImGuiTableFlags_NoPadInnerX |
+        ImGuiTableFlags_Resizable |
+        ImGuiTableFlags_Reorderable |
+        ImGuiTableFlags_Hideable;
 
     static int freeze_cols = 1;
     static int freeze_rows = 1;
@@ -343,6 +347,25 @@ skipit:
      */
     return eComponent::draw(prm);
 }
+
+/* const os_char *eTableView::draw_header_row()
+{
+      // Instead of calling TableHeadersRow() we'll submit custom headers ourselves
+        ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+        for (int column = 0; column < COLUMNS_COUNT; column++)
+        {
+            ImGui::TableSetColumnIndex(column);
+            const char* column_name = ImGui::TableGetColumnName(column); // Retrieve name passed to TableSetupColumn()
+            ImGui::PushID(column);
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+            ImGui::Checkbox("##checkall", &column_selected[column]);
+            ImGui::PopStyleVar();
+            ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+            ImGui::TableHeader(column_name);
+            ImGui::PopID();
+        }
+} */
+
 
 const os_char *eTableView::ix_column_name()
 {
