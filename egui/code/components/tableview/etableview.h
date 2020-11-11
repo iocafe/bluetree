@@ -193,6 +193,14 @@ protected:
      */
     void count_header_row_lines();
 
+    /* Create dialog window to edit a row or add a new row.
+     */
+    void edit_row_dialog(
+        os_boolean create_new_row);
+
+    /* Create dialog window to delete row (or rows). This function can also just delete the row.
+     */
+    void delete_row_dialog();
 
     /* Collect information about this object for tree browser.
      */
@@ -244,6 +252,15 @@ protected:
     /* Data row height in pixels. For now we assume all rows to have same height.
      */
     os_int m_data_row_h;
+
+    /* ePointer to "edit row dialog" to edit existing row or add a new row.
+       This can be moved to eGui if we want only one edit row window to be open at a time.
+     */
+    ePointer *m_row_dialog;
+
+    /* ePointer to row matrix referrd by row dialog.
+     */
+    ePointer *m_row_dialog_m;
 
     /* Buffer for editing value.
      */

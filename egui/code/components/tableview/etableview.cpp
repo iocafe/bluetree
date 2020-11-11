@@ -40,6 +40,9 @@ eTableView::eTableView(
     m_focused_column = -1;
     m_keyboard_focus_ok = OS_FALSE;
     m_nro_header_row_lines = 1;
+
+    m_row_dialog = new ePointer(this);
+    m_row_dialog_m = new ePointer(this);
 }
 
 
@@ -102,7 +105,7 @@ void eTableView::setupclass()
     setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     addpropertyl(cls, ECOMP_DROP_DOWN_LIST_SELECT, ecomp_drop_down_list_select,
         "drop down select", EPRO_SIMPLE);
-
+    addpropertyl(cls, ECOMP_COMMAND, ecomp_command, "command");
     propertysetdone(cls);
     os_unlock();
 }
@@ -140,22 +143,32 @@ eStatus eTableView::onpropertychange(
 
     switch (propertynr)
     {
-        case ECOMP_VALUE: /* table name (always)  */
-            // m_label_value.clear();
-            // m_set_checked = true;
-            break;
-
-        case ECOMP_TEXT: /* Translatable table name */
-            // m_text.clear();
-            break;
-
         case ECOMP_DROP_DOWN_LIST_SELECT:
             focused_row = eMatrix::cast(m_focused_row->get());
             c = eTableColumn::cast(m_columns->first(m_focused_column));
             if (focused_row && c) {
                 update_table_cell(ix_column_name(), ix_value(focused_row), c->name(), x);
             }
+            break;
 
+        case ECOMP_COMMAND:
+            switch (x->geti()) {
+                case ECOMPO_NEW_ROW:
+                    edit_row_dialog(OS_TRUE);
+                    break;
+
+                case ECOMPO_EDIT_ROW:
+                    edit_row_dialog(OS_FALSE);
+                    break;
+
+                case ECOMPO_DELETE_ROW:
+                    delete_row_dialog();
+                    break;
+
+                default:
+                    goto call_parent;
+            }
+            setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
             break;
 
         default:
@@ -163,6 +176,9 @@ eStatus eTableView::onpropertychange(
     }
 
     return ESTATUS_SUCCESS;
+
+call_parent:
+    return eComponent::onpropertychange(propertynr, x, flags);
 }
 
 
@@ -340,7 +356,7 @@ eStatus eTableView::draw(
         ImGui::EndTable();
     }
 
-{
+/* {
  ImDrawList* draw_list;
 ImVec2 top_left, bottom_right;
 top_left.x = m_rect.x1;
@@ -352,7 +368,7 @@ ImU32  col = IM_COL32(48, 48, 255, 250);
 draw_list = ImGui::GetWindowDrawList();
 draw_list->AddRect(top_left, bottom_right, col, 0,
     ImDrawCornerFlags_All, 2);
-}
+} */
 
     /* Tool tip
      */
@@ -670,33 +686,44 @@ ePopup *eTableView::right_click_popup(
 {
     ePopup *p;
     eButton *item;
-    eVariable target;
-    os_char buf[E_OIXSTR_BUF_SZ];
+    os_char buf[E_OIXSTR_BUF_SZ + 32];
     os_int row;
 
     if (prm.mouse_pos.y < m_data_windows_start_y) return OS_NULL;
     row = (prm.mouse_pos.y - m_logical_data_start_y);
-    //if (row < 0) return OS_NULL;
+    if (row < 0) return OS_NULL;
     row /= m_data_row_h;
+    if (row >= m_row_to_m_len) return OS_NULL;
 
     p = eComponent::right_click_popup(prm);
     oixstr(buf, sizeof(buf));
+    os_strncat(buf, "/_p/_command", sizeof(buf));
 
-    /* Generic component scope items: refresh and show all.
-     */
     item = new eButton(p);
     item->setpropertys(ECOMP_TEXT, "new row");
-    item->setpropertyl(ECOMP_VALUE, 0);
-    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_REFRESH);
-    target = buf; target += "/_p/_command";
-    item->setpropertyv(ECOMP_TARGET, &target);
+    item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
+    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_NEW_ROW);
+    item->setpropertys(ECOMP_TARGET, buf);
+
+    item = new eButton(p);
+    item->setpropertys(ECOMP_TEXT, "edit row");
+    item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
+    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_EDIT_ROW);
+    item->setpropertys(ECOMP_TARGET, buf);
 
     item = new eButton(p);
     item->setpropertys(ECOMP_TEXT, "delete row");
-    item->setpropertyl(ECOMP_VALUE, OS_FALSE);
-    //item->setpropertyl(ECOMP_SETVALUE, !m_all);
-    target = buf; target += "/_p/all";
-    item->setpropertyv(ECOMP_TARGET, &target);
+    item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
+    item->setpropertyl(ECOMP_SETVALUE,ECOMPO_DELETE_ROW);
+    item->setpropertys(ECOMP_TARGET, buf);
+
+    /* Close old dialog if any.
+     */
+    delete m_row_dialog->get();
+
+    /* Set ePointer to row matrix.
+     */
+    m_row_dialog_m->set(m_row_to_m[row].m_row);
 
     return p;
 }

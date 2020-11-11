@@ -211,6 +211,10 @@ typedef enum {
     ECOMPO_CUT,
     ECOMPO_COPY,
     ECOMPO_PASTE,
+
+    ECOMPO_NEW_ROW,
+    ECOMPO_EDIT_ROW,
+    ECOMPO_DELETE_ROW
 }
 eCompoCommand;
 
