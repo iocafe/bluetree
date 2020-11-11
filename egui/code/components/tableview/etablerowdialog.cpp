@@ -34,11 +34,9 @@
 void eTableView::edit_row_dialog(
     os_boolean create_new_row)
 {
-    eObject *o;
     eWindow *w;
     eParameterList *p;
     eLineEdit *e;
-    eTableColumn *c;
     eContainer *rscols;
     eVariable *v;
     eName *n;
@@ -57,8 +55,7 @@ void eTableView::edit_row_dialog(
     m = eMatrix::cast(m_row_dialog_m->get());
     if (m == OS_NULL) return;
 
-    o = m_row_dialog->get();
-    delete o;
+    delete m_row_dialog->get();
 
     w = new eWindow(gui());
     w->setpropertys(ECOMP_VALUE, !create_new_row ? "edit row" : "new row");
@@ -80,8 +77,6 @@ void eTableView::edit_row_dialog(
             e->setpropertyv(propertynr, &value);
         }
 
-        // c = eTableColumn::cast(m_columns->byname(n->gets()));
-
         m->getv(0, v->oid(), &value);
         e->setpropertyv(ECOMP_VALUE, &value);
     }
@@ -102,9 +97,20 @@ void eTableView::edit_row_dialog(
 */
 void eTableView::delete_row_dialog()
 {
-    eObject *o;
+    eMatrix *m;
+    os_int ix_col;
+    eVariable where_clause;
 
-    o = m_row_dialog->get();
-    delete o;
+    delete m_row_dialog->get();
+    if (m_rowset == OS_NULL) return;
+    ix_col = m_rowset->ix_column_nr();
+    m = eMatrix::cast(m_row_dialog_m->get());
+    if (m == OS_NULL) return;
+
+    where_clause = "[";
+    where_clause += m->getl(0, ix_col);
+    where_clause += "]";
+
+    m_rowset->remove(where_clause.gets());
 }
 
