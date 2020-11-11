@@ -40,8 +40,6 @@ eTableView::eTableView(
     m_focused_column = -1;
     m_keyboard_focus_ok = OS_FALSE;
     m_nro_header_row_lines = 1;
-
-select();
 }
 
 
@@ -201,6 +199,10 @@ eStatus eTableView::draw(
     add_to_zorder(prm.window);
 
     if (m_rowset == OS_NULL || m_columns == OS_NULL) {
+        if (m_rowset == OS_NULL) {
+            select();
+        }
+
         goto skipit;
     }
 

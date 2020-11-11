@@ -85,7 +85,7 @@ public:
         osal_console_write("ThreadUsingTheTable started\n");
         configure_columns();
         m_step = 0;
-        timer(100);
+        timer(5);
     }
 
     virtual void onmessage(
@@ -169,9 +169,10 @@ for (int i = 0; i<150; i++) {
             case 11: insert_row(7, "kappo"); break;
             case 14: insert_row(8, "sussu"); break;
             case 17: insert_row(9, "deeku"); break;
+            default: if (m_step < 1000) insert_row(m_step+100, "deeku"); break;
         }
 
-        if (m_step > 16) m_step = 16;
+        // if (m_step > 16) m_step = 16;
     }
 
     void insert_row(

@@ -7,20 +7,20 @@
   @date    8.9.2020
 
   Object can enable or disable receiving ECMD_TIMER by calling base class'es eObject::timer()
-  function. Timer base precision is 40ms, which is intended to be cast enough for animating 
+  function. Timer base precision is 40ms, which is intended to be cast enough for animating
   user interface objects at rate of 25Hz. When more precise timing is needed, it should be
-  implemented by other means (for example by using loop containing os_sleep and alive() calls). 
-  
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used, 
+  implemented by other means (for example by using loop containing os_sleep and alive() calls).
+
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept 
+  or distribute this file you indicate that you have read the license and understand and accept
   it fully.
 
 ****************************************************************************************************
 */
 #include "eobjects.h"
 
-static const os_long base_step_ms = 40;
+static const os_long base_step_ms = 10;
 
 /**
 ****************************************************************************************************
@@ -29,12 +29,12 @@ static const os_long base_step_ms = 40;
 
   If the eObject::timer() function is called with nonzero period_ms argument, timer is enabled.
   Enabling timer means that object will receive periodic ECMD_TIMER messages. Calling
-  the function with zero argument, will disable the timer. 
+  the function with zero argument, will disable the timer.
 
   Notice that disabling timer or changing timer frequency doesn't effect immediately. Object
   may still for short while receive run messages after timer has been disabled. Reason for this
   is that period parameter is passed by message to timer thread.
-  
+
   @param  period_ms How often to receive ECMD_RUN message in milliseconds, or zero to disable
           the timer. This will be rounded to 40 ms precision.
 
@@ -43,7 +43,7 @@ static const os_long base_step_ms = 40;
 ****************************************************************************************************
 */
 void eObject::timer(
-    os_long period_ms) 
+    os_long period_ms)
 {
     eVariable period;
 
@@ -64,12 +64,12 @@ void eObject::timer(
 ****************************************************************************************************
 */
 eTimer::eTimer(
-	eObject *parent,
+    eObject *parent,
     e_oid id,
-	os_int flags)
+    os_int flags)
     : eThread(parent, id, flags)
 {
-	addname("//_timer");
+    addname("//_timer");
     ns_create();
 }
 
@@ -95,7 +95,7 @@ eTimer::~eTimer()
 
   @brief Add eTimer to class list and class'es properties to it's property set.
 
-  The eTimer::setupclass function adds eTimer to class list. The class list enables creating 
+  The eTimer::setupclass function adds eTimer to class list. The class list enables creating
   new objects dynamically by class identifier, which is used for serialization functions.
   It is also used to access class name.
 
@@ -116,13 +116,13 @@ void eTimer::setupclass()
 /**
 ****************************************************************************************************
 
-  @brief Function to process incoming messages. 
+  @brief Function to process incoming messages.
 
-  The onmessage function handles messages received by object. 
-  
+  The onmessage function handles messages received by object.
+
   @param   envelope Message envelope. Contains command, target and source paths and
            message content, etc.
-  @return  None. 
+  @return  None.
 
 ****************************************************************************************************
 */
@@ -200,7 +200,7 @@ void eTimer::settimer(
 #if OSAL_DEBUG
         /* If period has not changed warn user.
          */
-        if (step == t->oid()) 
+        if (step == t->oid())
         {
             osal_debug_error("repeated enable timer");
             return;
