@@ -164,6 +164,8 @@ protected:
     ************************************************************************************************
     */
 
+    void draw_header_row();
+
     void draw_tooltip();
 
     /* Callback when table data is received, etc.
@@ -186,6 +188,11 @@ protected:
     /* Create eTableColumn object for each column.
      */
     void setup_columns();
+
+    /* Count number of header lines, called by setup_columns()
+     */
+    void count_header_row_lines();
+
 
     /* Collect information about this object for tree browser.
      */
@@ -220,6 +227,23 @@ protected:
     ePointer *m_focused_row;
     os_int m_focused_column;
     os_boolean m_keyboard_focus_ok;
+
+    /* Column header row can have multiple lines of text, how many?
+     */
+    os_int m_nro_header_row_lines;
+
+    /* Screen Y coordinate where the table content starts (below column header)
+     */
+    os_int m_data_windows_start_y;
+
+    /* Here the data starts logically, can be smaller than m_data_windows_start_y
+       if table is scrolled.
+     */
+    os_int m_logical_data_start_y;
+
+    /* Data row height in pixels. For now we assume all rows to have same height.
+     */
+    os_int m_data_row_h;
 
     /* Buffer for editing value.
      */

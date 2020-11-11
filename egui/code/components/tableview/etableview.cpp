@@ -32,10 +32,14 @@ eTableView::eTableView(
     m_row_to_m_sz = 0;
     m_row_to_m_len = 0;
     m_columns = OS_NULL;
+    m_logical_data_start_y = 0;
+    m_data_windows_start_y = 0;
+    m_data_row_h = 24;
 
     m_focused_row = new ePointer(this);
     m_focused_column = -1;
     m_keyboard_focus_ok = OS_FALSE;
+    m_nro_header_row_lines = 1;
 
 select();
 }
@@ -226,27 +230,17 @@ eStatus eTableView::draw(
     {
         rmax = ImGui::GetContentRegionMax();
         origin = ImGui::GetCursorPos();
+        int ys = ImGui::GetScrollY();
+
         total_w = rmax.x - origin.x;
-        total_h = rmax.y - origin.y;
+        total_h = rmax.y - origin.y + ys;
 
         cpos = ImGui::GetCursorScreenPos();
         m_rect.x1 = cpos.x;
-        m_rect.y1 = cpos.y;
+        m_rect.y1 = cpos.y + ys;
 
         m_rect.x2 = m_rect.x1 + total_w - 1;
         m_rect.y2 = m_rect.y1 + total_h - 1;
-
-/* ImDrawList* draw_list;
-ImVec2 top_left, bottom_right;
-top_left.x = m_rect.x1;
-top_left.y = m_rect.y1;
-bottom_right.x = m_rect.x2;
-bottom_right.y = m_rect.y2;
-ImU32  col = IM_COL32(48, 48, 255, 250);
-
-draw_list = ImGui::GetWindowDrawList();
-draw_list->AddRect(top_left, bottom_right, col, 0,
-    ImDrawCornerFlags_All, 2); */
 
 
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
@@ -255,16 +249,21 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
              c && column < ncols;
              c = eTableColumn::cast(c->next()), column++)
         {
-            c->draw_column_header();
+            c->prepare_column_header_for_drawing();
         }
 
-        ImGui::TableHeadersRow();
+        // ImGui::TableHeadersRow();
+        draw_header_row();
+
+        m_data_windows_start_y = ImGui::GetCursorScreenPos().y + ys;
 
         first_row = OS_TRUE;
         focused_m = eMatrix::cast(m_focused_row->get());
         value = new eVariable(this);
         ImGuiListClipper clipper;
         clipper.Begin(nrows);
+        m_logical_data_start_y = clipper.StartPosY;
+        m_data_row_h = TEXT_BASE_HEIGHT;
         while (clipper.Step())
         {
             for (row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
@@ -288,6 +287,7 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
                     // a column is not visible, which can be used for clipping.
                     if (first_row) {
                         c->set_visible(ImGui::TableSetColumnIndex(column));
+                        m_data_windows_start_y = ImGui::GetCursorScreenPos().y + ys;
                     }
 
                     if (!c->visible()) {
@@ -322,18 +322,35 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
         if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
         {
             column = ImGui::TableGetHoveredColumn();
-            if (column >= 0) {
+            if (column >= 0 && prm.mouse_pos.y >= m_data_windows_start_y) {
                 c = eTableColumn::cast(m_columns->first(column));
-                row = (prm.mouse_pos.y - clipper.StartPosY) / TEXT_BASE_HEIGHT;
-                if (c && row >= 0 && row < nrows) {
-                    m = m_row_to_m[row].m_row;
-                    c->activate(m, column, this);
+                row = (prm.mouse_pos.y - m_logical_data_start_y);
+                if (row >= 0) {
+                    row /= m_data_row_h;
+                    if (c && row < nrows) {
+                        m = m_row_to_m[row].m_row;
+                        c->activate(m, column, this);
+                    }
                 }
             }
         }
 
         ImGui::EndTable();
     }
+
+{
+ ImDrawList* draw_list;
+ImVec2 top_left, bottom_right;
+top_left.x = m_rect.x1;
+top_left.y = m_rect.y1;
+bottom_right.x = m_rect.x2;
+bottom_right.y = m_rect.y2;
+ImU32  col = IM_COL32(48, 48, 255, 250);
+
+draw_list = ImGui::GetWindowDrawList();
+draw_list->AddRect(top_left, bottom_right, col, 0,
+    ImDrawCornerFlags_All, 2);
+}
 
     /* Tool tip
      */
@@ -348,23 +365,23 @@ skipit:
     return eComponent::draw(prm);
 }
 
-/* const os_char *eTableView::draw_header_row()
+
+// Instead of calling TableHeadersRow() we'll submit custom headers ourselves
+void eTableView::draw_header_row()
 {
-      // Instead of calling TableHeadersRow() we'll submit custom headers ourselves
-        ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
-        for (int column = 0; column < COLUMNS_COUNT; column++)
-        {
-            ImGui::TableSetColumnIndex(column);
-            const char* column_name = ImGui::TableGetColumnName(column); // Retrieve name passed to TableSetupColumn()
-            ImGui::PushID(column);
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-            ImGui::Checkbox("##checkall", &column_selected[column]);
-            ImGui::PopStyleVar();
-            ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-            ImGui::TableHeader(column_name);
-            ImGui::PopID();
-        }
-} */
+    eTableColumn *c;
+    os_int column, ncols;
+
+    ncols = m_rowset->ncolumns();
+
+    ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+    for (c = eTableColumn::cast(m_columns->first()), column=0;
+         c && column < ncols;
+         c = eTableColumn::cast(c->next()), column++)
+    {
+        c->draw_column_header(column, m_nro_header_row_lines);
+    }
+}
 
 
 const os_char *eTableView::ix_column_name()
@@ -611,8 +628,27 @@ void eTableView::setup_columns()
         c = new eTableColumn(m_columns, col_nr);
         c->setup_column(v);
     }
+
+    count_header_row_lines();
 }
 
+
+void eTableView::count_header_row_lines()
+{
+    eTableColumn *c;
+    os_int nro_lines;
+
+    m_nro_header_row_lines = 1;
+    for (c = eTableColumn::cast(m_columns->first());
+         c;
+         c = eTableColumn::cast(c->next()))
+    {
+        nro_lines = c->count_header_row_lines();
+        if (nro_lines > m_nro_header_row_lines) {
+            m_nro_header_row_lines = nro_lines;
+        }
+    }
+}
 
 
 /**
@@ -634,6 +670,12 @@ ePopup *eTableView::right_click_popup(
     eButton *item;
     eVariable target;
     os_char buf[E_OIXSTR_BUF_SZ];
+    os_int row;
+
+    if (prm.mouse_pos.y < m_data_windows_start_y) return OS_NULL;
+    row = (prm.mouse_pos.y - m_logical_data_start_y);
+    //if (row < 0) return OS_NULL;
+    row /= m_data_row_h;
 
     p = eComponent::right_click_popup(prm);
     oixstr(buf, sizeof(buf));

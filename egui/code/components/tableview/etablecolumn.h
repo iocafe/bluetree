@@ -87,12 +87,19 @@ public:
     void setup_column(
         eVariable *col_conf);
 
+    os_int count_header_row_lines();
+
+
     inline const os_char *name() {return m_name.ptr();}
 
     inline void set_visible(bool visible) {m_visible = visible;}
     inline bool visible() {return m_visible;}
 
-    void draw_column_header();
+    void prepare_column_header_for_drawing();
+
+    void draw_column_header(
+        os_int column_nr,
+        os_int nro_header_row_lines);
 
     void draw_value(
         eVariable *value,
@@ -116,6 +123,8 @@ protected:
     eStrBuffer m_text;
     eStrBuffer m_unit;
     eAttrBuffer m_attr;
+
+    os_short m_nro_header_row_lines;
 
     /* Column is visible flag.
      */

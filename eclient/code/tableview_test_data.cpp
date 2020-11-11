@@ -85,7 +85,7 @@ public:
         osal_console_write("ThreadUsingTheTable started\n");
         configure_columns();
         m_step = 0;
-        timer(1000);
+        timer(100);
     }
 
     virtual void onmessage(
@@ -120,10 +120,6 @@ public:
         column->setpropertys(EVARP_TEXT, "rivi");
         column->setpropertyi(ECOMP_TYPE, OS_INT);
 
-        column = new eVariable(columns);
-        column->addname("tstamp", ENAME_NO_MAP);
-        column->setpropertys(EVARP_TEXT, "aika-\nleiska");
-        column->setpropertys(ECOMP_ATTR, "tstamp=\"yy,sec\"");
 
 /* char buf[128];
 buf[0] = 'C';
@@ -141,6 +137,12 @@ for (int i = 0; i<150; i++) {
         column->addname("connectto", ENAME_NO_MAP);
         column->setpropertys(ECOMP_UNIT, "ms");
         column->setpropertyi(EVARP_TYPE, OS_STR);
+        column->setpropertys(EVARP_ATTR, "align=cright");
+
+        column = new eVariable(columns);
+        column->addname("tstamp", ENAME_NO_MAP);
+        column->setpropertys(EVARP_TEXT, "aika\nleiska");
+        column->setpropertys(ECOMP_ATTR, "tstamp=\"yy,sec\"");
 
         column = new eVariable(columns);
         column->addname("selectit", ENAME_NO_MAP);

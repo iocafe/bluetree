@@ -329,6 +329,7 @@ void ShowExampleAppDockSpace(bool* p_open)
 
     // DockSpace
     ImGuiIO& io = ImGui::GetIO();
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
     if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
     {
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");

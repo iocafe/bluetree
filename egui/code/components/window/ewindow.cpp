@@ -239,7 +239,7 @@ eStatus eWindow::draw(
      */
     label = m_label_title.get(this, ECOMP_VALUE);
     if (lock_window) {
-        ImGui::Begin(label, NULL, ImGuiWindowFlags_NoMove);
+        ImGui::Begin(label, NULL, ImGuiWindowFlags_NoMove); // ImGuiWindowFlags_NoMouseInputs ?
     }
     else
     {

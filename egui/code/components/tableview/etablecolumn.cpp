@@ -35,6 +35,7 @@ eTableColumn::eTableColumn(
     : eObject(parent, id, flags)
 {
     m_visible = OS_FALSE;
+    m_nro_header_row_lines = 1;
 }
 
 
@@ -117,16 +118,11 @@ void eTableColumn::setup_column(
         m_text.setv(n);
     }
     m_unit.get(col_conf, EVARP_UNIT);
-    if (!m_unit.isempty()) {
-        m_text.appends("\n");
-        m_text.appends(m_unit.ptr());
-    }
-
     m_attr.for_variable(col_conf);
 }
 
 
-void eTableColumn::draw_column_header()
+void eTableColumn::prepare_column_header_for_drawing()
 {
     const os_char *text;
     os_int col_nr;
@@ -134,12 +130,118 @@ void eTableColumn::draw_column_header()
     col_nr = oid();
 
     text = m_text.ptr();
+    // text = m_name.ptr();
     if (text == OS_NULL) {
         text = "?";
     }
+
     ImGui::TableSetupColumn(text, col_nr == 0 ? ImGuiTableColumnFlags_NoHide
         : ImGuiTableColumnFlags_None);
 }
+
+void eTableColumn::draw_column_header(
+    os_int column_nr,
+    os_int nro_header_row_lines)
+{
+    const os_char *text, *p, *e;
+    os_char buf[64];
+    os_memsz sz;
+    os_int i;
+    int x_pos, extra_w;
+
+    ImGui::TableSetColumnIndex(column_nr);
+    //const char* column_name = ImGui::TableGetColumnName(column_nr); // Retrieve name passed to TableSetupColumn()
+    ImGui::PushID(column_nr);
+    /* KEEP THIS COMMENT, MAY BE NEEDED FOR COLUMN GROUPS
+     * ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+    ImGui::Checkbox("##checkall", &m_checked);
+    ImGui::PopStyleVar();
+    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+    */
+
+    /* Draw column header text (first row), align left, center, or right.
+     */
+    p = m_text.ptr();
+    if (p == OS_NULL) {
+        p = "?";
+    }
+    os_boolean is_first = OS_TRUE;
+    while (OS_TRUE) {
+        e = os_strchr(p, '\n');
+        if (e) {
+            sz = e - p + 1;
+            if (sz > (os_memsz)sizeof(buf)) {
+                sz = sizeof(buf);
+            }
+            os_strncpy(buf, p, sz);
+            text = buf;
+        }
+        else {
+            text = p;
+        }
+
+        if (m_attr.alignment() != E_ALIGN_LEFT) {
+            extra_w = ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x;
+            if (extra_w > 0) {
+                x_pos = ImGui::GetCursorPosX();
+                x_pos += (m_attr.alignment() == E_ALIGN_RIGHT) ? extra_w : extra_w/2;
+                ImGui::SetCursorPosX(x_pos);
+            }
+        }
+        if (is_first) ImGui::TableHeader(text);
+        else ImGui::TextUnformatted(text);
+
+        if (e == OS_NULL) break;
+        p = e + 1;
+        is_first = OS_FALSE;
+    }
+
+    if (!m_unit.isempty() || column_nr == 0 ) {
+        for (i = m_nro_header_row_lines; i < nro_header_row_lines; i++)
+        {
+            // ImGui::TableHeader("");
+            ImGui::TextUnformatted("");
+        }
+    }
+
+    if (!m_unit.isempty()) {
+        /* Draw unit, align left, center, or right.
+         */
+        text = m_unit.ptr();
+        if (m_attr.alignment() != E_ALIGN_LEFT) {
+            extra_w = ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x;
+            if (extra_w > 0) {
+                x_pos = ImGui::GetCursorPosX();
+                x_pos += (m_attr.alignment() == E_ALIGN_RIGHT) ? extra_w : extra_w/2;
+                ImGui::SetCursorPosX(x_pos);
+            }
+        }
+        // ImGui::TableHeader(text);
+        ImGui::TextUnformatted(text);
+    }
+
+    ImGui::PopID();
+}
+
+
+os_int eTableColumn::count_header_row_lines()
+{
+    os_int nro_lines;
+    const os_char *p, *e;
+
+    nro_lines = 1;
+    p = m_text.ptr();
+    while ((e = os_strchr((os_char*)p, '\n'))) {
+        nro_lines++;
+        p = e + 1;
+    }
+    if (!m_unit.isempty()) {
+        nro_lines++;
+    }
+    m_nro_header_row_lines = (os_short)nro_lines;
+    return nro_lines;
+}
+
 
 // Modifies value
 void eTableColumn::draw_value(
