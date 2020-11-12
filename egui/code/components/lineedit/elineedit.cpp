@@ -35,8 +35,6 @@ eLineEdit::eLineEdit(
 {
     m_edit_value = false;
     m_prev_edit_value = false;
-    m_set_checked = true;
-    m_imgui_checked = false;
 }
 
 
@@ -138,7 +136,6 @@ eStatus eLineEdit::onpropertychange(
     {
         case ECOMP_VALUE: /* clear label to display new text and proceed */
             m_label_value.clear();
-            m_set_checked = true;
             break;
 
         case ECOMP_TEXT:
@@ -157,7 +154,6 @@ eStatus eLineEdit::onpropertychange(
         case EVARP_ATTR:
             m_label_value.clear();
             m_attr.clear();
-            m_set_checked = true;
             break;
 
         default:
@@ -336,43 +332,6 @@ void eLineEdit::draw_value(
                 activate();
             }
         }
-
-
-        /* ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
-        ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
-        switch (m_attr.showas())
-        {
-            case E_SHOWAS_CHECKBOX:
-                if (m_set_checked) {
-                    set_checked();
-                    m_set_checked = false;
-                }
-
-                label = m_label_edit.get(this);
-
-                if (ImGui::Checkbox(label, &m_imgui_checked))
-                {
-                    activate();
-                }
-                break;
-
-            default:
-                ImGui::Button(value, ImVec2(edit_w, 0));
-                if (ImGui::IsItemActive()) {
-                    activate();
-                }
-
-                break;
-        }
-        h = ImGui::GetItemRectSize().y;
-        if (h > *total_h) *total_h = h;
-
-        ImGui::PopStyleVar(2);
-
-        if (ImGui::IsItemHovered()) {
-            draw_tooltip();
-        }
-        */
     }
 }
 
@@ -524,8 +483,7 @@ void eLineEdit::activate()
     switch (m_attr.showas())
     {
         case E_SHOWAS_CHECKBOX:
-            setpropertyi(ECOMP_VALUE, m_imgui_checked);
-            m_set_checked = true;
+            setpropertyi(ECOMP_VALUE, propertyi(ECOMP_VALUE) ? OS_FALSE : OS_TRUE);
             break;
 
         case E_SHOWAS_DROP_DOWN_ENUM:
@@ -542,25 +500,6 @@ void eLineEdit::activate()
             m_edit_buf.set(value.gets(), 256);
             break;
     }
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Set value for ImGui checkmark, when needed.
-
-  The set_checked() function is called when drawing to set value to determine value for
-  m_imgui_checked boolean. Pointer to this boolean is passed to the ImGui to inform wether
-  to draw a check mark in to indicate true or false state of boolean.
-
-  @return  None.
-
-****************************************************************************************************
-*/
-void eLineEdit::set_checked()
-{
-    m_imgui_checked = propertyi(ECOMP_VALUE) ? true : false;
 }
 
 

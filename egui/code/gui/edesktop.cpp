@@ -68,6 +68,7 @@ void eGui::setup_desktop_application()
     x.set_sbits(OSAL_STATE_ORANGE|OSAL_STATE_CONNECTED);
     x.set_tstamp(etime());
     e->setpropertyo(ECOMP_VALUE, &x);
+    // e->setpropertyo(ECOMP_TYPE, OS_DOUBLE);
 
     e = new eLineEdit(p);
     e->setpropertyi(ECOMP_VALUE, OS_FALSE);
@@ -84,6 +85,24 @@ void eGui::setup_desktop_application()
     e->setpropertys(ECOMP_TEXT, "floppia");
     e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
     e->setpropertyi(ECOMP_DIGS, 2);
+
+    e = new eLineEdit(p);
+    e->setpropertyd(ECOMP_VALUE, 11.11);
+    e->setpropertys(ECOMP_TEXT, "duudi daa");
+    e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
+    e->setpropertyi(ECOMP_DIGS, 5);
+
+    e = new eLineEdit(p);
+    e->setpropertyd(ECOMP_VALUE, 11.11);
+    e->setpropertys(ECOMP_TEXT, "kasse ja ma");
+    e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
+    e->setpropertyi(ECOMP_DIGS, 5);
+
+    e = new eLineEdit(p);
+    e->setpropertyd(ECOMP_VALUE, 11.12);
+    e->setpropertys(ECOMP_TEXT, "kasse ja ma");
+    e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
+    e->setpropertyi(ECOMP_DIGS, 5);
 
     new eTableView(w);
 

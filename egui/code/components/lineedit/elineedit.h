@@ -129,8 +129,6 @@ protected:
 
     virtual void draw_tooltip();
 
-    void set_checked();
-
     /* Collect information about this object for tree browser.
      */
     virtual void object_info(
@@ -140,9 +138,6 @@ protected:
 
     bool m_edit_value;
     bool m_prev_edit_value;
-
-    bool m_set_checked;
-    bool m_imgui_checked;
 
     /* Buffer for editing value.
      */
