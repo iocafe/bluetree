@@ -351,6 +351,20 @@ public:
 
     /**
     ************************************************************************************************
+      Extended value
+    ************************************************************************************************
+    */
+    /* Get state bits. If the value is not extended, the function returns OSAL_STATE_CONNECTED.
+     */
+    inline os_int sbits() {if (type() != OS_OBJECT) return OSAL_STATE_CONNECTED; return sbits_internal();}
+
+    /* Get time stamp. If the value is not extended, the function returns 0.
+     */
+    inline os_long tstamp() {if (type() != OS_OBJECT) return 0; return tstamp_internal();}
+
+
+    /**
+    ************************************************************************************************
       Micellenous
     ************************************************************************************************
     */
@@ -458,6 +472,8 @@ protected:
         const os_char *str,
         os_memsz nchars);
 
+    os_int sbits_internal();
+    os_long tstamp_internal();
 
     /**
     ************************************************************************************************

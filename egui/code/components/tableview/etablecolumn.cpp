@@ -245,7 +245,7 @@ void eTableColumn::draw_value(
     eVariable *value,
     eTableView *view)
 {
-    edraw_value(value, view, m_attr);
+    edraw_value(value, value->sbits(), view, m_attr);
 }
 
 #if 0

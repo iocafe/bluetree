@@ -1899,6 +1899,7 @@ os_char *eVariable::allocate(
     return gets();
 }
 
+
 /**
 ****************************************************************************************************
 
@@ -1993,4 +1994,55 @@ os_boolean eVariable::clean_to_append_oix()
     }
 
     return OS_FALSE;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get extended value state bits.
+
+  If the variable holds extended value, this function returns state bits set for value. If time
+  stamp is not available, the function returns 0.
+
+  The state bits are used with IO signals, etc, to indicate if signal is connected, errornous,
+  etc.
+
+  @return Time stamp, microseconds since Epoc.
+
+****************************************************************************************************
+*/
+os_int eVariable::sbits_internal()
+{
+    eObject *o;
+    o = geto();
+    if (o) if (o->classid() == ECLASSID_VALUEX) {
+        return eValueX::cast(o)->sbits();
+    }
+
+    return OSAL_STATE_CONNECTED;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get extended value time stamp.
+
+  If the variable holds extended value, this function returns time stamp of the value. If time
+  stamp is not available, the function returns 0.
+
+  @return Time stamp, microseconds since Epoc.
+
+****************************************************************************************************
+*/
+os_long eVariable::tstamp_internal()
+{
+    eObject *o;
+    o = geto();
+    if (o) if (o->classid() == ECLASSID_VALUEX) {
+        return eValueX::cast(o)->tstamp();
+    }
+
+    return 0;
 }

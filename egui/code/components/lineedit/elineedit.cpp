@@ -223,10 +223,6 @@ eStatus eLineEdit::draw(
     m_rect.x2 = m_rect.x1 + total_w - 1;
     m_rect.y2 = m_rect.y1 + total_h - 1;
 
-    /* Draw marker for state bits if we have an extended value.
-     */
-    draw_state_bits(m_rect.x2 - edit_w - unit_spacer - unit_w);
-
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
@@ -236,7 +232,7 @@ eStatus eLineEdit::draw(
 void eLineEdit::draw_in_parameter_list(
     eDrawParams& prm)
 {
-    os_int edit_w = 200, total_h = 0;
+    os_int total_h = 0;
     const os_char *unit;
 
     add_to_zorder(prm.window);
@@ -247,7 +243,7 @@ void eLineEdit::draw_in_parameter_list(
     }
 
     if (ImGui::TableSetColumnIndex(1)) {
-        draw_value(prm, edit_w, &total_h);
+        draw_value(prm, -1, &total_h);
     }
 
     if (ImGui::TableSetColumnIndex(2)) {
@@ -262,9 +258,11 @@ void eLineEdit::draw_in_parameter_list(
     eComponent::draw(prm);
 }
 
+/* value_w Set -1 if drawing in table.
+ */
 void eLineEdit::draw_value(
     eDrawParams& prm,
-    os_int edit_w,
+    os_int value_w,
     os_int *total_h)
 {
     const os_char *label;
@@ -323,7 +321,7 @@ void eLineEdit::draw_value(
         eRect r;
         eVariable value;
         value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
-        edraw_value(&value, this, m_attr, &r);
+        edraw_value(&value, m_label_value.sbits(), this, m_attr, value_w, &r);
 
         /* Edit cell upon mouse click.
          */
@@ -335,59 +333,6 @@ void eLineEdit::draw_value(
     }
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Draw marker for state bits if we have extended value
-
-****************************************************************************************************
-*/
-void eLineEdit::draw_state_bits(
-    os_int x)
-{
-    os_int state_bits;
-    float circ_x, circ_y;
-    const os_int rad = 8;
-
-    if (!m_edit_value && m_label_value.isx())
-    {
-        ImVec4 colf;
-
-        state_bits = m_label_value.sbits();
-        colf = ImVec4(0.5f, 0.5f, 0.5f, 0.5f);
-        switch (state_bits & OSAL_STATE_ERROR_MASK)
-        {
-            case OSAL_STATE_YELLOW:
-                if (state_bits & OSAL_STATE_CONNECTED) {
-                    colf = ImVec4(0.8f, 0.8f, 0.2f, 0.5f /* alpha */);
-                }
-                break;
-
-            case OSAL_STATE_ORANGE:
-                if (state_bits & OSAL_STATE_CONNECTED) {
-                    colf = ImVec4(1.0f, 0.7f, 0.0f, 0.5f);
-                }
-                break;
-
-            case OSAL_STATE_RED:
-                colf = ImVec4(1.0f, 0.0f, 0.0f, 0.5f);
-                break;
-
-            default:
-                if (state_bits & OSAL_STATE_CONNECTED) {
-                    return;
-                }
-                break;
-        }
-
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImU32 col = ImColor(colf);
-        circ_x = (float)(x + 3*rad/2);
-        circ_y = m_rect.y1 + 0.5 * (m_rect.y2 - m_rect.y1 + 1);
-        draw_list->AddCircleFilled(ImVec2(circ_x, circ_y), rad, col, 0);
-    }
-}
 
 
 /**

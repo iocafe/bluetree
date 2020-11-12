@@ -21,8 +21,10 @@
 
 void edraw_value(
     eVariable *value,
+    os_int state_bits,
     eComponent *compo, // for redirs, tool tip, etc
     eAttrBuffer& attr,
+    os_int value_w = -1,
     eRect *r = OS_NULL);
 
 #endif

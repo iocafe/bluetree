@@ -121,11 +121,8 @@ protected:
     */
     void draw_value(
         eDrawParams& prm,
-        os_int edit_w,
+        os_int value_w,
         os_int *total_h);
-
-    void draw_state_bits(
-        os_int x);
 
     virtual void draw_tooltip();
 

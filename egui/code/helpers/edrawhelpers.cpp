@@ -16,27 +16,50 @@
 #include "egui.h"
 #include "imgui_internal.h"
 
+/* Forward referred static functions.
+ */
+static void edraw_state_bits(
+    os_int state_bits,
+    eRect *r);
 
-// Modifies value argument
+
+/* value_w Set -1 if drawing in table.
+ * Modifies value argument
+ */
+
 void edraw_value(
     eVariable *value,
+    os_int state_bits,
     eComponent *compo, // for redirs, tool tip, etc
     eAttrBuffer& attr,
+    os_int value_w,
     eRect *r)
 {
     const os_char *text;
     ImVec2 pos, pos_max;
     ImU32 box_col, check_col;
     ImDrawList *draw_list;
+    eRect tmpr;
     int extra_w, x_pos;
     bool checked;
 
-    if (r) {
+    if (value_w < 0) {
+        value_w = ImGui::GetColumnWidth();
+    }
+
+    if (r || state_bits != OSAL_STATE_CONNECTED) {
+        if (r == OS_NULL) {
+            r = &tmpr;
+        }
         pos = ImGui::GetCursorScreenPos();
         r->x1 = pos.x;
         r->y1 = pos.y;
-        r->x2 = pos.x + ImGui::GetColumnWidth();
+        r->x2 = pos.x + value_w;
         r->y2 = pos.y + ImGui::GetFrameHeight();
+
+        if (state_bits != OSAL_STATE_CONNECTED) {
+            edraw_state_bits(state_bits, r);
+        }
     }
 
     switch (attr.showas())
@@ -53,7 +76,7 @@ void edraw_value(
                 pos.x += pad;
 
                 if (attr.alignment() != E_ALIGN_LEFT) {
-                    extra_w = ImGui::GetColumnWidth() - (square_sz + 2 * pad);
+                    extra_w = value_w - (square_sz + 2 * pad);
                     if (extra_w > 0) {
                         if (attr.alignment() == E_ALIGN_CENTER) extra_w /= 2;
                         pos.x += extra_w;
@@ -82,7 +105,7 @@ void edraw_value(
             /* Align left, center, or right.
              */
             if (attr.alignment() != E_ALIGN_LEFT) {
-                extra_w = ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x;
+                extra_w = value_w - ImGui::CalcTextSize(text).x;
                 if (extra_w > 0) {
                     x_pos = ImGui::GetCursorPosX();
                     x_pos += (attr.alignment() == E_ALIGN_RIGHT) ? extra_w : extra_w/2;
@@ -94,9 +117,59 @@ void edraw_value(
             break;
     }
 
+
    /* Tool tip
      */
     if (ImGui::IsItemHovered()) {
         compo->draw_tooltip();
     }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Draw marker for state bits if we have extended value
+
+****************************************************************************************************
+*/
+static void edraw_state_bits(
+    os_int state_bits,
+    eRect *r)
+{
+    float circ_x, circ_y;
+    const os_int rad = 8;
+    ImVec4 colf;
+
+    colf = ImVec4(0.5f, 0.5f, 0.5f, 0.5f);
+    switch (state_bits & OSAL_STATE_ERROR_MASK)
+    {
+        case OSAL_STATE_YELLOW:
+            if (state_bits & OSAL_STATE_CONNECTED) {
+                colf = ImVec4(0.8f, 0.8f, 0.2f, 0.5f /* alpha */);
+            }
+            break;
+
+        case OSAL_STATE_ORANGE:
+            if (state_bits & OSAL_STATE_CONNECTED) {
+                colf = ImVec4(1.0f, 0.7f, 0.0f, 0.5f);
+            }
+            break;
+
+        case OSAL_STATE_RED:
+            colf = ImVec4(1.0f, 0.0f, 0.0f, 0.5f);
+            break;
+
+        default:
+            if (state_bits & OSAL_STATE_CONNECTED) {
+                return;
+            }
+            break;
+    }
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImU32 col = ImColor(colf);
+    circ_x = (float)(r->x1 + 3*rad/2);
+    circ_y = r->y1 + 0.5F * (r->y2 - r->y1);
+    draw_list->AddCircleFilled(ImVec2(circ_x, circ_y), rad, col, 0);
 }

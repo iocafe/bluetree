@@ -35,6 +35,7 @@ void eGui::setup_desktop_application()
     eTreeNode *n;
     eValueX x;
 
+/*
     w = new eWindow(this);
     w->setpropertys(ECOMP_VALUE, "Muuttujia");
 
@@ -52,6 +53,8 @@ void eGui::setup_desktop_application()
     x.set_tstamp(etime());
     e->setpropertyo(ECOMP_VALUE, &x);
 
+    w = new eWindow(this);
+    w->setpropertys(ECOMP_VALUE, "parameter list");
     p = new eParameterList(w);
 
     e = new eLineEdit(p);
@@ -103,6 +106,9 @@ void eGui::setup_desktop_application()
     e->setpropertys(ECOMP_TEXT, "kasse ja ma");
     e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
     e->setpropertyi(ECOMP_DIGS, 5);
+*/
+    w = new eWindow(this);
+    w->setpropertys(ECOMP_VALUE, "table");
 
     new eTableView(w);
 
@@ -113,6 +119,15 @@ void eGui::setup_desktop_application()
     n->setpropertys(ECOMP_PATH, "//");
     n->setpropertys(ECOMP_IPATH, "//");
 
+    w = new eWindow(this);
+    w->setpropertys(ECOMP_VALUE, "Browseri 2");
+    p = new eParameterList(w);
+
+    n = new eTreeNode(p);
+    n->setpropertys(ECOMP_PATH, "//");
+    n->setpropertys(ECOMP_IPATH, "//");
+
+
     /* e = new eLineEdit(w);
     e->setpropertys(ECOMP_VALUE, "Jakke ja suutari");
     e->setpropertys(ECOMP_TEXT, "Editti");
@@ -122,22 +137,5 @@ void eGui::setup_desktop_application()
     e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
     e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
     */
-
-/*     ECOMP_TYPE
-
-    #define ECOMP_STATE_BITS EVARP_STATE_BITS
-#define ECOMP_TIMESTAMP EVARP_TIMESTAMP
-#define ECOMP_DIGS EVARP_DIGS
-#define ECOMP_TEXT EVARP_TEXT
-#define ECOMP_UNIT EVARP_UNIT
-#define ECOMP_MIN EVARP_MIN
-#define ECOMP_MAX EVARP_MAX
-#define ECOMP_TYPE EVARP_TYPE
-#define ECOMP_ATTR EVARP_ATTR
-#define ECOMP_DEFAULT EVARP_DEFAULT
-#define ECOMP_GAIN EVARP_GAIN
-#define ECOMP_OFFSET EVARP_OFFSET
-#define ECOMP_PATH 30
-*/
 
 }
