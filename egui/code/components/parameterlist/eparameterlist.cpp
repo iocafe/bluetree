@@ -159,7 +159,7 @@ eStatus eParameterList::draw(
     eDrawParams& prm)
 {
     eComponent *c;
-    os_int total_w, total_h;
+    os_int total_w, total_h, ys;
     os_int row; // , column;
     ImVec2 size, rmax, origin;
     ImVec2 cpos;
@@ -180,36 +180,41 @@ eStatus eParameterList::draw(
 
     // Using those as a base value to create width/height that are factor of the size of our font
 
-    flags = ImGuiTableFlags_ScrollX |
+    flags = // ImGuiTableFlags_ScrollX |
         ImGuiTableFlags_ScrollY |
         ImGuiTableFlags_BordersInner |
+        // ImGuiTableFlags_NoBordersInBodyUntilResize |
         ImGuiTableFlags_NoPadOuterX |
         ImGuiTableFlags_Resizable |
-        ImGuiTableFlags_Reorderable;
+        ImGuiTableFlags_Reorderable |
+        ImGuiTableFlags_SizingPolicyStretchX |
+        ImGuiTableFlags_NoSavedSettings;
 
 
     static int freeze_cols = 1;
-    static int freeze_rows = 1;
+    static int freeze_rows = 0; // 1;
     static int ncols = 3;
 
     // When using ScrollX or ScrollY we need to specify a size for our table container!
     // Otherwise by default the table will fit all available space, like a BeginChild() call.
-    size = ImVec2(0, TEXT_BASE_HEIGHT * 8);
+    size = ImVec2(0, TEXT_BASE_HEIGHT * m_nro_components /* + 2*TEXT_BASE_HEIGHT/3 */);
     if (ImGui::BeginTable("##table3", ncols, flags, size))
     {
         rmax = ImGui::GetContentRegionMax();
         origin = ImGui::GetCursorPos();
+        ys = ImGui::GetScrollY();
         total_w = rmax.x - origin.x;
         total_h = rmax.y - origin.y;
 
         cpos = ImGui::GetCursorScreenPos();
         m_rect.x1 = cpos.x;
-        m_rect.y1 = cpos.y;
+        m_rect.y1 = cpos.y + ys;
 
         m_rect.x2 = m_rect.x1 + total_w - 1;
         m_rect.y2 = m_rect.y1 + total_h - 1;
 
-/* ImDrawList* draw_list;
+/* {
+ImDrawList* draw_list;
 ImVec2 top_left, bottom_right;
 top_left.x = m_rect.x1;
 top_left.y = m_rect.y1;
@@ -219,16 +224,17 @@ ImU32  col = IM_COL32(48, 48, 255, 250);
 
 draw_list = ImGui::GetWindowDrawList();
 draw_list->AddRect(top_left, bottom_right, col, 0,
-    ImDrawCornerFlags_All, 2); */
+    ImDrawCornerFlags_All, 2);
+} */
 
 
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
 
-        ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_NoHide);
-        ImGui::TableSetupColumn("value", ImGuiTableColumnFlags_NoHide);
-        ImGui::TableSetupColumn("unit", ImGuiTableColumnFlags_NoHide);
+        ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_NoHide, 150);
+        ImGui::TableSetupColumn("value", ImGuiTableColumnFlags_NoHide, 150);
+        ImGui::TableSetupColumn("unit", ImGuiTableColumnFlags_NoHide, 30);
 
-        ImGui::TableHeadersRow();
+        // ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
         clipper.Begin(m_nro_components);

@@ -245,7 +245,7 @@ eStatus eTableView::draw(
     // When using ScrollX or ScrollY we need to specify a size for our table container!
     // Otherwise by default the table will fit all available space, like a BeginChild() call.
     size = ImVec2(0, TEXT_BASE_HEIGHT * 8);
-    if (ImGui::BeginTable("##table2", ncols, flags, size))
+    if (ImGui::BeginTable("##table2", ncols, flags /*, size */))
     {
         rmax = ImGui::GetContentRegionMax();
         origin = ImGui::GetCursorPos();
