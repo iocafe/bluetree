@@ -416,6 +416,8 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
+    virtual void draw_tooltip() {}
+
     /* Draw edit mode decorations, like component frames, etc.
      */
     void draw_edit_mode_decorations(

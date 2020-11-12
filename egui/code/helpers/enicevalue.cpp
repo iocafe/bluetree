@@ -1,6 +1,6 @@
 /**
 
-  @file    eautolabel.cpp
+  @file    enicevalue.cpp
   @brief   Format value nicely for UI display.
   @author  Pekka Lehtikoski
   @version 1.0

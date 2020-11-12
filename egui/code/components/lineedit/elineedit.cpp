@@ -270,7 +270,7 @@ void eLineEdit::draw_value(
     os_int edit_w,
     os_int *total_h)
 {
-    const os_char *value, *label;
+    const os_char *label;
     const ImVec2 zero_pad(0, 0);
     ImGuiInputTextFlags eflags;
     os_int h;
@@ -321,9 +321,11 @@ void eLineEdit::draw_value(
         ImGui::PopStyleVar();
     }
     else {
+        eVariable value;
         value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
+        edraw_value(&value, this, m_attr);
 
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
+        /* ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
         switch (m_attr.showas())
         {
@@ -334,6 +336,7 @@ void eLineEdit::draw_value(
                 }
 
                 label = m_label_edit.get(this);
+
                 if (ImGui::Checkbox(label, &m_imgui_checked))
                 {
                     activate();
@@ -345,6 +348,7 @@ void eLineEdit::draw_value(
                 if (ImGui::IsItemActive()) {
                     activate();
                 }
+
                 break;
         }
         h = ImGui::GetItemRectSize().y;
@@ -352,11 +356,10 @@ void eLineEdit::draw_value(
 
         ImGui::PopStyleVar(2);
 
-        /* Tool tip
-         */
         if (ImGui::IsItemHovered()) {
             draw_tooltip();
         }
+        */
     }
 }
 

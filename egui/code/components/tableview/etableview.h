@@ -166,7 +166,7 @@ protected:
 
     void draw_header_row();
 
-    void draw_tooltip();
+    virtual void draw_tooltip();
 
     /* Callback when table data is received, etc.
      */

@@ -329,7 +329,7 @@ eStatus eTableView::draw(
                                 continue;
                             }
                         }
-                        c->draw_value(value, m, this);
+                        c->draw_value(value, this);
                     }
                 }
                 first_row = OS_FALSE;

@@ -165,5 +165,4 @@ void eAutoLabel::set(
         m_extended_value = OS_TRUE;
         m_state_bits = ex->sbits();
     }
-
 }

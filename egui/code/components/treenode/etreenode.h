@@ -126,7 +126,7 @@ protected:
     */
     void draw_underline(os_int y);
     void draw_state_bits(os_int x);
-    void draw_tooltip();
+    virtual void draw_tooltip();
 
     void request_object_info();
 

@@ -1,7 +1,7 @@
 /**
 
-  @file    enicevalue.h
-  @brief   Format value nicely for UI display.
+  @file    edrawhelpers.h
+  @brief   Helper functions for rendering components.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    15.9.2020
@@ -15,21 +15,13 @@
 */
 #include "egui.h"
 #pragma once
-#ifndef ENICEVALUE_H_
-#define ENICEVALUE_H_
+#ifndef EDRAWHELPERS_H_
+#define EDRAWHELPERS_H_
 #include "egui.h"
 
-/* Format value nicely for UI display.
- */
-void enice_value_for_ui(
+void edraw_value(
     eVariable *value,
-    eObject *obj,
-    eAttrBuffer *attr);
-
-void enice_ui_value_to_internal_type(
-    eVariable *value,
-    eVariable *new_value,
-    eObject *obj,
-    eAttrBuffer *attr);
+    eComponent *compo, // for redirs, tool tip, etc
+    eAttrBuffer& attr);
 
 #endif

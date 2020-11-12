@@ -14,7 +14,6 @@
 ****************************************************************************************************
 */
 #include "egui.h"
-#include "imgui_internal.h"
 
 
 /**
@@ -242,8 +241,15 @@ os_int eTableColumn::count_header_row_lines()
     return nro_lines;
 }
 
+void eTableColumn::draw_value(
+    eVariable *value,
+    eTableView *view)
+{
+    edraw_value(value, view, m_attr);
+}
 
-// Modifies value
+#if 0
+// Modifies value argument
 void eTableColumn::draw_value(
     eVariable *value,
     eMatrix *m,
@@ -311,7 +317,7 @@ void eTableColumn::draw_value(
             break;
     }
 }
-
+#endif
 
 /** Modifies value
 */
@@ -328,7 +334,7 @@ void eTableColumn::draw_edit(
     {
         case E_SHOWAS_CHECKBOX:
         case E_SHOWAS_DROP_DOWN_ENUM:
-            draw_value(value, m, view);
+            draw_value(value, view);
             return;
 
         case E_SHOWAS_INTEGER_NUMBER:

@@ -29,6 +29,8 @@ eStrBuffer::eStrBuffer()
 {
     m_buf = OS_NULL;
     m_buf_sz = 0;
+    m_extended_value = OS_FALSE;
+    m_state_bits = OSAL_STATE_CONNECTED;
 }
 
 eStrBuffer::~eStrBuffer()
@@ -69,6 +71,7 @@ void eStrBuffer::setv(
 {
     os_char *ptr;
     os_memsz sz;
+    eValueX *ex;
 
     ptr = value->gets(&sz);
 
@@ -82,6 +85,12 @@ void eStrBuffer::setv(
     else {
         allocate(sz);
         os_memcpy(m_buf, ptr, sz);
+    }
+
+    ex = value->getx();
+    if (ex) {
+        m_extended_value = OS_TRUE;
+        m_state_bits = ex->sbits();
     }
 }
 
@@ -103,18 +112,23 @@ void eStrBuffer::appends(
 
 /* This function is typically used only when drawing, etc to avoid buffer allocation when
    inactive in memory. obj pointer is used to get property value and context for translation redirects, etc.
+   @param  attr Can be os NULL if not needed.
  */
 const os_char *eStrBuffer::get(
     eObject *obj,
-    os_int propertynr)
+    os_int propertynr,
+    eAttrBuffer *attr)
 {
+    eVariable *tmp;
+
     if (m_buf_sz == 0) {
-        eVariable tmp;
-        obj->propertyv(propertynr, &tmp);
+        tmp = new eVariable(obj, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+        obj->propertyv(propertynr, tmp);
 
         // Here we could do language translation !!!!!!!!!!!!!!!!
 
-        setv(&tmp);
+        setv(tmp);
+        delete tmp;
     }
 
     return m_buf_sz == BUF_SZ_EMPTY_STR ? osal_str_empty : m_buf;

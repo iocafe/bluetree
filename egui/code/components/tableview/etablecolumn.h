@@ -103,7 +103,6 @@ public:
 
     void draw_value(
         eVariable *value,
-        eMatrix *m,
         eTableView *view);
 
     void draw_edit(

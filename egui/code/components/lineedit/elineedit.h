@@ -126,7 +126,7 @@ protected:
     void draw_state_bits(
         os_int x);
 
-    void draw_tooltip();
+    virtual void draw_tooltip();
 
     void set_checked();
 
@@ -155,7 +155,8 @@ protected:
     eAttrBuffer m_attr;
 
     eAutoLabel m_label_edit;
-    eAutoLabel m_label_value;
+    // eAutoLabel m_label_value;
+    eStrBuffer  m_label_value;
 };
 
 
