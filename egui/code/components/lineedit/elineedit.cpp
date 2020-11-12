@@ -213,7 +213,7 @@ eStatus eLineEdit::draw(
     ImGui::SameLine(relative_x2 - edit_w - unit_spacer - unit_w);
     ImGui::SetNextItemWidth(edit_w);
 
-    draw_value(edit_w, &total_h);
+    draw_value(prm, edit_w, &total_h);
 
     unit = m_unit.get(this, ECOMP_UNIT);
     if (*unit != '\0') {
@@ -251,7 +251,7 @@ void eLineEdit::draw_in_parameter_list(
     }
 
     if (ImGui::TableSetColumnIndex(1)) {
-        draw_value(edit_w, &total_h);
+        draw_value(prm, edit_w, &total_h);
     }
 
     if (ImGui::TableSetColumnIndex(2)) {
@@ -267,6 +267,7 @@ void eLineEdit::draw_in_parameter_list(
 }
 
 void eLineEdit::draw_value(
+    eDrawParams& prm,
     os_int edit_w,
     os_int *total_h)
 {
@@ -321,9 +322,21 @@ void eLineEdit::draw_value(
         ImGui::PopStyleVar();
     }
     else {
+        /* Draw value (not editing).
+         */
+        eRect r;
         eVariable value;
         value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
-        edraw_value(&value, this, m_attr);
+        edraw_value(&value, this, m_attr, &r);
+
+        /* Edit cell upon mouse click.
+         */
+        if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON]) {
+            if (erect_is_point_inside(r, prm.mouse_pos) && !prm.edit_mode) {
+                activate();
+            }
+        }
+
 
         /* ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));

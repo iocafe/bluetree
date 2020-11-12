@@ -120,6 +120,7 @@ protected:
     ************************************************************************************************
     */
     void draw_value(
+        eDrawParams& prm,
         os_int edit_w,
         os_int *total_h);
 

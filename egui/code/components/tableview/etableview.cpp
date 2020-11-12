@@ -230,7 +230,8 @@ eStatus eTableView::draw(
 
     // Using those as a base value to create width/height that are factor of the size of our font
 
-    flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
+    flags = ImGuiTableFlags_ScrollX |
+        ImGuiTableFlags_ScrollY |
         ImGuiTableFlags_BordersInner |
         ImGuiTableFlags_NoPadOuterX |
         // ImGuiTableFlags_NoPadInnerX |
@@ -337,6 +338,8 @@ eStatus eTableView::draw(
         }
         delete value;
 
+        /* Edit cell upon mouse click.
+         */
         if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
         {
             column = ImGui::TableGetHoveredColumn();

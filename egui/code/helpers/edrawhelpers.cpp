@@ -21,7 +21,8 @@
 void edraw_value(
     eVariable *value,
     eComponent *compo, // for redirs, tool tip, etc
-    eAttrBuffer& attr)
+    eAttrBuffer& attr,
+    eRect *r)
 {
     const os_char *text;
     ImVec2 pos, pos_max;
@@ -29,6 +30,14 @@ void edraw_value(
     ImDrawList *draw_list;
     int extra_w, x_pos;
     bool checked;
+
+    if (r) {
+        pos = ImGui::GetCursorScreenPos();
+        r->x1 = pos.x;
+        r->y1 = pos.y;
+        r->x2 = pos.x + ImGui::GetColumnWidth();
+        r->y2 = pos.y + ImGui::GetFrameHeight();
+    }
 
     switch (attr.showas())
     {

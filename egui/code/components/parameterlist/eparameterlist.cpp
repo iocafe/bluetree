@@ -160,7 +160,7 @@ eStatus eParameterList::draw(
 {
     eComponent *c;
     os_int total_w, total_h;
-    os_int row, column;
+    os_int row; // , column;
     ImVec2 size, rmax, origin;
     ImVec2 cpos;
     ImGuiTableFlags flags;
@@ -174,9 +174,19 @@ eStatus eParameterList::draw(
 
     // Using those as a base value to create width/height that are factor of the size of our font
 
-    flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg |
+    /* flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg |
         ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable |
-        ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+        ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable; */
+
+    // Using those as a base value to create width/height that are factor of the size of our font
+
+    flags = ImGuiTableFlags_ScrollX |
+        ImGuiTableFlags_ScrollY |
+        ImGuiTableFlags_BordersInner |
+        ImGuiTableFlags_NoPadOuterX |
+        ImGuiTableFlags_Resizable |
+        ImGuiTableFlags_Reorderable;
+
 
     static int freeze_cols = 1;
     static int freeze_rows = 1;
@@ -214,13 +224,9 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
 
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
 
-        for (column=0;
-             column < ncols;
-             column++)
-        {
-            ImGui::TableSetupColumn("UKE", column == 0 ? ImGuiTableColumnFlags_NoHide
-                : ImGuiTableColumnFlags_None);
-        }
+        ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_NoHide);
+        ImGui::TableSetupColumn("value", ImGuiTableColumnFlags_NoHide);
+        ImGui::TableSetupColumn("unit", ImGuiTableColumnFlags_NoHide);
 
         ImGui::TableHeadersRow();
 
