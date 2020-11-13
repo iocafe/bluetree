@@ -205,10 +205,11 @@ eStatus eTableView::draw(
     eVariable *value, *col_conf;
     eContainer *rscols;
     os_int nrows, ncols, total_w, total_h;
-    os_int row, column;
+    os_int row, column, ys;
     ImVec2 size, rmax, origin;
     ImVec2 cpos;
     ImGuiTableFlags flags;
+    ImGuiListClipper clipper;
     os_boolean first_row;
 
     // const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
@@ -251,7 +252,7 @@ eStatus eTableView::draw(
     {
         rmax = ImGui::GetContentRegionMax();
         origin = ImGui::GetCursorPos();
-        int ys = ImGui::GetScrollY();
+        ys = ImGui::GetScrollY();
 
         total_w = rmax.x - origin.x;
         total_h = rmax.y - origin.y + ys;
@@ -281,7 +282,6 @@ eStatus eTableView::draw(
         first_row = OS_TRUE;
         focused_m = eMatrix::cast(m_focused_row->get());
         value = new eVariable(this);
-        ImGuiListClipper clipper;
         clipper.Begin(nrows);
         m_logical_data_start_y = clipper.StartPosY;
         m_data_row_h = TEXT_BASE_HEIGHT;
@@ -338,7 +338,6 @@ eStatus eTableView::draw(
                 first_row = OS_FALSE;
             }
         }
-        delete value;
 
         m_hovered_column = ImGui::TableGetHoveredColumn();
         if (m_hovered_column >= 0) {
@@ -348,29 +347,21 @@ eStatus eTableView::draw(
             if (c && rscols) {
                 col_conf = eVariable::cast(rscols->first(m_hovered_column));
                 if (col_conf) {
-                    c->draw_tooltip(col_conf);
+                    value->clear();
+                    row = (prm.mouse_pos.y - m_logical_data_start_y);
+                    if (row >= 0) {
+                        row /= m_data_row_h;
+                        if (row < m_row_to_m_len) {
+                            m = m_row_to_m[row].m_row;
+                            if (m) m->getv(0, m_hovered_column, value);
+                        }
+                    }
+                    c->draw_tooltip(value, col_conf);
                 }
             }
         }
 
-        /* Edit cell upon mouse click.
-         */
-        /* if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
-        {
-            column = ImGui::TableGetHoveredColumn();
-            if (column >= 0 && prm.mouse_pos.y >= m_data_windows_start_y) {
-                c = eTableColumn::cast(m_columns->first(column));
-                row = (prm.mouse_pos.y - m_logical_data_start_y);
-                if (row >= 0) {
-                    row /= m_data_row_h;
-                    if (c && row < nrows) {
-                        m = m_row_to_m[row].m_row;
-                        c->activate(m, column, this);
-                    }
-                }
-            }
-        } */
-
+        delete value;
         ImGui::EndTable();
     }
 

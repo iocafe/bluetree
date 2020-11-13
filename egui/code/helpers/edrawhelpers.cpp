@@ -113,7 +113,9 @@ void edraw_value(
                 }
             }
 
-            ImGui::TextUnformatted(text);
+            //ImGui::TextUnformatted(text);
+            ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", text);
+
             break;
     }
 
@@ -216,7 +218,7 @@ void edraw_tooltip(
             if (etime_timestamp_str(utc, &item) == ESTATUS_SUCCESS)
             {
                 if (!text.isempty()) text += "\n";
-                text += "updated ";
+                text += "timestamp ";
                 text += item;
                 worth_showing = OS_TRUE;
             }

@@ -151,6 +151,9 @@ for (int i = 0; i<150; i++) {
         column->setpropertyi(EVARP_TYPE, OS_CHAR);
         column->setpropertys(ECOMP_ATTR, "enum=\"1.eka,2.toka,3.koka\"");
 
+        column = new eVariable(columns);
+        column->addname("x", ENAME_NO_MAP);
+
         /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
          */
         etable_configure(this, "//mymtx", configuration, ETABLE_ADOPT_ARGUMENT);
@@ -183,6 +186,7 @@ for (int i = 0; i<150; i++) {
     {
         eContainer row;
         eVariable *element;
+        eValueX x;
 
         element = new eVariable(&row);
         element->addname("ix", ENAME_NO_MAP);
@@ -203,6 +207,13 @@ for (int i = 0; i<150; i++) {
         element = new eVariable(&row);
         element->addname("selectit", ENAME_NO_MAP);
         element->setl(osal_rand(0, 3));
+
+        element = new eVariable(&row);
+        element->addname("x", ENAME_NO_MAP);
+        x = 1234.5;
+        x.set_sbits(OSAL_STATE_ORANGE|OSAL_STATE_CONNECTED);
+        x.set_tstamp(etime());
+        element->setpropertyo(ECOMP_VALUE, &x);
 
         etable_insert(this, "//mymtx", table_name, &row);
     }

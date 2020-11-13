@@ -318,9 +318,10 @@ void eTableColumn::draw_edit(
 
 
 void eTableColumn::draw_tooltip(
+    eVariable *value,
     eVariable *col_conf)
 {
-    edraw_tooltip(col_conf, OS_NULL, m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE), m_attr);
+    edraw_tooltip(col_conf, value, m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE), m_attr);
 }
 
 

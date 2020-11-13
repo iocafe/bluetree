@@ -111,6 +111,7 @@ public:
         eTableView *view);
 
     void draw_tooltip(
+        eVariable *value,
         eVariable *col_conf);
 
     void activate(
