@@ -112,7 +112,8 @@ public:
 
     void draw_tooltip(
         eVariable *value,
-        eVariable *col_conf);
+        eVariable *col_conf,
+        os_int ttip_flags);
 
     void activate(
         eMatrix *focus_row,

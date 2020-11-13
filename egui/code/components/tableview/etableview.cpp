@@ -356,7 +356,8 @@ eStatus eTableView::draw(
                             if (m) m->getv(0, m_hovered_column, value);
                         }
                     }
-                    c->draw_tooltip(value, col_conf);
+                    c->draw_tooltip(value, col_conf,
+                        row >= 0 ? EDRAW_TTIP_CELL_VALUE : EDRAW_TTIP_DEFAULT);
                 }
             }
         }

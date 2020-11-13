@@ -19,6 +19,10 @@
 #define EDRAWHELPERS_H_
 #include "egui.h"
 
+
+#define EDRAW_TTIP_DEFAULT 0
+#define EDRAW_TTIP_CELL_VALUE 1
+
 void edraw_value(
     eVariable *value,
     os_int state_bits,
@@ -31,6 +35,7 @@ void edraw_tooltip(
     eObject *obj,
     eVariable *value,
     const os_char *otext,
-    eAttrBuffer& oattr);
+    eAttrBuffer& oattr,
+    os_int flags);
 
 #endif
