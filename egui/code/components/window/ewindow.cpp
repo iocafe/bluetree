@@ -316,10 +316,6 @@ eStatus eWindow::draw(
         draw_edit_mode_decorations(wprm);
     }
 
-    if (wprm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON]) {
-        open_popup(wprm);
-    }
-
     for (mouse_button_nr = 0;
          mouse_button_nr < EIMGUI_NRO_MOUSE_BUTTONS;
          mouse_button_nr++)
@@ -342,6 +338,7 @@ eStatus eWindow::draw(
     ImGui::End();
     return ESTATUS_SUCCESS;
 }
+
 
 /**
 ****************************************************************************************************
@@ -388,10 +385,21 @@ void eWindow::click(
     eDrawParams& prm,
     os_int mouse_button_nr)
 {
-    eComponent *c;
+    eComponent *c, *e;
+
     c = findcomponent(prm.mouse_pos);
+    e = c;
     if (c) {
-        c->on_click(prm, mouse_button_nr);
+        do {
+            if (erect_is_point_inside(c->visible_rect(), prm.mouse_pos)) {
+                if (c->on_click(prm, mouse_button_nr)) {
+                    break;
+                }
+            }
+            if (c == this) break;
+            c = c->m_prev_z;
+        }
+        while (c && c != e);
     }
 }
 

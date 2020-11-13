@@ -432,7 +432,7 @@ eStatus eTreeNode::draw(
     ImGuiInputTextFlags eflags;
     bool isopen;
 
-    add_to_zorder(prm.window);
+    add_to_zorder(prm.window, prm.layer);
     m_attr.for_variable(this);
 
     relative_x2 = ImGui::GetContentRegionMax().x;

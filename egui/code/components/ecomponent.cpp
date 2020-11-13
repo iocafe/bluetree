@@ -45,6 +45,7 @@ eComponent::eComponent(
     m_select = OS_FALSE;
     m_popup_open = OS_FALSE;
     m_next_z = m_prev_z = OS_NULL;
+    m_zlayer = 0;
 }
 
 
@@ -266,20 +267,33 @@ eComponent *eComponent::findcomponent(
   components of window by "depth", from bottom to top. Z order is two directional linked list.
 
   @param   w Pointer to eWindow.
+  @param   layer Layer. 0 for components in base layer. 1 for popup, 2 for poup up from popup.
 
 ****************************************************************************************************
 */
 void eComponent::add_to_zorder(
-    eWindow *w)
+    eWindow *w,
+    os_int layer)
 {
+    eComponent *z;
+
     if (w == OS_NULL) return;
 
     if (classid() != EGUICLASSID_WINDOW)
     {
-        m_prev_z = w->m_prev_z;
-        m_next_z = w;
+        z = w;
+        while (z->m_prev_z->classid() != EGUICLASSID_WINDOW)
+        {
+            if (z->m_prev_z->m_zlayer <= layer) break;
+            z = z->m_prev_z;
+        }
+
+
+        m_prev_z = z->m_prev_z;
+        m_next_z = z;
         m_prev_z->m_next_z = this;
-        w->m_prev_z = this;
+        z->m_prev_z = this;
+        m_zlayer = layer;
     }
 }
 
@@ -795,27 +809,39 @@ void eComponent::close_popup()
 }
 
 /* Component clicked.
+ * @return OS_TRUE if click was processed.
  */
-void eComponent::on_click(
+os_boolean eComponent::on_click(
     eDrawParams& prm,
     os_int mouse_button_nr)
 {
     eWindowSelect op;
 
-    if (prm.edit_mode && mouse_button_nr == EIMGUI_LEFT_MOUSE_BUTTON)
-    {
-        if (prm.mouse_click_keyboard_flags[mouse_button_nr] & EDRAW_LEFT_CTRL_DOWN)
+    if (prm.edit_mode) {
+        if (mouse_button_nr == EIMGUI_LEFT_MOUSE_BUTTON)
         {
-            op = m_select
-               ? EWINDOW_REMOVE_FROM_SELECTION
-               : EWINDOW_APPEND_TO_SELECTION;
-        }
-        else {
-            op = EWINDOW_NEW_SELECTION;
-        }
+            if (prm.mouse_click_keyboard_flags[mouse_button_nr] & EDRAW_LEFT_CTRL_DOWN)
+            {
+                op = m_select
+                   ? EWINDOW_REMOVE_FROM_SELECTION
+                   : EWINDOW_APPEND_TO_SELECTION;
+            }
+            else {
+                op = EWINDOW_NEW_SELECTION;
+            }
 
-        prm.window->select(this, op);
+            prm.window->select(this, op);
+            return OS_TRUE;
+        }
     }
+
+    else {
+        if (prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON]) {
+            right_click_popup(prm);
+        }
+    }
+
+    return OS_FALSE;
 }
 
 

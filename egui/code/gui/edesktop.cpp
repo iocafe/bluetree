@@ -35,7 +35,6 @@ void eGui::setup_desktop_application()
     eTreeNode *n;
     eValueX x;
 
-/*
     w = new eWindow(this);
     w->setpropertys(ECOMP_VALUE, "Muuttujia");
 
@@ -106,7 +105,7 @@ void eGui::setup_desktop_application()
     e->setpropertys(ECOMP_TEXT, "kasse ja ma");
     e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
     e->setpropertyi(ECOMP_DIGS, 5);
-*/
+
     w = new eWindow(this);
     w->setpropertys(ECOMP_VALUE, "table");
 

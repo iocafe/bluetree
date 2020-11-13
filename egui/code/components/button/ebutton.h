@@ -101,6 +101,13 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
+    /* Process mouse click.
+     */
+    virtual os_boolean on_click(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
+
+
     /* Activate the component (start editing value, toggle checkbox, or show drop down list).
      */
     virtual void activate();

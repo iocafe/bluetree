@@ -35,6 +35,7 @@ eTableView::eTableView(
     m_logical_data_start_y = 0;
     m_data_windows_start_y = 0;
     m_data_row_h = 24;
+    m_hovered_column = -1;
 
     m_focused_row = new ePointer(this);
     m_focused_column = -1;
@@ -212,7 +213,7 @@ eStatus eTableView::draw(
     // const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
     const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
-    add_to_zorder(prm.window);
+    add_to_zorder(prm.window, prm.layer);
 
     if (m_rowset == OS_NULL || m_columns == OS_NULL) {
         if (m_rowset == OS_NULL) {
@@ -338,9 +339,11 @@ eStatus eTableView::draw(
         }
         delete value;
 
+        m_hovered_column = ImGui::TableGetHoveredColumn();
+
         /* Edit cell upon mouse click.
          */
-        if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
+        /* if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
         {
             column = ImGui::TableGetHoveredColumn();
             if (column >= 0 && prm.mouse_pos.y >= m_data_windows_start_y) {
@@ -354,7 +357,7 @@ eStatus eTableView::draw(
                     }
                 }
             }
-        }
+        } */
 
         ImGui::EndTable();
     }
@@ -373,18 +376,58 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
     ImDrawCornerFlags_All, 2);
 } */
 
-    /* Tool tip
-     */
-    if (ImGui::IsItemHovered()) {
-        draw_tooltip();
-    }
-
 skipit:
 
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
 }
+
+/**
+****************************************************************************************************
+
+  @brief Component clicked.
+
+  The eTableView::on_click() function is called when a component is clicked. If the component
+  processess the mouse click, it returns OS_TRUE. This indicates that the click has been
+  processed. If it doesn't process the click, it call's eComponent base classess'es on_click()
+  function to try if base class wants to process the click.
+  When the mouse click is not processed, it is passed to parent object in z order.
+
+  @param   prm Drawing parameters, notice especially edit_mode.
+  @param   mouse_button_nr Which mouse button, for example EIMGUI_LEFT_MOUSE_BUTTON.
+
+  @return  OS_TRUE if mouse click was processed by this component, or OS_FALSE if not.
+
+****************************************************************************************************
+*/
+os_boolean eTableView::on_click(
+    eDrawParams& prm,
+    os_int mouse_button_nr)
+{
+    eTableColumn *c;
+    eMatrix *m;
+    os_int row, column;
+
+    if (!prm.edit_mode && mouse_button_nr == EIMGUI_LEFT_MOUSE_BUTTON) {
+        column = m_hovered_column;
+        if (column >= 0 && prm.mouse_pos.y >= m_data_windows_start_y) {
+            c = eTableColumn::cast(m_columns->first(column));
+            row = (prm.mouse_pos.y - m_logical_data_start_y);
+            if (row >= 0) {
+                row /= m_data_row_h;
+                if (c && row < m_row_to_m_len) {
+                    m = m_row_to_m[row].m_row;
+                    c->activate(m, column, this);
+                }
+            }
+        }
+
+        return OS_TRUE;
+    }
+    return eComponent::on_click(prm, mouse_button_nr);
+}
+
 
 
 // Instead of calling TableHeadersRow() we'll submit custom headers ourselves
@@ -466,18 +509,6 @@ void eTableView::update_table_cell(
     element->setv(column_value);
 
     m_rowset->update(where_clause.gets(), row, ETABLE_ADOPT_ARGUMENT);
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Draw tool tip, called when mouse is hovering over the value
-
-****************************************************************************************************
-*/
-void eTableView::draw_tooltip()
-{
 }
 
 

@@ -168,7 +168,7 @@ eStatus eParameterList::draw(
     // const float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
     const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
-    add_to_zorder(prm.window);
+    add_to_zorder(prm.window, prm.layer);
 
     generate_component_array();
 

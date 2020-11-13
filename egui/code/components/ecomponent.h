@@ -151,6 +151,10 @@ typedef struct eDrawParams
      */
     eWindow *window;
 
+    /* Layer, 0 for base layer, 1 for popup...
+     */
+    os_int layer;
+
     /* This component is in edit mode.
      */
     os_boolean edit_mode;
@@ -300,7 +304,9 @@ public:
 
     /* Add component to window's Z order
      */
-    void add_to_zorder(eWindow *w);
+    void add_to_zorder(
+        eWindow *w,
+        os_int layer);
 
     /* Remove component from window's Z order
      */
@@ -416,6 +422,9 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
+    virtual void draw_in_parameter_list(
+        eDrawParams& prm) {draw(prm);}
+
     virtual void draw_tooltip() {}
 
     /* Draw edit mode decorations, like component frames, etc.
@@ -423,6 +432,46 @@ public:
     void draw_edit_mode_decorations(
         eDrawParams& prm,
         os_boolean mouse_over);
+
+    /* If mouse is clicked within component's visible rectangle, we still verify that click is
+       close enough to line, etc, to select the component, and if the point is "special point",
+       like end point of the line which can be used to modify the component.
+     */
+    virtual ecompoClickSpec check_click(ePos pos) {OSAL_UNUSED(pos); return ECOMPO_CLICK_OK;}
+
+    /* Component clicked (select in edit mode, etc).
+     */
+    virtual os_boolean on_click(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
+
+    /* Drag desture detected, we are starting to drag this component.
+     */
+    virtual void on_start_drag(
+        eDrawParams& prm,
+        os_int mouse_button_nr,
+        ePos& mouse_down_pos);
+
+    /* Mouse dragging, we are copying/moving/mofifying component(s).
+     */
+    virtual void on_drag(
+        eDrawParams& prm,
+        os_int mouse_button_nr,
+        eGuiDragMode drag_mode,
+        ePos& mouse_pos);
+
+    /* Mouse released to end drag, actually copy/move object or and modification.
+     */
+    virtual void on_drop(
+        eDrawParams& prm,
+        os_int mouse_button_nr,
+        eComponent *origin,
+        eGuiDragMode drag_mode,
+        ePos& mouse_up_pos);
+
+    /* Delete has been selected from pop up menu, etc.
+     */
+    void on_delete();
 
     /* Start editing value, toggle checkbox or show drop down list.
      */
@@ -445,6 +494,9 @@ public:
         ePopup *p);
 
     void close_popup();
+
+
+
 
 
     /**
@@ -480,45 +532,6 @@ public:
      */
     eRect& visible_rect() {return m_rect; }
 
-    /* If mouse is clicked within component's visible rectangle, we still verify that click is
-       close enough to line, etc, to select the component, and if the point is "special point",
-       like end point of the line which can be used to modify the component.
-     */
-    virtual ecompoClickSpec check_click(ePos pos) {OSAL_UNUSED(pos); return ECOMPO_CLICK_OK;}
-
-    /* Component clicked (select in edit mode, etc ).
-     */
-    void on_click(
-        eDrawParams& prm,
-        os_int mouse_button_nr);
-
-    /* Drag desture detected, we are starting to drag this component.
-     */
-    void on_start_drag(
-        eDrawParams& prm,
-        os_int mouse_button_nr,
-        ePos& mouse_down_pos);
-
-    /* Mouse dragging, we are copying/moving/mofifying component(s).
-     */
-    void on_drag(
-        eDrawParams& prm,
-        os_int mouse_button_nr,
-        eGuiDragMode drag_mode,
-        ePos& mouse_pos);
-
-    /* Mouse released to end drag, actually copy/move object or and modification.
-     */
-    void on_drop(
-        eDrawParams& prm,
-        os_int mouse_button_nr,
-        eComponent *origin,
-        eGuiDragMode drag_mode,
-        ePos& mouse_up_pos);
-
-    /* Delete has been selected from pop up menu, etc.
-     */
-    void on_delete();
 
 
 protected:
@@ -555,6 +568,7 @@ protected:
 
     /* Z order */
     eComponent *m_next_z, *m_prev_z;
+    os_int m_zlayer;
 };
 
 

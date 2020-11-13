@@ -35,6 +35,7 @@ eLineEdit::eLineEdit(
 {
     m_edit_value = false;
     m_prev_edit_value = false;
+    os_memclear(&m_value_rect, sizeof(eRect));
 }
 
 
@@ -184,7 +185,7 @@ eStatus eLineEdit::draw(
     os_int edit_w, unit_w, relative_x2, unit_spacer, total_w, total_h, h;
     const os_char *unit;
 
-    add_to_zorder(prm.window);
+    add_to_zorder(prm.window, prm.layer);
     m_attr.for_variable(this);
 
     relative_x2 = ImGui::GetContentRegionMax().x;
@@ -235,7 +236,7 @@ void eLineEdit::draw_in_parameter_list(
     os_int total_h = 0;
     const os_char *unit;
 
-    add_to_zorder(prm.window);
+    add_to_zorder(prm.window, prm.layer);
     m_attr.for_variable(this);
 
     if (ImGui::TableSetColumnIndex(0)) {
@@ -314,22 +315,26 @@ void eLineEdit::draw_value(
         if (h > *total_h) *total_h = h;
 
         ImGui::PopStyleVar();
+
+        // WE SHOULD SET m_value rect here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
     else {
         /* Draw value (not editing).
          */
-        eRect r;
         eVariable value;
         value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
-        edraw_value(&value, m_label_value.sbits(), this, m_attr, value_w, &r);
+        edraw_value(&value, m_label_value.sbits(), this, m_attr, value_w, &m_value_rect);
+        if (value_w < 0) {
+            m_rect = m_value_rect;
+        }
 
         /* Edit cell upon mouse click.
          */
-        if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON]) {
+        /* if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON]) {
             if (erect_is_point_inside(r, prm.mouse_pos) && !prm.edit_mode) {
                 activate();
             }
-        }
+        } */
     }
 }
 
@@ -407,6 +412,38 @@ void eLineEdit::draw_tooltip()
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Component clicked.
+
+  The eLineEdit::on_click() function is called when a component is clicked. If the component
+  processess the mouse click, it returns OS_TRUE. This indicates that the click has been
+  processed. If it doesn't process the click, it call's eComponent base classess'es on_click()
+  function to try if base class wants to process the click.
+  When the mouse click is not processed, it is passed to parent object in z order.
+
+  @param   prm Drawing parameters, notice especially edit_mode.
+  @param   mouse_button_nr Which mouse button, for example EIMGUI_LEFT_MOUSE_BUTTON.
+
+  @return  OS_TRUE if mouse click was processed by this component, or OS_FALSE if not.
+
+****************************************************************************************************
+*/
+os_boolean eLineEdit::on_click(
+    eDrawParams& prm,
+    os_int mouse_button_nr)
+{
+    if (!prm.edit_mode && mouse_button_nr == EIMGUI_LEFT_MOUSE_BUTTON) {
+        if (erect_is_point_inside(m_value_rect, prm.mouse_pos)) {
+            activate();
+            return OS_TRUE;
+        }
+    }
+    return eComponent::on_click(prm, mouse_button_nr);
 }
 
 

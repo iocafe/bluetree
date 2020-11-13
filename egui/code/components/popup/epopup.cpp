@@ -206,6 +206,12 @@ eStatus ePopup::draw(
 {
     eComponent *c;
     const os_char *label;
+    eDrawParams wprm;
+
+    wprm = prm;
+    wprm.layer++;
+
+    add_to_zorder(wprm.window, wprm.layer);
 
     label = m_label_title.get(this);
 
@@ -221,7 +227,7 @@ eStatus ePopup::draw(
              c;
              c = c->nextcomponent(EOID_GUI_COMPONENT))
         {
-            c->draw(prm);
+            c->draw(wprm);
         }
 
         ImGui::EndPopup();

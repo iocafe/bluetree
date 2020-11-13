@@ -118,6 +118,12 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
+    /* Component clicked.
+     */
+    virtual os_boolean on_click(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
+
     /* Index column info
      */
     const os_char *ix_column_name();
@@ -165,8 +171,6 @@ protected:
     */
 
     void draw_header_row();
-
-    virtual void draw_tooltip();
 
     /* Callback when table data is received, etc.
      */
@@ -252,6 +256,8 @@ protected:
     /* Data row height in pixels. For now we assume all rows to have same height.
      */
     os_int m_data_row_h;
+
+    os_int m_hovered_column;
 
     /* ePointer to "edit row dialog" to edit existing row or add a new row.
        This can be moved to eGui if we want only one edit row window to be open at a time.

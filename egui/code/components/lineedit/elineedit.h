@@ -105,8 +105,14 @@ public:
 
     /* Special draw function for drawing within eParameterList.
      */
-    void draw_in_parameter_list(
+    virtual void draw_in_parameter_list(
         eDrawParams& prm);
+
+    /* Component clicked.
+     */
+    virtual os_boolean on_click(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
 
     /* Activate the component (start editing value, toggle checkbox, or show drop down list).
      */
@@ -150,6 +156,8 @@ protected:
     eAutoLabel m_label_edit;
     // eAutoLabel m_label_value;
     eStrBuffer  m_label_value;
+
+    eRect m_value_rect;
 };
 
 
