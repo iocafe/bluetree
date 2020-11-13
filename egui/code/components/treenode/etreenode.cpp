@@ -45,6 +45,7 @@ eTreeNode::eTreeNode(
 #if ETREENODE_TOOLTIPS_FOR_DEBUG
     m_object_flags = 0;
 #endif
+    os_memclear(&m_value_rect, sizeof(eRect));
 }
 
 
@@ -366,7 +367,8 @@ eStatus eTreeNode::onpropertychange(
             if (m_received_change == 0) {
                 set_modified_value();
             }
-            m_label_value.clear();
+            // m_label_value.clear();
+            m_value.clear();
             m_set_checked = true;
             break;
 
@@ -385,7 +387,8 @@ eStatus eTreeNode::onpropertychange(
         case ECOMP_TYPE:
         case ECOMP_ATTR:
             m_attr.clear();
-            m_label_value.clear();
+            //m_label_value.clear();
+            m_value.clear();
             m_set_checked = true;
             break;
 
@@ -428,8 +431,8 @@ eStatus eTreeNode::draw(
     eComponent *child;
     os_int text_w, edit_w, full_edit_w, unit_w, relative_x2, path_w, ipath_w, unit_spacer,
         total_w, total_h, w_left, h;
-    const os_char *label, *value, *text, *unit, *path;
-    ImGuiInputTextFlags eflags;
+    const os_char *label, /* *value, */ *text, *unit, *path;
+    // ImGuiInputTextFlags eflags;
     bool isopen;
 
     add_to_zorder(prm.window, prm.layer);
@@ -465,7 +468,7 @@ eStatus eTreeNode::draw(
 
     /* Decide on column widths.
      */
-    text_w = 250;
+    text_w = 350;
     full_edit_w = 200;
     if (m_attr.showas() == E_SHOWAS_CHECKBOX) {
         edit_w = ImGui::GetFrameHeight();
@@ -511,6 +514,9 @@ eStatus eTreeNode::draw(
     ImGui::SameLine(relative_x2 - edit_w - unit_spacer - unit_w - path_w - ipath_w);
     ImGui::SetNextItemWidth(edit_w);
 
+    draw_value(prm, edit_w, &total_h);
+
+#if 0
     if (m_edit_value) {
         label = m_label_edit.get(this);
 
@@ -550,6 +556,7 @@ eStatus eTreeNode::draw(
         if (h > total_h) total_h = h;
     }
     else {
+
         value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
 
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
@@ -585,7 +592,7 @@ eStatus eTreeNode::draw(
             draw_tooltip();
         }
     }
-
+#endif
     if (unit_w > 0) {
         unit = m_unit.get(this, ECOMP_UNIT);
         if (*unit != '\0') {
@@ -624,10 +631,6 @@ eStatus eTreeNode::draw(
         draw_underline(m_rect.y1 + total_h - 1);
     }
 
-    /* Draw marker for state bits if we have an extended value.
-     */
-    draw_state_bits(m_rect.x2 - edit_w - unit_spacer - unit_w - path_w - ipath_w);
-
     if (isopen)
     {
         for (child = firstcomponent(EOID_GUI_COMPONENT);
@@ -644,6 +647,82 @@ eStatus eTreeNode::draw(
     eComponent::draw(prm);
 
     return ESTATUS_SUCCESS;
+}
+
+
+
+/* value_w Set -1 if drawing in table.
+ */
+void eTreeNode::draw_value(
+    eDrawParams& prm,
+    os_int value_w,
+    os_int *total_h)
+{
+    const os_char *label;
+    const ImVec2 zero_pad(0, 0);
+    ImGuiInputTextFlags eflags;
+    os_int h;
+
+    if (m_edit_value) {
+
+        label = m_label_edit.get(this);
+
+        switch (m_attr.showas())
+        {
+            case E_SHOWAS_INTEGER_NUMBER:
+            case E_SHOWAS_DECIMAL_NUMBER:
+                eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll;
+                break;
+
+            default:
+                eflags = ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll;
+                break;
+        }
+
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
+        ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
+        if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
+        {
+            eVariable value, nice_value;
+            propertyv(ECOMP_VALUE, &value);
+            nice_value.setv(&value);
+            enice_value_for_ui(&nice_value, this, &m_attr);
+
+            m_edit_value = false;
+            if (os_strcmp(m_edit_buf.ptr(), nice_value.gets())) {
+                eVariable new_value;
+                new_value.sets(m_edit_buf.ptr());
+                enice_ui_value_to_internal_type(&value, &new_value, this, &m_attr);
+                setpropertyv(ECOMP_VALUE, &value);
+            }
+        }
+        else {
+            if (!m_prev_edit_value) {
+                ImGui::SetKeyboardFocusHere(-1);
+                m_prev_edit_value = true;
+            }
+        }
+
+        h = ImGui::GetItemRectSize().y;
+        if (h > *total_h) *total_h = h;
+
+        ImGui::PopStyleVar();
+
+
+        // WE SHOULD SET m_value rect here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
+    else {
+        /* Draw value (not editing).
+         */
+        eVariable value;
+        // value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
+        value = m_value.get(this, ECOMP_VALUE, &m_attr, ESTRBUF_SINGLELINE);
+        // edraw_value(&value, m_label_value.sbits(), this, m_attr, value_w, &m_value_rect);
+        edraw_value(&value, m_value.sbits(), this, m_attr, value_w, &m_value_rect);
+        if (value_w < 0) {
+            m_rect = m_value_rect;
+        }
+    }
 }
 
 
@@ -671,59 +750,6 @@ void eTreeNode::draw_underline(
     draw_list->AddRect(top_left, bottom_right, col);
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Draw marker for state bits if we have extended value
-
-****************************************************************************************************
-*/
-void eTreeNode::draw_state_bits(
-    os_int x)
-{
-    os_int state_bits;
-    float circ_x, circ_y;
-    const os_int rad = 8;
-
-    if (!m_edit_value && m_label_value.isx())
-    {
-        ImVec4 colf;
-
-        state_bits = m_label_value.sbits();
-        colf = ImVec4(0.5f, 0.5f, 0.5f, 0.5f);
-        switch (state_bits & OSAL_STATE_ERROR_MASK)
-        {
-            case OSAL_STATE_YELLOW:
-                if (state_bits & OSAL_STATE_CONNECTED) {
-                    colf = ImVec4(0.8f, 0.8f, 0.2f, 0.5f /* alpha */);
-                }
-                break;
-
-            case OSAL_STATE_ORANGE:
-                if (state_bits & OSAL_STATE_CONNECTED) {
-                    colf = ImVec4(1.0f, 0.7f, 0.0f, 0.5f);
-                }
-                break;
-
-            case OSAL_STATE_RED:
-                colf = ImVec4(1.0f, 0.0f, 0.0f, 0.5f);
-                break;
-
-            default:
-                if (state_bits & OSAL_STATE_CONNECTED) {
-                    return;
-                }
-                break;
-        }
-
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImU32 col = ImColor(colf);
-        circ_x = (float)(x + 3*rad/2);
-        circ_y = m_rect.y1 + 0.5 * (m_rect.y2 - m_rect.y1 + 1);
-        draw_list->AddCircleFilled(ImVec2(circ_x, circ_y), rad, col, 0);
-    }
-}
 
 /**
 ****************************************************************************************************
@@ -813,6 +839,38 @@ void eTreeNode::draw_tooltip()
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Component clicked.
+
+  The eTreeNode::on_click() function is called when a component is clicked. If the component
+  processess the mouse click, it returns OS_TRUE. This indicates that the click has been
+  processed. If it doesn't process the click, it call's eComponent base classess'es on_click()
+  function to try if base class wants to process the click.
+  When the mouse click is not processed, it is passed to parent object in z order.
+
+  @param   prm Drawing parameters, notice especially edit_mode.
+  @param   mouse_button_nr Which mouse button, for example EIMGUI_LEFT_MOUSE_BUTTON.
+
+  @return  OS_TRUE if mouse click was processed by this component, or OS_FALSE if not.
+
+****************************************************************************************************
+*/
+os_boolean eTreeNode::on_click(
+    eDrawParams& prm,
+    os_int mouse_button_nr)
+{
+    if (!prm.edit_mode && mouse_button_nr == EIMGUI_LEFT_MOUSE_BUTTON) {
+        if (erect_is_point_inside(m_value_rect, prm.mouse_pos)) {
+            activate();
+            return OS_TRUE;
+        }
+    }
+    return eComponent::on_click(prm, mouse_button_nr);
 }
 
 

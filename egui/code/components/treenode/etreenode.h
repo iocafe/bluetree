@@ -109,6 +109,12 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
+    /* Component clicked (mouse).
+     */
+    os_boolean on_click(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
+
     /* Activate the component (start editing value, toggle checkbox, or show drop down list).
      */
     virtual void activate();
@@ -124,8 +130,14 @@ protected:
       Member variables.
     ************************************************************************************************
     */
-    void draw_underline(os_int y);
-    void draw_state_bits(os_int x);
+    void draw_value(
+        eDrawParams& prm,
+        os_int value_w,
+        os_int *total_h);
+
+    void draw_underline(
+        os_int y);
+
     virtual void draw_tooltip();
 
     void request_object_info();
@@ -170,13 +182,15 @@ protected:
     eAttrBuffer m_attr;
 
     eAutoLabel m_label_node;
-    eAutoLabel m_label_value;
+    eStrBuffer m_value;
+    // eAutoLabel m_label_value;
     eAutoLabel m_label_edit;
 
 #if ETREENODE_TOOLTIPS_FOR_DEBUG
     os_uint m_object_flags;
 #endif
 
+    eRect m_value_rect;
 };
 
 
