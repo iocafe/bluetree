@@ -118,9 +118,9 @@ void edraw_value(
     }
 
 
-   /* Tool tip
+    /* Tool tip
      */
-    if (ImGui::IsItemHovered()) {
+    if (value_w >= 0) if (ImGui::IsItemHovered()) {
         compo->draw_tooltip();
     }
 }
@@ -172,4 +172,85 @@ static void edraw_state_bits(
     circ_x = (float)(r->x1 + 3*rad/2);
     circ_y = r->y1 + 0.5F * (r->y2 - r->y1);
     draw_list->AddCircleFilled(ImVec2(circ_x, circ_y), rad, col, 0);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Draw tool tip, called when mouse is hovering over the value
+
+****************************************************************************************************
+*/
+void edraw_tooltip(
+    eObject *obj,
+    eVariable *value,
+    const os_char *otext,
+    eAttrBuffer& oattr)
+{
+    eVariable text, item;
+    eValueX *ex;
+    os_long utc;
+    os_int state_bits;
+    os_boolean worth_showing = OS_FALSE;
+
+#define E_DEBUG_TOOLTIPS 1
+
+#if E_DEBUG_TOOLTIPS
+    text.sets(otext);
+    text.singleline();
+#endif
+    obj->propertyv(ECOMP_TTIP, &item);
+    if (!item.isempty()) {
+        if (!text.isempty()) text += "\n";
+        text += item;
+        worth_showing = OS_TRUE;
+    }
+
+    if (value) if (!value->isempty()) {
+        ex = value->getx();
+        if (ex) {
+            state_bits = ex->sbits();
+
+            utc = ex->tstamp();
+            if (etime_timestamp_str(utc, &item) == ESTATUS_SUCCESS)
+            {
+                if (!text.isempty()) text += "\n";
+                text += "updated ";
+                text += item;
+                worth_showing = OS_TRUE;
+            }
+
+            if ((state_bits & OSAL_STATE_CONNECTED) == 0) {
+                if (!text.isempty()) text += "\n";
+                text += "signal is disconnected";
+                worth_showing = OS_TRUE;
+            }
+            if (state_bits & OSAL_STATE_ERROR_MASK) {
+                if (state_bits & OSAL_STATE_CONNECTED) {
+                    if (!text.isempty()) text += "\n";
+                    text += "signal ";
+                }
+                else {
+                    text += ", ";
+                }
+                switch (state_bits & OSAL_STATE_ERROR_MASK)
+                {
+                    case OSAL_STATE_YELLOW: text += "warning"; break;
+                    default:
+                    case OSAL_STATE_ORANGE: text += "error"; break;
+                    case OSAL_STATE_RED: text += "fault"; break;
+                }
+                worth_showing = OS_TRUE;
+            }
+        }
+    }
+
+    if (worth_showing) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(text.gets());
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 }

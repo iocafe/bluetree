@@ -110,6 +110,9 @@ public:
         eMatrix *m,
         eTableView *view);
 
+    void draw_tooltip(
+        eVariable *col_conf);
+
     void activate(
         eMatrix *focus_row,
         os_int focus_column,

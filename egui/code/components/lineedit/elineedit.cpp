@@ -316,6 +316,7 @@ void eLineEdit::draw_value(
 
         ImGui::PopStyleVar();
 
+
         // WE SHOULD SET m_value rect here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
     else {
@@ -327,14 +328,6 @@ void eLineEdit::draw_value(
         if (value_w < 0) {
             m_rect = m_value_rect;
         }
-
-        /* Edit cell upon mouse click.
-         */
-        /* if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON]) {
-            if (erect_is_point_inside(r, prm.mouse_pos) && !prm.edit_mode) {
-                activate();
-            }
-        } */
     }
 }
 
@@ -347,6 +340,7 @@ void eLineEdit::draw_value(
 
 ****************************************************************************************************
 */
+#if 0
 void eLineEdit::draw_tooltip()
 {
     eVariable text, item;
@@ -412,6 +406,14 @@ void eLineEdit::draw_tooltip()
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
+}
+#endif
+
+void eLineEdit::draw_tooltip()
+{
+    eVariable value;
+    propertyv(ECOMP_VALUE, &value);
+    edraw_tooltip(this, &value, m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE), m_attr);
 }
 
 

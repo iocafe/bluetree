@@ -27,4 +27,10 @@ void edraw_value(
     os_int value_w = -1,
     eRect *r = OS_NULL);
 
+void edraw_tooltip(
+    eObject *obj,
+    eVariable *value,
+    const os_char *otext,
+    eAttrBuffer& oattr);
+
 #endif

@@ -202,7 +202,8 @@ eStatus eTableView::draw(
 {
     eTableColumn *c;
     eMatrix *m, *focused_m;
-    eVariable *value;
+    eVariable *value, *col_conf;
+    eContainer *rscols;
     os_int nrows, ncols, total_w, total_h;
     os_int row, column;
     ImVec2 size, rmax, origin;
@@ -340,6 +341,17 @@ eStatus eTableView::draw(
         delete value;
 
         m_hovered_column = ImGui::TableGetHoveredColumn();
+        if (m_hovered_column >= 0) {
+            c = eTableColumn::cast(m_columns->first(m_hovered_column));
+            rscols = m_rowset->columns();
+
+            if (c && rscols) {
+                col_conf = eVariable::cast(rscols->first(m_hovered_column));
+                if (col_conf) {
+                    c->draw_tooltip(col_conf);
+                }
+            }
+        }
 
         /* Edit cell upon mouse click.
          */
