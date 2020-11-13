@@ -69,6 +69,7 @@ void eTableView::edit_row_dialog(
 
         e = new eLineEdit(p);
         v->propertyv(EVARP_TEXT, &value);
+        value.singleline();
         e->setpropertyv(EVARP_TEXT, value.isempty() ? n : &value);
 
         i = 0;

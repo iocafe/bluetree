@@ -112,12 +112,12 @@ void eTableColumn::setup_column(
         m_name.setv(n);
     }
 
-    m_text.get(col_conf, EVARP_TEXT);
+    m_attr.for_variable(col_conf);
+    m_text.get(col_conf, EVARP_TEXT, &m_attr);
     if (m_text.isempty()) {
         m_text.setv(n);
     }
-    m_unit.get(col_conf, EVARP_UNIT);
-    m_attr.for_variable(col_conf);
+    m_unit.get(col_conf, EVARP_UNIT, &m_attr, ESTRBUF_SINGLELINE);
 }
 
 
@@ -125,17 +125,26 @@ void eTableColumn::prepare_column_header_for_drawing()
 {
     const os_char *text;
     os_int col_nr;
+    eVariable *tmp = OS_NULL;
 
     col_nr = oid();
 
     text = m_text.ptr();
-    // text = m_name.ptr();
     if (text == OS_NULL) {
         text = "?";
     }
 
+    if (os_strchr(text, '\n')) {
+        tmp = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+        tmp->sets(text);
+        tmp->singleline();
+        text = tmp->gets();
+    }
+
     ImGui::TableSetupColumn(text, col_nr == 0 ? ImGuiTableColumnFlags_NoHide
         : ImGuiTableColumnFlags_None);
+
+    delete tmp;
 }
 
 void eTableColumn::draw_column_header(
@@ -241,83 +250,16 @@ os_int eTableColumn::count_header_row_lines()
     return nro_lines;
 }
 
+/** Modifies value
+*/
 void eTableColumn::draw_value(
     eVariable *value,
     eTableView *view)
 {
+    value->singleline();
     edraw_value(value, value->sbits(), view, m_attr);
 }
 
-#if 0
-// Modifies value argument
-void eTableColumn::draw_value(
-    eVariable *value,
-    eMatrix *m,
-    eTableView *view)
-{
-    const os_char *text;
-    ImVec2 pos, pos_max;
-    ImU32 box_col, check_col;
-    ImDrawList *draw_list;
-    int extra_w, x_pos;
-    bool checked;
-
-    switch (m_attr.showas())
-    {
-        case E_SHOWAS_CHECKBOX:
-            {
-                checked = (bool)value->getl();
-
-                const os_int pad = 2;
-                os_int square_sz = ImGui::GetFrameHeight();
-                square_sz -= 3 * pad;
-
-                pos = ImGui::GetCursorScreenPos();
-                pos.x += pad;
-
-                if (m_attr.alignment() != E_ALIGN_LEFT) {
-                    extra_w = ImGui::GetColumnWidth() - (square_sz + 2 * pad);
-                    if (extra_w > 0) {
-                        if (m_attr.alignment() == E_ALIGN_CENTER) extra_w /= 2;
-                        pos.x += extra_w;
-                    }
-                }
-
-                pos_max = pos;
-                pos_max.x += square_sz;
-                pos_max.y += square_sz;
-
-                box_col = ImGui::GetColorU32(ImGuiCol_Border);
-                draw_list = ImGui::GetWindowDrawList();
-                draw_list->AddRect(pos, pos_max, box_col, 0);
-                if (checked) {
-                    check_col = ImGui::GetColorU32(ImGuiCol_CheckMark);
-                    pos.x++;
-                    ImGui::RenderCheckMark(draw_list, pos, check_col, square_sz - pad);
-                }
-            }
-            break;
-
-        default:
-            enice_value_for_ui(value, view, &m_attr);
-            text = value->gets();
-
-            /* Align left, center, or right.
-             */
-            if (m_attr.alignment() != E_ALIGN_LEFT) {
-                extra_w = ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x;
-                if (extra_w > 0) {
-                    x_pos = ImGui::GetCursorPosX();
-                    x_pos += (m_attr.alignment() == E_ALIGN_RIGHT) ? extra_w : extra_w/2;
-                    ImGui::SetCursorPosX(x_pos);
-                }
-            }
-
-            ImGui::TextUnformatted(text);
-            break;
-    }
-}
-#endif
 
 /** Modifies value
 */

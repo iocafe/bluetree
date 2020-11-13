@@ -838,6 +838,7 @@ os_boolean eComponent::on_click(
     else {
         if (prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON]) {
             right_click_popup(prm);
+            return OS_TRUE;
         }
     }
 

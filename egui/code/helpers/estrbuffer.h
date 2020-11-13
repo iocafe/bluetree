@@ -18,6 +18,9 @@
 #define ESTRBUFFER_H_
 #include "egui.h"
 
+#define ESTRBUF_DEFAULT 0
+#define ESTRBUF_SINGLELINE 1
+
 /**
 ****************************************************************************************************
 
@@ -40,7 +43,8 @@ public:
     const os_char *get(
         eObject *component,
         os_int propertynr,
-        eAttrBuffer *attr = OS_NULL);
+        eAttrBuffer *attr = OS_NULL,
+        os_int flags = ESTRBUF_DEFAULT);
 
     void setv(
         eVariable *value);

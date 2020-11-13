@@ -425,6 +425,16 @@ os_boolean eTableView::on_click(
 
         return OS_TRUE;
     }
+
+    /* Allow ImGui to handle right clicks to table header
+     */
+    if (mouse_button_nr == EIMGUI_RIGHT_MOUSE_BUTTON) {
+       row = (prm.mouse_pos.y - m_logical_data_start_y);
+       if (row <= 0) {
+            return OS_TRUE;
+       }
+    }
+
     return eComponent::on_click(prm, mouse_button_nr);
 }
 

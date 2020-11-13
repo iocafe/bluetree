@@ -141,7 +141,7 @@ for (int i = 0; i<150; i++) {
 
         column = new eVariable(columns);
         column->addname("tstamp", ENAME_NO_MAP);
-        column->setpropertys(EVARP_TEXT, "aika\nleiska");
+        column->setpropertys(EVARP_TEXT, "aika-\nleiska");
         column->setpropertys(ECOMP_ATTR, "tstamp=\"yy,sec\"");
 
         column = new eVariable(columns);

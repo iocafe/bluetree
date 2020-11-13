@@ -396,6 +396,10 @@ public:
      */
     os_boolean is_oix();
 
+    /* Remove new lines from string.
+     */
+    void singleline();
+
     /* Remove stuff from path what becomes unnecessary when oix is appended to it.
      */
     os_boolean clean_to_append_oix();

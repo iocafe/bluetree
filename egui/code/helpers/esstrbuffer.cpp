@@ -113,17 +113,24 @@ void eStrBuffer::appends(
 /* This function is typically used only when drawing, etc to avoid buffer allocation when
    inactive in memory. obj pointer is used to get property value and context for translation redirects, etc.
    @param  attr Can be os NULL if not needed.
+   @param  flags ESTRBUF_DEFAULT, ESTRBUF_SINGLELINE
  */
+
 const os_char *eStrBuffer::get(
     eObject *obj,
     os_int propertynr,
-    eAttrBuffer *attr)
+    eAttrBuffer *attr,
+    os_int flags)
 {
     eVariable *tmp;
 
     if (m_buf_sz == 0) {
         tmp = new eVariable(obj, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
         obj->propertyv(propertynr, tmp);
+
+        if (flags & ESTRBUF_SINGLELINE) {
+            tmp->singleline();
+        }
 
         // Here we could do language translation !!!!!!!!!!!!!!!!
 

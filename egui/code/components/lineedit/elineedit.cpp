@@ -136,7 +136,7 @@ eStatus eLineEdit::onpropertychange(
     switch (propertynr)
     {
         case ECOMP_VALUE: /* clear label to display new text and proceed */
-            m_label_value.clear();
+            m_value.clear();
             break;
 
         case ECOMP_TEXT:
@@ -153,7 +153,7 @@ eStatus eLineEdit::onpropertychange(
         case EVARP_MAX:
         case EVARP_TYPE:
         case EVARP_ATTR:
-            m_label_value.clear();
+            m_value.clear();
             m_attr.clear();
             break;
 
@@ -195,7 +195,7 @@ eStatus eLineEdit::draw(
     m_rect.x1 = cpos.x;
     m_rect.y1 = cpos.y;
 
-    ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT));
+    ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE));
     total_h = ImGui::GetItemRectSize().y;
 
     if (m_attr.showas() == E_SHOWAS_CHECKBOX) {
@@ -212,7 +212,7 @@ eStatus eLineEdit::draw(
 
     draw_value(prm, edit_w, &total_h);
 
-    unit = m_unit.get(this, ECOMP_UNIT);
+    unit = m_unit.get(this, ECOMP_UNIT, &m_attr, ESTRBUF_SINGLELINE);
     if (*unit != '\0') {
         ImGui::SameLine(relative_x2 - unit_w);
         ImGui::SetNextItemWidth(unit_w);
@@ -240,7 +240,7 @@ void eLineEdit::draw_in_parameter_list(
     m_attr.for_variable(this);
 
     if (ImGui::TableSetColumnIndex(0)) {
-        ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT));
+        ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE));
     }
 
     if (ImGui::TableSetColumnIndex(1)) {
@@ -248,7 +248,7 @@ void eLineEdit::draw_in_parameter_list(
     }
 
     if (ImGui::TableSetColumnIndex(2)) {
-        unit = m_unit.get(this, ECOMP_UNIT);
+        unit = m_unit.get(this, ECOMP_UNIT, &m_attr, ESTRBUF_SINGLELINE);
         if (*unit != '\0') {
             ImGui::TextUnformatted(unit);
         }
@@ -322,8 +322,8 @@ void eLineEdit::draw_value(
         /* Draw value (not editing).
          */
         eVariable value;
-        value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
-        edraw_value(&value, m_label_value.sbits(), this, m_attr, value_w, &m_value_rect);
+        value = m_value.get(this, ECOMP_VALUE, &m_attr, ESTRBUF_SINGLELINE);
+        edraw_value(&value, m_value.sbits(), this, m_attr, value_w, &m_value_rect);
         if (value_w < 0) {
             m_rect = m_value_rect;
         }
@@ -358,7 +358,7 @@ void eLineEdit::draw_tooltip()
 #define E_DEBUG_TOOLTIPS 0
 
 #if E_DEBUG_TOOLTIPS
-    text.sets(m_text.get(this, ECOMP_TEXT));
+    text.sets(m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE));
 #endif
     propertyv(ECOMP_TTIP, &item);
     if (!item.isempty()) {

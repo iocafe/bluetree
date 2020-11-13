@@ -154,8 +154,7 @@ protected:
     eAttrBuffer m_attr;
 
     eAutoLabel m_label_edit;
-    // eAutoLabel m_label_value;
-    eStrBuffer  m_label_value;
+    eStrBuffer m_value;
 
     eRect m_value_rect;
 };

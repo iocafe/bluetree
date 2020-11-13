@@ -1922,6 +1922,52 @@ os_boolean eVariable::is_oix()
 /**
 ****************************************************************************************************
 
+  @brief Remove new lines from string.
+
+  If variable contains a string, convert new line characters to spaces and remove "-\n".
+  @return OS_TRUE if object name is oix.
+
+****************************************************************************************************
+*/
+void eVariable::singleline()
+{
+    os_char *p, *q;
+    os_memsz used;
+
+    if (type() != OS_STR) return;
+
+    if (m_vflags & EVAR_STRBUF_ALLOCATED) {
+        p = m_value.strptr.ptr;
+        used = m_value.strptr.used;
+    }
+    else {
+        p = m_value.strbuf.buf;
+        used = m_value.strbuf.used;
+    }
+    if (os_strchr(p, '\n') == OS_NULL) return;
+
+    while ((q = os_strstr(p, "-\n", OSAL_STRING_DEFAULT))) {
+        os_memmove(q, q + 2, used - (q - p));
+        used -= 2;
+    }
+
+    while ((q = os_strchr(p, '\n'))) {
+        *q = ' ';
+        p = q + 1;
+    }
+
+    if (m_vflags & EVAR_STRBUF_ALLOCATED) {
+        m_value.strptr.used = used;
+    }
+    else {
+        m_value.strbuf.used = used;
+    }
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Remove stuff from path what becomes unnecessary when oix is appended to it.
 
   If a path contains oix object name like "@401_3", the last object name is removed.
