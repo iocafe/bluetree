@@ -286,7 +286,7 @@ eStatus eWindow::draw(
     /* Draw child components and setup Z order.
      */
     clear_zorder();
-    for (c = firstcomponent(EOID_GUI_COMPONENT); c; c = c->nextcomponent(EOID_GUI_COMPONENT))
+    for (c = firstcomponent(); c; c = c->nextcomponent())
     {
         c->draw(wprm);
     }

@@ -109,6 +109,11 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
+    /* Draw the component within parameter list.
+     */
+    virtual void draw_in_parameter_list(
+        eDrawParams& prm);
+
     /* Component clicked (mouse).
      */
     os_boolean on_click(

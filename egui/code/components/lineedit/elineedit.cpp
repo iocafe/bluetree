@@ -346,7 +346,7 @@ void eLineEdit::draw_tooltip()
     propertyv(ECOMP_VALUE, &value);
     edraw_tooltip(this, &value,
         m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE),
-        m_attr, EDRAW_TTIP_DEFAULT);
+        OS_NULL, m_attr, EDRAW_TTIP_DEFAULT);
 }
 
 

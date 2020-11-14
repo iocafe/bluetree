@@ -148,7 +148,7 @@ void eTreeNode::onmessage(
 
                 content = eContainer::cast(envelope->content());
 
-                while ((child = firstcomponent(EOID_GUI_COMPONENT)))
+                while ((child = firstcomponent()))
                 {
                     delete child;
                 }
@@ -549,9 +549,9 @@ eStatus eTreeNode::draw(
 
     if (isopen)
     {
-        for (child = firstcomponent(EOID_GUI_COMPONENT);
+        for (child = firstcomponent();
              child;
-             child = child->nextcomponent(EOID_GUI_COMPONENT))
+             child = child->nextcomponent())
         {
             child->draw(prm);
         }
@@ -566,6 +566,76 @@ eStatus eTreeNode::draw(
 }
 
 
+void eTreeNode::draw_in_parameter_list(
+    eDrawParams& prm)
+{
+    os_int total_h = 0;
+    eComponent *child;
+    const os_char *label, *text, *unit, *path;
+    bool isopen;
+
+    add_to_zorder(prm.window, prm.layer);
+    m_attr.for_variable(this);
+
+    if (m_autoopen)
+    {
+        ImGui::SetNextItemOpen(true);
+        m_autoopen = false;
+    }
+
+    if (!ImGui::TableSetColumnIndex(0)) {
+        return;
+    }
+    label = m_label_node.get(this);
+    text = m_text.get(this, ECOMP_TEXT);
+    isopen = ImGui::TreeNodeEx(label, m_show_expand_arrow
+        ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_Leaf, "%s", text);
+
+    /* If we open the component, request information.
+     */
+    if (isopen != m_isopen) {
+        if (isopen && m_show_expand_arrow && !m_child_data_received) {
+            request_object_info();
+        }
+        m_isopen = isopen;
+    }
+
+    if (ImGui::TableSetColumnIndex(1)) {
+        draw_value(prm, -1, &total_h);
+    }
+
+    if (ImGui::TableSetColumnIndex(2)) {
+        unit = m_unit.get(this, ECOMP_UNIT, &m_attr, ESTRBUF_SINGLELINE);
+        if (*unit != '\0') {
+            ImGui::TextUnformatted(unit);
+        }
+    }
+
+    if (ImGui::TableSetColumnIndex(3)) {
+        path = m_path.get(this, ECOMP_PATH, &m_attr, ESTRBUF_SINGLELINE);
+        if (*path != '\0') {
+            ImGui::TextUnformatted(path);
+        }
+    }
+
+    if (isopen)
+    {
+        for (child = firstcomponent();
+             child;
+             child = child->nextcomponent())
+        {
+            ImGui::TableNextRow();
+
+            child->draw_in_parameter_list(prm);
+        }
+        ImGui::TreePop();
+    }
+
+    /* Let base class implementation handle the rest.
+     */
+    eComponent::draw(prm);
+}
+
 
 /* value_w Set -1 if drawing in table.
  */
@@ -579,8 +649,8 @@ void eTreeNode::draw_value(
     ImGuiInputTextFlags eflags;
     os_int h;
 
-    if (m_edit_value) {
-
+    if (m_edit_value)
+    {
         label = m_label_edit.get(this);
 
         switch (m_attr.showas())
@@ -673,6 +743,29 @@ void eTreeNode::draw_underline(
 */
 void eTreeNode::draw_tooltip()
 {
+    eVariable value, flagvar;
+    os_char *flagstr;
+
+    propertyv(ECOMP_VALUE, &value);
+    eobjflags_to_str(&flagvar, m_object_flags);
+    flagstr = flagvar.gets();
+
+    edraw_tooltip(this, &value,
+        m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE),
+        flagstr,
+        m_attr, EDRAW_TTIP_PATH|EDRAW_TTIP_IPATH);
+
+/*    eObject *obj,
+    eVariable *value,
+    const os_char *otext,
+    const os_char *path,
+    const os_char *ipath,
+    const os_char *flags,
+    eAttrBuffer& oattr,
+    os_int flags);
+
+
+
     eVariable text, item;
     eValueX *ex;
     const os_char *str;
@@ -752,6 +845,7 @@ void eTreeNode::draw_tooltip()
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
+  */
 }
 
 

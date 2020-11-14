@@ -223,9 +223,9 @@ eStatus ePopup::draw(
 
     if (ImGui::BeginPopup(label))
     {
-        for (c = firstcomponent(EOID_GUI_COMPONENT);
+        for (c = firstcomponent();
              c;
-             c = c->nextcomponent(EOID_GUI_COMPONENT))
+             c = c->nextcomponent())
         {
             c->draw(wprm);
         }

@@ -30,6 +30,7 @@ eParameterList::eParameterList(
     m_component = OS_NULL;
     m_nro_components = 0;
     m_component_array_sz = 0;
+    m_is_treebrowser = OS_FALSE;
 }
 
 
@@ -159,7 +160,7 @@ eStatus eParameterList::draw(
     eDrawParams& prm)
 {
     eComponent *c;
-    os_int total_w, total_h, ys;
+    os_int total_w, total_h, ys, ncols;
     os_int row; // , column;
     ImVec2 size, rmax, origin;
     ImVec2 cpos;
@@ -193,11 +194,12 @@ eStatus eParameterList::draw(
 
     static int freeze_cols = 1;
     static int freeze_rows = 0; // 1;
-    static int ncols = 3;
+    ncols = m_is_treebrowser ? 4 : 3;
 
     // When using ScrollX or ScrollY we need to specify a size for our table container!
     // Otherwise by default the table will fit all available space, like a BeginChild() call.
-    size = ImVec2(0, TEXT_BASE_HEIGHT * m_nro_components /* + 2*TEXT_BASE_HEIGHT/3 */);
+    size = ImVec2(0, m_is_treebrowser ? 0 : TEXT_BASE_HEIGHT * m_nro_components);
+
     if (ImGui::BeginTable("##table3", ncols, flags, size))
     {
         rmax = ImGui::GetContentRegionMax();
@@ -230,9 +232,13 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
 
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
 
-        ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_NoHide, 150);
+        ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_NoHide,
+            m_is_treebrowser ? 200 : 150);
         ImGui::TableSetupColumn("value", ImGuiTableColumnFlags_NoHide, 150);
         ImGui::TableSetupColumn("unit", ImGuiTableColumnFlags_NoHide, 30);
+        if (m_is_treebrowser) {
+            ImGui::TableSetupColumn("path", ImGuiTableColumnFlags_NoHide, 150);
+        }
 
         // ImGui::TableHeadersRow();
 
@@ -251,17 +257,20 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
                 }
                 c = m_component[row].m_ptr;
 
-                if (c->classid() == EGUICLASSID_LINE_EDIT)
-                {
-                    ((eLineEdit*)c)->draw_in_parameter_list(prm);
+                //if (c->classid() == EGUICLASSID_LINE_EDIT)
+                //{
+                if (!ImGui::TableSetColumnIndex(0)) {
+                    continue;
                 }
+                c->draw_in_parameter_list(prm);
+                /*}
                 else {
                     if (!ImGui::TableSetColumnIndex(0)) {
                         continue;
                     }
 
                     c->draw(prm);
-                }
+                }*/
 
             }
         }
@@ -320,12 +329,14 @@ try_again:
         max_components = m_component_array_sz / sizeof(ePrmListComponent);
     }
 
-    /* Draw child components and setup Z order.
-     */
-    for (c = firstcomponent(EOID_GUI_COMPONENT), nro_components = 0;
+    m_is_treebrowser = OS_FALSE;
+    for (c = firstcomponent(), nro_components = 0;
          c;
-         c = c->nextcomponent(EOID_GUI_COMPONENT), nro_components++)
+         c = c->nextcomponent(), nro_components++)
     {
+        if (c->classid() == EGUICLASSID_TREE_NODE) {
+            m_is_treebrowser = OS_TRUE;
+        }
         if (nro_components < max_components) {
             m_component[nro_components].m_ptr = c;
         }

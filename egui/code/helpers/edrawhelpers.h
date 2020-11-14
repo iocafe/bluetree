@@ -22,6 +22,8 @@
 
 #define EDRAW_TTIP_DEFAULT 0
 #define EDRAW_TTIP_CELL_VALUE 1
+#define EDRAW_TTIP_PATH 2
+#define EDRAW_TTIP_IPATH 4
 
 void edraw_value(
     eVariable *value,
@@ -35,6 +37,7 @@ void edraw_tooltip(
     eObject *obj,
     eVariable *value,
     const os_char *otext,
+    const os_char *flagstr,
     eAttrBuffer& oattr,
     os_int flags);
 

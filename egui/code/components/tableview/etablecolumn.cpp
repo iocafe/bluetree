@@ -323,7 +323,7 @@ void eTableColumn::draw_tooltip(
     os_int ttip_flags)
 {
     edraw_tooltip(col_conf, value,
-        m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE),
+        m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE), OS_NULL,
         m_attr, ttip_flags);
 }
 

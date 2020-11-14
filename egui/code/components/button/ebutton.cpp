@@ -197,13 +197,13 @@ eStatus eButton::draw(
 
     /* If this component has children, it contains a sub menu.
      */
-    c = firstcomponent(EOID_GUI_COMPONENT);
+    c = firstcomponent();
     if (c) {
             if (ImGui::BeginMenu(label))
             {
                 while (c) {
                     c->draw(prm);
-                    c = c->nextcomponent(EOID_GUI_COMPONENT);
+                    c = c->nextcomponent();
                 }
 
                 ImGui::EndMenu();

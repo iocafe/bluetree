@@ -134,8 +134,7 @@ protected:
     ePrmListComponent *m_component;
     os_int m_nro_components;
     os_memsz m_component_array_sz;
-
-
+    os_boolean m_is_treebrowser;
 };
 
 

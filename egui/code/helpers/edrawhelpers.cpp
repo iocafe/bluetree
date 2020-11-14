@@ -174,6 +174,7 @@ void edraw_tooltip(
     eObject *obj,
     eVariable *value,
     const os_char *otext,
+    const os_char *flagstr,
     eAttrBuffer& oattr,
     os_int flags)
 {
@@ -182,6 +183,7 @@ void edraw_tooltip(
     os_long utc;
     os_int state_bits;
     os_boolean worth_showing = OS_FALSE;
+    const os_char *str;
 
 #define E_DEBUG_TOOLTIPS 0
 
@@ -237,6 +239,48 @@ void edraw_tooltip(
             }
         }
     }
+
+
+    if (flags & EDRAW_TTIP_PATH)
+    {
+        obj->propertyv(ECOMP_PATH, &item);
+        str = item.gets();
+
+#if ETREENODE_TOOLTIPS_FOR_DEBUG
+        if (str) if (*str != '\0')
+#else
+        if (str) if (*str != '\0' && os_strchr((os_char*)str, '@') == OS_NULL)
+#endif
+        {
+            eliststr_appeneds(&text, "path: ");
+            text += str;
+            worth_showing = OS_TRUE;
+        }
+    }
+
+    if (flags & EDRAW_TTIP_IPATH)
+    {
+        obj->propertyv(ECOMP_IPATH, &item);
+        str = item.gets();
+#if ETREENODE_TOOLTIPS_FOR_DEBUG
+        if (str) if (*str != '\0')
+#else
+        if (str) if (*str != '\0' && os_strchr((os_char*)str, '@') == OS_NULL)
+#endif
+        {
+            eliststr_appeneds(&text, "ipath: ");
+            text += str;
+            worth_showing = OS_TRUE;
+        }
+    }
+
+#if ETREENODE_TOOLTIPS_FOR_DEBUG
+    if (flagstr) if (*flagstr) {
+        eliststr_appeneds(&text, "o-flags: ");
+        text += flagstr;
+        worth_showing = OS_TRUE;
+    }
+#endif
 
     if (worth_showing) {
         ImGui::BeginTooltip();
