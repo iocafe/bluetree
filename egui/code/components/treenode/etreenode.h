@@ -144,8 +144,6 @@ protected:
 
     void set_modified_value();
 
-    void set_checked();
-
     os_int setup_node(
         eVariable *item,
         eVariable& ipath,
@@ -159,8 +157,6 @@ protected:
     bool m_show_expand_arrow;
     bool m_edit_value;
     bool m_prev_edit_value;
-    bool m_set_checked;
-    bool m_imgui_checked;
     bool m_intermediate_node;
 
     os_boolean m_all;
@@ -183,7 +179,6 @@ protected:
 
     eAutoLabel m_label_node;
     eStrBuffer m_value;
-    // eAutoLabel m_label_value;
     eAutoLabel m_label_edit;
 
 #if ETREENODE_TOOLTIPS_FOR_DEBUG

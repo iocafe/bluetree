@@ -34,8 +34,6 @@ eTreeNode::eTreeNode(
     m_edit_value = false;
     m_prev_edit_value = false;
     m_show_expand_arrow = true;
-    m_set_checked = true;
-    m_imgui_checked = false;
 
     m_intermediate_node = false;
     m_node_type = 0;
@@ -367,9 +365,7 @@ eStatus eTreeNode::onpropertychange(
             if (m_received_change == 0) {
                 set_modified_value();
             }
-            // m_label_value.clear();
             m_value.clear();
-            m_set_checked = true;
             break;
 
         case ECOMP_TEXT:
@@ -387,9 +383,7 @@ eStatus eTreeNode::onpropertychange(
         case ECOMP_TYPE:
         case ECOMP_ATTR:
             m_attr.clear();
-            //m_label_value.clear();
             m_value.clear();
-            m_set_checked = true;
             break;
 
         case ECOMP_PATH:
@@ -432,7 +426,6 @@ eStatus eTreeNode::draw(
     os_int text_w, edit_w, full_edit_w, unit_w, relative_x2, path_w, ipath_w, unit_spacer,
         total_w, total_h, w_left, h;
     const os_char *label, /* *value, */ *text, *unit, *path;
-    // ImGuiInputTextFlags eflags;
     bool isopen;
 
     add_to_zorder(prm.window, prm.layer);
@@ -516,83 +509,6 @@ eStatus eTreeNode::draw(
 
     draw_value(prm, edit_w, &total_h);
 
-#if 0
-    if (m_edit_value) {
-        label = m_label_edit.get(this);
-
-        switch (m_attr.showas())
-        {
-            case E_SHOWAS_INTEGER_NUMBER:
-            case E_SHOWAS_DECIMAL_NUMBER:
-                eflags = ImGuiInputTextFlags_CharsDecimal|ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll;
-                break;
-
-            default:
-                eflags = ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll;
-                break;
-        }
-
-        ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
-        if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
-        {
-            eVariable value;
-            propertyv(ECOMP_VALUE, &value);
-            m_edit_value = false;
-            if (os_strcmp(m_edit_buf.ptr(), value.gets())) {
-                eVariable new_value;
-                new_value.sets(m_edit_buf.ptr());
-                enice_ui_value_to_internal_type(&value, &new_value, this, &m_attr);
-                setpropertyv(ECOMP_VALUE, &value);
-            }
-        }
-        else {
-            if (!m_prev_edit_value) {
-                ImGui::SetKeyboardFocusHere(-1);
-                m_prev_edit_value = true;
-            }
-        }
-
-        h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
-    }
-    else {
-
-        value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(1.0f, 0.5f));
-        switch (m_attr.showas())
-        {
-            case E_SHOWAS_CHECKBOX:
-                if (m_set_checked) {
-                    set_checked();
-                    m_set_checked = false;
-                }
-
-                label = m_label_edit.get(this);
-                if (ImGui::Checkbox(label, &m_imgui_checked))
-                {
-                    activate();
-                }
-                break;
-
-            default:
-                ImGui::Button(value, ImVec2(full_edit_w, 0));
-                if (ImGui::IsItemActive()) {
-                    activate();
-                }
-                break;
-        }
-        ImGui::PopStyleVar();
-        h = ImGui::GetItemRectSize().y;
-        if (h > total_h) total_h = h;
-
-        /* Tool tip
-         */
-        if (ImGui::IsItemHovered()) {
-            draw_tooltip();
-        }
-    }
-#endif
     if (unit_w > 0) {
         unit = m_unit.get(this, ECOMP_UNIT);
         if (*unit != '\0') {
@@ -708,16 +624,13 @@ void eTreeNode::draw_value(
 
         ImGui::PopStyleVar();
 
-
         // WE SHOULD SET m_value rect here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
     else {
         /* Draw value (not editing).
          */
         eVariable value;
-        // value = m_label_value.get(this, ECOMP_VALUE, &m_attr);
         value = m_value.get(this, ECOMP_VALUE, &m_attr, ESTRBUF_SINGLELINE);
-        // edraw_value(&value, m_label_value.sbits(), this, m_attr, value_w, &m_value_rect);
         edraw_value(&value, m_value.sbits(), this, m_attr, value_w, &m_value_rect);
         if (value_w < 0) {
             m_rect = m_value_rect;
@@ -892,8 +805,7 @@ void eTreeNode::activate()
     switch (m_attr.showas())
     {
         case E_SHOWAS_CHECKBOX:
-            setpropertyi(ECOMP_VALUE, m_imgui_checked);
-            m_set_checked = true;
+            setpropertyi(ECOMP_VALUE, propertyi(ECOMP_VALUE) ? OS_FALSE : OS_TRUE);
             break;
 
         case E_SHOWAS_DROP_DOWN_ENUM:
@@ -1019,21 +931,3 @@ void eTreeNode::set_modified_value()
     }
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Set value for ImGui checkmark, when needed.
-
-  The set_checked() function is called when drawing to set value to determine value for
-  m_imgui_checked boolean. Pointer to this boolean is passed to the ImGui to inform wether
-  to draw a check mark in to indicate true or false state of boolean.
-
-  @return  None.
-
-****************************************************************************************************
-*/
-void eTreeNode::set_checked()
-{
-    m_imgui_checked = propertyi(ECOMP_VALUE) ? true : false;
-}
