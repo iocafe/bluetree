@@ -115,14 +115,16 @@ public:
 
 protected:
 
-    void generate_component_array();
-
-
     /**
     ************************************************************************************************
       Protected functions.
     ************************************************************************************************
     */
+
+    void generate_component_array();
+
+    os_int count_subcomponents(
+        eComponent *compo);
 
 
     /**

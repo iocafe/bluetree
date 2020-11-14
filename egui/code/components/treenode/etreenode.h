@@ -129,6 +129,9 @@ public:
     virtual ePopup *right_click_popup(
         eDrawParams& prm);
 
+
+    os_boolean isopen() {return m_isopen;}
+
 protected:
     /**
     ************************************************************************************************

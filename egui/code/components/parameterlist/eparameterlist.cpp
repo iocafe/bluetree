@@ -257,51 +257,23 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
                 }
                 c = m_component[row].m_ptr;
 
-                //if (c->classid() == EGUICLASSID_LINE_EDIT)
-                //{
                 if (!ImGui::TableSetColumnIndex(0)) {
                     continue;
                 }
                 c->draw_in_parameter_list(prm);
-                /*}
-                else {
-                    if (!ImGui::TableSetColumnIndex(0)) {
-                        continue;
-                    }
-
-                    c->draw(prm);
-                }*/
 
             }
         }
 
-/*        if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON])
-        {
-            column = ImGui::TableGetHoveredColumn();
-            if (column >= 0 && column < m_row_to_m_len) {
-                c = eTableColumn::cast(m_columns->first(column));
-                row = (prm.mouse_pos.y - clipper.StartPosY) / TEXT_BASE_HEIGHT;
-                if (c && row >= 0 && row < nrows) {
-                    m = m_row_to_m[row].m_row;
-                    c->activate(m, column, this);
-                }
-            }
-        } */
-
         ImGui::EndTable();
     }
-
-    /* Tool tip
-     */
-    /* if (ImGui::IsItemHovered()) {
-        draw_tooltip();
-    } */
-
 
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
 }
+
+
 
 
 /**
@@ -330,22 +302,27 @@ try_again:
     }
 
     m_is_treebrowser = OS_FALSE;
+
     for (c = firstcomponent(), nro_components = 0;
          c;
          c = c->nextcomponent(), nro_components++)
     {
-        if (c->classid() == EGUICLASSID_TREE_NODE) {
-            m_is_treebrowser = OS_TRUE;
-        }
         if (nro_components < max_components) {
             m_component[nro_components].m_ptr = c;
         }
+
+        if (c->classid() == EGUICLASSID_TREE_NODE) {
+            m_is_treebrowser = OS_TRUE;
+        }
     }
+
     if (nro_components > max_components) {
         goto try_again;
     }
     m_nro_components = nro_components;
 }
+
+
 
 
 /**
