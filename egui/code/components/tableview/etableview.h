@@ -39,6 +39,12 @@ typedef struct
 eTableRow;
 
 
+/* FLags for edit_row_dialog().
+ */
+#define OETABLE_EDIT_ROW_NEW 1
+#define OETABLE_EDIT_ROW_COPY 2
+
+
 /**
 ****************************************************************************************************
   The eTableView is GUI component to display and modify variable value.
@@ -200,11 +206,16 @@ protected:
     /* Create dialog window to edit a row or add a new row.
      */
     void edit_row_dialog(
-        os_boolean create_new_row);
+        os_int flags);
 
     /* Create dialog window to delete row (or rows). This function can also just delete the row.
      */
     void delete_row_dialog();
+
+    /* Save new row or edit row dialog values to table.
+     */
+    void save_dialog_row(
+        os_int command);
 
     /* Collect information about this object for tree browser.
      */

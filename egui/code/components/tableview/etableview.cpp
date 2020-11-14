@@ -155,15 +155,20 @@ eStatus eTableView::onpropertychange(
         case ECOMP_COMMAND:
             switch (x->geti()) {
                 case ECOMPO_NEW_ROW:
-                    edit_row_dialog(OS_TRUE);
+                    edit_row_dialog(OETABLE_EDIT_ROW_NEW);
                     break;
 
                 case ECOMPO_EDIT_ROW:
-                    edit_row_dialog(OS_FALSE);
+                    edit_row_dialog(OETABLE_EDIT_ROW_COPY);
                     break;
 
                 case ECOMPO_DELETE_ROW:
                     delete_row_dialog();
+                    break;
+
+                case ECOMPO_INSERT_DLG_ROW:
+                case ECOMPO_UPDATE_DLG_ROW:
+                    save_dialog_row(x->geti());
                     break;
 
                 default:

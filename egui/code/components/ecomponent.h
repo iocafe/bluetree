@@ -218,7 +218,9 @@ typedef enum {
 
     ECOMPO_NEW_ROW,
     ECOMPO_EDIT_ROW,
-    ECOMPO_DELETE_ROW
+    ECOMPO_DELETE_ROW,
+    ECOMPO_INSERT_DLG_ROW,
+    ECOMPO_UPDATE_DLG_ROW
 }
 eCompoCommand;
 

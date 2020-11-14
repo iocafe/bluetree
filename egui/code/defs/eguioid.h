@@ -45,6 +45,7 @@
 #define EOID_GUI_WINDOW -102
 #define EOID_GUI_POPUP -103
 #define EOID_GUI_COMPONENT -104
+#define EOID_GUI_PARAMETER_LIST -105
 
 /* Misc objects used by components
  */

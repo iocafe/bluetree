@@ -32,7 +32,7 @@
 ****************************************************************************************************
 */
 void eTableView::edit_row_dialog(
-    os_boolean create_new_row)
+    os_int flags)
 {
     eWindow *w;
     eParameterList *p;
@@ -42,7 +42,9 @@ void eTableView::edit_row_dialog(
     eName *n;
     eMatrix *m;
     eVariable value;
+    eButton *button;
     os_int col_nr, i, propertynr;
+    os_char buf[E_OIXSTR_BUF_SZ + 32];
 
     static os_int copy_property_list[] = {EVARP_TYPE, EVARP_UNIT, EVARP_ATTR,
         EVARP_DEFAULT, EVARP_ABBR, EVARP_GROUP, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
@@ -52,22 +54,24 @@ void eTableView::edit_row_dialog(
     rscols = m_rowset->columns();
     if (rscols == OS_NULL) return;
 
-    m = eMatrix::cast(m_row_dialog_m->get());
-    if (m == OS_NULL) return;
-
     delete m_row_dialog->get();
 
+    m = eMatrix::cast(m_row_dialog_m->get());
+    if ((m == OS_NULL) && (flags & OETABLE_EDIT_ROW_COPY)) {
+        return;
+    }
+
     w = new eWindow(gui());
-    w->setpropertys(ECOMP_VALUE, !create_new_row ? "edit row" : "new row");
+    w->setpropertys(ECOMP_VALUE, (flags & OETABLE_EDIT_ROW_NEW) ? "new row" : "edit row");
 
     p = new eParameterList(w);
-
     for (v = rscols->firstv(), col_nr = 0; v; v = v->nextv(), col_nr++)
     {
         n = v->primaryname();
         if (n == OS_NULL) continue;
 
         e = new eLineEdit(p);
+        e->addname(n->gets(), ENAME_NO_MAP);
         v->propertyv(EVARP_TEXT, &value);
         value.singleline();
         e->setpropertyv(EVARP_TEXT, value.isempty() ? n : &value);
@@ -78,9 +82,25 @@ void eTableView::edit_row_dialog(
             e->setpropertyv(propertynr, &value);
         }
 
-        m->getv(0, v->oid(), &value);
+        if (flags & OETABLE_EDIT_ROW_COPY) {
+            m->getv(0, v->oid(), &value);
+        }
+        else {
+            v->propertyv(ECOMP_DEFAULT, &value);
+        }
         e->setpropertyv(ECOMP_VALUE, &value);
     }
+
+
+    oixstr(buf, sizeof(buf));
+    os_strncat(buf, "/_p/_command", sizeof(buf));
+
+    button = new eButton(w);
+    button->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
+    button->setpropertyl(ECOMP_SETVALUE,
+        (flags & OETABLE_EDIT_ROW_NEW) ? ECOMPO_INSERT_DLG_ROW : ECOMPO_UPDATE_DLG_ROW);
+    button->setpropertys(ECOMP_TARGET, buf);
+    button->setpropertys(ECOMP_TEXT, "ok");
 
     m_row_dialog->set(w);
 }
@@ -115,3 +135,60 @@ void eTableView::delete_row_dialog()
     m_rowset->remove(where_clause.gets());
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Create dialog window confirm delete row or rows.
+
+  The eTableView::delete_row_dialog functio...
+  For now, no window is created, row is deleted without warning!
+
+****************************************************************************************************
+*/
+void eTableView::save_dialog_row(
+    os_int command)
+{
+    eComponent *dlg, *plist, *c;
+    eMatrix *m;
+    eContainer *row;
+    eVariable *v;
+    eName *n;
+    os_int ix_col;
+    eVariable where_clause;
+
+    if (m_rowset == OS_NULL) return;
+    dlg = eComponent::cast(m_row_dialog->get());
+    if (dlg == OS_NULL) return;
+    plist = dlg->firstcomponent(EOID_GUI_PARAMETER_LIST);
+    if (plist == OS_NULL) return;
+
+    row = new eContainer(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+
+    for (c = plist->firstcomponent(); c; c = c->nextcomponent())
+    {
+        n = c->primaryname();
+        if (c->classid() != EGUICLASSID_LINE_EDIT || n == OS_NULL) continue;
+
+        v = new eVariable(row);
+        c->propertyv(ECOMP_VALUE, v);
+        v->addname(n->gets(), ENAME_NO_MAP);
+    }
+
+    ix_col = m_rowset->ix_column_nr();
+
+    if (command == ECOMPO_UPDATE_DLG_ROW) // Update
+    {
+        m = eMatrix::cast(m_row_dialog_m->get());
+        if (m == OS_NULL) return;
+        where_clause = "[";
+        where_clause += m->getl(0, ix_col);
+        where_clause += "]";
+        m_rowset->update(where_clause.gets(), row, ETABLE_ADOPT_ARGUMENT);
+    }
+
+    else {
+        m_rowset->insert(row, ETABLE_ADOPT_ARGUMENT);
+    }
+
+}

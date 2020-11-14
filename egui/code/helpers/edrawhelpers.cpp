@@ -37,7 +37,7 @@ void edraw_value(
     const os_char *text;
     ImVec2 pos, pos_max;
     ImU32 color, check_col;
-    ImVec4 fcolor;
+    // ImVec4 fcolor;
     ImDrawList *draw_list;
     int extra_w, x_pos;
     const os_int pad = 2;
@@ -113,8 +113,9 @@ void edraw_value(
                 ImGui::TextUnformatted(text);
             }
             else {
-                fcolor = ImGui::ColorConvertU32ToFloat4(edraw_get_state_color(state_bits));
-                ImGui::PushStyleColor(ImGuiCol_Text, fcolor);
+                ImGui::PushStyleColor(ImGuiCol_Text, edraw_get_state_color(state_bits));
+                // fcolor = ImGui::ColorConvertU32ToFloat4(edraw_get_state_color(state_bits));
+                // ImGui::PushStyleColor(ImGuiCol_Text, fcolor);
                 ImGui::TextUnformatted(text);
                 ImGui::PopStyleColor();
             }

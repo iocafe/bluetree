@@ -43,6 +43,7 @@ void etable_configure(
 
 /* Insert rows into table.
  * Row can be one row or container with multiple rows.
+ * @param  tflags ETABLE_ADOPT_ARGUMENT to delete or adopt rows argument.
  */
 void etable_insert(
     eObject *t,
@@ -60,6 +61,7 @@ void etable_insert(
 
 
 /* Update a row or rows of a table or insert a row to the table.
+ * @param  tflags ETABLE_ADOPT_ARGUMENT to delete or adopt rows argument.
  */
 void etable_update(
     eObject *t,

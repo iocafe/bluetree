@@ -49,7 +49,7 @@ public:
      */
     eParameterList(
         eObject *parent = OS_NULL,
-        e_oid id = EOID_GUI_COMPONENT,
+        e_oid id = EOID_GUI_PARAMETER_LIST,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.

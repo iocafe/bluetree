@@ -448,6 +448,7 @@ failed:
 
 /* Insert rows into table.
  * Row can be one row or container with multiple rows.
+ * @param  tflags ETABLE_ADOPT_ARGUMENT to delete or adopt rows argument.
  */
 void eRowSet::insert(
     eContainer *rows,
@@ -463,6 +464,7 @@ void eRowSet::insert(
 }
 
 /* Update a row or rows of a table.
+ * @param  tflags ETABLE_ADOPT_ARGUMENT to delete or adopt rows argument.
  */
 eStatus eRowSet::update(
     const os_char *where_clause,

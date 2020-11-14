@@ -179,6 +179,7 @@ eStatus eButton::draw(
     eComponent *c;
     const os_char *label;
     ImVec2 sz;
+    os_int cid;
 
     add_to_zorder(prm.window, prm.layer);
 
@@ -211,8 +212,38 @@ eStatus eButton::draw(
 
     }
     else {
-        if (ImGui::MenuItem(label, "", &m_imgui_toggl)) {
-            activate();
+        cid = parent()->classid();
+        if (cid == EGUICLASSID_POPUP || cid == EGUICLASSID_BUTTON)
+        {
+            if (ImGui::MenuItem(label, "", &m_imgui_toggl)) {
+                activate();
+            }
+        }
+        else {
+            if (m_imgui_toggl)
+            {
+                ImGui::PushID(label);
+                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertFloat4ToU32(ImVec4(0.3f, 0.7f, 0.5f, 1.0f)));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertFloat4ToU32(ImVec4(0.5f, 0.9f, 0.7f, 1.0f)));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertFloat4ToU32(ImVec4(0.3f, 0.7f, 0.5f, 1.0f)));
+                ImGui::Button(label);
+                if (ImGui::IsItemClicked(0))
+                {
+                    setpropertyl(ECOMP_VALUE, !propertyi(ECOMP_SETVALUE));
+                }
+                ImGui::PopStyleColor(3);
+                ImGui::PopID();
+            }
+            else
+            {
+                ImGui::Button(label);
+                if (ImGui::IsItemClicked(0)) {
+                    eVariable tmp;
+                    propertyv(ECOMP_SETVALUE, &tmp);
+                    setpropertyv(ECOMP_VALUE, &tmp);
+                    activate();
+                }
+            }
         }
     }
 
