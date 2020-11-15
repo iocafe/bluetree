@@ -350,20 +350,18 @@ public:
         eDrawParams& prm,
         os_int mouse_button_nr);
 
-    /* Drag desture detected, we are starting to drag this component.
+    /* Drag desture detected, start to drag this component.
      */
     virtual void on_start_drag(
         eDrawParams& prm,
-        os_int mouse_button_nr,
-        ePos& mouse_down_pos);
+        os_int mouse_button_nr);
 
-    /* Mouse dragging, we are copying/moving/mofifying component(s).
+    /* Mouse dragging, we are copying/moving/modifying component(s).
      */
     virtual void on_drag(
         eDrawParams& prm,
         os_int mouse_button_nr,
-        eGuiDragMode drag_mode,
-        ePos& mouse_pos);
+        eGuiDragMode drag_mode);
 
     /* Mouse released to end drag, actually copy/move object or and modification.
      */
@@ -371,12 +369,7 @@ public:
         eDrawParams& prm,
         os_int mouse_button_nr,
         eComponent *origin,
-        eGuiDragMode drag_mode,
-        ePos& mouse_up_pos);
-
-    /* Delete has been selected from pop up menu, etc.
-     */
-    void on_delete();
+        eGuiDragMode drag_mode);
 
     /* Start editing value, toggle checkbox or show drop down list.
      */
@@ -409,7 +402,7 @@ public:
     eComponent *nextcomponent(
         e_oid id = EOID_CHILD);
 
-    /* Get topmost component in Z orderr which encloses (x, y) position.
+    /* Get topmost component in Z order which encloses (x, y) position.
      */
     eComponent *findcomponent(
         ePos pos,
@@ -442,20 +435,30 @@ public:
         return (eGui*)parent(EGUICLASSID_GUI, EOID_ALL, true);
     }
 
-
+    /* Create popup window, often "select value" or "right click" popup menu.
+     */
     ePopup *popup();
 
+    /* Create "select value from drop down list" popup.
+     */
     ePopup *drop_down_list(
         eContainer *list,
         const os_char *propertyname = OS_NULL,
         os_int value = OS_INT_MAX);
 
+    /* Add edit mode items into "right click" popup menu.
+     */
     void add_popup_edit_mode_items(
         eDrawParams& prm,
         ePopup *p);
 
+    /* If this GUI component has popup open, close it.
+     */
     void close_popup();
 
+    /* Delete has been selected from pop up menu, etc.
+     */
+    void on_delete();
 
     /* Set redo layout flag.
      */

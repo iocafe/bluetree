@@ -636,7 +636,7 @@ void eComponent::draw_edit_mode_decorations(
 /**
 ****************************************************************************************************
 
-  @brief Generate popup window for any purpose.
+  @brief Create popup window, often "select value" or "right click" popup menu.
 
   This function crate general purpose ePopup window for this GUI component. The popup window
   is used to show drop down lists, right click menu, etc.
@@ -679,9 +679,6 @@ ePopup *eComponent::right_click_popup(
 
     p = popup();
 
-    /* Generic component scope items.
-     */
-
     /* Window scope items (also for popups).
      */
     scope = new eButton(p);
@@ -707,6 +704,8 @@ ePopup *eComponent::right_click_popup(
     item->setpropertys(ECOMP_VALUE, "guisettings");
     item->setpropertys(ECOMP_TARGET, "gui/_p/open");
 
+    /* Edit mode component scope items.
+     */
     if (prm.edit_mode) {
         add_popup_edit_mode_items(prm, p);
     }
@@ -723,6 +722,7 @@ ePopup *eComponent::right_click_popup(
   The add_popup_edit_mode_items functions adds edit mode items, like "cut", "copy", "paste"
   to right click popup.
 
+  @param   prm Structure holding rendering parameters.
   @param   p Pointer to the right click popup window.
   @return  None.
 
@@ -751,6 +751,21 @@ void eComponent::add_popup_edit_mode_items(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Create "select value from drop down list" popup.
+
+  The add_popup_edit_mode_items functions adds edit mode items, like "cut", "copy", "paste"
+  to right click popup.
+
+  @param   list List holding values to select from.
+  @param   propertyname Name of the property to set (if selected), for example "x".
+  @param   value Value to set if selected.
+  @return  Pointer to the new ePopup.
+
+****************************************************************************************************
+*/
 ePopup *eComponent::drop_down_list(
     eContainer *list,
     const os_char *propertyname,
@@ -798,6 +813,15 @@ ePopup *eComponent::drop_down_list(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief If this GUI component has popup open, close it.
+
+  The eComponent::close_popup() function...
+
+****************************************************************************************************
+*/
 void eComponent::close_popup()
 {
     eObject *o;
@@ -808,6 +832,45 @@ void eComponent::close_popup()
             delete o;
         }
         m_popup_open = false;
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Delete has been selected from pop up menu.
+
+  The eComponent::on_delete() function moves this component to gui's "delete later" list.
+
+****************************************************************************************************
+*/
+void eComponent::on_delete()
+{
+    eGui *g;
+    eWindow *w;
+    ePointer *p, *next_p;
+    eComponent *c;
+    eContainer *select_list;
+
+    w = (eWindow*)window(EGUICLASSID_WINDOW);
+    g = gui();
+    if (w == OS_NULL || g == OS_NULL) return;
+
+    if (w->editmode())
+    {
+        if (!m_select) {
+            w->select(this, EWINDOW_NEW_SELECTION);
+        }
+
+        select_list = w->get_select_list();
+        for (p = (ePointer*)select_list->first(); p; p = next_p) {
+            next_p = (ePointer*)p->next();
+            c = (eComponent*)p->get();
+            if (c) {
+                g->delete_later(c);
+            }
+        }
     }
 }
 
@@ -866,7 +929,8 @@ os_boolean eComponent::on_click(
 {
     eWindowSelect op;
 
-    if (prm.edit_mode ) {
+    if (prm.edit_mode)
+    {
         if (mouse_button_nr == EIMGUI_LEFT_MOUSE_BUTTON)
         {
             if (prm.mouse_click_keyboard_flags[mouse_button_nr] & EDRAW_LEFT_CTRL_DOWN)
@@ -893,12 +957,23 @@ os_boolean eComponent::on_click(
 }
 
 
-/* Drag desture detected, we are starting to drag this component.
- */
+/**
+****************************************************************************************************
+
+  @brief Drag desture detected, start to drag this component.
+
+  The eComponent::on_start_drag() initiates dragging this component. It saves drag mode
+  and ePointer to this component as drag origin.
+
+  @param   prm Structure holding rendering parameters.
+  @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON or EIMGUI_RIGHT_MOUSE_BUTTON.
+  @return  None.
+
+****************************************************************************************************
+*/
 void eComponent::on_start_drag(
     eDrawParams& prm,
-    os_int mouse_button_nr,
-    ePos& mouse_down_pos)
+    os_int mouse_button_nr)
 {
     eGuiDragMode drag_mode;
 
@@ -915,30 +990,64 @@ void eComponent::on_start_drag(
     }
 }
 
-/* Mouse dragging, we are copying/moving/mofifying component(s).
- */
+
+/**
+****************************************************************************************************
+
+  @brief Mouse dragging, we are copying/moving/modifying component(s).
+
+  Not implemented, intended for visualization.
+
+  @param   prm Structure holding rendering parameters.
+  @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON or EIMGUI_RIGHT_MOUSE_BUTTON.
+  @param   drag_mode One of: EGUI_DRAG_TO_COPY_COMPONENT, EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT,
+           or EGUI_DRAG_TO_MODIFY_COMPONENT
+
+  @return  None.
+
+****************************************************************************************************
+*/
 void eComponent::on_drag(
     eDrawParams& prm,
     os_int mouse_button_nr,
-    eGuiDragMode drag_mode,
-    ePos& mouse_pos)
+    eGuiDragMode drag_mode)
 {
-
+    OSAL_UNUSED(prm);
+    OSAL_UNUSED(mouse_button_nr);
+    OSAL_UNUSED(drag_mode);
 }
 
-/* Mouse released to end drag, actually copy/move object or and modification.
- */
+
+/**
+****************************************************************************************************
+
+  @brief Mouse released to end drag, actually copy/move object or and modification.
+
+  The eComponent::on_drop() is called to drop a dragged component when mouse drop gesture
+  is detected. eComponent base class'es on_drop() handles mostly the edit mode, normal
+  operation is class specfific.
+
+  @param   prm Structure holding rendering parameters.
+  @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON or EIMGUI_RIGHT_MOUSE_BUTTON.
+  @param   origin Pointer to dragged eComponent (origin), even the select list actually dropped.
+  @param   drag_mode One of: EGUI_DRAG_TO_COPY_COMPONENT, EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT,
+           or EGUI_DRAG_TO_MODIFY_COMPONENT
+
+  @return  None.
+
+****************************************************************************************************
+*/
 void eComponent::on_drop(
     eDrawParams& prm,
     os_int mouse_button_nr,
     eComponent *origin,
-    eGuiDragMode drag_mode,
-    ePos& mouse_up_pos)
+    eGuiDragMode drag_mode)
 {
     eWindow *source_w, *destination_w;
     ePointer *p, *next_p;
     eComponent *c, *before_c, *cloned;
     eContainer *select_list;
+    OSAL_UNUSED(mouse_button_nr);
 
     if ((drag_mode == EGUI_DRAG_TO_COPY_COMPONENT ||
          drag_mode == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT) &&
@@ -949,6 +1058,14 @@ void eComponent::on_drop(
 
         if (source_w != destination_w) {
             drag_mode = EGUI_DRAG_TO_COPY_COMPONENT;
+        }
+
+        /* Here we assume components on top of each others.
+         */
+        for (before_c = firstcomponent(); before_c; before_c = before_c->nextcomponent()) {
+            if (prm.mouse_pos.y < (before_c->rect().y1 + before_c->rect().y2)/2) {
+                break;
+            }
         }
 
         select_list = source_w->get_select_list();
@@ -962,57 +1079,18 @@ void eComponent::on_drop(
                 continue;
             }
 
-            /* Here we assume components on top of each others.
-             */
-            for (before_c = firstcomponent(); before_c; before_c = before_c->nextcomponent()) {
-                if (prm.mouse_pos.y < (before_c->rect().y1 + before_c->rect().y2)/2) {
-                    break;
-                }
-            }
-
             /* Always clone, to get rid of temporary state.
              */
             cloned = eComponent::cast(c->clone(this));
             if (before_c) {
                 cloned->adoptat(before_c);
+                before_c = cloned->nextcomponent();
             }
 
             /* Delete original if moving.
              */
             if (drag_mode == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT) {
                 prm.gui->delete_later(c);
-            }
-        }
-    }
-}
-
-
-/* Delete has been selected from pop up menu.
- */
-void eComponent::on_delete()
-{
-    eGui *g;
-    eWindow *w;
-    ePointer *p, *next_p;
-    eComponent *c;
-    eContainer *select_list;
-
-    w = (eWindow*)window(EGUICLASSID_WINDOW);
-    g = gui();
-    if (w == OS_NULL || g == OS_NULL) return;
-
-    if (w->editmode())
-    {
-        if (!m_select) {
-            w->select(this, EWINDOW_NEW_SELECTION);
-        }
-
-        select_list = w->get_select_list();
-        for (p = (ePointer*)select_list->first(); p; p = next_p) {
-            next_p = (ePointer*)p->next();
-            c = (eComponent*)p->get();
-            if (c) {
-                g->delete_later(c);
             }
         }
     }

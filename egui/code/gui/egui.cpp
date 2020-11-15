@@ -607,7 +607,7 @@ void eGui::handle_mouse()
            another, it is always copied. If component is dragged within window, it is moved
            by default. But it will be copied if user presses CTRL key when starting the
            drag.
-           Value EGUI_DRAG_TO_MODIFY_COMPONENT specifies that we are mofifying component
+           Value EGUI_DRAG_TO_MODIFY_COMPONENT specifies that we are modifying component
            by dragging some point of it with mouse.
 
 ****************************************************************************************************
@@ -663,7 +663,7 @@ void eGui::drag(
     eComponent *c;
     c = get_drag_origin();
     if (c) {
-        c->on_drag(m_draw_prm, mouse_button_nr, get_drag_mode(), m_draw_prm.mouse_pos);
+        c->on_drag(m_draw_prm, mouse_button_nr, get_drag_mode());
     }
 }
 
@@ -693,7 +693,7 @@ void eGui::drop_modification(
 
     drag_mode = get_drag_mode();
     if (drag_mode == EGUI_DRAG_TO_MODIFY_COMPONENT) {
-        origin->on_drop(m_draw_prm, mouse_button_nr, OS_NULL, drag_mode, m_draw_prm.mouse_pos);
+        origin->on_drop(m_draw_prm, mouse_button_nr, OS_NULL, drag_mode);
         save_drag_origin(OS_NULL, EGUI_NOT_DRAGGING);
     }
 }

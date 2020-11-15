@@ -424,7 +424,7 @@ void eWindow::start_drag(
     eComponent *c;
     c = findcomponent(prm.mouse_drag_start_pos[mouse_button_nr], &prm);
     if (c) {
-        c->on_start_drag(prm, mouse_button_nr, prm.mouse_drag_start_pos[mouse_button_nr]);
+        c->on_start_drag(prm, mouse_button_nr);
     }
 }
 
@@ -435,8 +435,8 @@ void eWindow::start_drag(
   @brief Forward drop to GUI component's on_drop() function.
 
   The eWindow::drop_component() is called to drop a dragged component when mouse drop is detected.
-  It forwards the drop to on_drop() function of the matching GUI component. eComponen base class'es
-  on_drop() handles mostly the edit mode, normal operation is class specfific.
+  It forwards the drop to on_drop() function of the matching GUI component. eComponent base
+  class'es on_drop() handles mostly the edit mode, normal operation is class specfific.
 
   @param   prm Structure holding rendering parameters.
   @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON or EIMGUI_RIGHT_MOUSE_BUTTON.
@@ -462,7 +462,7 @@ void eWindow::drop_component(
     {
         c = findcomponent(prm.mouse_pos, &prm, origin);
         if (c) {
-            c->on_drop(prm, mouse_button_nr, origin, drag_mode, prm.mouse_pos);
+            c->on_drop(prm, mouse_button_nr, origin, drag_mode);
             prm.gui->save_drag_origin(OS_NULL, EGUI_NOT_DRAGGING);
         }
     }
