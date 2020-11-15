@@ -142,9 +142,8 @@ void endpoint_example_1()
     eThreadHandle thandle1, thandle2, endpointthreadhandle;
     eContainer c;
 
-    /* Set up eSocket and my own classes for use.
+    /* Aet up class for use.
      */
-    eOsStream::setupclass();
     epMyClass::setupclass();
 
     /* Create and start class epMyClass as thread named "myclass1".

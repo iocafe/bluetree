@@ -262,13 +262,16 @@ public:
 
     /* Wait for stream or thread event.
      */
-    virtual void select(
+    virtual eStatus select(
         eStream **streams,
         os_int nstreams,
         osalEvent evnt,
         osalSelectData *selectdata,
+        os_int timeout_ms,
         os_int flags)
     {
+        osal_debug_error("select() not implemented for stream class");
+        return ESTATUS_FROM_OSAL_STATUS(OSAL_STATUS_NOT_SUPPORTED);
     }
 
     /* Accept incoming connection.

@@ -91,7 +91,6 @@ void eTableView::edit_row_dialog(
         e->setpropertyv(ECOMP_VALUE, &value);
     }
 
-
     oixstr(buf, sizeof(buf));
     os_strncat(buf, "/_p/_command", sizeof(buf));
 

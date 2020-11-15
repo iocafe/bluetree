@@ -388,7 +388,7 @@ void eConnection::run()
                return code, for example read and close can be returned at same time,
                and thread event with anything else.
              */
-            m_stream->select(&m_stream, 1, trigger(), &selectdata, OSAL_STREAM_DEFAULT);
+            m_stream->select(&m_stream, 1, trigger(), &selectdata, 0, OSAL_STREAM_DEFAULT);
 
 
             /* Handle thread events. If thread's message queue is becomes empty, we

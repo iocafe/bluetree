@@ -384,54 +384,55 @@ os_int eOsStream::readchar()
   "connect": Socket connected, "close": Socket closed.
   Thread evens indicate that there are messages to the thread to be processed.
 
-  @param  streams Array of socket stream pointers. This function waits for socket events from
-          all these streams.
-  @oaram  nstreams Number of items in streams array.
-  @param  evnt Operating system event to wait for.
-  @param  selectdata Pointer to structure in which to fill information about the event.
-          This includes error code.
-  @param  flags Reserved, set 0 for now.
+  @param   streams Array of socket stream pointers. This function waits for socket events from
+           all these streams.
+  @oaram   nstreams Number of items in streams array.
+  @param   evnt Operating system event to wait for.
+  @param   selectdata Pointer to structure in which to fill information about the event.
+           This includes error code.
+  @param   timeout_ms Maximum time to wait in select, ms. If zero, timeout is not used (infinite).
+  @param   flags Reserved, set 0 for now.
 
-  @return None.
+  @return  None.
 
 ****************************************************************************************************
 */
-void eOsStream::select(
+eStatus eOsStream::select(
     eStream **streams,
     os_int nstreams,
     osalEvent evnt,
     osalSelectData *selectdata,
+    os_int timeout_ms,
     os_int flags)
 {
-#if 0
     osalStatus s;
-    eOsStream **sockets, *so;
+    eOsStream **osstreams;
     osalStream osalsock[OSAL_SOCKET_SELECT_MAX];
     os_int i;
 
-    sockets = (eOsStream**)streams;
+    osstreams = (eOsStream**)streams;
 
     if (nstreams == 1)
     {
-        s = osal_stream_select(&sockets[0]->m_stream, 1, evnt,
-            selectdata, OSAL_STREAM_DEFAULT);
+        s = osal_stream_select(&osstreams[0]->m_stream, 1, evnt,
+            selectdata, timeout_ms, OSAL_STREAM_DEFAULT);
     }
     else
     {
         for (i = 0; i<nstreams; i++)
         {
-            osalsock[i] = sockets[i]->m_stream;
+            osalsock[i] = osstreams[i]->m_stream;
         }
 
-        osal_stream_select(osalsock, nstreams, evnt,
-            selectdata, OSAL_STREAM_DEFAULT);
+        s = osal_stream_select(osalsock, nstreams, evnt,
+            selectdata, timeout_ms, OSAL_STREAM_DEFAULT);
     }
 
-    i = selectdata->stream_nr;
+    /* i = selectdata->stream_nr;
     if (selectdata->errorcode == OSAL_SUCCESS &&
         i >= 0 && i < nstreams)
     {
-        so = sockets[i];
+        so = osstreams[i];
 
         if (selectdata->eventflags & OSAL_STREAM_READ_EVENT)
         {
@@ -443,8 +444,9 @@ void eOsStream::select(
         {
             selectdata->errorcode = so->write_socket(OS_FALSE);
         }
-    }
-#endif
+    } */
+
+    return ESTATUS_FROM_OSAL_STATUS(s);
 }
 
 

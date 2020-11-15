@@ -234,7 +234,7 @@ void eEndPoint::run()
          */
         if (m_stream)
         {
-            m_stream->select(&m_stream, 1, trigger(), &selectdata, OSAL_STREAM_DEFAULT);
+            m_stream->select(&m_stream, 1, trigger(), &selectdata, 0, OSAL_STREAM_DEFAULT);
 
             alive(EALIVE_RETURN_IMMEDIATELY);
 

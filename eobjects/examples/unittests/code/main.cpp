@@ -53,6 +53,16 @@ eStatus emain(
     os_char *argv[])
 {
     os_int test_nr = 83;
+    os_int nr;
+
+    if (argc >= 2) {
+        eVariable v;\
+        v = argv[1];
+        nr = v.geti();
+        if (nr > 0) {
+            test_nr = nr;
+        }
+    }
 
     switch (test_nr)
     {

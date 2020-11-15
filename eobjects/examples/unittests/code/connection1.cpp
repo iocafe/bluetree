@@ -41,7 +41,7 @@ static const os_char emyclass2p_y[] = "Y";
 class c1MyClass : public eThread
 {
 public:
-    /* Constructor. It is here just to initialize properties to default values.s
+    /* Constructor. Initialize properties to default values.
      */
     c1MyClass(
         eObject *parent = OS_NULL,
@@ -113,7 +113,6 @@ printf ("ULLE \'%s\'\n", v.gets());
         eThread::onmessage(envelope);
     }
 
-
     /* This gets called when property value changes
      */
     virtual eStatus onpropertychange(
@@ -151,13 +150,12 @@ void connection_example_1()
     eThreadHandle thandle1, thandle2, conthreadhandle;
     eContainer c;
 
-    /* Set up eSocket and my own classes for use.
+    /* Set up clas for use.
      */
-    eOsStream::setupclass();
     c1MyClass::setupclass();
 
     /* Create and start thread to listen for incoming socket connections,
-       name it "endpointthread".
+       name it "//myconnection".
      */
     t = new eConnection();
     t->addname("//myconnection");
