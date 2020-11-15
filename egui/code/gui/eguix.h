@@ -141,13 +141,10 @@ public:
 
     /**
     ************************************************************************************************
-
-      @name Base class functions to implement component functionality
-
-
+      Top level GUI functions
     ************************************************************************************************
     */
-    /* Run equi.
+    /* Run GUI.
      */
     eStatus run();
 
@@ -157,7 +154,7 @@ public:
         eRect& r,
         eLayoutParams& prm); */
 
-    /* Draw the component.
+    /* Draw the GUI.
      */
     eStatus draw(
         eDrawParams& prm,
@@ -166,9 +163,7 @@ public:
 
     /**
     ************************************************************************************************
-
-      @name Base class functions to implement component functionality
-
+      eGui functions called from components
     ************************************************************************************************
     */
 
@@ -209,11 +204,7 @@ public:
 
     /**
     ************************************************************************************************
-
-      @name Desktop application specific setup and functions.
-
-      These function are for desktop application.
-
+      Desktop application specific setup and functions.
     ************************************************************************************************
     */
     void setup_desktop_application();
@@ -232,10 +223,6 @@ protected:
     /* Parameters for drawing components
      */
     eDrawParams m_draw_prm;
-
-    /* Display size.
-     */
-    // eSize m_sz;
 
     /* ImGui autolabel count for generating labels for windows eWindow and ePopup.
      */

@@ -18,13 +18,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eButton::eButton(
@@ -40,13 +34,7 @@ eButton::eButton(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eButton::~eButton()
@@ -200,16 +188,15 @@ eStatus eButton::draw(
      */
     c = firstcomponent();
     if (c) {
-            if (ImGui::BeginMenu(label))
-            {
-                while (c) {
-                    c->draw(prm);
-                    c = c->nextcomponent();
-                }
-
-                ImGui::EndMenu();
+        if (ImGui::BeginMenu(label))
+        {
+            while (c) {
+                c->draw(prm);
+                c = c->nextcomponent();
             }
 
+            ImGui::EndMenu();
+        }
     }
     else {
         cid = parent()->classid();
