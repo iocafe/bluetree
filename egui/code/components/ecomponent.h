@@ -259,7 +259,6 @@ public:
     inline static eComponent *cast(
         eObject *o)
     {
-        e_assert_type(o, EGUICLASSID_COMPONENT)
         return (eComponent*)o;
     }
 
