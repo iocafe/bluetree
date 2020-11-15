@@ -18,13 +18,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eWindow::eWindow(
@@ -46,13 +40,7 @@ eWindow::eWindow(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eWindow::~eWindow()
@@ -202,11 +190,11 @@ os_long eWindow::make_autolabel()
 /**
 ****************************************************************************************************
 
-  @brief Draw the component.
+  @brief Draw the window.
 
   The eWindow::draw() function calls ImGui API to render the component.
 
-  @param   Prm Drawing parameters.
+  @param   prm Structure holding rendering parameters.
   @return  The function return ESTATUS_SUCCESS if all is fine. Other values indicate that the
            component is no longer drawable or useful. This could be for example a pop up menu
            closed implicitely by clicking elsewhere.
@@ -248,13 +236,13 @@ eStatus eWindow::draw(
           | ImGuiWindowFlags_NoTitleBar); */
     }
 
-// 5.11.2020 ImGuiHoveredFlags_ChildWindows flag added for tables TEST
     wprm.mouse_over_window = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
     wprm.mouse_dragged_over_window = OS_FALSE;
 
     dm = wprm.gui->get_drag_mode();
     if (dm == EGUI_DRAG_TO_COPY_COMPONENT || dm == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT)
     {
+        // 5.11.2020 ImGuiHoveredFlags_ChildWindows flag added for tables TEST
         wprm.mouse_dragged_over_window
             = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem|ImGuiHoveredFlags_ChildWindows);
     }
@@ -343,11 +331,12 @@ eStatus eWindow::draw(
 /**
 ****************************************************************************************************
 
-  @brief Draw edit mode decorations, like component frames, etc.
+  @brief Draw edit mode decorations, like component frames, etc while editing window.
 
-  The eWindow::edit_mode_decorations()....
+  The eWindow::edit_mode_decorations() is called when editing window (edit_mode flag) to draw
+  frames for components.
 
-  @param   prm Drawing parameters.
+  @param   prm Structure holding rendering parameters.
   @return  None
 
 ****************************************************************************************************
@@ -372,6 +361,23 @@ void eWindow::draw_edit_mode_decorations(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Forward mouse click to GUI component's on_click() function.
+
+  The eWindow::click() is called at mouse click within window. It forwards the mouse click to
+  window's topmost GUI component's matching to click position, to on_click() function.
+  Matching is done by checking component's visible rectangle at Z order from top to bottom.
+  If first matching GUI component doesn't process the mouse click (on_click() returns 0),
+  then the mouse click is forwarded to second top most GUI component, and so forth.
+
+  @param   prm Structure holding rendering parameters.
+  @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON or EIMGUI_RIGHT_MOUSE_BUTTON.
+  @return  None.
+
+****************************************************************************************************
+*/
 void eWindow::click(
     eDrawParams& prm,
     os_int mouse_button_nr)
@@ -394,6 +400,23 @@ void eWindow::click(
     }
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Forward drag start to GUI component's on_start_drag() function.
+
+  The eWindow::start_drag() is called to initiate drag from component when mouse drag is detected.
+  It forwards the drag start to on_start_drag() function of the matching GUI component.
+  eComponen base class'es on_start_drag() handles edit mode dragging, normal operation is
+  class specfific.
+
+  @param   prm Structure holding rendering parameters.
+  @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON or EIMGUI_RIGHT_MOUSE_BUTTON.
+  @return  None.
+
+****************************************************************************************************
+*/
 void eWindow::start_drag(
     eDrawParams& prm,
     os_int mouse_button_nr)
@@ -406,6 +429,21 @@ void eWindow::start_drag(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Forward drop to GUI component's on_drop() function.
+
+  The eWindow::drop_component() is called to drop a dragged component when mouse drop is detected.
+  It forwards the drop to on_drop() function of the matching GUI component. eComponen base class'es
+  on_drop() handles mostly the edit mode, normal operation is class specfific.
+
+  @param   prm Structure holding rendering parameters.
+  @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON or EIMGUI_RIGHT_MOUSE_BUTTON.
+  @return  None.
+
+****************************************************************************************************
+*/
 void eWindow::drop_component(
     eDrawParams& prm,
     os_int mouse_button_nr)
@@ -431,8 +469,31 @@ void eWindow::drop_component(
 }
 
 
-/* Modify selecction list and select flags of components.
- */
+/**
+****************************************************************************************************
+
+  @brief Modify selection list
+
+  The eWindow::select() function is used to modify list of selected QUI component's within the
+  window, and set ECOMP_SELECT property for each GUI component to indicate if it is selected
+  or not.
+
+  - EWINDOW_NEW_SELECTION: Set c as only selected component.
+  - EWINDOW_CLEAR_SELECTION: No selected components.
+  - EWINDOW_APPEND_TO_SELECTION: Add component c to list of selected components.
+  - EWINDOW_REMOVE_FROM_SELECTION: Remove component c from selected components.
+
+  @param   c Pointer to component. Can be OS_NULL if not needed. If OS_NULL, then
+           then EWINDOW_NEW_SELECTION is same as EWINDOW_CLEAR_SELECTION, and
+           EWINDOW_APPEND_TO_SELECTION/EWINDOW_REMOVE_FROM_SELECTION does noting.
+
+  @param   op One of: EWINDOW_NEW_SELECTION, EWINDOW_CLEAR_SELECTION, EWINDOW_APPEND_TO_SELECTION,
+           or EWINDOW_REMOVE_FROM_SELECTION.
+
+  @return  None.
+
+****************************************************************************************************
+*/
 void eWindow::select(eComponent *c,
     eWindowSelect op)
 {
@@ -476,7 +537,7 @@ void eWindow::select(eComponent *c,
                     if (is_c) {
                         cc->setpropertyl(ECOMP_SELECT, OS_TRUE);
                     }
-                    else {
+                    else if (c) {
                         if (c->isdecendentof(cc) ||
                             cc->isdecendentof(c))
                         {
@@ -517,7 +578,7 @@ void eWindow::select(eComponent *c,
 /**
 ****************************************************************************************************
 
-  @brief Add eTreeNode to class list and class'es properties to it's property set.
+  @brief Return information about this window for tree browser, etc.
 
   The eObject::object_info function fills in item (eVariable) to contain information
   about this object in tree browser view.

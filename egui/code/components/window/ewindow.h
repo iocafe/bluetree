@@ -101,24 +101,10 @@ public:
         return new eWindow(parent, id, flags);
     }
 
-    /* Modify selecction list and select flags of components.
-     */
-    void select(eComponent *c,
-        eWindowSelect op);
-
-    /* Modify selecction list and select flags of components.
-     */
-    inline eContainer *get_select_list()
-        {return m_select_list;}
-
-    /* Generating ImGui autolabel.
-     */
-    virtual os_long make_autolabel();
-
 
     /**
     ************************************************************************************************
-      Base class functions to implement component functionality
+      GUI component functionality (eComponent)
     ************************************************************************************************
     */
 
@@ -127,42 +113,82 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
+    /* Generating ImGui autolabel.
+     */
+    virtual os_long make_autolabel();
+
+
+    /**
+    ************************************************************************************************
+      eWindow specific functions
+    ************************************************************************************************
+    */
+
+    /* Modify selection list and component's select property.
+     */
+    void select(eComponent *c,
+        eWindowSelect op);
+
+    /* Get pointer to selection list.
+     */
+    inline eContainer *get_select_list()
+        {return m_select_list;}
+
     /* Get/set edit mode.
      */
     inline os_boolean editmode() {return m_edit_mode; }
     inline void set_editmode(os_int x) {m_edit_mode = (os_boolean)x; }
 
 protected:
+
+    /**
+    ************************************************************************************************
+      Protected functions
+    ************************************************************************************************
+    */
+
+    /* Draw edit mode decorations, like component frames, etc while editing window.
+     */
     void draw_edit_mode_decorations(
         eDrawParams& prm);
 
+    /* Forward mousel click to GUI component's on_click() function.
+     */
+    void click(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
+
+    /* Forward drag start to GUI component's on_start_drag() function.
+     */
+    void start_drag(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
+
+    /* Forward drop to GUI component's on_drop() function.
+     */
+    void drop_component(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
+
+    /* Return information about this window for tree browser, etc.
+     */
     virtual void object_info(
         eVariable *item,
         eVariable *name,
         eSet *appendix);
 
-    void click(
-        eDrawParams& prm,
-        os_int mouse_button_nr);
-
-    void start_drag(
-        eDrawParams& prm,
-        os_int mouse_button_nr);
-
-    void drop_component(
-        eDrawParams& prm,
-        os_int mouse_button_nr);
-
 
     /**
     ************************************************************************************************
-      Member variables.
+      Member variables
     ************************************************************************************************
     */
     /* Pointers to selected components.
      */
     eContainer *m_select_list;
 
+    /* Window label and title.
+     */
     eAutoLabel m_label_title;
 
     /* ImGui autolabel count for generating labels for components within the eWindow.

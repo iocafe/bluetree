@@ -286,53 +286,6 @@ public:
         return new eComponent(parent, id, flags);
     }
 
-    /* Generating ImGui autolabel.
-     */
-    virtual os_long make_autolabel() {return 0;}
-
-    /* Get first child component identified by oid.
-     */
-    eComponent *firstcomponent(
-        e_oid id = EOID_CHILD);
-
-    /* Get next component identified by oid.
-     */
-    eComponent *nextcomponent(
-        e_oid id = EOID_CHILD);
-
-    /* Get topmost component in Z orderr which encloses (x, y) position.
-     */
-    eComponent *findcomponent(
-        ePos pos,
-        eDrawParams *prm,
-        os_boolean is_drop = OS_FALSE);
-
-    /* Add component to window's Z order
-     */
-    void add_to_zorder(
-        eWindow *w,
-        os_int layer);
-
-    /* Remove component from window's Z order
-     */
-    void remove_from_zorder();
-
-    /* Wipe out whole Z order
-     */
-    void clear_zorder();
-
-    /* Get parent window (eWindow or ePopup).
-     */
-    eComponent *window(
-        os_int cid = 0);
-
-    /* Get parent gui.
-     */
-    inline eGui *gui()
-    {
-        return (eGui*)parent(EGUICLASSID_GUI, EOID_ALL, true);
-    }
-
     /* Called when property value changes.
      */
     virtual eStatus onpropertychange(
@@ -346,49 +299,6 @@ public:
         os_int propertynr,
         eVariable *x);
 
-
-    /**
-    ************************************************************************************************
-
-      @name Operator overloads
-
-      The operator overloads are implemented for convinience, and map to the member functions.
-      Using operator overloads may lead to more readable code, but may also confuse the
-      reader.
-
-    ************************************************************************************************
-    */
-
-    /** Operator "=", setting variable value.
-     */
-    /* inline const os_char operator=(const os_char x) { setl(x); return x; }
-    inline const os_uchar operator=(const os_uchar x) { setl(x); return x; }
-    inline const os_short operator=(const os_short x) { setl(x); return x; }
-    inline const os_ushort operator=(const os_ushort x) { setl(x); return x; }
-    inline const os_int operator=(const os_int x) { setl(x); return x; }
-    inline const os_uint operator=(const os_uint x) { setl(x); return x; }
-    inline const os_long operator=(const os_long x) { setl(x); return x; }
-    inline const os_float operator=(const os_float x) { setd(x); return x; }
-    inline const os_double operator=(const os_double x) { setd(x); return x; }
-    inline const os_char *operator=(const os_char *x) { sets(x); return x; }
-    inline void operator=(eComponent& x) { setv(&x); } */
-
-    /** Operator "+=", appending variable value.
-     */
-    /* inline const os_char *operator+=(const os_char *x) { appends(x); return x; }
-    inline void operator+=(eComponent& x) { appendv(&x); } */
-
-
-    /**
-    ************************************************************************************************
-
-      @name eObject virtual function implementations
-
-      Serialization means writing object to stream or reading it from strem.
-
-    ************************************************************************************************
-    */
-
     /* Write variable to stream.
      */
     virtual eStatus writer(
@@ -401,26 +311,16 @@ public:
         eStream *stream,
         os_int flags);
 
-    /* Message to or trough this object.
-     */
-    /* virtual void onmessage(); */
-
 
     /**
     ************************************************************************************************
-
-      @name Base class functions to implement component functionality
-
-      X...
-
+      eComponent base class functions (can be overloaded by specific GUI component)
     ************************************************************************************************
     */
 
-    /* Determine size, position of component and it's subcomponents. Setup Z order for draing.
+    /* Generating ImGui autolabel.
      */
-    /* virtual eStatus layout(
-        eRect& r,
-        eLayoutParams& prm) {} */
+    virtual os_long make_autolabel() {return 0;}
 
     /* Draw the component.
      */
@@ -485,12 +385,68 @@ public:
      */
     virtual void activate() {}
 
-    ePopup *popup();
-
     /* Generate right click popup menu.
      */
     virtual ePopup *right_click_popup(
         eDrawParams& prm);
+
+    /* Get visible component rectangle, for checking mouse clicks, ect.
+     * For now whole component rectangle is returned.
+     */
+    eRect& visible_rect() {return m_rect; }
+
+
+    /**
+    ************************************************************************************************
+      eComponent class specific functions (base class only)
+    ************************************************************************************************
+    */
+
+    /* Get first child component identified by oid.
+     */
+    eComponent *firstcomponent(
+        e_oid id = EOID_CHILD);
+
+    /* Get next component identified by oid.
+     */
+    eComponent *nextcomponent(
+        e_oid id = EOID_CHILD);
+
+    /* Get topmost component in Z orderr which encloses (x, y) position.
+     */
+    eComponent *findcomponent(
+        ePos pos,
+        eDrawParams *prm,
+        os_boolean is_drop = OS_FALSE);
+
+    /* Add component to window's Z order
+     */
+    void add_to_zorder(
+        eWindow *w,
+        os_int layer);
+
+    /* Remove component from window's Z order
+     */
+    void remove_from_zorder();
+
+    /* Wipe out whole Z order
+     */
+    void clear_zorder();
+
+    /* Get parent window (eWindow or ePopup).
+     */
+    eComponent *window(
+        os_int cid = 0);
+
+    /* Get parent gui.
+     */
+    inline eGui *gui()
+    {
+        return (eGui*)parent(EGUICLASSID_GUI, EOID_ALL, true);
+    }
+
+
+    ePopup *popup();
 
     ePopup *drop_down_list(
         eContainer *list,
@@ -504,14 +460,6 @@ public:
     void close_popup();
 
 
-
-
-
-    /**
-    ************************************************************************************************
-      Component functionality (base class only)
-    ************************************************************************************************
-    */
     /* Set redo layout flag.
      */
     // void redo_layout();
@@ -535,10 +483,6 @@ public:
      */
     // void capture_mouse();
 
-    /* Get visible component rectangle, for checking mouse clicks, ect.
-     * For now whole component rectangle is returned.
-     */
-    eRect& visible_rect() {return m_rect; }
 
     eRect& rect() {return m_rect; }
 
