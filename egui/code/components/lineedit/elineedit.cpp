@@ -382,21 +382,39 @@ os_boolean eLineEdit::on_click(
 }
 
 
-/* If this is a drop to edge, pass to parent.
- */
-ecompoDropSpec eLineEdit::check_drop(
+/**
+****************************************************************************************************
+
+  @brief Check if mouse position applies to this eLineEdit.
+
+  The eComponent::check_pos() function checks is mouse click, drag or drop applies to this
+  component. The eLineEdit implementation checks against smaller rectangle than component's
+  visible rectangle to allow dropping components between line edits: If this is a drop to
+  edge of component, return ECOMPO_IGNORE_MOUSE to pass to parent.
+
+  @param   pos Mouse position (x,y) to check.
+  @param   prm Structure holding rendering parameters.
+  @param   drag_origin If this a check for drop, pointer to original dragged component.
+           This can be used for type checking.
+
+  @return  If position "is within" component, the function returns ECOMPO_POS_OK (nonzero).
+           If not, ECOMPO_IGNORE_MOUSE (0).
+
+****************************************************************************************************
+*/
+ecompoPosCheckRval eLineEdit::check_pos(
     ePos& pos,
     eDrawParams *prm,
-    os_boolean is_drop)
+    eComponent *drag_origin)
 {
     eRect small_r;
-    if (is_drop && prm) if (prm->edit_mode) {
-        return ECOMPO_DROP_IGNORE;
+    if (drag_origin && prm) if (prm->edit_mode) {
+        return ECOMPO_IGNORE_MOUSE;
     }
 
     small_r = m_rect;
     erect_shrink(small_r, 4);
-    return erect_is_point_inside(small_r, pos) ? ECOMPO_DROP_OK : ECOMPO_DROP_IGNORE;
+    return erect_is_point_inside(small_r, pos) ? ECOMPO_POS_OK : ECOMPO_IGNORE_MOUSE;
 }
 
 

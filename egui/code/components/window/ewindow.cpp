@@ -460,7 +460,7 @@ void eWindow::drop_component(
     if (drag_mode == EGUI_DRAG_TO_COPY_COMPONENT ||
         drag_mode == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT)
     {
-        c = findcomponent(prm.mouse_pos, &prm, OS_TRUE);
+        c = findcomponent(prm.mouse_pos, &prm, origin);
         if (c) {
             c->on_drop(prm, mouse_button_nr, origin, drag_mode, prm.mouse_pos);
             prm.gui->save_drag_origin(OS_NULL, EGUI_NOT_DRAGGING);

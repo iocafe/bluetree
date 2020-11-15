@@ -114,12 +114,12 @@ public:
         eDrawParams& prm,
         os_int mouse_button_nr);
 
-    /* If this is a drop to edge, pass to parent.
+    /* Check if mouse position applies to this eLineEdit.
      */
-    virtual ecompoDropSpec check_drop(
+    virtual ecompoPosCheckRval check_pos(
         ePos& pos,
         eDrawParams *prm,
-        os_boolean is_drop);
+        eComponent *drag_origin);
 
     /* Activate the component (start editing value, toggle checkbox, or show drop down list).
      */

@@ -99,14 +99,14 @@ extern const os_char ecomp_select[];
 extern const os_char ecomp_command[];
 
 
-/* More specific info about drop position, returned by check_drop() function.
+/* More specific info about drop position, returned by check_pos() function.
  */
-typedef enum ecompoDropSpec
+typedef enum ecompoPosCheckRval
 {
-    ECOMPO_DROP_IGNORE = 0,
-    ECOMPO_DROP_OK,
+    ECOMPO_IGNORE_MOUSE = 0,
+    ECOMPO_POS_OK,
 }
-ecompoDropSpec;
+ecompoPosCheckRval;
 
 
 /* Parameters for layout(). These determine size, position of component and it's subcomponents.
@@ -191,7 +191,6 @@ typedef struct eDrawParams
     os_boolean mouse_dragging[EIMGUI_NRO_MOUSE_BUTTONS];
     ePos mouse_drag_start_pos[EIMGUI_NRO_MOUSE_BUTTONS];
     os_boolean mouse_drag_keyboard_flags[EIMGUI_NRO_MOUSE_BUTTONS];
-
 
     /* Internal for mouse processing. Normally components should not use these.
      */
@@ -338,16 +337,14 @@ public:
         eDrawParams& prm,
         os_boolean mouse_over);
 
-    /* If mouse is clicked within component's visible rectangle, we still verify that click is
-       close enough to line, etc, to select the component, and if the point is "special point",
-       like end point of the line which can be used to modify the component.
+    /* Check if mouse position applies to this component.
      */
-    virtual ecompoDropSpec check_drop(
+    virtual ecompoPosCheckRval check_pos(
         ePos& pos,
         eDrawParams *prm,
-        os_boolean is_drop);
+        eComponent *drag_origin);
 
-    /* Component clicked (select in edit mode, etc).
+    /* Component clicked.
      */
     virtual os_boolean on_click(
         eDrawParams& prm,
@@ -417,7 +414,7 @@ public:
     eComponent *findcomponent(
         ePos pos,
         eDrawParams *prm,
-        os_boolean is_drop = OS_FALSE);
+        eComponent *drag_origin = OS_NULL);
 
     /* Add component to window's Z order
      */

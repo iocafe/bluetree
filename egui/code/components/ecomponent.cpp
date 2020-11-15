@@ -229,6 +229,9 @@ eComponent *eComponent::nextcomponent(
   component can be the eWindow itsel) and searched for component.
 
   @param   pos ePos structure specifying point (x, y).
+  @param   prm Structure holding rendering parameters.
+  @param   drag_origin If this a check for drop, pointer to original dragged component.
+           This can be used for type checking.
 
   @return  Pointer to the topmost component in Z order which encloses point (x, y).
            Returns OS_NULL if none of the components covers point (x,y) found.
@@ -238,7 +241,7 @@ eComponent *eComponent::nextcomponent(
 eComponent *eComponent::findcomponent(
     ePos pos,
     eDrawParams *prm,
-    os_boolean is_drop)
+    eComponent *drag_origin)
 {
     eComponent *w, *c;
 
@@ -248,10 +251,8 @@ eComponent *eComponent::findcomponent(
     c = w;
     do {
         c = c->m_prev_z;
-        if (erect_is_point_inside(c->visible_rect(), pos)) {
-            if (c->check_drop(pos, prm, is_drop) != ECOMPO_DROP_IGNORE) {
-                return c;
-            }
+        if (c->check_pos(pos, prm, drag_origin) != ECOMPO_IGNORE_MOUSE) {
+            return c;
         }
     }
     while (c != w);
@@ -811,21 +812,54 @@ void eComponent::close_popup()
 }
 
 
-ecompoDropSpec eComponent::check_drop(
+/**
+****************************************************************************************************
+
+  @brief Check if mouse position applies to this component.
+
+  The eComponent::check_pos() function checks is mouse click, drag or drop applies to this
+  component. The base class implementation simply checks is position is within the
+  component's visible rectangle.
+
+  @param   pos Mouse position (x,y) to check.
+  @param   prm Structure holding rendering parameters.
+  @param   drag_origin If this a check for drop, pointer to original dragged component.
+           This can be used for type checking.
+
+  @return  If position "is within" component, the function returns ECOMPO_POS_OK (nonzero).
+           If not, ECOMPO_IGNORE_MOUSE (0).
+
+****************************************************************************************************
+*/
+ecompoPosCheckRval eComponent::check_pos(
     ePos& pos,
     eDrawParams *prm,
-    os_boolean is_drop)
+    eComponent *drag_origin)
 {
-    OSAL_UNUSED(pos);
     OSAL_UNUSED(prm);
-    OSAL_UNUSED(is_drop);
-    return ECOMPO_DROP_OK;
+    OSAL_UNUSED(drag_origin);
+
+    return erect_is_point_inside(visible_rect(), pos)
+        ? ECOMPO_POS_OK : ECOMPO_IGNORE_MOUSE;
 }
 
 
-/* Component clicked.
- * @return OS_TRUE if click was processed.
- */
+/**
+****************************************************************************************************
+
+  @brief GUI component's clicked, eComponent base class implementation.
+
+  The eComponent::on_click() is called at mouse click to this component. The base class
+  implementation takes care about edit mode selection and "right click" popup menu.
+
+  @param   prm Structure holding rendering parameters.
+  @param   mouse_button_nr Either EIMGUI_LEFT_MOUSE_BUTTON or EIMGUI_RIGHT_MOUSE_BUTTON.
+  @return  OS_TRUE if click was consumed (processed) by the component, or OS_FALSE if not.
+           If click is not processed, the click will be forwareded to GUI component below
+           this one.
+
+****************************************************************************************************
+*/
 os_boolean eComponent::on_click(
     eDrawParams& prm,
     os_int mouse_button_nr)
