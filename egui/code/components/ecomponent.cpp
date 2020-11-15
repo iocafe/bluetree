@@ -921,7 +921,12 @@ void eComponent::on_drop(
         for (p = (ePointer*)select_list->first(); p; p = next_p) {
             next_p = (ePointer*)p->next();
             c = (eComponent*)p->get();
-            if (c == OS_NULL) continue;
+            if (c == OS_NULL) {
+                continue;
+            }
+            if (isdecendentof(c)) {
+                continue;
+            }
 
             /* Here we assume components on top of each others.
              */

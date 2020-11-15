@@ -600,11 +600,12 @@ eObject *eObject::parent(
 os_boolean eObject::isdecendentof(
     eObject *ancestor)
 {
-    while (ancestor != this) {
-        if (ancestor == OS_NULL) {
+    eObject *o = this;
+    while (ancestor != o) {
+        if (o == OS_NULL) {
             return OS_FALSE;
         }
-        ancestor = ancestor->parent();
+        o = o->parent();
     }
 
     return OS_TRUE;

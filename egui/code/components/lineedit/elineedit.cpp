@@ -395,7 +395,7 @@ ecompoDropSpec eLineEdit::check_drop(
     }
 
     small_r = m_rect;
-    erect_shrink(small_r, 3);
+    erect_shrink(small_r, 4);
     return erect_is_point_inside(small_r, pos) ? ECOMPO_DROP_OK : ECOMPO_DROP_IGNORE;
 }
 
