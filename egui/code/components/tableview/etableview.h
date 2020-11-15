@@ -30,11 +30,6 @@ typedef struct
     /* Pointer to row data matrix.
      */
     eMatrix *m_row;
-
-    /* Row pixel coordinates
-     */
-    // os_int m_y1;
-    // os_int m_y2;
 }
 eTableRow;
 
@@ -47,13 +42,11 @@ eTableRow;
 
 /**
 ****************************************************************************************************
-  The eTableView is GUI component to display and modify variable value.
+  eTableView class.
 ****************************************************************************************************
 */
 class eTableView : public eComponent
 {
-//    friend class eTableColumn;
-
 public:
 
     /**
@@ -116,7 +109,7 @@ public:
 
     /**
     ************************************************************************************************
-      eComponent functionality
+      GUI component functionality (eComponent)
     ************************************************************************************************
     */
     /* Draw the component.
@@ -130,7 +123,13 @@ public:
         eDrawParams& prm,
         os_int mouse_button_nr);
 
-    /* Index column info
+
+    /**
+    ************************************************************************************************
+      eTableView specific functions
+    ************************************************************************************************
+    */
+    /* Get index column name and index value
      */
     const os_char *ix_column_name();
     os_long ix_value(eMatrix *m);
@@ -155,7 +154,6 @@ public:
         os_int focus_column = -1,
         const os_char *edit_str = "",
         os_int edit_sz = 128);
-
 
     void update_table_cell(
         const os_char *ix_column_name,

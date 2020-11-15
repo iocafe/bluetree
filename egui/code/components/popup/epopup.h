@@ -18,19 +18,10 @@
 #define EPOPUP_H_
 #include "egui.h"
 
-/**
-****************************************************************************************************
-
-  @name Defines
-
-  X...
-
-****************************************************************************************************
-*/
 
 /**
 ****************************************************************************************************
-  GUI popup window like drop down menu.
+  GUI popup window ("right click" menu, "select value" from drop down list).
 ****************************************************************************************************
 */
 class ePopup : public eComponent
@@ -99,21 +90,20 @@ public:
         return new ePopup(parent, id, flags);
     }
 
-    /* Generating ImGui autolabel.
-     */
-    virtual os_long make_autolabel();
-
 
     /**
     ************************************************************************************************
-      Base class functions to implement component functionality
-    ************************************************************************************************
+        GUI component functionality (eComponent)
+  ************************************************************************************************
     */
     /* Draw the component.
      */
     virtual eStatus draw(
         eDrawParams& prm);
 
+    /* Generating ImGui autolabel.
+     */
+    virtual os_long make_autolabel();
 
 protected:
 

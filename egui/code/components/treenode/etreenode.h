@@ -101,7 +101,7 @@ public:
 
     /**
     ************************************************************************************************
-      Base class functions to implement component functionality
+      GUI component functionality (eComponent)
     ************************************************************************************************
     */
     /* Draw the component.
@@ -116,7 +116,7 @@ public:
 
     /* Component clicked (mouse).
      */
-    os_boolean on_click(
+    virtual os_boolean on_click(
         eDrawParams& prm,
         os_int mouse_button_nr);
 
@@ -129,13 +129,11 @@ public:
     virtual ePopup *right_click_popup(
         eDrawParams& prm);
 
-
-    os_boolean isopen() {return m_isopen;}
-
 protected:
+
     /**
     ************************************************************************************************
-      Member variables.
+      Protected functions
     ************************************************************************************************
     */
     void draw_value(
@@ -156,6 +154,12 @@ protected:
         eVariable *item,
         eVariable& ipath,
         eVariable& path);
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
 
     os_int m_received_change;
 

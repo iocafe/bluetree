@@ -601,5 +601,4 @@ void eWindow::object_info(
 
     propertyv(ECOMP_VALUE, &tmp);
     item->setpropertyv(EVARP_VALUE, &tmp);
-
 }

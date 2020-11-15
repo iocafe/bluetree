@@ -33,7 +33,7 @@ ePrmListComponent;
 
 /**
 ****************************************************************************************************
-  The eParameterList is GUI component to display and modify variable value.
+  eParameterList class
 ****************************************************************************************************
 */
 class eParameterList : public eComponent
@@ -100,7 +100,7 @@ public:
 
     /**
     ************************************************************************************************
-      eComponent functionality
+      GUI component functionality (eComponent)
     ************************************************************************************************
     */
     /* Draw the component.
