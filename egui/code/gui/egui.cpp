@@ -498,7 +498,7 @@ void eGui::handle_mouse()
             dx = m_draw_prm.mouse_pos.x - m_mouse.down_pos[i].x;
             dy = m_draw_prm.mouse_pos.y - m_mouse.down_pos[i].y;
 
-            if (dx*dx + dy + dy > 20 && !m_mouse.is_dragging[i])
+            if (dx*dx + dy*dy > 20 && !m_mouse.is_dragging[i])
             {
                 m_mouse.is_dragging[i] = OS_TRUE;
             }

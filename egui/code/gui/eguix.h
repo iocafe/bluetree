@@ -153,9 +153,9 @@ public:
 
     /* Determine size, position of component and it's subcomponents. Setup Z order for draing.
      */
-    eStatus layout(
+    /* eStatus layout(
         eRect& r,
-        eLayoutParams& prm);
+        eLayoutParams& prm); */
 
     /* Draw the component.
      */

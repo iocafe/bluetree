@@ -181,9 +181,9 @@ public:
 
     /* Adopting object as child of this object.
      */
-    void adoptat(
+    inline void adoptat(
         eObject *beforethis,
-        e_oid id = EOID_CHILD);
+        e_oid id = EOID_CHILD) { adopt(beforethis, id, EOBJ_BEFORE_THIS); }
 
     /* Helper function for clone functionality.
      */

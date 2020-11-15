@@ -114,6 +114,13 @@ public:
         eDrawParams& prm,
         os_int mouse_button_nr);
 
+    /* If this is a drop to edge, pass to parent.
+     */
+    virtual ecompoDropSpec check_drop(
+        ePos& pos,
+        eDrawParams *prm,
+        os_boolean is_drop);
+
     /* Activate the component (start editing value, toggle checkbox, or show drop down list).
      */
     virtual void activate();

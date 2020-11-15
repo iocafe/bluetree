@@ -236,7 +236,9 @@ eComponent *eComponent::nextcomponent(
 ****************************************************************************************************
 */
 eComponent *eComponent::findcomponent(
-    ePos pos)
+    ePos pos,
+    eDrawParams *prm,
+    os_boolean is_drop)
 {
     eComponent *w, *c;
 
@@ -247,7 +249,7 @@ eComponent *eComponent::findcomponent(
     do {
         c = c->m_prev_z;
         if (erect_is_point_inside(c->visible_rect(), pos)) {
-            if (check_click(pos) != ECOMPO_CLICK_IGNORE) {
+            if (c->check_drop(pos, prm, is_drop) != ECOMPO_DROP_IGNORE) {
                 return c;
             }
         }
@@ -808,6 +810,19 @@ void eComponent::close_popup()
     }
 }
 
+
+ecompoDropSpec eComponent::check_drop(
+    ePos& pos,
+    eDrawParams *prm,
+    os_boolean is_drop)
+{
+    OSAL_UNUSED(pos);
+    OSAL_UNUSED(prm);
+    OSAL_UNUSED(is_drop);
+    return ECOMPO_DROP_OK;
+}
+
+
 /* Component clicked.
  * @return OS_TRUE if click was processed.
  */
@@ -817,7 +832,7 @@ os_boolean eComponent::on_click(
 {
     eWindowSelect op;
 
-    if (prm.edit_mode) {
+    if (prm.edit_mode ) {
         if (mouse_button_nr == EIMGUI_LEFT_MOUSE_BUTTON)
         {
             if (prm.mouse_click_keyboard_flags[mouse_button_nr] & EDRAW_LEFT_CTRL_DOWN)
@@ -835,11 +850,9 @@ os_boolean eComponent::on_click(
         }
     }
 
-    else {
-        if (prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON]) {
-            right_click_popup(prm);
-            return OS_TRUE;
-        }
+    if (prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON]) {
+        right_click_popup(prm);
+        return OS_TRUE;
     }
 
     return OS_FALSE;
@@ -890,7 +903,7 @@ void eComponent::on_drop(
 {
     eWindow *source_w, *destination_w;
     ePointer *p, *next_p;
-    eComponent *c;
+    eComponent *c, *before_c, *cloned;
     eContainer *select_list;
 
     if ((drag_mode == EGUI_DRAG_TO_COPY_COMPONENT ||
@@ -910,9 +923,20 @@ void eComponent::on_drop(
             c = (eComponent*)p->get();
             if (c == OS_NULL) continue;
 
+            /* Here we assume components on top of each others.
+             */
+            for (before_c = firstcomponent(); before_c; before_c = before_c->nextcomponent()) {
+                if (prm.mouse_pos.y < (before_c->rect().y1 + before_c->rect().y2)/2) {
+                    break;
+                }
+            }
+
             /* Always clone, to get rid of temporary state.
              */
-            c->clone(this);
+            cloned = eComponent::cast(c->clone(this));
+            if (before_c) {
+                cloned->adoptat(before_c);
+            }
 
             /* Delete original if moving.
              */

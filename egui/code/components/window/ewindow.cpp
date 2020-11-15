@@ -358,7 +358,7 @@ void eWindow::draw_edit_mode_decorations(
     eComponent *c, *mouse_over;
 
     if (prm.mouse_over_window || prm.mouse_dragged_over_window) {
-        mouse_over = findcomponent(prm.mouse_pos);
+        mouse_over = findcomponent(prm.mouse_pos, &prm);
     }
     else {
         mouse_over = OS_NULL;
@@ -371,15 +371,6 @@ void eWindow::draw_edit_mode_decorations(
     }
 }
 
-void eWindow::open_popup(
-    eDrawParams& prm)
-{
-    eComponent *c;
-    c = findcomponent(prm.mouse_pos);
-    if (c) {
-        c->right_click_popup(prm);
-    }
-}
 
 void eWindow::click(
     eDrawParams& prm,
@@ -387,7 +378,7 @@ void eWindow::click(
 {
     eComponent *c, *e;
 
-    c = findcomponent(prm.mouse_pos);
+    c = findcomponent(prm.mouse_pos, &prm);
     e = c;
     if (c) {
         do {
@@ -408,7 +399,7 @@ void eWindow::start_drag(
     os_int mouse_button_nr)
 {
     eComponent *c;
-    c = findcomponent(prm.mouse_drag_start_pos[mouse_button_nr]);
+    c = findcomponent(prm.mouse_drag_start_pos[mouse_button_nr], &prm);
     if (c) {
         c->on_start_drag(prm, mouse_button_nr, prm.mouse_drag_start_pos[mouse_button_nr]);
     }
@@ -431,7 +422,7 @@ void eWindow::drop_component(
     if (drag_mode == EGUI_DRAG_TO_COPY_COMPONENT ||
         drag_mode == EGUI_DRAG_TO_MOVE_OR_COPY_COMPONENT)
     {
-        c = findcomponent(prm.mouse_pos);
+        c = findcomponent(prm.mouse_pos, &prm, OS_TRUE);
         if (c) {
             c->on_drop(prm, mouse_button_nr, origin, drag_mode, prm.mouse_pos);
             prm.gui->save_drag_origin(OS_NULL, EGUI_NOT_DRAGGING);

@@ -382,6 +382,24 @@ os_boolean eLineEdit::on_click(
 }
 
 
+/* If this is a drop to edge, pass to parent.
+ */
+ecompoDropSpec eLineEdit::check_drop(
+    ePos& pos,
+    eDrawParams *prm,
+    os_boolean is_drop)
+{
+    eRect small_r;
+    if (is_drop && prm) if (prm->edit_mode) {
+        return ECOMPO_DROP_IGNORE;
+    }
+
+    small_r = m_rect;
+    erect_shrink(small_r, 3);
+    return erect_is_point_inside(small_r, pos) ? ECOMPO_DROP_OK : ECOMPO_DROP_IGNORE;
+}
+
+
 /**
 ****************************************************************************************************
 

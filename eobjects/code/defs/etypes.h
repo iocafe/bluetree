@@ -36,13 +36,23 @@ typedef struct ePos
 }
 ePos;
 
+/* Check if point x,y is within rectangle.
+ */
 os_boolean erect_is_xy_inside(
     eRect& r,
     os_int x,
     os_int y);
 
+/* Check if point x,y is within rectangle.
+ */
 os_boolean erect_is_point_inside(
     eRect& r,
     ePos& p);
+
+/* Make rectangle smaller by padding edges
+ */
+void erect_shrink(
+    eRect& r,
+    os_int n);
 
 #endif

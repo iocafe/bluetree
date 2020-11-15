@@ -99,19 +99,20 @@ extern const os_char ecomp_select[];
 extern const os_char ecomp_command[];
 
 
-/* More specific info about click position, returned by check_click() function.
+/* More specific info about drop position, returned by check_drop() function.
  */
-typedef enum ecompoClickSpec
+typedef enum ecompoDropSpec
 {
-    ECOMPO_CLICK_IGNORE = 0,
-    ECOMPO_CLICK_OK,
+    ECOMPO_DROP_IGNORE = 0,
+    ECOMPO_DROP_OK,
 }
-ecompoClickSpec;
+ecompoDropSpec;
 
 
 /* Parameters for layout(). These determine size, position of component and it's subcomponents.
    Setup Z order for draing.
  */
+ #if 0
 typedef struct eLayoutParams
 {
     /* Enable component. Disabled components have size 0 and are not dron nor appear in Z order.
@@ -136,6 +137,7 @@ typedef struct eLayoutParams
     os_boolean edit_mode;
 }
 eLayoutParams;
+#endif
 
 /* Keyboard flags with mouse.
  */
@@ -302,7 +304,9 @@ public:
     /* Get topmost component in Z orderr which encloses (x, y) position.
      */
     eComponent *findcomponent(
-        ePos pos);
+        ePos pos,
+        eDrawParams *prm,
+        os_boolean is_drop = OS_FALSE);
 
     /* Add component to window's Z order
      */
@@ -439,7 +443,10 @@ public:
        close enough to line, etc, to select the component, and if the point is "special point",
        like end point of the line which can be used to modify the component.
      */
-    virtual ecompoClickSpec check_click(ePos pos) {OSAL_UNUSED(pos); return ECOMPO_CLICK_OK;}
+    virtual ecompoDropSpec check_drop(
+        ePos& pos,
+        eDrawParams *prm,
+        os_boolean is_drop);
 
     /* Component clicked (select in edit mode, etc).
      */
@@ -534,6 +541,7 @@ public:
      */
     eRect& visible_rect() {return m_rect; }
 
+    eRect& rect() {return m_rect; }
 
 
 protected:
@@ -554,7 +562,7 @@ protected:
 
     /* Saved layout parameters.
      */
-    eLayoutParams m_layout_prm; // ?????????????????????????????????????????????????????
+    // eLayoutParams m_layout_prm; // ?????????????????????????????????????????????????????
 
     /* Minimum and maximum sizes in pixels what component can be drawn in and still looks acceptable.
      */

@@ -141,9 +141,6 @@ protected:
         eVariable *name,
         eSet *appendix);
 
-    void open_popup(
-        eDrawParams& prm);
-
     void click(
         eDrawParams& prm,
         os_int mouse_button_nr);

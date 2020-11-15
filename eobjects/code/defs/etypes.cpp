@@ -33,3 +33,13 @@ os_boolean erect_is_point_inside(
     return erect_is_xy_inside(r, p.x, p.y);
 }
 
+void erect_shrink(
+    eRect& r,
+    os_int n)
+{
+    r.x1 += n;
+    r.y1 += n;
+    r.x2 -= n;
+    r.y2 -= n;
+}
+
