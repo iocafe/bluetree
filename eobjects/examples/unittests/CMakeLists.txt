@@ -27,8 +27,6 @@ set(E_SOURCE_PATH "$ENV{E_ROOT}/${E_REPO}/eobjects/examples/${E_PROJECT}/code")
 
 # Set include path for the project.
 include_directories("${E_SOURCE_PATH}")
-
-# Add libraries.
 include_directories("$ENV{E_ROOT}/${E_REPO}/eobjects")
 
 # Add header files, the file(GLOB_RECURSE...) allows for wildcards and recurses subdirs.

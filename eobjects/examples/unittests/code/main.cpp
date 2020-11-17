@@ -30,7 +30,7 @@
    and macro EMAIN_CONSOLE_ENTRY eobjects specific osal_main() function which calls emain.
  */
 EOSAL_C_MAIN
-EMAIN_CONSOLE_ENTRY
+EMAIN_CONSOLE_ENTRY("unittests")
 
 /**
 ****************************************************************************************************

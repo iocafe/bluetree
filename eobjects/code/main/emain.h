@@ -53,9 +53,9 @@ OSAL_C_HEADER_ENDS
 
 ****************************************************************************************************
 */
-#define EMAIN_CONSOLE_ENTRY osalStatus osal_main(os_int argc, os_char *argv[]) { \
+#define EMAIN_CONSOLE_ENTRY(process_name) osalStatus osal_main(os_int argc, os_char *argv[]) { \
     osalStatus s; \
-    eobjects_initialize(OS_NULL); \
+    eobjects_initialize(process_name, EOBJECTS_DEFAULT_INIT); \
     eprocess_create(); \
     s = (osalStatus)emain(argc, argv); \
     eprocess_close(); \

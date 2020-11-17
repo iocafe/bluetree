@@ -17,7 +17,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $ENV{E_LIBOUT})
 set(BACKBONE "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code")
 set(EXTENSIONS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/extensions")
 
-# Add iocom and pins library include paths.
+# Add library include paths.
 include_directories("$ENV{E_ROOT}/iocom")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}")
 

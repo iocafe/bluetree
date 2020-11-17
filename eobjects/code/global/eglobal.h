@@ -26,7 +26,7 @@ class eConsole;
 
 /* Space allocation for process name, nr, id, etc. strings.
  */
-#define ENET_PROCESS_NAME_SZ 32
+#define ENET_PROCESS_NAME_SZ 16
 #define ENET_PROCESS_NR_SZ 16
 #define ENET_PROCESS_ID_SZ 48
 #define ENET_PROCESS_NICK_NAME_SZ 48
@@ -132,6 +132,10 @@ typedef struct eGlobal
     /** Pointer to global structure for egui library.
      */
     struct eGuiGlobal *eguiglobal;
+
+    /** Initialization flags saved by eobjects_inititalize() for eobjects_shutdown()
+     */
+    os_int eobjects_init_flags;
 }
 eGlobal;
 

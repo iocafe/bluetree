@@ -21,10 +21,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-  Clears member variables.
-
+  Constructor. Clears member variables.
 ****************************************************************************************************
 */
 eOsStream::eOsStream(
@@ -39,10 +36,7 @@ eOsStream::eOsStream(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-  Closes the OS socket if it is open.
-
+  Virtual destructor. Closes the OS stream if it is open.
 ****************************************************************************************************
 */
 eOsStream::~eOsStream()

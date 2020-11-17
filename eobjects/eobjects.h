@@ -25,10 +25,16 @@
  */
 #include "eosalx.h"
 
+/* Flags for eobjects_initialize() function.
+ */
+#define EOBJECTS_DEFAULT_INIT 0
+#define EOBJECTS_NO_NETWORK_INIT 1
+
 /* Initialize eobject library for use.
  */
 void eobjects_initialize(
-    void *reserved);
+    const os_char *process_name,
+    os_int flags);
 
 /* Shut down eobjects library.
 */
