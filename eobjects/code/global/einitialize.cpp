@@ -76,6 +76,7 @@ void eobjects_initialize(
         persistentprm.device_name = process_name;
         os_persistent_initialze(&persistentprm);
 
+#if OSAL_SOCKET_SUPPORT
 #if OSAL_TLS_SUPPORT
         os_memclear(&security, sizeof(security));
         // security->certs_dir
@@ -83,8 +84,12 @@ void eobjects_initialize(
 #else
         osal_socket_initialize(OS_NULL, 0, OS_NULL, 0);
 #endif
+#endif
 #if OSAL_SERIAL_SUPPORT
         osal_serial_initialize();
+#endif
+#if OSAL_BLUETOOTH_SUPPORT
+        osal_bluetooth_initialize();
 #endif
     }
 
@@ -114,14 +119,19 @@ void eobjects_shutdown()
 
     if ((eglobal->eobjects_init_flags & EOBJECTS_NO_NETWORK_INIT) == 0)
     {
+#if OSAL_SOCKET_SUPPORT
 #if OSAL_TLS_SUPPORT
         osal_tls_shutdown();
 #else
         osal_socket_shutdown();
 #endif
+#endif
 
 #if OSAL_SERIAL_SUPPORT
         osal_serial_shutdown();
+#endif
+#if OSAL_BLUETOOTH_SUPPORT
+        osal_bluetooth_shutdown();
 #endif
         os_persistent_shutdown();
     }

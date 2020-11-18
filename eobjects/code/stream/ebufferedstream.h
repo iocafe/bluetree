@@ -65,6 +65,13 @@ public:
     ************************************************************************************************
     */
 
+    /* Set up queue buffers and select optional encoding.
+     */
+    eStatus setup_queues(
+        os_memsz in_sz,
+        os_memsz out_sz,
+        os_int flags);
+
     /* Write data to stream.
      */
     eStatus write_out_queue(
@@ -99,6 +106,10 @@ protected:
     /** Output queue (buffer).
      */
     eQueue *m_out;
+
+    /** Saved flags.
+     */
+    os_int m_flags;
 };
 
 #endif

@@ -18,6 +18,15 @@
 */
 #include "eobjects.h"
 
+/* Default maximum queue sizes (for catastrophic failure on program error are 100MB).
+   These can be overridden by compiler define.
+ */
+#ifndef ESTREAM_IN_QUEUE_SZ
+#define ESTREAM_IN_QUEUE_SZ 100000000L
+#endif
+#ifndef ESTREAM_OUT_QUEUE_SZ
+#define ESTREAM_OUT_QUEUE_SZ 100000000L
+#endif
 
 /**
 ****************************************************************************************************
@@ -72,29 +81,42 @@ void eOsStream::setupclass()
 /**
 ****************************************************************************************************
 
-  @brief Open a socket.
+  @brief Open an eosal stream stream.
 
-  The open() function opens a socket. The function can either connect a socket or listen to
-  specific TCP port.
+  The open() function opens a TLS socket, TCP socket, serial port, file, or memory buffer.
+  For socket, the function can either connect a socket or listen to specific TCP port (optionally
+  on spefic network interface).
 
   @param  parameters Socket parameters, a list string or direct value.
           Address and port to connect to, or interface and port to listen for.
           Socket IP address and port can be specified either as value of "addr" item
-          or directly in parameter sstring. For example "192.168.1.55:20" or "localhost:12345"
-          specify IPv4 addressed. If only port number is specified, which is often
-          useful for listening socket, for example ":12345".
-          IPv4 address is automatically recognized from numeric address like
-          "2001:0db8:85a3:0000:0000:8a2e:0370:7334", but not when address is specified as string
-          nor for empty IP specifying only port to listen. Use brackets around IP address
-          to mark IPv6 address, for example "[localhost]:12345", or "[]:12345" for empty IP.
+          or directly in parameter sstring. For example "socket:192.168.1.55:20" or
+          "socket:localhost:12345" specify IPv4 addressed.
 
-XXXXXXXXXXXXXXXXXX FLAGS
-  @param  flags Flags for creating the socket. Bit fields, combination of:
+          To listen for a socket port on all network interfaces specify port number number
+          without IP address. For example "tls::12345".
+
+          IPv4 address is automatically recognized from numeric address like
+          "tls:2001:0db8:85a3:0000:0000:8a2e:0370:7334", but not when address is specified as string
+          nor for empty IP specifying only port to listen. Use brackets around IP address
+          to mark IPv6 address, for example "tls:[localhost]:12345", or "tls:[]:12345" for empty IP.
+
+          - "tls:", TLS socket.
+          - "socket:" TCP socket.
+          - "serial:" Serial communication.
+          - "bluetooth:" Blue tooth specific implementation. On Windows/Linux blue tooth is
+             just a serial port, and this choice is not valid.
+          - "file:" File on local file system.
+          - "buffer:" Memory buffer. This can be used to serialize and encode objects on
+             the fly, like to store serialized object into database column.
+
+  @param  flags Flags for the open function. Bit fields, some common ones:
           - OSAL_STREAM_CONNECT: Connect to specified socket port at specified IP address.
           - OSAL_STREAM_LISTEN: Open a socket to listen for incoming connections.
-          - OSAL_STREAM_UDP_MULTICAST: Open a UDP multicast socket.
           - OSAL_STREAM_TCP_NODELAY: Disable Nagle's algorithm on TCP socket.
           - OSAL_STREAM_NO_REUSEADDR: Disable reusability of the socket descriptor.
+          - OSAL_STREAM_PLAIN: Disable stream encoding.
+          - OSAL_STREAM_UNBUFFERED: Disable buffering.
 
   @return  If successfull, the function returns ESTATUS_SUCCESS. Other return values
            indicate an error.
@@ -106,20 +128,78 @@ eStatus eOsStream::open(
     os_int flags)
 {
     osalStatus s;
+    const osalStreamInterface *iface;
+    os_memsz len;
 
-    /* If socket is already open.
+    /* Names and pointers of the supported OSAL interfaces.
+     */
+    typedef struct {
+        const os_char *name;
+        const osalStreamInterface *iface;
+    }
+    eIfaceListItem;
+
+    const static eIfaceListItem iface_list[] = {
+#if OSAL_SOCKET_SUPPORT
+#if OSAL_TLS_SUPPORT
+        {"tls:", OSAL_TLS_IFACE},
+#endif
+        {"socket:", OSAL_SOCKET_IFACE},
+#endif
+#if OSAL_SERIAL_SUPPORT
+        {"serial:", OSAL_SERIAL_IFACE},
+#endif
+#if OSAL_BLUETOOTH_SUPPORT
+        {"bluetooth:", OSAL_BLUETOOTH_IFACE},
+#endif
+#if OSAL_FILESYS_SUPPORT
+        {"file:", OSAL_FILE_IFACE},
+#endif
+#if OSAL_STREAM_BUFFER_SUPPORT
+        {"buffer:", OSAL_STREAM_BUFFER_IFACE},
+#endif
+        {OS_NULL, OS_NULL}
+    };
+    const eIfaceListItem *item;
+
+    /* If stream is already open.
      */
     if (m_stream) {
         osal_debug_error("eOsStream: stream is already open");
         return ESTATUS_FAILED;
     }
 
-    const osalStreamInterface *iface = OSAL_SOCKET_IFACE;
+    /* Find interface by name
+     */
+    for (item = iface_list; item->name; item++) {
+        len = os_strlen(item->name) - 1;
+        if (!os_strncmp(parameters, item->name, len)) {
+            break;
+        }
+    }
+    if (item == OS_NULL) {
+        osal_debug_error("eOsStream::open: interface, like \"tls:\" not in open() parameters");
+        return ESTATUS_FAILED;
+    }
+    iface = item->iface;
 
-    /* Open socket and return ESTATUS_SUCCESS or ESTATUS_FAILED.
+    /* Open socket and return ESTATUS_SUCCESS or ESTATUS_FAILED. Save flags.
      */
     m_stream = osal_stream_open(iface, parameters, OS_NULL, &s, flags);
-    return s ? ESTATUS_FAILED : ESTATUS_SUCCESS;
+    if (s) return ESTATUS_FROM_OSAL_STATUS(s);
+    m_flags = flags;
+
+    /* Set up queues.
+     */
+    if ((flags & (OSAL_STREAM_PLAIN|OSAL_STREAM_UNBUFFERED))
+        == (OSAL_STREAM_PLAIN|OSAL_STREAM_UNBUFFERED))
+    {
+        return ESTATUS_SUCCESS;
+    }
+
+    /* Setup queues to buffer outgoing and incoming data.
+     */
+    return setup_queues(ESTREAM_IN_QUEUE_SZ, ESTREAM_OUT_QUEUE_SZ, flags);
 }
 
 
@@ -207,6 +287,7 @@ eStatus eOsStream::write(
         *nwritten = 0;
         return ESTATUS_FAILED;
     }
+
 
 
 return ESTATUS_FAILED;
