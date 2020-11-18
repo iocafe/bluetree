@@ -54,8 +54,7 @@ eBufferedStream::eBufferedStream(
 */
 eBufferedStream::~eBufferedStream()
 {
-    delete m_in;
-    delete m_out;
+    delete_queues();
 }
 
 
@@ -72,6 +71,7 @@ eBufferedStream::~eBufferedStream()
   @param  flags Flags to set up buffering, same as for the open stream function. Bit fields.
           - OSAL_STREAM_PLAIN: Disable stream encoding.
           - OSAL_STREAM_UNBUFFERED: Disable buffering.
+          - OSAL_STREAM_LISTEN: Do nothing.
 
   @return  If successfull, the function returns ESTATUS_SUCCESS. Other return values
            indicate an error.
@@ -83,12 +83,54 @@ eStatus eBufferedStream::setup_queues(
     os_memsz out_sz,
     os_int flags)
 {
+    os_char nbuf[OSAL_NBUF_SZ];
 
-    // OSAL_STREAM_ENCODE_ON_WRITE
- //       - OSAL_STREAM_ENCODE_ON_WRITE
+    /* If we are listening, delete any queues.
+     */
+    if ((flags & OSAL_STREAM_LISTEN) ||
+       ((flags & (OSAL_STREAM_PLAIN|OSAL_STREAM_UNBUFFERED))
+       == (OSAL_STREAM_PLAIN|OSAL_STREAM_UNBUFFERED)))
+    {
+        delete_queues();
+    }
 
+    /* Otherwise connecting or accepting a socket, create the queues.
+     */
+    else if (flags )
+    {
+        if (m_in == OS_NULL) m_in = new eQueue(this);
+        if (m_out == OS_NULL) m_out = new eQueue(this);
+        m_in->close();
+        m_out->close();
+        osal_int_to_str(nbuf, sizeof(nbuf), in_sz);
+        m_in->open(nbuf, (flags & OSAL_STREAM_PLAIN)
+            ? OSAL_FLUSH_CTRL_COUNT|OSAL_STREAM_SELECT
+            : OSAL_STREAM_DECODE_ON_READ|OSAL_FLUSH_CTRL_COUNT|OSAL_STREAM_SELECT);
+        osal_int_to_str(nbuf, sizeof(nbuf), out_sz);
+        m_out->open(nbuf, (flags & OSAL_STREAM_PLAIN)
+            ? OSAL_STREAM_SELECT
+            : OSAL_STREAM_ENCODE_ON_WRITE|OSAL_STREAM_SELECT);
+    }
+
+    m_flags = flags;
     return ESTATUS_SUCCESS;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Delete queue buffers.
+
+****************************************************************************************************
+*/
+void eBufferedStream::delete_queues()
+{
+    delete m_in;
+    delete m_out;
+    m_in = m_out = OS_NULL;
+}
+
 
 #if 0
     /* Write all data to queue.

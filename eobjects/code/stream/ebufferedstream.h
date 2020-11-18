@@ -72,6 +72,9 @@ public:
         os_memsz out_sz,
         os_int flags);
 
+    void delete_queues();
+
+
     /* Write data to stream.
      */
     eStatus write_out_queue(

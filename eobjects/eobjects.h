@@ -85,7 +85,7 @@ void eobjects_shutdown();
 #include "code/stream/equeue.h"
 #include "code/stream/ebufferedstream.h"
 #include "code/stream/eosstream.h"
-#include "code/buffer/ebuffer.h"
+#include "code/stream/ebuffer.h"
 #include "code/connection/econnection.h"
 #include "code/connection/eendpoint.h"
 #include "code/helpers/etypeenum_helpers.h"
