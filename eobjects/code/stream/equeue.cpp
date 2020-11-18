@@ -140,7 +140,7 @@ eStatus eQueue::open(
     if (max_sz <= 0) {
         max_sz = 100000000L;
     }
-    m_max_blocks = (os_int)(max_sz / EQUEUE_DEFALT_BLOCK_SZ);
+    m_max_blocks = (os_int)((max_sz + EQUEUE_DEFALT_BLOCK_SZ - 1) / EQUEUE_DEFALT_BLOCK_SZ);
 
     /* Save flags which indicate weather to
      */
