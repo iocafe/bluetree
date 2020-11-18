@@ -25,7 +25,7 @@ class eQueue;
   EOSAL library stream as eobjects stream.
 ****************************************************************************************************
 */
-class eOsStream : public eStream
+class eOsStream : public eBufferedStream
 {
 public:
     /**
@@ -141,10 +141,6 @@ public:
         eStatus *s = OS_NULL,
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM);
-
-    virtual eStatus accept(
-        eStream *newstream,
-        os_int flags) {return ESTATUS_FAILED;}
 
 
 protected:

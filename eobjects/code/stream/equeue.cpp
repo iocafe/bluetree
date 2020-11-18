@@ -321,7 +321,6 @@ void eQueue::write_encoded(
     os_char c;
     os_int i;
 
-
     for (i = 0; i < buf_sz; i++)
     {
         /* Get current character

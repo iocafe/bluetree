@@ -180,16 +180,6 @@ public:
      */
     virtual os_int classid() {return ECLASSID_STREAM; }
 
-    /* Static constructor function.
-     */
-    static eStream *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eStream(parent, id, flags);
-    }
-
 
     /**
     ************************************************************************************************

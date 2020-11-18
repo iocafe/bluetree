@@ -28,7 +28,7 @@ eOsStream::eOsStream(
     eObject *parent,
     e_oid id,
     os_int flags)
-    : eStream(parent, id, flags)
+    : eBufferedStream(parent, id, flags)
 {
     m_stream = OS_NULL;
 }
