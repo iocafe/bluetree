@@ -145,6 +145,12 @@ public:
 
 protected:
 
+    virtual eStatus buffered_write(
+        const os_char *buf,
+        os_memsz buf_sz,
+        os_memsz *nwritten);
+
+
     /**
     ************************************************************************************************
       Member variables.
@@ -153,6 +159,10 @@ protected:
     /* EOSAL stream
      */
     osalStream m_stream;
+
+    /* EOSAL stream interface.
+     */
+    const osalStreamInterface *m_iface;
 };
 
 #endif

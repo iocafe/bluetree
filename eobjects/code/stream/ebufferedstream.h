@@ -101,6 +101,16 @@ public:
 //    eStatus advance_out_queue(
 
 protected:
+    /* Actually write to to implementing stream (called by flush())
+     */
+    virtual eStatus buffered_write(
+        const os_char *buf,
+        os_memsz buf_sz,
+        os_memsz *nwritten)
+    {
+        osal_debug_error("buffered_write not implemented by derived class");
+        return ESTATUS_FAILED;
+    }
 
     /** Input queue (buffer).
      */

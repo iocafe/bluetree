@@ -99,7 +99,7 @@ typedef enum
      */
     ESTATUS_TIMEOUT = 550,
 
-    /*& Buffer overflow, eQueue in communication?
+    /** Buffer overflow, streams, eQueue
      */
     ESTATUS_BUFFER_OVERFLOW = 555
 }

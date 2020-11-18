@@ -276,14 +276,18 @@ void eQueue::delblock()
   The write() function appends data to queue. The data can be encoded, if flag
   OSAL_STREAM_ENCODE_ON_WRITE was given to open().
 
+  All data is always written to buffer. Buffer overflow check is there only to detect errornous
+  use (like never ending write with no handshake) before computer runs out of memory.
+
   @param  buf Pointer to data to write.
   @param  buf_sz Number of bytes to write.
-  @param  nwritten Pointer to integer where to store number of bytes written to queue. This is
-          always same as byte_sz. Can be set to OS_NULL, if not needed.
+  @param  nwritten Pointer to integer where to store number of bytes written to queue.
+          On success, this is set to buf_sz, otherwise to 0. Can be OS_NULL,
+          if not needed. This argument is here only for derived function compatibility.
 
-  @return  If successfull, the function returns ESTATUS_SUCCESS. Other return values
-           indicate an error. eQueue class cannot fail, so return value is always
-           ESTATUS_SUCCESS.
+  @return  If successfull, the function returns ESTATUS_SUCCESS. If maximum allocatable buffer
+           size is filled, the function returns error code ESTATUS_BUFFER_OVERFLOW. In this case
+           the stream should be closed.
 
 ****************************************************************************************************
 */
@@ -314,7 +318,9 @@ eStatus eQueue::write(
         s = write_plain(buf, buf_sz);
     }
 
-    if (nwritten != OS_NULL) *nwritten = buf_sz;
+    if (nwritten != OS_NULL) {
+        *nwritten = s ? 0 : buf_sz;
+    }
     return s;
 }
 
@@ -332,7 +338,9 @@ eStatus eQueue::write(
 
   @param  buf Pointer to data to write.
   @param  buf_sz Number of bytes to write.
-  @return None
+  @return  If successfull, the function returns ESTATUS_SUCCESS. If maximum allocatable buffer
+           size is filled, the function returns error code ESTATUS_BUFFER_OVERFLOW. In this case
+           the stream should be closed.
 
 ****************************************************************************************************
 */

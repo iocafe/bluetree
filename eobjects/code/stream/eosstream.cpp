@@ -40,6 +40,7 @@ eOsStream::eOsStream(
     : eBufferedStream(parent, id, flags)
 {
     m_stream = OS_NULL;
+    m_iface = OS_NULL;
 }
 
 
@@ -128,7 +129,6 @@ eStatus eOsStream::open(
     os_int flags)
 {
     osalStatus s;
-    const osalStreamInterface *iface;
     os_memsz len;
 
     /* Names and pointers of the supported OSAL interfaces.
@@ -181,21 +181,12 @@ eStatus eOsStream::open(
         osal_debug_error("eOsStream::open: interface, like \"tls:\" not in open() parameters");
         return ESTATUS_FAILED;
     }
-    iface = item->iface;
+    m_iface = item->iface;
 
     /* Open socket and return ESTATUS_SUCCESS or ESTATUS_FAILED. Save flags.
      */
-    m_stream = osal_stream_open(iface, parameters, OS_NULL, &s, flags);
+    m_stream = osal_stream_open(m_iface, parameters, OS_NULL, &s, flags);
     if (s) return ESTATUS_FROM_OSAL_STATUS(s);
-    m_flags = flags;
-
-    /* Set up queues.
-     */
-    if ((flags & (OSAL_STREAM_PLAIN|OSAL_STREAM_UNBUFFERED))
-        == (OSAL_STREAM_PLAIN|OSAL_STREAM_UNBUFFERED))
-    {
-        return ESTATUS_SUCCESS;
-    }
 
     /* Setup queues to buffer outgoing and incoming data.
      */
@@ -266,14 +257,22 @@ eStatus eOsStream::flush(
 /**
 ****************************************************************************************************
 
-  @brief Write data to socket output buffer/to socket.
+  @brief Write data to output buffer.
 
-  The eOsStream::write function writes data first to output buffer. Then attempts to write
-  data from output buffer into socket, as long as there are full frames and socket would
-  not block.
+  If buffering is used, the eOsStream::write function writes data to output buffer. Data is not
+  written to socket or other stream by this function, but only when flush is called.
+  If buffering is not used, data is written directly to underlying EOSAL stream.
 
-  @return If succesfull, the function returns ESTATUS_SUCCESS (0). Otherwise if socket is not
-          open returns ESTATUS failed.
+  @param   buf Pointer to data to write.
+  @param   buf_sz Number of bytes to write.
+  @param   nwritten Pointer to integer where to store number of bytes written.
+           If this stream is buffered: On success, this is set to buf_sz, otherwise to 0.
+           Can be OS_NULL, if not needed.
+           If stream is not buffered: This is set to number of bytes actually written, which
+           may be less than buf_sz. This argument must not be OS_NULL.
+
+  @return  If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
+           an error.
 
 ****************************************************************************************************
 */
@@ -282,15 +281,67 @@ eStatus eOsStream::write(
     os_memsz buf_sz,
     os_memsz *nwritten)
 {
+    osalStatus s;
+    eStatus es;
+
+    if (m_stream == OS_NULL)
+    {
+        if (nwritten) *nwritten = 0;
+        return ESTATUS_FAILED;
+    }
+
+    if (m_out == OS_NULL) {
+        s = m_iface->stream_write(m_stream, buf, buf_sz, nwritten, OSAL_STREAM_DEFAULT);
+        return ESTATUS_FROM_OSAL_STATUS(s);
+    }
+
+    /* Write all data to buffer.
+     */
+    es = m_out->write(buf, buf_sz, nwritten);
+
+#if OSAL_DEBUG
+    if (nwritten && !es) {
+        osal_debug_assert(*nwritten == buf_sz);
+    }
+#endif
+
+    return es;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Buffered socket flush calls this function to actually write the data to stream.
+
+  The eOsStream::buffered_write function writes data to socket or other output stream.
+
+  @param   buf Pointer to data to write.
+  @param   buf_sz Number of bytes to write.
+  @param   nwritten Pointer to integer where to store number of bytes written.
+           This is set to number of bytes actually written, which may be less than buf_sz.
+           This argument must not be OS_NULL.
+
+  @return  If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
+           an error.
+
+****************************************************************************************************
+*/
+eStatus eOsStream::buffered_write(
+    const os_char *buf,
+    os_memsz buf_sz,
+    os_memsz *nwritten)
+{
+    osalStatus s;
+
     if (m_stream == OS_NULL)
     {
         *nwritten = 0;
         return ESTATUS_FAILED;
     }
 
-
-
-return ESTATUS_FAILED;
+    s = m_iface->stream_write(m_stream, buf, buf_sz, nwritten, OSAL_STREAM_DEFAULT);
+    return ESTATUS_FROM_OSAL_STATUS(s);
 }
 
 
@@ -376,22 +427,37 @@ eStatus eOsStream::read(
   @param  c Character 0-255 or control code > 255 to write.
   @return If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
           an error.
+          Return value ESTATUS_BUFFER_OVERFLOW from unbuffered stream indicates that byte
+          could not be written.
 
 ****************************************************************************************************
 */
 eStatus eOsStream::writechar(
     os_int c)
 {
-#if 0
-    /* Write the character to output queue.
-     */
-    m_out->writechar(c);
+    osalStatus s;
+    os_char cc;
+    os_memsz nwritten;
 
-    /* If we have whole frame buffered, try to write data to socket.
+    /* If we got output queue (buffered stream), append to the queue.
      */
-    return write_socket(OS_FALSE);
-#endif
-    return ESTATUS_SUCCESS;
+    if (m_out) {
+        return m_out->writechar(c);
+    }
+
+    /* No output queue, make sure that the stream is open.
+     */
+    if (m_stream == OS_NULL) {
+        return ESTATUS_FAILED;
+    }
+
+    /* Write directly to the stream (1 byte only, no control codes).
+     */
+    cc = (os_char)c;
+    s = m_iface->stream_write(m_stream, &cc, 1, &nwritten, OSAL_STREAM_DEFAULT);
+    if (s) ESTATUS_FROM_OSAL_STATUS(s);
+
+    return nwritten == 1 ? ESTATUS_SUCCESS : ESTATUS_BUFFER_OVERFLOW;
 }
 
 
