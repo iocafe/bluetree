@@ -97,7 +97,11 @@ typedef enum
 
     /** Generic timeout code.
      */
-    ESTATUS_TIMEOUT = 550
+    ESTATUS_TIMEOUT = 550,
+
+    /*& Buffer overflow, eQueue in communication?
+     */
+    ESTATUS_BUFFER_OVERFLOW = 555
 }
 eStatus;
 

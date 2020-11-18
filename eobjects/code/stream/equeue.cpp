@@ -54,6 +54,9 @@ eQueue::eQueue(
     m_bytes = 0;
     m_flushctrl_last_c = 0;
     m_flush_count = 0;
+
+    m_nblocks = 0;
+    m_max_blocks = 100000;
 }
 
 
@@ -108,7 +111,9 @@ void eQueue::setupclass()
   The open() function clears the queue into initial state and sets flags for encoding and
   decoding data on read and write.
 
-  @param  parameters Ignored by eQueue.
+  @param  parameters Queue buffer maximum size in bytes as a string. OS_NULL to use
+          the default buffer size.
+
   @param  flags for eQueue, bit fields:
           - OSAL_STREAM_ENCODE_ON_WRITE: Encode data when writing into queue.
             If flag not set, data is written to queue as is.
@@ -125,9 +130,17 @@ eStatus eQueue::open(
     os_char *parameters,
     os_int flags)
 {
+    os_memsz max_sz;
+
     /* Call close() to make sure that queue is empty and all member variables initialized.
      */
     close();
+
+    max_sz = osal_str_to_int(parameters, OS_NULL);
+    if (max_sz <= 0) {
+        max_sz = 100000000L;
+    }
+    m_max_blocks = (os_int)(max_sz / EQUEUE_DEFALT_BLOCK_SZ);
 
     /* Save flags which indicate weather to
      */
@@ -216,6 +229,7 @@ void eQueue::newblock()
         m_oldest = b;
     }
     m_newest = b;
+    m_nblocks++;
 }
 
 
@@ -250,6 +264,7 @@ void eQueue::delblock()
     /* Free memory allocate for the block.
      */
     os_free(b, EQUEUE_DEFALT_BLOCK_SZ);
+    m_nblocks--;
 }
 
 
@@ -277,23 +292,30 @@ eStatus eQueue::write(
     os_memsz buf_sz,
     os_memsz *nwritten)
 {
+    eStatus s;
+
     /* Make sure that we have at least one block.
      */
-    if (m_newest == OS_NULL) newblock();
+    if (m_newest == OS_NULL) {
+        if (m_nblocks >= m_max_blocks) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
+        newblock();
+    }
 
     /* Write data either encoded or "as is".
      */
     if (m_flags & OSAL_STREAM_ENCODE_ON_WRITE)
     {
-        write_encoded(buf, buf_sz);
+        s = write_encoded(buf, buf_sz);
     }
     else
     {
-        write_plain(buf, buf_sz);
+        s = write_plain(buf, buf_sz);
     }
 
     if (nwritten != OS_NULL) *nwritten = buf_sz;
-    return ESTATUS_SUCCESS;
+    return s;
 }
 
 
@@ -314,7 +336,7 @@ eStatus eQueue::write(
 
 ****************************************************************************************************
 */
-void eQueue::write_encoded(
+eStatus eQueue::write_encoded(
     const os_char *buf,
     os_memsz buf_sz)
 {
@@ -341,11 +363,15 @@ void eQueue::write_encoded(
         {
             if (m_wr_count) /* with repeat count */
             {
-                complete_last_write();
+                if (complete_last_write()) {
+                    return ESTATUS_BUFFER_OVERFLOW;
+                }
             }
             else if (m_wr_prevc != EQUEUE_NO_PREVIOUS_CHAR) /* without repeat count */
             {
-                putcharacter(m_wr_prevc);
+                if (putcharacter(m_wr_prevc)) {
+                    return ESTATUS_BUFFER_OVERFLOW;
+                }
                 m_bytes++;
             }
 
@@ -356,8 +382,12 @@ void eQueue::write_encoded(
                 /* If data countains control character, save as control character followed
                    by ctrl in data mark.
                  */
-                putcharacter(E_STREAM_CTRL_CHAR);
-                putcharacter(E_STREAM_CTRLCH_IN_DATA);
+                if (putcharacter(E_STREAM_CTRL_CHAR)) {
+                    return ESTATUS_BUFFER_OVERFLOW;
+                }
+                if (putcharacter(E_STREAM_CTRLCH_IN_DATA)) {
+                    return ESTATUS_BUFFER_OVERFLOW;
+                }
                 m_bytes += 2;
 
                 /* no previous character
@@ -371,6 +401,8 @@ void eQueue::write_encoded(
             m_wr_count = 0;
         }
     }
+
+    return ESTATUS_SUCCESS;
 }
 
 
@@ -388,7 +420,7 @@ void eQueue::write_encoded(
 
 ****************************************************************************************************
 */
-void eQueue::write_plain(
+eStatus eQueue::write_plain(
     const os_char *buf,
     os_memsz buf_sz)
 {
@@ -434,6 +466,9 @@ void eQueue::write_plain(
         if (m_newest->head + 1 == m_newest->tail ||
             (m_newest->head == m_newest->sz - 1 && m_newest->tail == 0))
         {
+            if (m_nblocks >= m_max_blocks) {
+                return ESTATUS_BUFFER_OVERFLOW;
+            }
             newblock();
         }
 
@@ -465,6 +500,8 @@ void eQueue::write_plain(
             buf_sz -= n;
         }
     }
+
+    return ESTATUS_SUCCESS;
 }
 
 
@@ -479,28 +516,42 @@ void eQueue::write_plain(
 
 ****************************************************************************************************
 */
-void eQueue::complete_last_write()
+eStatus eQueue::complete_last_write()
 {
     /* If writing without encoding, there is nothing to do.
      */
-    if ((m_flags & OSAL_STREAM_ENCODE_ON_WRITE) == 0) return;
+    if ((m_flags & OSAL_STREAM_ENCODE_ON_WRITE) == 0) {
+        return ESTATUS_SUCCESS;
+    }
 
     if (m_wr_count == 0) /* without repeat count */
     {
-        putcharacter(m_wr_prevc);
+        if (putcharacter(m_wr_prevc)) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
         m_bytes++;
     }
     else if (m_wr_count == 1) /* repeat twice */
     {
-        putcharacter(m_wr_prevc);
-        putcharacter((os_char)m_wr_prevc);
+        if (putcharacter(m_wr_prevc)) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
+        if (putcharacter((os_char)m_wr_prevc)) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
         m_bytes+=2;
     }
     else  /* with repeat count */
     {
-        putcharacter(E_STREAM_CTRL_CHAR);
-        putcharacter(m_wr_count);
-        putcharacter(m_wr_prevc);
+        if (putcharacter(E_STREAM_CTRL_CHAR)) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
+        if (putcharacter(m_wr_count)) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
+        if (putcharacter(m_wr_prevc)) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
         m_bytes+=3;
     }
 
@@ -508,6 +559,7 @@ void eQueue::complete_last_write()
      */
     m_wr_prevc = EQUEUE_NO_PREVIOUS_CHAR;
     m_wr_count = 0;
+    return ESTATUS_SUCCESS;
 }
 
 
@@ -546,7 +598,9 @@ eStatus eQueue::read(
      */
     if (m_wr_prevc != EQUEUE_NO_PREVIOUS_CHAR)
     {
-        complete_last_write();
+        if (complete_last_write()) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
     }
 
     /* If no buffer.
@@ -794,7 +848,12 @@ eStatus eQueue::writechar(
 {
     /* Make sure that we have at least one block.
      */
-    if (m_newest == OS_NULL) newblock();
+    if (m_newest == OS_NULL) {
+        if (m_nblocks >= m_max_blocks) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
+        newblock();
+    }
 
     /* If writing without encoding, just write the character.
      */
@@ -809,7 +868,9 @@ eStatus eQueue::writechar(
      */
     if (m_wr_prevc != EQUEUE_NO_PREVIOUS_CHAR)
     {
-        complete_last_write();
+        if (complete_last_write()) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
     }
 
     switch (c)
@@ -869,7 +930,9 @@ os_int eQueue::readchar()
      */
     if (m_wr_prevc != EQUEUE_NO_PREVIOUS_CHAR)
     {
-        complete_last_write();
+        if (complete_last_write()) {
+            return ESTATUS_BUFFER_OVERFLOW;
+        }
     }
 
     /* If no buffer.

@@ -166,19 +166,19 @@ private:
 
     /* Write data to queue, encode while writing.
      */
-    void write_encoded(
+    eStatus write_encoded(
         const os_char *buf,
         os_memsz buf_sz);
 
     /* Write data to queue without modification.
      */
-    void write_plain(
+    eStatus write_plain(
         const os_char *buf,
         os_memsz buf_sz);
 
     /** Put character to queue.
      */
-    inline void putcharacter(
+    inline eStatus putcharacter(
         os_int c)
     {
         os_int nexthead;
@@ -192,18 +192,24 @@ private:
          */
         if (nexthead == m_newest->tail)
         {
+            if (m_nblocks >= m_max_blocks) {
+                return ESTATUS_BUFFER_OVERFLOW;
+            }
+
             newblock();
             nexthead = 1;
         }
 
         *(((os_char*)m_newest) + sizeof(eQueueBlock) + m_newest->head) = (os_char)c;
         m_newest->head = nexthead;
+
+        return ESTATUS_SUCCESS;
     }
 
     /* Finish with last write so also previous character has been
        processed.
      */
-    void complete_last_write();
+    eStatus complete_last_write();
 
     /* Read and decode data.
      */
@@ -276,6 +282,14 @@ private:
      */
     os_int m_flags;
 
+    /** Maximum queue memory allocation in bytes.
+     */
+    os_int m_max_blocks;
+
+    /** Current memory allocation in bytes.
+     */
+    os_int m_nblocks;
+
     /** Previous character
      */
     os_int m_wr_prevc;
@@ -307,6 +321,7 @@ private:
     /** Last character of previous write_plain() call.
      */
     os_uchar m_flushctrl_last_c;
+
 };
 
 #endif

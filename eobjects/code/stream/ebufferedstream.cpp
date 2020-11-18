@@ -96,7 +96,7 @@ eStatus eBufferedStream::setup_queues(
 
     /* Otherwise connecting or accepting a socket, create the queues.
      */
-    else if (flags )
+    else if (flags)
     {
         if (m_in == OS_NULL) m_in = new eQueue(this);
         if (m_out == OS_NULL) m_out = new eQueue(this);
