@@ -28,10 +28,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
   The constructor clears member variables.
-
 ****************************************************************************************************
 */
 eBuffer::eBuffer(
@@ -47,10 +44,7 @@ eBuffer::eBuffer(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-  Releases memory allocated for the buffer.
-
+  Virtual destructor releases memory allocated for the buffer.
 ****************************************************************************************************
 */
 eBuffer::~eBuffer()
@@ -70,7 +64,6 @@ eBuffer::~eBuffer()
   class'es properties and metadata for those.
 
   This needs to be called before eMatrix:setupclass(), there is a dependency in setup.
-
 
 ****************************************************************************************************
 */

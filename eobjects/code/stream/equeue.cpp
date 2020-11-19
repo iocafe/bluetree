@@ -33,10 +33,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
   The constructor clears member variables for an empty eQueue object.
-
 ****************************************************************************************************
 */
 eQueue::eQueue(
@@ -62,10 +59,7 @@ eQueue::eQueue(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-  Releases all memory allocated for the queue.
-
+  Virtual destructor releases all memory allocated for the queue.
 ****************************************************************************************************
 */
 eQueue::~eQueue()
