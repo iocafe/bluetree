@@ -98,8 +98,6 @@ public:
         return ESTATUS_SUCCESS;
     }
 
-//    eStatus advance_out_queue(
-
 protected:
     /* Actually write to to implementing stream (called by flush())
      */
@@ -112,6 +110,20 @@ protected:
         return ESTATUS_FAILED;
     }
 
+    virtual eStatus buffered_read(
+        os_char *buf,
+        os_memsz buf_sz,
+        os_memsz *nread)
+    {
+        osal_debug_error("buffered_read not implemented by derived class");
+        return ESTATUS_FAILED;
+    }
+
+    eStatus buffer_to_stream(
+        os_boolean flushnow);
+
+    eStatus stream_to_buffer();
+
     /** Input queue (buffer).
      */
     eQueue *m_in;
@@ -120,9 +132,13 @@ protected:
      */
     eQueue *m_out;
 
+    os_memsz m_frame_sz;
+
     /** Saved flags.
      */
     os_int m_flags;
+
+    os_boolean m_flushnow;
 };
 
 #endif

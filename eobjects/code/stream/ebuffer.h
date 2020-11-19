@@ -127,15 +127,13 @@ public:
      */
     virtual eStatus write(
         const os_char *buf,
-        os_memsz buf_sz,
-        os_memsz *nwritten = OS_NULL);
+        os_memsz buf_sz);
 
     /* Read data from queue.
      */
     virtual eStatus read(
         os_char *buf,
         os_memsz buf_sz,
-        os_memsz *nread = OS_NULL,
         os_int flags = 0);
 
     /* Write character to queue, typically control code.

@@ -96,15 +96,13 @@ public:
      */
     virtual eStatus write(
         const os_char *buf,
-        os_memsz buf_sz,
-        os_memsz *nwritten = OS_NULL);
+        os_memsz buf_sz);
 
     /* Read data from stream.
      */
     virtual eStatus read(
         os_char *buf,
         os_memsz buf_sz,
-        os_memsz *nread = OS_NULL,
         os_int flags = 0);
 
     /* Write character, typically control code.
@@ -149,6 +147,11 @@ protected:
         const os_char *buf,
         os_memsz buf_sz,
         os_memsz *nwritten);
+
+    virtual eStatus buffered_read(
+        os_char *buf,
+        os_memsz buf_sz,
+        os_memsz *nread);
 
 
     /**

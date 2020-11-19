@@ -216,7 +216,6 @@ eStatus eSet::writer(
     os_uchar *p, *e;
     eHandle *handle;
     os_int count;
-    os_memsz nwritten;
     os_uchar iid, ibytes, itype;
     os_double d;
     os_long l;
@@ -309,8 +308,7 @@ eStatus eSet::writer(
 
                 case OS_STR:
                     if (stream->putl(ibytes)) goto failed;
-                    if (stream->write((os_char*)p, ibytes, &nwritten)) goto failed;
-                    if (nwritten != ibytes) goto failed;
+                    if (stream->write((os_char*)p, ibytes)) goto failed;
                     break;
 
                 default:
@@ -459,8 +457,7 @@ eStatus eSet::reader(
             case OS_STR:
                 if (stream->getl(&lval)) goto failed;
                 ibytes = (os_uchar)lval;
-                if (stream->read((os_char*)p, ibytes, &nread)) goto failed;
-                if (nread != lval) goto failed;
+                if (stream->read((os_char*)p, ibytes)) goto failed;
                 *ibytes_pos = ibytes;
                 break;
 

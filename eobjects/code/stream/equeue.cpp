@@ -281,9 +281,6 @@ void eQueue::delblock()
 
   @param  buf Pointer to data to write.
   @param  buf_sz Number of bytes to write.
-  @param  nwritten Pointer to integer where to store number of bytes written to queue.
-          On success, this is set to buf_sz, otherwise to 0. Can be OS_NULL,
-          if not needed. This argument is here only for derived function compatibility.
 
   @return  If successfull, the function returns ESTATUS_SUCCESS. If maximum allocatable buffer
            size is filled, the function returns error code ESTATUS_BUFFER_OVERFLOW. In this case
@@ -293,8 +290,7 @@ void eQueue::delblock()
 */
 eStatus eQueue::write(
     const os_char *buf,
-    os_memsz buf_sz,
-    os_memsz *nwritten)
+    os_memsz buf_sz)
 {
     eStatus s;
 
@@ -318,9 +314,6 @@ eStatus eQueue::write(
         s = write_plain(buf, buf_sz);
     }
 
-    if (nwritten != OS_NULL) {
-        *nwritten = s ? 0 : buf_sz;
-    }
     return s;
 }
 
@@ -596,7 +589,7 @@ eStatus eQueue::complete_last_write()
 
 ****************************************************************************************************
 */
-eStatus eQueue::read(
+eStatus eQueue::readx(
     os_char *buf,
     os_memsz buf_sz,
     os_memsz *nread,

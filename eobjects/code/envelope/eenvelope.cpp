@@ -380,7 +380,6 @@ eStatus eEnvelope::writer(
     const os_int version = 0;
     os_int n;
     os_short mflags;
-    os_memsz nmoved;
     eObject *ctnt, *ctxt;
 
     /* Begin the object and write version number.
@@ -413,8 +412,7 @@ eStatus eEnvelope::writer(
     if (stream->putl(n)) goto failed;
     if (n>0)
     {
-        stream->write(m_target.str + m_target.str_pos, n, &nmoved);
-        if (nmoved != n) goto failed;
+        stream->write(m_target.str + m_target.str_pos, n);
     }
 
     /* Write source, unless EMSG_NO_REPLIES is given.
@@ -432,8 +430,7 @@ eStatus eEnvelope::writer(
         if (stream->putl(n)) goto failed;
         if (n>0)
         {
-            stream->write(m_source.str + m_source.str_pos, n, &nmoved);
-            if (nmoved != n) goto failed;
+            stream->write(m_source.str + m_source.str_pos, n);
         }
     }
 
@@ -531,8 +528,7 @@ eStatus eEnvelope::reader(
         m_target.str = os_malloc(l + 1 + 14, &sz);
         m_target.str_alloc = (os_short)sz;
         m_target.str_pos = (os_short)(sz - l - 1);
-        stream->read(m_target.str + m_target.str_pos, l, &sz);
-        if (sz != l) goto failed;
+        stream->read(m_target.str + m_target.str_pos, l);
         m_target.str[m_target.str_pos + l] = '\0';
     }
 
@@ -546,8 +542,7 @@ eStatus eEnvelope::reader(
             m_source.str = os_malloc(l + 1 + 14, &sz);
             m_source.str_alloc = (os_short)sz;
             m_source.str_pos = (os_short)(sz - l - 1);
-            stream->read(m_source.str + m_source.str_pos, l, &sz);
-            if (sz != l) goto failed;
+            stream->read(m_source.str + m_source.str_pos, l);
             m_source.str[m_source.str_pos + l] = '\0';
         }
     }

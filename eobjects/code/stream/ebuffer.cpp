@@ -139,7 +139,7 @@ eStatus eBuffer::writer(
     eStream *stream,
     os_int sflags)
 {
-    os_memsz nwritten;
+    OSAL_UNUSED(sflags);
 
     /* Version number. Increment if new serialized items are added to the object,
        and check for new version's items in read() function.
@@ -158,8 +158,7 @@ eStatus eBuffer::writer(
      */
     if (m_used > 0)
     {
-        stream->write(m_ptr, m_used, &nwritten);
-        if (nwritten != m_used) goto failed;
+        stream->write(m_ptr, m_used);
     }
 
     /* End the object.
@@ -202,7 +201,7 @@ eStatus eBuffer::reader(
     /* Version number. Used to check which versions item's are in serialized data.
      */
     os_long tmp;
-    os_memsz nbytes, nread;
+    os_memsz nbytes;
     os_int version;
 
     /* If we have old data, delete it.
@@ -227,8 +226,7 @@ eStatus eBuffer::reader(
      */
     if (nbytes > 0)
     {
-        stream->read(m_ptr, nbytes, &nread);
-        if (nread != nbytes) goto failed;
+        stream->read(m_ptr, nbytes);
     }
 
     /* End the object.
@@ -326,8 +324,6 @@ eStatus eBuffer::close()
 
   @param  buf Pointer to data to write.
   @param  buf_sz Number of bytes to write.
-  @param  nwritten Pointer to integer where to store number of bytes written to queue. This is
-          always same as byte_sz. Can be set to OS_NULL, if not needed.
 
   @return Always ESTATUS_SUCCESS.
 
@@ -335,8 +331,7 @@ eStatus eBuffer::close()
 */
 eStatus eBuffer::write(
     const os_char *buf,
-    os_memsz buf_sz,
-    os_memsz *nwritten)
+    os_memsz buf_sz)
 {
     /* If new data does not fit into current buffer allocation, allocate more space.
      * Allocate about 1.5 times more space than we have.
@@ -351,9 +346,8 @@ eStatus eBuffer::write(
     os_memcpy(m_ptr + m_used, buf, buf_sz);
     m_used += buf_sz;
 
-    /* Return number of bytes written and success code.
+    /* Success.
      */
-    if (nwritten != OS_NULL) *nwritten = buf_sz;
     return ESTATUS_SUCCESS;
 }
 
@@ -367,9 +361,6 @@ eStatus eBuffer::write(
 
   @param  buf Pointer to buffer into which to read data.
   @param  buf_sz Size of buffer in bytes.
-  @param  nread Pointer to integer where to store number of bytes read from queue. This may be
-          less than buffer size if the function runs out of data in queue. Can be set to
-          OS_NULL, if not needed.
   @param  flags Ignored.
 
   @return If successfull, the function returns ESTATUS_SUCCESS. Other if no more data is
@@ -380,7 +371,6 @@ eStatus eBuffer::write(
 eStatus eBuffer::read(
     os_char *buf,
     os_memsz buf_sz,
-    os_memsz *nread,
     os_int flags)
 {
     os_memsz
@@ -400,9 +390,8 @@ eStatus eBuffer::read(
         s = ESTATUS_SUCCESS;
     }
 
-    /* Return number of bytes read and success code.
+    /* Success.
      */
-    if (nread != OS_NULL) *nread = buf_sz;
     return s;
 }
 

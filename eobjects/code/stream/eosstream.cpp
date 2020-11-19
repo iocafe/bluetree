@@ -116,8 +116,6 @@ void eOsStream::setupclass()
           - OSAL_STREAM_LISTEN: Open a socket to listen for incoming connections.
           - OSAL_STREAM_TCP_NODELAY: Disable Nagle's algorithm on TCP socket.
           - OSAL_STREAM_NO_REUSEADDR: Disable reusability of the socket descriptor.
-          - OSAL_STREAM_PLAIN: Disable stream encoding.
-          - OSAL_STREAM_UNBUFFERED: Disable buffering.
 
   @return  If successfull, the function returns ESTATUS_SUCCESS. Other return values
            indicate an error.
@@ -215,6 +213,7 @@ eStatus eOsStream::close()
 
     osal_stream_close(m_stream, OSAL_STREAM_DEFAULT);
     m_stream = OS_NULL;
+    delete_queues();
 
     return ESTATUS_SUCCESS;
 }
@@ -239,15 +238,13 @@ eStatus eOsStream::close()
 eStatus eOsStream::flush(
     os_int flags)
 {
-    // osalSelectData selectdata;
-    // eStream *strm;
-    // eStatus s;
+    OSAL_UNUSED(flags);
 
-    if (m_stream == OS_NULL)
-    {
-
+    if (m_out == OS_NULL) {
         return ESTATUS_FAILED;
     }
+
+    buffer_to_stream(OS_TRUE);
 
     return osal_stream_flush(m_stream, OSAL_STREAM_DEFAULT)
         ? ESTATUS_FAILED : ESTATUS_SUCCESS;
@@ -265,11 +262,6 @@ eStatus eOsStream::flush(
 
   @param   buf Pointer to data to write.
   @param   buf_sz Number of bytes to write.
-  @param   nwritten Pointer to integer where to store number of bytes written.
-           If this stream is buffered: On success, this is set to buf_sz, otherwise to 0.
-           Can be OS_NULL, if not needed.
-           If stream is not buffered: This is set to number of bytes actually written, which
-           may be less than buf_sz. This argument must not be OS_NULL.
 
   @return  If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
            an error.
@@ -278,43 +270,27 @@ eStatus eOsStream::flush(
 */
 eStatus eOsStream::write(
     const os_char *buf,
-    os_memsz buf_sz,
-    os_memsz *nwritten)
+    os_memsz buf_sz)
 {
-    osalStatus s;
-    eStatus es;
-
-    if (m_stream == OS_NULL)
-    {
-        if (nwritten) *nwritten = 0;
-        return ESTATUS_FAILED;
-    }
+    eStatus s;
 
     if (m_out == OS_NULL) {
-        s = m_iface->stream_write(m_stream, buf, buf_sz, nwritten, OSAL_STREAM_DEFAULT);
-        return ESTATUS_FROM_OSAL_STATUS(s);
+        return ESTATUS_FAILED;
     }
 
     /* Write all data to buffer.
      */
-    es = m_out->write(buf, buf_sz, nwritten);
-
-#if OSAL_DEBUG
-    if (nwritten && !es) {
-        osal_debug_assert(*nwritten == buf_sz);
-    }
-#endif
-
-    return es;
+    return m_out->write(buf, buf_sz);
 }
 
 
 /**
 ****************************************************************************************************
 
-  @brief Buffered socket flush calls this function to actually write the data to stream.
+  @brief Write buffered data to underlying stream.
 
   The eOsStream::buffered_write function writes data to socket or other output stream.
+  Buffered socket flush calls this function to actually write the data to stream.
 
   @param   buf Pointer to data to write.
   @param   buf_sz Number of bytes to write.
@@ -356,9 +332,6 @@ eStatus eOsStream::buffered_write(
 
   @param  buf Ponter to buffer where to place the data read.
   @param  buf_sz Buffer size in bytes.
-  @param  nread Pointer integer into which number of bytes read is stored.
-          OS_NULL if not needed.
-          Less or equal to buf_sz.
   @param  flags Ignored, set zero for now.
 
   @return If succesfull, the function returns ESTATUS_SUCCESS (0). Otherwise if error
@@ -369,32 +342,29 @@ eStatus eOsStream::buffered_write(
 eStatus eOsStream::read(
     os_char *buf,
     os_memsz buf_sz,
-    os_memsz *nread,
     os_int flags)
 {
-#if 0
-    eStatus s;
+    eStatus s = ESTATUS_SUCCESS;
     osalSelectData selectdata;
     eStream *strm;
     os_memsz nrd, n;
 
     if (m_stream == OS_NULL)
     {
-        if (nread) *nread = 0;
         return ESTATUS_FAILED;
     }
-
-    /* Try to read socket.
-     */
-    s = read_socket();
-    if (s) return s;
 
     n = 0;
     while (OS_TRUE)
     {
+        /* Try to read the stream.
+         */
+        s = stream_to_buffer();
+        if (s) break;
+
         /* Try to get from queue.
          */
-        m_in->read(buf + n, buf_sz, &nrd);
+        m_in->readx(buf + n, buf_sz, &nrd);
         buf_sz -= nrd;
         n += nrd;
         buf += nrd;
@@ -403,17 +373,53 @@ eStatus eOsStream::read(
         /* Let select handle data transfers.
          */
         strm = this;
-        select(&strm, 1, OS_NULL, &selectdata, OSAL_STREAM_DEFAULT);
-        if (selectdata.errorcode)
+        s = select(&strm, 1, OS_NULL, &selectdata, 100, OSAL_STREAM_DEFAULT);
+        if (s) break;
+
+        /* if (selectdata.errorcode)
         {
             if (nread) *nread = n;
             return ESTATUS_FAILED;
-        }
+        } */
     }
 
-    if (nread) *nread = n;
-#endif
-    return ESTATUS_SUCCESS;
+    return s;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Read data from underlying stream to buffer.
+
+  The eOsStream::buffered_read function writes data to socket or other output stream.
+
+  @param   buf Pointer to buffer where to store data read.
+  @param   buf_sz Maximum number of bytes to read.
+  @param   nread Pointer to integer where to store number of bytes read.
+           This is set to number of bytes actually read, which may be less than buf_sz.
+           This argument must not be OS_NULL.
+
+  @return  If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
+           an error.
+
+****************************************************************************************************
+*/
+eStatus eOsStream::buffered_read(
+    os_char *buf,
+    os_memsz buf_sz,
+    os_memsz *nread)
+{
+    osalStatus s;
+
+    if (m_stream == OS_NULL)
+    {
+        *nread = 0;
+        return ESTATUS_FAILED;
+    }
+
+    s = m_iface->stream_read(m_stream, buf, buf_sz, nread, OSAL_STREAM_DEFAULT);
+    return ESTATUS_FROM_OSAL_STATUS(s);
 }
 
 
