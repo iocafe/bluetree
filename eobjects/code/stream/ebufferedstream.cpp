@@ -33,7 +33,7 @@ eBufferedStream::eBufferedStream(
     m_out = OS_NULL;
     m_flags = 0;
     m_flushnow = OS_FALSE;
-    m_frame_sz = 1400;
+    m_frame_sz = 10000; /* This is not TCP frame size, we start sending after buffering 10k even there is more coming. */
 }
 
 
@@ -82,7 +82,7 @@ eStatus eBufferedStream::setup_queues(
 
     /* Otherwise connecting or accepting a socket, create the queues.
      */
-    else if (flags)
+    else
     {
         if (m_in == OS_NULL) m_in = new eQueue(this);
         if (m_out == OS_NULL) m_out = new eQueue(this);
@@ -112,18 +112,6 @@ void eBufferedStream::delete_queues()
     delete m_out;
     m_in = m_out = OS_NULL;
 }
-
-
-#if 0
-    /* Write all data to queue.
-     */
-    m_out->write(buf, buf_sz, nwritten);
-
-    /* If we have one frame buffered, try to write data to socket frame at a time.
-     */
-    return write_socket(OS_FALSE);
-
-#endif
 
 
 /**
@@ -172,15 +160,6 @@ eStatus eBufferedStream::buffer_to_stream(
         s = buffered_write(buf, nread, &nwritten);
         if (s) break;
 
-        /* os = osal_stream_write(m_socket, buf,
-            nread, &nwritten, OSAL_STREAM_DEFAULT);
-        if (os)
-        {
-            s = ESTATUS_FAILED;
-            break;
-        }
-        */
-
         if (nwritten <= 0) break;
 
         m_out->readx(OS_NULL, nwritten, &nread);
@@ -219,12 +198,6 @@ eStatus eBufferedStream::stream_to_buffer()
         s = buffered_read(buf, sizeof(buf), &nread);
         if (s) return s;
 
-        /* os = osal_socket_read(m_socket, buf, sizeof(buf), &nread, OSAL_STREAM_DEFAULT);
-        if (os)
-        {
-            s = ESTATUS_FAILED;
-            break;
-        } */
         if (nread == 0)
         {
             break;
@@ -235,3 +208,5 @@ eStatus eBufferedStream::stream_to_buffer()
 
     return s;
 }
+
+

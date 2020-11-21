@@ -184,7 +184,7 @@ eStatus eOsStream::open(
 
     /* Open socket and return ESTATUS_SUCCESS or ESTATUS_FAILED. Save flags.
      */
-    m_stream = osal_stream_open(m_iface, parameters, OS_NULL, &s, flags);
+    m_stream = m_iface->stream_open(parameters, OS_NULL, &s, flags);
     if (s) return ESTATUS_FROM_OSAL_STATUS(s);
 
     /* Setup queues to buffer outgoing and incoming data.
@@ -212,7 +212,7 @@ eStatus eOsStream::close()
         return ESTATUS_FAILED;
     }
 
-    osal_stream_close(m_stream, OSAL_STREAM_DEFAULT);
+    m_iface->stream_close(m_stream, OSAL_STREAM_DEFAULT);
     m_stream = OS_NULL;
     delete_queues();
 
@@ -247,7 +247,7 @@ eStatus eOsStream::flush(
 
     buffer_to_stream(OS_TRUE);
 
-    return osal_stream_flush(m_stream, OSAL_STREAM_DEFAULT)
+    return m_iface->stream_flush(m_stream, OSAL_STREAM_DEFAULT)
         ? ESTATUS_FAILED : ESTATUS_SUCCESS;
 }
 
@@ -273,8 +273,6 @@ eStatus eOsStream::write(
     const os_char *buf,
     os_memsz buf_sz)
 {
-    eStatus s;
-
     if (m_out == OS_NULL) {
         return ESTATUS_FAILED;
     }
@@ -442,29 +440,13 @@ eStatus eOsStream::buffered_read(
 eStatus eOsStream::writechar(
     os_int c)
 {
-    osalStatus s;
-    os_char cc;
-    os_memsz nwritten;
-
     /* If we got output queue (buffered stream), append to the queue.
      */
     if (m_out) {
         return m_out->writechar(c);
     }
 
-    /* No output queue, make sure that the stream is open.
-     */
-    if (m_stream == OS_NULL) {
-        return ESTATUS_FAILED;
-    }
-
-    /* Write directly to the stream (1 byte only, no control codes).
-     */
-    cc = (os_char)c;
-    s = m_iface->stream_write(m_stream, &cc, 1, &nwritten, OSAL_STREAM_DEFAULT);
-    if (s) ESTATUS_FROM_OSAL_STATUS(s);
-
-    return nwritten == 1 ? ESTATUS_SUCCESS : ESTATUS_BUFFER_OVERFLOW;
+    return ESTATUS_FAILED;
 }
 
 
@@ -482,13 +464,10 @@ eStatus eOsStream::writechar(
 */
 os_int eOsStream::readchar()
 {
-    return E_STREM_END_OF_DATA;
-#if 0
     os_int c;
     eStatus s;
     osalSelectData selectdata;
     eStream *strm;
-
 
     if (m_stream == OS_NULL)
     {
@@ -504,7 +483,7 @@ os_int eOsStream::readchar()
 
         /* Try to read socket.
          */
-        s = read_socket();
+        s = stream_to_buffer();
         if (s) return E_STREM_END_OF_DATA;
 
         /* Try to get from queue.
@@ -515,10 +494,9 @@ os_int eOsStream::readchar()
         /* Let select handle data transfers.
          */
         strm = this;
-        select(&strm, 1, OS_NULL, &selectdata, OSAL_STREAM_DEFAULT);
-        if (selectdata.errorcode) return E_STREM_END_OF_DATA;
+        s = select(&strm, 1, OS_NULL, &selectdata, 0, OSAL_STREAM_DEFAULT);
+        if (s) return E_STREM_END_OF_DATA;
     }
-#endif
 }
 
 
@@ -562,7 +540,7 @@ eStatus eOsStream::select(
 
     if (nstreams == 1)
     {
-        s = osal_stream_select(&osstreams[0]->m_stream, 1, evnt,
+        s = m_iface->stream_select(&osstreams[0]->m_stream, 1, evnt,
             selectdata, timeout_ms, OSAL_STREAM_DEFAULT);
     }
     else
@@ -572,29 +550,16 @@ eStatus eOsStream::select(
             osalsock[i] = osstreams[i]->m_stream;
         }
 
-        s = osal_stream_select(osalsock, nstreams, evnt,
+        s = m_iface->stream_select(osalsock, nstreams, evnt,
             selectdata, timeout_ms, OSAL_STREAM_DEFAULT);
     }
+    if (s) return ESTATUS_FROM_OSAL_STATUS(s);
 
-    /* i = selectdata->stream_nr;
-    if (selectdata->errorcode == OSAL_SUCCESS &&
-        i >= 0 && i < nstreams)
-    {
-        so = osstreams[i];
+    if (m_in) {
+        return stream_to_buffer();
+    }
 
-        if (selectdata->eventflags & OSAL_STREAM_READ_EVENT)
-        {
-            selectdata->errorcode = so->read_socket();
-            if (selectdata->errorcode) return;
-        }
-
-        if (selectdata->eventflags & OSAL_STREAM_WRITE_EVENT)
-        {
-            selectdata->errorcode = so->write_socket(OS_FALSE);
-        }
-    } */
-
-    return ESTATUS_FROM_OSAL_STATUS(s);
+    return ESTATUS_SUCCESS;
 }
 
 
@@ -624,7 +589,7 @@ eStream *eOsStream::accept(
     osalStream new_osal_stream;
     os_char remoteip[128];
 
-    new_osal_stream = osal_stream_accept(m_stream, remoteip, sizeof(remoteip),
+    new_osal_stream = m_iface->stream_accept(m_stream, remoteip, sizeof(remoteip),
         &osal_s, OSAL_STREAM_DEFAULT);
 
     if (new_osal_stream)
@@ -647,6 +612,3 @@ eStream *eOsStream::accept(
 
     return OS_NULL;
 }
-
-
-

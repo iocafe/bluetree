@@ -363,6 +363,7 @@ void eConnection::run()
 {
     osalSelectData selectdata;
     os_long try_again_ms = osal_rand(3000, 4000);
+    eStatus s;
 
     /* Run as long as thread is not requested to exit.
      */
@@ -388,7 +389,12 @@ void eConnection::run()
                return code, for example read and close can be returned at same time,
                and thread event with anything else.
              */
-            m_stream->select(&m_stream, 1, trigger(), &selectdata, 0, OSAL_STREAM_DEFAULT);
+            s = m_stream->select(&m_stream, 1, trigger(), &selectdata, 0, OSAL_STREAM_DEFAULT);
+            if (s)
+            {
+                close();
+                continue;
+            }
 
             /* Call alive() to process messages. If stream gets closed, step out here.
              */
@@ -441,7 +447,7 @@ void eConnection::run()
                 m_fast_timer_enabled = 1;
             }
 
-            if (m_connectetion_failed_once && m_delete_on_error)
+            if (/* m_connectetion_failed_once && */ m_delete_on_error)
             {
                 break;
             }
