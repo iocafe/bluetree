@@ -226,6 +226,7 @@ void eEndPoint::run()
     osalSelectData selectdata;
     eStream *newstream;
     eConnection *c;
+    eStatus s;
 
     while (!exitnow())
     {
@@ -238,26 +239,23 @@ void eEndPoint::run()
 
             alive(EALIVE_RETURN_IMMEDIATELY);
 
-//            else if (selectdata.eventflags & OSAL_STREAM_ACCEPT_EVENT)
+            osal_trace("select pass");
+
+            /* New by class ID.
+             */
+            newstream = m_stream->accept(OSAL_STREAM_DEFAULT, &s, this, EOID_ITEM);
+            if (newstream)
             {
-                osal_console_write("accept event\n");
-
-                /* New by class ID.
-                 */
-                newstream = OS_NULL; // m_stream->accept(newstream, OSAL_STREAM_DEFAULT);
-
-                if (newstream)
-                {
-                    c = new eConnection();
-                    c->addname("//connection");
-                    c->accepted(newstream);
-                    c->start(); /* After this c pointer is useless */
-                }
-                else
-                {
-                    delete newstream;
-                    osal_console_write("osal_stream_accept failed\n");
-                }
+                c = new eConnection();
+                c->addname("//connection");
+                c->accepted(newstream);
+                c->start(); /* After this c pointer is useless */
+                osal_trace3("stream accepted");
+            }
+            else
+            {
+                delete newstream;
+                osal_debug_error_int("accept() failed: ", s);
             }
         }
 
@@ -297,7 +295,7 @@ void eEndPoint::open()
     s = m_stream->open(m_ipaddr->gets(), OSAL_STREAM_LISTEN|OSAL_STREAM_SELECT);
     if (s)
     {
-        osal_console_write("osal_stream_open failed\n");
+        osal_debug_error_str("Opening listening stream failed", m_ipaddr->gets());
         delete m_stream;
         m_stream = OS_NULL;
     }

@@ -1,12 +1,12 @@
 /**
 
   @file    endpoint1.cpp
-  @brief   Example code about connecting two processes.
+  @brief   Connecting two processes, end point.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    10.10.2020
 
-  This demonstrates creating an end point which listens for socket connections.
+  Unit test: End point listening for incoming socket connections.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -139,7 +139,7 @@ public:
 void endpoint_example_1()
 {
     eThread *t;
-    eThreadHandle thandle1, thandle2, endpointthreadhandle;
+    eThreadHandle thandle1, endpointthreadhandle;
     eContainer c;
 
     /* Aet up class for use.
@@ -162,7 +162,7 @@ t->setpropertys(EMYCLASS1P_A, "Nasse");
     t->addname("//myendpoint");
     t->start(&endpointthreadhandle); /* After this t pointer is useless */
     c.setpropertys_msg(endpointthreadhandle.uniquename(),
-         ":" IOC_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr);
+         "socket::" IOC_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr);
 
     os_sleep(15000000);
 

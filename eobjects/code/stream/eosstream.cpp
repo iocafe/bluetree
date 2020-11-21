@@ -167,11 +167,12 @@ eStatus eOsStream::open(
         return ESTATUS_FAILED;
     }
 
-    /* Find interface by name
+    /* Find interface by name, and skip interface in "parameters" string.
      */
     for (item = iface_list; item->name; item++) {
         len = os_strlen(item->name) - 1;
         if (!os_strncmp(parameters, item->name, len)) {
+            parameters += len;
             break;
         }
     }
@@ -632,6 +633,7 @@ eStream *eOsStream::accept(
          */
         new_stream = new eOsStream(parent, id);
         new_stream->m_stream = new_osal_stream;
+        new_stream->m_iface = m_iface;
 
         if (s) {
             *s = ESTATUS_SUCCESS;

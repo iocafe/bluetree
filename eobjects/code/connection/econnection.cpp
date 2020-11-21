@@ -390,60 +390,39 @@ void eConnection::run()
              */
             m_stream->select(&m_stream, 1, trigger(), &selectdata, 0, OSAL_STREAM_DEFAULT);
 
-
-            /* Handle thread events. If thread's message queue is becomes empty, we
-               flush the socket writes.
+            /* Call alive() to process messages. If stream gets closed, step out here.
              */
-   //         if (selectdata.eventflags & OSAL_STREAM_CUSTOM_EVENT)
-            {
-                /* Call alive() to process messages.
-                 */
-                alive(EALIVE_RETURN_IMMEDIATELY);
-
-                /* If message queue for incoming messages is empty, flush writes.
-                 */
-                if (m_message_queue->first() == OS_NULL && m_new_writes)
-                {
-                    if (m_stream->writechar(E_STREAM_FLUSH))
-                    {
-                        close();
-                        continue;
-                    }
-                    if (m_stream->flush())
-                    {
-                        close();
-                        continue;
-                    }
-                    os_get_timer(&m_last_send);
-                    m_new_writes = OS_FALSE;
-                }
+            alive(EALIVE_RETURN_IMMEDIATELY);
+            if (m_stream == OS_NULL) {
+                continue;
             }
 
-            /* Stream connected.
+            /* If message queue for incoming messages is empty, flush writes.
              */
- //           if (selectdata.eventflags & OSAL_STREAM_CONNECT_EVENT)
+            if (m_message_queue->first() == OS_NULL && m_new_writes)
             {
-                if (connected())
+                if (m_stream->writechar(E_STREAM_FLUSH))
                 {
                     close();
                     continue;
                 }
+                if (m_stream->flush())
+                {
+                    close();
+                    continue;
+                }
+                os_get_timer(&m_last_send);
+                m_new_writes = OS_FALSE;
             }
 
-            /* Data received, send objects though messaging once full message is received
-               (see flush count).
+            /* Read objects, as long we have whole objects to read.
              */
-//            if (selectdata.eventflags & OSAL_STREAM_READ_EVENT)
+            while (m_stream->flushcount() > 0)
             {
-                /* Read objects, as long we have whole objects to read.
-                 */
-                while (m_stream->flushcount() > 0)
+                if (read())
                 {
-                    if (read())
-                    {
-                        close();
-                        break;
-                    }
+                    close();
+                    continue;
                 }
             }
         }
