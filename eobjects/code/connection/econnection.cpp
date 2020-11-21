@@ -431,10 +431,9 @@ void eConnection::run()
              */
             while (m_stream->flushcount() > 0)
             {
-                if (read())
-                {
+                if (read()) {
                     close();
-                    continue;
+                    break;
                 }
             }
         }

@@ -95,7 +95,7 @@ public:
              */
             if (envelope->command() == ECMD_TIMER)
             {
-                setpropertyl(EMYCLASS1P_A, propertyl(EMYCLASS1P_A) + 1);
+                // setpropertyl(EMYCLASS1P_A, propertyl(EMYCLASS1P_A) + 1);
                 return;
             }
         }
@@ -115,7 +115,7 @@ public:
         switch (propertynr)
         {
             case EMYCLASS1P_A:
-                // printf ("1: GOT A \'%s\'\n", x->gets());
+                printf ("1: GOT A \'%s\'\n", x->gets());
                 break;
 
             case EMYCLASS1P_B:

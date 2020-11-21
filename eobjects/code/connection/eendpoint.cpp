@@ -258,7 +258,7 @@ void eEndPoint::run()
                     osal_trace3("stream accepted");
                 }
             }
-            else
+            else if (s)
             {
                 delete newstream;
                 osal_debug_error_int("accept() failed: ", s);

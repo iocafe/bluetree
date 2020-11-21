@@ -509,6 +509,7 @@ eStream *eOsStream::accept(
     e_oid id)
 {
     eOsStream *new_stream;
+    eStatus es;
     osalStatus osal_s;
     osalStream new_osal_stream;
     os_char remoteip[128];
@@ -524,8 +525,14 @@ eStream *eOsStream::accept(
         new_stream->m_stream = new_osal_stream;
         new_stream->m_iface = m_iface;
 
+        es = new_stream->setup_queues(ESTREAM_IN_QUEUE_SZ, ESTREAM_OUT_QUEUE_SZ, flags);
+        if (es) {
+            delete new_stream;
+            new_stream = OS_NULL;
+        }
+
         if (s) {
-            *s = ESTATUS_SUCCESS;
+            *s = es;
         }
         return new_stream;
     }

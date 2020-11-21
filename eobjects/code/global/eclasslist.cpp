@@ -91,10 +91,12 @@ eNewObjFunc eclasslist_newobj(
     {
         nfunc = (eNewObjFunc)pointer->getp();
     }
+#if OSAL_DEBUG
     else
     {
-        osal_debug_error("eclasslist_newobj: Class not found");
+        osal_debug_error_int("eclasslist_newobj: Class not found, cid=", cid);
     }
+#endif
 
     os_unlock();
     return nfunc;
@@ -126,10 +128,12 @@ os_char *eclasslist_classname(
         name = pointer->firstn(EOID_NAME);
         if (name) namestr = name->gets();
     }
+#if OSAL_DEBUG
     else
     {
-        osal_debug_error_int("eclasslist_newobj: Class not found, cid=", cid);
+        osal_debug_error_int("eclasslist_classname: Class not found, cid=", cid);
     }
+#endif
 
     os_unlock();
     return namestr;
