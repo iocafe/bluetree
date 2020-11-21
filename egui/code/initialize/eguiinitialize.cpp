@@ -26,6 +26,7 @@
   be the first egui function called. The egui_shutdown() function cleans up resources
   used by the library.
 
+  @param  process_name Name of this process
   @return None.
 
 ****************************************************************************************************

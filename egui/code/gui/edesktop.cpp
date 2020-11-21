@@ -137,4 +137,6 @@ void eGui::setup_desktop_application()
     e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
     */
 
+
+    setpropertys(EGUIP_TEXT, eglobal->process_name);
 }

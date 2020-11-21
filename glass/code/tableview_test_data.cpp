@@ -13,7 +13,7 @@
 
 ****************************************************************************************************
 */
-#include "eclient.h"
+#include "glass.h"
 #include "tableview_test_data.h"
 
 /* Every class needs to have unique class identifier (classid). Class identifier is is 32 bit

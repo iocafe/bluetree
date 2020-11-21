@@ -1,9 +1,9 @@
-# bluetree/eclient/CmakeLists.txt - Cmake build for eclient.
+# bluetree/glass/CmakeLists.txt - Cmake build for glass user interface.
 cmake_minimum_required(VERSION 3.5)
 
 # Set project name (= project root folder name).
 set(E_REPO "bluetree")
-set(E_PROJECT "eclient")
+set(E_PROJECT "glass")
 project(${E_PROJECT})
 
 # include build information common to all projects.
