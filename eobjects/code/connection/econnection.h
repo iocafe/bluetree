@@ -119,7 +119,7 @@ public:
         return ESTATUS_SUCCESS;
     } */
 
-    virtual void accepted(
+    virtual eStatus accepted(
         eStream *stream);
 
 

@@ -115,7 +115,7 @@ public:
         switch (propertynr)
         {
             case EMYCLASS1P_A:
-                printf ("1: GOT A \'%s\'\n", x->gets());
+                // printf ("1: GOT A \'%s\'\n", x->gets());
                 break;
 
             case EMYCLASS1P_B:

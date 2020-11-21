@@ -248,9 +248,15 @@ void eEndPoint::run()
             {
                 c = new eConnection();
                 c->addname("//connection");
-                c->accepted(newstream);
-                c->start(); /* After this c pointer is useless */
-                osal_trace3("stream accepted");
+                s = c->accepted(newstream);
+                if (s) {
+                    delete c;
+                    osal_debug_error_int("accepted() failed: ", s);
+                }
+                else {
+                    c->start(); /* After this c pointer is useless */
+                    osal_trace3("stream accepted");
+                }
             }
             else
             {

@@ -163,8 +163,8 @@ void connection_example_1()
     c.setpropertys_msg(conthreadhandle.uniquename(), // "//myconnection",
          "socket:localhost", econnp_ipaddr);
 
-//    c.setpropertys_msg("//myconnection/myclass1",
-//         "message from connection_example1", "A");
+    c.setpropertys_msg("//myconnection/myclass1",
+         "message from connection_example1", "B");
 
 //    os_sleep(2000);
 

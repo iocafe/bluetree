@@ -58,6 +58,20 @@ public:
      */
     virtual os_int classid() {return ECLASSID_BUFFERED_STREAM; }
 
+    /**
+    ************************************************************************************************
+      eStream functionality.
+    ************************************************************************************************
+    */
+
+    /* Write character, typically control code.
+     */
+    virtual eStatus writechar(
+        os_int c);
+
+    /* Read character or control code.
+     */
+    virtual os_int readchar();
 
     /**
     ************************************************************************************************
@@ -132,7 +146,9 @@ protected:
      */
     eQueue *m_out;
 
-    os_memsz m_frame_sz;
+    /** We start sending after buffering 3900 bytes even there is more coming.
+     */
+    os_memsz m_send_size;
 
     /** Saved flags.
      */

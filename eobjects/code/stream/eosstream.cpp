@@ -422,82 +422,6 @@ eStatus eOsStream::buffered_read(
 }
 
 
-/**
-****************************************************************************************************
-
-  @brief Write character, typically control code.
-
-  The eOsStream::writechar function writes character or control code.
-
-  @param  c Character 0-255 or control code > 255 to write.
-  @return If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
-          an error.
-          Return value ESTATUS_BUFFER_OVERFLOW from unbuffered stream indicates that byte
-          could not be written.
-
-****************************************************************************************************
-*/
-eStatus eOsStream::writechar(
-    os_int c)
-{
-    /* If we got output queue (buffered stream), append to the queue.
-     */
-    if (m_out) {
-        return m_out->writechar(c);
-    }
-
-    return ESTATUS_FAILED;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Read character or control code.
-
-  The eOsStream::readchar function reads character or control code.
-
-  @return If succesfull, the function returns Character 0-255. Return value
-          E_STREM_END_OF_DATA indicates broken socket.
-
-****************************************************************************************************
-*/
-os_int eOsStream::readchar()
-{
-    os_int c;
-    eStatus s;
-    osalSelectData selectdata;
-    eStream *strm;
-
-    if (m_stream == OS_NULL)
-    {
-        return E_STREM_END_OF_DATA;
-    }
-
-    while (OS_TRUE)
-    {
-        /* Try to get from queue.
-         */
-        c = m_in->readchar();
-        if (c != E_STREM_END_OF_DATA) return c;
-
-        /* Try to read socket.
-         */
-        s = stream_to_buffer();
-        if (s) return E_STREM_END_OF_DATA;
-
-        /* Try to get from queue.
-         */
-        c = m_in->readchar();
-        if (c != E_STREM_END_OF_DATA) return c;
-
-        /* Let select handle data transfers.
-         */
-        strm = this;
-        s = select(&strm, 1, OS_NULL, &selectdata, 0, OSAL_STREAM_DEFAULT);
-        if (s) return E_STREM_END_OF_DATA;
-    }
-}
 
 
 /**
@@ -612,3 +536,4 @@ eStream *eOsStream::accept(
 
     return OS_NULL;
 }
+

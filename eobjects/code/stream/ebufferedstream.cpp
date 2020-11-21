@@ -33,7 +33,7 @@ eBufferedStream::eBufferedStream(
     m_out = OS_NULL;
     m_flags = 0;
     m_flushnow = OS_FALSE;
-    m_frame_sz = 10000; /* This is not TCP frame size, we start sending after buffering 10k even there is more coming. */
+    m_send_size = 3900;
 }
 
 
@@ -143,7 +143,7 @@ eStatus eBufferedStream::buffer_to_stream(
     while (OS_TRUE)
     {
         n = m_out->bytes();
-        if ((n < m_frame_sz && !m_flushnow) || n < 1)
+        if ((n < m_send_size && !m_flushnow) || n < 1)
         {
             if (n < 1) m_flushnow = OS_FALSE;
             break;
@@ -151,10 +151,10 @@ eStatus eBufferedStream::buffer_to_stream(
 
         if (buf == OS_NULL)
         {
-            buf = os_malloc(m_frame_sz, OS_NULL);
+            buf = os_malloc(m_send_size, OS_NULL);
         }
 
-        m_out->readx(buf, m_frame_sz, &nread, OSAL_STREAM_PEEK);
+        m_out->readx(buf, m_send_size, &nread, OSAL_STREAM_PEEK);
         if (nread == 0) break;
 
         s = buffered_write(buf, nread, &nwritten);
@@ -167,7 +167,7 @@ eStatus eBufferedStream::buffer_to_stream(
 
     if (buf)
     {
-        os_free(buf, m_frame_sz);
+        os_free(buf, m_send_size);
     }
 
     return s;
@@ -210,3 +210,79 @@ eStatus eBufferedStream::stream_to_buffer()
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Write character, typically control code.
+
+  The eOsStream::writechar function writes character or control code.
+
+  @param  c Character 0-255 or control code > 255 to write.
+  @return If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
+          an error.
+          Return value ESTATUS_BUFFER_OVERFLOW from unbuffered stream indicates that byte
+          could not be written.
+
+****************************************************************************************************
+*/
+eStatus eBufferedStream::writechar(
+    os_int c)
+{
+    /* If we got output queue (buffered stream), append to the queue.
+     */
+    if (m_out) {
+        return m_out->writechar(c);
+    }
+
+    return ESTATUS_FAILED;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Read character or control code.
+
+  The eOsStream::readchar function reads character or control code.
+
+  @return If succesfull, the function returns Character 0-255. Return value
+          E_STREM_END_OF_DATA indicates broken socket.
+
+****************************************************************************************************
+*/
+os_int eBufferedStream::readchar()
+{
+    os_int c;
+    eStatus s;
+    osalSelectData selectdata;
+    eStream *strm;
+
+    if (m_in == OS_NULL)
+    {
+        return E_STREM_END_OF_DATA;
+    }
+
+    while (OS_TRUE)
+    {
+        /* Try to get from queue.
+         */
+        c = m_in->readchar();
+        if (c != E_STREM_END_OF_DATA) return c;
+
+        /* Try to read socket.
+         */
+        s = stream_to_buffer();
+        if (s) return E_STREM_END_OF_DATA;
+
+        /* Try to get from queue.
+         */
+        c = m_in->readchar();
+        if (c != E_STREM_END_OF_DATA) return c;
+
+        /* Let select handle data transfers.
+         */
+        strm = this;
+        s = select(&strm, 1, OS_NULL, &selectdata, 0, OSAL_STREAM_DEFAULT);
+        if (s) return E_STREM_END_OF_DATA;
+    }
+}

@@ -396,6 +396,12 @@ void eConnection::run()
                 continue;
             }
 
+
+            if (!m_connected)
+            {
+                connected();
+            }
+
             /* Call alive() to process messages. If stream gets closed, step out here.
              */
             alive(EALIVE_RETURN_IMMEDIATELY);
@@ -405,7 +411,7 @@ void eConnection::run()
 
             /* If message queue for incoming messages is empty, flush writes.
              */
-            if (m_message_queue->first() == OS_NULL && m_new_writes)
+            if (/* m_message_queue->first() == OS_NULL && */ m_new_writes)
             {
                 if (m_stream->writechar(E_STREAM_FLUSH))
                 {
@@ -447,12 +453,18 @@ void eConnection::run()
                 m_fast_timer_enabled = 1;
             }
 
+            alive(EALIVE_RETURN_IMMEDIATELY);
+
             if (/* m_connectetion_failed_once && */ m_delete_on_error)
             {
                 break;
             }
 
-            alive(EALIVE_WAIT_FOR_EVENT);
+            open();
+
+            if (m_stream == OS_NULL) {
+                alive(EALIVE_WAIT_FOR_EVENT);
+            }
         }
     }
 }
@@ -470,16 +482,18 @@ void eConnection::run()
 
 ****************************************************************************************************
 */
-void eConnection::accepted(
+eStatus eConnection::accepted(
     eStream *stream)
 {
+    eStatus s;
+
     delete m_stream;
     m_stream = stream;
     stream->adopt(this);
 
-    connected();
-
+    s = connected();
     m_delete_on_error = OS_TRUE;
+    return s;
 }
 
 
@@ -520,7 +534,7 @@ void eConnection::open()
     s = m_stream->open(m_ipaddr->gets(), OSAL_STREAM_CONNECT|OSAL_STREAM_SELECT);
     if (s)
     {
-        osal_console_write("osal_stream_open failed\n");
+        osal_debug_error_int("osal_stream_open failed: ", s);
         delete m_stream;
         m_stream = OS_NULL;
         return;
@@ -593,6 +607,7 @@ eStatus eConnection::connected()
     eEnvelope *envelope;
     eObject *mark;
     eName *name;
+    eStatus s;
 
     /* Inform client bindings that the binding can be reestablished.
      */
@@ -623,8 +638,10 @@ eStatus eConnection::connected()
      */
     if (m_new_writes)
     {
-        m_stream->writechar(E_STREAM_FLUSH);
-        m_stream->flush();
+        s = m_stream->writechar(E_STREAM_FLUSH);
+        if (s) return s;
+        s = m_stream->flush();
+        if (s) return s;
         os_get_timer(&m_last_send);
         m_new_writes = OS_FALSE;
     }
