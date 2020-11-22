@@ -374,12 +374,6 @@ eStatus eOsStream::read(
         strm = this;
         s = select(&strm, 1, OS_NULL, &selectdata, 100, OSAL_STREAM_DEFAULT);
         if (s) break;
-
-        /* if (selectdata.errorcode)
-        {
-            if (nread) *nread = n;
-            return ESTATUS_FAILED;
-        } */
     }
 
     return s;

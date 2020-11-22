@@ -714,7 +714,7 @@ void eQueue::read_decoded(
             continue;
         }
 
-        /* Plain character, nothing to di with control characters
+        /* Plain character, nothing to do with control characters
          */
         buf[n++] = c;
         if (n >= buf_sz) break;

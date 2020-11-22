@@ -502,6 +502,7 @@ eStatus eEnvelope::reader(
     {
         if (stream->flushcount() <= 0)
         {
+            osal_trace2("eEnvelope::flush count zeroed");
             return ESTATUS_NO_WHOLE_MESSAGES_TO_READ;
         }
 
