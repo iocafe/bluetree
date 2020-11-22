@@ -27,13 +27,7 @@ const os_char
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eEndPoint::eEndPoint(
@@ -46,6 +40,7 @@ eEndPoint::eEndPoint(
      */
     m_stream = OS_NULL;
     m_initialized = OS_FALSE;
+    m_open_failed = OS_FALSE;
     m_stream_classid = ECLASSID_OSSTREAM;
     m_ipaddr = new eVariable(this);
 }
@@ -53,13 +48,7 @@ eEndPoint::eEndPoint(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eEndPoint::~eEndPoint()
@@ -194,8 +183,7 @@ eStatus eEndPoint::simpleproperty(
   It marks end point object initialized, and opens listening end point if ip address
   for it is already set.
 
-  @param   params Parameters for the new thread.
-  @return  None.
+  @param   params Parameters for the new thread. Not used.
 
 ****************************************************************************************************
 */
@@ -212,17 +200,21 @@ void eEndPoint::initialize(
 /**
 ****************************************************************************************************
 
-  @brief Run the connection.
+  @brief End point main loop.
 
-  The eEndPoint::run() function...
+  The eEndPoint::run() function contains the main loop of eEndPoint thread. The run loop
+  function waits for socket or thread events. When either is received, the function
+  processes messages received by eEndPoint thread and tries to accept incoming socket
+  connection.
 
-  @return  None.
+  If a incoming is successfully accepted, a pointer to new eStream object returned:
+  It creates an eConnection object, set it to use the accepted stream and start it
+  as it's own thread.
 
 ****************************************************************************************************
 */
 void eEndPoint::run()
 {
-//    eStatus s;
     osalSelectData selectdata;
     eStream *newstream;
     eConnection *c;
@@ -230,18 +222,22 @@ void eEndPoint::run()
 
     while (!exitnow())
     {
-        /* If we have listening socket, wait for socket or thread event.
-           Call alive() to process thread events.
+        /* If we are listening a socket port.
          */
         if (m_stream)
         {
+            /* Wait forever for an incoming socket or thread event.
+             */
             m_stream->select(&m_stream, 1, trigger(), &selectdata, 0, OSAL_STREAM_DEFAULT);
+            osal_trace2("select pass");
 
+            /* Call alive() to process thread events.
+             */
             alive(EALIVE_RETURN_IMMEDIATELY);
 
-            osal_trace("select pass");
-
-            /* New by class ID.
+            /* Try to accept incoming connection, if a incoming is successfully
+             * accepted, a pointer to new eStream object returned: Create eConnection
+             * object, set it to use the accepted stream and start it as own thread.
              */
             newstream = m_stream->accept(OSAL_STREAM_DEFAULT, &s, this, EOID_ITEM);
             if (newstream)
@@ -258,21 +254,32 @@ void eEndPoint::run()
                     osal_trace3("stream accepted");
                 }
             }
-            else if (s)
+            else if (s != ESTATUS_NO_NEW_CONNECTION)
             {
-                delete newstream;
                 osal_debug_error_int("accept() failed: ", s);
             }
         }
 
-        /* Otherwise wait for thread events and process them.
+        /* Not listening for socket port, either configuration properties
+           have not been set, or opening the port has failed. If open
+           has failed, keep on retrying in case other process has
+           reserved the port and happens to release it.
          */
         else
         {
-            alive(EALIVE_WAIT_FOR_EVENT);
+            if (m_open_failed) {
+                alive(EALIVE_RETURN_IMMEDIATELY);
+                open();
+                if (m_open_failed) {
+                    os_sleep(500);
+                }
+            }
+            else {
+                alive(EALIVE_WAIT_FOR_EVENT);
+            }
         }
 
-        osal_console_write("worker running\n");
+        osal_trace2("eEndPoint running");
     }
 }
 
@@ -282,9 +289,7 @@ void eEndPoint::run()
 
   @brief Open the end point.
 
-  The eEndPoint::open() starts listening end point.
-
-  @return  None.
+  The eEndPoint::open() starts listening a socket port for incoming connections.
 
 ****************************************************************************************************
 */
@@ -292,9 +297,10 @@ void eEndPoint::open()
 {
     eStatus s;
 
+    m_open_failed = OS_FALSE;
     if (m_stream || !m_initialized || m_ipaddr->isempty()) return;
 
-    /* New by class ID.
+    /* New stream by class ID.
      */
     m_stream = (eStream*)newchild(m_stream_classid);
 
@@ -304,6 +310,7 @@ void eEndPoint::open()
         osal_debug_error_str("Opening listening stream failed", m_ipaddr->gets());
         delete m_stream;
         m_stream = OS_NULL;
+        m_open_failed = OS_TRUE;
     }
     else
     {
@@ -317,9 +324,7 @@ void eEndPoint::open()
 
   @brief Close the end point.
 
-  The eEndPoint::close() function closes listening end point.
-
-  @return  None.
+  The eEndPoint::close() function closes the listening socket.
 
 ****************************************************************************************************
 */
@@ -329,7 +334,6 @@ void eEndPoint::close()
 
     setpropertyl(EENDPP_ISOPEN, OS_FALSE);
 
-//    m_stream->close();
     delete m_stream;
     m_stream = OS_NULL;
 }

@@ -102,13 +102,32 @@ public:
     virtual void initialize(
         eContainer *params = OS_NULL);
 
-    /* Run the connection.
+    /* Run the end point: main loop to process thread events and accept connections.
      */
     virtual void run();
 
 protected:
+
+    /**
+    ************************************************************************************************
+      Protected member functions.
+    ************************************************************************************************
+    */
+
+    /* Try to start listening socket port.
+     */
     void open();
+
+    /* Close the listening socket.
+     */
     void close();
+
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
 
     /** Stream class identifier. Specifies stream class to use.
      */
@@ -127,6 +146,10 @@ protected:
     /** End point object initailized flag.
      */
     os_boolean m_initialized;
+
+    /** We tried to open socket port and failed.
+     */
+    os_boolean m_open_failed;
 };
 
 #endif

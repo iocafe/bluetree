@@ -48,6 +48,10 @@ typedef enum
      */
     ESTATUS_FAILED = OSAL_STATUS_FAILED,
 
+    /** Accept stream function: No new incoming connection.
+     */
+    ESTATUS_NO_NEW_CONNECTION = OSAL_NO_NEW_CONNECTION,
+
     /** General purpose FALSE.
      */
     ESTATUS_FALSE = 50,
