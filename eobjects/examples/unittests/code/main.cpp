@@ -25,6 +25,7 @@
 #include "threads.h"
 #include "variables.h"
 #include "matrix.h"
+#include "queue.h"
 
 /* If needed for the operating system, EOSAL_C_MAIN macro generates the actual C main() function.
    and macro EMAIN_CONSOLE_ENTRY eobjects specific osal_main() function which calls emain.
@@ -80,6 +81,7 @@ eStatus emain(
         case 81: matrix_example1(); break;
         case 82: matrix_as_table_2(); break;
         case 83: matrix_as_remote_table_3(); break;
+        case 91: queue_example1(); break;
     }
 
     return ESTATUS_SUCCESS;

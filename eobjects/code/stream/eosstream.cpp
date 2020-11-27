@@ -345,12 +345,24 @@ eStatus eOsStream::read(
 {
     eStatus s = ESTATUS_SUCCESS;
     osalSelectData selectdata;
+    osalEvent trigger = OS_NULL;
+    os_boolean set_trigger = OS_FALSE;
+    eThread *thrd;
     eStream *strm;
     os_memsz nrd, n;
+    os_timer start_t = 0;
 
     if (m_stream == OS_NULL)
     {
         return ESTATUS_FAILED;
+    }
+
+    /* Get Pointer to thread object. Used to interrupt the read if
+       the thread is requested to exit.
+     */
+    thrd = thread();
+    if (thrd) {
+        trigger = thrd->trigger();
     }
 
     n = 0;
@@ -369,13 +381,44 @@ eStatus eOsStream::read(
         buf += nrd;
         if (buf_sz <= 0) break;
 
+        if (start_t == 0) {
+            os_get_timer(&start_t);
+        }
+        else {
+            if (os_has_elapsed(&start_t, 30000)) /* timeout 30 sec */
+            {
+                s = ESTATUS_FAILED;
+                break;
+            }
+        }
+
         /* Let select handle data transfers.
          */
         strm = this;
-        s = select(&strm, 1, OS_NULL, &selectdata, 100, OSAL_STREAM_DEFAULT);
+        s = select(&strm, 1, trigger, &selectdata, 100, OSAL_STREAM_DEFAULT);
         if (s) break;
+
+        if (trigger) {
+            if (selectdata.stream_nr ==  OSAL_STREAM_NR_CUSTOM_EVENT) {
+                set_trigger = OS_TRUE;
+            }
+
+            if (thrd->exitnow()) {
+                s = ESTATUS_FAILED;
+                break;
+            }
+        }
     }
 
+    if (set_trigger) {
+        osal_event_set(trigger);
+    }
+
+#if OSAL_DEBUG
+    if (s) {
+        osal_debug_error("eOsStream::read failed, corrupted object?");
+    }
+#endif
     return s;
 }
 

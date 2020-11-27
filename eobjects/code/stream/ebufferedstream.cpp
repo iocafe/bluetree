@@ -140,6 +140,8 @@ eStatus eBufferedStream::buffer_to_stream(
 
     m_flushnow |= flushnow;
 
+// THIS IS NOT EFFICIENT
+
     while (OS_TRUE)
     {
         n = m_out->bytes();

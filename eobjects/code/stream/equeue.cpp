@@ -335,14 +335,14 @@ eStatus eQueue::write_encoded(
     const os_char *buf,
     os_memsz buf_sz)
 {
-    os_char c;
+    os_uchar c; /* Must be unsigned char */
     os_int i;
 
     for (i = 0; i < buf_sz; i++)
     {
-        /* Get current character
+        /* Get current character. Must convert to unsigned char
          */
-        c = buf[i];
+        c = (os_uchar)buf[i];
 
         /* If c is same as previous character, and we haven reached maximum number
            of characters to combine together, just increment the count
@@ -391,7 +391,7 @@ eStatus eQueue::write_encoded(
             }
             else
             {
-                m_wr_prevc = (os_uchar)c;
+                m_wr_prevc = c;
             }
             m_wr_count = 0;
         }
@@ -515,7 +515,9 @@ eStatus eQueue::complete_last_write()
 {
     /* If writing without encoding, there is nothing to do.
      */
-    if ((m_flags & OSAL_STREAM_ENCODE_ON_WRITE) == 0) {
+    if ((m_flags & OSAL_STREAM_ENCODE_ON_WRITE) == 0 /* ||
+         m_wr_prevc == EQUEUE_NO_PREVIOUS_CHAR */)
+    {
         return ESTATUS_SUCCESS;
     }
 
@@ -578,8 +580,7 @@ eStatus eQueue::complete_last_write()
           OSAL_STREAM_DECODE_ON_READ flag given to open() or accept).
 
   @return If successfull, the function returns ESTATUS_SUCCESS. Other return values
-          indicate an error. eQueue class cannot fail, so return value is always
-          ESTATUS_SUCCESS.
+          indicate an error.
 
 ****************************************************************************************************
 */
@@ -841,6 +842,8 @@ void eQueue::read_plain(
 eStatus eQueue::writechar(
     os_int c)
 {
+    eStatus s;
+
     /* Make sure that we have at least one block.
      */
     if (m_newest == OS_NULL) {
@@ -854,9 +857,9 @@ eStatus eQueue::writechar(
      */
     if ((m_flags & OSAL_STREAM_ENCODE_ON_WRITE) == 0)
     {
-        putcharacter(c);
+        s = putcharacter(c);
         m_bytes++;
-        return ESTATUS_SUCCESS;
+        return s;
     }
 
     /* Make sure that everything written is in buffer.
@@ -896,10 +899,12 @@ eStatus eQueue::writechar(
             return ESTATUS_SUCCESS;
     }
 
-    putcharacter(E_STREAM_CTRL_CHAR);
-    putcharacter(c);
-    m_bytes += 2;
-    return ESTATUS_SUCCESS;
+    s = putcharacter(E_STREAM_CTRL_CHAR);
+    if (s == ESTATUS_SUCCESS) {
+        s = putcharacter(c);
+        m_bytes += 2;
+    }
+    return s;
 }
 
 

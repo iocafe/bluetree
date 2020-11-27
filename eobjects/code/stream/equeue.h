@@ -123,11 +123,23 @@ public:
 
     /* Read data from queue.
      */
-    virtual eStatus readx(
+    eStatus readx(
         os_char *buf,
         os_memsz buf_sz,
-        os_memsz *nread = OS_NULL,
+        os_memsz *nread, // = OS_NULL,
         os_int flags = 0);
+
+    virtual inline eStatus read(
+        os_char *buf,
+        os_memsz buf_sz,
+        os_int flags)
+    {
+        os_memsz nread;
+        eStatus s = readx(buf, buf_sz, &nread, flags);
+        if (nread != buf_sz) s = ESTATUS_FAILED;
+        return s;
+    }
+
 
     /* Write character to queue, typically control code.
      */

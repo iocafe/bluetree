@@ -105,7 +105,6 @@ public:
         os_memsz buf_sz,
         os_int flags = 0);
 
-
     /* Number of incoming flush controls in queue at the moment.
      */
     virtual os_int flushcount()

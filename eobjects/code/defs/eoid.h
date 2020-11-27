@@ -39,49 +39,50 @@
  */
 #define EOID_ITEM -1
 
-/** This is temporary attachment which should be mostly igniored..
- */
-#define EOID_TEMPORARY -2
-
-/** This object is root helper of object tree.
- */
-#define EOID_ROOT_HELPER -3
-
 /** Attachment: This object is name.
  */
-#define EOID_NAME -10
-
-/** Attachment: This object is namespace.
- */
-#define EOID_NAMESPACE -11
-
-/** Attachment: This object pointer target link (ePointer use only).
- */
-#define EOID_PPTR_TARGET -12
-
-/** Attachment: This object is general purpose appendix.
- */
-#define EOID_APPENDIX -13
+#define EOID_NAME -2
 
 /** Generic identifier for flags.
  */
-#define EOID_FLAGS -15
+#define EOID_FLAGS -3
 
 /** Content, used for envelopes, etc.
  */
-#define EOID_CONTENT -30
+#define EOID_CONTENT -4
 
 /** Context, used for envelopes, etc.
  */
-#define EOID_CONTEXT -31
+#define EOID_CONTEXT -5
 
 /** Object's stored properties eContainer.
  */
-#define EOID_PROPERTIES -33
+#define EOID_PROPERTIES -6
 
 /** Object's bindings container.
  */
-#define EOID_BINDINGS -35
+#define EOID_BINDINGS -7
+
+/** This is temporary attachment which should be mostly igniored..
+ */
+#define EOID_TEMPORARY -10
+
+/** This object is root helper of object tree.
+ */
+#define EOID_ROOT_HELPER -11
+
+/** Attachment: This object is namespace.
+ */
+#define EOID_NAMESPACE -12
+
+/** Attachment: This object pointer target link (ePointer use only).
+ */
+#define EOID_PPTR_TARGET -13
+
+/** Attachment: This object is general purpose appendix.
+ */
+#define EOID_APPENDIX -14
+
 
 /** Table/matrix related identifiers.
  */

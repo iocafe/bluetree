@@ -50,6 +50,7 @@ public:
         : eThread(parent, id, flags)
     {
         initproperties();
+        m_count = 100;
     }
 
     /* Add eMyClass'es properties to class'es property set.
@@ -74,9 +75,9 @@ public:
     virtual void initialize(
         eContainer *params = OS_NULL)
     {
-//        bind(EMYCLASS2P_X, "//myconnection/myclass1/_p/A", EBIND_DEFAULT|EBIND_ATTR);
+        bind(EMYCLASS2P_X, "//myconnection/myclass1/_p/A", EBIND_DEFAULT|EBIND_ATTR);
 // setpropertyd(EMYCLASS2P_Y, 3.3);
-//        bind(EMYCLASS2P_Y, "//myconnection/myclass1/_p/B", EBIND_CLIENTINIT);
+        bind(EMYCLASS2P_Y, "//myconnection/myclass1/_p/B", EBIND_CLIENTINIT);
 // setpropertyd(EMYCLASS2P_Y, 4.3);
     }
 
@@ -97,13 +98,14 @@ public:
             {
 //                setpropertyl(EMYCLASS2P_X, -2 * propertyl(EMYCLASS2P_X));
 //                setpropertyl(EMYCLASS2P_Y, propertyl(EMYCLASS2P_Y)+1);
-                propertyv(EMYCLASS2P_X, &v);
-printf ("ULLE \'%s\'\n", v.gets());
-                setpropertyv(EMYCLASS2P_Y, &v);
+//                propertyv(EMYCLASS2P_X, &v);
+//printf ("ULLE \'%s\'\n", v.gets());
+//                setpropertyv(EMYCLASS2P_Y, &v);
 
 /*    setpropertys_msg("//myconnection/myclass1",
          "message from connection_example1", "A"); */
 
+                setpropertyl_msg("//myconnection/myclass1", m_count++, "B");
                 return;
             }
         }
@@ -136,6 +138,8 @@ printf ("ULLE \'%s\'\n", v.gets());
 
         return ESTATUS_SUCCESS;
     }
+
+    os_int m_count;
 };
 
 
@@ -163,8 +167,6 @@ void connection_example_1()
     c.setpropertys_msg(conthreadhandle.uniquename(), // "//myconnection",
          "socket:localhost", econnp_ipaddr);
 
-    c.setpropertys_msg("//myconnection/myclass1",
-         "message from connection_example1", "B");
 
 //    os_sleep(2000);
 
@@ -172,12 +174,12 @@ void connection_example_1()
      */
     t = new c1MyClass();
     t->addname("thread2", ENAME_PROCESS_NS);
-//  t->timer(120);
+    t->timer(40);
     t->start(&thandle2); /* After this t pointer is useless */
 
 //    c.setpropertyd_msg("//thread2/_p/Y", 11.5);
 
-    os_sleep(1500000);
+    os_sleep(15000000);
 
     /* Wait for the threads to terminate.
      */
