@@ -121,14 +121,16 @@ public:
         const os_char *buf,
         os_memsz buf_sz);
 
-    /* Read data from queue.
+    /* Read data from queue (Extended function, returns nread).
      */
     eStatus readx(
         os_char *buf,
         os_memsz buf_sz,
-        os_memsz *nread, // = OS_NULL,
+        os_memsz *nread,
         os_int flags = 0);
 
+    /* Read data from queue.
+     */
     virtual inline eStatus read(
         os_char *buf,
         os_memsz buf_sz,
@@ -139,7 +141,6 @@ public:
         if (nread != buf_sz) s = ESTATUS_FAILED;
         return s;
     }
-
 
     /* Write character to queue, typically control code.
      */
@@ -217,8 +218,7 @@ private:
         return ESTATUS_SUCCESS;
     }
 
-    /* Finish with last write so also previous character has been
-       processed.
+    /* Finish with last write so also previous character has been processed.
      */
     eStatus complete_last_write();
 
@@ -332,7 +332,6 @@ private:
     /** Last character of previous write_plain() call.
      */
     os_uchar m_flushctrl_last_c;
-
 };
 
 #endif

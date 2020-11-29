@@ -73,6 +73,9 @@ public:
      */
     virtual os_int readchar();
 
+
+protected:
+
     /**
     ************************************************************************************************
      Buffering, in and out queues.
@@ -86,8 +89,9 @@ public:
         os_memsz out_sz,
         os_int flags);
 
+    /* Delete queue buffers (for clean up).
+     */
     void delete_queues();
-
 
     /* Write data to stream.
      */
@@ -112,8 +116,8 @@ public:
         return ESTATUS_SUCCESS;
     }
 
-protected:
-    /* Actually write to to implementing stream (called by flush())
+    /* Write buffered data from m_out to stream (called by buffer_to_stream())
+       Derived stream class must implement this function.
      */
     virtual eStatus buffered_write(
         const os_char *buf,
@@ -124,6 +128,9 @@ protected:
         return ESTATUS_FAILED;
     }
 
+    /* Read data from stream into buffer m_in (called by stream_to_buffer())
+       Derived stream class must implement this function.
+     */
     virtual eStatus buffered_read(
         os_char *buf,
         os_memsz buf_sz,
@@ -133,10 +140,21 @@ protected:
         return ESTATUS_FAILED;
     }
 
+    /* Write from intenal buffer m_out to the stream.
+     */
     eStatus buffer_to_stream(
         os_boolean flushnow);
 
+    /* Read from the stream into intenal buffer m_in.
+     */
     eStatus stream_to_buffer();
+
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
 
     /** Input queue (buffer).
      */
@@ -146,7 +164,7 @@ protected:
      */
     eQueue *m_out;
 
-    /** We start sending after buffering 3900 bytes even there is more coming.
+    /** We start sending after buffering m_send_size bytes even there is more coming.
      */
     os_memsz m_send_size;
 

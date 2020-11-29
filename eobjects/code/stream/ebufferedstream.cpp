@@ -17,7 +17,6 @@
 */
 #include "eobjects.h"
 
-
 /**
 ****************************************************************************************************
   Constructor.
@@ -117,12 +116,14 @@ void eBufferedStream::delete_queues()
 /**
 ****************************************************************************************************
 
-  @brief Write from intenal buffer m_out to OSAL socket.
+  @brief Write from intenal buffer m_out to the stream.
 
   The eSocket::write_socket() function writes data from m_out queue to socket.
   If flushnow is not set, the function does nothing until m_out holds enough data for at least
   one ethernet frame. All data from m_out queue which can be sent immediately without wait,
   is written to socket.
+
+  The derived stream class must implement buffered_write() to write to the stream.
 
   @param  flushnow If OS_TRUE, even single buffered byte is written. Otherwise waits until
           enough bytes for ethernet frame are buffered before writing.
@@ -140,35 +141,36 @@ eStatus eBufferedStream::buffer_to_stream(
 
     m_flushnow |= flushnow;
 
-// THIS IS NOT EFFICIENT
-
     while (OS_TRUE)
     {
         n = m_out->bytes();
-        if ((n < m_send_size && !m_flushnow) || n < 1)
-        {
+        if ((n < m_send_size && !m_flushnow) || n < 1) {
             if (n < 1) m_flushnow = OS_FALSE;
             break;
         }
 
-        if (buf == OS_NULL)
-        {
+        if (buf == OS_NULL) {
             buf = os_malloc(m_send_size, OS_NULL);
         }
 
         m_out->readx(buf, m_send_size, &nread, OSAL_STREAM_PEEK);
-        if (nread == 0) break;
+        if (nread == 0) {
+            break;
+        }
 
         s = buffered_write(buf, nread, &nwritten);
-        if (s) break;
+        if (s) {
+            break;
+        }
 
-        if (nwritten <= 0) break;
+        if (nwritten <= 0) {
+            break;
+        }
 
         m_out->readx(OS_NULL, nwritten, &nread);
     }
 
-    if (buf)
-    {
+    if (buf) {
         os_free(buf, m_send_size);
     }
 
@@ -179,10 +181,12 @@ eStatus eBufferedStream::buffer_to_stream(
 /**
 ****************************************************************************************************
 
-  @brief Read from OSAL socket into intenal buffer m_in.
+  @brief Read from stream into intenal buffer m_in.
 
   The eBufferedStream::stream_to_buffer function reads data from socket and places it to
   m_in queue. All available data from socket is read.
+
+  The derived stream class must implement buffered_read() to read to the stream.
 
   @return If no error detected, the function returns ESTATUS_SUCCESS.
           Other return values indicate an error and that socket is to be disconnected.
@@ -192,20 +196,20 @@ eStatus eBufferedStream::buffer_to_stream(
 eStatus eBufferedStream::stream_to_buffer()
 {
     os_memsz nread;
-    os_char buf[740];
+    os_char buf[2048];
     eStatus s = ESTATUS_SUCCESS;
 
     while (OS_TRUE)
     {
         s = buffered_read(buf, sizeof(buf), &nread);
-        if (s) return s;
-
-        if (nread == 0)
-        {
+        if (s || nread == 0) {
             break;
         }
 
-        m_in->write(buf, nread);
+        s = m_in->write(buf, nread);
+        if (s) {
+            break;
+        }
     }
 
     return s;
