@@ -248,11 +248,14 @@ failed:
 void ePropertyBinding::onmessage(
     eEnvelope *envelope)
 {
+    os_int cmd;
+
     /* If at final destination for the message.
      */
     if (*envelope->target()=='\0')
     {
-        switch (envelope->command())
+        cmd = envelope->command();
+        switch (cmd)
         {
             case ECMD_BIND_REPLY:
                 cbindok(this, envelope);
@@ -263,7 +266,7 @@ void ePropertyBinding::onmessage(
             case ECMD_NO_TARGET:
                 if (m_bflags & EBIND_CLIENT)
                 {
-                    disconnect();
+                    disconnect(OS_FALSE, cmd);
                 }
                 else
                 {

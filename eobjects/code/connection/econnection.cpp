@@ -666,7 +666,7 @@ eStatus eConnection::connected()
 void eConnection::disconnected()
 {
     eEnvelope *envelope;
-    eObject *mark;
+    eVariable *mark;
     eName *name;
 
     while ((envelope = eEnvelope::cast(m_initbuffer->first())))
@@ -681,15 +681,21 @@ void eConnection::disconnected()
 
     /* Inform all bindings that the connection is lost.
      */
-    for (mark = m_client_bindings->first(); mark; mark = mark->next())
+    for (mark = m_client_bindings->firstv(); mark; mark = mark->nextv())
     {
-        name = mark->firstn();
-        message(ECMD_SRV_UNBIND, name->gets());
+        if (mark->getl()) {
+            name = mark->firstn();
+            message(ECMD_SRV_UNBIND, name->gets());
+            mark->setl(0);
+        }
     }
-    for (mark = m_server_bindings->first(); mark; mark = mark->next())
+    for (mark = m_server_bindings->firstv(); mark; mark = mark->nextv())
     {
-        name = mark->firstn();
-        message(ECMD_UNBIND, name->gets());
+        if (mark->getl()) {
+            name = mark->firstn();
+            message(ECMD_UNBIND, name->gets());
+            mark->setl(0);
+        }
     }
 
     m_connected = OS_FALSE;
@@ -715,7 +721,7 @@ void eConnection::monitor_binds(
     eEnvelope *envelope)
 {
     eContainer *bindings;
-    eObject *mark;
+    eVariable *mark;
     os_int command;
     os_char *source;
 
@@ -730,7 +736,7 @@ void eConnection::monitor_binds(
             bindings = m_client_bindings;
             break;
 
-        /* Server binding reply to ECMD_BIND/ECMD_BIND_RS , or server binding deleted.
+        /* Server binding reply to ECMD_BIND/ECMD_BIND_RS, or server binding deleted.
          */
         case ECMD_BIND_REPLY:
         case ECMD_SRV_UNBIND:
@@ -742,19 +748,26 @@ void eConnection::monitor_binds(
     }
 
     source = envelope->source();
-    mark = eContainer::cast(bindings->byname(source));
-    if (mark)
+    mark = eVariable::cast(bindings->byname(source));
+
+    switch (command)
     {
-        if (command == ECMD_BIND || command == ECMD_BIND_RS || command == ECMD_BIND_REPLY) {
-            return;
-        }
-        delete mark;
-    }
-    else
-    {
-        if (command == ECMD_UNBIND || command == ECMD_SRV_UNBIND) return;
-        mark = new eContainer(bindings);
-        mark->addname(source);
+       case ECMD_BIND:
+       case ECMD_BIND_RS:
+       case ECMD_BIND_REPLY:
+            if (mark == OS_NULL) {
+                mark = new eVariable(bindings);
+                mark->addname(source);
+            }
+            mark->setl(OS_TRUE);
+            break;
+
+        case ECMD_UNBIND:
+        case ECMD_SRV_UNBIND:
+            if (mark) {
+                delete mark;
+            }
+            break;
     }
 }
 

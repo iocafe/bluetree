@@ -121,12 +121,14 @@ void eRowSetBinding::onmessage(
     eEnvelope *envelope)
 {
     eDBM *dbm;
+    os_int cmd;
 
     /* If at final destination for the message.
      */
     if (*envelope->target()=='\0')
     {
-        switch (envelope->command())
+        cmd = envelope->command();
+        switch (cmd)
         {
             case ECMD_BIND_REPLY:
                 cbindok(this, envelope);
@@ -139,7 +141,7 @@ void eRowSetBinding::onmessage(
                  * so it can be reconnected.
                  */
                 if (m_bflags & EBIND_CLIENT) {
-                    disconnect();
+                    disconnect(OS_FALSE, cmd);
                 }
 
                 /* Server side: Delete this eRowSetBinding and refresh trigger data.

@@ -26,12 +26,7 @@ const os_char ebindp_state[] = "state";
 
 /**
 ****************************************************************************************************
-
-  @brief Binding base class constructor.
-
-  Clear member variables.
-  @return  None.
-
+  Binding base class constructor.  Clear member variables.
 ****************************************************************************************************
 */
 eBinding::eBinding(
@@ -64,7 +59,7 @@ eBinding::~eBinding()
 {
     /* Disconnect and clear all allocated memory
      */
-    disconnect();
+    disconnect(OS_TRUE, 0);
     set_objpath(OS_NULL);
 }
 
@@ -89,24 +84,7 @@ eObject *eBinding::clone(
     e_oid id,
     os_int aflags)
 {
-return OS_NULL;
-/*
-    eObject
-        *clonedobj,
-        *child;
-
-    clonedobj = new eBinding(parent, id == EOID_CHILD ? oid() : id, flags());
-
-    for (child = first(EOID_ALL); child; child = child->next(EOID_ALL))
-    {
-        if (child->isclonable())
-        {
-            child->clone(clonedobj, child->oid(), aflags);
-        }
-    }
-
-    return clonedobj;
-*/
+    return OS_NULL;
 }
 
 
@@ -249,9 +227,9 @@ void eBinding::bind_base(
 {
     os_int cmd;
 
-    /* Clear state variables only?
+    /* Clear binding state.
      */
-    disconnect();
+    disconnect(OS_FALSE, 0);
 
     /* Save objpath. If objpath is NULL, this is skipped for reactivating binding.
      */
@@ -461,15 +439,19 @@ void eBinding::set_bindpath(
   @brief Disconnect the binding and release allocated memory.
 
   The eBinding::disconnects() disconnects and clears allocated memory.
-  @return None.
+
+  @param   cmd ECMD_UNBIND, ECMD_SRV_UNBIND, or ECMD_NO_TARGET.
+           ECMD_UNBIND Really forget the binding from eConnection's list.
 
 ****************************************************************************************************
 */
-void eBinding::disconnect()
+void eBinding::disconnect(
+    os_boolean send_unbind_message,
+    os_int cmd)
 {
     /* Send disconnect message
      */
-    switch (m_state)
+    if (send_unbind_message) switch (m_state)
     {
         case E_BINDING_UNUSED:
             break;
@@ -484,7 +466,6 @@ void eBinding::disconnect()
                  m_bindpath, OS_NULL, OS_NULL, EMSG_NO_ERRORS|EMSG_NO_RESOLVE);
             break;
     }
-
 
     if (m_bindpath) {
         set_bindpath(OS_NULL);
