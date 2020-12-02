@@ -266,7 +266,7 @@ void ePropertyBinding::onmessage(
             case ECMD_NO_TARGET:
                 if (m_bflags & EBIND_CLIENT)
                 {
-                    disconnect(OS_FALSE, cmd);
+                    disconnect(OS_FALSE);
                 }
                 else
                 {

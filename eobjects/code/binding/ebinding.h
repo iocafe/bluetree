@@ -229,8 +229,7 @@ protected:
     /* Disconnect the binding and release allocated memory.
      */
     void disconnect(
-        os_boolean send_unbind_message,
-        os_int cmd);
+        os_boolean send_unbind_message);
 
 
     /**

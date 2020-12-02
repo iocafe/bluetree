@@ -118,7 +118,7 @@ public:
         column = new eVariable(columns);
         column->addname("ix", ENAME_NO_MAP);
         column->setpropertys(EVARP_TEXT, "rivi");
-        column->setpropertyi(ECOMP_TYPE, OS_INT);
+        column->setpropertyi(EVARP_TYPE, OS_INT);
 
 
 /* char buf[128];
@@ -131,25 +131,25 @@ for (int i = 0; i<150; i++) {
 
         column = new eVariable(columns);
         column->addname("connected", ENAME_NO_MAP);
-        column->setpropertyi(ECOMP_TYPE, OS_BOOLEAN);
+        column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
 
         column = new eVariable(columns);
         column->addname("connectto", ENAME_NO_MAP);
-        column->setpropertys(ECOMP_UNIT, "ms");
+        column->setpropertys(EVARP_UNIT, "ms");
         column->setpropertyi(EVARP_TYPE, OS_STR);
         column->setpropertys(EVARP_ATTR, "align=cright");
 
         column = new eVariable(columns);
         column->addname("tstamp", ENAME_NO_MAP);
         column->setpropertys(EVARP_TEXT, "aika-\nleiska");
-        column->setpropertys(ECOMP_ATTR, "tstamp=\"yy,sec\"");
-        column->setpropertys(ECOMP_TTIP, "Daa dillan dillan daa");
+        column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\"");
+        column->setpropertys(EVARP_TTIP, "Daa dillan dillan daa");
 
 
         column = new eVariable(columns);
         column->addname("selectit", ENAME_NO_MAP);
         column->setpropertyi(EVARP_TYPE, OS_CHAR);
-        column->setpropertys(ECOMP_ATTR, "enum=\"1.eka,2.toka,3.koka\"");
+        column->setpropertys(EVARP_ATTR, "enum=\"1.eka,2.toka,3.koka\"");
 
         column = new eVariable(columns);
         column->addname("x", ENAME_NO_MAP);
@@ -213,7 +213,7 @@ for (int i = 0; i<150; i++) {
         x = 1234.5;
         x.set_sbits(OSAL_STATE_ORANGE|OSAL_STATE_CONNECTED);
         x.set_tstamp(etime());
-        element->setpropertyo(ECOMP_VALUE, &x);
+        element->setpropertyo(EVARP_VALUE, &x);
 
         etable_insert(this, "//mymtx", table_name, &row);
     }

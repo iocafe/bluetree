@@ -158,8 +158,7 @@ void connection_example_1()
      */
     c1MyClass::setupclass();
 
-    /* Create and start thread to listen for incoming socket connections,
-       name it "//myconnection".
+    /* Create and start thread to run socket connection, name it "//myconnection".
      */
     t = new eConnection();
     t->addname("//myconnection");

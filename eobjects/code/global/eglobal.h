@@ -133,6 +133,10 @@ typedef struct eGlobal
      */
     struct eGuiGlobal *eguiglobal;
 
+    /** Network service thread handle.
+     */
+    eThreadHandle netservice_thread_handle;
+
     /** Initialization flags saved by eobjects_inititalize() for eobjects_shutdown()
      */
     os_int eobjects_init_flags;

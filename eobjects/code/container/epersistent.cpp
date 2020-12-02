@@ -1,10 +1,12 @@
 /**
 
-  @file    enetservice.cpp
-  @brief   enet service implementation.
+  @file    econtainer.cpp
+  @brief   Simple object container.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
+
+  The container object is like a box holding a set of child objects.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -14,7 +16,6 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "extensions/netservice/enetservice.h"
 
 
 /**
@@ -22,17 +23,12 @@
   Constructor.
 ****************************************************************************************************
 */
-eNetService::eNetService(
+ePersistent::ePersistent(
     eObject *parent,
     e_oid oid,
     os_int flags)
-    : eThread(parent, oid, flags)
+    : eContainer(parent, oid, flags)
 {
-    m_persistent_accounts = OS_NULL;
-    m_accounts_matrix = OS_NULL;
-    initproperties();
-
-    create_user_accounts_table();
 }
 
 
@@ -41,7 +37,7 @@ eNetService::eNetService(
   Virtual destructor.
 ****************************************************************************************************
 */
-eNetService::~eNetService()
+ePersistent::~ePersistent()
 {
 }
 
@@ -51,7 +47,7 @@ eNetService::~eNetService()
 
   @brief Clone object
 
-  The eNetService::clone function clones and object including object's children.
+  The ePersistent::clone function clones and object including object's children.
   Names will be left detached in clone.
 
   @param  parent Parent for the clone.
@@ -61,13 +57,13 @@ eNetService::~eNetService()
 
 ****************************************************************************************************
 */
-eObject *eNetService::clone(
+eObject *ePersistent::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
     eObject *clonedobj;
-    clonedobj = new eNetService(parent, id == EOID_CHILD ? oid() : id, flags());
+    clonedobj = new ePersistent(parent, id == EOID_CHILD ? oid() : id, flags());
     clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
     return clonedobj;
 }
@@ -85,57 +81,13 @@ eObject *eNetService::clone(
 
 ****************************************************************************************************
 */
-void eNetService::setupclass()
+void ePersistent::setupclass()
 {
-    const os_int cls = ECLASSID_CONTAINER;
+    const os_int cls = ECLASSID_PERSISTENT;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eNetService");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "ePersistent");
     os_unlock();
-}
-
-
-
-/* Initialize network service.
- */
-void enetservice_initialize()
-{
-    eThread *t;
-    eContainer c;
-
-    /* Set up clas for use.
-     */
-    c1MyClass::setupclass();
-
-    /* Create and start net service thread to listen for incoming socket connections,
-       name it "//myconnection".
-     */
-    t = new eNetService();
-    t->addname("//server");
-    t->start(&eglobal->netservice_thread_handle); /* After this t pointer is useless */
-    c.setpropertys_msg(conthreadhandle.uniquename(), // "//myconnection",
-         "socket:localhost", econnp_ipaddr);
-
-
-//    os_sleep(2000);
-
-    /* Create and start thread named "thread2".
-     */
-    t = new c1MyClass();
-    t->addname("thread2", ENAME_PROCESS_NS);
-    t->timer(40);
-    t->start(&thandle2); /* After this t pointer is useless */
-
-//    c.setpropertyd_msg("//thread2/_p/Y", 11.5);
-
-    os_sleep(15000000);
-
-    /* Wait for the threads to terminate.
-     */
-    thandle2.terminate();
-    thandle2.join();
-    conthreadhandle.terminate();
-    conthreadhandle.join();
 }

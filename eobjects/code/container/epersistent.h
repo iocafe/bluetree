@@ -1,10 +1,12 @@
 /**
 
-  @file    enetservice.h
-  @brief   enet service implementation.
+  @file    econtainer.h
+  @brief   Simple object container.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
+
+  The container object is like a box holding a set of child objects.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -14,28 +16,29 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef ENETSERVICE_H_
-#define ENETSERVICE_H_
+#ifndef EPERSISTENT_H_
+#define EPERSISTENT_H_
 #include "eobjects.h"
+
 
 /**
 ****************************************************************************************************
-  eNetService class.
+  ePersistent is like a box of objects.
 ****************************************************************************************************
 */
-class eNetService : public eThread
+class ePersistent : public eContainer
 {
 public:
     /* Constructor.
      */
-    eNetService(
+    ePersistent(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eNetService();
+    virtual ~ePersistent();
 
     /* Clone object.
      */
@@ -44,18 +47,18 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to eNetService pointer.
+    /* Casting eObject pointer to ePersistent pointer.
      */
-    inline static eNetService *cast(
+    inline static ePersistent *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_NETSERVICE)
-        return (eNetService*)o;
+        e_assert_type(o, ECLASSID_PERSISTENT)
+        return (ePersistent*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_NETSERVICE; }
+    virtual os_int classid() {return ECLASSID_PERSISTENT; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -63,43 +66,13 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eNetService *newobj(
+    static ePersistent *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eNetService(parent, id, flags);
+        return new ePersistent(parent, id, flags);
     }
-
-protected:
-    /**
-    ************************************************************************************************
-      Internal functions.
-    ************************************************************************************************
-    */
-
-    /* Create "user accounts" table.
-     */
-    void create_user_accounts_table();
-
-
-    /**
-    ************************************************************************************************
-      Member variables
-    ************************************************************************************************
-    */
-
-    /** Persistent object to hold user accounts table.
-     */
-    ePersistent *m_persistent_accounts;
-
-    /** User accounts table (matrix).
-     */
-    eMatrix *m_accounts_matrix;
 };
-
-/* Initialize network service.
- */
-void enetservice_initialize();
 
 #endif

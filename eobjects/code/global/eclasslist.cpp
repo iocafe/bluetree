@@ -165,6 +165,7 @@ void eclasslist_initialize()
     eVariable::setupclass();
     eSet::setupclass();
     eContainer::setupclass();
+    ePersistent::setupclass();
     eName::setupclass();
     eNameSpace::setupclass();
     eValueX::setupclass();

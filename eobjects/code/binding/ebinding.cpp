@@ -59,7 +59,7 @@ eBinding::~eBinding()
 {
     /* Disconnect and clear all allocated memory
      */
-    disconnect(OS_TRUE, 0);
+    disconnect(OS_TRUE);
     set_objpath(OS_NULL);
 }
 
@@ -229,7 +229,7 @@ void eBinding::bind_base(
 
     /* Clear binding state.
      */
-    disconnect(OS_FALSE, 0);
+    disconnect(OS_FALSE);
 
     /* Save objpath. If objpath is NULL, this is skipped for reactivating binding.
      */
@@ -446,8 +446,7 @@ void eBinding::set_bindpath(
 ****************************************************************************************************
 */
 void eBinding::disconnect(
-    os_boolean send_unbind_message,
-    os_int cmd)
+    os_boolean send_unbind_message)
 {
     /* Send disconnect message
      */

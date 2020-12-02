@@ -141,7 +141,7 @@ void eRowSetBinding::onmessage(
                  * so it can be reconnected.
                  */
                 if (m_bflags & EBIND_CLIENT) {
-                    disconnect(OS_FALSE, cmd);
+                    disconnect(OS_FALSE);
                 }
 
                 /* Server side: Delete this eRowSetBinding and refresh trigger data.

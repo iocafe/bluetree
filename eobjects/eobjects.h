@@ -58,6 +58,7 @@ void eobjects_shutdown();
 #include "code/variable/evariable.h"
 #include "code/set/eset.h"
 #include "code/container/econtainer.h"
+#include "code/container/epersistent.h"
 #include "code/pointer/epointer.h"
 #include "code/valuex/evaluex.h"
 #include "code/name/ename.h"
