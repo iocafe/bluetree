@@ -31,8 +31,6 @@ eNetService::eNetService(
     m_persistent_accounts = OS_NULL;
     m_accounts_matrix = OS_NULL;
     initproperties();
-
-    create_user_accounts_table();
 }
 
 
@@ -96,46 +94,29 @@ void eNetService::setupclass()
     os_unlock();
 }
 
-
-
-/* Initialize network service.
- */
-void enetservice_initialize()
+void eNetService::initialize(
+    eContainer *params)
 {
-    eThread *t;
-    eContainer c;
+    ns_create();
+    create_user_accounts_table();
+}
+
+
+/* Start network service.
+ */
+void enet_start_server(
+    eThreadHandle *server_thread_handle)
+{
+    eNetService *net_service;
 
     /* Set up clas for use.
      */
-    c1MyClass::setupclass();
+    eNetService::setupclass();
 
     /* Create and start net service thread to listen for incoming socket connections,
-       name it "//myconnection".
+       name it "//service".
      */
-    t = new eNetService();
-    t->addname("//server");
-    t->start(&eglobal->netservice_thread_handle); /* After this t pointer is useless */
-    c.setpropertys_msg(conthreadhandle.uniquename(), // "//myconnection",
-         "socket:localhost", econnp_ipaddr);
-
-
-//    os_sleep(2000);
-
-    /* Create and start thread named "thread2".
-     */
-    t = new c1MyClass();
-    t->addname("thread2", ENAME_PROCESS_NS);
-    t->timer(40);
-    t->start(&thandle2); /* After this t pointer is useless */
-
-//    c.setpropertyd_msg("//thread2/_p/Y", 11.5);
-
-    os_sleep(15000000);
-
-    /* Wait for the threads to terminate.
-     */
-    thandle2.terminate();
-    thandle2.join();
-    conthreadhandle.terminate();
-    conthreadhandle.join();
+    net_service = new eNetService();
+    net_service->addname("//service");
+    net_service->start(server_thread_handle);
 }

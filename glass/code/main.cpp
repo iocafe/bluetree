@@ -43,7 +43,7 @@ eStatus emain(
     os_char *argv[])
 {
     eGui *gui;
-    eThreadHandle client_thread_handle;
+    eThreadHandle client_thread_handle, server_thread_handle;
     eStatus s;
 
 //    duudeli(); return ESTATUS_SUCCESS;
@@ -60,12 +60,15 @@ eStatus emain(
 
     /* Manage network connections.
      */
+    enet_start_server(&server_thread_handle);
     enet_start_client(&client_thread_handle);
 
     gui = new eGui(egui_get_container());
     gui->setup_desktop_application();
     gui->run();
 
+    server_thread_handle.terminate();
+    server_thread_handle.join();
     client_thread_handle.terminate();
     client_thread_handle.join();
 

@@ -18,4 +18,5 @@
 #define ECLIENT_H_
 #include "egui.h"
 #include "extensions/netclient/enetclient.h"
+#include "extensions/netservice/enetservice.h"
 #endif

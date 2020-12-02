@@ -71,6 +71,9 @@ public:
         return new eNetService(parent, id, flags);
     }
 
+    virtual void initialize(
+        eContainer *params = OS_NULL);
+
 protected:
     /**
     ************************************************************************************************
@@ -98,8 +101,9 @@ protected:
     eMatrix *m_accounts_matrix;
 };
 
-/* Initialize network service.
+/* Start network service.
  */
-void enetservice_initialize();
+void enet_start_server(
+    eThreadHandle *server_thread_handle);
 
 #endif
