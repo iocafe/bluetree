@@ -121,7 +121,7 @@ typedef struct eGlobal
 
     /** Composition file name
      */
-    os_char composition[ENET_COMPOSITION_NAME_SZ];
+    // os_char composition[ENET_COMPOSITION_NAME_SZ];
 
     /** This is special for eMatrix clas. Memory manager and eBuffer implementation
         are tested at startup, how much memory we actually get when we request

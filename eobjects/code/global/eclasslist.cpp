@@ -188,6 +188,7 @@ void eclasslist_initialize()
     eProcess::setupclass();
     eRoot::setupclass();
     eOsStream::setupclass();
+    eFileSystem::setupclass();
 }
 
 

@@ -19,7 +19,7 @@
 /* Default root directory.
  */
 #ifndef ENET_ROOT_DIR
-#define ENET_ROOT_DIR OSAL_FS_ROOT "coderoot/borromean/"
+#define ENET_ROOT_DIR OSAL_FS_ROOT "coderoot/fsys/"
 #endif
 
 /* Default composition root directory.
@@ -98,7 +98,7 @@ void enet_process_initialize(
 
     /* Set default top composition file name.
      */
-    os_strncpy(eglobal->composition, "default", ENET_COMPOSITION_NAME_SZ);
+    // os_strncpy(eglobal->composition, "default", ENET_COMPOSITION_NAME_SZ);
 
     /* Load process specific parameters from file.
      */

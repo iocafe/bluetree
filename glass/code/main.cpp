@@ -42,13 +42,17 @@ eStatus emain(
     os_int argc,
     os_char *argv[])
 {
+    eThreadHandle client_thread_handle;
+    eThreadHandle server_thread_handle;
+    eThreadHandle fsys_thread_handle;
     eGui *gui;
-    eThreadHandle client_thread_handle, server_thread_handle;
     eStatus s;
 
 //    duudeli(); return ESTATUS_SUCCESS;
 
     tableview_test_start();
+
+    efsys_expose_directory("//fsys", OSAL_FS_ROOT "coderoot", &fsys_thread_handle);
 
     egui_initialize();
     s = eimgui_initialize();
@@ -58,8 +62,6 @@ eStatus emain(
         return ESTATUS_FAILED;
     }
 
-    /* Manage network connections.
-     */
     enet_start_server(&server_thread_handle);
     enet_start_client(&client_thread_handle);
 
@@ -74,6 +76,9 @@ eStatus emain(
 
     eimgui_shutdown();
     egui_shutdown();
+
+    fsys_thread_handle.terminate();
+    fsys_thread_handle.join();
 
     tableview_test_end();
 
