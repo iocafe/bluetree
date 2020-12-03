@@ -103,7 +103,8 @@ void eTableView::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eTableView");
-    setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
+    // setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
+    addpropertys(cls, ECOMP_PATH, ecomp_path, "path", EPRO_PERSISTENT);
     addpropertyl(cls, ECOMP_DROP_DOWN_LIST_SELECT, ecomp_drop_down_list_select,
         "drop down select", EPRO_SIMPLE);
     addpropertyl(cls, ECOMP_COMMAND, ecomp_command, "command");
@@ -144,6 +145,11 @@ eStatus eTableView::onpropertychange(
 
     switch (propertynr)
     {
+        case ECOMP_PATH:
+            delete m_rowset;
+            m_rowset = OS_NULL;
+            break;
+
         case ECOMP_DROP_DOWN_LIST_SELECT:
             focused_row = eMatrix::cast(m_focused_row->get());
             c = eTableColumn::cast(m_columns->first(m_focused_column));
@@ -543,13 +549,18 @@ void eTableView::update_table_cell(
 void eTableView::select()
 {
     eContainer columns;
-    eVariable *column;
+    eVariable *column, path;
+
+    propertyv(ECOMP_PATH, &path);
+    if (path.isempty()) {
+        return;
+    }
 
     if (m_rowset == OS_NULL) {
         m_rowset = new eRowSet(this);
     }
 
-    m_rowset->set_dbm("//mymtx");
+    m_rowset->set_dbm(path.gets());
     m_rowset->set_callback(eTableView::static_callback, this);
     column = new eVariable(&columns);
     column->addname("*", ENAME_NO_MAP);
@@ -746,7 +757,11 @@ ePopup *eTableView::right_click_popup(
     row = (prm.mouse_pos.y - m_logical_data_start_y);
     if (row < 0) return OS_NULL;
     row /= m_data_row_h;
-    if (row >= m_row_to_m_len) return OS_NULL;
+    // if (row >= m_row_to_m_len) return OS_NULL;
+
+    /* Close old dialog if any.
+     */
+    delete m_row_dialog->get();
 
     p = eComponent::right_click_popup(prm);
     oixstr(buf, sizeof(buf));
@@ -758,25 +773,27 @@ ePopup *eTableView::right_click_popup(
     item->setpropertyl(ECOMP_SETVALUE, ECOMPO_NEW_ROW);
     item->setpropertys(ECOMP_TARGET, buf);
 
-    item = new eButton(p);
-    item->setpropertys(ECOMP_TEXT, "edit row");
-    item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
-    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_EDIT_ROW);
-    item->setpropertys(ECOMP_TARGET, buf);
+    if (row < m_row_to_m_len)
+    {
+        item = new eButton(p);
+        item->setpropertys(ECOMP_TEXT, "edit row");
+        item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
+        item->setpropertyl(ECOMP_SETVALUE, ECOMPO_EDIT_ROW);
+        item->setpropertys(ECOMP_TARGET, buf);
 
-    item = new eButton(p);
-    item->setpropertys(ECOMP_TEXT, "delete row");
-    item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
-    item->setpropertyl(ECOMP_SETVALUE,ECOMPO_DELETE_ROW);
-    item->setpropertys(ECOMP_TARGET, buf);
+        item = new eButton(p);
+        item->setpropertys(ECOMP_TEXT, "delete row");
+        item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
+        item->setpropertyl(ECOMP_SETVALUE,ECOMPO_DELETE_ROW);
+        item->setpropertys(ECOMP_TARGET, buf);
 
-    /* Close old dialog if any.
-     */
-    delete m_row_dialog->get();
-
-    /* Set ePointer to row matrix.
-     */
-    m_row_dialog_m->set(m_row_to_m[row].m_row);
+        /* Set ePointer to row matrix.
+         */
+        m_row_dialog_m->set(m_row_to_m[row].m_row);
+    }
+    else {
+        m_row_dialog_m->set(OS_NULL);
+    }
 
     return p;
 }

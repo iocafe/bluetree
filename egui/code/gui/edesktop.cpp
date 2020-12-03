@@ -33,6 +33,7 @@ void eGui::setup_desktop_application()
     eParameterList *p;
     eLineEdit *e;
     eTreeNode *n;
+    eTableView *t;
     eValueX x;
 
     w = new eWindow(this);
@@ -107,9 +108,16 @@ void eGui::setup_desktop_application()
     e->setpropertyi(ECOMP_DIGS, 5);
 
     w = new eWindow(this);
-    w->setpropertys(ECOMP_VALUE, "table");
+    w->setpropertys(ECOMP_VALUE, "test table");
 
-    new eTableView(w);
+    t = new eTableView(w);
+    t->setpropertys(ECOMP_PATH, "//mymtx");
+
+    w = new eWindow(this);
+    w->setpropertys(ECOMP_VALUE, "kayttajat");
+
+    t = new eTableView(w);
+    t->setpropertys(ECOMP_PATH, "//service/accounts");
 
     w = new eWindow(this);
     w->setpropertys(ECOMP_VALUE, "Browseri");

@@ -61,7 +61,7 @@ void eNetService::create_user_accounts_table()
 
     column = new eVariable(columns);
     column->addname("user", ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "device/user name");
+    column->setpropertys(EVARP_TEXT, "name");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_TTIP,
         "Device or user name. Examples: \'candy3\',\n"
@@ -87,9 +87,11 @@ void eNetService::create_user_accounts_table()
 
     column = new eVariable(columns);
     column->addname("logon_tstamp", ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "last successfull logon");
+    column->setpropertys(EVARP_TEXT, "last logon");
     column->setpropertyi(EVARP_TYPE, OS_LONG);
     column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\"");
+    column->setpropertys(EVARP_TTIP,
+        "Time stamp of the last successfull logon");
 
     /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
      */
