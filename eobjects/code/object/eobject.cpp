@@ -59,14 +59,14 @@ eObject::eObject(
     eRoot *root;
 
     mm_handle = OS_NULL;
-    flags &= EOBJ_CLONE_MASK;
-
     mm_parent = parent;
 
     /* If this if not primitive object?
      */
     if ((flags & EOBJ_EROOT_OPTIONAL) == 0 || parent != OS_NULL)
     {
+        flags &= EOBJ_CLONE_MASK;
+
         /* No parent, allocate root object?
          */
         if (parent == OS_NULL)
