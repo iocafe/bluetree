@@ -992,13 +992,20 @@ protected:
         eVariable *name,
         eSet *appendix);
 
-    void browse_list_namespace(
-        eContainer *content);
+    /* List names in this object's namespace. Used for browsing.
+     */
+    virtual void browse_list_namespace(
+        eContainer *content,
+        const os_char *target);
 
+    /* List child objects. Used for browsing.
+     */
     void browse_list_children(
         eContainer *content,
         os_int browse_flags);
 
+    /* List object properties. Used for browsing.
+     */
     void browse_list_properties(
         eContainer *content);
 

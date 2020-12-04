@@ -785,7 +785,7 @@ void eObject::send_browse_info(
     /* If this object has name space, list named objects.
      */
     if (browse_flags & EBROWSE_NSPACE) {
-        browse_list_namespace(content);
+        browse_list_namespace(content, envelope->target());
     }
 
     /* List child objects. Used for browsing.
@@ -858,7 +858,6 @@ void eObject::object_info(
     }
 
     appendix->setl(EBROWSE_BROWSE_FLAGS, browse_flags);
-
     appendix->setl(EBROWSE_OBJECT_FLAGS, flags());
 
     // item->sets(EBROWSE_ITEM_NAMESPACE_ID, name->namespaceid());
@@ -866,10 +865,24 @@ void eObject::object_info(
 }
 
 
-/* List names in this object's namespace. Used for browsing.
- */
+/**
+****************************************************************************************************
+
+  @brief List names in this object's namespace. Used for browsing.
+
+  The eObject::browse_list_namespace function lists named children, grandchildren, etc,
+  when name is mapped to name space of this object. Each list item is a variable.
+
+  @param   content Pointer to container into which to place list items.
+  @param   target When browsing structure which is not made out of eObjects,
+           this can be path within the object (like file system, etc).
+  @param   None.
+
+****************************************************************************************************
+*/
 void eObject::browse_list_namespace(
-    eContainer *content)
+    eContainer *content,
+    const os_char *target)
 {
     eName *name;
     eVariable *item;
@@ -902,8 +915,20 @@ void eObject::browse_list_namespace(
 }
 
 
-/* List child objects. Used for browsing.
- */
+/**
+****************************************************************************************************
+
+  @brief List child objects. Used for browsing.
+
+  The eObject::browse_list_children function lists the children of this object.
+  Each list item is a variable.
+
+  @param   content Pointer to container into which to place list items.
+  @param   browse_flags select wether to list all children or...
+  @param   None.
+
+****************************************************************************************************
+*/
 void eObject::browse_list_children(
     eContainer *content,
     os_int browse_flags)
@@ -936,8 +961,20 @@ void eObject::browse_list_children(
     }
 }
 
-/* List child objects. Used for browsing.
- */
+
+/**
+****************************************************************************************************
+
+  @brief List object properties. Used for browsing.
+
+  The eObject::browse_list_properties function list this object's properties.
+  Each list item is a variable.
+
+  @param   content Pointer to container into which to place list items.
+  @param   None.
+
+****************************************************************************************************
+*/
 void eObject::browse_list_properties(
     eContainer *content)
 {

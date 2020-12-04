@@ -74,6 +74,20 @@ public:
     virtual void initialize(
         eContainer *params = OS_NULL);
 
+    /* Process an incoming message.
+     */
+    virtual void onmessage(
+        eEnvelope *envelope);
+
+    virtual void browse_list_namespace(
+        eContainer *content,
+        const os_char *target);
+
+    virtual void object_info(
+        eVariable *item,
+        eVariable *name,
+        eSet *appendix);
+
 protected:
     /**
     ************************************************************************************************

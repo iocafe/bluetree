@@ -39,16 +39,9 @@ static void ethread_func(
     osalEvent done);
 
 
-
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eThread::eThread(
@@ -65,23 +58,13 @@ eThread::eThread(
      */
     m_message_queue = new eContainer(OS_NULL, EOID_INTERNAL, EOBJ_TEMPORARY_ATTACHMENT);
 
-addname("//thread");
-
     m_exit_requested = OS_FALSE;
 }
 
 
-
-
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eThread::~eThread()

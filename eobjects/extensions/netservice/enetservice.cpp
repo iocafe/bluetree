@@ -85,7 +85,7 @@ eObject *eNetService::clone(
 */
 void eNetService::setupclass()
 {
-    const os_int cls = ECLASSID_CONTAINER;
+    const os_int cls = ECLASSID_NETSERVICE;
 
     /* Add the class to class list.
      */

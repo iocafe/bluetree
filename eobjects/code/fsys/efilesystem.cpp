@@ -82,7 +82,7 @@ eObject *eFileSystem::clone(
 */
 void eFileSystem::setupclass()
 {
-    const os_int cls = ECLASSID_CONTAINER;
+    const os_int cls = ECLASSID_FILE_SYSTEM;
 
     /* Add the class to class list.
      */
@@ -96,6 +96,122 @@ void eFileSystem::initialize(
 {
 //    ns_create();
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Process an incoming message.
+
+  The eFileSystem::onmessage function handles messages received by object. This function
+  checks for commands related to file system.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eFileSystem::onmessage(
+    eEnvelope *envelope)
+{
+    eThread::onmessage(envelope);
+}
+
+
+
+
+/**
+****************************************************************************************************
+
+  @brief List names in this object's namespace. Here we list files and folders.
+
+  The eFileSystem::browse_list_namespace function lists named children, grandchildren, etc,
+  when name is mapped to name space of this object. Each list item is a variable.
+
+  @param   content Pointer to container into which to place list items.
+  @param   target When browsing structure which is not made out of eObjects,
+           this can be path within the object (like file system, etc).
+  @param   None.
+
+****************************************************************************************************
+*/
+void eFileSystem::browse_list_namespace(
+    eContainer *content,
+    const os_char *target)
+{
+    eVariable *item;
+    eSet *appendix;
+    os_char buf[E_OIXSTR_BUF_SZ];
+    osalDirListItem *list, *listitem;
+    osalStatus s;
+
+    s = osal_dir("/coderoot", "*", &list, OSAL_DIR_FILESTAT);
+    if (s) {
+        osal_debug_error("osal_dir failed");
+        return;
+    }
+
+    oixstr(buf, sizeof(buf));
+
+    for (listitem = list; listitem; listitem = listitem->next)
+    {
+        item = new eVariable(content, EBROWSE_NSPACE);
+        appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
+        appendix->sets(EBROWSE_PATH, listitem->name);
+
+        /** Get oix and ucnt as string.
+         */
+        appendix->sets(EBROWSE_IPATH, listitem->name);
+
+        item->setpropertys(EVARP_TEXT, listitem->name);
+
+    }
+
+    /* Release directory list from memory.
+     */
+    osal_free_dirlist(list);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Collect information about a file or folder.
+
+  The eFileSystem::object_info function fills in item (eVariable) to contain information
+  about this object for tree browser view.
+
+  @param   item Pointer to eVariable to set up with object information.
+  @param   name Object's name if known. OS_NULL if object is not named or name is
+           unknown at this time.
+  @param   appendix Pointer to eSet into which to store property flags. The stored property
+           flags indicate if object has namespace, children, or properties.
+
+****************************************************************************************************
+*/
+void eFileSystem::object_info(
+    eVariable *item,
+    eVariable *name,
+    eSet *appendix)
+{
+    // eVariable value;
+
+    eObject::object_info(item, name, appendix);
+
+    /* propertyv(ECOMP_TEXT, &value);
+    if (!value.isempty()) {
+        eVariable value2;
+        value2 += "\"";
+        value2 += value;
+        value2 += "\" ";
+        item->propertyv(EVARP_TEXT, &value);
+        value2 += value;
+        item->setpropertyv(EVARP_TEXT, &value2);
+    } */
+}
+
+
 
 
 /**

@@ -114,7 +114,7 @@ eObject *eNetClient::clone(
 */
 void eNetClient::setupclass()
 {
-    const os_int cls = ECLASSID_CONTAINER;
+    const os_int cls = ECLASSID_NETCLIENT;
 
     /* Add the class to class list.
      */
