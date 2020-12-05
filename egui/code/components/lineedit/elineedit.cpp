@@ -457,13 +457,16 @@ void eLineEdit::activate()
            unknown at this time.
   @param   appendix Pointer to eSet into which to store property flags. The stored property
            flags indicate if object has namespace, children, or properties.
+  @param   target Path "within object" when browsing a tree which is not made out
+           of actual eObjects. For example OS file system directory.
 
 ****************************************************************************************************
 */
 void eLineEdit::object_info(
     eVariable *item,
     eVariable *name,
-    eSet *appendix)
+    eSet *appendix,
+    const os_char *target)
 {
     eVariable value;
     os_int propertynr, i;
@@ -472,7 +475,7 @@ void eLineEdit::object_info(
         EVARP_DEFAULT, EVARP_ABBR, EVARP_GROUP, EVARP_TTIP, EVARP_DIGS, EVARP_MIN, EVARP_MAX,
         EVARP_GAIN, EVARP_OFFSET, 0};
 
-    eObject::object_info(item, name, appendix);
+    eObject::object_info(item, name, appendix, target);
 
     propertyv(ECOMP_TEXT, &value);
     if (!value.isempty()) {

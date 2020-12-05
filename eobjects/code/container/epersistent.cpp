@@ -18,6 +18,11 @@
 #include "eobjects.h"
 
 
+/* Persistent object property names.
+ */
+const os_char
+    eperp_path[] = "path";
+
 /**
 ****************************************************************************************************
   Constructor.
@@ -89,5 +94,7 @@ void ePersistent::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "ePersistent");
+    addpropertys(cls, EPERP_PATH, eperp_path, "path", EPRO_PERSISTENT);
+    propertysetdone(cls);
     os_unlock();
 }

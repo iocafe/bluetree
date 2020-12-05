@@ -15,6 +15,10 @@
 */
 #include "eobjects.h"
 
+/* File system property names.
+ */
+const os_char
+    efsysp_path[] = "path";
 
 /**
 ****************************************************************************************************
@@ -27,6 +31,7 @@ eFileSystem::eFileSystem(
     os_int flags)
     : eThread(parent, oid, flags)
 {
+    m_path = new eVariable(this);
     initproperties();
 }
 
@@ -88,6 +93,8 @@ void eFileSystem::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eFileSystem");
+    addpropertys(cls, EFSYSP_PATH, efsysp_path, "path", EPRO_PERSISTENT);
+    propertysetdone(cls);
     os_unlock();
 }
 
@@ -115,10 +122,61 @@ void eFileSystem::initialize(
 void eFileSystem::onmessage(
     eEnvelope *envelope)
 {
+    os_char *target, c;
+    os_int command;
+
+    target = envelope->target();
+    c = *target;
+
+    /* Process commands to files and foldes */
+    if (c != '\0' && c != '_' && c != '@')
+    {
+        command = envelope->command();
+        switch (command)
+        {
+          case ECMD_INFO_REQUEST:
+            send_browse_info(envelope);
+            return;
+        }
+    }
+
     eThread::onmessage(envelope);
 }
 
+/**
 
+****************************************************************************************************
+
+  @brief Called to inform the class about property value change (override).
+
+  The onpropertychange() function is called when class'es property changes, unless the
+  property is flagged with EPRO_NOONPRCH.
+
+  @param   propertynr Property number of changed property.
+  @param   x Variable containing the new value.
+  @param   flags
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
+           indicate that there was no property with given property number.
+
+****************************************************************************************************
+*/
+eStatus eFileSystem::onpropertychange(
+    os_int propertynr,
+    eVariable *x,
+    os_int flags)
+{
+    switch (propertynr)
+    {
+        case EFSYSP_PATH:
+            m_path->setv(x);
+            break;
+
+        default:
+            return eObject::onpropertychange(propertynr, x, flags);
+    }
+
+    return ESTATUS_SUCCESS;
+}
 
 
 /**
@@ -140,13 +198,17 @@ void eFileSystem::browse_list_namespace(
     eContainer *content,
     const os_char *target)
 {
-    eVariable *item;
+    eVariable tmp, *item;
     eSet *appendix;
-    os_char buf[E_OIXSTR_BUF_SZ];
+    os_char buf[E_OIXSTR_BUF_SZ], nbuf[OSAL_NBUF_SZ];
     osalDirListItem *list, *listitem;
     osalStatus s;
 
-    s = osal_dir("/coderoot", "*", &list, OSAL_DIR_FILESTAT);
+    tmp.setv(m_path);
+    tmp += "/";
+    tmp += target;
+
+    s = osal_dir(tmp.gets(), "*", &list, OSAL_DIR_FILESTAT);
     if (s) {
         osal_debug_error("osal_dir failed");
         return;
@@ -159,13 +221,22 @@ void eFileSystem::browse_list_namespace(
         item = new eVariable(content, EBROWSE_NSPACE);
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
         appendix->sets(EBROWSE_PATH, listitem->name);
-
-        /** Get oix and ucnt as string.
-         */
+        appendix->sets(EBROWSE_ITEM_TYPE, listitem->isdir ? "d" : "f");
         appendix->sets(EBROWSE_IPATH, listitem->name);
-
         item->setpropertys(EVARP_TEXT, listitem->name);
 
+        if (!listitem->isdir) {
+            etime_timestamp_str(listitem->tstamp, &tmp, ETIMESTR_SECONDS);
+            if (!tmp.isempty()) {
+                tmp += ", ";
+                item->setpropertyl(EVARP_TYPE, OS_STR);
+            }
+            osal_int_to_str(nbuf, sizeof(nbuf), listitem->sz);
+            tmp += nbuf;
+            // tmp += " bytes";
+            item->setpropertyv(EVARP_VALUE, &tmp);
+            item->setpropertys(EVARP_UNIT, "bytes");
+        }
     }
 
     /* Release directory list from memory.
@@ -187,31 +258,50 @@ void eFileSystem::browse_list_namespace(
            unknown at this time.
   @param   appendix Pointer to eSet into which to store property flags. The stored property
            flags indicate if object has namespace, children, or properties.
+  @param   target Path "within object" when browsing a tree which is not made out
+           of actual eObjects. For example OS file system directory.
 
 ****************************************************************************************************
 */
 void eFileSystem::object_info(
     eVariable *item,
     eVariable *name,
-    eSet *appendix)
+    eSet *appendix,
+    const os_char *target)
 {
+    const os_char *fname_only;
     // eVariable value;
 
-    eObject::object_info(item, name, appendix);
+    if (*target == '\0') {
+        eThread::object_info(item, name, appendix, target);
+    }
+    else
+    {
+        os_int browse_flags;
 
-    /* propertyv(ECOMP_TEXT, &value);
-    if (!value.isempty()) {
-        eVariable value2;
-        value2 += "\"";
-        value2 += value;
-        value2 += "\" ";
-        item->propertyv(EVARP_TEXT, &value);
-        value2 += value;
-        item->setpropertyv(EVARP_TEXT, &value2);
-    } */
+        /* Get file or directory name without path.
+         */
+        fname_only = os_strechr((os_char*)target, '/');
+        if (fname_only) {
+            fname_only++;
+        }
+        else {
+            fname_only = target;
+        }
+
+        item->setpropertys(EVARP_TEXT, fname_only);
+
+        browse_flags = 0;
+        if (1) { // IS FOLDER flags() & EOBJ_HAS_NAMESPACE) {
+            browse_flags |= EBROWSE_NSPACE;
+        }
+        /* if (is file or folder) {
+            browse_flags |= EBROWSE_PROPERTIES;
+        } */
+
+        appendix->setl(EBROWSE_BROWSE_FLAGS, browse_flags);
+    }
 }
-
-
 
 
 /**
@@ -237,5 +327,6 @@ void efsys_expose_directory(
      */
     fsys = new eFileSystem();
     fsys->addname(fsys_name);
+    fsys->setpropertys(EFSYSP_PATH, os_path);
     fsys->start(fsys_thread_handle);
 }

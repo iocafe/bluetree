@@ -600,16 +600,19 @@ void eWindow::select(eComponent *c,
            unknown at this time.
   @param   appendix Pointer to eSet into which to store property flags. The stored property
            flags indicate if object has namespace, children, or properties.
+  @param   target Path "within object" when browsing a tree which is not made out
+           of actual eObjects. For example OS file system directory.
 
 ****************************************************************************************************
 */
 void eWindow::object_info(
     eVariable *item,
     eVariable *name,
-    eSet *appendix)
+    eSet *appendix,
+    const os_char *target)
 {
     eVariable tmp;
-    eObject::object_info(item, name, appendix);
+    eObject::object_info(item, name, appendix, target);
 
     propertyv(ECOMP_TEXT, &tmp);
     item->setpropertyv(EVARP_VALUE, &tmp);

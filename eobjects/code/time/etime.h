@@ -187,6 +187,7 @@ eStatus edate_parse_str(
  */
 eStatus etime_timestamp_str(
     os_long utc,
-    eVariable *x);
+    eVariable *x,
+    os_int tflags = ETIMESTR_MILLISECONDS);
 
 #endif

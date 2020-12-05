@@ -455,7 +455,8 @@ protected:
     virtual void object_info(
         eVariable *item,
         eVariable *name,
-        eSet *appendix);
+        eSet *appendix,
+        const os_char *target);
 
     /** Set data type.
      */

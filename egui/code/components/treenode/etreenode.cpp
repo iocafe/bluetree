@@ -259,11 +259,12 @@ os_int eTreeNode::setup_node(
     eVariable tmp, value, ivalue, *p;
     eSet *appendix;
     eObject *o;
+    os_char *typ;
     os_int propertynr, browse_flags = 0;
 
-    m_show_expand_arrow = item->oid() != EBROWSE_PROPERTIES;
-    m_autoopen = false;
     m_node_type = item->oid();
+    m_show_expand_arrow = m_node_type != EBROWSE_PROPERTIES;
+    m_autoopen = false;
 
     for (p = item->firstp(); p; p = p->nextp())
     {
@@ -305,6 +306,15 @@ os_int eTreeNode::setup_node(
 
         if (appendix->getv(EBROWSE_BROWSE_FLAGS, &value)) {
             browse_flags = value.geti();
+        }
+
+        /* Do not show expand arrow for files.
+         */
+        if (appendix->getv(EBROWSE_ITEM_TYPE, &value)) {
+            typ = value.gets();
+            if (typ[0] == 'f') {
+                m_show_expand_arrow = OS_FALSE;
+            }
         }
 
 #if ETREENODE_TOOLTIPS_FOR_DEBUG

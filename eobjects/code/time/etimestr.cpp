@@ -17,7 +17,7 @@
 
 /* Limits for valid time stamp
  */
-const os_long etimestamp_min = 1601557429043337L; /* 1.1.2020 */
+const os_long etimestamp_min = 1501557429043337L; /* ? */
 const os_long etimestamp_max = 9601557429043337L; /* ? */
 
 
@@ -313,7 +313,8 @@ eStatus edate_parse_str(
  */
 eStatus etime_timestamp_str(
     os_long utc,
-    eVariable *x)
+    eVariable *x,
+    os_int tflags)
 {
     eLocalTime localt;
     os_char buf[EDATETIME_STR_BUF_SZ];
@@ -333,7 +334,7 @@ eStatus etime_timestamp_str(
         x->appends(" ");
     }
 
-    if (etime_make_str(&localt, buf, sizeof(buf), OS_NULL, ETIMESTR_MILLISECONDS)
+    if (etime_make_str(&localt, buf, sizeof(buf), OS_NULL, tflags)
         == ESTATUS_SUCCESS)
     {
         x->appends(buf);

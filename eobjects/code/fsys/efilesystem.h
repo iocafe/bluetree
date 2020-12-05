@@ -18,6 +18,23 @@
 #define EFILESYSTEM_H_
 #include "eobjects.h"
 
+
+/**
+****************************************************************************************************
+  Defines
+****************************************************************************************************
+*/
+
+/* File system property numbers.
+ */
+#define EFSYSP_PATH 10
+
+/* File system property names.
+ */
+extern const os_char
+    efsysp_path[];
+
+
 /**
 ****************************************************************************************************
   eFileSystem class.
@@ -79,6 +96,13 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
     virtual void browse_list_namespace(
         eContainer *content,
         const os_char *target);
@@ -86,7 +110,8 @@ public:
     virtual void object_info(
         eVariable *item,
         eVariable *name,
-        eSet *appendix);
+        eSet *appendix,
+        const os_char *target);
 
 protected:
     /**
@@ -102,6 +127,10 @@ protected:
       Member variables
     ************************************************************************************************
     */
+
+    /* OS path to root directory
+     */
+    eVariable *m_path;
 };
 
 /* Expose OS directory as object tree.

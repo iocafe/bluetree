@@ -819,11 +819,12 @@ ePopup *eTableView::right_click_popup(
 void eTableView::object_info(
     eVariable *item,
     eVariable *name,
-    eSet *appendix)
+    eSet *appendix,
+    const os_char *target)
 {
     eVariable value;
 
-    eObject::object_info(item, name, appendix);
+    eObject::object_info(item, name, appendix, target);
 
     propertyv(ECOMP_TEXT, &value);
     if (!value.isempty()) {

@@ -223,6 +223,7 @@ void eTimer::settimer(
     if (period_ms)
     {
         t = new eVariable(this, step);
+        t->setl(period_ms);
         t->addname(name, ENAME_PARENT_NS);
     }
 }

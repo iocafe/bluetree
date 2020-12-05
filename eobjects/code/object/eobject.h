@@ -110,6 +110,7 @@ class eRowSetBinding;
  */
 #define EBROWSE_PATH 1
 #define EBROWSE_IPATH 2
+#define EBROWSE_ITEM_TYPE 3
 
 /* Name space identifiers as static strings. eobj_this_ns is default
    for ns_first and ns_firstv functions()
@@ -990,7 +991,8 @@ protected:
     virtual void object_info(
         eVariable *item,
         eVariable *name,
-        eSet *appendix);
+        eSet *appendix,
+        const os_char *target);
 
     /* List names in this object's namespace. Used for browsing.
      */

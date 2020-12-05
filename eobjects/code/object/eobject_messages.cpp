@@ -779,7 +779,7 @@ void eObject::send_browse_info(
         item = new eVariable(content, EBROWSE_THIS_OBJECT);
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
         name = primaryname();
-        object_info(item, name, appendix);
+        object_info(item, name, appendix, envelope->target());
     }
 
     /* If this object has name space, list named objects.
@@ -820,13 +820,16 @@ void eObject::send_browse_info(
            unknown at this time.
   @param   appendix Pointer to eSet into which to store property flags. The stored property
            flags indicate if object has namespace, children, or properties.
+  @param   target Path "within object" when browsing a tree which is not made out
+           of actual eObjects. For example OS file system directory.
 
 ****************************************************************************************************
 */
 void eObject::object_info(
     eVariable *item,
     eVariable *name,
-    eSet *appendix)
+    eSet *appendix,
+    const os_char *target)
 {
     eVariable text;
     os_int browse_flags;
@@ -906,7 +909,7 @@ void eObject::browse_list_namespace(
 
         if (!is_process) {
             obj = name->parent();
-            obj->object_info(item, name, appendix);
+            obj->object_info(item, name, appendix, target);
         }
         else {
             item->setpropertyv(EVARP_TEXT, name);
@@ -957,7 +960,7 @@ void eObject::browse_list_children(
         child->oixstr(buf, sizeof(buf));
         appendix->sets(EBROWSE_IPATH, buf);
 
-        child->object_info(item, name, appendix);
+        child->object_info(item, name, appendix, "");
     }
 }
 
