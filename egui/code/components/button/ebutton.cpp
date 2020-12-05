@@ -207,6 +207,15 @@ eStatus eButton::draw(
             }
         }
         else {
+            os_int www = ImGui::CalcTextSize(label).x;
+            ImVec2 inner_spacing = ImGui::GetStyle().ItemInnerSpacing;
+            ImVec2 button_padding(50, inner_spacing.y);
+            button_padding.x -= www/2;
+            if (button_padding.x < inner_spacing.x) {
+                button_padding.x = inner_spacing.x;
+            }
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, button_padding);
+
             if (m_imgui_toggl)
             {
                 ImGui::PushID(label);
@@ -223,6 +232,7 @@ eStatus eButton::draw(
             }
             else
             {
+
                 ImGui::Button(label);
                 if (ImGui::IsItemClicked(0)) {
                     eVariable tmp;
@@ -231,6 +241,7 @@ eStatus eButton::draw(
                     activate();
                 }
             }
+            ImGui::PopStyleVar();
         }
     }
 
