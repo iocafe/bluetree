@@ -175,6 +175,7 @@ eStatus eTableView::onpropertychange(
                 case ECOMPO_INSERT_DLG_ROW:
                 case ECOMPO_UPDATE_DLG_ROW:
                     save_dialog_row(x->geti());
+                    gui()->delete_later(m_row_dialog->get());
                     break;
 
                 default:

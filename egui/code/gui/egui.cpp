@@ -695,16 +695,18 @@ void eGui::drop_modification(
   Add reference to object (usually GUI component) to list objects to be deleted.
   See delete_pending() function.
 
-  @param   o Pointer to object to add to pending deletes.
+  @param   o Pointer to object to add to pending deletes. If o is OS_NULL, the function
+           does nothing.
 
 ****************************************************************************************************
 */
 void eGui::delete_later(eObject *o)
 {
     ePointer *p;
-
-    p = new ePointer(m_delete_list);
-    p->set(o);
+    if (o) {
+        p = new ePointer(m_delete_list);
+        p->set(o);
+    }
 }
 
 
