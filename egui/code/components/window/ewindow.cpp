@@ -95,7 +95,7 @@ void eWindow::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eWindow");
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
-    addpropertys(cls, ECOMP_VALUE, ecomp_value, "title");
+    addpropertys(cls, ECOMP_TEXT, ecomp_text, "title text", EPRO_PERSISTENT);
     addpropertyb(cls, ECOMP_EDIT, ecomp_edit, "edit");
     propertysetdone(cls);
     os_unlock();
@@ -131,7 +131,7 @@ eStatus eWindow::onpropertychange(
 {
     switch (propertynr)
     {
-        case ECOMP_VALUE:
+        case ECOMP_TEXT:
             m_label_title.clear();
             break;
 
@@ -211,6 +211,7 @@ eStatus eWindow::draw(
     eGuiDragMode dm;
     os_int mouse_button_nr;
     os_boolean lock_window;
+    bool show_window = true, ok;
 
     wprm = prm;
     wprm.edit_mode = m_edit_mode;
@@ -225,15 +226,21 @@ eStatus eWindow::draw(
 
     /* Create a window.
      */
-    label = m_label_title.get(this, ECOMP_VALUE);
+    label = m_label_title.get(this, ECOMP_TEXT);
     if (lock_window) {
-        ImGui::Begin(label, NULL, ImGuiWindowFlags_NoMove); // ImGuiWindowFlags_NoMouseInputs ?
+        ok = ImGui::Begin(label, &show_window, ImGuiWindowFlags_NoMove); // ImGuiWindowFlags_NoMouseInputs ?
     }
     else
     {
-        ImGui::Begin(label);
+        ok = ImGui::Begin(label, &show_window);
         /*  ImGui::Begin(label, NULL, ImGuiWindowFlags_NoSavedSettings |ImGuiWindowFlags_NoMove
           | ImGuiWindowFlags_NoTitleBar); */
+    }
+
+    // Early out if the window is collapsed, as an optimization.
+    if (!ok) {
+        ImGui::End();
+        return ESTATUS_SUCCESS;
     }
 
     wprm.mouse_over_window = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
@@ -264,7 +271,7 @@ eStatus eWindow::draw(
         static os_int iii;
         iii++;
 
-        propertyv(ECOMP_VALUE, &tmp);
+        propertyv(ECOMP_TEXT, &tmp);
         osal_debug_error_str("Mouse over ", tmp.gets());
         osal_debug_error_int("HERE ", iii);
         osal_debug_error_int("HERE DOV ", wprm.mouse_over_window);
@@ -324,6 +331,11 @@ eStatus eWindow::draw(
     /* Finished with the window.
      */
     ImGui::End();
+
+    if (!show_window) {
+        gui()->delete_later(this);
+    }
+
     return ESTATUS_SUCCESS;
 }
 
@@ -599,6 +611,6 @@ void eWindow::object_info(
     eVariable tmp;
     eObject::object_info(item, name, appendix);
 
-    propertyv(ECOMP_VALUE, &tmp);
+    propertyv(ECOMP_TEXT, &tmp);
     item->setpropertyv(EVARP_VALUE, &tmp);
 }

@@ -36,7 +36,7 @@ eProcess::eProcess(
     eglobal->process_ns = new eNameSpace(this, EOID_NAMESPACE);
 
     m_sync_connectors = new eContainer(this);
-    m_sync_connectors->addname("../sync_connectors");
+    m_sync_connectors->addname("sync_connectors", ENAME_NO_MAP);
 }
 
 

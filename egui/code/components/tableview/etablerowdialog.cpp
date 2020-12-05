@@ -62,7 +62,7 @@ void eTableView::edit_row_dialog(
     }
 
     w = new eWindow(gui());
-    w->setpropertys(ECOMP_VALUE, (flags & OETABLE_EDIT_ROW_NEW) ? "new row" : "edit row");
+    w->setpropertys(ECOMP_TEXT, (flags & OETABLE_EDIT_ROW_NEW) ? "new row" : "edit row");
 
     p = new eParameterList(w);
     for (v = rscols->firstv(), col_nr = 0; v; v = v->nextv(), col_nr++)

@@ -48,7 +48,7 @@ eStatus emain(
     eGui *gui;
     eStatus s;
 
-//    duudeli(); return ESTATUS_SUCCESS;
+    // duudeli(); return ESTATUS_SUCCESS;
 
     tableview_test_start();
 

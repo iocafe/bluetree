@@ -37,7 +37,7 @@ void eGui::setup_desktop_application()
     eValueX x;
 
     w = new eWindow(this);
-    w->setpropertys(ECOMP_VALUE, "Muuttujia");
+    w->setpropertys(ECOMP_TEXT, "Muuttujia");
 
     e = new eLineEdit(w);
     e->setpropertys(ECOMP_TEXT, "Editti");
@@ -54,7 +54,7 @@ void eGui::setup_desktop_application()
     e->setpropertyo(ECOMP_VALUE, &x);
 
     w = new eWindow(this);
-    w->setpropertys(ECOMP_VALUE, "parameter list");
+    w->setpropertys(ECOMP_TEXT, "parameter list");
     p = new eParameterList(w);
 
     e = new eLineEdit(p);
@@ -108,26 +108,26 @@ void eGui::setup_desktop_application()
     e->setpropertyi(ECOMP_DIGS, 5);
 
     w = new eWindow(this);
-    w->setpropertys(ECOMP_VALUE, "test table");
+    w->setpropertys(ECOMP_TEXT, "test table");
 
     t = new eTableView(w);
     t->setpropertys(ECOMP_PATH, "//mymtx");
 
     w = new eWindow(this);
-    w->setpropertys(ECOMP_VALUE, "kayttajat");
+    w->setpropertys(ECOMP_TEXT, "kayttajat");
 
     t = new eTableView(w);
     t->setpropertys(ECOMP_PATH, "//service/accounts");
 
     w = new eWindow(this);
-    w->setpropertys(ECOMP_VALUE, "Browseri");
+    w->setpropertys(ECOMP_TEXT, "Browseri");
 
     n = new eTreeNode(w);
     n->setpropertys(ECOMP_PATH, "//");
     n->setpropertys(ECOMP_IPATH, "//");
 
     w = new eWindow(this);
-    w->setpropertys(ECOMP_VALUE, "Browseri 2");
+    w->setpropertys(ECOMP_TEXT, "Browseri 2");
     p = new eParameterList(w);
 
     n = new eTreeNode(p);

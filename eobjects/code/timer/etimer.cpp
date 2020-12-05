@@ -48,7 +48,7 @@ void eObject::timer(
     eVariable period;
 
     period = period_ms;
-    message(ECMD_SETTIMER, "//_timer", OS_NULL, &period);
+    message(ECMD_SETTIMER, "//timers", OS_NULL, &period);
 }
 
 
@@ -69,7 +69,7 @@ eTimer::eTimer(
     os_int flags)
     : eThread(parent, id, flags)
 {
-    addname("//_timer");
+    addname("//timers");
     ns_create();
 }
 
