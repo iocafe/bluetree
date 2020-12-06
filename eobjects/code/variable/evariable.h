@@ -387,11 +387,6 @@ public:
      */
     os_char *tostring();
 
-    /* Fix string length after string length has been modified trough string pointer
-     */
-    /* void strmodified(
-        os_memsz sz); */
-
     /* Check if object name is oix.
      */
     os_boolean is_oix();
@@ -399,6 +394,10 @@ public:
     /* Remove new lines from string.
      */
     void singleline();
+
+    /* Make string lower case.
+     */
+    void tolower();
 
     /* Remove stuff from path what becomes unnecessary when oix is appended to it.
      */

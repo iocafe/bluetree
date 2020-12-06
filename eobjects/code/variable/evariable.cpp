@@ -1928,7 +1928,6 @@ os_boolean eVariable::is_oix()
   @brief Remove new lines from string.
 
   If variable contains a string, convert new line characters to spaces and remove "-\n".
-  @return OS_TRUE if object name is oix.
 
 ****************************************************************************************************
 */
@@ -1964,6 +1963,44 @@ void eVariable::singleline()
     }
     else {
         m_value.strbuf.used = used;
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Make string lower case.
+
+  If variable contains a string, convert all characters to lower case.
+  Note: For now this works only for ASCII characters, plan is to expand the function
+  for common languages.
+
+****************************************************************************************************
+*/
+void eVariable::tolower()
+{
+    os_char *p;
+    os_uchar c;
+
+    if (type() != OS_STR) return;
+
+    if (m_vflags & EVAR_STRBUF_ALLOCATED) {
+        p = m_value.strptr.ptr;
+        if (p == OS_NULL) return;
+    }
+    else {
+        p = m_value.strbuf.buf;
+    }
+
+    while (*p != '\0')
+    {
+        c = (os_uchar)*p;
+        if (c >= 'A' && c <= 'Z') {
+            c = c - 'A' + 'a';
+            *p = c;
+        }
+        p++;
     }
 }
 

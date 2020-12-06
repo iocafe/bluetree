@@ -200,7 +200,10 @@ void eFileSystem::browse_list_namespace(
 {
     eVariable tmp, *item;
     eSet *appendix;
-    os_char buf[E_OIXSTR_BUF_SZ], nbuf[OSAL_NBUF_SZ];
+    eContainer *tmp_content;
+    eName *name;
+    eObject *obj;
+    os_char buf[E_OIXSTR_BUF_SZ], nbuf[OSAL_NBUF_SZ], c;
     osalDirListItem *list, *listitem;
     osalStatus s;
 
@@ -216,9 +219,12 @@ void eFileSystem::browse_list_namespace(
 
     oixstr(buf, sizeof(buf));
 
+    tmp_content = new eContainer(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    tmp_content->ns_create();
+
     for (listitem = list; listitem; listitem = listitem->next)
     {
-        item = new eVariable(content, EBROWSE_NSPACE);
+        item = new eVariable(tmp_content, EBROWSE_NSPACE);
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
         appendix->sets(EBROWSE_PATH, listitem->name);
         appendix->sets(EBROWSE_ITEM_TYPE, listitem->isdir ? "d" : "f");
@@ -233,11 +239,29 @@ void eFileSystem::browse_list_namespace(
             }
             osal_int_to_str(nbuf, sizeof(nbuf), listitem->sz);
             tmp += nbuf;
-            // tmp += " bytes";
             item->setpropertyv(EVARP_VALUE, &tmp);
             item->setpropertys(EVARP_UNIT, "bytes");
         }
+
+        /* Add name for sorting
+         */
+        tmp.sets(listitem->isdir ? "a" : "b");
+        c = listitem->name[0];
+        tmp.appends(listitem->name);
+        tmp.appends(osal_char_isupper(c) ? "a" : "b");
+        tmp.tolower();
+        item->addname(tmp.gets());
     }
+
+    /* Copy in sort order.
+     */
+    while ((name = tmp_content->ns_first())) {
+        obj = name->parent();
+        delete name;
+        obj->adopt(content);
+    }
+
+    delete tmp_content;
 
     /* Release directory list from memory.
      */
