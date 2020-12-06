@@ -259,11 +259,7 @@ public:
 
     /**
     ************************************************************************************************
-
-      @name Object flags
-
-      X..
-
+      Object flags
     ************************************************************************************************
     */
 
@@ -961,16 +957,22 @@ public:
     /**
     ************************************************************************************************
 
-      @name Child callback
+      @name Callback from child object
 
-      Any object may send a message to an another object by calling message() function.
-      When an object receives a message, it's onmessage function gets called.
+      A child object can alert parent object by calling this function of the parent. This alert
+      can be change of value, new child object or deleted child object, etc. Flag
+      XXXX selects if an object should call parent's oncallback function.
+
+      The callback function returns ESTATUS_SUCCESS, except if callback function is not
+      implemented for the parent object class (default implementation).
 
     ************************************************************************************************
     */
-    virtual eStatus oncallback()
+    virtual eStatus oncallback(
+        callback
+        eObject *obj)
     {
-        return ESTATUS_SUCCESS;
+        return ESTATUS_FAILED; /* Failed status indicated that callback is not implemented */
     }
 
 protected:

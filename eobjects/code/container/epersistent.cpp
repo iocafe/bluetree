@@ -21,6 +21,8 @@
 /* Persistent object property names.
  */
 const os_char
+    eperp_root_dir[] = "rootdir",
+    eperp_root_path[] = "rootpath",
     eperp_path[] = "path";
 
 /**
@@ -34,6 +36,10 @@ ePersistent::ePersistent(
     os_int flags)
     : eContainer(parent, oid, flags)
 {
+    m_latest_touch = 0;
+    m_oldest_touch = 0;
+
+    initproperties();
 }
 
 
@@ -79,7 +85,7 @@ eObject *ePersistent::clone(
 
   @brief Add the class to class list and class'es properties to it's property set.
 
-  The eVariable::setupclass function adds the class to class list and class'es properties to
+  The ePersistent::setupclass function adds the class to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
@@ -94,7 +100,30 @@ void ePersistent::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "ePersistent");
-    addpropertys(cls, EPERP_PATH, eperp_path, "path", EPRO_PERSISTENT);
+    addpropertys(cls, EPERP_ROOT_DIR, eperp_root_dir, "/coderoot/fsys", "root dir", EPRO_PERSISTENT);
+    addpropertys(cls, EPERP_ROOT_PATH, eperp_root_path, "//fsys", "root path", EPRO_PERSISTENT);
+    addpropertys(cls, EPERP_PATH, eperp_path, "path", "unknown.eo", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Mark the peristent object changed.
+
+  The ePersistent::touch function adds the class to class list and class'es properties to
+  it's property set. The class list enables creating new objects dynamically by class identifier,
+  which is used for serialization reader functions. The property set stores static list of
+  class'es properties and metadata for those.
+
+****************************************************************************************************
+*/
+void ePersistent::touch()
+{
+    osal_get_timer(&m_latest_touch);
+    if (m_oldest_touch == 0) {
+        m_oldest_touch = m_latest_touch;
+    }
 }

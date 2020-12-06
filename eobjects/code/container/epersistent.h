@@ -29,11 +29,15 @@
 
 /* Persistent object property numbers.
  */
-#define EPERP_PATH 10
+#define EPERP_ROOT_DIR 10
+#define EPERP_ROOT_PATH 20
+#define EPERP_PATH 30
 
 /* Persistent object property names.
  */
 extern const os_char
+    eperp_root_dir[],
+    eperp_root_path[],
     eperp_path[];
 
 
@@ -89,6 +93,28 @@ public:
     {
         return new ePersistent(parent, id, flags);
     }
+
+
+protected:
+    /**
+    ************************************************************************************************
+      Internal functions.
+    ************************************************************************************************
+    */
+
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
+    /* Timer value when the content was last changed.
+     */
+    os_timer m_latest_touch;
+
+    /* Timer value of the first unsaved change.
+     */
+    os_timer m_oldest_touch;
 };
 
 #endif
