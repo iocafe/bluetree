@@ -44,6 +44,11 @@ eTreeNode::eTreeNode(
     m_object_flags = 0;
 #endif
     os_memclear(&m_value_rect, sizeof(eRect));
+
+    /* Clear row count. Set -1 that we actually clear the parents.
+     */
+    m_row_count = -1;
+    clear_row_count();
 }
 
 
@@ -465,6 +470,7 @@ eStatus eTreeNode::draw(
             request_object_info();
         }
         m_isopen = isopen;
+        clear_row_count();
     }
 
     total_h = ImGui::GetItemRectSize().y;
@@ -608,6 +614,7 @@ void eTreeNode::draw_in_parameter_list(
             request_object_info();
         }
         m_isopen = isopen;
+        clear_row_count();
     }
 
     if (ImGui::TableSetColumnIndex(1)) {
@@ -928,8 +935,6 @@ void eTreeNode::request_object_info()
   user setting. Member variable m_received_change is used to block calls to this function
   caused by setting received data to this function.
 
-  @return  None.
-
 ****************************************************************************************************
 */
 void eTreeNode::set_modified_value()
@@ -943,3 +948,67 @@ void eTreeNode::set_modified_value()
     }
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Count number or text rows needed by this node and open subnodes.
+
+  The tree browser is displayed within eParameterList, we need to know how many rows are visible
+  to make Y scrolling work.
+
+  @return  Number of text rows needed to display this node and open subnodes.
+
+****************************************************************************************************
+*/
+os_int eTreeNode::count_rows()
+{
+    eComponent *child;
+    eTreeNode *node;
+
+    if (!m_isopen) {
+        return 1;
+    }
+    if (m_row_count) {
+        return m_row_count;
+    }
+
+    m_row_count = 1;
+    for (child = firstcomponent();
+         child;
+         child = child->nextcomponent())
+    {
+        if (child->classid() == EGUICLASSID_TREE_NODE) {
+            node = eTreeNode::cast(child);
+            m_row_count += node->count_rows();
+        }
+        else {
+            m_row_count ++;
+        }
+    }
+    return m_row_count;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Clear visible row count.
+
+  This function clears visible row count of this node and parents. This forces recount when
+  the count_rows() is called the next time.
+
+****************************************************************************************************
+*/
+void eTreeNode::clear_row_count()
+{
+    eObject *p;
+    eTreeNode *node;
+
+    m_row_count = 0;
+    p = parent();
+    if (p) if (p->classid() == EGUICLASSID_TREE_NODE) {
+        node = eTreeNode::cast(p);
+        node->clear_row_count();
+    }
+}

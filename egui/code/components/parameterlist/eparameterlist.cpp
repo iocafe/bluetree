@@ -30,7 +30,7 @@ eParameterList::eParameterList(
     m_component = OS_NULL;
     m_nro_components = 0;
     m_component_array_sz = 0;
-    m_is_treebrowser = OS_FALSE;
+    m_treebrowser_row_count = 0;
 }
 
 
@@ -194,11 +194,13 @@ eStatus eParameterList::draw(
 
     static int freeze_cols = 1;
     static int freeze_rows = 0; // 1;
-    ncols = m_is_treebrowser ? 4 : 3;
+    ncols = m_treebrowser_row_count ? 4 : 3;
 
     // When using ScrollX or ScrollY we need to specify a size for our table container!
     // Otherwise by default the table will fit all available space, like a BeginChild() call.
-    size = ImVec2(0, m_is_treebrowser ? 0 : TEXT_BASE_HEIGHT * m_nro_components);
+    size = ImVec2(0, m_treebrowser_row_count
+        ? TEXT_BASE_HEIGHT * m_treebrowser_row_count
+        : TEXT_BASE_HEIGHT * m_nro_components);
 
     if (ImGui::BeginTable("##table3", ncols, flags, size))
     {
@@ -233,10 +235,10 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
 
         ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_NoHide,
-            m_is_treebrowser ? 200 : 150);
+            m_treebrowser_row_count ? 200 : 150);
         ImGui::TableSetupColumn("value", ImGuiTableColumnFlags_NoHide, 150);
         ImGui::TableSetupColumn("unit", ImGuiTableColumnFlags_NoHide, 30);
-        if (m_is_treebrowser) {
+        if (m_treebrowser_row_count) {
             ImGui::TableSetupColumn("path", ImGuiTableColumnFlags_NoHide, 150);
         }
 
@@ -301,7 +303,7 @@ try_again:
         max_components = m_component_array_sz / sizeof(ePrmListComponent);
     }
 
-    m_is_treebrowser = OS_FALSE;
+    m_treebrowser_row_count = 0;
 
     for (c = firstcomponent(), nro_components = 0;
          c;
@@ -312,7 +314,7 @@ try_again:
         }
 
         if (c->classid() == EGUICLASSID_TREE_NODE) {
-            m_is_treebrowser = OS_TRUE;
+            m_treebrowser_row_count += eTreeNode::cast(c)->count_rows();
         }
     }
 

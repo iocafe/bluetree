@@ -129,6 +129,8 @@ public:
     virtual ePopup *right_click_popup(
         eDrawParams& prm);
 
+    os_int count_rows();
+
 protected:
 
     /**
@@ -155,6 +157,8 @@ protected:
         eVariable& ipath,
         eVariable& path);
 
+    void clear_row_count();
+
     /**
     ************************************************************************************************
       Member variables.
@@ -174,6 +178,8 @@ protected:
     os_boolean m_all;
 
     os_int m_node_type;
+
+    os_int m_row_count;
 
     /* Buffer for editing value.
      */
