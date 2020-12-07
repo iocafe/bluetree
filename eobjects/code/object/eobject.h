@@ -112,6 +112,14 @@ class eRowSetBinding;
 #define EBROWSE_IPATH 2
 #define EBROWSE_ITEM_TYPE 3
 
+/* Reason for parent callback, see eObject::docallback() and eObject::oncallback() functions.
+ */
+typedef enum {
+    ECALLBACK_VARIABLE_VALUE_CHANGED
+    // ECALLBACK_VARIABLE_VALUE_CLEARED
+}
+eCallbackEvent;
+
 /* Name space identifiers as static strings. eobj_this_ns is default
    for ns_first and ns_firstv functions()
  */
@@ -951,29 +959,30 @@ public:
     eRowSetBinding *firstrb(
         e_oid id);
 
-    /* virtual void onmessagefrombinding() {}
-    void messagetobinding(); */
 
     /**
     ************************************************************************************************
 
-      @name Callback from child object
+      @name Child callbacks
 
-      A child object can alert parent object by calling this function of the parent. This alert
-      can be change of value, new child object or deleted child object, etc. Flag
-      XXXX selects if an object should call parent's oncallback function.
-
-      The callback function returns ESTATUS_SUCCESS, except if callback function is not
-      implemented for the parent object class (default implementation).
+      Callbacks from child objects to parent object.
 
     ************************************************************************************************
     */
+
+    /* Process a callback from a child object.
+     */
     virtual eStatus oncallback(
-        callback
-        eObject *obj)
-    {
-        return ESTATUS_FAILED; /* Failed status indicated that callback is not implemented */
-    }
+        eCallbackEvent event,
+        eObject *obj,
+        eObject *appendix);
+
+    /* Call parent object's docallback function.
+     */
+    void docallback(
+        eCallbackEvent event,
+        eObject *appendix = OS_NULL);
+
 
 protected:
     void message_within_thread(

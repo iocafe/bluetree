@@ -471,6 +471,13 @@ void eVariable::clear()
 void eVariable::setl(
     const os_long x)
 {
+    os_boolean change;
+
+    /* Check if the new value is different from the old one. (We must still call clear() even if
+       value is different, we may have a string buffer which needs to be released).
+     */
+    change = (os_boolean)(type() != OS_LONG || m_value.valbuf.v.l != x);
+
     /* Release any allocated memory.
      */
     clear();
@@ -482,6 +489,12 @@ void eVariable::setl(
     /* Set data type.
      */
     settype(OS_LONG);
+
+    /* Inform parent object that a variable value was changed.
+     */
+    if (change) {
+        docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
+    }
 }
 
 
@@ -500,6 +513,13 @@ void eVariable::setl(
 void eVariable::setd(
     const os_double x)
 {
+    os_boolean change;
+
+    /* Check if the new value is different from the old one. (We must still call clear() even if
+       value is different, we may have a string buffer which needs to be released).
+     */
+    change = (os_boolean)(type() != OS_DOUBLE || m_value.valbuf.v.d != x);
+
     /* Release any allocated memory.
      */
     clear();
@@ -511,6 +531,12 @@ void eVariable::setd(
     /* Set data type.
      */
     settype(OS_DOUBLE);
+
+    /* Inform parent object that a variable value was changed.
+     */
+    if (change) {
+        docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
+    }
 }
 
 
@@ -532,12 +558,9 @@ void eVariable::sets(
     const os_char *x,
     os_memsz max_chars)
 {
-    os_memsz
-        n,
-        tmpstr_sz;
-
-    os_char
-        *tmpstr;
+    os_memsz n, tmpstr_sz;
+    os_char *tmpstr, *str;
+    os_int change;
 
     /* Minimum string is:
      */
@@ -551,6 +574,15 @@ void eVariable::sets(
         tmpstr = m_value.valbuf.tmpstr;
         tmpstr_sz = m_value.valbuf.tmpstr_sz;
         m_value.valbuf.tmpstr = OS_NULL;
+        change = OS_TRUE;
+    }
+
+    else {
+        /* Check if the new value is different from the old one. (We must still call clear() even if
+           value is different, we may have a string buffer which needs to be released).
+         */
+        str = (m_vflags & EVAR_STRBUF_ALLOCATED) ? m_value.strptr.ptr : m_value.strbuf.buf;
+        change = os_strcmp(x, str);
     }
 
     /* Release any allocated memory.
@@ -598,6 +630,12 @@ void eVariable::sets(
     {
         os_free(tmpstr, tmpstr_sz);
     }
+
+    /* Inform parent object that a variable value was changed.
+     */
+    if (change) {
+        docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
+    }
 }
 
 
@@ -620,27 +658,47 @@ void eVariable::setv(
     eVariable *x,
     os_boolean move_value)
 {
-    osalTypeId srctype;
+    osalTypeId srctype, oldtype;
     os_memsz n;
+    os_char *newstr, *oldstr;
+    os_boolean change;
 
-    /* Release any allocated memory.
-     */
-    clear();
+    change = OS_TRUE;
+    oldtype = type();
 
-    if (x == OS_NULL) return;
+    if (x) {
+        srctype = x->type();
+    }
+    else {
+        srctype = OS_UNDEFINED_TYPE;
+    }
 
-    srctype = x->type();
+    if (srctype == OS_STR && oldtype == OS_STR)
+    {
+        /* Check if the new string is same as old one. .
+         */
+        oldstr = (m_vflags & EVAR_STRBUF_ALLOCATED) ? m_value.strptr.ptr : m_value.strbuf.buf;
+        newstr = (x->m_vflags & EVAR_STRBUF_ALLOCATED) ? x->m_value.strptr.ptr : x->m_value.strbuf.buf;
+        if (!os_strcmp(newstr, oldstr)) return;
+    }
+
     switch (srctype)
     {
-        /* If already empty.
+        /* If empty, clear() did the job.
          */
         case OS_UNDEFINED_TYPE:
+            if (oldtype != OS_UNDEFINED_TYPE) {
+                clear();
+                docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
+            }
             return;
 
         /* If this is string, check if long string has been allocated in separate
            buffer.
          */
         case OS_STR:
+            clear();
+
             /* If separate string buffer has been allocated.
              */
             if (x->m_vflags & EVAR_STRBUF_ALLOCATED)
@@ -679,6 +737,8 @@ void eVariable::setv(
         /* If variable contains object.
          */
         case OS_OBJECT:
+            clear();
+
             if (move_value)
             {
                 m_value.valbuf.v.o = x->m_value.valbuf.v.o;
@@ -703,6 +763,21 @@ void eVariable::setv(
         /* Other data types, just copy the value.
          */
         default:
+            if (oldtype == srctype) switch (srctype)
+            {
+                case OS_LONG:
+                    change = (m_value.valbuf.v.l != x->m_value.valbuf.v.l);
+                    break;
+
+                case OS_DOUBLE:
+                    change = (m_value.valbuf.v.d != x->m_value.valbuf.v.d);
+                    break;
+
+                default:
+                    break;
+            }
+
+            clear();
             m_value.valbuf.v = x->m_value.valbuf.v;
             break;
     }
@@ -710,6 +785,12 @@ void eVariable::setv(
     /* Set data type.
      */
     settype(srctype);
+
+    /* Inform parent object that a variable value was changed.
+     */
+    if (change) {
+        docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
+    }
 }
 
 
@@ -756,6 +837,10 @@ void eVariable::seto(
     /* Set data type.
      */
     settype(OS_OBJECT);
+
+    /* Inform parent object that a variable value was changed.
+     */
+    docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
 }
 
 

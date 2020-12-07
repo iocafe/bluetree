@@ -122,7 +122,7 @@ void ePersistent::setupclass()
 */
 void ePersistent::touch()
 {
-    osal_get_timer(&m_latest_touch);
+    os_get_timer(&m_latest_touch);
     if (m_oldest_touch == 0) {
         m_oldest_touch = m_latest_touch;
     }

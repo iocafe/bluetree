@@ -62,6 +62,11 @@ class ePointer;
 #define EOBJ_CUST_FLAG7         0x00000400
 #define EOBJ_CUST_FLAG8         0x00000800
 
+/** Mark that this object should call eObject::docallback when changed, etc.
+ */
+#define EOBJ_PERSISTENT_CALLBACK 0x00001000
+#define EOBJ_TEMPORARY_CALLBACK 0x00008000
+
 /** Special flag to allocate eVariable, eValueEx, eThreadHandle without eRoot.
  */
 #define EOBJ_EROOT_OPTIONAL     0x01000000
@@ -84,11 +89,14 @@ class ePointer;
 /** Cloned aflag argument mask for flags for adopt(), clone() and clonegeeric() functions ..
  */
 #define EOBJ_CLONE_ARG_AFLAGS_MASK (EOBJ_CUST_FLAGS_MASK | EOBJ_IS_ATTACHMENT | \
-    EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE)
+    EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE | EOBJ_PERSISTENT_CALLBACK | \
+    EOBJ_TEMPORARY_CALLBACK)
 
 /** Serialization mask, which bits to save.
  */
-#define EOBJ_SERIALIZATION_MASK 0x0000FFFF
+#define EOBJ_SERIALIZATION_MASK (EOBJ_CUST_FLAGS_MASK | EOBJ_IS_ATTACHMENT | \
+    EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE | EOBJ_PERSISTENT_CALLBACK | \
+    EOBJ_HAS_NAMESPACE)
 
 /** Clone mask, which bits to clone.
  */
