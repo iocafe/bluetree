@@ -101,7 +101,6 @@ void eFileSystem::setupclass()
 void eFileSystem::initialize(
     eContainer *params)
 {
-//    ns_create();
 }
 
 
@@ -321,13 +320,60 @@ void eFileSystem::object_info(
     }
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Save envelope content as a file (binary serialization).
+
+  @param envelope Message envelope received by the eFileSystem object. This is eContainer
+         which holds eVariable for path and eObject for content.
+
+****************************************************************************************************
+*/
 void eFileSystem::save_file(
     eEnvelope *envelope)
 {
-    eObject *c;
+    eObject *c, *file_content;
+    eVariable file_path, *relative_path;
+    const os_char *p;
+    eStatus s = ESTATUS_FAILED;
 
+    /* Get path to eFileSystem root directory. If path doesn't end with '/', append one.
+     */
+    propertyv(EFSYSP_PATH, &file_path);
+    p = os_strechr(file_path.gets(), '/');
+    if (p) if (p[1] != '\0') {
+        file_path.appends("/");
+    }
+
+    /* Get file content and relative path from message content. Save to file.
+     */
     c = envelope->content();
-    if (c) c->save("uke.uke");
+    if (c) {
+        relative_path = eVariable::cast(c->first(EOID_PATH));
+
+        if (relative_path) {
+            file_path.appendv(relative_path);
+            file_content = c->first(EOID_CONTENT);
+            if (file_content) {
+                s = file_content->save(file_path.gets());
+            }
+        }
+    }
+
+    /* Report error or success
+     */
+    if (s) {
+        eVariable message;
+        message.sets("Saving \'");
+        message.appendv(&file_path);
+        message.appends("\' failed.");
+        reply(ECMD_ERROR, envelope, message.gets());
+    }
+    else {
+        reply(ECMD_ERROR, envelope);
+    }
 }
 
 

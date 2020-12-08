@@ -1,7 +1,7 @@
 /**
 
   @file    eobject_save_load.cpp
-  @brief   Object base class, saving object as a file.
+  @brief   Object base class, saving object as a file and loading object from file.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -23,7 +23,7 @@
 
    The eObject::save function serializes this object into a file.
 
-   @param   path Relative path to target file within file system.
+   @param   path OS path to target file.
 
    @return  If the file was successfully writte, the function returns ESTATUS_SUCCESS.
             Other return values indicate an error.
@@ -33,21 +33,31 @@
 eStatus eObject::save(
     const os_char *path)
 {
+    eVariable tmp;
     eOsStream *stream;
+    eStatus s;
 
+    /* Open file as stream.
+     */
     stream = new eOsStream(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    tmp.sets("file:");
+    tmp.appends(path);
+    s = stream->open(tmp.gets(), OSAL_STREAM_WRITE);
+    if (s) goto failed;
 
-    stream->open("file:/coderoot/fsys/ukke.txt", OSAL_STREAM_WRITE);
+    /* Write file content.
+     */
+    s = write(stream, OSAL_STREAM_DEFAULT);
+    if (s) goto failed;
 
-    // classid
-    // oid
-
-    writer(stream, 0);
-
+    /* Flush and close the file.
+     */
     stream->flush();
     stream->close();
+
+failed:
     delete stream;
-    return ESTATUS_SUCCESS;
+    return s;
 }
 
 /*

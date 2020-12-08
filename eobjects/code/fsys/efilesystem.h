@@ -125,7 +125,6 @@ protected:
     void save_file(
         eEnvelope *envelope);
 
-
     /**
     ************************************************************************************************
       Member variables

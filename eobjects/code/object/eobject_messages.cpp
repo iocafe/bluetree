@@ -584,19 +584,56 @@ getout:
   was not received or processed.
 
   @param  envelope Pointer to received envelope.
+  @param  msg Often description of error, etc with ECMD_NO_TARGET and ECMD_ERROR.
 
 ****************************************************************************************************
 */
 void eObject::notarget(
-    eEnvelope *envelope)
+    eEnvelope *envelope,
+    const os_char *msg)
 {
-    os_int command = envelope->command();
+    reply(ECMD_NO_TARGET, envelope, msg);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Reply to received message with success, error, or no target message.
+
+  The notarget() function sends ECMD_NO_TARGET message as a reply to a received message.
+  The notarget messages are used by object which sent the message to detect if the message
+  was not received or processed.
+
+  @param  command Reply command, often ECMD_NO_TARGET, ECMD_OK or ECMD_ERROR.
+  @param  envelope Pointer to received envelope.
+  @param  msg Often description of error, etc with ECMD_NO_TARGET and ECMD_ERROR.
+
+****************************************************************************************************
+*/
+void eObject::reply(
+    os_int command,
+    eEnvelope *envelope,
+    const os_char *msg)
+{
+    eVariable *content;
+    os_int env_command = envelope->command();
 
     if ((envelope->mflags() & EMSG_NO_REPLIES) == 0 &&
-        command != ECMD_NO_TARGET)
+        env_command != ECMD_NO_TARGET &&
+        env_command != ECMD_OK &&
+        env_command != ECMD_ERROR)
     {
+        if (msg) {
+            content = new eVariable(this, EOID_TEMPORARY);
+            content->sets(msg);
+        }
+        else {
+            content = OS_NULL;
+        }
+
         message(ECMD_NO_TARGET, envelope->source(), envelope->target(),
-            OS_NULL, EMSG_DEFAULT, envelope->context());
+            content, EMSG_DEL_CONTENT, envelope->context());
     }
 }
 

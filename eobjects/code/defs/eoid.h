@@ -83,6 +83,10 @@
  */
 #define EOID_APPENDIX -14
 
+/** Path, generic path.
+ */
+#define EOID_PATH -15
+
 
 /** Table/matrix related identifiers.
  */

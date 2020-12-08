@@ -83,7 +83,6 @@ void eProcess::setupclass()
 void eProcess::initialize(eContainer *params)
 {
     osal_console_write("initializing process\n");
-
 }
 
 void eProcess::run()
@@ -122,7 +121,6 @@ eContainer *eProcess::sync_connectors()
   @brief Create eProcess object and start  thread to run it.
 
   The eprocess_create() function...
-
 
   @return  None.
 

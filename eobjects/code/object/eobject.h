@@ -680,7 +680,15 @@ public:
     /* Reply with ECMD_NO_TARGET to indicate that target object was not found.
      */
     void notarget(
-        eEnvelope *envelope);
+        eEnvelope *envelope,
+        const os_char *msg = OS_NULL);
+
+    /* Reply to message, often with ECMD_NO_TARGET, ECMD_OK or ECMD_ERROR command.
+     */
+    void reply(
+        os_int command,
+        eEnvelope *envelope,
+        const os_char *msg = OS_NULL);
 
     /* Process an incoming message.
      */

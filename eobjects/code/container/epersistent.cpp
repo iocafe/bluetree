@@ -300,17 +300,22 @@ void ePersistent::check_save_timer()
 */
 void ePersistent::save_as_message()
 {
-    eVariable target, tmp;
-    os_char *p;
+    eVariable target, *relative_path;
+    eContainer *content;
+    const os_char *p;
+
+    content = new eContainer(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    relative_path = new eVariable(content, EOID_PATH);
+    clone(content, EOID_CONTENT);
 
     propertyv(EPERP_ROOT_PATH, &target);
-    propertyv(EPERP_FILE, &tmp);
+    propertyv(EPERP_FILE, relative_path);
     p = os_strechr(target.gets(), '/');
-    if (p) if (*p != '\0') {
+    if (p) if (p[1] != '\0') {
         target.appends("/");
     }
-    target.appendv(&tmp);
+    target.appendv(relative_path);
 
     p = target.gets();
-    message(ECMD_SAVE_FILE, p, OS_NULL, this, EMSG_KEEP_CONTENT);
+    message(ECMD_SAVE_FILE, p, OS_NULL, content, EMSG_DEL_CONTENT);
 }
