@@ -116,7 +116,7 @@ public:
     /* Open the queue.
      */
     virtual eStatus open(
-        os_char *parameters,
+        const os_char *parameters,
         os_int flags = 0);
 
     /* Close the queue.

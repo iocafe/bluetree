@@ -121,7 +121,7 @@ void eQueue::setupclass()
 ****************************************************************************************************
 */
 eStatus eQueue::open(
-    os_char *parameters,
+    const os_char *parameters,
     os_int flags)
 {
     os_memsz max_sz;

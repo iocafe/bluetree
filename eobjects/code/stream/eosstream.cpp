@@ -123,7 +123,7 @@ void eOsStream::setupclass()
 ****************************************************************************************************
 */
 eStatus eOsStream::open(
-    os_char *parameters,
+    const os_char *parameters,
     os_int flags)
 {
     osalStatus s;

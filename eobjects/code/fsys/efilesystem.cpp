@@ -324,7 +324,10 @@ void eFileSystem::object_info(
 void eFileSystem::save_file(
     eEnvelope *envelope)
 {
+    eObject *c;
 
+    c = envelope->content();
+    if (c) c->save("uke.uke");
 }
 
 

@@ -164,7 +164,7 @@ public:
     /* Open the stream.
      */
     virtual eStatus open(
-        os_char *parameters,
+        const os_char *parameters,
         os_int flags=0)
     {
         return ESTATUS_SUCCESS;

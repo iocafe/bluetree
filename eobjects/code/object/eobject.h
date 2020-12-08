@@ -492,6 +492,11 @@ public:
         return ESTATUS_FAILED;
     }
 
+    /* Save this object to a file
+     */
+    eStatus save(
+        const os_char *path);
+
 
 #if E_SUPPROT_JSON
     /**

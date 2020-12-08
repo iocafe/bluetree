@@ -284,9 +284,12 @@ failed:
 ****************************************************************************************************
 */
 eStatus eBuffer::open(
-    os_char *parameters,
+    const os_char *parameters,
     os_int flags)
 {
+    OSAL_UNUSED(parameters);
+    OSAL_UNUSED(flags);
+
     m_pos = 0;
     return ESTATUS_SUCCESS;
 }

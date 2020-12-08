@@ -279,7 +279,7 @@ void ePersistent::check_save_timer()
         if (os_has_elapsed_since(&m_latest_touch, &now_t, m_save_time) ||
             os_has_elapsed_since(&m_oldest_touch, &now_t, m_save_latest_time))
         {
-            save();
+            save_as_message();
             m_latest_touch = 0;
             m_oldest_touch = 0;
             m_timer_set = OS_FALSE;
@@ -298,7 +298,7 @@ void ePersistent::check_save_timer()
 
 ****************************************************************************************************
 */
-void ePersistent::save()
+void ePersistent::save_as_message()
 {
     eVariable target, tmp;
     os_char *p;

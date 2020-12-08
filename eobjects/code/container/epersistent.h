@@ -131,7 +131,7 @@ protected:
 
     /* Save persistent object by sending it as message to file system.
      */
-    void save();
+    void save_as_message();
 
     /**
     ************************************************************************************************
