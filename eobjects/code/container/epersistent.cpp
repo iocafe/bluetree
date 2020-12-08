@@ -111,12 +111,38 @@ void ePersistent::setupclass()
 /**
 ****************************************************************************************************
 
+  @brief Process a callback from a child object.
+
+  The ePersistent::touch function
+
+****************************************************************************************************
+*/
+eStatus ePersistent::oncallback(
+    eCallbackEvent event,
+    eObject *obj,
+    eObject *appendix)
+{
+    switch (event)
+    {
+        case ECALLBACK_VARIABLE_VALUE_CHANGED:
+        case ECALLBACK_TABLE_CONTENT_CHANGED:
+            touch();
+            break;
+
+        default:
+            break;
+    }
+
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Mark the peristent object changed.
 
-  The ePersistent::touch function adds the class to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier,
-  which is used for serialization reader functions. The property set stores static list of
-  class'es properties and metadata for those.
+  The ePersistent::touch function
 
 ****************************************************************************************************
 */

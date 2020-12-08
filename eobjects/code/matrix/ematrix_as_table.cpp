@@ -137,6 +137,7 @@ void eMatrix::insert(
         }
         while (row);
     }
+    docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
 }
 
 
@@ -315,7 +316,10 @@ eStatus eMatrix::update(
     os_int tflags,
     eDBM *dbm)
 {
-    return select_update_remove(EMTX_UPDATE, where_clause, row, OS_NULL, tflags, dbm);
+    eStatus s;
+    s = select_update_remove(EMTX_UPDATE, where_clause, row, OS_NULL, tflags, dbm);
+    docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+    return s;
 }
 
 
@@ -337,6 +341,7 @@ void eMatrix::remove(
     eDBM *dbm)
 {
     select_update_remove(EMTX_REMOVE, where_clause, OS_NULL, OS_NULL, tflags, dbm);
+    docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
 }
 
 

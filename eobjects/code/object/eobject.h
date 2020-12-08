@@ -115,8 +115,8 @@ class eRowSetBinding;
 /* Reason for parent callback, see eObject::docallback() and eObject::oncallback() functions.
  */
 typedef enum {
-    ECALLBACK_VARIABLE_VALUE_CHANGED
-    // ECALLBACK_VARIABLE_VALUE_CLEARED
+    ECALLBACK_VARIABLE_VALUE_CHANGED,
+    ECALLBACK_TABLE_CONTENT_CHANGED
 }
 eCallbackEvent;
 

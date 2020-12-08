@@ -344,7 +344,7 @@ eVariable *eObject::addpropertys(
     eVariable *p;
     p = addproperty(cid, propertynr, propertyname, text, pflags);
     p->setpropertyl(EVARP_TYPE, OS_STR);
-    return OS_NULL;
+    return p;
 }
 
 
@@ -375,7 +375,7 @@ eVariable *eObject::addpropertys(
         p->sets(x);
         p->setpropertys(EVARP_DEFAULT, x);
     }
-    return OS_NULL;
+    return p;
 }
 
 

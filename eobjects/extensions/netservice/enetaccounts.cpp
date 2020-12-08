@@ -96,4 +96,5 @@ void eNetService::create_user_accounts_table()
     /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
      */
     m_accounts_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
+    m_accounts_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
 }

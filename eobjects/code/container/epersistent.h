@@ -94,6 +94,12 @@ public:
         return new ePersistent(parent, id, flags);
     }
 
+    /* Process a callback from a child object.
+     */
+    virtual eStatus oncallback(
+        eCallbackEvent event,
+        eObject *obj,
+        eObject *appendix);
 
 protected:
     /**
