@@ -1,12 +1,10 @@
 /**
 
-  @file    econtainer.h
-  @brief   Simple object container.
+  @file    epersistent.h
+  @brief   Persistent container (saved to disc).
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
-
-  The container object is like a box holding a set of child objects.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -108,8 +106,9 @@ protected:
     ************************************************************************************************
     */
 
+    /* Flags the peristent object changed (needs to be saved).
+     */
     void touch();
-
 
     /**
     ************************************************************************************************

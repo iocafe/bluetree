@@ -1,12 +1,18 @@
 /**
 
-  @file    econtainer.cpp
-  @brief   Simple object container.
+  @file    epersistent.cpp
+  @brief   Persistent container (saved to disc).
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
 
-  The container object is like a box holding a set of child objects.
+  The persistent object is container, which typically holds named eVariable and eMatrix items.
+  - When a persisten object is initialised, the content is loaded from local file.
+  - When a variable value, or marix content is changed, the persistent object's oncallback
+    function gets called.
+  - The oncallback function sets up timer to save the changes to disc drive.
+  - When some time has elapsed since last change, the persistent object send's a clone
+    of itself to eFileSystem object for saving (EPERP_ROOT_PATH property, typically "//fsys").
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -122,6 +128,9 @@ eStatus ePersistent::oncallback(
     eObject *obj,
     eObject *appendix)
 {
+    OSAL_UNUSED(obj);
+    OSAL_UNUSED(appendix);
+
     switch (event)
     {
         case ECALLBACK_VARIABLE_VALUE_CHANGED:
@@ -140,7 +149,7 @@ eStatus ePersistent::oncallback(
 /**
 ****************************************************************************************************
 
-  @brief Mark the peristent object changed.
+  @brief Flags the peristent object changed (needs to be saved).
 
   The ePersistent::touch function
 
