@@ -120,6 +120,10 @@ protected:
     ************************************************************************************************
     */
 
+    /* Save object received as message into a file.
+     */
+    void save_file(
+        eEnvelope *envelope);
 
 
     /**

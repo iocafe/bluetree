@@ -29,15 +29,18 @@
  */
 #define EPERP_ROOT_DIR 10
 #define EPERP_ROOT_PATH 20
-#define EPERP_PATH 30
+#define EPERP_FILE 30
+#define EPERP_SAVE_TIME_MS 40
+#define EPERP_SAVE_LATEST_TIME_MS 50
 
 /* Persistent object property names.
  */
 extern const os_char
     eperp_root_dir[],
     eperp_root_path[],
-    eperp_path[];
-
+    eperp_path[],
+    eperp_save_time_ms[],
+    eperp_save_latest_time_ms[];
 
 /**
 ****************************************************************************************************
@@ -92,6 +95,18 @@ public:
         return new ePersistent(parent, id, flags);
     }
 
+    /* Function to process incoming messages.
+     */
+    virtual void onmessage(
+        eEnvelope *envelope);
+
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
     /* Process a callback from a child object.
      */
     virtual eStatus oncallback(
@@ -110,6 +125,14 @@ protected:
      */
     void touch();
 
+    /* Check if enugh time has passed since last change to save the peristent data.
+     */
+    void check_save_timer();
+
+    /* Save persistent object by sending it as message to file system.
+     */
+    void save();
+
     /**
     ************************************************************************************************
       Member variables
@@ -122,6 +145,18 @@ protected:
     /* Timer value of the first unsaved change.
      */
     os_timer m_oldest_touch;
+
+    /* Save changes at this many milliseconds after last change.
+     */
+    os_long m_save_time;
+
+    /* Save changes at latest after this many milliseconds.
+     */
+    os_long m_save_latest_time;
+
+    /* Flag indicating that a timer has started.
+     */
+    os_boolean m_timer_set;
 };
 
 #endif

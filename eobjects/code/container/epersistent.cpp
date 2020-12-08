@@ -29,7 +29,9 @@
 const os_char
     eperp_root_dir[] = "rootdir",
     eperp_root_path[] = "rootpath",
-    eperp_path[] = "path";
+    eperp_path[] = "path",
+    eperp_save_time_ms[] = "time_ms",
+    eperp_save_latest_time_ms[] = "latest_ms";
 
 /**
 ****************************************************************************************************
@@ -44,6 +46,9 @@ ePersistent::ePersistent(
 {
     m_latest_touch = 0;
     m_oldest_touch = 0;
+    m_save_time = 201;
+    m_save_latest_time = 2001;
+    m_timer_set = OS_FALSE;
 
     initproperties();
 }
@@ -106,11 +111,97 @@ void ePersistent::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "ePersistent");
-    addpropertys(cls, EPERP_ROOT_DIR, eperp_root_dir, "/coderoot/fsys", "root dir", EPRO_PERSISTENT);
-    addpropertys(cls, EPERP_ROOT_PATH, eperp_root_path, "//fsys", "root path", EPRO_PERSISTENT);
-    addpropertys(cls, EPERP_PATH, eperp_path, "path", "unknown.eo", EPRO_PERSISTENT);
+    addpropertys(cls, EPERP_ROOT_DIR, eperp_root_dir, "/coderoot/fsys", "root dir", EPRO_DEFAULT);
+    addpropertys(cls, EPERP_ROOT_PATH, eperp_root_path, "//fsys", "root path", EPRO_DEFAULT);
+    addpropertys(cls, EPERP_FILE, eperp_path, "unknown.eo", "file name", EPRO_PERSISTENT);
+    addpropertyl(cls, EPERP_SAVE_TIME_MS, eperp_save_time_ms, 200, "save time", EPRO_DEFAULT);
+    addpropertyl(cls, EPERP_SAVE_LATEST_TIME_MS, eperp_save_latest_time_ms, 2000, "save latest", EPRO_DEFAULT);
     propertysetdone(cls);
     os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Function to process incoming messages.
+
+  The eTreeNode::onmessage function handles messages received by object. If this function
+  doesn't process message, it calls parent class'es onmessage function.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void ePersistent::onmessage(
+    eEnvelope *envelope)
+{
+    /* If at final destination for the message.
+     */
+    if (*envelope->target()=='\0' && envelope->command() == ECMD_TIMER)
+    {
+        check_save_timer();
+        return;
+    }
+
+    /* Default thread message processing.
+     */
+    eContainer::onmessage(envelope);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Called to inform the class about property value change (override).
+
+  The onpropertychange() function is called when class'es property changes, unless the
+  property is flagged with EPRO_NOONPRCH.
+  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
+  in class members and and return it when simpleproperty() is called.
+
+  Notice for change logging: Previous value is still valid when this function is called.
+  You can get the old value by calling property() function inside onpropertychange()
+  function.
+
+  @param   propertynr Property number of changed property.
+  @param   x Variable containing the new value.
+  @param   flags
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
+           indicate that there was no property with given property number.
+
+****************************************************************************************************
+*/
+eStatus ePersistent::onpropertychange(
+    os_int propertynr,
+    eVariable *x,
+    os_int flags)
+{
+    switch (propertynr)
+    {
+        case EPERP_ROOT_DIR:
+        case EPERP_ROOT_PATH:
+        case EPERP_FILE:
+            break;
+
+        case EPERP_SAVE_TIME_MS:
+            m_save_time = x->geti();
+            break;
+
+        case EPERP_SAVE_LATEST_TIME_MS:
+            m_save_latest_time = x->geti();
+            break;
+
+        default:
+            goto call_parent;
+    }
+
+    return ESTATUS_SUCCESS;
+
+call_parent:
+    return eContainer::onpropertychange(propertynr, x, flags);
 }
 
 
@@ -161,4 +252,65 @@ void ePersistent::touch()
     if (m_oldest_touch == 0) {
         m_oldest_touch = m_latest_touch;
     }
+
+    if (!m_timer_set) {
+        m_timer_set = OS_TRUE;
+        timer(m_save_time);
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Check if enugh time has passed since last change to save the peristent data.
+
+  The ePersistent::check_save_timer function...
+
+****************************************************************************************************
+*/
+void ePersistent::check_save_timer()
+{
+    os_timer now_t;
+
+    if (m_timer_set)
+    {
+        os_get_timer(&now_t);
+        if (os_has_elapsed_since(&m_latest_touch, &now_t, m_save_time) ||
+            os_has_elapsed_since(&m_oldest_touch, &now_t, m_save_latest_time))
+        {
+            save();
+            m_latest_touch = 0;
+            m_oldest_touch = 0;
+            m_timer_set = OS_FALSE;
+            timer(0);
+        }
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Save persistent object by sending it as message to file system.
+
+  The ePersistent::save function...
+
+****************************************************************************************************
+*/
+void ePersistent::save()
+{
+    eVariable target, tmp;
+    os_char *p;
+
+    propertyv(EPERP_ROOT_PATH, &target);
+    propertyv(EPERP_FILE, &tmp);
+    p = os_strechr(target.gets(), '/');
+    if (p) if (*p != '\0') {
+        target.appends("/");
+    }
+    target.appendv(&tmp);
+
+    p = target.gets();
+    message(ECMD_SAVE_FILE, p, OS_NULL, this, EMSG_KEEP_CONTENT);
 }

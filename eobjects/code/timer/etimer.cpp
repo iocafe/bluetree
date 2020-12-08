@@ -54,13 +54,7 @@ void eObject::timer(
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  Name timer object as "_timer" and enable name space for it.
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eTimer::eTimer(
@@ -76,13 +70,7 @@ eTimer::eTimer(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eTimer::~eTimer()
@@ -164,8 +152,12 @@ void eTimer::onmessage(
 
   @brief Enable/disable timer.
 
-  The eTimer::settimer() function...
+  The eTimer::settimer() function creates eVariable as mark to identify timer for target object.
+  The eVariable by timer period, and named with target object's oid. Value is period in ms, just
+  for UI purposes.
 
+  @param   period_ms Timer "hit" period in milliseconds.
+  @param   name Name for timer, like "@403_1" (target object's oix + ucount as string).
   @return  None.
 
 ****************************************************************************************************
@@ -223,7 +215,7 @@ void eTimer::settimer(
     if (period_ms)
     {
         t = new eVariable(this, step);
-        t->setl(period_ms);
+        t->setl(step * base_step_ms);
         t->addname(name, ENAME_PARENT_NS);
     }
 }

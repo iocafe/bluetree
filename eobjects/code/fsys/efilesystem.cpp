@@ -93,7 +93,7 @@ void eFileSystem::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eFileSystem");
-    addpropertys(cls, EFSYSP_PATH, efsysp_path, "path", EPRO_PERSISTENT);
+    addpropertys(cls, EFSYSP_PATH, efsysp_path, "/coderoot/fsys", "path", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -136,6 +136,10 @@ void eFileSystem::onmessage(
         {
           case ECMD_INFO_REQUEST:
             send_browse_info(envelope);
+            return;
+
+          case ECMD_SAVE_FILE:
+            save_file(envelope);
             return;
         }
     }
@@ -294,15 +298,12 @@ void eFileSystem::object_info(
     const os_char *target)
 {
     const os_char *fname_only;
-    // eVariable value;
 
     if (*target == '\0') {
         eThread::object_info(item, name, appendix, target);
     }
     else
     {
-        os_int browse_flags;
-
         /* Get file or directory name without path.
          */
         fname_only = os_strechr((os_char*)target, '/');
@@ -315,16 +316,15 @@ void eFileSystem::object_info(
 
         item->setpropertys(EVARP_TEXT, fname_only);
 
-        browse_flags = 0;
-        if (1) { // IS FOLDER flags() & EOBJ_HAS_NAMESPACE) {
-            browse_flags |= EBROWSE_NSPACE;
-        }
-        /* if (is file or folder) {
-            browse_flags |= EBROWSE_PROPERTIES;
-        } */
-
+        os_int browse_flags = EBROWSE_NSPACE;
         appendix->setl(EBROWSE_BROWSE_FLAGS, browse_flags);
     }
+}
+
+void eFileSystem::save_file(
+    eEnvelope *envelope)
+{
+
 }
 
 
@@ -354,3 +354,4 @@ void efsys_expose_directory(
     fsys->setpropertys(EFSYSP_PATH, os_path);
     fsys->start(fsys_thread_handle);
 }
+

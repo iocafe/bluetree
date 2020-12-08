@@ -85,6 +85,10 @@
 #define ECMD_INFO_REQUEST -60
 #define ECMD_INFO_REPLY -61
 
+/* File system related.
+ */
+#define ECMD_SAVE_FILE -65
+
 /* Thread control, exit thread.
  */
 #define ECMD_EXIT_THREAD -999
