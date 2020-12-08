@@ -29,7 +29,7 @@
 const os_char
     eperp_root_dir[] = "rootdir",
     eperp_root_path[] = "rootpath",
-    eperp_path[] = "path",
+    eperp_file[] = "path",
     eperp_save_time_ms[] = "time_ms",
     eperp_save_latest_time_ms[] = "latest_ms";
 
@@ -113,7 +113,7 @@ void ePersistent::setupclass()
     eclasslist_add(cls, (eNewObjFunc)newobj, "ePersistent");
     addpropertys(cls, EPERP_ROOT_DIR, eperp_root_dir, "/coderoot/fsys", "root dir", EPRO_DEFAULT);
     addpropertys(cls, EPERP_ROOT_PATH, eperp_root_path, "//fsys", "root path", EPRO_DEFAULT);
-    addpropertys(cls, EPERP_FILE, eperp_path, "unknown.eo", "file name", EPRO_PERSISTENT);
+    addpropertys(cls, EPERP_FILE, eperp_file, "unknown.eo", "file name", EPRO_PERSISTENT);
     addpropertyl(cls, EPERP_SAVE_TIME_MS, eperp_save_time_ms, 200, "save time", EPRO_DEFAULT);
     addpropertyl(cls, EPERP_SAVE_LATEST_TIME_MS, eperp_save_latest_time_ms, 2000, "save latest", EPRO_DEFAULT);
     propertysetdone(cls);
@@ -319,3 +319,37 @@ void ePersistent::save_as_message()
     p = target.gets();
     message(ECMD_SAVE_FILE, p, OS_NULL, content, EMSG_DEL_CONTENT);
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Load persistent object from local file system.
+
+  The ePersistent::save function...
+
+****************************************************************************************************
+*/
+void ePersistent::load_file(
+    const os_char *file_name)
+{
+    eVariable path, tmp;
+    os_char *p;
+    eObject *obj;
+
+    if (file_name) {
+        setpropertys(EPERP_FILE, file_name);
+    }
+
+    propertyv(EPERP_ROOT_DIR, &path);
+    p = os_strechr(path.gets(), '/');
+    if (p) if (p[1] != '\0') {
+        path.appends("/");
+    }
+    propertyv(EPERP_FILE, &tmp);
+    path.appendv(&tmp);
+
+    obj = load(path.gets());
+
+}
+

@@ -38,7 +38,7 @@
 extern const os_char
     eperp_root_dir[],
     eperp_root_path[],
-    eperp_path[],
+    eperp_file[],
     eperp_save_time_ms[],
     eperp_save_latest_time_ms[];
 
@@ -113,6 +113,12 @@ public:
         eCallbackEvent event,
         eObject *obj,
         eObject *appendix);
+
+    /* Load persistent object from local file system.
+     */
+    void load_file(
+        const os_char *file_name);
+
 
 protected:
     /**

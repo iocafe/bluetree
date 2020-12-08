@@ -24,8 +24,7 @@
    The eObject::save function serializes this object into a file.
 
    @param   path OS path to target file.
-
-   @return  If the file was successfully writte, the function returns ESTATUS_SUCCESS.
+   @return  If the file was successfully written, the function returns ESTATUS_SUCCESS.
             Other return values indicate an error.
 
 ****************************************************************************************************
@@ -58,6 +57,49 @@ eStatus eObject::save(
 failed:
     delete stream;
     return s;
+}
+
+
+/**
+****************************************************************************************************
+
+   @brief Load object from a file
+
+   The eObject::load function reads a serialized object from a file.
+
+   @param   path OS path to source file.
+   @return  Pointer to loaded object, or OS_NULL if reading file has failed.
+
+****************************************************************************************************
+*/
+eObject *eObject::load(
+    const os_char *path)
+{
+    eVariable tmp;
+    eOsStream *stream;
+    eObject *obj = OS_NULL;
+    eStatus s;
+
+    /* Open file as stream.
+     */
+    stream = new eOsStream(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    tmp.sets("file:");
+    tmp.appends(path);
+    s = stream->open(tmp.gets(), OSAL_STREAM_READ);
+    if (s) goto failed;
+
+    /* Write file content.
+     */
+    obj = read(stream, OSAL_STREAM_DEFAULT);
+    if (obj) goto failed;
+
+    /* close the file.
+     */
+    stream->close();
+
+failed:
+    delete stream;
+    return obj;
 }
 
 /*

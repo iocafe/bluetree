@@ -497,6 +497,11 @@ public:
     eStatus save(
         const os_char *path);
 
+    /* Load object from a file
+     */
+    eObject *load(
+        const os_char *path);
+
 
 #if E_SUPPROT_JSON
     /**

@@ -52,7 +52,7 @@ eStatus emain(
 
     tableview_test_start();
 
-    efsys_expose_directory("//fsys", OSAL_FS_ROOT "coderoot", &fsys_thread_handle);
+    efsys_expose_directory("//fsys", OSAL_FS_ROOT "coderoot/fsys", &fsys_thread_handle);
 
     egui_initialize();
     s = eimgui_initialize();
