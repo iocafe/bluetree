@@ -616,7 +616,8 @@ public:
 
     /* Get first name given to this this object.
      */
-    eName *primaryname();
+    eName *primaryname(
+        os_int nstype = -1);
 
     /* Add integer value as name to parent namespace.
      */

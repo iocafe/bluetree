@@ -335,7 +335,7 @@ void ePersistent::load_file(
 {
     eVariable path, tmp;
     os_char *p;
-    eObject *obj;
+    eObject *content;
 
     if (file_name) {
         setpropertys(EPERP_FILE, file_name);
@@ -349,6 +349,83 @@ void ePersistent::load_file(
     propertyv(EPERP_FILE, &tmp);
     path.appendv(&tmp);
 
-    obj = load(path.gets());
+    content = load(path.gets());
+    if (content) {
+        content->adopt(this, EOID_TEMPORARY, EOBJ_NO_MAP|EOBJ_IS_ATTACHMENT);
+        use_loded_content(ePersistent::cast(content));
+        delete content;
+    }
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Copy loaded data to use.
+
+  The ePersistent::use_loded_content function...
+
+****************************************************************************************************
+*/
+void ePersistent::use_loded_content(
+    ePersistent *content)
+{
+    eObject *srcobj, *dstobj;
+    eName *srcname;
+
+content->print_json();
+
+    for (srcobj = content->first();
+         srcobj;
+         srcobj = srcobj->next())
+    {
+        switch (srcobj->classid())
+        {
+            case ECLASSID_VARIABLE:
+            case ECLASSID_MATRIX:
+                break;
+
+            default:
+                continue;
+        }
+
+        srcname = srcobj->primaryname(ENAME_PARENT_NS);
+        if (srcname) {
+            dstobj = byname(srcname->gets());
+        }
+        else {
+            srcname = srcobj->primaryname();
+            if (srcname == OS_NULL) continue;
+
+            dstobj = ns_get(srcname->gets(), srcname->namespaceid(), srcobj->classid());
+        }
+
+        if (dstobj == OS_NULL) continue;
+        switch (dstobj->classid())
+        {
+            case ECLASSID_VARIABLE:
+                ((eVariable*)dstobj)->setv((eVariable*)srcobj);
+                break;
+
+            case ECLASSID_MATRIX:
+                copy_loaded_matrix((eMatrix*)dstobj, (eMatrix*)srcobj);
+                break;
+        }
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Copy loaded matrix data into used matrix.
+
+  The ePersistent::copy_loaded_matrix function...
+
+****************************************************************************************************
+*/
+void ePersistent::copy_loaded_matrix(
+    eMatrix *dstm,
+    eMatrix *srcm)
+{
+}

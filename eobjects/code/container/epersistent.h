@@ -139,6 +139,17 @@ protected:
      */
     void save_as_message();
 
+    /* Copy loaded data to use.
+     */
+    void use_loded_content(
+        ePersistent *content);
+
+    /* Copy loaded matrix data into used matrix.
+     */
+    void copy_loaded_matrix(
+        eMatrix *dstm,
+        eMatrix *srcm);
+
     /**
     ************************************************************************************************
       Member variables

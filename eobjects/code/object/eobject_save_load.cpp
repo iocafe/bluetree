@@ -88,7 +88,7 @@ eObject *eObject::load(
     s = stream->open(tmp.gets(), OSAL_STREAM_READ);
     if (s) goto failed;
 
-    /* Write file content.
+    /* Read file content.
      */
     obj = read(stream, OSAL_STREAM_DEFAULT);
     if (obj) goto failed;

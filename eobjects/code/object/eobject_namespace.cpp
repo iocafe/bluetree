@@ -603,17 +603,27 @@ eName *eObject::addintname(
   Object's first name may later on separated with alternate names with name flags. At this
   fime first name is simply name which was added first.
 
+  @param   nstype -1 to return name for any name space, to select the name space, sete
+           one of: ENAME_PARENT_NS, ENAME_PROCESS_NS, ENAME_THREAD_NS, ENAME_SPECIFIED_NS,
+           ENAME_NO_NS, or ENAME_THIS_NS.
+
   @return  Pointer to first name (eName), or OS_NULL if none found.
 
 ****************************************************************************************************
 */
-eName *eObject::primaryname()
+eName *eObject::primaryname(
+    os_int nstype)
 {
-    eObject *n;
+    eName *n;
 
-    for (n = first(EOID_NAME); n; n = n->next(EOID_NAME)) {
-        if (n->classid() == ECLASSID_NAME) {
-            return eName::cast(n);
+    for (n = firstn(); n; n = n->nextn())
+    {
+        if (nstype == -1) {
+            return n;
+        }
+        else if (nstype == n->ns_type())
+        {
+            return n;
         }
     }
     return OS_NULL;

@@ -172,6 +172,11 @@ public:
      */
     inline bool is_mapped() {return m_namespace != OS_NULL; }
 
+    /* Get name space type, one of ENAME_PARENT_NS, ENAME_PROCESS_NS,
+       ENAME_THREAD_NS, ENAME_SPECIFIED_NS, ENAME_NO_NS, or ENAME_THIS_NS.
+     */
+    inline os_int ns_type() {return m_ns_type; }
+
 protected:
     /* Collect information about this object for tree browser.
      */
