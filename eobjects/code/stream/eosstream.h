@@ -157,6 +157,10 @@ protected:
     /* EOSAL stream interface.
      */
     const osalStreamInterface *m_iface;
+
+    /* Is select meaningfull for this interface.
+     */
+    os_boolean m_use_select;
 };
 
 #endif

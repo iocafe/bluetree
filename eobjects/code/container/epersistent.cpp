@@ -350,6 +350,5 @@ void ePersistent::load_file(
     path.appendv(&tmp);
 
     obj = load(path.gets());
-
 }
 

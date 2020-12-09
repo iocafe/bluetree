@@ -41,6 +41,7 @@ eOsStream::eOsStream(
 {
     m_stream = OS_NULL;
     m_iface = OS_NULL;
+    m_use_select = OS_TRUE;
 }
 
 
@@ -134,29 +135,30 @@ eStatus eOsStream::open(
     typedef struct {
         const os_char *name;
         const osalStreamInterface *iface;
+        os_boolean use_select;
     }
     eIfaceListItem;
 
     const static eIfaceListItem iface_list[] = {
 #if OSAL_SOCKET_SUPPORT
 #if OSAL_TLS_SUPPORT
-        {"tls:", OSAL_TLS_IFACE},
+        {"tls:", OSAL_TLS_IFACE, OS_TRUE},
 #endif
-        {"socket:", OSAL_SOCKET_IFACE},
+        {"socket:", OSAL_SOCKET_IFACE, OS_TRUE},
 #endif
 #if OSAL_SERIAL_SUPPORT
-        {"serial:", OSAL_SERIAL_IFACE},
+        {"serial:", OSAL_SERIAL_IFACE, OS_TRUE},
 #endif
 #if OSAL_BLUETOOTH_SUPPORT
-        {"bluetooth:", OSAL_BLUETOOTH_IFACE},
+        {"bluetooth:", OSAL_BLUETOOTH_IFACE, OS_TRUE},
 #endif
 #if OSAL_FILESYS_SUPPORT
-        {"file:", OSAL_FILE_IFACE},
+        {"file:", OSAL_FILE_IFACE, OS_FALSE},
 #endif
 #if OSAL_STREAM_BUFFER_SUPPORT
-        {"buffer:", OSAL_STREAM_BUFFER_IFACE},
+        {"buffer:", OSAL_STREAM_BUFFER_IFACE, OS_FALSE},
 #endif
-        {OS_NULL, OS_NULL}
+        {OS_NULL, OS_NULL, OS_FALSE}
     };
     const eIfaceListItem *item;
 
@@ -181,6 +183,7 @@ eStatus eOsStream::open(
         return ESTATUS_FAILED;
     }
     m_iface = item->iface;
+    m_use_select = item->use_select;
 
     /* Open socket and return ESTATUS_SUCCESS or ESTATUS_FAILED. Save flags.
      */
@@ -371,7 +374,7 @@ eStatus eOsStream::read(
         /* Try to read the stream.
          */
         s = stream_to_buffer();
-        if (s) break;
+        if (s && s != ESTATUS_STREAM_END) break;
 
         /* Try to get from queue.
          */
@@ -379,7 +382,10 @@ eStatus eOsStream::read(
         buf_sz -= nrd;
         n += nrd;
         buf += nrd;
-        if (buf_sz <= 0) break;
+        if (buf_sz <= 0) {
+            s = ESTATUS_SUCCESS;
+            break;
+        }
 
         if (start_t == 0) {
             os_get_timer(&start_t);
@@ -394,9 +400,16 @@ eStatus eOsStream::read(
 
         /* Let select handle data transfers.
          */
-        strm = this;
-        s = select(&strm, 1, trigger, &selectdata, 100, OSAL_STREAM_DEFAULT);
-        if (s) break;
+        if (m_use_select) {
+            strm = this;
+            s = select(&strm, 1, trigger, &selectdata, 2000, OSAL_STREAM_DEFAULT);
+            if (s) {
+                break;
+            }
+        }
+        else if (s == ESTATUS_STREAM_END && nrd == 0) {
+            break;
+        }
 
         if (trigger) {
             if (selectdata.stream_nr ==  OSAL_STREAM_NR_CUSTOM_EVENT) {
@@ -436,8 +449,10 @@ eStatus eOsStream::read(
            This is set to number of bytes actually read, which may be less than buf_sz.
            This argument must not be OS_NULL.
 
-  @return  If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
-           an error.
+  @return  If succesfull, the function returns ESTATUS_SUCCESS (0). Return value
+           ESTATUS_STREAM_END (OSAL_END_OF_FILE) indicates that we are reading file
+           and end of file has been reached, it is not real error. Other return
+           values indicate an error.
 
 ****************************************************************************************************
 */
@@ -497,24 +512,27 @@ eStatus eOsStream::select(
     osalStream osalsock[OSAL_SOCKET_SELECT_MAX];
     os_int i;
 
-    osstreams = (eOsStream**)streams;
+    if (m_use_select)
+    {
+        osstreams = (eOsStream**)streams;
 
-    if (nstreams == 1)
-    {
-        s = m_iface->stream_select(&osstreams[0]->m_stream, 1, evnt,
-            selectdata, timeout_ms, OSAL_STREAM_DEFAULT);
-    }
-    else
-    {
-        for (i = 0; i<nstreams; i++)
+        if (nstreams == 1)
         {
-            osalsock[i] = osstreams[i]->m_stream;
+            s = m_iface->stream_select(&osstreams[0]->m_stream, 1, evnt,
+                selectdata, timeout_ms, OSAL_STREAM_DEFAULT);
         }
+        else
+        {
+            for (i = 0; i<nstreams; i++)
+            {
+                osalsock[i] = osstreams[i]->m_stream;
+            }
 
-        s = m_iface->stream_select(osalsock, nstreams, evnt,
-            selectdata, timeout_ms, OSAL_STREAM_DEFAULT);
+            s = m_iface->stream_select(osalsock, nstreams, evnt,
+                selectdata, timeout_ms, OSAL_STREAM_DEFAULT);
+        }
+        if (s) return ESTATUS_FROM_OSAL_STATUS(s);
     }
-    if (s) return ESTATUS_FROM_OSAL_STATUS(s);
 
     if (m_in) {
         return stream_to_buffer();

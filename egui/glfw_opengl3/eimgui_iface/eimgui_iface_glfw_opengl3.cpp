@@ -269,7 +269,7 @@ eStatus eimgui_start_frame(eViewPort *viewport)
     window = (GLFWwindow*)viewport;
 
     if (glfwWindowShouldClose(window)) {
-        return ESTATUS_STREAM_END;
+        return ESTATUS_FAILED;
     }
 
     // Poll and handle events (inputs, window resize, etc.)

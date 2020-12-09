@@ -220,8 +220,7 @@ eStatus eContainer::reader(
 
     /* Read children
      */
-    while (count-- > 0)
-    {
+    while (count-- > 0) {
         read(stream, flags);
     }
 

@@ -71,8 +71,6 @@ eObject::eObject(
          */
         if (parent == OS_NULL)
         {
-            /* Allocate root helper object hand two handles.
-             */
             makeroot(id, flags);
         }
 
@@ -1026,7 +1024,7 @@ eStatus eObject::write(
      */
     if (*stream << classid()) goto failed;
     if (*stream << oid()) goto failed;
-    if (*stream << flags() & (EOBJ_SERIALIZATION_MASK)) goto failed;
+    if (*stream << (flags() & EOBJ_SERIALIZATION_MASK)) goto failed;
 
     /* Calculate and write number of attachments.
        HERE WE SHOULD USE HANDLES FOR SPEED
@@ -1094,6 +1092,9 @@ eObject *eObject::read(
     if (*stream >> cid) goto failed;
     if (*stream >> oid) goto failed;
     if (*stream >> oflags) goto failed;
+
+    // oflags &= ~0x40000000; // KEPPI oli virhe suluissa write functionssa, ei tarvita
+
     if (*stream >> n_attachements) goto failed;
 
     /* Generate new object.

@@ -197,20 +197,22 @@ eStatus eBufferedStream::stream_to_buffer()
 {
     os_memsz nread;
     os_char buf[2048];
-    eStatus s = ESTATUS_SUCCESS;
+    eStatus s, s2;
 
-    while (OS_TRUE)
+    do
     {
         s = buffered_read(buf, sizeof(buf), &nread);
-        if (s || nread == 0) {
+        if ((s && s != ESTATUS_STREAM_END) || nread == 0) {
             break;
         }
 
-        s = m_in->write(buf, nread);
-        if (s) {
+        s2 = m_in->write(buf, nread);
+        if (s2) {
+            s = s2;
             break;
         }
     }
+    while (s != ESTATUS_STREAM_END);
 
     return s;
 }

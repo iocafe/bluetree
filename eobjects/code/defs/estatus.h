@@ -59,7 +59,7 @@ typedef enum
     /** No more data available from stream. Like end of file or
      *  end of memory buffer or end of file.
      */
-    ESTATUS_STREAM_END = 51,
+    ESTATUS_STREAM_END = OSAL_END_OF_FILE,
 
     /** Object properties, properties not supported for the class.
      */

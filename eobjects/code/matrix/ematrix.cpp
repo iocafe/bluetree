@@ -754,7 +754,7 @@ eStatus eMatrix::reader(
 
         /* Read elements
          */
-        for (i = 0; i<first_full_ix; i++)
+        for (i = 0; i<full_count; i++)
         {
             elem_ix = (os_int)first_full_ix + i;
             row = elem_ix / m_ncolumns;
