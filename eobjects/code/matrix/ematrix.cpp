@@ -548,7 +548,7 @@ eStatus eMatrix::elementwrite(
     os_double d;
     os_float f;
     osalTypeId datatype;
-    os_int i, prev_buffer_nr, buffer_nr, elem_ix, per_block, ii;
+    os_int i, prev_buffer_nr, buffer_nr, elem_ix, ix_in_block, per_block, ii;
     os_short ss;
 
     if (stream->putl(first_full_ix)) goto failed;
@@ -577,12 +577,16 @@ eStatus eMatrix::elementwrite(
         dataptr = buffer->ptr();
         typeptr = dataptr + per_block * m_typesz;
 
+        ix_in_block = elem_ix - (buffer_nr - 1) * per_block;
+        dataptr += sizeof(eMatrixDataItem) * ix_in_block;
+        typeptr += ix_in_block;
+
         datatype = OS_UNDEFINED_TYPE;
         switch (m_datatype)
         {
             case OS_OBJECT:
-                os_memcpy(&mo, dataptr + sizeof(eMatrixDataItem) * i, sizeof(eMatrixDataItem));
-                switch (typeptr[i])
+                os_memcpy(&mo, dataptr, sizeof(eMatrixDataItem));
+                switch (*typeptr)
                 {
                     case OS_LONG:
                         l = mo.l;
