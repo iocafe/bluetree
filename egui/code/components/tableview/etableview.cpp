@@ -598,8 +598,6 @@ void eTableView::callback(
             fill_row_to_m();
             break;
     }
-
-    osal_console_write("eRowSet callback\n");
 }
 
 

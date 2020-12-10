@@ -27,9 +27,9 @@
 /* Persistent object property names.
  */
 const os_char
-    eperp_root_dir[] = "rootdir",
-    eperp_root_path[] = "rootpath",
-    eperp_file[] = "path",
+    eperp_root_dir[] = "root_dir",
+    eperp_root_path[] = "root_path",
+    eperp_file[] = "file_name",
     eperp_save_time_ms[] = "time_ms",
     eperp_save_latest_time_ms[] = "latest_ms";
 
@@ -392,6 +392,9 @@ content->print_json();
         srcname = srcobj->primaryname(ENAME_PARENT_NS);
         if (srcname) {
             dstobj = byname(srcname->gets());
+            if (dstobj == OS_NULL) {
+                dstobj = ns_get(srcname->gets(), srcname->namespaceid(), srcobj->classid());
+            }
         }
         else {
             srcname = srcobj->primaryname();

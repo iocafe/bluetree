@@ -21,13 +21,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eName::eName(
@@ -55,13 +49,7 @@ eName::eName(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
 eName::~eName()
@@ -264,6 +252,16 @@ eStatus eName::writer(
      */
     eVariable::writer(stream, flags);
 
+    /* Name space type
+     */
+    if (*stream << m_ns_type) goto failed;
+
+    /* Specific name space identifier string.
+     */
+    if (m_ns_type == ENAME_SPECIFIED_NS) {
+        stream->puts(namespaceid());
+    }
+
     /* End the object.
      */
     if (stream->write_end_block()) goto failed;
@@ -311,6 +309,19 @@ eStatus eName::reader(
     /* Use base class'es function to do the work.
      */
     eVariable::reader(stream, flags);
+
+    /* Name space type
+     */
+    if (*stream >> m_ns_type) goto failed;
+
+    /* Specific name space identifier string.
+     */
+    if (m_ns_type == ENAME_SPECIFIED_NS) {
+        if (m_namespace_id == OS_NULL) {
+            m_namespace_id = new eVariable(this, EOID_CHILD, EOBJ_TEMPORARY_ATTACHMENT);
+        }
+        stream->gets(m_namespace_id);
+    }
 
     /* End the object.
      */

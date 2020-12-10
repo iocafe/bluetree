@@ -1694,6 +1694,8 @@ eStatus eVariable::writer(
     eStream *stream,
     os_int flags)
 {
+    os_memsz sz;
+
     /* Version number. Increment if new serialized items are to the object,
        and check for new version's items in read() function.
      */
@@ -1722,13 +1724,15 @@ eStatus eVariable::writer(
         case OS_STR:
             if (m_vflags & EVAR_STRBUF_ALLOCATED)
             {
-                if (*stream << m_value.strptr.used - 1) goto failed;
-                if (stream->write(m_value.strptr.ptr, m_value.strptr.used - 1)) goto failed;
+                sz = m_value.strptr.used - 1;
+                if (*stream << sz) goto failed;
+                if (sz > 0) if (stream->write(m_value.strptr.ptr, sz)) goto failed;
             }
             else
             {
-                if (*stream << m_value.strbuf.used - 1) goto failed;
-                if (stream->write(m_value.strbuf.buf, m_value.strbuf.used - 1)) goto failed;
+                sz = m_value.strbuf.used - 1;
+                if (*stream << sz) goto failed;
+                if (sz > 0) if (stream->write(m_value.strbuf.buf, sz)) goto failed;
             }
             break;
 
@@ -1777,13 +1781,12 @@ eStatus eVariable::reader(
     eStream *stream,
     os_int flags)
 {
+    os_short vflags;
+    os_int sz;
+
     /* Version number. Used to check which versions item's are in serialized data.
      */
     os_int version;
-
-    os_short vflags;
-
-    os_long sz;
 
     /* Release any allocated memory.
      */
@@ -1817,9 +1820,9 @@ eStatus eVariable::reader(
              */
             if (sz < EVARIABLE_STRBUF_SZ)
             {
-                if (stream->read(m_value.strbuf.buf, sz)) goto failed;
+                if (sz > 0) if (stream->read(m_value.strbuf.buf, sz)) goto failed;
                 m_value.strbuf.buf[sz] = '\0';
-                m_value.strbuf.used = (os_uchar)sz;
+                m_value.strbuf.used = (os_uchar)sz + 1;
             }
 
             /* Otherwise we need to allocate buffer for long string. Allocate buffer, copy data in,
@@ -1829,9 +1832,9 @@ eStatus eVariable::reader(
             else
             {
                 m_value.strptr.ptr = os_malloc(sz+1, &m_value.strptr.allocated);
-                if (stream->read(m_value.strptr.ptr, sz)) goto failed;
+                if (sz > 0) if (stream->read(m_value.strptr.ptr, sz)) goto failed;
                 m_value.strptr.ptr[sz] = '\0';
-                m_value.strptr.used = sz+1;
+                m_value.strptr.used = sz + 1;
                 m_vflags |= EVAR_STRBUF_ALLOCATED;
             }
             break;
