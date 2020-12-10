@@ -81,6 +81,7 @@ void eNetService::create_user_accounts_table()
     column->addname("active_logons", ENAME_NO_MAP);
     column->setpropertyi(EVARP_TYPE, OS_INT);
     column->setpropertys(EVARP_TEXT, "active logons");
+    column->setpropertys(EVARP_ATTR, "nosave");
     column->setpropertys(EVARP_TTIP,
         "Number of users/devices, that are currently\n"
         "logged on using this account");

@@ -94,6 +94,7 @@ extern const os_char
 #define EVAR_TYPE_MASK   0x001F
 #define EVAR_DDIGS_MASK  0x03E0
 #define EVAR_DDIGS_SHIFT 5
+#define EVAR_NOSAVE      0x0400
 #define EVAR_STRBUF_ALLOCATED 0x2000
 
 /* Serialize type and number of decimal digits in flags.
@@ -390,6 +391,11 @@ public:
     /* Check if object name is oix.
      */
     os_boolean is_oix();
+
+    /* If this variable is not to be saved.
+     */
+    inline os_boolean is_nosave()
+        {return (m_vflags & EVAR_NOSAVE) ? OS_TRUE : OS_FALSE; }
 
     /* Remove new lines from string.
      */

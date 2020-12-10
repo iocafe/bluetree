@@ -320,6 +320,14 @@ public:
         os_int column,
         os_boolean *hasvalue = OS_NULL);
 
+    /* Get value from matrix as integer.
+     */
+    os_int geti(
+        os_int row,
+        os_int column,
+        os_boolean *hasvalue = OS_NULL)
+    { return (os_int)getl(row, column, hasvalue); }
+
     /* Get value from matrix as double.
      */
     os_double getd(
@@ -399,7 +407,7 @@ protected:
 
     /* ematrix_as_table.cpp: Insert single row to table.
      */
-    void insert_one_row(
+    eStatus insert_one_row(
         eContainer *row,
         os_int use_row_nr,
         eDBM *dbm);

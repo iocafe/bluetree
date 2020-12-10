@@ -1004,6 +1004,11 @@ public:
         eCallbackEvent event,
         eObject *appendix = OS_NULL);
 
+    /* Check if parent callback flag is set for this object. Returns 0 if not, nonzero if
+     * callback is set.
+     */
+    inline os_int hascallback()
+        {return flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK); }
 
 protected:
     void message_within_thread(

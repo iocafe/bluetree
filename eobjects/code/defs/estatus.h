@@ -44,6 +44,12 @@ typedef enum
      */
     ESTATUS_SUCCESS = OSAL_SUCCESS,
 
+    /** Same as ESTATUS_SUCCESS but indicates that nothing was actually done. This is used
+     *  by few functions to indicate that no change was made and further processing
+     *  of change is unnecessary.
+     */
+    ESTATUS_NO_CHANGES = OSAL_NOTHING_TO_DO,
+
     /** Unidentified failure.
      */
     ESTATUS_FAILED = OSAL_STATUS_FAILED,

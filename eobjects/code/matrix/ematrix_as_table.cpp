@@ -154,20 +154,30 @@ void eMatrix::insert(
            updated. If "row" argument specifies new row number, then this row is moved.
            Insert function sets here -1 to indicate that we are not updating a row.
   @param   tflags Reserved for future, set 0 for now.
+  @param   ESTATUS_SUCCESS is change was made, ESTATUS_NO_CHANGES if nothing was changed
+           (for update only).
 
 ****************************************************************************************************
 */
-void eMatrix::insert_one_row(
+eStatus eMatrix::insert_one_row(
     eContainer *row,
     os_int use_row_nr,
     eDBM *dbm)
 {
-    eVariable *element, *index_element, *column, *tcolumn;
+    eVariable *element, *index_element, *column, *tcolumn, *tmp = OS_NULL;
     eName *name;
     os_char *namestr;
     eContainer *trig_cols;
     os_long row_nr, ix_value;
-    os_int column_nr;
+    os_int column_nr, flags_val;
+    eStatus rval = ESTATUS_NO_CHANGES;
+
+    /* If this matrix needs to call parent (ESTATUS_NO_CHANGES not needed for select).
+     */
+    rval = (hascallback() && use_row_nr >= 0) ? ESTATUS_NO_CHANGES : ESTATUS_SUCCESS;
+    if (rval == ESTATUS_NO_CHANGES) {
+        tmp = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    }
 
     index_element = find_index_element(row);
     if (index_element == OS_NULL) {
@@ -201,6 +211,7 @@ void eMatrix::insert_one_row(
         else if (use_row_nr >= 0 && row_nr != use_row_nr) {
             copy_row(row_nr, use_row_nr);
             clear_row(use_row_nr);
+            rval = ESTATUS_SUCCESS;
 
             if (dbm) {
                 dbm->trigdata_append_remove(use_row_nr + 1);
@@ -232,20 +243,33 @@ void eMatrix::insert_one_row(
         }
 
         column_nr = column->oid();
-        setv(row_nr, column_nr, element);
+        if (rval == ESTATUS_NO_CHANGES && !column->is_nosave()) {
+            getv(row_nr, column_nr, tmp);
+            if (tmp->compare(element)) {
+                setv(row_nr, column_nr, element);
+                rval = ESTATUS_SUCCESS;
+            }
+        }
+        else {
+            setv(row_nr, column_nr, element);
+        }
     }
 
     /* Set flags column
      */
-    setl(row_nr, EMTX_FLAGS_COLUMN_NR, EMTX_FLAGS_ROW_OK);
+    flags_val = geti(row_nr, EMTX_FLAGS_COLUMN_NR);
+    if ((flags_val & EMTX_FLAGS_ROW_OK) == 0) {
+        setl(row_nr, EMTX_FLAGS_COLUMN_NR, EMTX_FLAGS_ROW_OK);
+        rval = ESTATUS_SUCCESS;
+    }
 
     /* Stored data related to trigged row into eDBM object.
      */
-    if (dbm == OS_NULL || m_columns == OS_NULL) return;
+    if (dbm == OS_NULL || m_columns == OS_NULL) goto getout;
     ix_value = row_nr + 1;
-    if (ix_value < dbm->minix() || ix_value > dbm->maxix()) return;
+    if (ix_value < dbm->minix() || ix_value > dbm->maxix()) goto getout;
     trig_cols = dbm->trigger_columns();
-    if (trig_cols == OS_NULL) return;
+    if (trig_cols == OS_NULL) goto getout;
     for (tcolumn = trig_cols->firstv(); tcolumn; tcolumn = tcolumn->nextv())
     {
         name = tcolumn->primaryname();
@@ -267,6 +291,10 @@ void eMatrix::insert_one_row(
     }
 
     dbm->trigdata_append_insert_or_update(ix_value);
+
+getout:
+    delete tmp;
+    return rval;
 }
 
 
@@ -306,7 +334,7 @@ eName *eMatrix::find_index_column_name()
   @param   tflags Reserved for future, set 0 for now.
   @param   dbm Pointer to eDBM to forward changes by trigger. OS_NULL if not needed.
 
-  @return  OSAL_SUCCESS if ok.
+  @return  ESTATUS_SUCCESS if ok.
 
 ****************************************************************************************************
 */
@@ -317,8 +345,14 @@ eStatus eMatrix::update(
     eDBM *dbm)
 {
     eStatus s;
+
     s = select_update_remove(EMTX_UPDATE, where_clause, row, OS_NULL, tflags, dbm);
-    docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+    if (s == ESTATUS_NO_CHANGES) {
+        s = ESTATUS_SUCCESS;
+    }
+    else if (s == ESTATUS_SUCCESS) {
+       docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+    }
     return s;
 }
 
@@ -340,8 +374,14 @@ void eMatrix::remove(
     os_int tflags,
     eDBM *dbm)
 {
-    select_update_remove(EMTX_REMOVE, where_clause, OS_NULL, OS_NULL, tflags, dbm);
-    docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+    eStatus s;
+    s = select_update_remove(EMTX_REMOVE, where_clause, OS_NULL, OS_NULL, tflags, dbm);
+    if (s == ESTATUS_NO_CHANGES) {
+        s = ESTATUS_SUCCESS;
+    }
+    else if (s == ESTATUS_SUCCESS) {
+        docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+    }
 }
 
 
@@ -361,7 +401,7 @@ void eMatrix::remove(
   @param   prm Select parameters. Includes pointer to callback function.
   @param   tflags Reserved for future, set 0 for now.
 
-  @return  OSAL_SUCCESS if ok. Other values indicate an error.
+  @return  ESTATUS_SUCCESS if ok. Other values indicate an error.
 
 ****************************************************************************************************
 */
@@ -389,7 +429,11 @@ eStatus eMatrix::select(
   @param   context Application specific context pointer to pass to callback function.
   @param   tflags Reserved for future, set 0 for now.
 
-  @return  OSAL_SUCCESS if ok. Other return values indicate an error or interrupted data transfer.
+  @return  ESTATUS_SUCCESS: ok.
+           ESTATUS_NO_CHANGES: Same as ESTATUS_SUCCESS but indicates that nothing was actually
+           done. This is used to indicate that no change was made and further processing of change
+           is unnecessary. If op is select, the function never returns ESTATUS_NO_CHANGES.
+           Other return values indicate an error or interrupted data transfer.
 
 ****************************************************************************************************
 */
@@ -412,13 +456,17 @@ eStatus eMatrix::select_update_remove(
     os_long minix, maxix;
     os_int row_nr, i, col_nr, nvars, nro_selected_cols;
     os_memsz count;
-    eStatus s, rval = ESTATUS_SUCCESS;
+    eStatus s, rval;
     os_boolean eval_error_reported = OS_FALSE;
 
     if (m_columns == OS_NULL) {
         osal_debug_error("eMatrix::select_update_remove: Not configured");
         return ESTATUS_FAILED;
     }
+
+    /* If this matrix needs to call parent (ESTATUS_NO_CHANGES not needed for select).
+     */
+    rval = (hascallback() && (op != EMTX_SELECT)) ? ESTATUS_NO_CHANGES : ESTATUS_SUCCESS;
 
     /* Asterix '*' as where clause is all rows, same as empty where clause.
      */
@@ -539,7 +587,6 @@ eStatus eMatrix::select_update_remove(
             if (s) {
                 if (s != ESTATUS_FALSE && !eval_error_reported)
                 {
-                    rval = s;
                     osal_debug_error_str("Where clause failed: ", where_clause);
                     eval_error_reported = OS_TRUE;
                 }
@@ -551,13 +598,25 @@ eStatus eMatrix::select_update_remove(
          */
         switch (op) {
             case EMTX_UPDATE:
-                insert_one_row(cont, row_nr, dbm);
+                if (insert_one_row(cont, row_nr, dbm) == ESTATUS_SUCCESS) {
+                    rval = ESTATUS_SUCCESS;
+                }
                 break;
 
             case EMTX_REMOVE:
                 if (dbm) {
                     dbm->trigdata_append_remove(row_nr + 1);
                 }
+
+                /* If we have parent callback and we are removing a row which
+                   exists, change ESTATUS_NO_CHANGES to ESTATUS_SUCCESS.
+                 */
+                if (rval == ESTATUS_NO_CHANGES) {
+                    if (getl(row_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) {
+                        rval = ESTATUS_SUCCESS;
+                    }
+                }
+
                 clear_row(row_nr);
                 break;
 
@@ -600,8 +659,11 @@ eStatus eMatrix::select_update_remove(
                 /* Callback.
                  */
                 if (prm) if (prm->callback) {
-                    rval = prm->callback(this, m, prm->context);
-                    if (rval) goto getout;
+                    s = prm->callback(this, m, prm->context);
+                    if (s) {
+                        rval = s;
+                        goto getout;
+                    }
                 }
 
                 /* Clean up in case callback did not adopt the matrix.

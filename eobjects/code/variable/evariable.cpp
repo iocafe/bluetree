@@ -184,7 +184,7 @@ void eVariable::setupproperties(
     addpropertys(cls, EVARP_UNIT, evarp_unit, "unit", EPRO_METADATA|EPRO_NOONPRCH);
     addpropertyd(cls, EVARP_MIN, evarp_min, "min", EPRO_METADATA|EPRO_NOONPRCH);
     addpropertyd(cls, EVARP_MAX, evarp_max, "max", EPRO_METADATA|EPRO_NOONPRCH);
-    addpropertys(cls, EVARP_ATTR, evarp_attr, "attr", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertys(cls, EVARP_ATTR, evarp_attr, "attr", EPRO_METADATA);
     addpropertyd(cls, EVARP_GAIN, evarp_gain, "gain", EPRO_METADATA|EPRO_NOONPRCH);
     addpropertyd(cls, EVARP_OFFSET, evarp_offset, "offset", EPRO_METADATA|EPRO_NOONPRCH);
     addproperty (cls, EVARP_CONF, evarp_conf, "conf", EPRO_METADATA|EPRO_NOONPRCH);
@@ -319,7 +319,6 @@ eStatus eVariable::onpropertychange(
             break;
 
         case EVARP_DIGS:
-
             if (x->isempty()) {
                 di = EVARP_DIGS_UNDEFINED;
             }
@@ -327,6 +326,15 @@ eStatus eVariable::onpropertychange(
                 di = (os_int)x->getl();
             }
             setdigs(di);
+            break;
+
+        case EVARP_ATTR:
+            m_vflags &= ~EVAR_NOSAVE;
+            if (x->type() == OS_STR) {
+                if (os_strstr(x->gets(), "nosave", OSAL_STRING_SEARCH_ITEM_NAME)) {
+                    m_vflags |= EVAR_NOSAVE;
+                }
+            }
             break;
 
         default:
@@ -492,7 +500,7 @@ void eVariable::setl(
 
     /* Inform parent object that a variable value was changed.
      */
-    if (change) {
+    if (change && (m_vflags & EVAR_NOSAVE) == 0) {
         docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
     }
 }
@@ -534,7 +542,7 @@ void eVariable::setd(
 
     /* Inform parent object that a variable value was changed.
      */
-    if (change) {
+    if (change && (m_vflags & EVAR_NOSAVE) == 0) {
         docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
     }
 }
@@ -633,7 +641,7 @@ void eVariable::sets(
 
     /* Inform parent object that a variable value was changed.
      */
-    if (change) {
+    if (change && (m_vflags & EVAR_NOSAVE) == 0) {
         docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
     }
 }
@@ -689,7 +697,9 @@ void eVariable::setv(
         case OS_UNDEFINED_TYPE:
             if (oldtype != OS_UNDEFINED_TYPE) {
                 clear();
-                docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
+                if ((m_vflags & EVAR_NOSAVE) == 0) {
+                    docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
+                }
             }
             return;
 
@@ -788,7 +798,7 @@ void eVariable::setv(
 
     /* Inform parent object that a variable value was changed.
      */
-    if (change) {
+    if (change && (m_vflags & EVAR_NOSAVE) == 0) {
         docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
     }
 }
@@ -840,7 +850,9 @@ void eVariable::seto(
 
     /* Inform parent object that a variable value was changed.
      */
-    docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
+    if ((m_vflags & EVAR_NOSAVE) == 0) {
+        docallback(ECALLBACK_VARIABLE_VALUE_CHANGED);
+    }
 }
 
 
