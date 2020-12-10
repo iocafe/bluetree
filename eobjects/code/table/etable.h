@@ -64,7 +64,6 @@ typedef struct eSelectParameters {
 eSelectParameters;
 
 
-
 /* tflags - table flags */
 #define ETABLE_ADOPT_ARGUMENT         0x10000000
 #define ETABLE_SERIALIZED_FLAGS_MASK  0x0000FFFF

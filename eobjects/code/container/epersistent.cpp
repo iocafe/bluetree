@@ -431,4 +431,71 @@ void ePersistent::copy_loaded_matrix(
     eMatrix *dstm,
     eMatrix *srcm)
 {
+    eContainer *sc, *dc, *src_cols, *dst_cols;
+    eName *n;
+    eVariable *v, *tmp;
+    eObject *dcol;
+    os_int max_src_cols, i, dst_i, *column_ix_tab;
+    os_int nro_src_rows, row;
+
+    /* Get column list of both source and destination matrices.
+     */
+    sc = srcm->configuration();
+    dc = dstm->configuration();
+    if (sc == OS_NULL || dc == OS_NULL) {
+        osal_debug_error("copy_loaded_matrix: Unconfigured matrix");
+        return;
+    }
+    src_cols = sc->firstc(EOID_TABLE_COLUMNS);
+    dst_cols = dc->firstc(EOID_TABLE_COLUMNS);
+    if (src_cols == OS_NULL || dst_cols == OS_NULL) {
+        osal_debug_error("copy_loaded_matrix: No column information");
+        return;
+    }
+
+    /* Generate column_ix_tab to convert source column index to destination column index.
+     */
+    max_src_cols = src_cols->childcount();
+    column_ix_tab = (os_int*)os_malloc(max_src_cols * sizeof(os_int), OS_NULL);
+    for (i = 0; i < max_src_cols; i++) {
+        column_ix_tab[i] = -1;
+    }
+    for (v = src_cols->firstv(); v; v = v->nextv())
+    {
+        n = v->primaryname();
+        if (n == OS_NULL) continue;
+        dcol = dst_cols->byname(n->gets());
+        if (dcol == OS_NULL) continue;
+
+        i = v->oid();
+        if (i < 0 || i >= max_src_cols) {
+            osal_debug_error("copy_loaded_matrix: column index out of bounds?");
+            continue;
+        }
+
+        column_ix_tab[i] = dcol->oid();
+    }
+    column_ix_tab[EMTX_FLAGS_COLUMN_NR] = EMTX_FLAGS_COLUMN_NR;
+    tmp = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+
+    nro_src_rows = srcm->nrows();
+    for (row = 0; row < nro_src_rows; row++)
+    {
+        for (i = 0; i<max_src_cols; i++) {
+            dst_i = column_ix_tab[i];
+            if (dst_i < 0) continue;
+            if (i == EMTX_FLAGS_COLUMN_NR) {
+                if ((srcm->getl(row, i) & EMTX_FLAGS_ROW_OK) == 0) {
+                    continue;
+                }
+            }
+            srcm->getv(row, i, tmp);
+            dstm->setv(row, dst_i, tmp);
+        }
+    }
+
+    /* Cleanup
+     */
+    delete tmp;
+    os_free(column_ix_tab, max_src_cols * sizeof(os_int));
 }

@@ -109,7 +109,7 @@ eContainer *eTable::process_configuration(
 
     *nro_columns = 0;
 
-    dst_configuration = new eContainer(this, EOID_TABLE_CONFIGURATION, EOBJ_TEMPORARY_ATTACHMENT);
+    dst_configuration = new eContainer(this, EOID_TABLE_CONFIGURATION, EOBJ_IS_ATTACHMENT);
     dst_configuration->ns_create();
 
     src_columns = configuration->firstc(EOID_TABLE_COLUMNS);
