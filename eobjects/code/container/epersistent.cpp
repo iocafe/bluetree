@@ -308,6 +308,9 @@ void ePersistent::save_as_message()
     relative_path = new eVariable(content, EOID_PATH);
     clone(content, EOID_CONTENT);
 
+content->print_json();
+
+
     propertyv(EPERP_ROOT_PATH, &target);
     propertyv(EPERP_FILE, relative_path);
     p = os_strechr(target.gets(), '/');

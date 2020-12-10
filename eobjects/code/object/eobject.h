@@ -84,6 +84,8 @@ class eRowSetBinding;
  */
 #define EOBJ_SERIALIZE_DEFAULT 0
 #define EOBJ_SERIALIZE_ONLY_CONTENT 1
+#define EOBJ_JSON_LIST_NAMESPACE 2
+#define EOBJ_JSON_EXPAND_NAMESPACE 4
 
 /* Flags for json_indent()
  */
@@ -519,7 +521,7 @@ public:
      */
     eStatus json_write(
         eStream *stream,
-        os_int sflags = EOBJ_SERIALIZE_DEFAULT,
+        os_int sflags = EOBJ_JSON_LIST_NAMESPACE,
         os_int indent = -1,
         os_boolean *comma = OS_NULL);
 
@@ -531,7 +533,7 @@ public:
 
     /* Print object as JSON to console.
      */
-    void print_json(os_int sflags = EOBJ_SERIALIZE_DEFAULT);
+    void print_json(os_int sflags = EOBJ_JSON_LIST_NAMESPACE);
 
     /* Called to check if object has class specific content. If there is no class
        specific JSON content, json_writer or json_reader should not be called.

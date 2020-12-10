@@ -54,6 +54,8 @@ eStatus eObject::json_writer(
   @param  sflags Serialization flags.
             - EOBJ_SERIALIZE_DEFAULT (0) Default
             - EOBJ_SERIALIZE_ONLY_CONTENT Serialze only content, no metadata.
+            - EOBJ_JSON_LIST_NAMESPACE
+            - EOBJ_JSON_EXPAND_NAMESPACE
   @param  indent Indentation depth, 0, 1... Writes 2x this spaces at beginning of a line.
           -1 is same as 0, but with extra new line at the end.
 
@@ -210,32 +212,37 @@ eStatus eObject::json_write(
     /* Write name space content (this could be optional,
        not used for serialization but good for debug testing)
      */
-    if (flags() & EOBJ_HAS_NAMESPACE)
+    if (sflags & (EOBJ_JSON_LIST_NAMESPACE | EOBJ_JSON_EXPAND_NAMESPACE))
     {
-        if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma1)) goto failed;
-        if (json_puts(stream, "\"nspace\": [")) goto failed;
+        if (flags() & EOBJ_HAS_NAMESPACE)
+        {
+            if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE, &comma1)) goto failed;
+            if (json_puts(stream, "\"nspace\": [")) goto failed;
 
-        is_process = (classid() == ECLASSID_PROCESS);
-        if (is_process) {
-            os_lock();
+            is_process = (classid() == ECLASSID_PROCESS);
+            if (is_process) {
+                os_lock();
+            }
+
+            comma3 = OS_FALSE;
+            for (name = ns_first(); name; name = name->ns_next(OS_FALSE)) {
+                if (json_indent(stream, indent + 1, EJSON_NEW_LINE_BEFORE, &comma3)) goto failed;
+                if (json_puts(stream, "{\"name\": ")) goto failed;
+                if (json_putqs(stream, name->gets())) goto failed;
+                if (sflags & EOBJ_JSON_EXPAND_NAMESPACE) {
+                    if (json_puts(stream, ", \"object\": ")) goto failed;
+                    name->parent()->json_write(stream, sflags, indent + 2, OS_NULL);
+                }
+                if (json_puts(stream, "}")) goto failed;
+            }
+
+            if (is_process) {
+                os_unlock();
+            }
+
+            if (json_indent(stream, indent)) goto failed;
+            if (json_puts(stream, "]")) goto failed;
         }
-
-        comma3 = OS_FALSE;
-        for (name = ns_first(); name; name = name->ns_next(OS_FALSE)) {
-            if (json_indent(stream, indent + 1, EJSON_NEW_LINE_BEFORE, &comma3)) goto failed;
-            if (json_puts(stream, "{\"name\": ")) goto failed;
-            if (json_putqs(stream, name->gets())) goto failed;
-            if (json_puts(stream, ", \"object\": ")) goto failed;
-            name->parent()->json_write(stream, sflags, indent + 2, OS_NULL);
-            if (json_puts(stream, "}")) goto failed;
-        }
-
-        if (is_process) {
-            os_unlock();
-        }
-
-        if (json_indent(stream, indent)) goto failed;
-        if (json_puts(stream, "]")) goto failed;
     }
 
     /* Write bindings.
@@ -349,12 +356,20 @@ failed:
     return OS_NULL;
 }
 
-/*
+
+/**
+****************************************************************************************************
+
+  @brief Helper for intendation, commas and new lines.
+
   @param  indent Indentation depth, 0, 1... Writes 2x this spaces before the line.
   @param  iflags EJSON_NO_NEW_LINE, EJSON_NEW_LINE_BEFORE, EJSON_NEW_LINE_ONLY
+
   @return If successfull, the function returns ESTATUS_SUCCESS. Other return
           values indicate an error.
- */
+
+****************************************************************************************************
+*/
 eStatus eObject::json_indent(
     eStream *stream,
     os_int indent,
@@ -419,6 +434,16 @@ eStatus eObject::json_puts(
 
   The eObject::json_putqs() function writes quoted string to JSON stream.
 
+  list of special character used in JSON:
+
+    \b  Backspace (ascii code 08)
+    \f  Form feed (ascii code 0C)
+    \n  New line
+    \r  Carriage return
+    \t  Tab
+    \"  Double quote
+    \\  Backslash character
+
   @param  stream The stream to write JSON to.
   @param  str String to write.
 
@@ -431,10 +456,40 @@ eStatus eObject::json_putqs(
     eStream *stream,
     const os_char *str)
 {
+    const os_char *replacement, *p;
+
     if (json_puts(stream, "\"")) return ESTATUS_FAILED;
-    if (json_puts(stream, str)) return ESTATUS_FAILED;
-    return json_puts(stream, "\"");
+
+    p = str;
+    while (*p) {
+        switch (*(p++)) {
+            case '\b': replacement = "\\b"; break;
+            case '\f': replacement = "\\f"; break;
+            case '\n': replacement = "\\n"; break;
+            case '\t': replacement = "\\t"; break;
+            case '\"': replacement = "\\\""; break;
+            case '\\': replacement = "\\\\"; break;
+
+            default:
+                goto skipit;
+        }
+
+        if (p > str + 1) {
+            if (stream->write(str, p - str - 1)) return ESTATUS_FAILED;
+        }
+        str = p;
+        if (json_puts(stream, replacement)) return ESTATUS_FAILED;
+
+skipit:;
+    }
+
+    if (p > str) {
+        if (stream->write(str, p - str)) return ESTATUS_FAILED;
+    }
+    json_puts(stream, "\"");
+    return ESTATUS_SUCCESS;
 }
+
 
 /**
 ****************************************************************************************************
@@ -535,6 +590,7 @@ eStatus eObject::json_putv(
 
     return quote ? json_putqs(stream, value->gets()) : json_puts(stream, value->gets());
 }
+
 
 /**
 ****************************************************************************************************
