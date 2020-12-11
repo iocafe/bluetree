@@ -249,7 +249,7 @@ public:
 
             case ERSET_INITIAL_DATA_RECEIVED:
             case ERSET_MODIFICATIONS_RECEIVED:
-                rset->print_json(EOBJ_SERIALIZE_ONLY_CONTENT);
+                rset->print_json(EOBJ_JSON_ONLY_CONTENT);
                 break;
         }
 

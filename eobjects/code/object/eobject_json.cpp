@@ -53,7 +53,7 @@ eStatus eObject::json_writer(
   @param  stream The stream to write to.
   @param  sflags Serialization flags.
             - EOBJ_SERIALIZE_DEFAULT (0) Default
-            - EOBJ_SERIALIZE_ONLY_CONTENT Serialze only content, no metadata.
+            - EOBJ_JSON_ONLY_CONTENT Serialze only content, no metadata.
             - EOBJ_JSON_LIST_NAMESPACE
             - EOBJ_JSON_EXPAND_NAMESPACE
   @param  indent Indentation depth, 0, 1... Writes 2x this spaces at beginning of a line.
@@ -102,10 +102,10 @@ eStatus eObject::json_write(
     indent++;
     if (json_puts(stream, "{")) goto failed;
 
-    /* If we are serializing only content (EOBJ_SERIALIZE_ONLY_CONTENT flag).
+    /* If we are serializing only content (EOBJ_JSON_ONLY_CONTENT flag).
      */
-    if (sflags & EOBJ_SERIALIZE_ONLY_CONTENT) {
-        sflags &= ~ EOBJ_SERIALIZE_ONLY_CONTENT;
+    if (sflags & EOBJ_JSON_ONLY_CONTENT) {
+        sflags &= ~ EOBJ_JSON_ONLY_CONTENT;
         goto serialze_content;
     }
 
@@ -303,7 +303,7 @@ failed:
   @param  stream The stream to write to.
   @param  sflags Serialization flags.
             - EOBJ_SERIALIZE_DEFAULT (0) Default
-            - EOBJ_SERIALIZE_ONLY_CONTENT Serialze only content, no metadata.
+            - EOBJ_JSON_ONLY_CONTENT Serialze only content, no metadata.
 
   @return If successfull the function returns pointer to te new child object.
           If reading object from stream fails, value OS_NULL is returned.

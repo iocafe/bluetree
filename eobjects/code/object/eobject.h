@@ -83,9 +83,9 @@ class eRowSetBinding;
 /* Serialization flags eObject::write(), eObject::read() and clonegeeric() functions.
  */
 #define EOBJ_SERIALIZE_DEFAULT 0
-#define EOBJ_SERIALIZE_ONLY_CONTENT 1
-#define EOBJ_JSON_LIST_NAMESPACE 2
-#define EOBJ_JSON_EXPAND_NAMESPACE 4
+#define EOBJ_JSON_ONLY_CONTENT 0x10
+#define EOBJ_JSON_LIST_NAMESPACE 0x20
+#define EOBJ_JSON_EXPAND_NAMESPACE 0x40
 
 /* Flags for json_indent()
  */

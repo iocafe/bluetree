@@ -310,7 +310,6 @@ void ePersistent::save_as_message()
 
 content->print_json();
 
-
     propertyv(EPERP_ROOT_PATH, &target);
     propertyv(EPERP_FILE, relative_path);
     p = os_strechr(target.gets(), '/');
@@ -410,7 +409,9 @@ content->print_json();
         switch (dstobj->classid())
         {
             case ECLASSID_VARIABLE:
-                ((eVariable*)dstobj)->setv((eVariable*)srcobj);
+                if (!((eVariable*)dstobj)->is_nosave()) {
+                    ((eVariable*)dstobj)->setv((eVariable*)srcobj);
+                }
                 break;
 
             case ECLASSID_MATRIX:
@@ -436,8 +437,7 @@ void ePersistent::copy_loaded_matrix(
 {
     eContainer *sc, *dc, *src_cols, *dst_cols;
     eName *n;
-    eVariable *v, *tmp;
-    eObject *dcol;
+    eVariable *v, *tmp, *dcol;
     os_int max_src_cols, i, dst_i, *column_ix_tab;
     os_int nro_src_rows, row;
 
@@ -467,8 +467,9 @@ void ePersistent::copy_loaded_matrix(
     {
         n = v->primaryname();
         if (n == OS_NULL) continue;
-        dcol = dst_cols->byname(n->gets());
+        dcol = eVariable::cast(dst_cols->byname(n->gets()));
         if (dcol == OS_NULL) continue;
+        if (dcol->is_nosave()) continue;
 
         i = v->oid();
         if (i < 0 || i >= max_src_cols) {
