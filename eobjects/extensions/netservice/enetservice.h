@@ -85,6 +85,13 @@ protected:
      */
     void create_user_accounts_table();
 
+    void add_user_account(
+        const os_char *user_name,
+        const os_char *password,
+        os_int accept,
+        os_int privileges,
+        os_int row_nr = -1);
+
 
     /**
     ************************************************************************************************

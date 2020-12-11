@@ -64,13 +64,30 @@ void eNetService::create_user_accounts_table()
     column->setpropertys(EVARP_TEXT, "name");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_TTIP,
-        "Device or user name. Examples: \'candy3\',\n"
+        "User or device name. Examples: \'candy3\',\n"
         "\'ispy*\', or \'frank*.iocafenet\'");
+
+    column = new eVariable(columns);
+    column->addname("accept", ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "accept");
+    column->setpropertyi(EVARP_TYPE, OS_CHAR);
+    column->setpropertys(EVARP_ATTR, "enum=\"0.none,1.eobjects,2.iocom,7.all protocols\"");
+    column->setpropertys(EVARP_TTIP,
+        "Accepted incoming connections for the user's.\n"
+        "- \'none\': Connections by this user are not allowed.\n"
+        "- \'eobjects\': eobjects communication protocol (for glass user interface, etc).\n"
+        "- \'iocom\': IO device communication protocol.\n"
+        "- \'all protocols\': both \'eobjects\' and \'iocom\' are accepted.\n");
 
     column = new eVariable(columns);
     column->addname("privileges", ENAME_NO_MAP);
     column->setpropertyi(EVARP_TYPE, OS_CHAR);
-    column->setpropertys(EVARP_ATTR, "enum=\"0,none,1.quest,2.user,3.admin\"");
+    column->setpropertys(EVARP_ATTR, "enum=\"1.quest,2.user,3.admin\"");
+    column->setpropertys(EVARP_TTIP,
+        "What this user is allowed to User priviliges.\n"
+        "- \'quest\': view data and parameters, user cannot change anything.\n"
+        "- \'user\': view and modify parameters necessary to use the system.\n"
+        "- \'admin\': user can do anything, like upgrade software and change system configuration.\n");
 
     column = new eVariable(columns);
     column->addname("password", ENAME_NO_MAP);
@@ -90,7 +107,7 @@ void eNetService::create_user_accounts_table()
     column->addname("logon_tstamp", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "last logon");
     column->setpropertyi(EVARP_TYPE, OS_LONG);
-    column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\"");
+    column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\",nosave");
     column->setpropertys(EVARP_TTIP,
         "Time stamp of the last successfull logon");
 
@@ -100,4 +117,50 @@ void eNetService::create_user_accounts_table()
     m_accounts_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
 
     m_persistent_accounts->load_file("accounts.eo");
+
+    if (m_accounts_matrix->nrows() == 0) {
+        add_user_account("ispy", "pass", 7, 3);
+    }
+}
+
+
+void eNetService::add_user_account(
+    const os_char *user_name,
+    const os_char *password,
+    os_int accept,
+    os_int privileges,
+    os_int row_nr)
+{
+    eContainer row;
+    eVariable *element;
+
+    if (row_nr > 0) {
+        element = new eVariable(&row);
+        element->addname("ix", ENAME_NO_MAP);
+        element->setl(row_nr);
+    }
+
+    element = new eVariable(&row);
+    element->addname("user", ENAME_NO_MAP);
+    element->sets(user_name);
+
+    if (password) {
+        element = new eVariable(&row);
+        element->addname("password", ENAME_NO_MAP);
+        element->sets(password);
+    }
+
+    if (accept >= 0) {
+        element = new eVariable(&row);
+        element->addname("accept", ENAME_NO_MAP);
+        element->setl(accept);
+    }
+
+    if (privileges >= 0) {
+        element = new eVariable(&row);
+        element->addname("privileges", ENAME_NO_MAP);
+        element->setl(privileges);
+    }
+
+    m_accounts_matrix->insert(&row);
 }
