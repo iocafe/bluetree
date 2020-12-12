@@ -197,12 +197,12 @@ void eObject::srvbind(
      * it before creating new so we never have a duplicate.
      */
     source = envelope->source();
-    bf &= (EBIND_ATTR|EBIND_CLIENT|EBIND_BIND_ROWSET);
+    bf &= (/* EBIND_METADATA|EBIND_CLIENT| */EBIND_BIND_ROWSET);
     for (binding = eBinding::cast(bindings->first(pnr));
          binding;
          binding = eBinding::cast(binding->next(pnr)))
     {
-        if ((binding->bflags() & (EBIND_ATTR|EBIND_CLIENT|EBIND_BIND_ROWSET)) != bf) continue;
+        if ((binding->bflags() & (/* EBIND_METADATA|EBIND_CLIENT| */EBIND_BIND_ROWSET)) != bf) continue;
         if (os_strcmp(binding->bindpath(), source)) continue;
     }
     if (binding) {
@@ -214,7 +214,7 @@ void eObject::srvbind(
     binding = eBinding::cast(newobject(bindings, cid, pnr,
          EOBJ_NOT_CLONABLE | EOBJ_NOT_SERIALIZABLE));
 
-    binding->srvbind(this,  envelope);
+    binding->srvbind(this, envelope);
 }
 
 

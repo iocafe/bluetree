@@ -319,7 +319,7 @@ void ePropertyBinding::onmessage(
             any limit to buffered memory use.
           - EBIND_METADATA: If meta data, like text, unit, attributes, etc exists, it is
             also transferred from remote object to local object.
-          - EBIND_ATTR: Bind also attributes (subproperties like "x.min").
+          - EBIND_METADATA: Bind also attributes (subproperties like "x.min").
   @return None.
 
 ****************************************************************************************************
@@ -369,11 +369,11 @@ void ePropertyBinding::bind2(
 
     /* If we are binding attributes like "x.min", get these.
      */
-    if (m_bflags & EBIND_ATTR)
+    if (m_bflags & EBIND_METADATA)
     {
-        if (listattr(m_localpropertynr, &x))
+        if (list_meta_pr_names(m_localpropertynr, &x))
         {
-            parameters->setv(EPR_BINDING_ATTRLIST, &x);
+            parameters->setv(EPR_BINDING_META_PR_NAMES, &x);
         }
     }
 
@@ -400,7 +400,8 @@ void ePropertyBinding::srvbind(
     eEnvelope *envelope)
 {
     eSet *parameters, *reply;
-    eVariable v;
+    eVariable v, propertyname;
+    const os_char *propertyname_str;
 
     parameters = eSet::cast(envelope->content());
     if (parameters == OS_NULL)
@@ -413,22 +414,23 @@ void ePropertyBinding::srvbind(
 
     /* Get property name.
      */
-    if (!parameters->getv(EPR_BINDING_PROPERTYNAME, &v))
+    if (!parameters->getv(EPR_BINDING_PROPERTYNAME, &propertyname))
     {
 #if OSAL_DEBUG
         osal_debug_error("srvbind() failed: Property name missing");
 #endif
         goto notarget;
     }
+    propertyname_str = propertyname.gets();
 
     /* Convert property name to property number (-1 = unknown property).
      */
-    m_localpropertynr = obj->propertynr(v.gets());
+    m_localpropertynr = obj->propertynr(propertyname_str);
     if (m_localpropertynr < 0)
     {
 #if OSAL_DEBUG
         osal_debug_error("srvbind() failed: Property name unknwon");
-        osal_debug_error(v.gets());
+        osal_debug_error(propertyname_str);
 #endif
         goto notarget;
     }
@@ -445,12 +447,6 @@ void ePropertyBinding::srvbind(
        Store initial property value, unless clientmaster.
      */
     reply = new eSet(this);
-    /* if (m_flags & ATTR)
-    {
-
-xxxx
-
-    } */
 
     /* If this client is nor master at initialization, get property value.
      */
@@ -463,6 +459,14 @@ xxxx
     {
         parameters->getv(EPR_BINDING_VALUE, &v);
         binding_setproperty(&v);
+    }
+
+    /* If we need to send meta data with binding.
+     */
+    if (m_bflags & EBIND_METADATA)
+    {
+        parameters->getv(EPR_BINDING_META_PR_NAMES, &v);
+        get_meta_pr_values(obj, propertyname_str, m_localpropertynr, v.gets(), reply);
     }
 
     /* Complete the server end of binding and return.
@@ -766,14 +770,14 @@ os_boolean ePropertyBinding::binding_getproperty(
 
   @brief List attributes (subproperties like "x.min") for the property.
 
-  The ePropertyBinding::listattr() function...
+  The ePropertyBinding::list_meta_pr_names() function...
 
   @param  x Variable where to store attribute list.
   @return OS_TRUE if successfull.
 
 ****************************************************************************************************
 */
-os_boolean ePropertyBinding::listattr(
+os_boolean ePropertyBinding::list_meta_pr_names(
     os_int propertynr,
     eVariable *x)
 {
@@ -800,6 +804,73 @@ os_boolean ePropertyBinding::listattr(
     return !x->isempty();
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Get values for metadata properties (like "x.min") for related to the property.
+
+  The ePropertyBinding::list_meta_pr_names() function...
+
+  @param  x Variable where to store attribute list.
+  @return OS_TRUE if successfull.
+
+****************************************************************************************************
+*/
+void ePropertyBinding::get_meta_pr_values(
+    eObject *obj,
+    const os_char *propertyname,
+    os_int propertynr,
+    const os_char *metadata_pr_list,
+    eSet *reply)
+{
+    eVariable *v = OS_NULL;
+    os_int meta_prnr, set_ix;
+    os_char *meta_prname, *meta_prext;
+    const os_char *p, *e;
+
+    /* Loop trough all requested metadata property name.
+     */
+    p = metadata_pr_list;
+    set_ix = EPR_BINDING_META_PR_VALUES;
+    while (*p != '\0')
+    {
+        if (v == OS_NULL) {
+            v = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+        }
+        e = os_strchr(p, ',');
+        if (e == OS_NULL) {
+            e = os_strchr(p, '\0');
+        }
+
+        /* Generate metadata property name to try.
+         */
+        v->sets(propertyname);
+        v->appends_nbytes(p, e - p);
+        meta_prname = v->gets();
+        meta_prext = os_strchr(meta_prname, '.');
+
+        /* If there is object specific value, use it.
+         */
+        meta_prnr = obj->propertynr(meta_prname);
+        if (meta_prnr >= 0 && meta_prext)
+        {
+            reply->sets(set_ix++, meta_prext);
+            obj->propertyv(meta_prnr, v);
+            reply->setv(set_ix++, v);
+            goto goon;
+        }
+
+        /* Otherwise get class specific value.
+         */
+
+goon:
+        if (*e == '\0') break;
+        p = e + 1;
+    }
+
+    delete v;
+}
 
 /**
 ****************************************************************************************************

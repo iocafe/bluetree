@@ -39,10 +39,10 @@ extern const os_char ebindp_state[];
 /* Binding flags (used by both ePropertyBinding and eRowSetBinding).
  */
 #define EBIND_DEFAULT       0
-#define EBIND_ATTR          0x0001
+#define EBIND_METADATA      0x0001
 #define EBIND_CLIENTINIT    0x0002
 #define EBIND_NOFLOWCLT     0x0004
-#define EBIND_METADATA      0x0008
+/* #define EBIND_RESERVED      0x0008 */
 
 #define EBIND_CLIENT        0x0010  /* do not give as argument */
 #define EBIND_TEMPORARY     0x0020
@@ -52,7 +52,7 @@ extern const os_char ebindp_state[];
 #define EBIND_INTERTHREAD   0x0800  /* do not give as argument */
 
 #define EBIND_TYPE_MASK     EBIND_BIND_ROWSET
-#define EBIND_SER_MASK     (EBIND_TYPE_MASK|EBIND_CLIENTINIT|EBIND_NOFLOWCLT|EBIND_METADATA|EBIND_ATTR)
+#define EBIND_SER_MASK     (EBIND_TYPE_MASK|EBIND_CLIENTINIT|EBIND_NOFLOWCLT|EBIND_METADATA)
 
 /* Binding states.
  */

@@ -34,7 +34,7 @@ const os_char
     evarp_group[] = "x.group",
     evarp_gain[] = "x.gain",
     evarp_offset[] = "x.offset",
-    evarp_conf[] = "conf"; /* This MUST not start with "x." */
+    evarp_conf[] = "_conf"; /* This MUST not start with "x." */
 
 
 /**
@@ -173,6 +173,7 @@ void eVariable::setupproperties(
        property set before setting value for it. There is trick with p to set text type
        after adding property type. This effects only eVariable class.
      */
+addproperty (cls, EVARP_CONF, evarp_conf, "conf", EPRO_NOONPRCH); /* Property stuff */
     text = addproperty(cls, EVARP_TEXT, evarp_text, "text", EPRO_METADATA|EPRO_NOONPRCH);
     vtype = addpropertyl (cls, EVARP_TYPE, evarp_type, "type", EPRO_METADATA|EPRO_NOONPRCH);
     addproperty (cls, EVARP_ABBR, evarp_abbr, "abbreviation", EPRO_METADATA|EPRO_NOONPRCH);
@@ -187,7 +188,6 @@ void eVariable::setupproperties(
     addpropertys(cls, EVARP_ATTR, evarp_attr, "attr", EPRO_METADATA);
     addpropertyd(cls, EVARP_GAIN, evarp_gain, "gain", EPRO_METADATA|EPRO_NOONPRCH);
     addpropertyd(cls, EVARP_OFFSET, evarp_offset, "offset", EPRO_METADATA|EPRO_NOONPRCH);
-    addproperty (cls, EVARP_CONF, evarp_conf, "conf", EPRO_METADATA|EPRO_NOONPRCH);
 
     {
         eVariable tmp;
@@ -1291,7 +1291,7 @@ void eVariable::appends(
 {
     if (x == OS_NULL) x = "";
 
-    appends_internal(x, os_strlen(x)-1);
+    appends_nbytes(x, os_strlen(x)-1);
 }
 
 
@@ -1314,7 +1314,7 @@ void eVariable::appendl(
     os_char nbuf[OSAL_NBUF_SZ];
 
     osal_int_to_str(nbuf, sizeof(nbuf), x);
-    appends_internal(nbuf, os_strlen(nbuf)-1);
+    appends_nbytes(nbuf, os_strlen(nbuf)-1);
 }
 
 
@@ -1352,7 +1352,7 @@ void eVariable::appendv(
     del_tmpstr = !x->tmpstrallocated(); // ????????????????????????????????????????????
 
     str = x->gets(&sz);
-    appends_internal(str, sz-1);
+    appends_nbytes(str, sz-1);
 
     if (del_tmpstr) x->gets_free();
 }
@@ -1886,7 +1886,7 @@ failed:
 
   @brief Append string to variable value, internal.
 
-  The appends_internal() function appends characters from string to variable. After this
+  The appends_nbytes() function appends characters from string to variable. After this
   call the variable always contains a string.
 
   @param   str Pointer to the string to append. If str is NULL, the function just allocates
@@ -1897,7 +1897,7 @@ failed:
 
 ****************************************************************************************************
 */
-void eVariable::appends_internal(
+void eVariable::appends_nbytes(
     const os_char *str,
     os_memsz nchars)
 {
@@ -1999,7 +1999,7 @@ os_char *eVariable::allocate(
     os_memsz nchars)
 {
     sets(OS_NULL);
-    appends_internal(OS_NULL, nchars);
+    appends_nbytes(OS_NULL, nchars);
     return gets();
 }
 

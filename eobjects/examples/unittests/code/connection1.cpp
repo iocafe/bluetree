@@ -75,7 +75,7 @@ public:
     virtual void initialize(
         eContainer *params = OS_NULL)
     {
-        bind(EMYCLASS2P_X, "//myconnection/myclass1/_p/A", EBIND_DEFAULT|EBIND_ATTR);
+        bind(EMYCLASS2P_X, "//myconnection/myclass1/_p/A", EBIND_DEFAULT|EBIND_METADATA);
 // setpropertyd(EMYCLASS2P_Y, 3.3);
         bind(EMYCLASS2P_Y, "//myconnection/myclass1/_p/B", EBIND_CLIENTINIT);
 // setpropertyd(EMYCLASS2P_Y, 4.3);

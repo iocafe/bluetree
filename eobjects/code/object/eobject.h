@@ -132,6 +132,7 @@ typedef enum {
 }
 eCallbackEvent;
 
+
 /* Name space identifiers as static strings. eobj_this_ns is default
    for ns_first and ns_firstv functions()
  */

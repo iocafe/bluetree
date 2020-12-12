@@ -50,7 +50,7 @@ class eValueX;
 #define EVARP_MAX 16
 #define EVARP_GAIN 17
 #define EVARP_OFFSET 18
-#define EVARP_CONF 25
+#define EVARP_CONF 0
 
 /* Variable property names.
  */
@@ -341,6 +341,12 @@ public:
     void appends(
         const os_char *x);
 
+    /* Append known length string to variable value.
+     */
+    void appends_nbytes(
+        const os_char *str,
+        os_memsz nchars);
+
     void appendl(
         os_long x);
 
@@ -475,12 +481,6 @@ protected:
     {
         if (tmpstrallocated()) gets_free();
     }
-
-    /* Append string to variable value, internal.
-     */
-    void appends_internal(
-        const os_char *str,
-        os_memsz nchars);
 
     os_int sbits_internal();
     os_long tstamp_internal();

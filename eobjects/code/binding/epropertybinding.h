@@ -24,7 +24,9 @@ typedef enum ePrBindingParamEnum {
     EPR_BINDING_FLAGS = 1,
     EPR_BINDING_PROPERTYNAME,
     EPR_BINDING_VALUE,
-    EPR_BINDING_ATTRLIST
+    EPR_BINDING_META_PR_NAMES,
+
+    EPR_BINDING_META_PR_VALUES /* must be last */
 }
 ePrBindingParamEnum;
 
@@ -187,9 +189,22 @@ protected:
 
     /* List attributes (subproperties like "x.min") for the property.
      */
-    os_boolean listattr(
+    os_boolean list_meta_pr_names(
         os_int propertynr,
         eVariable *x);
+
+    void get_meta_pr_values(
+        eObject *obj,
+        const os_char *propertyname,
+        os_int propertynr,
+        const os_char *metadata_pr_list,
+        eSet *reply);
+
+    /* List attributes (subproperties like "x.min") for the property.
+     */
+    /* os_boolean match_meta_pr_names(
+        os_int propertynr,
+        eVariable *x); */
 
     /* Save property name.
      */

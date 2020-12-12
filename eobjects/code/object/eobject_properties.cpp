@@ -395,7 +395,7 @@ void eObject::propertysetdone(
     os_int cid)
 {
     eContainer *pset;
-    eVariable *p, *mp;
+    eVariable *p, *next_p, *mp;
     eName *name;
     os_char *propertyname, *e;
 
@@ -405,8 +405,9 @@ void eObject::propertysetdone(
     pset = eglobal->propertysets->firstc(cid);
     if (pset == OS_NULL) return;
 
-    for (p = pset->firstv(); p; p = p->nextv())
+    for (p = pset->firstv(); p; p = next_p)
     {
+        next_p = p->nextv();
         name = p->firstn();
         if (name == OS_NULL) continue;
         propertyname = name->gets();
@@ -421,9 +422,12 @@ void eObject::propertysetdone(
             mp = eVariable::cast(pset->byname(v.gets()));
             if (mp)
             {
-                p->propertyv(EVARP_CONF, &v);
+                mp->propertyv(EVARP_CONF, &v);
+                if (!v.isempty()) {
+                    v.appends(",");
+                }
                 v.appends(e);
-                p->setpropertyv(EVARP_CONF, &v);
+                mp->setpropertyv(EVARP_CONF, &v);
             }
         }
     }

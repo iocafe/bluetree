@@ -90,7 +90,7 @@ void eGui::open_content(
             }
 
             e = new eLineEdit(p);
-            e->bind(ECOMP_VALUE, mypath.gets(), evarp_value, EBIND_ATTR|EBIND_METADATA);
+            e->bind(ECOMP_VALUE, mypath.gets(), evarp_value, EBIND_METADATA);
         }
     }
 }
