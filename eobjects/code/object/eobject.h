@@ -105,14 +105,24 @@ class eRowSetBinding;
 #define EBROWSE_BROWSE_FLAGS 32
 
 /* More browse object identifier numbers (used bot object id but not in bit fields).
+  - EBROWSE_OBJECT_FLAGS: EOBJ_IS_ATTACHMENT, EOBJ_CUST_FLAG1, etc as returned
+    by eObject::flags().
+  - EBROWSE_RIGHT_CLICK_SELECTIONS: Which right click selections to show "open" in right
+    click popup menu for this object. Like "open", "graph", etc. in right click menu.
  */
 #define EBROWSE_OBJECT_FLAGS 33
+#define EBROWSE_RIGHT_CLICK_SELECTIONS 34
 
 /* Browse appendix indices.
  */
 #define EBROWSE_PATH 1
 #define EBROWSE_IPATH 2
 #define EBROWSE_ITEM_TYPE 3
+
+/* Bits for EBROWSE_RIGHT_CLICK_SELECTIONS.
+ */
+#define EBROWSE_OPEN_SELECTION 1
+#define EBROWSE_GRAPH_SELECTION 2
 
 /* Reason for parent callback, see eObject::docallback() and eObject::oncallback() functions.
  */
@@ -1011,11 +1021,23 @@ public:
         {return flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK); }
 
 protected:
+
+    /**
+    ************************************************************************************************
+      Protected functions
+    ************************************************************************************************
+    */
+
     void message_within_thread(
         eEnvelope *envelope,
         const os_char *namespace_id);
 
     void message_process_ns(
+        eEnvelope *envelope);
+
+    /* Information for opening object has been requested, send it.
+     */
+    virtual void send_open_info(
         eEnvelope *envelope);
 
     /* Object information request by tree browser node, etc. Reply to it.

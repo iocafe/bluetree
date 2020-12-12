@@ -85,6 +85,11 @@
 #define ECMD_INFO_REQUEST -60
 #define ECMD_INFO_REPLY -61
 
+/* Opening objects in UI, etc.
+ */
+#define ECMD_OPEN_REQUEST -62
+#define ECMD_OPEN_REPLY -63
+
 /* File system related.
  */
 #define ECMD_SAVE_FILE -65

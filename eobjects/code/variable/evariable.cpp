@@ -230,6 +230,7 @@ void eVariable::object_info(
         EVARP_GAIN, EVARP_OFFSET, 0};
 
     eObject::object_info(item, name, appendix, target);
+    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN_SELECTION);
 
     propertyv(EVARP_TEXT, &value);
     if (!value.isempty()) {

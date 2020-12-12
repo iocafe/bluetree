@@ -217,6 +217,9 @@ typedef enum {
     ECOMPO_COPY,
     ECOMPO_PASTE,
 
+    ECOMPO_OPEN,
+    ECOMPO_GRAPH,
+
     ECOMPO_NEW_ROW,
     ECOMPO_EDIT_ROW,
     ECOMPO_DELETE_ROW,
@@ -438,6 +441,27 @@ public:
     /* Create popup window, often "select value" or "right click" popup menu.
      */
     ePopup *popup();
+
+    /* Add command item to right click popup menu
+     */
+    void add_popup_item_command(
+        const os_char *text,
+        os_int command,
+        ePopup *p);
+
+    /* Add toggle item to right click popup menu
+     */
+    void add_popup_item_toggle(
+        const os_char *text,
+        os_int propertynr,
+        const os_char *propertyname,
+        ePopup *p);
+
+    /* Send message to object to request open content
+     */
+    void open_request(
+        const os_char *path,
+        os_int command = EBROWSE_OPEN_SELECTION);
 
     /* Create "select value from drop down list" popup.
      */

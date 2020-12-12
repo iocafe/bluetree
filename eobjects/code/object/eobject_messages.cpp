@@ -690,6 +690,10 @@ void eObject::onmessage(
               case ECMD_INFO_REQUEST:
                 send_browse_info(envelope);
                 return;
+
+              case ECMD_OPEN_REQUEST:
+                send_open_info(envelope);
+                return;
             }
 
 #if OSAL_DEBUG
@@ -767,6 +771,36 @@ getout:
     /* Send "no target" reply message to indicate that recipient was not found.
      */
     notarget(envelope);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Information for opening object has been requested, send it.
+
+  The object has received ECMD_INFO request and it needs to return back information
+  for opening the object.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eObject::send_open_info(
+    eEnvelope *envelope)
+{
+    eContainer *content;
+
+    /* Created container for reply content.
+     */
+    content = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+
+    /* Send reply to caller
+     */
+    message(ECMD_OPEN_REPLY, envelope->source(),
+        envelope->target(), content, EMSG_DEL_CONTENT, envelope->context());
 }
 
 

@@ -43,6 +43,7 @@ eTreeNode::eTreeNode(
 #if ETREENODE_TOOLTIPS_FOR_DEBUG
     m_object_flags = 0;
 #endif
+    m_right_click_selections = 0;
     os_memclear(&m_value_rect, sizeof(eRect));
 
     /* Clear row count. Set -1 that we actually clear the parents.
@@ -322,6 +323,12 @@ os_int eTreeNode::setup_node(
             }
         }
 
+        /* Additional selections in right click popup menu.
+         */
+        if (appendix->getv(EBROWSE_RIGHT_CLICK_SELECTIONS, &value)) {
+            m_right_click_selections = value.geti();
+        }
+
 #if ETREENODE_TOOLTIPS_FOR_DEBUG
         m_object_flags = (os_uint)appendix->getl(EBROWSE_OBJECT_FLAGS);
 #endif
@@ -359,15 +366,27 @@ eStatus eTreeNode::onpropertychange(
     eVariable *x,
     os_int flags)
 {
+    os_int command;
+
     switch (propertynr)
     {
         case ECOMP_COMMAND:
-            if (x->geti() == ECOMPO_REFRESH) {
-                request_object_info();
-                setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
-            }
-            else {
-                goto call_parent;
+            command = x->geti();
+            switch (command)
+            {
+                case ECOMPO_REFRESH:
+                    request_object_info();
+                    setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
+                    break;
+
+                case ECOMPO_OPEN:
+                case ECOMPO_GRAPH:
+                    open_request(m_ipath.get(this, ECOMP_IPATH), command);
+                    setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
+                    break;
+
+                default:
+                    goto call_parent;
             }
             break;
 
@@ -860,28 +879,21 @@ ePopup *eTreeNode::right_click_popup(
     eDrawParams& prm)
 {
     ePopup *p;
-    eButton *item;
-    eVariable target;
-    os_char buf[E_OIXSTR_BUF_SZ];
-
     p = eComponent::right_click_popup(prm);
-    oixstr(buf, sizeof(buf));
 
-    /* Generic component scope items: refresh and show all.
+    /* Additional right click selections from object.
      */
-    item = new eButton(p);
-    item->setpropertys(ECOMP_TEXT, "refresh");
-    item->setpropertyl(ECOMP_VALUE, 0);
-    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_REFRESH);
-    target = buf; target += "/_p/_command";
-    item->setpropertyv(ECOMP_TARGET, &target);
+    if (m_right_click_selections & EBROWSE_OPEN_SELECTION) {
+        add_popup_item_command("open", ECOMPO_OPEN, p);
+    }
+    if (m_right_click_selections & EBROWSE_GRAPH_SELECTION) {
+        add_popup_item_command("graph", ECOMPO_GRAPH, p);
+    }
 
-    item = new eButton(p);
-    item->setpropertys(ECOMP_TEXT, "all items");
-    item->setpropertyl(ECOMP_VALUE, OS_FALSE);
-    item->setpropertyl(ECOMP_SETVALUE, !m_all);
-    target = buf; target += "/_p/all";
-    item->setpropertyv(ECOMP_TARGET, &target);
+    /* Other component scope items: refresh and show all.
+     */
+    add_popup_item_command("refresh", ECOMPO_REFRESH, p);
+    add_popup_item_toggle("all items", ECOMP_ALL, ecomp_all, p);
 
     return p;
 }

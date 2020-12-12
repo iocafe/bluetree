@@ -126,6 +126,44 @@ void eGui::setupclass()
 /**
 ****************************************************************************************************
 
+  @brief Function to process incoming messages.
+
+  The eGui::onmessage function handles messages received by object. If this function
+  doesn't process message, it calls parent class'es onmessage function.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eGui::onmessage(
+    eEnvelope *envelope)
+{
+    /* If at final destination for the message.
+     */
+    if (*envelope->target()=='\0')
+    {
+        switch (envelope->command())
+        {
+            case ECMD_OPEN_REPLY:
+                open_content(envelope->source(), envelope->content(), envelope->context());
+                return;
+
+            default:
+                break;
+        }
+    }
+
+    /* Call parent class'es onmessage.
+     */
+    eObject::onmessage(envelope);
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Generating ImGui autolabel.
 
   The eGui::make_autolabel generates unique nonzero numbers for ImGui labels.

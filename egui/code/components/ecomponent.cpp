@@ -732,22 +732,88 @@ void eComponent::add_popup_edit_mode_items(
     eDrawParams& prm,
     ePopup *p)
 {
-    eButton *item;
-    eVariable target;
-    os_char buf[E_OIXSTR_BUF_SZ];
-
-    oixstr(buf, sizeof(buf));
-
-    /* Generic component scope items: refresh and show all.
+    /* Generic component scope items
      */
     if (classid() != EGUICLASSID_WINDOW) {
-        item = new eButton(p);
-        item->setpropertys(ECOMP_TEXT, "cut");
-        item->setpropertyl(ECOMP_VALUE, 0);
-        item->setpropertyl(ECOMP_SETVALUE, ECOMPO_CUT);
-        target = buf; target += "/_p/_command";
-        item->setpropertyv(ECOMP_TARGET, &target);
+        add_popup_item_command("cut", ECOMPO_CUT, p);
     }
+}
+
+
+/**
+****************************************************************************************************
+  Add command item to right click popup menu
+****************************************************************************************************
+*/
+void eComponent::add_popup_item_command(
+    const os_char *text,
+    os_int command,
+    ePopup *p)
+{
+    eButton *item;
+    os_char buf[E_OIXSTR_BUF_SZ + 32];
+
+    oixstr(buf, sizeof(buf));
+    os_strncat(buf, "/_p/_command", sizeof(buf));
+
+    item = new eButton(p);
+    item->setpropertys(ECOMP_TEXT, text);
+    item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
+    item->setpropertyl(ECOMP_SETVALUE, command);
+    item->setpropertys(ECOMP_TARGET, buf);
+}
+
+
+/**
+****************************************************************************************************
+  Add toggle item to right click popup menu
+****************************************************************************************************
+*/
+void eComponent::add_popup_item_toggle(
+    const os_char *text,
+    os_int propertynr,
+    const os_char *propertyname,
+    ePopup *p)
+{
+    eButton *item;
+    os_char buf[E_OIXSTR_BUF_SZ + 32];
+    os_int state;
+
+    oixstr(buf, sizeof(buf));
+    os_strncat(buf, "/_p/", sizeof(buf));
+    os_strncat(buf, propertyname, sizeof(buf));
+    state = propertyi(propertynr);
+
+    item = new eButton(p);
+    item->setpropertys(ECOMP_TEXT, text);
+    item->setpropertyl(ECOMP_VALUE, OS_FALSE);
+    item->setpropertyl(ECOMP_SETVALUE, !state);
+    item->setpropertys(ECOMP_TARGET, buf);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Send message to object to request open content
+
+  @param  path Path to the object to "open".
+  @param  command EBROWSE_OPEN_SELECTION, EBROWSE_GRAPH_SELECTION
+
+****************************************************************************************************
+*/
+void eComponent::open_request(
+    const os_char *path,
+    os_int command)
+{
+    eContainer *context;
+    eVariable *v;
+
+    context = new eContainer(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    v = new eVariable(context, EBROWSE_RIGHT_CLICK_SELECTIONS);
+    v->setl(command);
+    gui()->open_request(path, context);
+    delete context;
 }
 
 
@@ -1095,3 +1161,4 @@ void eComponent::on_drop(
         }
     }
 }
+

@@ -101,6 +101,11 @@ public:
      */
     static void setupclass();
 
+    /* Function to process incoming messages.
+     */
+    virtual void onmessage(
+        eEnvelope *envelope);
+
     /* Generating ImGui autolabel.
      */
     os_long make_autolabel();
@@ -201,6 +206,25 @@ public:
      */
     void delete_pending();
 
+
+    /**
+    ************************************************************************************************
+      Opening windows.
+    ************************************************************************************************
+    */
+
+    /* Send message to object to request open content.
+     */
+    void open_request(
+        const os_char *path,
+        eObject *context);
+
+    /* Create a window to display object content.
+     */
+    void open_content(
+        const os_char *path,
+        eObject *content,
+        eObject *context);
 
     /**
     ************************************************************************************************

@@ -431,6 +431,13 @@ protected:
     void dbm_message(
         eEnvelope *envelope);
 
+    /* Collect information about this matrix for tree browser, etc.
+     */
+    void object_info(
+        eVariable *item,
+        eVariable *name,
+        eSet *appendix,
+        const os_char *target);
 
     /**
     ************************************************************************************************

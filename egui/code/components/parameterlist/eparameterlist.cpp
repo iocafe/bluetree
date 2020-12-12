@@ -343,22 +343,8 @@ ePopup *eParameterList::right_click_popup(
     eDrawParams& prm)
 {
     ePopup *p;
-    //eButton *item;
-    // eVariable target;
-    os_char buf[E_OIXSTR_BUF_SZ];
 
     p = eComponent::right_click_popup(prm);
-    oixstr(buf, sizeof(buf));
-
-    /* Generic component scope items: refresh and show all.
-     */
-    /* item = new eButton(p);
-    item->setpropertys(ECOMP_TEXT, "new row");
-    item->setpropertyl(ECOMP_VALUE, 0);
-    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_REFRESH);
-    target = buf; target += "/_p/_command";
-    item->setpropertyv(ECOMP_TARGET, &target); */
-
     return p;
 }
 

@@ -748,43 +748,24 @@ ePopup *eTableView::right_click_popup(
     eDrawParams& prm)
 {
     ePopup *p;
-    eButton *item;
-    os_char buf[E_OIXSTR_BUF_SZ + 32];
     os_int row;
 
     if (prm.mouse_pos.y < m_data_windows_start_y) return OS_NULL;
     row = (prm.mouse_pos.y - m_logical_data_start_y);
     if (row < 0) return OS_NULL;
     row /= m_data_row_h;
-    // if (row >= m_row_to_m_len) return OS_NULL;
 
     /* Close old dialog if any.
      */
     delete m_row_dialog->get();
 
     p = eComponent::right_click_popup(prm);
-    oixstr(buf, sizeof(buf));
-    os_strncat(buf, "/_p/_command", sizeof(buf));
 
-    item = new eButton(p);
-    item->setpropertys(ECOMP_TEXT, "new row");
-    item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
-    item->setpropertyl(ECOMP_SETVALUE, ECOMPO_NEW_ROW);
-    item->setpropertys(ECOMP_TARGET, buf);
+    add_popup_item_command("new row", ECOMPO_NEW_ROW, p);
 
-    if (row < m_row_to_m_len)
-    {
-        item = new eButton(p);
-        item->setpropertys(ECOMP_TEXT, "edit row");
-        item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
-        item->setpropertyl(ECOMP_SETVALUE, ECOMPO_EDIT_ROW);
-        item->setpropertys(ECOMP_TARGET, buf);
-
-        item = new eButton(p);
-        item->setpropertys(ECOMP_TEXT, "delete row");
-        item->setpropertyl(ECOMP_VALUE, ECOMPO_NO_COMMAND);
-        item->setpropertyl(ECOMP_SETVALUE,ECOMPO_DELETE_ROW);
-        item->setpropertys(ECOMP_TARGET, buf);
+    if (row < m_row_to_m_len) {
+        add_popup_item_command("edit row", ECOMPO_EDIT_ROW, p);
+        add_popup_item_command("delete row", ECOMPO_DELETE_ROW, p);
 
         /* Set ePointer to row matrix.
          */
@@ -822,7 +803,7 @@ void eTableView::object_info(
 {
     eVariable value;
 
-    eObject::object_info(item, name, appendix, target);
+    eComponent::object_info(item, name, appendix, target);
 
     propertyv(ECOMP_TEXT, &value);
     if (!value.isempty()) {

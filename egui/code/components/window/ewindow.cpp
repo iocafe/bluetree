@@ -612,7 +612,7 @@ void eWindow::object_info(
     const os_char *target)
 {
     eVariable tmp;
-    eObject::object_info(item, name, appendix, target);
+    eComponent::object_info(item, name, appendix, target);
 
     propertyv(ECOMP_TEXT, &tmp);
     item->setpropertyv(EVARP_VALUE, &tmp);
