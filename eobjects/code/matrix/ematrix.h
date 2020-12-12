@@ -339,7 +339,7 @@ public:
 protected:
     /**
     ************************************************************************************************
-      Internal functions.
+      Protected functions.
     ************************************************************************************************
     */
 
@@ -433,11 +433,17 @@ protected:
 
     /* Collect information about this matrix for tree browser, etc.
      */
-    void object_info(
+    virtual void object_info(
         eVariable *item,
         eVariable *name,
         eSet *appendix,
         const os_char *target);
+
+    /* Information for opening object has been requested, send it.
+     */
+    virtual void send_open_info(
+        eEnvelope *envelope);
+
 
     /**
     ************************************************************************************************

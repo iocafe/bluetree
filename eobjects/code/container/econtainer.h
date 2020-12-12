@@ -111,6 +111,28 @@ public:
     /* Empty the container.
      */
     void clear();
+
+
+protected:
+    /**
+    ************************************************************************************************
+      Protected functions.
+    ************************************************************************************************
+    */
+
+    /* Collect information about this object for tree browser, etc.
+     */
+    virtual void object_info(
+        eVariable *item,
+        eVariable *name,
+        eSet *appendix,
+        const os_char *target);
+
+    /* Information for opening object has been requested, send it.
+     */
+    virtual void send_open_info(
+        eEnvelope *envelope);
+
 };
 
 #endif

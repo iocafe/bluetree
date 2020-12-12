@@ -2311,3 +2311,34 @@ void eMatrix::object_info(
     eObject::object_info(item, name, appendix, target);
     appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN_SELECTION);
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Information for opening object has been requested, send it.
+
+  The object has received ECMD_INFO request and it needs to return back information
+  for opening the object.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eMatrix::send_open_info(
+    eEnvelope *envelope)
+{
+    eContainer *content;
+
+    /* Created container for reply content.
+     */
+    content = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+    new eVariable(content, ECLASSID_MATRIX);
+
+    /* Send reply to caller
+     */
+    message(ECMD_OPEN_REPLY, envelope->source(),
+        envelope->target(), content, EMSG_DEL_CONTENT, envelope->context());
+}

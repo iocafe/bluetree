@@ -41,10 +41,23 @@ public:
     virtual void initialize(
         eContainer *params = OS_NULL)
     {
+        eVariable *v;
+
         osal_console_write("ThreadExposingTheTable started\n");
 
         m_mtx = new eMatrix(this);
         m_mtx->addname("//mymtx");
+
+        m_pers = new ePersistent(this);
+        m_pers->addname("//mypersistent");
+        m_pers->ns_create();
+        v = new eVariable(m_pers);
+        v->addname("../abba");
+        v->setpropertys(EVARP_TEXT, "ABBA");
+        v = new eVariable(m_pers);
+        v->addname("../bansku");
+        v->setpropertys(EVARP_TEXT, "BANSKU");
+        v->setpropertys(EVARP_UNIT, "kN");
     }
 
     virtual void finish()
@@ -63,6 +76,7 @@ public:
 protected:
 
     eMatrix *m_mtx;
+    ePersistent *m_pers;
 };
 
 

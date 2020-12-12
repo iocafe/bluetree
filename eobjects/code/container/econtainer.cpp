@@ -310,3 +310,76 @@ void eContainer::clear()
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Collect information about this matrix for tree browser, etc.
+
+  The eContainer::object_info function fills in item (eVariable) to contain information
+  about this object for tree browser view.
+
+  @param   item Pointer to eVariable to set up with object information.
+  @param   name Object's name if known. OS_NULL if object is not named or name is
+           unknown at this time.
+  @param   appendix Pointer to eSet into which to store property flags. The stored property
+           flags indicate if object has namespace, children, or properties.
+  @param   target Path "within object" when browsing a tree which is not made out
+           of actual eObjects. For example OS file system directory.
+
+****************************************************************************************************
+*/
+void eContainer::object_info(
+    eVariable *item,
+    eVariable *name,
+    eSet *appendix,
+    const os_char *target)
+{
+    eObject::object_info(item, name, appendix, target);
+    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN_SELECTION);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Information for opening object has been requested, send it.
+
+  The object has received ECMD_INFO request and it needs to return back information
+  for opening the object.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eContainer::send_open_info(
+    eEnvelope *envelope)
+{
+    eContainer *content;
+    eObject *o;
+    eVariable *item;
+    eName *name;
+    os_int cid;
+
+    /* Created container for reply content.
+     */
+    content = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+
+    for (name = eObject::ns_firstv(); name; name = name->ns_next(OS_FALSE))
+    {
+        o = name->parent();
+        cid = o->classid();
+        if (cid != ECLASSID_VARIABLE && cid != ECLASSID_MATRIX) {
+            continue;
+        }
+
+        item = new eVariable(content, cid);
+        item->setv(name);
+    }
+
+    /* Send reply to caller
+     */
+    message(ECMD_OPEN_REPLY, envelope->source(),
+        envelope->target(), content, EMSG_DEL_CONTENT, envelope->context());
+}

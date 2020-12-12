@@ -55,13 +55,44 @@ void eGui::open_content(
 {
     eWindow *w;
     eTableView *t;
+    eParameterList *p;
+    eLineEdit *e;
+    eVariable *v, mypath;
 
-    w = new eWindow(this);
-    w->setpropertys(ECOMP_TEXT, "test table");
+    for (v = content->firstv(ECLASSID_MATRIX); v; v = v->nextv(ECLASSID_MATRIX))
+    {
+        mypath.sets(path);
+        if (!v->isempty()) {
+            mypath.appends("/");
+            mypath.appendv(v);
+        }
 
-    t = new eTableView(w);
-    t->setpropertys(ECOMP_PATH, path);
+        w = new eWindow(this);
+        w->setpropertys(ECOMP_TEXT, "test table");
 
+        t = new eTableView(w);
+        t->setpropertys(ECOMP_PATH, mypath.gets());
+    }
+
+
+    if (content->firstv(ECLASSID_VARIABLE))
+    {
+        w = new eWindow(this);
+        w->setpropertys(ECOMP_TEXT, "test vars");
+        p = new eParameterList(w);
+
+        for (v = content->firstv(ECLASSID_VARIABLE); v; v = v->nextv(ECLASSID_VARIABLE))
+        {
+            mypath.sets(path);
+            if (!v->isempty()) {
+                mypath.appends("/");
+                mypath.appendv(v);
+            }
+
+            e = new eLineEdit(p);
+            e->bind(ECOMP_VALUE, mypath.gets(), evarp_value, EBIND_ATTR|EBIND_METADATA);
+        }
+    }
 }
 
 
