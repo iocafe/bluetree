@@ -30,10 +30,11 @@
 */
 void eGui::open_request(
     const os_char *path,
+    eObject *content,
     eObject *context)
 {
     message(ECMD_OPEN_REQUEST, path,
-        OS_NULL, OS_NULL, EMSG_KEEP_CONTEXT, context);
+        OS_NULL, content, EMSG_KEEP_CONTEXT, context);
 }
 
 
@@ -90,7 +91,7 @@ void eGui::open_content(
             }
 
             e = new eLineEdit(p);
-            e->bind(ECOMP_VALUE, mypath.gets(), evarp_value, EBIND_METADATA);
+            e->bind(ECOMP_VALUE, mypath.gets(), EBIND_METADATA);
         }
     }
 }

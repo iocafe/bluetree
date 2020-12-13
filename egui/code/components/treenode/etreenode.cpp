@@ -367,6 +367,7 @@ eStatus eTreeNode::onpropertychange(
     os_int flags)
 {
     os_int command;
+    eTreeNode *p;
 
     switch (propertynr)
     {
@@ -380,8 +381,18 @@ eStatus eTreeNode::onpropertychange(
                     break;
 
                 case ECOMPO_OPEN:
+                    open_request(m_ipath.get(this, ECOMP_IPATH), EBROWSE_OPEN);
+                    setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
+                    break;
+
                 case ECOMPO_GRAPH:
-                    open_request(m_ipath.get(this, ECOMP_IPATH), command);
+                    open_request(m_ipath.get(this, ECOMP_IPATH), EBROWSE_GRAPH);
+                    setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
+                    break;
+
+                case ECOMPO_PROPERTIES:
+                    p = eTreeNode::cast(parent());
+                    open_request(p->m_ipath.get(p, ECOMP_IPATH), EBROWSE_PROPERTIES);
                     setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
                     break;
 
@@ -883,11 +894,15 @@ ePopup *eTreeNode::right_click_popup(
 
     /* Additional right click selections from object.
      */
-    if (m_right_click_selections & EBROWSE_OPEN_SELECTION) {
+    if (m_right_click_selections & EBROWSE_OPEN)
+    {
         add_popup_item_command("open", ECOMPO_OPEN, p);
     }
-    if (m_right_click_selections & EBROWSE_GRAPH_SELECTION) {
+    if (m_right_click_selections & EBROWSE_GRAPH) {
         add_popup_item_command("graph", ECOMPO_GRAPH, p);
+    }
+    if (m_intermediate_node && m_node_type == EBROWSE_PROPERTIES) {
+        add_popup_item_command("open", ECOMPO_PROPERTIES, p);
     }
 
     /* Other component scope items: refresh and show all.

@@ -335,7 +335,7 @@ void eContainer::object_info(
     const os_char *target)
 {
     eObject::object_info(item, name, appendix, target);
-    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN_SELECTION);
+    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN);
 }
 
 
@@ -356,30 +356,54 @@ void eContainer::object_info(
 void eContainer::send_open_info(
     eEnvelope *envelope)
 {
-    eContainer *content;
+    eContainer *request, *reply;
+    eVariable *v;
+    os_int command = EBROWSE_OPEN;
     eObject *o;
     eVariable *item;
     eName *name;
     os_int cid;
 
-    /* Created container for reply content.
+    /* Get command
      */
-    content = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
-
-    for (name = eObject::ns_firstv(); name; name = name->ns_next(OS_FALSE))
-    {
-        o = name->parent();
-        cid = o->classid();
-        if (cid != ECLASSID_VARIABLE && cid != ECLASSID_MATRIX) {
-            continue;
+    request = eContainer::cast(envelope->content());
+    if (request->classid() != ECLASSID_CONTAINER) return;
+    if (request) {
+        v = request->firstv(EOID_PARAMETER);
+        if (v) {
+            command = v->geti();
         }
-
-        item = new eVariable(content, cid);
-        item->setv(name);
     }
 
-    /* Send reply to caller
+    /* The "open" selection shows the variables and matrices in the container.
      */
-    message(ECMD_OPEN_REPLY, envelope->source(),
-        envelope->target(), content, EMSG_DEL_CONTENT, envelope->context());
+    if (command == EBROWSE_OPEN)
+    {
+        /* Created container for reply content.
+         */
+        reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+
+        for (name = eObject::ns_firstv(); name; name = name->ns_next(OS_FALSE))
+        {
+            o = name->parent();
+            cid = o->classid();
+            if (cid != ECLASSID_VARIABLE && cid != ECLASSID_MATRIX) {
+                continue;
+            }
+
+            item = new eVariable(reply, cid);
+            item->setv(name);
+        }
+
+        /* Send reply to caller
+         */
+        message(ECMD_OPEN_REPLY, envelope->source(),
+            envelope->target(), reply, EMSG_DEL_CONTENT, envelope->context());
+    }
+
+    /* Otherwise use default implementation for properties, etc.
+     */
+    else {
+        eObject::send_open_info(envelope);
+    }
 }

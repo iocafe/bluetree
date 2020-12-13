@@ -217,6 +217,7 @@ public:
      */
     void open_request(
         const os_char *path,
+        eObject *content,
         eObject *context);
 
     /* Create a window to display object content.

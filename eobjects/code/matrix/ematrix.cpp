@@ -2309,7 +2309,7 @@ void eMatrix::object_info(
     const os_char *target)
 {
     eObject::object_info(item, name, appendix, target);
-    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN_SELECTION);
+    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN);
 }
 
 
@@ -2330,15 +2330,41 @@ void eMatrix::object_info(
 void eMatrix::send_open_info(
     eEnvelope *envelope)
 {
-    eContainer *content;
+    eContainer *request, *reply;
+    eVariable *v;
+    os_int command = EBROWSE_OPEN;
 
-    /* Created container for reply content.
+    /* Get command
      */
-    content = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
-    new eVariable(content, ECLASSID_MATRIX);
+    request = eContainer::cast(envelope->content());
+    if (request->classid() != ECLASSID_CONTAINER) return;
+    if (request) {
+        v = request->firstv(EOID_PARAMETER);
+        if (v) {
+            command = v->geti();
+        }
+    }
 
-    /* Send reply to caller
+// EBROWSE_PROPERTIES
+
+    /* The "open" selection shows the matrix content as table.
      */
-    message(ECMD_OPEN_REPLY, envelope->source(),
-        envelope->target(), content, EMSG_DEL_CONTENT, envelope->context());
+    if (command == EBROWSE_OPEN)
+    {
+        /* Created container for reply content.
+         */
+        reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+        new eVariable(reply, ECLASSID_MATRIX);
+
+        /* Send reply to caller
+         */
+        message(ECMD_OPEN_REPLY, envelope->source(),
+            envelope->target(), reply, EMSG_DEL_CONTENT, envelope->context());
+    }
+
+    /* Otherwise use default implementation for properties, etc.
+     */
+    else {
+        eObject::send_open_info(envelope);
+    }
 }

@@ -476,7 +476,7 @@ void eLineEdit::object_info(
         EVARP_GAIN, EVARP_OFFSET, 0};
 
     eComponent::object_info(item, name, appendix, target);
-    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN_SELECTION);
+    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN);
 
     propertyv(ECOMP_TEXT, &value);
     if (!value.isempty()) {

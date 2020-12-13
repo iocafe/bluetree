@@ -121,8 +121,8 @@ class eRowSetBinding;
 
 /* Bits for EBROWSE_RIGHT_CLICK_SELECTIONS.
  */
-#define EBROWSE_OPEN_SELECTION 1
-#define EBROWSE_GRAPH_SELECTION 2
+#define EBROWSE_OPEN 1
+#define EBROWSE_GRAPH 2
 
 /* Reason for parent callback, see eObject::docallback() and eObject::oncallback() functions.
  */
@@ -132,6 +132,9 @@ typedef enum {
 }
 eCallbackEvent;
 
+/* Short marking for allocating temporary child object.
+ */
+#define ETEMPORARY this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT
 
 /* Name space identifiers as static strings. eobj_this_ns is default
    for ns_first and ns_firstv functions()

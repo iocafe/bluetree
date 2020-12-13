@@ -817,7 +817,7 @@ os_boolean ePropertyBinding::list_meta_pr_names(
 
   @brief Get values for metadata properties (like "x.min") for related to the property.
 
-  The ePropertyBinding::list_meta_pr_names() function...
+  The ePropertyBinding::get_meta_pr_values() function...
 
   @param  x Variable where to store attribute list.
   @return OS_TRUE if successfull.
@@ -830,7 +830,8 @@ void ePropertyBinding::get_meta_pr_values(
     const os_char *metadata_pr_list,
     eSet *reply)
 {
-    eVariable *v = OS_NULL;
+    eVariable *v = OS_NULL, *mprname = OS_NULL, *pr = OS_NULL;
+    eContainer *propertyset = OS_NULL;
     os_int meta_prnr, set_ix;
     os_char *meta_prname, *meta_prext;
     const os_char *p, *e;
@@ -842,7 +843,8 @@ void ePropertyBinding::get_meta_pr_values(
     while (*p != '\0')
     {
         if (v == OS_NULL) {
-            v = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+            v = new eVariable(ETEMPORARY);
+            mprname = new eVariable(ETEMPORARY);
         }
         e = os_strchr(p, ',');
         if (e == OS_NULL) {
@@ -851,9 +853,9 @@ void ePropertyBinding::get_meta_pr_values(
 
         /* Generate metadata property name to try.
          */
-        v->sets(propertyname);
-        v->appends_nbytes(p, e - p);
-        meta_prname = v->gets();
+        mprname->sets(propertyname);
+        mprname->appends_nbytes(p, e - p);
+        meta_prname = mprname->gets();
         meta_prext = os_strchr(meta_prname, '.');
 
         /* If there is object specific value, use it.
@@ -869,13 +871,44 @@ void ePropertyBinding::get_meta_pr_values(
 
         /* Otherwise get class specific value.
          */
+        if (propertyset == OS_NULL) {
+            os_lock();
+            propertyset = eglobal->propertysets->firstc(obj->classid());
+            if (propertyset == OS_NULL) {
+                os_unlock();
+                goto goon;
+            }
+            pr = eVariable::cast(propertyset->byname(propertyname));
+        }
+
+        /* mprname->sets(evarp_value);
+        mprname->appends_nbytes(p, e - p);
+        meta_prname = mprname->gets();
+        meta_prext = os_strchr(meta_prname, '.'); */
+
+        if (pr) {
+            v->sets(evarp_value);
+            v->appends_nbytes(p, e - p);
+
+            meta_prnr = pr->propertynr(v->gets());
+            if (meta_prnr >= 0) {
+                pr->propertyv(meta_prnr, v);
+                reply->sets(set_ix++, meta_prext);
+                reply->setv(set_ix++, v);
+            }
+        }
 
 goon:
         if (*e == '\0') break;
         p = e + 1;
     }
 
+    if (propertyset) {
+        os_unlock();
+    }
+
     delete v;
+    delete mprname;
 }
 
 
@@ -903,7 +936,7 @@ void ePropertyBinding::set_meta_pr_values(
     obj = grandparent();
     if (obj == OS_NULL) return;
 
-    v = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    v = new eVariable(ETEMPORARY);
     os_lock();
 
     /* Get property var

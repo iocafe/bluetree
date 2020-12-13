@@ -304,11 +304,11 @@ void ePersistent::save_as_message()
     eContainer *content;
     const os_char *p;
 
-    content = new eContainer(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    content = new eContainer(ETEMPORARY);
     relative_path = new eVariable(content, EOID_PATH);
     clone(content, EOID_CONTENT);
 
-content->print_json();
+// content->print_json();
 
     propertyv(EPERP_ROOT_PATH, &target);
     propertyv(EPERP_FILE, relative_path);
@@ -375,7 +375,7 @@ void ePersistent::use_loded_content(
     eObject *srcobj, *dstobj;
     eName *srcname;
 
-content->print_json();
+// content->print_json();
 
     for (srcobj = content->first();
          srcobj;
@@ -480,7 +480,7 @@ void ePersistent::copy_loaded_matrix(
         column_ix_tab[i] = dcol->oid();
     }
     column_ix_tab[EMTX_FLAGS_COLUMN_NR] = EMTX_FLAGS_COLUMN_NR;
-    tmp = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    tmp = new eVariable(ETEMPORARY);
 
     nro_src_rows = srcm->nrows();
     for (row = 0; row < nro_src_rows; row++)

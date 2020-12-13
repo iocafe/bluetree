@@ -38,7 +38,7 @@ eStatus eObject::save(
 
     /* Open file as stream.
      */
-    stream = new eOsStream(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    stream = new eOsStream(ETEMPORARY);
     tmp.sets("file:");
     tmp.appends(path);
     s = stream->open(tmp.gets(), OSAL_STREAM_WRITE);
@@ -82,7 +82,7 @@ eObject *eObject::load(
 
     /* Open file as stream.
      */
-    stream = new eOsStream(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    stream = new eOsStream(ETEMPORARY);
     tmp.sets("file:");
     tmp.appends(path);
     s = stream->open(tmp.gets(), OSAL_STREAM_READ);

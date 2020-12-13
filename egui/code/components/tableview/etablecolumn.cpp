@@ -123,7 +123,7 @@ void eTableColumn::prepare_column_header_for_drawing()
     }
 
     if (os_strchr(text, '\n')) {
-        tmp = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+        tmp = new eVariable(ETEMPORARY);
         tmp->sets(text);
         tmp->singleline();
         text = tmp->gets();

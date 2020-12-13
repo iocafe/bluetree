@@ -63,6 +63,10 @@
  */
 #define EOID_BINDINGS -7
 
+/** Micellenous parameter.
+ */
+#define EOID_PARAMETER -8
+
 /** This is temporary attachment which should be mostly igniored..
  */
 #define EOID_TEMPORARY -10

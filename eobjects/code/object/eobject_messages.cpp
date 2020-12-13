@@ -316,7 +316,7 @@ void eObject::message_process_ns(
      */
     else
     {
-        objname = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+        objname = new eVariable(ETEMPORARY);
 
         /* Get next object name in target path.
            Remember length of object name.
@@ -411,8 +411,8 @@ void eObject::message_process_ns(
              */
             envelope->move_target_over_objname((os_short)sz - 1);
 
-            savedtarget = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
-            mytarget = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+            savedtarget = new eVariable(ETEMPORARY);
+            mytarget = new eVariable(ETEMPORARY);
 
             savedtarget->sets(envelope->target());
 
@@ -791,16 +791,28 @@ getout:
 void eObject::send_open_info(
     eEnvelope *envelope)
 {
-    eContainer *content;
+    eContainer *reply;
+    eVariable *p;
+    eVariable *item;
+    eName *name;
 
-    /* Created container for reply content.
+    /* Show properties regardless of command.
      */
-    content = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+    reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+    for (p = firstp(EOID_CHILD, EPRO_NO_ERRORS); p; p = p->nextp())
+    {
+        name = p->primaryname();
+        if (name == OS_NULL) continue;
+
+        item = new eVariable(reply, ECLASSID_VARIABLE);
+        item->sets("_p/");
+        item->appendv(name);
+    }
 
     /* Send reply to caller
      */
     message(ECMD_OPEN_REPLY, envelope->source(),
-        envelope->target(), content, EMSG_DEL_CONTENT, envelope->context());
+        envelope->target(), reply, EMSG_DEL_CONTENT, envelope->context());
 }
 
 

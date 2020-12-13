@@ -222,7 +222,7 @@ void eFileSystem::browse_list_namespace(
 
     oixstr(buf, sizeof(buf));
 
-    tmp_content = new eContainer(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    tmp_content = new eContainer(ETEMPORARY);
     tmp_content->ns_create();
 
     for (listitem = list; listitem; listitem = listitem->next)

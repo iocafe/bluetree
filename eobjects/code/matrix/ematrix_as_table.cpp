@@ -176,7 +176,7 @@ eStatus eMatrix::insert_one_row(
      */
     rval = (hascallback() && use_row_nr >= 0) ? ESTATUS_NO_CHANGES : ESTATUS_SUCCESS;
     if (rval == ESTATUS_NO_CHANGES) {
-        tmp = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+        tmp = new eVariable(ETEMPORARY);
     }
 
     index_element = find_index_element(row);

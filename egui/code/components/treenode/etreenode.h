@@ -179,8 +179,8 @@ protected:
 
     os_int m_node_type;
 
-    /** Additional selections in right click popup menu, like EBROWSE_OPEN_SELECTION,
-        EBROWSE_GRAPH_SELECTION, etc.
+    /** Additional selections in right click popup menu, like EBROWSE_OPEN,
+        EBROWSE_GRAPH, etc.
 .    */
     os_int m_right_click_selections;
 

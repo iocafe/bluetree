@@ -798,7 +798,7 @@ void eComponent::add_popup_item_toggle(
   @brief Send message to object to request open content
 
   @param  path Path to the object to "open".
-  @param  command EBROWSE_OPEN_SELECTION, EBROWSE_GRAPH_SELECTION
+  @param  command EBROWSE_OPEN, EBROWSE_GRAPH, EBROWSE_PROPERTIES
 
 ****************************************************************************************************
 */
@@ -806,14 +806,18 @@ void eComponent::open_request(
     const os_char *path,
     os_int command)
 {
-    eContainer *context;
+    eContainer *context, *content;
     eVariable *v;
 
-    context = new eContainer(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    content = new eContainer(ETEMPORARY);
+    v = new eVariable(content, EOID_PARAMETER);
+    v->setl(command);
+    context = new eContainer(ETEMPORARY);
     v = new eVariable(context, EBROWSE_RIGHT_CLICK_SELECTIONS);
     v->setl(command);
-    gui()->open_request(path, context);
+    gui()->open_request(path, content, context);
     delete context;
+    delete content;
 }
 
 

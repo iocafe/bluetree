@@ -219,6 +219,7 @@ typedef enum {
 
     ECOMPO_OPEN,
     ECOMPO_GRAPH,
+    ECOMPO_PROPERTIES,
 
     ECOMPO_NEW_ROW,
     ECOMPO_EDIT_ROW,
@@ -461,7 +462,7 @@ public:
      */
     void open_request(
         const os_char *path,
-        os_int command = EBROWSE_OPEN_SELECTION);
+        os_int command = EBROWSE_OPEN);
 
     /* Create "select value from drop down list" popup.
      */

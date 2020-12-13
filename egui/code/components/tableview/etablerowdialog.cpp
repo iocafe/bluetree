@@ -162,7 +162,7 @@ void eTableView::save_dialog_row(
     plist = dlg->firstcomponent(EOID_GUI_PARAMETER_LIST);
     if (plist == OS_NULL) return;
 
-    row = new eContainer(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    row = new eContainer(ETEMPORARY);
 
     for (c = plist->firstcomponent(); c; c = c->nextcomponent())
     {
