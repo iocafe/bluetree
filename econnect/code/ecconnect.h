@@ -60,7 +60,6 @@
 #define ecconp_offset evarp_offset
 #define ecconp_state_bits evarp_state_bits
 #define ecconp_timestamp evarp_timestamp
-#define ecconp_conf evarp_conf
 extern const os_char ecconp_path[];
 
 

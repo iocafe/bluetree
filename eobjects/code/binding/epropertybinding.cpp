@@ -466,7 +466,7 @@ void ePropertyBinding::srvbind(
     if (m_bflags & EBIND_METADATA)
     {
         parameters->getv(EPR_BINDING_META_PR_NAMES, &v);
-        get_meta_pr_values(obj, propertyname_str, m_localpropertynr, v.gets(), reply);
+        get_meta_pr_values(obj, propertyname_str, v.gets(), reply);
     }
 
     /* Complete the server end of binding and return.
@@ -498,11 +498,11 @@ void ePropertyBinding::cbindok(
     eObject *obj,
     eEnvelope *envelope)
 {
-    eSet *parameters;
+    eSet *reply;
     eVariable v;
 
-    parameters = eSet::cast(envelope->content());
-    if (parameters == OS_NULL)
+    reply = eSet::cast(envelope->content());
+    if (reply == OS_NULL)
     {
 #if OSAL_DEBUG
         osal_debug_error("cbindok() failed: no content");
@@ -510,11 +510,18 @@ void ePropertyBinding::cbindok(
         goto notarget;
     }
 
+    /* If we need to send meta data with binding.
+     */
+    if (m_bflags & EBIND_METADATA)
+    {
+        set_meta_pr_values(reply);
+    }
+
     /* If this server side is master at initialization, get property value.
      */
     if ((m_bflags & EBIND_CLIENTINIT) == 0)
     {
-        parameters->getv(EPR_BINDING_VALUE, &v);
+        reply->getv(EPR_BINDING_VALUE, &v);
         binding_setproperty(&v);
     }
 
@@ -820,7 +827,6 @@ os_boolean ePropertyBinding::list_meta_pr_names(
 void ePropertyBinding::get_meta_pr_values(
     eObject *obj,
     const os_char *propertyname,
-    os_int propertynr,
     const os_char *metadata_pr_list,
     eSet *reply)
 {
@@ -871,6 +877,64 @@ goon:
 
     delete v;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Set metadata to properties at client end of binding.
+
+  The ePropertyBinding::set_meta_pr_values() function...
+
+****************************************************************************************************
+*/
+void ePropertyBinding::set_meta_pr_values(
+    eSet *reply)
+{
+    eObject *obj;
+    eName *propertyname;
+    eContainer *propertyset;
+    eVariable meta_prext, meta_prname, *v;
+    eVariable *meta_pvar, *propertyvar;
+    os_int get_ix;
+
+    /* Get local property name.
+     */
+    obj = grandparent();
+    if (obj == OS_NULL) return;
+
+    v = new eVariable(this, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    os_lock();
+
+    /* Get property var
+     */
+    propertyset = eglobal->propertysets->firstc(obj->classid());
+    propertyvar = propertyset->firstv(m_localpropertynr);
+    if (propertyvar == OS_NULL) goto getout;
+    propertyname = propertyvar->primaryname();
+    if (propertyname == OS_NULL) goto getout;
+    // propertyname_str = propertyname.gets();
+
+    get_ix = EPR_BINDING_META_PR_VALUES;
+    while (reply->getv(get_ix++, &meta_prext)) {
+        meta_prname.setv(propertyname);
+        meta_prname.appendv(&meta_prext);
+        reply->getv(get_ix++, v);
+
+        meta_pvar = eVariable::cast(propertyset->byname(meta_prname.gets()));
+        if (meta_pvar == OS_NULL) {
+            osal_debug_error_str("set_meta_pr_values, property not found: ", meta_prname.gets());
+            continue;
+        }
+
+        obj->setpropertyv(meta_pvar->oid(), v);
+    }
+
+getout:
+    os_unlock();
+    delete v;
+}
+
 
 /**
 ****************************************************************************************************

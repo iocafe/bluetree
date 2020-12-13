@@ -166,14 +166,16 @@ void eVariable::setupclass()
 void eVariable::setupproperties(
     os_int cls)
 {
-    eVariable *text, *vtype;
+    eVariable *text, *vtype, *conf = OS_NULL;
 
     /* Order of these addproperty() calls is important, since eVariable itself is used to
        describe the properties in property set. The property to set must be added to
        property set before setting value for it. There is trick with p to set text type
        after adding property type. This effects only eVariable class.
      */
-addproperty (cls, EVARP_CONF, evarp_conf, "conf", EPRO_NOONPRCH); /* Property stuff */
+    if (cls == ECLASSID_VARIABLE) {
+        conf = addproperty (cls, EVARP_CONF, evarp_conf, OS_NULL, EPRO_NOONPRCH); /* Property stuff */
+    }
     text = addproperty(cls, EVARP_TEXT, evarp_text, "text", EPRO_METADATA|EPRO_NOONPRCH);
     vtype = addpropertyl (cls, EVARP_TYPE, evarp_type, "type", EPRO_METADATA|EPRO_NOONPRCH);
     addproperty (cls, EVARP_ABBR, evarp_abbr, "abbreviation", EPRO_METADATA|EPRO_NOONPRCH);
@@ -194,6 +196,10 @@ addproperty (cls, EVARP_CONF, evarp_conf, "conf", EPRO_NOONPRCH); /* Property st
         text->setpropertyl(EVARP_TYPE, OS_STR);
         emake_type_enum_str(&tmp);
         vtype->setpropertyv(EVARP_ATTR, &tmp);
+    }
+
+    if (cls == ECLASSID_VARIABLE) {
+        conf->setpropertys(EVARP_TEXT, "conf");
     }
 }
 

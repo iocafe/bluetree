@@ -50,7 +50,7 @@ class eValueX;
 #define EVARP_MAX 16
 #define EVARP_GAIN 17
 #define EVARP_OFFSET 18
-#define EVARP_CONF 0
+#define EVARP_CONF 26
 
 /* Variable property names.
  */

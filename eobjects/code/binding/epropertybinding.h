@@ -196,15 +196,13 @@ protected:
     void get_meta_pr_values(
         eObject *obj,
         const os_char *propertyname,
-        os_int propertynr,
         const os_char *metadata_pr_list,
         eSet *reply);
 
-    /* List attributes (subproperties like "x.min") for the property.
+    /* Set metadata to properties at client end of binding.
      */
-    /* os_boolean match_meta_pr_names(
-        os_int propertynr,
-        eVariable *x); */
+    void set_meta_pr_values(
+        eSet *reply);
 
     /* Save property name.
      */
@@ -235,8 +233,6 @@ protected:
     /** Which property of local object is bound.
      */
     os_int m_localpropertynr;
-
-
 };
 
 #endif
