@@ -13,8 +13,7 @@
 
 ****************************************************************************************************
 */
-#include "econnect.h"
-#include "nodeconf.h"
+#include "ioconnect.h"
 
 
 /* GUI property names.
@@ -121,7 +120,7 @@ eObject *ecRoot::clone(
 */
 void ecRoot::setupclass()
 {
-    const os_int cls = ECONNCLASSID_ROOT;
+    const os_int cls = IOCONNCLASSID_ROOT;
 
     /* Add the class to class list.
      */

@@ -16,7 +16,7 @@
 #pragma once
 #ifndef ECROOT_H_
 #define ECROOT_H_
-#include "econnect.h"
+#include "ioconnect.h"
 
 /**
 ****************************************************************************************************
@@ -104,7 +104,7 @@ public:
     inline static ecRoot *cast(
         eObject *o)
     {
-        e_assert_type(o, ECONNCLASSID_ROOT)
+        e_assert_type(o, IOCONNCLASSID_ROOT)
         return (ecRoot*)o;
     }
 
@@ -112,7 +112,7 @@ public:
      */
     virtual os_int classid()
     {
-        return ECONNCLASSID_ROOT;
+        return IOCONNCLASSID_ROOT;
     }
 
     /* Static function to add class to propertysets and class list.

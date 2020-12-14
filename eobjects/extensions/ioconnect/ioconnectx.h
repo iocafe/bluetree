@@ -1,6 +1,6 @@
 /**
 
-  @file    ecconnect.h
+  @file    ioconnect.h
   @brief   Connects to iocom device.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -14,9 +14,9 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef ECCONNECT_H_
-#define ECCONNECT_H_
-#include "econnect.h"
+#ifndef IOCONNECT_H_
+#define IOCONNECT_H_
+#include "ioconnect.h"
 
 /**
 ****************************************************************************************************
@@ -30,56 +30,56 @@
 
 /* Enumeration of object properties.
  */
-#define ECCONP_VALUE EVARP_VALUE
-#define ECCONP_STATE_BITS EVARP_STATE_BITS
-#define ECCONP_TIMESTAMP EVARP_TIMESTAMP
-#define ECCONP_DIGS EVARP_DIGS
-#define ECCONP_TEXT EVARP_TEXT
-#define ECCONP_UNIT EVARP_UNIT
-#define ECCONP_MIN EVARP_MIN
-#define ECCONP_MAX EVARP_MAX
-#define ECCONP_TYPE EVARP_TYPE
-#define ECCONP_ATTR EVARP_ATTR
-#define ECCONP_DEFAULT EVARP_DEFAULT
-#define ECCONP_GAIN EVARP_GAIN
-#define ECCONP_OFFSET EVARP_OFFSET
-#define ECCONP_PATH 30
+#define IOCONP_VALUE EVARP_VALUE
+#define IOCONP_STATE_BITS EVARP_STATE_BITS
+#define IOCONP_TIMESTAMP EVARP_TIMESTAMP
+#define IOCONP_DIGS EVARP_DIGS
+#define IOCONP_TEXT EVARP_TEXT
+#define IOCONP_UNIT EVARP_UNIT
+#define IOCONP_MIN EVARP_MIN
+#define IOCONP_MAX EVARP_MAX
+#define IOCONP_TYPE EVARP_TYPE
+#define IOCONP_ATTR EVARP_ATTR
+#define IOCONP_DEFAULT EVARP_DEFAULT
+#define IOCONP_GAIN EVARP_GAIN
+#define IOCONP_OFFSET EVARP_OFFSET
+#define IOCONP_PATH 30
 
 /* Property names.
  */
-#define ecconp_value evarp_value
-#define ecconp_digs evarp_digs
-#define ecconp_text evarp_text
-#define ecconp_unit evarp_unit
-#define ecconp_min evarp_min
-#define ecconp_max evarp_max
-#define ecconp_type evarp_type
-#define ecconp_attr evarp_attr
-#define ecconp_default evarp_default
-#define ecconp_gain evarp_gain
-#define ecconp_offset evarp_offset
-#define ecconp_state_bits evarp_state_bits
-#define ecconp_timestamp evarp_timestamp
-extern const os_char ecconp_path[];
+#define ioconp_value evarp_value
+#define ioconp_digs evarp_digs
+#define ioconp_text evarp_text
+#define ioconp_unit evarp_unit
+#define ioconp_min evarp_min
+#define ioconp_max evarp_max
+#define ioconp_type evarp_type
+#define ioconp_attr evarp_attr
+#define ioconp_default evarp_default
+#define ioconp_gain evarp_gain
+#define ioconp_offset evarp_offset
+#define ioconp_state_bits evarp_state_bits
+#define ioconp_timestamp evarp_timestamp
+extern const os_char ioconp_path[];
 
 
 
 /**
 ****************************************************************************************************
 
-  @brief ecConnect class.
+  @brief ioConnect class.
 
-  The ecConnect is dynamically typed variable, which can store integers, floating point values
+  The ioConnect is dynamically typed variable, which can store integers, floating point values
   and strings.
 
 ****************************************************************************************************
 */
-class ecConnect : public eObject
+class ioConnect : public eObject
 {
     /**
     ************************************************************************************************
 
-      @name ecConnect overrides for eObject base class functions.
+      @name ioConnect overrides for eObject base class functions.
 
       X...
 
@@ -88,14 +88,14 @@ class ecConnect : public eObject
 public:
     /* Constructor.
      */
-    ecConnect(
+    ioConnect(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~ecConnect();
+    virtual ~ioConnect();
 
     /* Clone object.
      */
@@ -104,18 +104,18 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to ecConnect pointer.
+    /* Casting eObject pointer to ioConnect pointer.
      */
-    inline static ecConnect *cast(
+    inline static ioConnect *cast(
         eObject *o)
     {
-        e_assert_type(o, ECONNCLASSID_CONNECT)
-        return (ecConnect*)o;
+        e_assert_type(o, IOCONNCLASSID_CONNECT)
+        return (ioConnect*)o;
     }
 
     /* Get class identifier
      */
-    virtual os_int classid() {return ECONNCLASSID_CONNECT; }
+    virtual os_int classid() {return IOCONNCLASSID_CONNECT; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -128,12 +128,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static ecConnect *newobj(
+    static ioConnect *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new ecConnect(parent, id, flags);
+        return new ioConnect(parent, id, flags);
     }
 
     /* Called when property value changes.

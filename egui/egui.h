@@ -24,7 +24,6 @@
 /* Include library headers.
  */
 #include "eobjects.h"
-#include "econnect.h"
 
 /* Initialize the egui library for use.
  */

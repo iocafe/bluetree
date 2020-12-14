@@ -1,12 +1,12 @@
 /**
 
-  @file    econnect.h
+  @file    ioconnect.h
   @brief   Main egui library header file.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    14.9.2020
 
-  This econnect library main header file. If further includes rest of econnect headers.
+  This ioconnect library main header file. If further includes rest of ioconnect headers.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -26,8 +26,7 @@
 
 /* Include egui headers.
  */
-#include "code/ecclassid.h"
-#include "code/ecconnect.h"
-#include "code/ecroot.h"
+#include "extensions/ioconnect/ioconnectx.h"
+#include "extensions/ioconnect/ioroot.h"
 
 #endif

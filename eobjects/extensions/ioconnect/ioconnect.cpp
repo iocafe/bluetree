@@ -1,6 +1,6 @@
 /**
 
-  @file    ecconnect.h
+  @file    ioconnect.h
   @brief   Connects to iocom device.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -13,12 +13,12 @@
 
 ****************************************************************************************************
 */
-#include "econnect.h"
+#include "ioconnect.h"
 
 /* Variable property names.
  */
 const os_char
-    ecconp_path[] = "path";
+    ioconp_path[] = "path";
 
 
 /**
@@ -32,7 +32,7 @@ const os_char
 
 ****************************************************************************************************
 */
-ecConnect::ecConnect(
+ioConnect::ioConnect(
     eObject *parent,
     e_oid id,
     os_int flags)
@@ -56,7 +56,7 @@ ecConnect::ecConnect(
 
 ****************************************************************************************************
 */
-ecConnect::~ecConnect()
+ioConnect::~ioConnect()
 {
     /* Release any allocated memory.
      */
@@ -79,13 +79,13 @@ ecConnect::~ecConnect()
 
 ****************************************************************************************************
 */
-eObject *ecConnect::clone(
+eObject *ioConnect::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
-    ecConnect *clonedobj;
-    clonedobj = new ecConnect(parent, id == EOID_CHILD ? oid() : id, flags());
+    ioConnect *clonedobj;
+    clonedobj = new ioConnect(parent, id == EOID_CHILD ? oid() : id, flags());
 
     /** Copy variable value.
      */
@@ -102,23 +102,23 @@ eObject *ecConnect::clone(
 /**
 ****************************************************************************************************
 
-  @brief Add ecConnect to class list and class'es properties to it's property set.
+  @brief Add ioConnect to class list and class'es properties to it's property set.
 
-  The ecConnect::setupclass function adds ecConnect to class list and class'es properties to
+  The ioConnect::setupclass function adds ioConnect to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
 ****************************************************************************************************
 */
-void ecConnect::setupclass()
+void ioConnect::setupclass()
 {
-    const os_int cls = ECONNCLASSID_CONNECT;
+    const os_int cls = IOCONNCLASSID_CONNECT;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "ecConnect");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "ioConnect");
     setupproperties(cls);
     propertysetdone(cls);
     os_unlock();
@@ -130,24 +130,24 @@ void ecConnect::setupclass()
 
   @brief Add class'es properties to property set.
 
-  The ecConnect::setupproperties is helper function for setupclass, it is called from both
-  ecConnect class and derived classes like eName.
+  The ioConnect::setupproperties is helper function for setupclass, it is called from both
+  ioConnect class and derived classes like eName.
 
   Process mutex must be locked when calling this function.
 
 ****************************************************************************************************
 */
-void ecConnect::setupproperties(
+void ioConnect::setupproperties(
     os_int cls)
 {
     // eVariable *p;
 
-    /* Order of these addproperty() calls is important, since ecConnect itself is used to
+    /* Order of these addproperty() calls is important, since ioConnect itself is used to
        describe the properties in property set. The property to set must be added to
        property set before setting value for it. There is trick with p to set text type
-       after adding property type. This effects only ecConnect class.
+       after adding property type. This effects only ioConnect class.
      */
-    /* p = */ addproperty(cls, ECCONP_TEXT, ecconp_text, "text", EPRO_METADATA|EPRO_NOONPRCH);
+    /* p = */ addproperty(cls, IOCONP_TEXT, ioconp_text, "text", EPRO_METADATA|EPRO_NOONPRCH);
 }
 
 
@@ -173,18 +173,18 @@ void ecConnect::setupproperties(
 
 ****************************************************************************************************
 */
-eStatus ecConnect::onpropertychange(
+eStatus ioConnect::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
 {
     switch (propertynr)
     {
-/*         case ECCONP_VALUE:
+/*         case IOCONP_VALUE:
             setv(x);
             break;
 
-        case ECCONP_DIGS:
+        case IOCONP_DIGS:
             setdigs((os_int)x->getl());
             break; */
 
@@ -211,18 +211,18 @@ eStatus ecConnect::onpropertychange(
 
 ****************************************************************************************************
 */
-eStatus ecConnect::simpleproperty(
+eStatus ioConnect::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
     switch (propertynr)
     {
 /*
-        case ECCONP_VALUE:
+        case IOCONP_VALUE:
             x->setv(this);
             break;
 
-        case ECCONP_DIGS:
+        case IOCONP_DIGS:
             x->setl(digs());
             break;
 */
