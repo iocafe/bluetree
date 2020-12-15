@@ -26,15 +26,19 @@ class eConsole;
 
 /* Space allocation for process name, nr, id, etc. strings.
  */
-#define ENET_PROCESS_NAME_SZ 16
-#define ENET_PROCESS_NR_SZ 16
-#define ENET_PROCESS_ID_SZ 48
-#define ENET_PROCESS_NICK_NAME_SZ 48
+#define EGLOBAL_PROCESS_NAME_SZ 16
+#define EGLOBAL_PROCESS_NR_SZ 16
+#define EGLOBAL_PROCESS_ID_SZ 32
+// #define EGLOBAL_PROCESS_NICK_NAME_SZ 48
 
-/* Space allocation for directory string and composition file name.
+/* Space allocation for path and relative path.
  */
-#define ENET_DIR_SZ 128
-#define ENET_COMPOSITION_NAME_SZ 32
+#ifndef EGLOBAL_PATH_SZ
+#define EGLOBAL_PATH_SZ 128
+#endif
+#ifndef EGLOBAL_RELATIVE_PATH_SZ
+#define EGLOBAL_RELATIVE_PATH_SZ 64
+#endif
 
 
 /**
@@ -88,40 +92,34 @@ typedef struct eGlobal
 
     /** Name of the process, like "grumpy".
      */
-    os_char process_name[ENET_PROCESS_NAME_SZ];
+    os_char process_name[EGLOBAL_PROCESS_NAME_SZ];
 
     /** Process idenfification number, can be serial
         number or short text.
      */
-    os_char process_nr[ENET_PROCESS_NR_SZ];
+    os_char process_nr[EGLOBAL_PROCESS_NR_SZ];
 
     /** Process identification, process name and identification name together
      */
-    os_char process_id[ENET_PROCESS_ID_SZ];
+    os_char process_id[EGLOBAL_PROCESS_ID_SZ];
 
-    /** Process nick name to display to user.
+    /** Path to root data directory (operating system path).
      */
-    os_char process_nick_name[ENET_PROCESS_NICK_NAME_SZ];
+    os_char root_path[EGLOBAL_PATH_SZ];
 
-    /** Composition directory.
+    /** Static application specific file directory. Relative within root directory.
+        This doesn't contain product number.
      */
-    os_char composition_dir[ENET_DIR_SZ];
+    os_char app_static_dir[EGLOBAL_RELATIVE_PATH_SZ];
 
-    /** Executable directory.
+    /** Application's dynamic data directory (relative within root directory).
+        This contains application name and product number.
      */
-    os_char bin_dir[ENET_DIR_SZ];
+    os_char data_dir[EGLOBAL_RELATIVE_PATH_SZ];
 
-    /** Parameter directory.
+    /** Executables, operating system path to the directory.
      */
-    os_char prm_dir[ENET_DIR_SZ];
-
-    /** Database directory.
-     */
-    os_char db_dir[ENET_DIR_SZ];
-
-    /** Composition file name
-     */
-    // os_char composition[ENET_COMPOSITION_NAME_SZ];
+    os_char bin_path[EGLOBAL_PATH_SZ];
 
     /** This is special for eMatrix clas. Memory manager and eBuffer implementation
         are tested at startup, how much memory we actually get when we request
@@ -156,6 +154,13 @@ inline eHandle *eget_handle(
 {
     return eglobal->hroot.m_table[oix >> EHANDLE_HANDLE_BITS]->m_handle + (oix & EHANDLE_TABLE_MASK);
 }
+
+
+/* Initialize flat global structure.
+ */
+void eglobal_initialize(
+    const os_char *process_name,
+    const os_char *process_nr);
 
 
 #endif

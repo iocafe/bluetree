@@ -34,6 +34,8 @@
  */
 void eobjects_initialize(
     const os_char *process_name,
+    os_int argc,
+    os_char *argv[],
     os_int flags);
 
 /* Shut down eobjects library.

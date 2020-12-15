@@ -1,6 +1,6 @@
 /**
 
-  @file    ecroot.h
+  @file    ioroot.h
   @brief   Root object.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -20,77 +20,73 @@
 
 /**
 ****************************************************************************************************
-
-  @name Defines
-
-  X...
-
+  Defines
 ****************************************************************************************************
 */
 
 /* Enumeration of GUI object properties.
  */
-#define ECROOTP_VALUE 1
-#define ECROOTP_STATE_BITS 2
-#define ECROOTP_TIMESTAMP 3
-#define ECROOTP_DIGS 4
-#define ECROOTP_TEXT 6
-#define ECROOTP_UNIT 8
-#define ECROOTP_MIN 10
-#define ECROOTP_MAX 12
-#define ECROOTP_TYPE 14
-#define ECROOTP_ATTR 16
-#define ECROOTP_DEFAULT 18
-#define ECROOTP_GAIN 20
-#define ECROOTP_OFFSET 22
-#define ECROOTP_CONF 24
+#define IOROOTP_VALUE 1
+#define IOROOTP_STATE_BITS 2
+#define IOROOTP_TIMESTAMP 3
+#define IOROOTP_DIGS 4
+#define IOROOTP_TEXT 6
+#define IOROOTP_UNIT 8
+#define IOROOTP_MIN 10
+#define IOROOTP_MAX 12
+#define IOROOTP_TYPE 14
+#define IOROOTP_ATTR 16
+#define IOROOTP_DEFAULT 18
+#define IOROOTP_GAIN 20
+#define IOROOTP_OFFSET 22
+#define IOROOTP_CONF 24
 
 /* GUI property names.
  */
 extern const os_char
-    ecrootp_value[],
-    ecrootp_digs[],
-    ecrootp_text[],
-    ecrootp_unit[],
-    ecrootp_min[],
-    ecrootp_max[],
-    ecrootp_type[],
-    ecrootp_attr[],
-    ecrootp_default[],
-    ecrootp_gain[],
-    ecrootp_offset[],
-    ecrootp_state_bits[],
-    ecrootp_timestamp[],
-    ecrootp_conf[];
+    iorootp_value[],
+    iorootp_digs[],
+    iorootp_text[],
+    iorootp_unit[],
+    iorootp_min[],
+    iorootp_max[],
+    iorootp_type[],
+    iorootp_attr[],
+    iorootp_default[],
+    iorootp_gain[],
+    iorootp_offset[],
+    iorootp_state_bits[],
+    iorootp_timestamp[],
+    iorootp_conf[];
 
 
 /**
 ****************************************************************************************************
 
-  @brief ecRoot class.
+  @brief ioRoot class.
 
-  The ecRoot is root of graphical user interface display.
+  The ioRoot is root of graphical user interface display.
 
 ****************************************************************************************************
 */
-class ecRoot : public eObject
+class ioRoot : public eObject
 {
 public:
     /**
     ************************************************************************************************
-      ecRoot overrides for eObject base class functions.
+      ioRoot overrides for eObject base class functions.
     ************************************************************************************************
     */
     /* Constructor.
      */
-    ecRoot(
+    ioRoot(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~ecRoot();
+    virtual ~ioRoot();
 
     /* Clone object.
      */
@@ -99,13 +95,13 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to ecRoot pointer.
+    /* Casting eObject pointer to ioRoot pointer.
      */
-    inline static ecRoot *cast(
+    inline static ioRoot *cast(
         eObject *o)
     {
         e_assert_type(o, IOCONNCLASSID_ROOT)
-        return (ecRoot*)o;
+        return (ioRoot*)o;
     }
 
     /* Get class identifier.
@@ -126,12 +122,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static ecRoot *newobj(
+    static ioRoot *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new ecRoot(parent, id, flags);
+        return new ioRoot(parent, id, flags);
     }
 
     /* Called when property value changes.

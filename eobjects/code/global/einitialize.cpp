@@ -26,32 +26,48 @@
   be the first eobjects function called. The eobjects_shutdown() function cleans up resources
   used by the library.
 
-  @param  process_name Application name, important. This is used by communication to identify this
-          application. Choose unique short name without special characters.
-          Only 'a' - 'z' and 'A' - 'Z' characters. Max 15 characters + terminating '\0'.
-  @param  flags EOBJECTS_DEFAULT_INIT (0) Default initialization.
-          Flag EOBJECTS_NO_NETWORK_INIT disables network and iocom initialization. This
-          can be used if eosal network is initialized beforehand. Not recommended, gets complex.
-  @return None.
+  @param   process_name Application name (same as device name), important. This is used by
+           communication  to identify this application. Choose unique short name without special
+           characters. Only 'a' - 'z' and 'A' - 'Z' characters. Max 15 characters + terminating '\0'.
+  @param   argc Number of command line arguments.
+  @param   argv Array of string pointers, one for each command line argument. UTF8 encoded.
+  @param   flags EOBJECTS_DEFAULT_INIT (0) Default initialization.
+           Flag EOBJECTS_NO_NETWORK_INIT disables network and iocom initialization. This
+           can be used if eosal network is initialized beforehand. Not recommended, gets complex.
+  @return  None.
 
 ****************************************************************************************************
 */
 void eobjects_initialize(
     const os_char *process_name,
+    os_int argc,
+    os_char *argv[],
     os_int flags)
 {
     osalSecurityConfig security;
     osPersistentParams persistentprm;
+    const os_char *process_nr = OS_NULL;
+    os_int i;
 
     /* Do nothing if the library has been initialized.
      */
     if (eglobal->initialized) return;
 
-    /* Clear the global strcture, mark initialized and save process name.
+    /* Find out process number.
+     */
+    for (i = 1; i < argc; i++) {
+        if (!os_strcmp(argv[i], "-n")) {
+            if (osal_char_isdigit(argv[i][2])) {
+                process_nr = argv[i] + 2;
+            }
+        }
+    }
+
+    /* Clear the global structure, mark initialized and save process name.
      */
     os_memclear(eglobal, sizeof(eGlobal));
     eglobal->initialized = OS_TRUE;
-    os_strncpy(eglobal->process_name, process_name, ENET_PROCESS_NAME_SZ);
+    eglobal_initialize(process_name, process_nr);
 
     /* Initialize handle tables.
      */

@@ -40,7 +40,7 @@ void egui_initialize()
      */
     if (eglobal->eguiglobal) return;
 
-   /* Clear the global strcture and mark initialized.
+   /* Clear the global structure.
      */
     eguiglobal = (eGuiGlobal*)os_malloc(sizeof(eGuiGlobal), OS_NULL);
     eglobal->eguiglobal = eguiglobal;

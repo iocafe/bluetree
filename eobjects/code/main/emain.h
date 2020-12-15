@@ -48,6 +48,7 @@ OSAL_C_HEADER_ENDS
 
   @param   argc Number of command line arguments.
   @param   argv Array of string pointers, one for each command line argument plus.
+                "-nX" sets process number (device number) X, for example "-n3".
 
   @return  Integer return value to caller, OSAL_SUCCESS (0) to indicate "all fine".
 
@@ -55,7 +56,7 @@ OSAL_C_HEADER_ENDS
 */
 #define EMAIN_CONSOLE_ENTRY(process_name) osalStatus osal_main(os_int argc, os_char *argv[]) { \
     osalStatus s; \
-    eobjects_initialize(process_name, EOBJECTS_DEFAULT_INIT); \
+    eobjects_initialize(process_name, argc, argv, EOBJECTS_DEFAULT_INIT); \
     eprocess_create(); \
     s = (osalStatus)emain(argc, argv); \
     eprocess_close(); \

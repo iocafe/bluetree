@@ -78,11 +78,7 @@ class ioConnect : public eObject
 {
     /**
     ************************************************************************************************
-
-      @name ioConnect overrides for eObject base class functions.
-
-      X...
-
+      eObject base class function overrides.
     ************************************************************************************************
     */
 public:

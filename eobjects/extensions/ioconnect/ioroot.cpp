@@ -1,6 +1,6 @@
 /**
 
-  @file    ecroot.cpp
+  @file    ioroot.cpp
   @brief   Root object.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -19,34 +19,29 @@
 /* GUI property names.
  */
 const os_char
-    ecrootp_value[] = "x",
-    ecrootp_digs[] = "x.digs",
-    ecrootp_text[] = "x.text",
-    ecrootp_unit[] = "x.unit",
-    ecrootp_min[] = "x.min",
-    ecrootp_max[] = "x.max",
-    ecrootp_type[] = "x.type",
-    ecrootp_attr[] = "x.attr",
-    ecrootp_default[] = "x.default",
-    ecrootp_gain[] = "x.gain",
-    ecrootp_offset[] = "x.offset",
-    ecrootp_state_bits[] = "x.quality",
-    ecrootp_timestamp[] = "x.timestamp",
-    ecrootp_conf[] = "conf"; /* This MUST not start with "x." */
+    iorootp_value[] = "x",
+    iorootp_digs[] = "x.digs",
+    iorootp_text[] = "x.text",
+    iorootp_unit[] = "x.unit",
+    iorootp_min[] = "x.min",
+    iorootp_max[] = "x.max",
+    iorootp_type[] = "x.type",
+    iorootp_attr[] = "x.attr",
+    iorootp_default[] = "x.default",
+    iorootp_gain[] = "x.gain",
+    iorootp_offset[] = "x.offset",
+    iorootp_state_bits[] = "x.quality",
+    iorootp_timestamp[] = "x.timestamp",
+    iorootp_conf[] = "conf"; /* This MUST not start with "x." */
 
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
+  Constructor.
 
 ****************************************************************************************************
 */
-ecRoot::ecRoot(
+ioRoot::ioRoot(
     eObject *parent,
     e_oid id,
     os_int flags)
@@ -57,16 +52,10 @@ ecRoot::ecRoot(
 
 /**
 ****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
+  Virtual destructor.
 ****************************************************************************************************
 */
-ecRoot::~ecRoot()
+ioRoot::~ioRoot()
 {
     shutdown();
 }
@@ -86,13 +75,13 @@ ecRoot::~ecRoot()
 
 ****************************************************************************************************
 */
-eObject *ecRoot::clone(
+eObject *ioRoot::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
-    ecRoot *clonedobj;
-    clonedobj = new ecRoot(parent, id == EOID_CHILD ? oid() : id, flags());
+    ioRoot *clonedobj;
+    clonedobj = new ioRoot(parent, id == EOID_CHILD ? oid() : id, flags());
 
     /** Copy variable value.
      */
@@ -109,23 +98,23 @@ eObject *ecRoot::clone(
 /**
 ****************************************************************************************************
 
-  @brief Add ecRoot to class list and class'es properties to it's property set.
+  @brief Add ioRoot to class list and class'es properties to it's property set.
 
-  The ecRoot::setupclass function adds ecRoot to class list and class'es properties to
+  The ioRoot::setupclass function adds ioRoot to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
 ****************************************************************************************************
 */
-void ecRoot::setupclass()
+void ioRoot::setupclass()
 {
     const os_int cls = IOCONNCLASSID_ROOT;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "ecRoot");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "ioRoot");
     setupproperties(cls);
     propertysetdone(cls);
     os_unlock();
@@ -137,26 +126,26 @@ void ecRoot::setupclass()
 
   @brief Add class'es properties to property set.
 
-  The ecRoot::setupproperties is helper function for setupclass, it is called from both
-  ecRoot class and derived classes like eName.
+  The ioRoot::setupproperties is helper function for setupclass, it is called from both
+  ioRoot class and derived classes like eName.
 
   Process mutex must be locked when calling this function.
 
 ****************************************************************************************************
 */
-void ecRoot::setupproperties(
+void ioRoot::setupproperties(
     os_int cls)
 {
     eVariable *p;
 
-    /* Order of these addproperty() calls is important, since ecRoot itself is used to
+    /* Order of these addproperty() calls is important, since ioRoot itself is used to
        describe the properties in property set. The property to set must be added to
        property set before setting value for it. There is trick with p to set text type
-       after adding property type. This effects only ecRoot class.
+       after adding property type. This effects only ioRoot class.
      */
-    p = addproperty(cls, ECROOTP_TEXT, ecrootp_text, "text", EPRO_METADATA|EPRO_NOONPRCH);
-    addpropertyl (cls, ECROOTP_TYPE, ecrootp_type, "type", EPRO_METADATA|EPRO_NOONPRCH);
-    p->setpropertyl(ECROOTP_TYPE, OS_STR);
+    p = addproperty(cls, IOROOTP_TEXT, iorootp_text, "text", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertyl (cls, IOROOTP_TYPE, iorootp_type, "type", EPRO_METADATA|EPRO_NOONPRCH);
+    p->setpropertyl(IOROOTP_TYPE, OS_STR);
 }
 
 
@@ -182,18 +171,18 @@ void ecRoot::setupproperties(
 
 ****************************************************************************************************
 */
-eStatus ecRoot::onpropertychange(
+eStatus ioRoot::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
 {
     switch (propertynr)
     {
-/*         case ECROOTP_VALUE:
+/*         case IOROOTP_VALUE:
             setv(x);
             break;
 
-        case ECROOTP_DIGS:
+        case IOROOTP_DIGS:
             setdigs((os_int)x->getl());
             break; */
 
@@ -220,18 +209,18 @@ eStatus ecRoot::onpropertychange(
 
 ****************************************************************************************************
 */
-eStatus ecRoot::simpleproperty(
+eStatus ioRoot::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {
     switch (propertynr)
     {
 /*
-        case ECROOTP_VALUE:
+        case IOROOTP_VALUE:
             x->setv(this);
             break;
 
-        case ECROOTP_DIGS:
+        case IOROOTP_DIGS:
             x->setl(digs());
             break;
 */
@@ -243,7 +232,7 @@ eStatus ecRoot::simpleproperty(
 }
 
 
-eStatus ecRoot::initialize(const os_char *device_name)
+eStatus ioRoot::initialize(const os_char *device_name)
 {
 #if 0
     osPersistentParams persistentprm;
@@ -324,6 +313,6 @@ eStatus ecRoot::initialize(const os_char *device_name)
 }
 
 
-void ecRoot::shutdown()
+void ioRoot::shutdown()
 {
 }
