@@ -29,7 +29,7 @@ eNetService::eNetService(
     : eThread(parent, oid, flags)
 {
     m_persistent_accounts = OS_NULL;
-    m_accounts_matrix = OS_NULL;
+    m_account_matrix = OS_NULL;
     initproperties();
 }
 
@@ -100,6 +100,7 @@ void eNetService::initialize(
     ns_create();
     create_user_account_table();
     create_end_point_table();
+    create_connection_table();
 }
 
 

@@ -45,8 +45,8 @@ void eNetService::create_user_account_table()
     eVariable *column;
 
     m_persistent_accounts = new ePersistent(this);
-    m_accounts_matrix = new eMatrix(m_persistent_accounts);
-    m_accounts_matrix->addname("accounts");
+    m_account_matrix = new eMatrix(m_persistent_accounts);
+    m_account_matrix->addname("accounts");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
@@ -113,12 +113,12 @@ void eNetService::create_user_account_table()
 
     /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
      */
-    m_accounts_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
-    m_accounts_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
+    m_account_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
+    m_account_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
 
     m_persistent_accounts->load_file("accounts.eo");
 
-    if (m_accounts_matrix->nrows() == 0) {
+    if (m_account_matrix->nrows() == 0) {
         add_user_account("ispy", "pass", 7, 3);
     }
 }
@@ -162,5 +162,5 @@ void eNetService::add_user_account(
         element->setl(privileges);
     }
 
-    m_accounts_matrix->insert(&row);
+    m_account_matrix->insert(&row);
 }

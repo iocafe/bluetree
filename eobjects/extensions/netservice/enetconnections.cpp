@@ -1,7 +1,7 @@
 /**
 
-  @file    enetendpoints.cpp
-  @brief   End points to listen to.
+  @file    enetconnections.cpp
+  @brief   Connections to establish.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -20,9 +20,9 @@
 /**
 ****************************************************************************************************
 
-  @brief Create "end point" table.
+  @brief Create "connections" table.
 
-  The eNetService::create_user_account_table function...
+  The eNetService::create_connection_table function...
 
     "connect": [{
                 "transport": "none",
@@ -44,14 +44,14 @@
 
 ****************************************************************************************************
 */
-void eNetService::create_end_point_table()
+void eNetService::create_connection_table()
 {
     eContainer *configuration, *columns;
     eVariable *column;
 
-    m_end_points = new ePersistent(this);
-    m_endpoint_matrix = new eMatrix(m_end_points);
-    m_endpoint_matrix->addname("endpoints");
+    m_connections = new ePersistent(this);
+    m_connection_matrix = new eMatrix(m_connections);
+    m_connection_matrix->addname("connections");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
@@ -69,7 +69,7 @@ void eNetService::create_end_point_table()
     column->setpropertys(EVARP_TEXT, "enable");
     column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
     column->setpropertys(EVARP_TTIP,
-        "Enable this end point");
+        "Enable this connection.");
 
     column = new eVariable(columns);
     column->addname("protocol", ENAME_NO_MAP);
@@ -77,9 +77,32 @@ void eNetService::create_end_point_table()
     column->setpropertyi(EVARP_TYPE, OS_CHAR);
     column->setpropertys(EVARP_ATTR, "enum=\"1.eobjects,2.iocom\"");
     column->setpropertys(EVARP_TTIP,
-        "Listen for protocol.\n"
+        "Connect using this protocol.\n"
         "- \'eobjects\': eobjects communication protocol (for glass user interface, etc).\n"
         "- \'iocom\': IO device communication protocol.\n");
+
+    column = new eVariable(columns);
+    column->addname("connection", ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "connection");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_TTIP,
+        "IP andress and optional TCP port number, or \'*\' to connect to addressed determined\n"
+        "by lighthouse UDP multicasts. Examples: \'192.168.1.222\', \'192.168.1.222:666\', \'*\',\n"
+        "or \'COM1:115200\'");
+
+    column = new eVariable(columns);
+    column->addname("devices", ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "devices");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_TTIP,
+        "List of device to connect to. Wildcard \'*\' can be used.");
+
+    column = new eVariable(columns);
+    column->addname("network", ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "network");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_TTIP,
+        "Device network name to connect to. Wildcard \'*\' to connect to any network.");
 
     column = new eVariable(columns);
     column->addname("transport", ENAME_NO_MAP);
@@ -93,20 +116,12 @@ void eNetService::create_end_point_table()
         "- \'SERIAL\': Serial communication.\n");
 
     column = new eVariable(columns);
-    column->addname("port", ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "port/iface");
-    column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_TTIP,
-        "TCP port number proceeded with IP . Examples: \'6666\',\n"
-        "\'192.168.1.222:666\', or \'COM1:115200\'");
-
-    column = new eVariable(columns);
     column->addname("active", ENAME_NO_MAP);
     column->setpropertyi(EVARP_TYPE, OS_INT);
-    column->setpropertys(EVARP_TEXT, "active connections");
+    column->setpropertys(EVARP_TEXT, "active");
     column->setpropertys(EVARP_ATTR, "nosave");
     column->setpropertys(EVARP_TTIP,
-        "Number of active connections on this end point");
+        "Number of active connections on resulting this end point");
 
     column = new eVariable(columns);
     column->addname("tstamp", ENAME_NO_MAP);
@@ -118,14 +133,14 @@ void eNetService::create_end_point_table()
 
     /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
      */
-    m_endpoint_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
-    m_endpoint_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
+    m_connection_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
+    m_connection_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
 
-    m_end_points->load_file("endpoints.eo");
+    m_connections->load_file("connections.eo");
 
-    if (m_endpoint_matrix->nrows() == 0) {
-        add_end_point(OS_TRUE, 1, 1, "5999");
-        add_end_point(OS_TRUE, 2, 1, IOC_DEFAULT_SOCKET_PORT_STR);
+    if (m_connection_matrix->nrows() == 0) {
+        add_connection(OS_TRUE, 1, "*", "*", 1);
+        add_connection(OS_TRUE, 2, "*", "*", 1);
     }
 }
 
@@ -133,19 +148,18 @@ void eNetService::create_end_point_table()
 /**
 ****************************************************************************************************
 
-  @brief Add a line for an end point to "end point" table.
+  @brief Add a row for a connection to "connections" table.
 
-  The eNetService::add_end_point function...
-
-  @param  protocol,
+  The eNetService::add_connection function...
 
 ****************************************************************************************************
 */
-void eNetService::add_end_point(
+void eNetService::add_connection(
     os_int enable,
     os_int protocol,
+    const os_char *connection,
+    const os_char *devices,
     os_int transport,
-    const os_char *port,
     os_int row_nr)
 {
     eContainer row;
@@ -165,15 +179,21 @@ void eNetService::add_end_point(
     element->addname("protocol", ENAME_NO_MAP);
     element->setl(protocol);
 
+    if (connection) {
+        element = new eVariable(&row);
+        element->addname("connection", ENAME_NO_MAP);
+        element->sets(connection);
+    }
+
+    if (devices) {
+        element = new eVariable(&row);
+        element->addname("devices", ENAME_NO_MAP);
+        element->sets(connection);
+    }
+
     element = new eVariable(&row);
     element->addname("transport", ENAME_NO_MAP);
     element->setl(transport);
 
-    if (port) {
-        element = new eVariable(&row);
-        element->addname("port", ENAME_NO_MAP);
-        element->sets(port);
-    }
-
-    m_endpoint_matrix->insert(&row);
+    m_connection_matrix->insert(&row);
 }

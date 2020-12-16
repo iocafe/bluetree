@@ -96,11 +96,29 @@ protected:
      */
     void create_end_point_table();
 
+    /* Add a line for an end point to "end point" table.
+     */
     void add_end_point(
+        os_int enable,
         os_int protocol,
         os_int transport,
         const os_char *port,
         os_int row_nr = -1);
+
+    /* Create "connections" table.
+     */
+    void create_connection_table();
+
+    /* Add a row for a connection to "connections" table.
+     */
+    void add_connection(
+        os_int enable,
+        os_int protocol,
+        const os_char *connection,
+        const os_char *devices,
+        os_int transport,
+        os_int row_nr = -1);
+
 
     /**
     ************************************************************************************************
@@ -114,7 +132,7 @@ protected:
 
     /** User accounts table (matrix).
      */
-    eMatrix *m_accounts_matrix;
+    eMatrix *m_account_matrix;
 
     /** Persistent object to hold end point table.
      */
@@ -123,6 +141,14 @@ protected:
     /** End point table (matrix).
      */
     eMatrix *m_endpoint_matrix;
+
+    /** Persistent object to hold the connection table.
+     */
+    ePersistent *m_connections;
+
+    /** Connection table (matrix).
+     */
+    eMatrix *m_connection_matrix;
 };
 
 /* Start network service.
