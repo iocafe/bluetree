@@ -20,9 +20,9 @@
 /**
 ****************************************************************************************************
 
-  @brief Create "user accounts" table.
+  @brief Create "user account" table.
 
-  The eNetService::create_user_accounts_table function...
+  The eNetService::create_user_account_table function...
 
     "accounts": [
         {
@@ -39,7 +39,7 @@
 
 ****************************************************************************************************
 */
-void eNetService::create_user_accounts_table()
+void eNetService::create_user_account_table()
 {
     eContainer *configuration, *columns;
     eVariable *column;

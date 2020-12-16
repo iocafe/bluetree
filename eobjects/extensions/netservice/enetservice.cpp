@@ -98,7 +98,8 @@ void eNetService::initialize(
     eContainer *params)
 {
     ns_create();
-    create_user_accounts_table();
+    create_user_account_table();
+    create_end_point_table();
 }
 
 
@@ -114,9 +115,9 @@ void enet_start_server(
     eNetService::setupclass();
 
     /* Create and start net service thread to listen for incoming socket connections,
-       name it "//service".
+       name it "//netservice".
      */
     net_service = new eNetService();
-    net_service->addname("//service");
+    net_service->addname("//netservice");
     net_service->start(server_thread_handle);
 }

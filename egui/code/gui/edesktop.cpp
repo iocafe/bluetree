@@ -107,7 +107,7 @@ void eGui::setup_desktop_application()
     e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
     e->setpropertyi(ECOMP_DIGS, 5);
 
-    w = new eWindow(this);
+    /* w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "test table");
 
     t = new eTableView(w);
@@ -117,13 +117,8 @@ void eGui::setup_desktop_application()
     w->setpropertys(ECOMP_TEXT, "kayttajat");
 
     t = new eTableView(w);
-    t->setpropertys(ECOMP_PATH, "//service/accounts");
-
-    w = new eWindow(this);
-    w->setpropertys(ECOMP_TEXT, "kayttajat sofie");
-
-    t = new eTableView(w);
-    t->setpropertys(ECOMP_PATH, "//service/accounts");
+    t->setpropertys(ECOMP_PATH, "//netservice/accounts");
+    */
 
     w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "Browseri");

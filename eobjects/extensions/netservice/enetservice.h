@@ -83,7 +83,7 @@ protected:
 
     /* Create "user accounts" table.
      */
-    void create_user_accounts_table();
+    void create_user_account_table();
 
     void add_user_account(
         const os_char *user_name,
@@ -92,6 +92,15 @@ protected:
         os_int privileges,
         os_int row_nr = -1);
 
+    /* Create "end point" table.
+     */
+    void create_end_point_table();
+
+    void add_end_point(
+        os_int protocol,
+        os_int transport,
+        const os_char *port,
+        os_int row_nr = -1);
 
     /**
     ************************************************************************************************
@@ -106,6 +115,14 @@ protected:
     /** User accounts table (matrix).
      */
     eMatrix *m_accounts_matrix;
+
+    /** Persistent object to hold end point table.
+     */
+    ePersistent *m_end_points;
+
+    /** End point table (matrix).
+     */
+    eMatrix *m_endpoint_matrix;
 };
 
 /* Start network service.

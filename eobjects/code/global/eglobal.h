@@ -29,9 +29,8 @@ class eConsole;
 #define EGLOBAL_PROCESS_NAME_SZ 16
 #define EGLOBAL_PROCESS_NR_SZ 16
 #define EGLOBAL_PROCESS_ID_SZ 32
-// #define EGLOBAL_PROCESS_NICK_NAME_SZ 48
 
-/* Space allocation for path and relative path.
+/* Space allocation for absolute and relative paths.
  */
 #ifndef EGLOBAL_PATH_SZ
 #define EGLOBAL_PATH_SZ 128
@@ -46,7 +45,8 @@ class eConsole;
 
   @brief Global structure.
 
-  X...
+  A flag C structure for global parameters. Excluding pointers, these are not modified at run
+  time and can be accessed without synchronization.
 
 ****************************************************************************************************
 */
@@ -147,7 +147,7 @@ inline eNameSpace *eglobal_process_ns()
     return eglobal->process_ns;
 }
 
-/* THIS MUST BE AS FAST FUNCTION AS POSSIBLE
+/* THIS SHOULD BE AS FAST FUNCTION AS POSSIBLE
  */
 inline eHandle *eget_handle(
     e_oix oix)
