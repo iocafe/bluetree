@@ -116,14 +116,16 @@ void eLightHouseClient::finish()
     ioc_release_lighthouse_client(&m_lighthouse);
 }
 
-
+/* Listen for lighthouse USP multicasts.
+ */
 void eLightHouseClient::run()
 {
     osalStatus s;
 
-    while (!exitnow())
+    while (OS_TRUE)
     {
         alive(EALIVE_RETURN_IMMEDIATELY);
+        if (exitnow()) break;
 
         s = ioc_run_lighthouse_client(&m_lighthouse, m_trigger);
         if (s != OSAL_SUCCESS) {
@@ -137,7 +139,8 @@ osal_debug_error("XXX");
     }
 }
 
-
+/* Callback by the same thread which calls ioc_run_lighthouse_client()
+ */
 void eLightHouseClient::callback(
     LighthouseClient *c,
     os_char *ip_addr,
@@ -163,8 +166,8 @@ void enet_start_lighthouse_client(
      */
     eLightHouseClient::setupclass();
 
-    /* Create and start net service thread to listen for incoming socket connections,
-       name it "//netservice".
+    /* Create and start thread to listen for lighthouse UDP multicasts,
+       name it "//lookout".
      */
     lighthouse = new eLightHouseClient();
     lighthouse->addname("//lookout");
