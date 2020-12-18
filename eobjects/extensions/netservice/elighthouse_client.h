@@ -104,13 +104,25 @@ protected:
         os_char *network_name,
         void *context);
 
+    /* Create "io device networks and processes" table.
+     */
+    void create_table();
+
 
     /**
     ************************************************************************************************
       Member variables
     ************************************************************************************************
     */
+
+    /** eosal lighthouse client structure.
+     */
     LighthouseClient m_lighthouse;
+
+    /** Table showing eobjcts processess and iocom device networks.
+     */
+    eMatrix *m_matrix;
+
 };
 
 /* Start light house client.
