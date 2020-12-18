@@ -308,7 +308,7 @@ void eThread::alive(
 {
     eEnvelope *envelope;
 
-    /* Wait for thread to be trigged. Always clear the event, even we would not be writing.
+    /* Wait for thread to be trigged. Always clear the event, even we would not be waiting.
      */
     osal_event_wait(m_trigger, flags & EALIVE_WAIT_FOR_EVENT
         ? OSAL_EVENT_INFINITE : OSAL_EVENT_NO_WAIT);

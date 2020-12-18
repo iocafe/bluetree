@@ -19,6 +19,7 @@ set(EXTENSIONS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/extensions")
 
 # Add library include paths.
 include_directories("$ENV{E_ROOT}/iocom")
+include_directories("$ENV{E_ROOT}/iocom/extensions/lighthouse")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}")
 
 # Add main headers.

@@ -18,6 +18,8 @@
 #define ENETSERVICE_H_
 #include "iocom.h"
 
+#include "extensions/netservice/elighthouse_client.h"
+
 /* Default socket port number for eobject communication. TCP ports 6371 - 6375 are unassigned.
  */
 #define ENET_DEFAULT_SOCKET_PORT 6371
@@ -44,10 +46,10 @@ public:
 
     /* Clone object.
      */
-    virtual eObject *clone(
+    /* virtual eObject *clone(
         eObject *parent,
         e_oid id = EOID_CHILD,
-        os_int aflags = 0);
+        os_int aflags = 0); */
 
     /* Casting eObject pointer to eNetService pointer.
      */
@@ -150,6 +152,10 @@ protected:
     /** IOCOM root object!
      */
     iocRoot m_root;
+
+    /** Lighthouse client thread handle.
+     */
+    eThreadHandle m_lighthouse_client_thread_handle;
 
     /** Persistent object to hold user accounts table.
      */

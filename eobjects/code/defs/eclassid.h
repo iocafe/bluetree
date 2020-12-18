@@ -69,10 +69,7 @@
 
 #define ECLASSID_FILE_SYSTEM 50
 #define ECLASSID_NETSERVICE 51
-// #define ECLASSID_NETCLIENT 52
-
-// #define IOCONNCLASSID_ROOT 55
-// #define IOCONNCLASSID_CONNECT 56
+#define ECLASSID_LIGHT_HOUSE_CLIENT 52
 
 /* First class id reserved for applications. All positive 32 bit integers
    starting from ECLASSID_APP_BASE can be used by application.

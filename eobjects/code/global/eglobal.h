@@ -27,7 +27,6 @@ class eConsole;
 /* Space allocation for process name, nr, id, etc. strings.
  */
 #define EGLOBAL_PROCESS_NAME_SZ 16
-#define EGLOBAL_PROCESS_NR_SZ 16
 #define EGLOBAL_PROCESS_ID_SZ 32
 
 /* Space allocation for absolute and relative paths.
@@ -94,10 +93,9 @@ typedef struct eGlobal
      */
     os_char process_name[EGLOBAL_PROCESS_NAME_SZ];
 
-    /** Process idenfification number, can be serial
-        number or short text.
+    /** Process idenfification number (device number, can be serial number).
      */
-    os_char process_nr[EGLOBAL_PROCESS_NR_SZ];
+    os_int process_nr;
 
     /** Process identification, process name and identification name together
      */

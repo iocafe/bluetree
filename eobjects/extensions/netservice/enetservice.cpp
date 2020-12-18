@@ -59,7 +59,7 @@ eNetService::~eNetService()
 
 ****************************************************************************************************
 */
-eObject *eNetService::clone(
+/* eObject *eNetService::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
@@ -68,7 +68,7 @@ eObject *eNetService::clone(
     clonedobj = new eNetService(parent, id == EOID_CHILD ? oid() : id, flags());
     clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
     return clonedobj;
-}
+} */
 
 
 /**
@@ -99,7 +99,6 @@ void eNetService::setupclass()
 void eNetService::initialize(
     eContainer *params)
 {
-
     ns_create();
 
     create_user_account_table();
@@ -146,6 +145,9 @@ void eNetService::initialize(
     m_connconf = ioc_get_connection_conf(&m_nodeconf);
     ioc_get_lighthouse_info(m_connconf, &m_lighthouse_server_info);
 #endif
+
+
+    enet_start_lighthouse_client(&m_lighthouse_client_thread_handle);
 }
 
 /* Overloaded eThread function to perform thread specific cleanup when threa exists.
@@ -153,6 +155,11 @@ void eNetService::initialize(
  */
 void eNetService::finish()
 {
+    /* Stop light house client.
+     */
+    m_lighthouse_client_thread_handle.terminate();
+    m_lighthouse_client_thread_handle.join();
+
     /* Remove eosal network event handler.
      */
     osal_set_net_event_handler(OS_NULL, this,

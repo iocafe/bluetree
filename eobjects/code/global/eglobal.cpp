@@ -72,17 +72,13 @@ void eglobal_initialize(
     os_int argc,
     os_char *argv[])
 {
-    const os_char *process_nr = OS_NULL;
+    os_int process_nr = 0;
     os_int i;
+    os_char process_nr_str[OSAL_NBUF_SZ];
 
     /* Set default paths.
      */
     os_strncpy(eglobal->root_path, EGLOBAL_ROOT_PATH, EGLOBAL_PATH_SZ);
-    os_strncpy(eglobal->app_static_dir, EGLOBAL_APP_STATIC_DIR, EGLOBAL_RELATIVE_PATH_SZ);
-    os_strncat(eglobal->app_static_dir, process_name, EGLOBAL_RELATIVE_PATH_SZ);
-    os_strncpy(eglobal->data_dir, EGLOBAL_DATA_DIR, EGLOBAL_RELATIVE_PATH_SZ);
-    os_strncat(eglobal->data_dir, process_name, EGLOBAL_RELATIVE_PATH_SZ);
-    os_strncat(eglobal->data_dir, process_nr, EGLOBAL_RELATIVE_PATH_SZ);
     os_strncpy(eglobal->bin_path, EGLOBAL_BIN_DIR, EGLOBAL_PATH_SZ);
 
     /* Check if we have process number or path modifiers.
@@ -90,7 +86,7 @@ void eglobal_initialize(
     for (i = 1; i < argc; i++) {
         if (!os_strncmp(argv[i], "-n=", 3)) {
             if (osal_char_isdigit(argv[i][3])) {
-                process_nr = argv[i] + 3;
+                process_nr = (os_int)osal_str_to_int(argv[i] + 3, OS_NULL);
             }
         }
         else if (!os_strncmp(argv[i], "-p=", 3)) {
@@ -100,13 +96,20 @@ void eglobal_initialize(
             os_strncpy(eglobal->bin_path, argv[i], EGLOBAL_PATH_SZ);
         }
     }
+    osal_int_to_str(process_nr_str, sizeof(process_nr_str), process_nr);
 
-    /* Save process identification in global flat structure, so synchronization
-       is not needed to access these.
+    /* Set relative dirctories.
+     */
+    os_strncpy(eglobal->app_static_dir, EGLOBAL_APP_STATIC_DIR, EGLOBAL_RELATIVE_PATH_SZ);
+    os_strncat(eglobal->app_static_dir, process_name, EGLOBAL_RELATIVE_PATH_SZ);
+    os_strncpy(eglobal->data_dir, EGLOBAL_DATA_DIR, EGLOBAL_RELATIVE_PATH_SZ);
+    os_strncat(eglobal->data_dir, process_name, EGLOBAL_RELATIVE_PATH_SZ);
+    os_strncat(eglobal->data_dir, process_nr_str, EGLOBAL_RELATIVE_PATH_SZ);
+
+    /* Set process identification.
      */
     os_strncpy(eglobal->process_name, process_name, EGLOBAL_PROCESS_NAME_SZ);
-    os_strncpy(eglobal->process_nr, process_nr, EGLOBAL_PROCESS_NR_SZ);
+    eglobal->process_nr = process_nr;
     os_strncpy(eglobal->process_id, process_name, EGLOBAL_PROCESS_ID_SZ);
-    os_strncat(eglobal->process_id, process_nr, EGLOBAL_PROCESS_ID_SZ);
-
+    os_strncat(eglobal->process_id, process_nr_str, EGLOBAL_PROCESS_ID_SZ);
 }
