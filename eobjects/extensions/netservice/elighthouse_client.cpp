@@ -103,6 +103,8 @@ void eLightHouseClient::initialize(
         OS_FALSE, /* is_ipv6 */
         OS_FALSE, /* is_tls */
         OS_NULL);
+
+    ioc_set_lighthouse_client_callback(&m_lighthouse, callback, this);
 }
 
 
@@ -123,24 +125,31 @@ void eLightHouseClient::run()
     {
         alive(EALIVE_RETURN_IMMEDIATELY);
 
-        os_sleep(1000);
-
-        s = ioc_run_lighthouse_client(&m_lighthouse);
-        switch (s) {
-            case OSAL_SUCCESS:
-                // ioc_lighthouse_select(&m_lighthouse, m_trigger);
-                break;
-
-            case OSAL_PENDING:
-                os_sleep(500);
-                break;
-
-            default:
+        s = ioc_run_lighthouse_client(&m_lighthouse, m_trigger);
+        if (s != OSAL_SUCCESS) {
+            if (s != OSAL_PENDING) {
 osal_debug_error_int("ioc_run_lighthouse_client failed, s=", s);
-                os_sleep(500);
-                break;
+            }
+            os_sleep(500);
         }
+
+osal_debug_error("XXX");
     }
+}
+
+
+void eLightHouseClient::callback(
+    LighthouseClient *c,
+    os_char *ip_addr,
+    os_int tls_port_nr,
+    os_int tcp_port_nr,
+    os_char *network_name,
+    void *context)
+{
+    osal_debug_error_str("HERE 1 ", ip_addr);
+    osal_debug_error_str("HERE 2 ", network_name);
+    osal_debug_error_int("HERE 3 ", tls_port_nr);
+    osal_debug_error_int("HERE 4 ", osal_rand(1, 1000));
 }
 
 /* Start light house client.
@@ -148,7 +157,7 @@ osal_debug_error_int("ioc_run_lighthouse_client failed, s=", s);
 void enet_start_lighthouse_client(
     eThreadHandle *lighthouse_client_thread_handle)
 {
-    eLightHouseClient *lighthouse;
+    struct eLightHouseClient *lighthouse;
 
     /* Set up class for use.
      */

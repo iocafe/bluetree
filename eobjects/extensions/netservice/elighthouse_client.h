@@ -96,6 +96,13 @@ protected:
     ************************************************************************************************
     */
 
+    static void callback(
+        struct LighthouseClient *c,
+        os_char *ip_addr,
+        os_int tls_port_nr,
+        os_int tcp_port_nr,
+        os_char *network_name,
+        void *context);
 
 
     /**
