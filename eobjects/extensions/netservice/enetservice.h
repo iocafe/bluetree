@@ -16,7 +16,12 @@
 #pragma once
 #ifndef ENETSERVICE_H_
 #define ENETSERVICE_H_
-#include "eobjects.h"
+#include "iocom.h"
+
+/* Default socket port number for eobject communication. TCP ports 6371 - 6375 are unassigned.
+ */
+#define ENET_DEFAULT_SOCKET_PORT 6371
+#define ENET_DEFAULT_SOCKET_PORT_STR "6371"
 
 /**
 ****************************************************************************************************
@@ -71,8 +76,15 @@ public:
         return new eNetService(parent, id, flags);
     }
 
+    /* Overloaded eThread function to initialize new thread.
+     */
     virtual void initialize(
         eContainer *params = OS_NULL);
+
+    /* Overloaded eThread function to perform thread specific cleanup when threa exists.
+     */
+    virtual void finish();
+
 
 protected:
     /**
@@ -80,6 +92,15 @@ protected:
       Internal functions.
     ************************************************************************************************
     */
+
+    /* Network event/error handler to move information by callbacks to messages.
+     */
+    static void net_event_handler(
+        osalErrorLevel level,
+        const os_char *module,
+        os_int code,
+        const os_char *description,
+        void *context);
 
     /* Create "user accounts" table.
      */
@@ -126,6 +147,10 @@ protected:
     ************************************************************************************************
     */
 
+    /** IOCOM root object!
+     */
+    iocRoot m_root;
+
     /** Persistent object to hold user accounts table.
      */
     ePersistent *m_persistent_accounts;
@@ -153,7 +178,7 @@ protected:
 
 /* Start network service.
  */
-void enet_start_server(
+void enet_start_service(
     eThreadHandle *server_thread_handle);
 
 #endif

@@ -27,8 +27,8 @@
 /* Persistent object property names.
  */
 const os_char
-    eperp_root_dir[] = "root_dir",
     eperp_root_path[] = "root_path",
+    eperp_relative_path[] = "rel_path",
     eperp_file[] = "file_name",
     eperp_save_time_ms[] = "time_ms",
     eperp_save_latest_time_ms[] = "latest_ms";
@@ -111,8 +111,8 @@ void ePersistent::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "ePersistent");
-    addpropertys(cls, EPERP_ROOT_DIR, eperp_root_dir, "/coderoot/fsys", "root dir", EPRO_DEFAULT);
     addpropertys(cls, EPERP_ROOT_PATH, eperp_root_path, "//fsys", "root path", EPRO_DEFAULT);
+    addproperty (cls, EPERP_RELATIVE_PATH, eperp_relative_path, "root path", EPRO_DEFAULT);
     addpropertys(cls, EPERP_FILE, eperp_file, "unknown.eo", "file name", EPRO_PERSISTENT);
     addpropertyl(cls, EPERP_SAVE_TIME_MS, eperp_save_time_ms, 200, "save time", EPRO_DEFAULT);
     addpropertyl(cls, EPERP_SAVE_LATEST_TIME_MS, eperp_save_latest_time_ms, 2000, "save latest", EPRO_DEFAULT);
@@ -181,8 +181,8 @@ eStatus ePersistent::onpropertychange(
 {
     switch (propertynr)
     {
-        case EPERP_ROOT_DIR:
         case EPERP_ROOT_PATH:
+        case EPERP_RELATIVE_PATH:
         case EPERP_FILE:
             break;
 
@@ -300,7 +300,7 @@ void ePersistent::check_save_timer()
 */
 void ePersistent::save_as_message()
 {
-    eVariable target, *relative_path;
+    eVariable target, *relative_path, tmp;
     eContainer *content;
     const os_char *p;
 
@@ -311,11 +311,12 @@ void ePersistent::save_as_message()
 // content->print_json();
 
     propertyv(EPERP_ROOT_PATH, &target);
-    propertyv(EPERP_FILE, relative_path);
-    p = os_strechr(target.gets(), '/');
-    if (p) if (p[1] != '\0') {
-        target.appends("/");
-    }
+    get_relative_path(relative_path);
+    propertyv(EPERP_FILE, &tmp);
+    relative_path->appends("/");
+    relative_path->appendv(&tmp);
+
+    target.appends("/");
     target.appendv(relative_path);
 
     p = target.gets();
@@ -336,18 +337,17 @@ void ePersistent::load_file(
     const os_char *file_name)
 {
     eVariable path, tmp;
-    os_char *p;
     eObject *content;
 
     if (file_name) {
         setpropertys(EPERP_FILE, file_name);
     }
 
-    propertyv(EPERP_ROOT_DIR, &path);
-    p = os_strechr(path.gets(), '/');
-    if (p) if (p[1] != '\0') {
-        path.appends("/");
-    }
+    path.sets(eglobal->root_path);
+    path.appends("/");
+    get_relative_path(&tmp);
+    path.appendv(&tmp);
+    path.appends("/");
     propertyv(EPERP_FILE, &tmp);
     path.appendv(&tmp);
 
@@ -358,6 +358,20 @@ void ePersistent::load_file(
         delete content;
     }
 }
+
+
+/* Get relative path, like "data/grumpy10"
+ */
+void ePersistent::get_relative_path(
+    eVariable *relative_path)
+{
+    propertyv(EPERP_RELATIVE_PATH, relative_path);
+    if (relative_path->isempty()) {
+        relative_path->sets(eglobal->data_dir);
+        setpropertyv(EPERP_RELATIVE_PATH, relative_path);
+    }
+}
+
 
 
 /**

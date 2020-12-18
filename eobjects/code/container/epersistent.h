@@ -27,8 +27,8 @@
 
 /* Persistent object property numbers.
  */
-#define EPERP_ROOT_DIR 10
-#define EPERP_ROOT_PATH 20
+#define EPERP_ROOT_PATH 10
+#define EPERP_RELATIVE_PATH 20
 #define EPERP_FILE 30
 #define EPERP_SAVE_TIME_MS 40
 #define EPERP_SAVE_LATEST_TIME_MS 50
@@ -36,8 +36,8 @@
 /* Persistent object property names.
  */
 extern const os_char
-    eperp_root_dir[],
     eperp_root_path[],
+    eperp_relative_path[],
     eperp_file[],
     eperp_save_time_ms[],
     eperp_save_latest_time_ms[];
@@ -138,6 +138,11 @@ protected:
     /* Save persistent object by sending it as message to file system.
      */
     void save_as_message();
+
+    /* Get relative path, like "data/grumpy10"
+     */
+    void get_relative_path(
+        eVariable *relative_path);
 
     /* Copy loaded data to use.
      */

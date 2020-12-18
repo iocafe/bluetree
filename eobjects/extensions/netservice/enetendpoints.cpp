@@ -124,7 +124,7 @@ void eNetService::create_end_point_table()
     m_end_points->load_file("endpoints.eo");
 
     if (m_endpoint_matrix->nrows() == 0) {
-        add_end_point(OS_TRUE, 1, 1, "5999");
+        add_end_point(OS_TRUE, 1, 1, ENET_DEFAULT_SOCKET_PORT_STR);
         add_end_point(OS_TRUE, 2, 1, IOC_DEFAULT_SOCKET_PORT_STR);
     }
 }

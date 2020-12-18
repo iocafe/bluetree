@@ -94,24 +94,115 @@ void eNetService::setupclass()
     os_unlock();
 }
 
+/* Overloaded eThread function to initialize new thread. Called after eNetService object is created.
+ */
 void eNetService::initialize(
     eContainer *params)
 {
+
     ns_create();
+
     create_user_account_table();
     create_end_point_table();
     create_connection_table();
+
+    /* Setup eosal network event handler callback to keep track of errors and network state.
+     */
+    osal_set_net_event_handler(net_event_handler, this,
+        OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
+
+    /* Initialize communication root object.
+     */
+    ioc_initialize_root(&m_root);
+
+#if 0
+    /* Use devicedir library for development testing, initialize.
+     */
+    io_initialize_device_console(&m_console, &m_root);
+
+    /* Setup IO pins.
+     */
+    m_pins_header = prm->pins_header;
+    pins_setup(m_pins_header, PINS_DEFAULT);
+
+    /* Load device/network configuration and device/user account congiguration
+       (persistent storage is typically either file system or micro-controller's flash).
+       Defaults are set in network-defaults.json and in account-defaults.json.
+     */
+    ioc_load_node_config(&m_nodeconf, prm->network_defaults,
+        prm->network_defaults_sz, device_name, IOC_LOAD_PBNR_NODE_CONF);
+    m_device_id = ioc_get_device_id(&m_nodeconf);
+    ioc_set_iodevice_id(&m_root, device_name, m_device_id->device_nr,
+        m_device_id->password, m_device_id->network_name);
+
+    ioc_initialize_dynamic_root(&m_root);
+
+    /* Set callback function to receive information about new dynamic memory blocks.
+     */
+    // ioc_set_root_callback(&iocom_root, app_root_callback, OS_NULL);
+
+    /* Get service TCP port number and transport (IOC_TLS_SOCKET or IOC_TCP_SOCKET).
+     */
+    m_connconf = ioc_get_connection_conf(&m_nodeconf);
+    ioc_get_lighthouse_info(m_connconf, &m_lighthouse_server_info);
+#endif
+}
+
+/* Overloaded eThread function to perform thread specific cleanup when threa exists.
+   This is a "pair" to initialize function.
+ */
+void eNetService::finish()
+{
+    /* Remove eosal network event handler.
+     */
+    osal_set_net_event_handler(OS_NULL, this,
+        OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
+
+#if 0
+    /* Finished with lighthouse.
+     */
+    ioc_release_lighthouse_server(&m_lighthouse_server);
+
+    /* Stop SPI and I2C threads.
+     */
+#if OSAL_MULTITHREAD_SUPPORT && (PINS_SPI || PINS_I2C)
+    pins_stop_multithread_devicebus();
+#endif
+
+    pins_shutdown(m_pins_header);
+
+    /* Release any memory allocated for node configuration.
+    */
+    ioc_release_node_config(&m_nodeconf);
+#endif
+
+    ioc_release_root(&m_root);
+    eThread::finish();
+}
+
+
+/* Error handler to move information provided by error handler callbacks to network state structure.
+ * This can be called by any thread: The function just converts callbacks to messages.
+ */
+void eNetService::net_event_handler(
+    osalErrorLevel level,
+    const os_char *module,
+    os_int code,
+    const os_char *description,
+    void *context)
+{
+
 }
 
 
 /* Start network service.
  */
-void enet_start_server(
+void enet_start_service(
     eThreadHandle *server_thread_handle)
 {
     eNetService *net_service;
 
-    /* Set up clas for use.
+    /* Set up class for use.
      */
     eNetService::setupclass();
 

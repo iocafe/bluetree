@@ -1,7 +1,7 @@
 /**
 
   @file    efilesystem.cpp
-  @brief   enet service implementation.
+  @brief   File system as object tree.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -93,7 +93,7 @@ void eFileSystem::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eFileSystem");
-    addpropertys(cls, EFSYSP_PATH, efsysp_path, "/coderoot/fsys", "path", EPRO_PERSISTENT);
+    addpropertys(cls, EFSYSP_PATH, efsysp_path, "/coderoot/fsys", "path", EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();
 }
@@ -170,14 +170,45 @@ eStatus eFileSystem::onpropertychange(
 {
     switch (propertynr)
     {
-        case EFSYSP_PATH:
-            m_path->setv(x);
+        case EFSYSP_PATH: /* Read only for sandbox security */
             break;
 
         default:
             return eObject::onpropertychange(propertynr, x, flags);
     }
 
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get value of simple property (override).
+
+  The simpleproperty() function stores current value of simple property into variable x.
+
+  @param   propertynr Property number to get.
+  @param   x Variable into which to store the property value.
+  @return  If property with property number was stored in x, the function returns
+           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
+           given number was not among simple properties.
+
+****************************************************************************************************
+*/
+eStatus eFileSystem::simpleproperty(
+    os_int propertynr,
+    eVariable *x)
+{
+    switch (propertynr)
+    {
+        case EFSYSP_PATH:
+            m_path->setv(m_path);
+            break;
+
+        default:
+            return eObject::simpleproperty(propertynr, x);
+    }
     return ESTATUS_SUCCESS;
 }
 
@@ -341,7 +372,7 @@ void eFileSystem::save_file(
 
     /* Get path to eFileSystem root directory. If path doesn't end with '/', append one.
      */
-    propertyv(EFSYSP_PATH, &file_path);
+    file_path.setv(m_path);
     p = os_strechr(file_path.gets(), '/');
     if (p) if (p[1] != '\0') {
         file_path.appends("/");
@@ -400,7 +431,8 @@ void efsys_expose_directory(
      */
     fsys = new eFileSystem();
     fsys->addname(fsys_name);
-    fsys->setpropertys(EFSYSP_PATH, os_path);
+    // NOW REfsys->setpropertys(EFSYSP_PATH, os_path);
+    fsys->set_os_path(os_path);
     fsys->start(fsys_thread_handle);
 }
 

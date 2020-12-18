@@ -154,7 +154,7 @@ void connection_example_1()
     eThreadHandle thandle1, thandle2, conthreadhandle;
     eContainer c;
 
-    /* Set up clas for use.
+    /* Set up class for use.
      */
     c1MyClass::setupclass();
 

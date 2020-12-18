@@ -42,17 +42,18 @@ eStatus emain(
     os_int argc,
     os_char *argv[])
 {
-    eThreadHandle client_thread_handle;
-    eThreadHandle server_thread_handle;
+    eThreadHandle service_thread_handle;
     eThreadHandle fsys_thread_handle;
     eGui *gui;
     eStatus s;
+    OSAL_UNUSED(argc);
+    OSAL_UNUSED(argv);
 
     // duudeli(); return ESTATUS_SUCCESS;
 
-    tableview_test_start();
+tableview_test_start();
 
-    efsys_expose_directory("//fsys", OSAL_FS_ROOT "coderoot/fsys", &fsys_thread_handle);
+    efsys_expose_directory("//fsys", eglobal->root_path, &fsys_thread_handle);
 
     egui_initialize();
     s = eimgui_initialize();
@@ -62,17 +63,14 @@ eStatus emain(
         return ESTATUS_FAILED;
     }
 
-    enet_start_server(&server_thread_handle);
-    enet_start_client(&client_thread_handle);
+    enet_start_service(&service_thread_handle);
 
     gui = new eGui(egui_get_container());
     gui->setup_desktop_application();
     gui->run();
 
-    server_thread_handle.terminate();
-    server_thread_handle.join();
-    client_thread_handle.terminate();
-    client_thread_handle.join();
+    service_thread_handle.terminate();
+    service_thread_handle.join();
 
     eimgui_shutdown();
     egui_shutdown();

@@ -160,7 +160,8 @@ inline eHandle *eget_handle(
  */
 void eglobal_initialize(
     const os_char *process_name,
-    const os_char *process_nr);
+    os_int argc,
+    os_char *argv[]);
 
 
 #endif

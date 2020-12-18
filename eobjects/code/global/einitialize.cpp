@@ -46,28 +46,17 @@ void eobjects_initialize(
 {
     osalSecurityConfig security;
     osPersistentParams persistentprm;
-    const os_char *process_nr = OS_NULL;
-    os_int i;
+    os_char path[OSAL_PERSISTENT_MAX_PATH];
 
     /* Do nothing if the library has been initialized.
      */
     if (eglobal->initialized) return;
 
-    /* Find out process number.
-     */
-    for (i = 1; i < argc; i++) {
-        if (!os_strcmp(argv[i], "-n")) {
-            if (osal_char_isdigit(argv[i][2])) {
-                process_nr = argv[i] + 2;
-            }
-        }
-    }
-
     /* Clear the global structure, mark initialized and save process name.
      */
     os_memclear(eglobal, sizeof(eGlobal));
     eglobal->initialized = OS_TRUE;
-    eglobal_initialize(process_name, process_nr);
+    eglobal_initialize(process_name, argc, argv);
 
     /* Initialize handle tables.
      */
@@ -82,14 +71,25 @@ void eobjects_initialize(
     if ((flags & EOBJECTS_NO_NETWORK_INIT) == 0)
     {
         /* Setup error handling. Here we select to keep track of network state. We could also
-           set application specific error handler callback by calling osal_set_error_handler().
+           set application specific event handler callback by calling osal_set_net_event_handler().
          */
         osal_initialize_net_state();
 
-        /* Initialize persistent storage (typically flash is running in micro-controller)
+        /* Initialize persistent storage
          */
         os_memclear(&persistentprm, sizeof(persistentprm));
-        persistentprm.device_name = process_name;
+        os_strncpy(path, eglobal->root_path, sizeof(path));
+        os_strncat(path, "/", sizeof(path));
+        os_strncat(path, eglobal->data_dir, sizeof(path));
+        os_strncat(path, "/eosal", sizeof(path));
+        if (emkdir(path, EMKDIR_DIR_PATH)) {
+            eVariable msg;
+            msg = "Unable to create directory \'";
+            msg.appends(path);
+            msg.appends("\'");
+osal_debug_error(msg.gets()); /* We need better error handling */
+        }
+        persistentprm.path = path;
         os_persistent_initialze(&persistentprm);
 
 #if OSAL_SOCKET_SUPPORT

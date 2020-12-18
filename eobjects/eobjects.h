@@ -90,6 +90,7 @@ void eobjects_shutdown();
 #include "code/stream/eosstream.h"
 #include "code/stream/ebuffer.h"
 #include "code/fsys/efilesystem.h"
+#include "code/fsys/edirectory.h"
 #include "code/connection/econnection.h"
 #include "code/connection/eendpoint.h"
 #include "code/helpers/etypeenum_helpers.h"

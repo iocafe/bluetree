@@ -29,7 +29,7 @@ eGlobal *eglobal = &eglobal_buf;
 /* Default root directory.
  */
 #ifndef EGLOBAL_ROOT_PATH
-#define EGLOBAL_ROOT_PATH OSAL_FS_ROOT "coderoot/fsys/"
+#define EGLOBAL_ROOT_PATH OSAL_FS_ROOT "coderoot/fsys"
 #endif
 
 /* Directory containing static application files.
@@ -47,7 +47,7 @@ eGlobal *eglobal = &eglobal_buf;
 /* Default data directory.
  */
 #ifndef EGLOBAL_DATA_DIR
-#define EGLOBAL_DATA_DIR "prm/"
+#define EGLOBAL_DATA_DIR "data/"
 #endif
 
 
@@ -69,17 +69,13 @@ eGlobal *eglobal = &eglobal_buf;
 */
 void eglobal_initialize(
     const os_char *process_name,
-    const os_char *process_nr)
+    os_int argc,
+    os_char *argv[])
 {
-    /* Save process identification in global flat structure, so synchronization
-       is not needed to access these.
-     */
-    os_strncpy(eglobal->process_name, process_name, EGLOBAL_PROCESS_NAME_SZ);
-    os_strncpy(eglobal->process_nr, process_nr, EGLOBAL_PROCESS_NR_SZ);
-    os_strncpy(eglobal->process_id, process_name, EGLOBAL_PROCESS_ID_SZ);
-    os_strncat(eglobal->process_id, process_nr, EGLOBAL_PROCESS_ID_SZ);
+    const os_char *process_nr = OS_NULL;
+    os_int i;
 
-    /* Set paths.
+    /* Set default paths.
      */
     os_strncpy(eglobal->root_path, EGLOBAL_ROOT_PATH, EGLOBAL_PATH_SZ);
     os_strncpy(eglobal->app_static_dir, EGLOBAL_APP_STATIC_DIR, EGLOBAL_RELATIVE_PATH_SZ);
@@ -88,4 +84,29 @@ void eglobal_initialize(
     os_strncat(eglobal->data_dir, process_name, EGLOBAL_RELATIVE_PATH_SZ);
     os_strncat(eglobal->data_dir, process_nr, EGLOBAL_RELATIVE_PATH_SZ);
     os_strncpy(eglobal->bin_path, EGLOBAL_BIN_DIR, EGLOBAL_PATH_SZ);
+
+    /* Check if we have process number or path modifiers.
+     */
+    for (i = 1; i < argc; i++) {
+        if (!os_strncmp(argv[i], "-n=", 3)) {
+            if (osal_char_isdigit(argv[i][3])) {
+                process_nr = argv[i] + 3;
+            }
+        }
+        else if (!os_strncmp(argv[i], "-p=", 3)) {
+            os_strncpy(eglobal->root_path, argv[i], EGLOBAL_PATH_SZ);
+        }
+        else if (!os_strncmp(argv[i], "-b=", 3)) {
+            os_strncpy(eglobal->bin_path, argv[i], EGLOBAL_PATH_SZ);
+        }
+    }
+
+    /* Save process identification in global flat structure, so synchronization
+       is not needed to access these.
+     */
+    os_strncpy(eglobal->process_name, process_name, EGLOBAL_PROCESS_NAME_SZ);
+    os_strncpy(eglobal->process_nr, process_nr, EGLOBAL_PROCESS_NR_SZ);
+    os_strncpy(eglobal->process_id, process_name, EGLOBAL_PROCESS_ID_SZ);
+    os_strncat(eglobal->process_id, process_nr, EGLOBAL_PROCESS_ID_SZ);
+
 }

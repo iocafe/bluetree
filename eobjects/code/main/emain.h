@@ -48,7 +48,7 @@ OSAL_C_HEADER_ENDS
 
   @param   argc Number of command line arguments.
   @param   argv Array of string pointers, one for each command line argument plus.
-                "-nX" sets process number (device number) X, for example "-n3".
+                "-n=X" sets process number (device number) X, for example "-n=3".
 
   @return  Integer return value to caller, OSAL_SUCCESS (0) to indicate "all fine".
 

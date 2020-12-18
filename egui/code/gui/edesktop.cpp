@@ -33,7 +33,7 @@ void eGui::setup_desktop_application()
     eParameterList *p;
     eLineEdit *e;
     eTreeNode *n;
-    eTableView *t;
+    // eTableView *t;
     eValueX x;
 
     w = new eWindow(this);

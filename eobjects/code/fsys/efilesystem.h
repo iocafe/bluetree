@@ -1,7 +1,7 @@
 /**
 
   @file    efilesystem.h
-  @brief   enet service implementation.
+  @brief   File system as object tree.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -103,15 +103,32 @@ public:
         eVariable *x,
         os_int flags);
 
+    /* Get value of simple property (override).
+     */
+    virtual eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
+
+    /* List names in this object's namespace. Here we list files and folders.
+     */
     virtual void browse_list_namespace(
         eContainer *content,
         const os_char *target);
 
+    /* Collect information about a file or folder.
+     */
     virtual void object_info(
         eVariable *item,
         eVariable *name,
         eSet *appendix,
         const os_char *target);
+
+    /* Set operating system path. Cannot be modified as property for
+       sandbox security.
+     */
+    void set_os_path(const os_char *path) {
+        m_path->sets(path);
+    }
 
 protected:
     /**
