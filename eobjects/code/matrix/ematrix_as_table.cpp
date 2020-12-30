@@ -331,7 +331,8 @@ eName *eMatrix::find_index_column_name()
            rows are updated.
   @param   row A row of updated data. eContainer holding an eVariable for each element (column)
            to update. eVariable name is column name.
-  @param   tflags Reserved for future, set 0 for now.
+  @param   tflags Set 0 for default operation.
+           - ETABLE_INSERT_OR_UPDATE. Update existing row(s). If no row updated, insert as a new row.
   @param   dbm Pointer to eDBM to forward changes by trigger. OS_NULL if not needed.
 
   @return  ESTATUS_SUCCESS if ok.
@@ -345,8 +346,16 @@ eStatus eMatrix::update(
     eDBM *dbm)
 {
     eStatus s;
+    os_boolean row_to_update_found;
 
-    s = select_update_remove(EMTX_UPDATE, where_clause, row, OS_NULL, tflags, dbm);
+    s = select_update_remove(EMTX_UPDATE, where_clause, row, OS_NULL, tflags, dbm, &row_to_update_found);
+    if ((tflags & ETABLE_INSERT_OR_UPDATE) && !row_to_update_found)
+    {
+        insert_one_row(row, -1, dbm);
+        docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+        return ESTATUS_SUCCESS;
+    }
+
     if (s == ESTATUS_NO_CHANGES) {
         s = ESTATUS_SUCCESS;
     }
@@ -375,7 +384,7 @@ void eMatrix::remove(
     eDBM *dbm)
 {
     eStatus s;
-    s = select_update_remove(EMTX_REMOVE, where_clause, OS_NULL, OS_NULL, tflags, dbm);
+    s = select_update_remove(EMTX_REMOVE, where_clause, OS_NULL, OS_NULL, tflags, dbm, OS_NULL);
     if (s == ESTATUS_NO_CHANGES) {
         s = ESTATUS_SUCCESS;
     }
@@ -411,7 +420,7 @@ eStatus eMatrix::select(
     eSelectParameters *prm,
     os_int tflags)
 {
-    return select_update_remove(EMTX_SELECT, where_clause, cols, prm, tflags, OS_NULL);
+    return select_update_remove(EMTX_SELECT, where_clause, cols, prm, tflags, OS_NULL, OS_NULL);
 }
 
 
@@ -423,11 +432,16 @@ eStatus eMatrix::select(
   @param   op What to do: EMTX_UPDATE, EMTX_REMOVE or EMTX_SELECT.
   @param   where_clause String containing range and/or actual where clause.
   @param   cont A row of updated data or eContainer holding columns to select.
+
   @param   callback Pointer to callback function which will receive the data. The
            callback function may be called multiple times to receive data as matrices with
            N data rows in each. N is chosen for efficiency.
   @param   context Application specific context pointer to pass to callback function.
   @param   tflags Reserved for future, set 0 for now.
+
+  @param   row_to_update_found EMTX_UPDATE: If a row to update is found, this is set to OS_TRUE,
+           otherwise to OS_FALSE. Used to implement ETABLE_INSERT_OR_UPDATE functionality.
+           If not needed, can be OS_NULL;
 
   @return  ESTATUS_SUCCESS: ok.
            ESTATUS_NO_CHANGES: Same as ESTATUS_SUCCESS but indicates that nothing was actually
@@ -443,7 +457,8 @@ eStatus eMatrix::select_update_remove(
     eContainer *cont,
     eSelectParameters *prm,
     os_int tflags,
-    eDBM *dbm)
+    eDBM *dbm,
+    os_boolean *row_to_update_found)
 {
     eWhere *w = OS_NULL;
     os_int *col_mtx = OS_NULL, *sel_mtx = OS_NULL;
@@ -458,6 +473,10 @@ eStatus eMatrix::select_update_remove(
     os_memsz count;
     eStatus s, rval;
     os_boolean eval_error_reported = OS_FALSE;
+
+    if (row_to_update_found) {
+        *row_to_update_found = OS_FALSE;
+    }
 
     if (m_columns == OS_NULL) {
         osal_debug_error("eMatrix::select_update_remove: Not configured");
@@ -600,6 +619,9 @@ eStatus eMatrix::select_update_remove(
             case EMTX_UPDATE:
                 if (insert_one_row(cont, row_nr, dbm) == ESTATUS_SUCCESS) {
                     rval = ESTATUS_SUCCESS;
+                }
+                if (row_to_update_found) {
+                    *row_to_update_found = OS_TRUE;
                 }
                 break;
 

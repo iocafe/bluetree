@@ -66,6 +66,7 @@ eSelectParameters;
 
 /* tflags - table flags */
 #define ETABLE_ADOPT_ARGUMENT         0x10000000
+#define ETABLE_INSERT_OR_UPDATE       0x00008000
 #define ETABLE_SERIALIZED_FLAGS_MASK  0x0000FFFF
 
 

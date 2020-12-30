@@ -424,7 +424,8 @@ protected:
         eContainer *cont,
         eSelectParameters *prm,
         os_int tflags,
-        eDBM *dbm);
+        eDBM *dbm,
+        os_boolean *row_to_update_found);
 
     /* ematrix_as_table.cpp: Pass messages to DBM object.
      */

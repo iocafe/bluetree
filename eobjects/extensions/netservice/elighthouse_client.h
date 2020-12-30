@@ -98,10 +98,7 @@ protected:
 
     static void callback(
         struct LighthouseClient *c,
-        os_char *ip_addr,
-        os_int tls_port_nr,
-        os_int tcp_port_nr,
-        os_char *network_name,
+        LightHouseClientCallbackData *data,
         void *context);
 
     /* Create "io device networks and processes" table.
@@ -123,6 +120,9 @@ protected:
      */
     eMatrix *m_matrix;
 
+    /** Multicast counters by network service.
+     */
+    eContainer *m_counters;
 };
 
 /* Start light house client.

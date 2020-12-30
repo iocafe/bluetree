@@ -29,7 +29,12 @@ eLightHouseClient::eLightHouseClient(
     : eThread(parent, oid, flags)
 {
     m_matrix = OS_NULL;
+    m_counters = new eContainer(this);
+    m_counters->ns_create();
 //    initproperties();
+
+    addname("//LAN");
+
 }
 
 
@@ -145,24 +150,34 @@ osal_debug_error("XXX");
  */
 void eLightHouseClient::callback(
     LighthouseClient *c,
-    os_char *ip_addr,
-    os_int tls_port_nr,
-    os_int tcp_port_nr,
-    os_char *network_name,
+    LightHouseClientCallbackData *data,
     void *context)
 {
     eLightHouseClient *ec;
     eContainer *row;
-    eVariable *element;
+    eVariable *element, *where, *counter;
     os_char buf[E_OIXSTR_BUF_SZ];
 
     ec = (eLightHouseClient*)context;
-    if (ec->m_matrix == OS_NULL) return;
+    if (ec->m_matrix == OS_NULL || data->network_name == OS_NULL) return;
 
-    osal_debug_error_str("HERE 1 ", ip_addr);
-    osal_debug_error_str("HERE 2 ", network_name);
-    osal_debug_error_int("HERE 3 ", tls_port_nr);
+    osal_debug_error_str("HERE 1 ", data->ip_addr);
+    osal_debug_error_str("HERE 2 ", data->network_name);
+    osal_debug_error_int("HERE 3 ", data->tls_port_nr);
     osal_debug_error_int("HERE 4 ", osal_rand(1, 1000));
+
+    counter = eVariable::cast(ec->m_counters->byname(data->network_name));
+    if (counter) {
+        if (counter->getl() == data->counter) {
+            osal_debug_error_int("repeated lightcouse counter ", data->counter);
+            return;
+        }
+    }
+    else {
+        counter = new eVariable(ec->m_counters);
+        counter->addname(data->network_name);
+    }
+    counter->setl(data->counter);
 
     row = new eContainer(ec, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
 
@@ -174,7 +189,7 @@ void eLightHouseClient::callback(
 
     element = new eVariable(row);
     element->addname("name", ENAME_NO_MAP);
-    element->sets(network_name);
+    element->sets(data->network_name);
 
     /* element = new eVariable(&row);
     element->addname("protocol", ENAME_NO_MAP);
@@ -182,19 +197,27 @@ void eLightHouseClient::callback(
 
     element = new eVariable(row);
     element->addname("ip", ENAME_NO_MAP);
-    element->sets(ip_addr);
+    element->sets(data->ip_addr);
 
     element = new eVariable(row);
     element->addname("tlsport", ENAME_NO_MAP);
-    if (tls_port_nr) element->setl(tls_port_nr);
+    if (data->tls_port_nr) element->setl(data->tls_port_nr);
 
     element = new eVariable(row);
     element->addname("tcpport", ENAME_NO_MAP);
-    if (tcp_port_nr) element->setl(tcp_port_nr);
+    if (data->tcp_port_nr) element->setl(data->tcp_port_nr);
+
+    where = new eVariable(ec, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
+    where->appends("name=\'");
+    where->appends(data->network_name);
+    where->appends("\'");
 
     ec->m_matrix->oixstr(buf, sizeof(buf));
     // ec->m_matrix->insert(&row);
-    etable_insert(ec, buf, OS_NULL, row, ETABLE_ADOPT_ARGUMENT);
+    etable_update(ec, buf, OS_NULL, where->gets(), row,
+        ETABLE_ADOPT_ARGUMENT|ETABLE_INSERT_OR_UPDATE);
+
+    delete where;
 
 }
 
@@ -214,7 +237,7 @@ void eLightHouseClient::create_table()
     eVariable *column;
 
     m_matrix = new eMatrix(this);
-    m_matrix->addname("LAN");
+    m_matrix->addname("services");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
