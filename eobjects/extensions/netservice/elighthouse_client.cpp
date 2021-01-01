@@ -28,12 +28,9 @@ eLightHouseClient::eLightHouseClient(
     os_int flags)
     : eThread(parent, oid, flags)
 {
-    m_matrix = OS_NULL;
     m_counters = new eContainer(this);
     m_counters->ns_create();
 //    initproperties();
-
-    addname("//LAN");
 
 }
 
@@ -103,8 +100,7 @@ void eLightHouseClient::setupclass()
 void eLightHouseClient::initialize(
     eContainer *params)
 {
-    ns_create();
-    create_table();
+    // ns_create();
 
     ioc_initialize_lighthouse_client(&m_lighthouse,
         OS_FALSE, /* is_ipv6 */
@@ -115,7 +111,7 @@ void eLightHouseClient::initialize(
 }
 
 
-/* Overloaded eThread function to perform thread specific cleanup when threa exists: Release
+/* Overloaded eThread function to perform thread specific cleanup when thread exists: Release
    resources allocated for lighthouse client. This is a "pair" to initialize function.
  */
 void eLightHouseClient::finish()
@@ -156,10 +152,9 @@ void eLightHouseClient::callback(
     eLightHouseClient *ec;
     eContainer *row;
     eVariable *element, *where, *counter;
-    os_char buf[E_OIXSTR_BUF_SZ];
 
     ec = (eLightHouseClient*)context;
-    if (ec->m_matrix == OS_NULL || data->network_name == OS_NULL) return;
+    if (data->network_name == OS_NULL) return;
 
     osal_debug_error_str("HERE 1 ", data->ip_addr);
     osal_debug_error_str("HERE 2 ", data->network_name);
@@ -212,9 +207,8 @@ void eLightHouseClient::callback(
     where->appends(data->network_name);
     where->appends("\'");
 
-    ec->m_matrix->oixstr(buf, sizeof(buf));
-    // ec->m_matrix->insert(&row);
-    etable_update(ec, buf, OS_NULL, where->gets(), row,
+    // ec->m_matrix->oixstr(buf, sizeof(buf));
+    etable_update(ec, "//netservice/services", OS_NULL, where->gets(), row,
         ETABLE_ADOPT_ARGUMENT|ETABLE_INSERT_OR_UPDATE);
 
     delete where;
@@ -227,17 +221,17 @@ void eLightHouseClient::callback(
 
   @brief Create "io device networks and processes" table.
 
-  The eLightHouseClient::create_table function...
+  The eNetService::create_table function...
 
 ****************************************************************************************************
 */
-void eLightHouseClient::create_table()
+void eNetService::create_services_table()
 {
     eContainer *configuration, *columns;
     eVariable *column;
 
-    m_matrix = new eMatrix(this);
-    m_matrix->addname("services");
+    m_services_matrix = new eMatrix(this);
+    m_services_matrix->addname("services");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
@@ -298,8 +292,8 @@ void eLightHouseClient::create_table()
 
     /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
      */
-    m_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
-    m_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
+    m_services_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
+    m_services_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
 }
 
 
@@ -315,9 +309,9 @@ void enet_start_lighthouse_client(
     eLightHouseClient::setupclass();
 
     /* Create and start thread to listen for lighthouse UDP multicasts,
-       name it "//lookout".
+       name it "//lighthouse".
      */
     lighthouse = new eLightHouseClient();
-    lighthouse->addname("//lookout");
+    lighthouse->addname("//_lighthouse");
     lighthouse->start(lighthouse_client_thread_handle);
 }

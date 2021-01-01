@@ -43,13 +43,6 @@ public:
      */
     virtual ~eLightHouseClient();
 
-    /* Clone object.
-    virtual eObject *clone(
-        eObject *parent,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0);
-     */
-
     /* Casting eObject pointer to eLightHouseClient pointer.
      */
     inline static eLightHouseClient *cast(
@@ -82,7 +75,7 @@ public:
     virtual void initialize(
         eContainer *params = OS_NULL);
 
-    /* Overloaded eThread function to perform thread specific cleanup when threa exists.
+    /* Overloaded eThread function to perform thread specific cleanup when thread exists.
      */
     virtual void finish();
 
@@ -101,10 +94,6 @@ protected:
         LightHouseClientCallbackData *data,
         void *context);
 
-    /* Create "io device networks and processes" table.
-     */
-    void create_table();
-
 
     /**
     ************************************************************************************************
@@ -115,10 +104,6 @@ protected:
     /** eosal lighthouse client structure.
      */
     LighthouseClient m_lighthouse;
-
-    /** Table showing eobjcts processess and iocom device networks.
-     */
-    eMatrix *m_matrix;
 
     /** Multicast counters by network service.
      */

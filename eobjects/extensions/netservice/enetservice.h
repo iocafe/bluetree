@@ -44,13 +44,6 @@ public:
      */
     virtual ~eNetService();
 
-    /* Clone object.
-     */
-    /* virtual eObject *clone(
-        eObject *parent,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0); */
-
     /* Casting eObject pointer to eNetService pointer.
      */
     inline static eNetService *cast(
@@ -78,14 +71,13 @@ public:
         return new eNetService(parent, id, flags);
     }
 
-    /* Overloaded eThread function to initialize new thread.
+    /* Called after eNetService object is created.
      */
-    virtual void initialize(
-        eContainer *params = OS_NULL);
+    void initialize();
 
-    /* Overloaded eThread function to perform thread specific cleanup when threa exists.
+    /* Start closing net service (no process lock)..
      */
-    virtual void finish();
+    void finish();
 
 
 protected:
@@ -142,6 +134,10 @@ protected:
         os_int transport,
         os_int row_nr = -1);
 
+    /* Create "io device networks and processes" table.
+     */
+    void create_services_table();
+
 
     /**
     ************************************************************************************************
@@ -180,11 +176,18 @@ protected:
     /** Connection table (matrix).
      */
     eMatrix *m_connection_matrix;
+
+    /** Services table (matrix).
+     */
+    eMatrix *m_services_matrix;
 };
 
 /* Start network service.
  */
-void enet_start_service(
-    eThreadHandle *server_thread_handle);
+void enet_start_service();
+
+/* Shut down network service.
+ */
+void enet_stop_service();
 
 #endif

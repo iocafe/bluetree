@@ -114,7 +114,7 @@ public:
      */
     virtual void run();
 
-    /* Overload this function to perform thread specific cleanup when threa exists. This
+    /* Overload this function to perform thread specific cleanup when thread exists. This
        is a "pair" to initialize function.
      */
     virtual void finish() {}

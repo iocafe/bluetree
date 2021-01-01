@@ -30,6 +30,12 @@ eNetService::eNetService(
 {
     m_persistent_accounts = OS_NULL;
     m_account_matrix = OS_NULL;
+    m_end_points = OS_NULL;
+    m_endpoint_matrix = OS_NULL;
+    m_connections = OS_NULL;
+    m_connection_matrix = OS_NULL;
+    m_services_matrix = OS_NULL;
+
     initproperties();
 }
 
@@ -41,34 +47,23 @@ eNetService::eNetService(
 */
 eNetService::~eNetService()
 {
+    /* Remove eosal network event handler.
+     */
+    osal_set_net_event_handler(OS_NULL, this,
+        OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
+
+#if 0
+    /* Finished with lighthouse.
+     */
+    ioc_release_lighthouse_server(&m_lighthouse_server);
+
+    /* Release any memory allocated for node configuration.
+    */
+    ioc_release_node_config(&m_nodeconf);
+#endif
+
+    ioc_release_root(&m_root);
 }
-
-
-/**
-****************************************************************************************************
-
-  @brief Clone object
-
-  The eNetService::clone function clones and object including object's children.
-  Names will be left detached in clone.
-
-  @param  parent Parent for the clone.
-  @param  oid Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
-  @return Pointer to the clone.
-
-****************************************************************************************************
-*/
-/* eObject *eNetService::clone(
-    eObject *parent,
-    e_oid id,
-    os_int aflags)
-{
-    eObject *clonedobj;
-    clonedobj = new eNetService(parent, id == EOID_CHILD ? oid() : id, flags());
-    clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
-    return clonedobj;
-} */
 
 
 /**
@@ -94,16 +89,16 @@ void eNetService::setupclass()
     os_unlock();
 }
 
-/* Overloaded eThread function to initialize new thread. Called after eNetService object is created.
+/* Called after eNetService object is created.
  */
-void eNetService::initialize(
-    eContainer *params)
+void eNetService::initialize()
 {
     ns_create();
 
     create_user_account_table();
     create_end_point_table();
     create_connection_table();
+    create_services_table();
 
     /* Setup eosal network event handler callback to keep track of errors and network state.
      */
@@ -118,11 +113,6 @@ void eNetService::initialize(
     /* Use devicedir library for development testing, initialize.
      */
     io_initialize_device_console(&m_console, &m_root);
-
-    /* Setup IO pins.
-     */
-    m_pins_header = prm->pins_header;
-    pins_setup(m_pins_header, PINS_DEFAULT);
 
     /* Load device/network configuration and device/user account congiguration
        (persistent storage is typically either file system or micro-controller's flash).
@@ -146,12 +136,11 @@ void eNetService::initialize(
     ioc_get_lighthouse_info(m_connconf, &m_lighthouse_server_info);
 #endif
 
-
     enet_start_lighthouse_client(&m_lighthouse_client_thread_handle);
 }
 
-/* Overloaded eThread function to perform thread specific cleanup when threa exists.
-   This is a "pair" to initialize function.
+
+/* Start closing net service (no process lock).
  */
 void eNetService::finish()
 {
@@ -159,32 +148,6 @@ void eNetService::finish()
      */
     m_lighthouse_client_thread_handle.terminate();
     m_lighthouse_client_thread_handle.join();
-
-    /* Remove eosal network event handler.
-     */
-    osal_set_net_event_handler(OS_NULL, this,
-        OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
-
-#if 0
-    /* Finished with lighthouse.
-     */
-    ioc_release_lighthouse_server(&m_lighthouse_server);
-
-    /* Stop SPI and I2C threads.
-     */
-#if OSAL_MULTITHREAD_SUPPORT && (PINS_SPI || PINS_I2C)
-    pins_stop_multithread_devicebus();
-#endif
-
-    pins_shutdown(m_pins_header);
-
-    /* Release any memory allocated for node configuration.
-    */
-    ioc_release_node_config(&m_nodeconf);
-#endif
-
-    ioc_release_root(&m_root);
-    // eThread::finish();
 }
 
 
@@ -203,26 +166,37 @@ void eNetService::net_event_handler(
 
 
 /* Start network service.
+   Setup network service class and creates global network service object.
  */
-void enet_start_service(
-    eThreadHandle *server_thread_handle)
+void enet_start_service()
 {
-    eNetService *net_service;
+    eNetService *netservice;
 
     /* Set up class for use.
      */
     eNetService::setupclass();
 
-    /* Create and start net service thread to listen for incoming socket connections,
-       name it "//netservice".
+    /* Create global network service object.
      */
-    /* net_service = new eNetService();
-    net_service->addname("//netservice");
-    net_service->start(server_thread_handle); */
-
     os_lock();
-    net_service = new eNetService(eglobal->process);
-    net_service->addname("//netservice");
-    net_service->initialize(OS_NULL);
+    netservice = new eNetService(eglobal->process);
+    netservice->addname("//netservice");
+    eglobal->netservice = netservice;
+    netservice->initialize();
     os_unlock();
+}
+
+
+/* Shut down network service.
+ * Deletes global network service object.
+ */
+void enet_stop_service()
+{
+    if (eglobal->netservice) {
+        eglobal->netservice->finish();
+        os_lock();
+        delete eglobal->netservice;
+        eglobal->netservice = OS_NULL;
+        os_unlock();
+    }
 }

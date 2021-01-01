@@ -63,14 +63,13 @@ tableview_test_start();
         return ESTATUS_FAILED;
     }
 
-    enet_start_service(&service_thread_handle);
+    enet_start_service();
 
     gui = new eGui(egui_get_container());
     gui->setup_desktop_application();
     gui->run();
 
-    service_thread_handle.terminate();
-    service_thread_handle.join();
+    enet_stop_service();
 
     eimgui_shutdown();
     egui_shutdown();

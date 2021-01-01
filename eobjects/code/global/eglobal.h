@@ -23,6 +23,7 @@
 
 class eThreadHandle;
 class eConsole;
+class eNetService;
 
 /* Space allocation for process name, nr, id, etc. strings.
  */
@@ -88,6 +89,10 @@ typedef struct eGlobal
     /** Pointer to timer thread handle
      */
     eThreadHandle *timerhandle;
+
+    /** Network service object (netservice extension). OS_NULL if not used.
+     */
+    eNetService *netservice;
 
     /** Name of the process, like "grumpy".
      */
