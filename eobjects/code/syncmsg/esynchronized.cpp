@@ -57,6 +57,8 @@ eSynchronized::eSynchronized(
     m_path = OS_NULL;
     m_ref = OS_NULL;
     m_event = OS_NULL;
+    m_context = OS_NULL;
+    m_synchronize = OS_FALSE;
 }
 
 
@@ -96,7 +98,6 @@ void eSynchronized::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eSynchronized");
-    //propertysetdone(cls);
     os_unlock();
 }
 
@@ -145,6 +146,9 @@ eStatus eSynchronized::simpleproperty(
 
   The eSynchronized::initialize_synch_transfer function.
 
+  If this is run by process, no synchronization is done, but data is sent by the synchronization
+  object.
+
   @param  path Path to remote object.
   @return None.
 
@@ -155,25 +159,42 @@ void eSynchronized::initialize_synch_transfer(
 {
     eContainer *connectors;
     eSyncConnector *connector;
+    eThread *t;
 
-    if (m_ref) {
+    if (m_path) {
         osal_debug_error("initialize_synch_transfer: Function called twice");
         finish_sync_transfer(OS_TRUE);
     }
 
-    m_event = osal_event_create();
+    /* If this object is run process.
+     */
+    m_synchronize = OS_FALSE;
+    t = thread();
+    if (t) {
+        m_synchronize = (os_boolean)(t->classid() != ECLASSID_PROCESS);
+    }
+
     m_path = new eVariable(this);
     m_path->sets(path);
-    m_ref = new ePointer(this);
 
-    os_lock();
+    if (m_synchronize) {
+        m_ref = new ePointer(this);
+        m_event = osal_event_create();
 
-    connectors = eProcess::sync_connectors();
-    connector = new eSyncConnector(connectors);
-    connector->set_sync_event(m_event);
-    m_ref->set(connector);
+        os_lock();
 
-    os_unlock();
+        connectors = eProcess::sync_connectors();
+        connector = new eSyncConnector(connectors);
+        connector->set_sync_event(m_event);
+        m_ref->set(connector);
+
+        os_unlock();
+    }
+    else {
+        m_context = new eVariable(this);
+        m_context->sets("pc");
+        m_context->appendl(osal_rand(1, 100000));
+    }
 }
 
 
@@ -194,21 +215,28 @@ void eSynchronized::finish_sync_transfer(
 {
     eObject *connector;
 
-    if (m_ref == OS_NULL) {
+    if (m_path == OS_NULL) {
         return;
     }
 
-    os_lock();
-    connector = m_ref->get();
-    delete connector;
-    os_unlock();
+    if (m_synchronize)
+    {
+        os_lock();
+        connector = m_ref->get();
+        delete connector;
+        os_unlock();
+        delete m_ref;
+        m_ref = OS_NULL;
+        osal_event_delete(m_event);
+        m_event = OS_NULL;
+    }
+    else {
+        delete m_context;
+        m_context = OS_NULL;
+    }
 
     delete m_path;
-    delete m_ref;
-    osal_event_delete(m_event);
     m_path = OS_NULL;
-    m_ref = OS_NULL;
-    m_event = OS_NULL;
 }
 
 
@@ -224,7 +252,7 @@ void eSynchronized::finish_sync_transfer(
 
   @param   envelope Message envelope to send. Contains command, target and source paths and
            message content, etc. Envelope pointer will not be valid after this function call.
-           Contexxt and target will be set by this function.
+           Context and target will be set by this function.
   @return  The function returns ESTATUS_SUCCESS if all is fine. Other return values indicate
            that there is no connection to the receiving object.
 
@@ -238,7 +266,7 @@ eStatus eSynchronized::synch_send(
 
     /* Make sure that this has been initialize_synch_transfer() has been called.
      */
-    if (m_ref == OS_NULL) {
+    if (m_path == OS_NULL) {
         osal_debug_error("synch_send: not initialized");
         return ESTATUS_FAILED;
     }
@@ -247,33 +275,42 @@ eStatus eSynchronized::synch_send(
      */
     envelope->settarget(m_path);
 
-    /* Start thread sync.
-     */
-    os_lock();
-
-    /* Get pointer to sync connector object within process. If we do not have it, it
-       has been deleted under process?
-     */
-    connector = eSyncConnector::cast(m_ref->get());
-    if (connector == OS_NULL)
+    if (m_synchronize)
     {
-        osal_debug_error("synch_send: connector object has been deleted?");
+        /* Start thread sync.
+         */
+        os_lock();
+
+        /* Get pointer to sync connector object within process. If we do not have it, it
+           has been deleted under process?
+         */
+        connector = eSyncConnector::cast(m_ref->get());
+        if (connector == OS_NULL)
+        {
+            osal_debug_error("synch_send: connector object has been deleted?");
+            os_unlock();
+            return ESTATUS_FAILED;
+        }
+
+        if (connector->failed()) {
+            os_unlock();
+            return ESTATUS_FAILED;
+        }
+
+        /* Send message trough connector.
+         */
+        s = connector->send_message(envelope);
+
+        /* End thread sync.
+         */
         os_unlock();
-        return ESTATUS_FAILED;
     }
-
-    if (connector->failed()) {
-        os_unlock();
-        return ESTATUS_FAILED;
+    else {
+        envelope->setcontext(m_context);
+        envelope->addmflags(EMSG_NO_REPLIES);
+        message(envelope);
+        s = ESTATUS_SUCCESS;
     }
-
-    /* Send message trough connector.
-     */
-    s = connector->send_message(envelope);
-
-    /* End thread sync.
-     */
-    os_unlock();
 
     return s;
 }
@@ -298,8 +335,12 @@ eEnvelope *eSynchronized::sync_receive(
 
     /* Make sure that this has been initialize_synch_transfer() has been called.
      */
-    if (m_ref == OS_NULL) {
+    if (m_path == OS_NULL) {
         osal_debug_error("sync_receive: not initialized");
+        return OS_NULL;
+    }
+
+    if (!m_synchronize) {
         return OS_NULL;
     }
 
@@ -345,7 +386,8 @@ eEnvelope *eSynchronized::sync_receive(
   - To check if a reply has been received from remote object.
 
   @return  "In air count": Number of synchronized data transfer messages which have been sent
-           but not yet acknowledged or replied. -1 if failed.
+           but not yet acknowledged or replied. -1 if failed. If the transfer is not synchronized,
+           then the function returns 0.
 
 ****************************************************************************************************
 */
@@ -357,9 +399,13 @@ os_int eSynchronized::in_air_count()
 
     /* Make sure that this has been initialize_synch_transfer() has been called.
      */
-    if (m_ref == OS_NULL) {
+    if (m_path == OS_NULL) {
         osal_debug_error("in_air_count: not initialized");
         return -1;
+    }
+
+    if (!m_synchronize) {
+        return 0;
     }
 
     /* Start thread sync.
@@ -403,6 +449,8 @@ os_int eSynchronized::in_air_count()
   - To wait until remote object has acknowledged N enough received envelopes to send more data.
   - To wait until a reply has been received from remote object.
 
+  If the transnsfer is not synchronized, the function returns always ESTATUS_SUCCESS.
+
   @param  count "in air count to wait for".
   @param  timeout_ms Wait timeout. To wait infinetly give OSAL_EVENT_INFINITE (-1) here.
           To check "in air count" without waiting set timeout_ms to 0.
@@ -417,6 +465,10 @@ eStatus eSynchronized::sync_wait(
     os_long timeout_ms)
 {
     os_int c;
+
+    if (!m_synchronize) {
+        return ESTATUS_SUCCESS;
+    }
 
     while (OS_TRUE) {
         c = in_air_count();

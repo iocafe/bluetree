@@ -628,6 +628,7 @@ void eRowSetBinding::srvselect(
         columns, &m_pstruct, 0 /* tflags = 0 ???????????????? */);
 
     /* Send ECMD_OK as reply to indicate that the selection has completed.
+     * This goes in order even synchronization is within eProcess.
      */
     message(ECMD_OK, envelope->source(),
         envelope->target(), OS_NULL, EMSG_DEFAULT, envelope->context());
@@ -782,8 +783,10 @@ void eRowSetBinding::table_data_received(
     delete tmp;
 
 getout:
-    message (ECMD_ACK, envelope->source(), envelope->target(),
-        OS_NULL, EMSG_KEEP_CONTEXT, envelope->context());
+    if ((envelope->mflags() & EMSG_NO_REPLIES) == 0) {
+        message (ECMD_ACK, envelope->source(), envelope->target(),
+            OS_NULL, EMSG_KEEP_CONTEXT, envelope->context());
+    }
 }
 
 

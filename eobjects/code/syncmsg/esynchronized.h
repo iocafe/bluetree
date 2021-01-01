@@ -138,6 +138,8 @@ protected:
     eVariable *m_path;
     ePointer *m_ref;
     osalEvent m_event;
+    eVariable *m_context; /* message context when not synchronizing */
+    os_boolean m_synchronize; /* If process, we do not synchronize */
 };
 
 #endif

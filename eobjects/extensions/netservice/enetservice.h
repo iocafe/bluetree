@@ -30,7 +30,7 @@
   eNetService class.
 ****************************************************************************************************
 */
-class eNetService : public eThread
+class eNetService : public eObject
 {
 public:
     /* Constructor.

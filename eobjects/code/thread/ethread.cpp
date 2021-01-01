@@ -194,6 +194,10 @@ void eThread::start(
         prmstruct.params = eContainer::cast(params->clone(this, EOID_INTERNAL));
     }
 
+    /* Initialize the thread.
+     */
+    initialize(prmstruct.params);
+
     if (thandle)
     {
         handle = osal_thread_create(ethread_func, &prmstruct, OS_NULL, OSAL_THREAD_ATTACHED);
@@ -231,10 +235,6 @@ static void ethread_func(
     /* Copy parameters to local stack
      */
     os_memcpy(&prmstruct, prm, sizeof(eThreadParameters));
-
-    /* Initialize the thread.
-     */
-    prmstruct.thread->initialize(prmstruct.params);
 
     /* Let thread which created this one proceed.
      */

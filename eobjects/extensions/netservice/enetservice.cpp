@@ -26,7 +26,7 @@ eNetService::eNetService(
     eObject *parent,
     e_oid oid,
     os_int flags)
-    : eThread(parent, oid, flags)
+    : eObject(parent, oid, flags)
 {
     m_persistent_accounts = OS_NULL;
     m_account_matrix = OS_NULL;
@@ -184,7 +184,7 @@ void eNetService::finish()
 #endif
 
     ioc_release_root(&m_root);
-    eThread::finish();
+    // eThread::finish();
 }
 
 
@@ -216,7 +216,13 @@ void enet_start_service(
     /* Create and start net service thread to listen for incoming socket connections,
        name it "//netservice".
      */
-    net_service = new eNetService();
+    /* net_service = new eNetService();
     net_service->addname("//netservice");
-    net_service->start(server_thread_handle);
+    net_service->start(server_thread_handle); */
+
+    os_lock();
+    net_service = new eNetService(eglobal->process);
+    net_service->addname("//netservice");
+    net_service->initialize(OS_NULL);
+    os_unlock();
 }
