@@ -1,6 +1,6 @@
 /**
 
-  @file    enetconnections.cpp
+  @file    enetconnect.cpp
   @brief   Connections to establish.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -22,7 +22,7 @@
 
   @brief Create "connections" table.
 
-  The eNetService::create_connection_table function...
+  The eNetService::create_connect_table function...
 
     "connect": [{
                 "transport": "none",
@@ -44,14 +44,14 @@
 
 ****************************************************************************************************
 */
-void eNetService::create_connection_table()
+void eNetService::create_connect_table()
 {
     eContainer *configuration, *columns;
     eVariable *column;
 
-    m_connections = new ePersistent(this);
-    m_connection_matrix = new eMatrix(m_connections);
-    m_connection_matrix->addname("connections");
+    m_connect = new ePersistent(this);
+    m_connection_matrix = new eMatrix(m_connect);
+    m_connection_matrix->addname("connect");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
@@ -136,7 +136,7 @@ void eNetService::create_connection_table()
     m_connection_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
     m_connection_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
 
-    m_connections->load_file("connections.eo");
+    m_connect->load_file("connections.eo");
 
     if (m_connection_matrix->nrows() == 0) {
         add_connection(OS_TRUE, 1, "*", "*", 1);

@@ -122,7 +122,7 @@ protected:
 
     /* Create "connections" table.
      */
-    void create_connection_table();
+    void create_connect_table();
 
     /* Add a row for a connection to "connections" table.
      */
@@ -171,7 +171,7 @@ protected:
 
     /** Persistent object to hold the connection table.
      */
-    ePersistent *m_connections;
+    ePersistent *m_connect;
 
     /** Connection table (matrix).
      */

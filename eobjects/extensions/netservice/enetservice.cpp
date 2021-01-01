@@ -32,7 +32,7 @@ eNetService::eNetService(
     m_account_matrix = OS_NULL;
     m_end_points = OS_NULL;
     m_endpoint_matrix = OS_NULL;
-    m_connections = OS_NULL;
+    m_connect = OS_NULL;
     m_connection_matrix = OS_NULL;
     m_services_matrix = OS_NULL;
 
@@ -97,7 +97,7 @@ void eNetService::initialize()
 
     create_user_account_table();
     create_end_point_table();
-    create_connection_table();
+    create_connect_table();
     create_services_table();
 
     /* Setup eosal network event handler callback to keep track of errors and network state.

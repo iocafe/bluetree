@@ -30,8 +30,6 @@ eLightHouseClient::eLightHouseClient(
 {
     m_counters = new eContainer(this);
     m_counters->ns_create();
-//    initproperties();
-
 }
 
 
@@ -43,33 +41,6 @@ eLightHouseClient::eLightHouseClient(
 eLightHouseClient::~eLightHouseClient()
 {
 }
-
-
-/**
-****************************************************************************************************
-
-  @brief Clone object
-
-  The eLightHouseClient::clone function clones and object including object's children.
-  Names will be left detached in clone.
-
-  @param  parent Parent for the clone.
-  @param  oid Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
-  @return Pointer to the clone.
-
-****************************************************************************************************
-*/
-/* eObject *eLightHouseClient::clone(
-    eObject *parent,
-    e_oid id,
-    os_int aflags)
-{
-    eObject *clonedobj;
-    clonedobj = new eLightHouseClient(parent, id == EOID_CHILD ? oid() : id, flags());
-    clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
-    return clonedobj;
-} */
 
 
 /**
@@ -100,8 +71,6 @@ void eLightHouseClient::setupclass()
 void eLightHouseClient::initialize(
     eContainer *params)
 {
-    // ns_create();
-
     ioc_initialize_lighthouse_client(&m_lighthouse,
         OS_FALSE, /* is_ipv6 */
         OS_FALSE, /* is_tls */
@@ -176,19 +145,21 @@ void eLightHouseClient::callback(
 
     row = new eContainer(ec, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
 
-    /* if (row_nr > 0) {
-        element = new eVariable(&row);
-        element->addname("ix", ENAME_NO_MAP);
-        element->setl(row_nr);
-    } */
-
     element = new eVariable(row);
     element->addname("name", ENAME_NO_MAP);
     element->sets(data->network_name);
 
-    /* element = new eVariable(&row);
+    element = new eVariable(row);
     element->addname("protocol", ENAME_NO_MAP);
-    element->setl(protocol); */
+    if (!os_strcmp(data->protocol, "i")) {
+        element->sets("iocom");
+    }
+    else if (!os_strcmp(data->protocol, "o")) {
+        element->sets("eobjects");
+    }
+    else {
+        element->sets(data->protocol);
+    }
 
     element = new eVariable(row);
     element->addname("ip", ENAME_NO_MAP);
@@ -202,17 +173,19 @@ void eLightHouseClient::callback(
     element->addname("tcpport", ENAME_NO_MAP);
     if (data->tcp_port_nr) element->setl(data->tcp_port_nr);
 
+    element = new eVariable(row);
+    element->addname("tstamp", ENAME_NO_MAP);
+    element->setl(etime());
+
     where = new eVariable(ec, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
     where->appends("name=\'");
     where->appends(data->network_name);
     where->appends("\'");
 
-    // ec->m_matrix->oixstr(buf, sizeof(buf));
     etable_update(ec, "//netservice/services", OS_NULL, where->gets(), row,
         ETABLE_ADOPT_ARGUMENT|ETABLE_INSERT_OR_UPDATE);
 
     delete where;
-
 }
 
 
@@ -284,7 +257,7 @@ void eNetService::create_services_table()
 
     column = new eVariable(columns);
     column->addname("tstamp", ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, " connection");
+    column->setpropertys(EVARP_TEXT, "time stamp");
     column->setpropertyi(EVARP_TYPE, OS_LONG);
     column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\",nosave");
     column->setpropertys(EVARP_TTIP,
@@ -309,7 +282,7 @@ void enet_start_lighthouse_client(
     eLightHouseClient::setupclass();
 
     /* Create and start thread to listen for lighthouse UDP multicasts,
-       name it "//lighthouse".
+       name it "_lighthouse" in process name space.
      */
     lighthouse = new eLightHouseClient();
     lighthouse->addname("//_lighthouse");
