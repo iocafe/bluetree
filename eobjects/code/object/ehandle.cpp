@@ -465,6 +465,15 @@ void eHandle::delete_children()
             }
         }
 
+#if OSAL_DEBUG
+        if (h->m_object == OS_NULL)
+        {
+            osal_debug_error_int("STRANDED HANDLE? oid=", h->m_oid);
+            m_children = OS_NULL;
+            return;
+        }
+#endif
+
         delete h->m_object;
     }
 }

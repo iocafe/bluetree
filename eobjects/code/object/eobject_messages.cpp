@@ -1064,19 +1064,20 @@ void eObject::browse_list_children(
 void eObject::browse_list_properties(
     eContainer *content)
 {
-    eVariable *p, *item, value;
+    eVariable *p, *item, *value;
     eSet *appendix;
     eName *name;
     os_int propertynr;
 
+    value = new eVariable(ETEMPORARY);
     for (p = firstp(EOID_CHILD, EPRO_NO_ERRORS); p; p = p->nextp())
     {
         item = eVariable::cast(p->clone(content, EBROWSE_PROPERTIES,
             EOBJ_NO_CLONED_NAMES|EOBJ_NO_MAP));
 
         propertynr = p->oid();
-        propertyv(propertynr, &value);
-        *item = value;
+        propertyv(propertynr, value);
+        item->setv(value);
 
         appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
         name = p->primaryname();
@@ -1084,6 +1085,7 @@ void eObject::browse_list_properties(
             appendix->setv(EBROWSE_IPATH, name);
         }
     }
+    delete value;
 }
 
 
