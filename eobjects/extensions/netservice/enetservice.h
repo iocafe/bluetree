@@ -17,13 +17,22 @@
 #ifndef ENETSERVICE_H_
 #define ENETSERVICE_H_
 #include "iocom.h"
-
+#include "eobjects.h"
 #include "extensions/netservice/elighthouse_client.h"
+#include "extensions/netservice/enetserv_prm.h"
 
 /* Default socket port number for eobject communication. TCP ports 6371 - 6375 are unassigned.
  */
 #define ENET_DEFAULT_SOCKET_PORT 6371
 #define ENET_DEFAULT_SOCKET_PORT_STR "6371"
+
+/* Flags for enet_start_service() function.
+ */
+#define ENET_ENABLE_IOCOM_CLIENT 1
+#define ENET_ENABLE_EOBJECTS_CLIENT 2
+#define ENET_ENABLE_IOCOM_SERVICE 4
+#define ENET_ENABLE_EOBJECTS_SERVICE 8
+
 
 /**
 ****************************************************************************************************
@@ -71,11 +80,12 @@ public:
         return new eNetService(parent, id, flags);
     }
 
-    /* Called after eNetService object is created.
+    /* Called after eNetService object is created to start it.
      */
-    void initialize();
+    void start(
+        os_int flags);
 
-    /* Start closing net service (no process lock)..
+    /* Start closing net service (no process lock).
      */
     void finish();
 
@@ -138,6 +148,15 @@ protected:
      */
     void create_services_table();
 
+    /* Create table of trusted client certificates.
+     */
+    void create_trusted_certificate_table();
+
+    /* Create parameters for service.
+     */
+    void create_service_parameters(
+        os_int flags);
+
 
     /**
     ************************************************************************************************
@@ -153,38 +172,40 @@ protected:
      */
     eThreadHandle m_lighthouse_client_thread_handle;
 
-    /** Persistent object to hold user accounts table.
-     */
-    ePersistent *m_persistent_accounts;
-
-    /** User accounts table (matrix).
+    /* User accounts table (matrix) and persistent object to contain it.
      */
     eMatrix *m_account_matrix;
+    ePersistent *m_persistent_accounts;
 
-    /** Persistent object to hold end point table.
-     */
-    ePersistent *m_end_points;
-
-    /** End point table (matrix).
+    /* End point table (matrix) and persistent object to contain it.
      */
     eMatrix *m_endpoint_matrix;
+    ePersistent *m_end_points;
 
-    /** Persistent object to hold the connection table.
-     */
-    ePersistent *m_connect;
-
-    /** Connection table (matrix).
+    /* Connection table (matrix) and persistent object to contain it.
      */
     eMatrix *m_connection_matrix;
+    ePersistent *m_connect;
 
-    /** Services table (matrix).
+    /* Services table (matrix).
      */
     eMatrix *m_services_matrix;
+
+    /* Trusted client certificate table (matrix) and persistent object to contain it.
+     */
+    eMatrix *m_trusted_matrix;
+    ePersistent *m_persistent_trusted;
+
+    /* Structure of server parameters and persistent object to contain these.
+     */
+    eNetServPrm m_serv_prm;
+    ePersistent *m_persistent_serv_prm;
 };
 
 /* Start network service.
  */
-void enet_start_service();
+void enet_start_service(
+    os_int flags);
 
 /* Shut down network service.
  */

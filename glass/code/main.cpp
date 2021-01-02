@@ -63,7 +63,8 @@ tableview_test_start();
         return ESTATUS_FAILED;
     }
 
-    enet_start_service();
+    enet_start_service(ENET_ENABLE_IOCOM_CLIENT|ENET_ENABLE_EOBJECTS_CLIENT|
+        ENET_ENABLE_IOCOM_SERVICE /* |ENET_ENABLE_EOBJECTS_SERVICE */);
 
     gui = new eGui(egui_get_container());
     gui->setup_desktop_application();

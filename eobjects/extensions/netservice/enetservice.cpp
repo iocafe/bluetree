@@ -35,6 +35,10 @@ eNetService::eNetService(
     m_connect = OS_NULL;
     m_connection_matrix = OS_NULL;
     m_services_matrix = OS_NULL;
+    m_trusted_matrix = OS_NULL;
+    m_persistent_trusted = OS_NULL;
+    m_persistent_serv_prm = OS_NULL;
+    os_memclear(&m_serv_prm, sizeof(eNetServPrm));
 
     initproperties();
 }
@@ -89,15 +93,33 @@ void eNetService::setupclass()
     os_unlock();
 }
 
-/* Called after eNetService object is created.
- */
-void eNetService::initialize()
+
+/**
+****************************************************************************************************
+
+  @brief Create Start network service.
+
+  Called after eNetService object is created to create data structures and start operation.
+
+  @param  flags Bit fields, combination of ENET_ENABLE_IOCOM_CLIENT, ENET_ENABLE_EOBJECTS_CLIENT,
+          ENET_ENABLE_IOCOM_SERVICE and ENET_ENABLE_EOBJECTS_SERVICE.
+
+****************************************************************************************************
+*/
+void eNetService::start(
+    os_int flags)
 {
     ns_create();
 
-    create_user_account_table();
-    create_end_point_table();
-    create_connect_table();
+    if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_EOBJECTS_SERVICE)) {
+        create_user_account_table();
+        create_end_point_table();
+        create_service_parameters(flags);
+    }
+    if (flags & (ENET_ENABLE_IOCOM_CLIENT | ENET_ENABLE_EOBJECTS_CLIENT)) {
+        create_connect_table();
+        create_trusted_certificate_table();
+    }
     create_services_table();
 
     /* Setup eosal network event handler callback to keep track of errors and network state.
@@ -165,24 +187,28 @@ void eNetService::net_event_handler(
 }
 
 
-/* Start network service.
-   Setup network service class and creates global network service object.
- */
-void enet_start_service()
-{
-    eNetService *netservice;
+/**
+****************************************************************************************************
 
-    /* Set up class for use.
-     */
+  @brief Start network service.
+
+  Setup network service class and creates global network service object.
+
+  @param  flags Bit fields, combination of ENET_ENABLE_IOCOM_CLIENT, ENET_ENABLE_EOBJECTS_CLIENT,
+          ENET_ENABLE_IOCOM_SERVICE and ENET_ENABLE_EOBJECTS_SERVICE.
+
+****************************************************************************************************
+*/
+void enet_start_service(
+    os_int flags)
+{
     eNetService::setupclass();
 
-    /* Create global network service object.
-     */
     os_lock();
-    netservice = new eNetService(eglobal->process);
+    eNetService *netservice = new eNetService(eglobal->process);
     netservice->addname("//netservice");
     eglobal->netservice = netservice;
-    netservice->initialize();
+    netservice->start(flags);
     os_unlock();
 }
 

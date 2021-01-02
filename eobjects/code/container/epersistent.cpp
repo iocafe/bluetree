@@ -361,6 +361,9 @@ void ePersistent::load_file(
         content->adopt(this, EOID_TEMPORARY, EOBJ_NO_MAP|EOBJ_IS_ATTACHMENT);
         use_loded_content(ePersistent::cast(content));
         delete content;
+
+        m_timer_set = OS_FALSE;
+        timer(0);
     }
 }
 
