@@ -205,6 +205,7 @@ void eNetService::create_services_table()
 
     m_services_matrix = new eMatrix(this);
     m_services_matrix->addname("services");
+    m_services_matrix->setpropertys(ETABLEP_TEXT, "services in local network");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
@@ -243,21 +244,21 @@ void eNetService::create_services_table()
 
     column = new eVariable(columns);
     column->addname("tlsport", ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "tlsport");
+    column->setpropertys(EVARP_TEXT, "TLS port");
     column->setpropertyi(EVARP_TYPE, OS_INT);
     column->setpropertys(EVARP_TTIP,
         "Listening secure TLS socket port number.");
 
     column = new eVariable(columns);
     column->addname("tcpport", ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "tcpport");
+    column->setpropertys(EVARP_TEXT, "TCP port");
     column->setpropertyi(EVARP_TYPE, OS_INT);
     column->setpropertys(EVARP_TTIP,
         "Listening TCP socket port number (not secured).");
 
     column = new eVariable(columns);
     column->addname("tstamp", ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "time stamp");
+    column->setpropertys(EVARP_TEXT, "timestamp");
     column->setpropertyi(EVARP_TYPE, OS_LONG);
     column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\",nosave");
     column->setpropertys(EVARP_TTIP,

@@ -112,9 +112,11 @@ void eRowSet::setupclass()
         EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty (cls, ERSETP_IX_COLUMN_NAME, ersetp_ix_column_name, "ix column",
         EPRO_PERSISTENT|EPRO_SIMPLE);
-
     addproperty (cls, ERSETP_CONFIGURATION, ersetp_configuration, "configuration",
         EPRO_PERSISTENT|EPRO_SIMPLE);
+
+    add_generic_table_properties(cls, ETABLE_BASIC_ATTR_GROUP|ETABLE_TIME_ATTR_GROUP);
+
     propertysetdone(cls);
     os_unlock();
 }
@@ -607,6 +609,9 @@ void eRowSet::client_binding_complete(
         if (configuration) {
             m_configuration = eContainer::cast(configuration->clone(this,
                 EOID_TABLE_CONFIGURATION, EOBJ_TEMPORARY_ATTACHMENT));
+
+            process_configuration_attribs(m_configuration,
+                ETABLE_BASIC_ATTR_GROUP|ETABLE_TIME_ATTR_GROUP);
 
             ix_column_name = "ix";
             v = m_configuration->firstv(EOID_TABLE_IX_COLUMN_NAME);

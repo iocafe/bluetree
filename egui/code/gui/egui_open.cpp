@@ -69,7 +69,7 @@ void eGui::open_content(
         }
 
         w = new eWindow(this);
-        w->setpropertys(ECOMP_TEXT, "test table");
+        w->setpropertys(ECOMP_TEXT, "table");
 
         t = new eTableView(w);
         t->setpropertys(ECOMP_PATH, mypath.gets());

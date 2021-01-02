@@ -109,6 +109,8 @@ void eMatrix::setupclass()
     addpropertyl(cls, EMTXP_NCOLUMNS, emtxp_ncolumns, "nro columns", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty (cls, EMTXP_CONFIGURATION, emtxp_configuration, "configuration",
         EPRO_PERSISTENT|EPRO_SIMPLE);
+
+    add_generic_table_properties(cls, ETABLE_BASIC_ATTR_GROUP);
     propertysetdone(cls);
     os_unlock();
 
@@ -359,7 +361,14 @@ eStatus eMatrix::simpleproperty(
 
         case EMTXP_CONFIGURATION:
             c = firstc(EOID_TABLE_CONFIGURATION);
-            x->seto(c);
+            if (c) {
+                c = eContainer::cast(c->clone(ETEMPORARY));
+                add_attribs_to_configuration(c, ETABLE_BASIC_ATTR_GROUP);
+                x->seto(c, OS_TRUE);
+            }
+            else {
+                x->clear();
+            }
             break;
 
         default:

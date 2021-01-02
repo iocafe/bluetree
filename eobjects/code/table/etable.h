@@ -70,6 +70,30 @@ eSelectParameters;
 #define ETABLE_SERIALIZED_FLAGS_MASK  0x0000FFFF
 
 
+/* Table attribute selection flags (bit fields). For example tables which can handle large time
+   based data, use page mode, row mode, etc.
+ */
+#define ETABLE_BASIC_ATTR_GROUP 1
+#define ETABLE_TIME_ATTR_GROUP 2
+
+/* Structure to set up table configuration attribute
+ */
+typedef struct {
+    const os_char *attr_name;
+    os_int property_nr;
+    os_int group_flags;
+}
+etableConfAttr;
+
+/* Generic table attribute list.
+ */
+extern const etableConfAttr etable_attrs[];
+
+/* Number of genertic table attributes.
+ */
+extern const os_int etable_nro_attrs;
+
+
 /**
 ****************************************************************************************************
   The eTable is base class for tables. Underlying table can be eMatrix, eSelection or database
@@ -217,13 +241,42 @@ public:
       Helper function to implement table.
     ************************************************************************************************
     */
+
+    /* Add generic table properties to derived class'es property set.
+     */
+    static void add_generic_table_properties(
+        os_int cls,
+        os_int group_flags);
+
     eContainer *process_configuration(
         eContainer *configuration,
         os_int *nro_columns,
         os_int tflags);
 
+    /* Store generic table configuration attributes in table properties.
+     */
+    void process_configuration_attribs(
+        eContainer *configuration,
+        os_int group_flags);
+
+    /* Set generic table attributes from properties to table configuration.
+     */
+    void add_attribs_to_configuration(
+        eContainer *configuration,
+        os_int group_flags);
+
+    /* This adds ETABLE_BASIC_ATTR_GROUP table attributes to configuration.
+       Override in derived class to get also ETABLE_TIME_ATTR_GROUP, etc.
+     */
+    virtual void add_attribs_to_configuration(
+        eContainer *configuration)
+    {
+        add_attribs_to_configuration(configuration, ETABLE_BASIC_ATTR_GROUP);
+    }
+
     eWhere *set_where(
         const os_char *where_clause);
+
 
     /* eWhere *get_where(); */
 };

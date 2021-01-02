@@ -47,6 +47,7 @@ void eNetService::create_user_account_table()
     m_persistent_accounts = new ePersistent(this);
     m_account_matrix = new eMatrix(m_persistent_accounts);
     m_account_matrix->addname("accounts");
+    m_account_matrix->setpropertys(ETABLEP_TEXT, "user accounts");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);

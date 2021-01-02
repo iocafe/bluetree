@@ -167,7 +167,6 @@ void eDBM::onmessage(
                 osal_debug_error("eDBM:Faulty ECMD_UPDATE_TABLE_ROWS message received");
                 return;
 
-
             case ECMD_REMOVE_ROWS_FROM_TABLE:
                 content = envelope->content();
                 if (content) {
@@ -372,8 +371,8 @@ void eDBM::remove(
 
   @brief Solve column wildcards, requested_columns -> resolved_configuration.
 
-  This generates table configuration tree as "resolved congufuration" which includes
-  expilicetly the table columns matching to the requested configuration.
+  This generates table configuration tree as "resolved configuration" which includes
+  explicetly the table columns matching to the requested configuration.
 
   Order specified in requested columns is preserved in resolved configuration.
 
@@ -401,6 +400,8 @@ void eDBM::solve_table_configuration(
     resolved_configuration->clear();
     sconfiguration = table->configuration();
     scolumns = sconfiguration->firstc(EOID_TABLE_COLUMNS);
+
+    table->add_attribs_to_configuration(sconfiguration);
 
     for (sitem = sconfiguration->first(); sitem; sitem = sitem->next())
     {

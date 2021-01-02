@@ -29,7 +29,7 @@ class eDBM;
 */
 
 /* eRowSet property numbers. These are used also for eRowSetBinding.
-   Make sure that EBINDP_BFLAGS, EBINDP_STATE and ETABLEP_CONFIGURATION
+   Make sure that EBINDP_BFLAGS and EBINDP_STATE
    do not overlap with these numbers.
  */
 #define ERSETP_NROWS 18

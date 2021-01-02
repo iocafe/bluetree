@@ -16,6 +16,16 @@
 #include "eobjects.h"
 
 
+/* Generic table attribute list.
+ */
+const etableConfAttr etable_attrs[]
+    = {{"text", ETABLEP_TEXT, ETABLE_BASIC_ATTR_GROUP}};
+
+/* Number of genertic table attributes.
+ */
+const os_int etable_nro_attrs = (sizeof(etable_attrs)/sizeof(etableConfAttr));
+
+
 /**
 ****************************************************************************************************
 
@@ -75,6 +85,24 @@ void eTable::setupclass()
 }
 
 
+/* Add generic table properties to derived class'es property set.
+ */
+void eTable::add_generic_table_properties(
+    os_int cls,
+    os_int group_flags)
+{
+    os_int i;
+
+    for (i = 0; i < etable_nro_attrs; i++) {
+        if (group_flags & etable_attrs[i].group_flags)
+        {
+            addproperty (cls, etable_attrs[i].property_nr, etable_attrs[i].attr_name,
+                etable_attrs[i].attr_name, EPRO_PERSISTENT);
+        }
+    }
+}
+
+
 /**
 ****************************************************************************************************
 
@@ -119,6 +147,7 @@ eContainer *eTable::process_configuration(
 
     if (src_columns) {
         dst_columns = new eContainer(dst_configuration, EOID_TABLE_COLUMNS);
+        dst_columns->addname("columns", ENAME_PRIMARY|ENAME_NO_MAP);
         dst_columns->ns_create();
 
         first_src_column = src_columns->firstv();
@@ -153,6 +182,84 @@ eContainer *eTable::process_configuration(
     }
 
     return dst_configuration;
+}
+
+
+/* Store generic table configuration attributes in table properties.
+ */
+void eTable::process_configuration_attribs(
+    eContainer *configuration,
+    os_int group_flags)
+{
+    eContainer *src_attrs;
+    eVariable *src_attr;
+    eName *n;
+    os_char *namestr;
+    os_int id, i;
+
+    src_attrs = configuration->firstc(EOID_TABLE_ATTR);
+    if (src_attrs == OS_NULL) {
+        src_attrs = eContainer::cast(configuration->byname("attr"));
+    }
+    if (src_attrs) {
+        for (src_attr = src_attrs->firstv(); src_attr; src_attr = src_attr->nextv())
+        {
+            id = src_attr->oid();
+            n = src_attr->primaryname();
+            namestr = OS_NULL;
+            if (n) namestr = n->gets();
+
+            for (i = 0; i < etable_nro_attrs; i++)
+            {
+                if (group_flags & etable_attrs[i].group_flags) {
+                    if (id == etable_attrs[i].property_nr ||
+                        !os_strcmp(namestr, etable_attrs[i].attr_name))
+                    {
+                        setpropertyv(etable_attrs[i].property_nr, src_attr);
+                    }
+#if OSAL_DEBUG
+                    else {
+                        osal_debug_error_int("eTable: Unknown config attr ", id);
+                    }
+#endif
+                }
+            }
+        }
+    }
+}
+
+
+/* Set generic table attributes from properties to table configuration.
+ */
+void eTable::add_attribs_to_configuration(
+    eContainer *configuration,
+    os_int group_flags)
+{
+    eContainer *attrs;
+    eVariable *attr;
+    eVariable v;
+    os_int i;
+
+    attrs = configuration->firstc(EOID_TABLE_ATTR);
+    if (attrs == OS_NULL) {
+        attrs = eContainer::cast(configuration->byname("attr"));
+    }
+    if (attrs == OS_NULL) {
+        attrs = new eContainer(configuration, EOID_TABLE_ATTR);
+        attrs->addname("attr", ENAME_PRIMARY|ENAME_NO_MAP);
+        attrs->ns_create();
+    }
+
+    for (i = 0; i < etable_nro_attrs; i++) {
+        if (group_flags & etable_attrs[i].group_flags) {
+            propertyv(etable_attrs[i].property_nr, &v);
+            if (!v.isempty()) {
+                attr = new eVariable(attrs, etable_attrs[i].property_nr);
+                attr->addname(etable_attrs[i].attr_name, ENAME_PRIMARY|ENAME_NO_MAP);
+                attr->setv(&v);
+            }
+        }
+    }
 }
 
 

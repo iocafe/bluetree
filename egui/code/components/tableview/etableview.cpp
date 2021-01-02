@@ -711,6 +711,16 @@ void eTableView::setup_columns()
     }
 
     count_header_row_lines();
+
+    /* THIS MODIFIES WINDOW TITLE, SHOW NOT ALWAYS HAPPEN.
+     */
+    eVariable tmp;
+    eComponent *w;
+    m_rowset->propertyv(ETABLEP_TEXT, &tmp);
+    if (!tmp.isempty()) {
+        w = window();
+        if (w) w->setpropertyv(ECOMP_TEXT, &tmp);
+    }
 }
 
 

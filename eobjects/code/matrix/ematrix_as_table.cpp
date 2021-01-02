@@ -64,8 +64,10 @@ void eMatrix::configure(
         osal_debug_error("eMatrix::configure: NULL configuration");
         return;
     }
-    c = process_configuration(configuration, &nro_columns, tflags);
 
+    process_configuration_attribs(configuration, ETABLE_BASIC_ATTR_GROUP);
+
+    c = process_configuration(configuration, &nro_columns, tflags);
     if (c) {
         m_own_change++;
         resize(m_datatype, m_nrows, nro_columns);

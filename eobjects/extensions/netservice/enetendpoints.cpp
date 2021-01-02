@@ -52,6 +52,7 @@ void eNetService::create_end_point_table()
     m_end_points = new ePersistent(this);
     m_endpoint_matrix = new eMatrix(m_end_points);
     m_endpoint_matrix->addname("endpoints");
+    m_endpoint_matrix->setpropertys(ETABLEP_TEXT, "end points to listen to");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
