@@ -49,6 +49,7 @@ public:
         m_mtx->addname("//mymtx");
 
         m_pers = new ePersistent(this);
+        m_pers->setpropertys(EPERP_TEXT, "Minun muuttujat");
         m_pers->addname("//mypersistent");
         m_pers->ns_create();
         v = new eVariable(m_pers);

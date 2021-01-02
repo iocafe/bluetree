@@ -18,6 +18,12 @@
 #include "eobjects.h"
 
 
+/* eContainer property names.
+ */
+const os_char
+    econtp_text[] = "text";
+
+
 /**
 ****************************************************************************************************
   Constructor.
@@ -89,6 +95,8 @@ void eContainer::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eContainer");
+    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT);
+    propertysetdone(cls);
     os_unlock();
 }
 
@@ -382,6 +390,12 @@ void eContainer::send_open_info(
         /* Created container for reply content.
          */
         reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+
+        eVariable tmp;
+        propertyv(ECONTP_TEXT, &tmp);
+        if (!tmp.isempty()) {
+            reply->setpropertyv(ECONTP_TEXT, &tmp);
+        }
 
         for (name = eObject::ns_firstv(); name; name = name->ns_next(OS_FALSE))
         {

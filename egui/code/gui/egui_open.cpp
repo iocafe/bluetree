@@ -58,7 +58,7 @@ void eGui::open_content(
     eTableView *t;
     eParameterList *p;
     eLineEdit *e;
-    eVariable *v, mypath;
+    eVariable *v, mypath, tmp;
 
     for (v = content->firstv(ECLASSID_MATRIX); v; v = v->nextv(ECLASSID_MATRIX))
     {
@@ -69,17 +69,26 @@ void eGui::open_content(
         }
 
         w = new eWindow(this);
-        w->setpropertys(ECOMP_TEXT, "table");
+
+        content->propertyv(ECONTP_TEXT, &tmp);
+        if (tmp.isempty()) {
+            tmp.sets("table");
+        }
+        w->setpropertyv(ECOMP_TEXT, &tmp);
 
         t = new eTableView(w);
         t->setpropertys(ECOMP_PATH, mypath.gets());
     }
 
-
     if (content->firstv(ECLASSID_VARIABLE))
     {
         w = new eWindow(this);
-        w->setpropertys(ECOMP_TEXT, "test vars");
+        content->propertyv(ECONTP_TEXT, &tmp);
+        if (tmp.isempty()) {
+            tmp.sets("variables");
+        }
+        w->setpropertyv(ECOMP_TEXT, &tmp);
+
         p = new eParameterList(w);
 
         for (v = content->firstv(ECLASSID_VARIABLE); v; v = v->nextv(ECLASSID_VARIABLE))

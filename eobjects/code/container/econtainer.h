@@ -20,6 +20,14 @@
 #define ECONTAINER_H_
 #include "eobjects.h"
 
+/* eContainer property numbers.
+ */
+#define ECONTP_TEXT 5
+
+/* eContainer property names.
+ */
+extern const os_char
+    econtp_text[];
 
 /**
 ****************************************************************************************************

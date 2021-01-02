@@ -87,9 +87,10 @@
  */
 #define EOID_APPENDIX -14
 
-/** Path, generic path.
+/** Path, generic.
  */
 #define EOID_PATH -15
+
 
 
 /** Table/matrix related identifiers.

@@ -2365,6 +2365,12 @@ void eMatrix::send_open_info(
         reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
         new eVariable(reply, ECLASSID_MATRIX);
 
+        eVariable tmp;
+        propertyv(ETABLEP_TEXT, &tmp);
+        if (!tmp.isempty()) {
+            reply->setpropertyv(ECONTP_TEXT, &tmp);
+        }
+
         /* Send reply to caller
          */
         message(ECMD_OPEN_REPLY, envelope->source(),

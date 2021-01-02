@@ -106,16 +106,21 @@ eObject *ePersistent::clone(
 void ePersistent::setupclass()
 {
     const os_int cls = ECLASSID_PERSISTENT;
+    eVariable *p;
 
     /* Add the class to class list.
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "ePersistent");
+    addpropertys(cls, EPERP_TEXT, eperp_text, "text", EPRO_PERSISTENT);
     addpropertys(cls, EPERP_ROOT_PATH, eperp_root_path, "//fsys", "root path", EPRO_DEFAULT);
-    addproperty (cls, EPERP_RELATIVE_PATH, eperp_relative_path, "root path", EPRO_DEFAULT);
+    addproperty (cls, EPERP_RELATIVE_PATH, eperp_relative_path, "relative path", EPRO_DEFAULT);
     addpropertys(cls, EPERP_FILE, eperp_file, "unknown.eo", "file name", EPRO_PERSISTENT);
-    addpropertyl(cls, EPERP_SAVE_TIME_MS, eperp_save_time_ms, 200, "save time", EPRO_DEFAULT);
-    addpropertyl(cls, EPERP_SAVE_LATEST_TIME_MS, eperp_save_latest_time_ms, 2000, "save latest", EPRO_DEFAULT);
+    p = addpropertyl(cls, EPERP_SAVE_TIME_MS, eperp_save_time_ms, 200, "save time", EPRO_DEFAULT);
+    p->setpropertys(EVARP_UNIT, "ms");
+    p = addpropertyl(cls, EPERP_SAVE_LATEST_TIME_MS, eperp_save_latest_time_ms, 2000,
+        "save latest", EPRO_DEFAULT);
+    p->setpropertys(EVARP_UNIT, "ms");
     propertysetdone(cls);
     os_unlock();
 }

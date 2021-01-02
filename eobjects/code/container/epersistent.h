@@ -27,6 +27,7 @@
 
 /* Persistent object property numbers.
  */
+#define EPERP_TEXT ECONTP_TEXT
 #define EPERP_ROOT_PATH 10
 #define EPERP_RELATIVE_PATH 20
 #define EPERP_FILE 30
@@ -35,6 +36,7 @@
 
 /* Persistent object property names.
  */
+#define eperp_text econtp_text
 extern const os_char
     eperp_root_path[],
     eperp_relative_path[],
