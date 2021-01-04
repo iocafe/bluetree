@@ -233,7 +233,7 @@ osal_debug_error_int("ioc_run_lighthouse_client failed, s=", s);
             os_sleep(500);
         }
 
-osal_debug_error("XXX");
+osal_debug_error("HERE XXX");
 
         if (m_send_udp_multicasts) {
             if (m_publish) {
@@ -342,9 +342,6 @@ void eLightHouseService::publish()
     eMatrix *m;
     eObject *conf, *columns, *col;
     os_int enable_col, h, y;
-    osalLighthouseInfo lighthouse_info;
-
-    os_memclear(&lighthouse_info, sizeof(lighthouse_info));
 
     os_lock();
 
@@ -360,6 +357,11 @@ void eLightHouseService::publish()
 
     h = m->nrows();
 
+    ioc_initialize_lighthouse_server(&m_server);
+    ioc_lighthouse_start_endpoints(&m_server, "manteli");
+    ioc_lighthouse_add_endpoint(&m_server, "naksu", "o", 55577,3233, OS_FALSE);
+
+
     for (y = 0; y<h; y++) {
         if ((m->geti(y, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
         if (m->geti(y, enable_col) == 0) continue;
@@ -369,7 +371,6 @@ void eLightHouseService::publish()
 
     os_unlock();
 
-    ioc_initialize_lighthouse_server(&m_server, "abba", &lighthouse_info, "manteli");
 
     return;
 
@@ -489,7 +490,4 @@ void enet_start_lighthouse_thread(
     lighthouse->bind(ELIGHTHOUSEP_SEND_UDP_MULTICASTS, "//netservice/servprm/lighthouseserv");
     lighthouse->bind(ELIGHTHOUSEP_PUBLISH, "//netservice", enetservp_endpoint_change_counter);
     lighthouse->start(lighthouse_client_thread_handle);
-
 }
-
-
