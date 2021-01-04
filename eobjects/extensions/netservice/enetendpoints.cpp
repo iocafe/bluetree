@@ -123,6 +123,7 @@ void eNetService::create_end_point_table()
     m_endpoint_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
 
     m_end_points->load_file("endpoints.eo");
+    m_end_points->setflags(EOBJ_TEMPORARY_CALLBACK);
 
     if (m_endpoint_matrix->nrows() == 0) {
         add_end_point(OS_TRUE, 1, 1, ENET_DEFAULT_SOCKET_PORT_STR);

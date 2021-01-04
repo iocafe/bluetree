@@ -19,6 +19,26 @@
 #include "iocom.h"
 #include "lighthouse.h"
 
+class eNetService;
+
+/**
+****************************************************************************************************
+  Defines, etc.
+****************************************************************************************************
+*/
+
+/* Lighthouse UDP service property numbers.
+ */
+#define ELIGHTHOUSEP_SEND_UDP_MULTICASTS 10
+#define ELIGHTHOUSEP_PUBLISH 15
+
+/* Lighthouse UDP service property names.
+ */
+extern const os_char
+    elighthousep_send_udp_multicasts[],
+    elighthousep_publish[];
+
+
 /* Default socket port number for eobject communication. TCP ports 6371 - 6375 are unassigned.
  */
 #define ENET_DEFAULT_SOCKET_PORT 6371
@@ -26,30 +46,30 @@
 
 /**
 ****************************************************************************************************
-  eLightHouseClient class.
+  eLightHouseService class.
 ****************************************************************************************************
 */
-class eLightHouseClient : public eThread
+class eLightHouseService : public eThread
 {
 public:
     /* Constructor.
      */
-    eLightHouseClient(
+    eLightHouseService(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eLightHouseClient();
+    virtual ~eLightHouseService();
 
-    /* Casting eObject pointer to eLightHouseClient pointer.
+    /* Casting eObject pointer to eLightHouseService pointer.
      */
-    inline static eLightHouseClient *cast(
+    inline static eLightHouseService *cast(
         eObject *o)
     {
         e_assert_type(o, ECLASSID_LIGHT_HOUSE_CLIENT)
-        return (eLightHouseClient*)o;
+        return (eLightHouseService*)o;
     }
 
     /* Get class identifier.
@@ -62,12 +82,33 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eLightHouseClient *newobj(
+    static eLightHouseService *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eLightHouseClient(parent, id, flags);
+        return new eLightHouseService(parent, id, flags);
+    }
+
+    /* Function to process incoming messages.
+     */
+    virtual void onmessage(
+        eEnvelope *envelope);
+
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
+    /* Set pointer to network service (eNetService is owned by eProcess, oe_lock() must
+       be on to access.
+     */
+    inline void set_netservice(
+        eNetService *netservice)
+    {
+        m_netservice = netservice;
     }
 
     /* Overloaded eThread function to initialize new thread.
@@ -94,6 +135,10 @@ protected:
         LightHouseClientCallbackData *data,
         void *context);
 
+    void publish();
+
+    void stop_udp_multicasts();
+
 
     /**
     ************************************************************************************************
@@ -101,18 +146,50 @@ protected:
     ************************************************************************************************
     */
 
+    /* Set pointer to network service (eNetService is owned by eProcess, oe_lock() must
+       be on to access.
+     */
+    eNetService *m_netservice;
+
+/* CLIENT ************************** */
     /** eosal lighthouse client structure.
      */
-    LighthouseClient m_lighthouse;
+    LighthouseClient m_client;
 
     /** Multicast counters by network service.
      */
     eContainer *m_counters;
+
+/* SERVICE ************************* */
+
+    /** eosal lighthouse server structure.
+     */
+    LighthouseServer m_server;
+
+    /** Server side IDP multicasts are enabled.
+     */
+    os_boolean m_send_udp_multicasts;
+
+    /** Value of ELIGHTHOUSEP_PUBLISH property. When changed, the end point information is
+        published.
+     */
+    os_int m_publish_count;
+
+    /** Publish function is not called immediately when m_publish_count changed, but instead
+        m_publish is set. This allows multiple publish requests to result in one publish() call.
+     */
+    os_boolean m_publish;
+
+    /** OS_TRUE if initialized for sending UDP multicasts.
+     */
+    os_boolean m_udp_send_initialized;
 };
 
 /* Start light house client.
  */
-void enet_start_lighthouse_client(
+void enet_start_lighthouse_thread(
+    eNetService *netservice,
+    os_int flags,
     eThreadHandle *lighthouse_client_thread_handle);
 
 

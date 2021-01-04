@@ -34,8 +34,9 @@
    @brief Process a callback from child object
 
    A child object can alert parent object by calling docallback(), which calls this this function
-   of the parent object.
-
+   of the parent object. This generic implementation passess the callback to parent object, if
+   this object has either EOBJ_PERSISTENT_CALLBACK or EOBJ_TEMPORARY_CALLBACK flag set. If
+   callback is not processed by parent object, EOBJ_TEMPORARY_CALLBACK flag is turned off.
 
    @param   event Reason for the callback, for example ECALLBACK_VARIABLE_VALUE_CHANGED
    @param   obj Pointer to the child object.
@@ -51,6 +52,18 @@ eStatus eObject::oncallback(
     eObject *obj,
     eObject *appendix)
 {
+    /* If we need to pass callback to parent class.
+     */
+    if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
+        eObject *p = parent();
+        if (p) {
+            if (p->oncallback(event, this, obj) == ESTATUS_SUCCESS) {
+                return ESTATUS_SUCCESS;
+            }
+            clearflags(EOBJ_TEMPORARY_CALLBACK);
+        }
+    }
+
     /* Failed status indicates that the oncallback function is not implemented.
      */
     return ESTATUS_FAILED;
@@ -72,6 +85,8 @@ eStatus eObject::oncallback(
    @param   event Reason for the callback, for example ECALLBACK_VARIABLE_VALUE_CHANGED
    @param   appendix Additional information about callback, event specific.
 
+   @return  The callback function returns ESTATUS_SUCCESS, except if callback function is not
+            implemented for the parent object class (default implementation).
    @return  None.
 
 ****************************************************************************************************

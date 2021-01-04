@@ -128,7 +128,8 @@ class eRowSetBinding;
  */
 typedef enum {
     ECALLBACK_VARIABLE_VALUE_CHANGED,
-    ECALLBACK_TABLE_CONTENT_CHANGED
+    ECALLBACK_TABLE_CONTENT_CHANGED,
+    ECALLBACK_PERSISTENT_CHANGED
 }
 eCallbackEvent;
 
@@ -971,14 +972,14 @@ public:
         os_int localpropertynr,
         const os_char *remotepath,
         const os_char *remoteproperty,
-        os_int bflags);
+        os_int bflags = 0);
 
     /* Bind properties, remote property .
      */
     void bind(
         os_int localpropertynr,
         const os_char *remotepath,
-        os_int bflags);
+        os_int bflags = 0);
 
     /* Create bindings container for the object.
      */

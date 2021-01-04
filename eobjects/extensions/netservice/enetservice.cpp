@@ -17,6 +17,12 @@
 #include "extensions/netservice/enetservice.h"
 
 
+/* Net service property names.
+ */
+const os_char
+    enetservp_endpoint_change_counter[] = "epchangecnt";
+
+
 /**
 ****************************************************************************************************
   Constructor.
@@ -38,6 +44,7 @@ eNetService::eNetService(
     m_trusted_matrix = OS_NULL;
     m_persistent_trusted = OS_NULL;
     m_persistent_serv_prm = OS_NULL;
+    m_end_points_config_counter = 0;
     os_memclear(&m_serv_prm, sizeof(eNetServPrm));
 
     initproperties();
@@ -90,6 +97,9 @@ void eNetService::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eNetService");
+    addpropertyl(cls, ENETSERVP_ENDPOINT_CHANGE_COUNTER, enetservp_endpoint_change_counter,
+        0, "end point change counter", EPRO_DEFAULT|EPRO_NOONPRCH);
+    propertysetdone(cls);
     os_unlock();
 }
 
@@ -158,7 +168,10 @@ void eNetService::start(
     ioc_get_lighthouse_info(m_connconf, &m_lighthouse_server_info);
 #endif
 
-    enet_start_lighthouse_client(&m_lighthouse_client_thread_handle);
+    /* Start the light house service as separate thread. This must be after parmaters
+     * haven been created so binding succeed.
+     */
+    enet_start_lighthouse_thread(this, flags, &m_lighthouse_client_thread_handle);
 }
 
 
@@ -171,6 +184,40 @@ void eNetService::finish()
     m_lighthouse_client_thread_handle.terminate();
     m_lighthouse_client_thread_handle.join();
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Process a callback from a child object.
+
+  The NetService::oncallback function
+
+****************************************************************************************************
+*/
+eStatus eNetService::oncallback(
+    eCallbackEvent event,
+    eObject *obj,
+    eObject *appendix)
+{
+    OSAL_UNUSED(obj);
+
+    if (event == ECALLBACK_PERSISTENT_CHANGED)
+    {
+        if (obj == m_end_points) {
+            setpropertyl(ENETSERVP_ENDPOINT_CHANGE_COUNTER, ++m_end_points_config_counter);
+        }
+    }
+
+    /* If we need to pass callback to parent class.
+     */
+    if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
+        eObject::oncallback(event, obj, appendix);
+    }
+
+    return ESTATUS_SUCCESS;
+}
+
 
 
 /* Error handler to move information provided by error handler callbacks to network state structure.

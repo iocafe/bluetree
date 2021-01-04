@@ -215,7 +215,7 @@ call_parent:
 
   @brief Process a callback from a child object.
 
-  The ePersistent::touch function
+  The ePersistent::oncallback function
 
 ****************************************************************************************************
 */
@@ -224,9 +224,6 @@ eStatus ePersistent::oncallback(
     eObject *obj,
     eObject *appendix)
 {
-    OSAL_UNUSED(obj);
-    OSAL_UNUSED(appendix);
-
     switch (event)
     {
         case ECALLBACK_VARIABLE_VALUE_CHANGED:
@@ -236,6 +233,12 @@ eStatus ePersistent::oncallback(
 
         default:
             break;
+    }
+
+    /* If we need to pass callback to parent class.
+     */
+    if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
+        eContainer::oncallback(event, obj, appendix);
     }
 
     return ESTATUS_SUCCESS;
@@ -299,7 +302,7 @@ void ePersistent::check_save_timer()
 
   @brief Save persistent object by sending it as message to file system.
 
-  The ePersistent::save function...
+  The ePersistent::save_as_message function...
 
 ****************************************************************************************************
 */
@@ -326,6 +329,8 @@ void ePersistent::save_as_message()
 
     p = target.gets();
     message(ECMD_SAVE_FILE, p, OS_NULL, content, EMSG_DEL_CONTENT);
+
+    docallback(ECALLBACK_PERSISTENT_CHANGED);
 }
 
 
@@ -334,7 +339,7 @@ void ePersistent::save_as_message()
 
   @brief Load persistent object from local file system.
 
-  The ePersistent::save function...
+  The ePersistent::load_file function...
 
 ****************************************************************************************************
 */

@@ -18,8 +18,24 @@
 #define ENETSERVICE_H_
 #include "iocom.h"
 #include "eobjects.h"
-#include "extensions/netservice/elighthouse_client.h"
+#include "extensions/netservice/elighthouse_thread.h"
 #include "extensions/netservice/enetserv_prm.h"
+
+
+/**
+****************************************************************************************************
+  Defines, etc.
+****************************************************************************************************
+*/
+
+/* Net service property numbers.
+ */
+#define ENETSERVP_ENDPOINT_CHANGE_COUNTER 10
+
+/* Net service property names.
+ */
+extern const os_char
+    enetservp_endpoint_change_counter[];
 
 /* Default socket port number for eobject communication. TCP ports 6371 - 6375 are unassigned.
  */
@@ -41,6 +57,8 @@
 */
 class eNetService : public eObject
 {
+    friend class eLightHouseService;
+
 public:
     /* Constructor.
      */
@@ -79,6 +97,13 @@ public:
     {
         return new eNetService(parent, id, flags);
     }
+
+    /* Process a callback from a child object.
+     */
+    virtual eStatus oncallback(
+        eCallbackEvent event,
+        eObject *obj,
+        eObject *appendix);
 
     /* Called after eNetService object is created to start it.
      */
@@ -181,6 +206,7 @@ protected:
      */
     eMatrix *m_endpoint_matrix;
     ePersistent *m_end_points;
+    os_long m_end_points_config_counter;
 
     /* Connection table (matrix) and persistent object to contain it.
      */

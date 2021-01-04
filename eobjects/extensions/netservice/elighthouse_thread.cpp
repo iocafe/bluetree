@@ -16,20 +16,33 @@
 #include "eobjects.h"
 #include "extensions/netservice/enetservice.h"
 
+/* Lighthouse UDP service property names.
+ */
+const os_char
+    elighthousep_send_udp_multicasts[] = "send_multicasts",
+    elighthousep_publish[] = "publish";
 
 /**
 ****************************************************************************************************
   Constructor.
 ****************************************************************************************************
 */
-eLightHouseClient::eLightHouseClient(
+eLightHouseService::eLightHouseService(
     eObject *parent,
     e_oid oid,
     os_int flags)
     : eThread(parent, oid, flags)
 {
+    m_netservice = OS_NULL;
+
+    m_send_udp_multicasts = OS_FALSE;
+    m_publish_count = 0;
+    m_publish = OS_TRUE;
+    m_udp_send_initialized = OS_FALSE;
+
     m_counters = new eContainer(this);
     m_counters->ns_create();
+    initproperties();
 }
 
 
@@ -38,7 +51,7 @@ eLightHouseClient::eLightHouseClient(
   Virtual destructor.
 ****************************************************************************************************
 */
-eLightHouseClient::~eLightHouseClient()
+eLightHouseService::~eLightHouseService()
 {
 }
 
@@ -55,42 +68,155 @@ eLightHouseClient::~eLightHouseClient()
 
 ****************************************************************************************************
 */
-void eLightHouseClient::setupclass()
+void eLightHouseService::setupclass()
 {
     const os_int cls = ECLASSID_LIGHT_HOUSE_CLIENT;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eLightHouseClient");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eLightHouseService");
+    addpropertyb(cls, ELIGHTHOUSEP_SEND_UDP_MULTICASTS, elighthousep_send_udp_multicasts,
+        OS_FALSE, "send UDP multicasts", EPRO_PERSISTENT);
+    addpropertyb(cls, ELIGHTHOUSEP_PUBLISH, elighthousep_publish,
+        OS_FALSE, "publish end point info", EPRO_DEFAULT);
+    propertysetdone(cls);
     os_unlock();
 }
 
-/* Overloaded eThread function to initialize new thread. Called after eLightHouseClient object is created.
+
+/**
+****************************************************************************************************
+
+  @brief Function to process incoming messages.
+
+  The eLightHouseService::onmessage function handles messages received by object. If this function
+  doesn't process message, it calls parent class'es onmessage function.
+
+  Send UDP broadcasts by timer hit.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eLightHouseService::onmessage(
+    eEnvelope *envelope)
+{
+    os_timer ti;
+    osalStatus s;
+
+    /* If at final destination for the message.
+     */
+    if (*envelope->target()=='\0')
+    {
+        switch (envelope->command())
+        {
+            case ECMD_TIMER:
+                if (m_udp_send_initialized) {
+                    os_get_timer(&ti);
+                    s = ioc_run_lighthouse_server(&m_server, &ti);
+                    if (s != OSAL_SUCCESS && s != OSAL_PENDING) {
+                        stop_udp_multicasts();
+                        m_udp_send_initialized = OS_FALSE;
+                    }
+                }
+                return;
+
+            default:
+                break;
+        }
+    }
+
+    /* Call parent class'es onmessage.
+     */
+    eThread::onmessage(envelope);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Called to inform the class about property value change (override).
+
+  The onpropertychange() function is called when class'es property changes, unless the
+  property is flagged with EPRO_NOONPRCH.
+  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
+  in class members and and return it when simpleproperty() is called.
+
+  Notice for change logging: Previous value is still valid when this function is called.
+  You can get the old value by calling property() function inside onpropertychange()
+  function.
+
+  @param   propertynr Property number of changed property.
+  @param   x Variable containing the new value.
+  @param   flags
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
+           indicate that there was no property with given property number.
+
+****************************************************************************************************
+*/
+eStatus eLightHouseService::onpropertychange(
+    os_int propertynr,
+    eVariable *x,
+    os_int flags)
+{
+    os_int count;
+
+    switch (propertynr)
+    {
+        case ELIGHTHOUSEP_SEND_UDP_MULTICASTS:
+            m_send_udp_multicasts = (os_boolean)x->getl();
+            if (m_send_udp_multicasts) m_publish = OS_TRUE;
+            break;
+
+        case ELIGHTHOUSEP_PUBLISH:
+            count = x->geti();
+            if (count != m_publish_count) {
+                m_publish_count = count;
+                m_publish = OS_TRUE;
+            }
+            break;
+
+        default:
+            return eObject::onpropertychange(propertynr, x, flags);
+    }
+
+    return ESTATUS_SUCCESS;
+}
+
+
+/* Overloaded eThread function to initialize new thread. Called after eLightHouseService object is created.
  */
-void eLightHouseClient::initialize(
+void eLightHouseService::initialize(
     eContainer *params)
 {
-    ioc_initialize_lighthouse_client(&m_lighthouse,
+    ioc_initialize_lighthouse_client(&m_client,
         OS_FALSE, /* is_ipv6 */
         OS_FALSE, /* is_tls */
         OS_NULL);
 
-    ioc_set_lighthouse_client_callback(&m_lighthouse, callback, this);
+    ioc_set_lighthouse_client_callback(&m_client, callback, this);
 }
 
 
 /* Overloaded eThread function to perform thread specific cleanup when thread exists: Release
    resources allocated for lighthouse client. This is a "pair" to initialize function.
  */
-void eLightHouseClient::finish()
+void eLightHouseService::finish()
 {
-    ioc_release_lighthouse_client(&m_lighthouse);
+    ioc_release_lighthouse_client(&m_client);
+
+    if (m_udp_send_initialized) {
+        stop_udp_multicasts();
+        m_udp_send_initialized = OS_FALSE;
+    }
 }
 
 /* Listen for lighthouse USP multicasts.
  */
-void eLightHouseClient::run()
+void eLightHouseService::run()
 {
     osalStatus s;
 
@@ -99,7 +225,7 @@ void eLightHouseClient::run()
         alive(EALIVE_RETURN_IMMEDIATELY);
         if (exitnow()) break;
 
-        s = ioc_run_lighthouse_client(&m_lighthouse, m_trigger);
+        s = ioc_run_lighthouse_client(&m_client, m_trigger);
         if (s != OSAL_SUCCESS) {
             if (s != OSAL_PENDING) {
 osal_debug_error_int("ioc_run_lighthouse_client failed, s=", s);
@@ -108,21 +234,41 @@ osal_debug_error_int("ioc_run_lighthouse_client failed, s=", s);
         }
 
 osal_debug_error("XXX");
+
+        if (m_send_udp_multicasts) {
+            if (m_publish) {
+                m_publish = OS_FALSE;
+                if (m_udp_send_initialized) {
+                    stop_udp_multicasts();
+                    m_udp_send_initialized = OS_FALSE;
+                }
+
+                publish();
+                m_udp_send_initialized = OS_TRUE;
+                timer(5000);
+            }
+        }
+        else if (m_udp_send_initialized)
+        {
+            stop_udp_multicasts();
+            m_udp_send_initialized = OS_FALSE;
+            timer(0);
+        }
     }
 }
 
 /* Callback by the same thread which calls ioc_run_lighthouse_client()
  */
-void eLightHouseClient::callback(
+void eLightHouseService::callback(
     LighthouseClient *c,
     LightHouseClientCallbackData *data,
     void *context)
 {
-    eLightHouseClient *ec;
+    eLightHouseService *ec;
     eContainer *row;
     eVariable *element, *where, *counter;
 
-    ec = (eLightHouseClient*)context;
+    ec = (eLightHouseService*)context;
     if (data->network_name == OS_NULL) return;
 
     osal_debug_error_str("HERE 1 ", data->ip_addr);
@@ -186,6 +332,56 @@ void eLightHouseClient::callback(
         ETABLE_ADOPT_ARGUMENT|ETABLE_INSERT_OR_UPDATE);
 
     delete where;
+}
+
+
+/* Publish (initial or update) the end point information.
+ */
+void eLightHouseService::publish()
+{
+    eMatrix *m;
+    eObject *conf, *columns, *col;
+    os_int enable_col, h, y;
+    osalLighthouseInfo lighthouse_info;
+
+    os_memclear(&lighthouse_info, sizeof(lighthouse_info));
+
+    os_lock();
+
+    m = m_netservice->m_endpoint_matrix;
+    conf = m->configuration();
+    if (conf == OS_NULL) goto getout;
+    columns = conf->first(EOID_TABLE_COLUMNS);
+    if (columns == OS_NULL) goto getout;
+
+    col = columns->byname("enable");
+    if (col == OS_NULL) goto getout;
+    enable_col = col->oid();
+
+    h = m->nrows();
+
+    for (y = 0; y<h; y++) {
+        if ((m->geti(y, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
+        if (m->geti(y, enable_col) == 0) continue;
+
+
+    }
+
+    os_unlock();
+
+    ioc_initialize_lighthouse_server(&m_server, "abba", &lighthouse_info, "manteli");
+
+    return;
+
+getout:
+    os_unlock();
+    osal_debug_error("eLightHouseService::publish failed");
+}
+
+
+void eLightHouseService::stop_udp_multicasts()
+{
+    ioc_release_lighthouse_server(&m_server);
 }
 
 
@@ -271,21 +467,29 @@ void eNetService::create_services_table()
 }
 
 
-/* Start light house client.
+/* Start light house service.
  */
-void enet_start_lighthouse_client(
+void enet_start_lighthouse_thread(
+    eNetService *netservice,
+    os_int flags,
     eThreadHandle *lighthouse_client_thread_handle)
 {
-    struct eLightHouseClient *lighthouse;
+    struct eLightHouseService *lighthouse;
 
     /* Set up class for use.
      */
-    eLightHouseClient::setupclass();
+    eLightHouseService::setupclass();
 
     /* Create and start thread to listen for lighthouse UDP multicasts,
        name it "_lighthouse" in process name space.
      */
-    lighthouse = new eLightHouseClient();
+    lighthouse = new eLightHouseService();
     lighthouse->addname("//_lighthouse");
+    lighthouse->set_netservice(netservice);
+    lighthouse->bind(ELIGHTHOUSEP_SEND_UDP_MULTICASTS, "//netservice/servprm/lighthouseserv");
+    lighthouse->bind(ELIGHTHOUSEP_PUBLISH, "//netservice", enetservp_endpoint_change_counter);
     lighthouse->start(lighthouse_client_thread_handle);
+
 }
+
+
