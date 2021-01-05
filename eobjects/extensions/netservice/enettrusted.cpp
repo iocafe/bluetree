@@ -36,7 +36,7 @@ void eNetService::create_trusted_certificate_table()
     m_persistent_trusted = new ePersistent(this);
     m_trusted_matrix = new eMatrix(m_persistent_trusted);
     m_trusted_matrix->addname("trusted");
-    m_trusted_matrix->setpropertys(ETABLEP_TEXT, "trusted server certificates");
+    m_trusted_matrix->setpropertys(ETABLEP_TEXT, "trusted certificates");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);

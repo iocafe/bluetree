@@ -52,7 +52,7 @@ void eNetService::create_connect_table()
     m_connect = new ePersistent(this);
     m_connection_matrix = new eMatrix(m_connect);
     m_connection_matrix->addname("connect");
-    m_connection_matrix->setpropertys(ETABLEP_TEXT, "services to connect to");
+    m_connection_matrix->setpropertys(ETABLEP_TEXT, "connect to");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);

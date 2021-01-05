@@ -502,7 +502,7 @@ void eNetService::create_services_table()
 
     m_services_matrix = new eMatrix(this);
     m_services_matrix->addname("services");
-    m_services_matrix->setpropertys(ETABLEP_TEXT, "services in local network");
+    m_services_matrix->setpropertys(ETABLEP_TEXT, "LAN");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);

@@ -43,7 +43,7 @@ void eNetService::create_service_parameters(
     m_persistent_serv_prm = new ePersistent(this);
     m_persistent_serv_prm->addname("servprm");
     m_persistent_serv_prm->ns_create();
-    m_persistent_serv_prm->setpropertys(EPERP_TEXT, "service parameters");
+    m_persistent_serv_prm->setpropertys(EPERP_TEXT, "net parameters");
 
     m_serv_prm.nick_name = add_service_prm("nickname",
         "nick name",
