@@ -39,6 +39,7 @@ ePopup::ePopup(
 */
 ePopup::~ePopup()
 {
+    m_label_title.release(this);
 }
 
 

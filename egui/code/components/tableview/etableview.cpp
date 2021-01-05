@@ -54,6 +54,7 @@ eTableView::eTableView(
 */
 eTableView::~eTableView()
 {
+    m_label_edit.release(this);
     os_free(m_row_to_m, m_row_to_m_sz);
 }
 

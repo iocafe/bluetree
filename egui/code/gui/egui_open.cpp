@@ -75,6 +75,7 @@ void eGui::open_content(
             tmp.sets("table");
         }
         w->setpropertyv(ECOMP_TEXT, &tmp);
+        w->setpropertyv(ECOMP_NAME, &tmp);
 
         t = new eTableView(w);
         t->setpropertys(ECOMP_PATH, mypath.gets());
@@ -88,6 +89,7 @@ void eGui::open_content(
             tmp.sets("variables");
         }
         w->setpropertyv(ECOMP_TEXT, &tmp);
+        w->setpropertyv(ECOMP_NAME, &tmp);
 
         p = new eParameterList(w);
 

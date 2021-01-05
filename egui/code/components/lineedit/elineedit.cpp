@@ -40,6 +40,7 @@ eLineEdit::eLineEdit(
 */
 eLineEdit::~eLineEdit()
 {
+    m_label_edit.release(this);
 }
 
 

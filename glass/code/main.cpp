@@ -50,8 +50,7 @@ eStatus emain(
     OSAL_UNUSED(argv);
 
     // duudeli(); return ESTATUS_SUCCESS;
-
-tableview_test_start();
+    // tableview_test_start();
 
     efsys_expose_directory("//fsys", eglobal->root_path, &fsys_thread_handle);
 
@@ -81,7 +80,7 @@ tableview_test_start();
     fsys_thread_handle.terminate();
     fsys_thread_handle.join();
 
-    tableview_test_end();
+    // tableview_test_end();
 
     return ESTATUS_SUCCESS;
 }

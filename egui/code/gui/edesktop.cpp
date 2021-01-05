@@ -31,11 +31,11 @@ void eGui::setup_desktop_application()
 {
     eWindow *w;
     eParameterList *p;
-    eLineEdit *e;
+    // eLineEdit *e;
     eTreeNode *n;
     // eTableView *t;
     eValueX x;
-
+#if 0
     w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "Muuttujia");
 
@@ -106,7 +106,7 @@ void eGui::setup_desktop_application()
     e->setpropertys(ECOMP_TEXT, "kasse ja ma");
     e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
     e->setpropertyi(ECOMP_DIGS, 5);
-
+#endif
     /* w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "test table");
 
@@ -120,15 +120,15 @@ void eGui::setup_desktop_application()
     t->setpropertys(ECOMP_PATH, "//netservice/accounts");
     */
 
-    w = new eWindow(this);
+    /* w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "Browseri");
 
     n = new eTreeNode(w);
     n->setpropertys(ECOMP_PATH, "//");
-    n->setpropertys(ECOMP_IPATH, "//");
+    n->setpropertys(ECOMP_IPATH, "//"); */
 
     w = new eWindow(this);
-    w->setpropertys(ECOMP_TEXT, "Browseri 2");
+    w->setpropertys(ECOMP_TEXT, "browser");
     p = new eParameterList(w);
 
     n = new eTreeNode(p);

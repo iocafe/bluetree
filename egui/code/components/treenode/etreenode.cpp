@@ -60,6 +60,9 @@ eTreeNode::eTreeNode(
 */
 eTreeNode::~eTreeNode()
 {
+    m_label_node.release(this);
+    m_label_edit.release(this);
+
 }
 
 

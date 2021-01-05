@@ -108,7 +108,13 @@ public:
 
     /* Generating ImGui autolabel.
      */
-    os_long make_autolabel();
+    void make_autolabel(
+        eComponent *c,
+        eVariable *name,
+        eVariable *imgui_name);
+
+    void release_autolabel(
+        const os_char *imgui_name);
 
     /* Static constructor function for generating instance by class list.
      */
@@ -251,7 +257,8 @@ protected:
 
     /* ImGui autolabel count for generating labels for windows eWindow and ePopup.
      */
-    os_long m_autolabel_count;
+    // os_long m_autolabel_count;
+    eContainer *m_autolabel;
 
     /* Component we use as an origin for drag or component beging modifified.
      */

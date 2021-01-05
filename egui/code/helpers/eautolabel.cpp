@@ -30,12 +30,30 @@ eAutoLabel::eAutoLabel()
     m_count = 0;
     m_extended_value = OS_FALSE;
     m_state_bits = OSAL_STATE_CONNECTED;
+    m_autolabel = OS_NULL;
 }
 
 eAutoLabel::~eAutoLabel()
 {
+    if (m_label) {
+        osal_debug_error_str("Auto label not released: ", m_label);
+    }
+}
+
+void eAutoLabel::release(
+    eComponent *component)
+{
+    eGui *g;
+
+    if (m_autolabel) {
+        g = component->gui();
+        if (g) {
+            g->release_autolabel(m_autolabel);
+        }
+    }
     clear();
 }
+
 
 void eAutoLabel::allocate(
     os_memsz sz)
@@ -78,17 +96,18 @@ void eAutoLabel::clear(
 const os_char *eAutoLabel::get(
     eComponent *component,
     os_int propertynr,
+    os_int name_propertynr,
     eAttrBuffer *attr)
 {
     if (m_label) {
         return m_label;
     }
 
-    if (propertynr) {
-        set(component, propertynr, attr);
+    if (propertynr > 0) {
+        set(component, propertynr, name_propertynr, attr);
     }
     else {
-        setstr(component, OS_NULL);
+        setstr(component, OS_NULL, OS_NULL);
     }
 
     return m_label;
@@ -101,38 +120,57 @@ const os_char *eAutoLabel::get(
   @brief Store text Get hidden ImGui label reserved for this components.
 
   The eAutoLabel::set_text function...
+
+  @param  name Name to position a window within ImGUI or OS_NULL if not a window.
   @return None.
 
 ****************************************************************************************************
 */
 void eAutoLabel::setstr(
     eComponent *component,
-    const os_char *text)
+    const os_char *text,
+    eVariable *name)
 {
     const os_char hide_label_mark[] = "###l";
-    os_char nbuf[OSAL_NBUF_SZ];
+    const os_char *namestr;
+    os_char nbuf[OSAL_NBUF_SZ], *p;
     os_memsz sz;
     eComponent *window;
     eGui *g;
     os_int cid;
 
+    osal_debug_assert(component != OS_NULL);
+
     /* Make sure that we have count.
      */
-    if (m_count == 0) {
-        osal_debug_assert(component != OS_NULL);
-        cid = component->classid();
-        if (cid == EGUICLASSID_WINDOW || cid == EGUICLASSID_POPUP)
-        {
+    cid = component->classid();
+    if (cid == EGUICLASSID_WINDOW || cid == EGUICLASSID_POPUP)
+    {
+        namestr = "?";
+        if (m_autolabel == OS_NULL) {
             g = component->gui();
-            if (g) m_count = g->make_autolabel();
+            if (g) {
+                eVariable tmp;
+                g->make_autolabel(component, name, &tmp);
+                p = tmp.gets();
+                m_autolabel_sz = os_strlen(p);
+                m_autolabel = os_malloc(m_autolabel_sz, OS_NULL);
+                os_memcpy(m_autolabel, p, m_autolabel_sz);
+                namestr = m_autolabel;
+            }
         }
-        else {
+    }
+    else {
+        if (m_count == 0) {
             window = component->window();
             if (window) m_count = window->make_autolabel();
         }
+        osal_int_to_str(nbuf, sizeof(nbuf), m_count);
+        namestr = nbuf;
     }
 
-    sz = osal_int_to_str(nbuf, sizeof(nbuf), m_count);
+
+    sz = os_strlen(namestr);
     sz += os_strlen(hide_label_mark) - 1;
 
     if (text) {
@@ -145,20 +183,25 @@ void eAutoLabel::setstr(
     allocate(sz);
     os_strncpy(m_label, text, m_label_sz);
     os_strncat(m_label, hide_label_mark, m_label_sz);
-    os_strncat(m_label, nbuf, m_label_sz);
+    os_strncat(m_label, namestr, m_label_sz);
 }
 
 void eAutoLabel::set(
     eComponent *component,
     os_int propertynr,
+    os_int name_propertynr,
     eAttrBuffer *attr)
 {
-    eVariable tmp;
+    eVariable tmp, name;
     eValueX *ex;
+
+    if (name_propertynr >= 0) {
+        component->propertyv(name_propertynr, &name);
+    }
 
     component->propertyv(propertynr, &tmp);
     enice_value_for_ui(&tmp, component, attr);
-    setstr(component, tmp.gets());
+    setstr(component, tmp.gets(), &name);
 
     ex = tmp.getx();
     if (ex) {

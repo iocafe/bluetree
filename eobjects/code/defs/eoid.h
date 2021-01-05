@@ -92,7 +92,6 @@
 #define EOID_PATH -15
 
 
-
 /** Table/matrix related identifiers.
  */
 #define EOID_TABLE_CONFIGURATION -40

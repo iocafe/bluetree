@@ -22,6 +22,7 @@
 const os_char
     ecomp_target[] = "target",
     ecomp_setvalue[] = "setvalue",
+    ecomp_name[] = "name",
     ecomp_path[] = "path",
     ecomp_ipath[] = "ipath",
     ecomp_edit[] = "edit",

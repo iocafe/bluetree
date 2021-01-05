@@ -45,6 +45,7 @@ eWindow::eWindow(
 */
 eWindow::~eWindow()
 {
+    m_label_title.release(this);
     clear_zorder();
 }
 
@@ -95,6 +96,7 @@ void eWindow::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eWindow");
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
+    addpropertys(cls, ECOMP_NAME, ecomp_text, "name", EPRO_PERSISTENT);
     addpropertys(cls, ECOMP_TEXT, ecomp_text, "title text", EPRO_PERSISTENT);
     addpropertyb(cls, ECOMP_EDIT, ecomp_edit, "edit");
     propertysetdone(cls);
@@ -132,6 +134,7 @@ eStatus eWindow::onpropertychange(
     switch (propertynr)
     {
         case ECOMP_TEXT:
+        case ECOMP_NAME:
             m_label_title.clear();
             break;
 
@@ -226,7 +229,7 @@ eStatus eWindow::draw(
 
     /* Create a window.
      */
-    label = m_label_title.get(this, ECOMP_TEXT);
+    label = m_label_title.get(this, ECOMP_TEXT, ECOMP_NAME);
     if (lock_window) {
         ok = ImGui::Begin(label, &show_window, ImGuiWindowFlags_NoMove); // ImGuiWindowFlags_NoMouseInputs ?
     }

@@ -38,11 +38,17 @@ public:
     eAutoLabel();
     ~eAutoLabel();
 
+    /* Release must be called before destructor gets called.
+     */
+    void release(
+        eComponent *component);
+
     /* Get pointer to label string.
      */
     const os_char *get(
         eComponent *component,
-        os_int propertynr = 0,
+        os_int propertynr = -1,
+        os_int name_propertynr = -1,
         eAttrBuffer *attr = OS_NULL);
 
     void clear(
@@ -56,11 +62,13 @@ protected:
      */
     void setstr(
         eComponent *component,
-        const os_char *text);
+        const os_char *text,
+        eVariable *name);
 
     void set(
         eComponent *component,
         os_int propertynr,
+        os_int name_propertynr,
         eAttrBuffer *attr);
 
     void allocate(
@@ -71,6 +79,8 @@ protected:
     os_long m_count;
     os_boolean m_extended_value;
     os_char m_state_bits;
+    os_char *m_autolabel;
+    os_memsz m_autolabel_sz;
 };
 
 

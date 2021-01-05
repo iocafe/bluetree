@@ -55,11 +55,13 @@ class ePopup;
 
 #define ECOMP_TARGET 30
 #define ECOMP_SETVALUE 31
-#define ECOMP_PATH 32
-#define ECOMP_IPATH 33
-#define ECOMP_EDIT 34
-#define ECOMP_ALL 35
-#define ECOMP_DROP_DOWN_LIST_SELECT 36
+#define ECOMP_NAME 32
+#define ECOMP_PATH 33
+#define ECOMP_IPATH 34
+#define ECOMP_EDIT 35
+#define ECOMP_ALL 36
+#define ECOMP_DROP_DOWN_LIST_SELECT 37
+
 
 #define ECOMP_SELECT 60
 #define ECOMP_COMMAND 61
@@ -89,11 +91,13 @@ class ePopup;
 #define ecomp_offset evarp_offset
 extern const os_char ecomp_target[];
 extern const os_char ecomp_setvalue[];
+extern const os_char ecomp_name[];
 extern const os_char ecomp_path[];
 extern const os_char ecomp_ipath[];
 extern const os_char ecomp_edit[];
 extern const os_char ecomp_all[];
 extern const os_char ecomp_drop_down_list_select[];
+
 
 extern const os_char ecomp_select[];
 extern const os_char ecomp_command[];
