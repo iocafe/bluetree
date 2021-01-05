@@ -227,6 +227,8 @@ eStatus eWindow::draw(
         lock_window = erect_is_point_inside(m_rect, prm.mouse_left_press_pos);
     }
 
+ImGui::SetNextWindowSize(ImVec2(900, 200), ImGuiCond_FirstUseEver);
+
     /* Create a window.
      */
     label = m_label_title.get(this, ECOMP_TEXT, ECOMP_NAME);
