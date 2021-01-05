@@ -49,6 +49,7 @@ extern const os_char
 #define ENET_ENABLE_EOBJECTS_CLIENT 2
 #define ENET_ENABLE_IOCOM_SERVICE 4
 #define ENET_ENABLE_EOBJECTS_SERVICE 8
+#define ENET_DEFAULT_NO_END_POINTS 16
 
 
 /**
@@ -145,7 +146,8 @@ protected:
 
     /* Create "end point" table.
      */
-    void create_end_point_table();
+    void create_end_point_table(
+        os_int flags);
 
     /* Add a line for an end point to "end point" table.
      */

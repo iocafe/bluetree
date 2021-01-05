@@ -50,15 +50,21 @@ const os_char enet_endp_netname[] = "netname";
         ],
 
 
+  @param  flags Bit fields, ENET_DEFAULT_NO_END_POINTS flag checked by this function.
+
+
 ****************************************************************************************************
 */
-void eNetService::create_end_point_table()
+void eNetService::create_end_point_table(
+    os_int flags)
 {
     eContainer *configuration, *columns;
     eVariable *column;
+    os_boolean enable_by_default;
 
     m_end_points = new ePersistent(this);
     m_endpoint_matrix = new eMatrix(m_end_points);
+
     m_endpoint_matrix->addname("endpoints");
     m_endpoint_matrix->setpropertys(ETABLEP_TEXT, "end points to listen to");
 
@@ -104,11 +110,23 @@ void eNetService::create_end_point_table()
 
     column = new eVariable(columns);
     column->addname(enet_endp_port, ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "port/iface");
+    column->setpropertys(EVARP_TEXT, "port");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_TTIP,
-        "TCP port number proceeded with IP . Examples: \'6666\',\n"
-        "\'192.168.1.222:666\', or \'COM1:115200\'");
+        "TCP port number to listen to. Typical:\n"
+        "- \'6371\' eobjects socket.\n"
+        "- \'6374\' eobjects TLS.\n"
+        "- \'6368\' iocom socket.\n"
+        "- \'6369\' iocom TLS.\n"
+        "- \'COM1:115200\' serial port");
+
+    /* column = new eVariable(columns);
+    column->addname(enet_endp_iface, ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "interface");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_TTIP,
+        "Bind the end point only to a specific network interface.");
+     */
 
     /* column = new eVariable(columns);
     column->addname(enet_endp_netname, ENAME_NO_MAP);
@@ -116,6 +134,14 @@ void eNetService::create_end_point_table()
     column->setpropertys(EVARP_TEXT, "iocom network");
     column->setpropertys(EVARP_TTIP,
         "Device network name, used only with IOCOM protocol."); */
+
+    /* column = new eVariable(columns);
+    column->addname(enet_endp_serv_cert, ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "server certificate");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_TTIP,
+        "Server certificate for this end point.\n"
+        "If empty, the common cerver certificate is used."); */
 
     column = new eVariable(columns);
     column->addname("active", ENAME_NO_MAP);
@@ -142,10 +168,16 @@ void eNetService::create_end_point_table()
     m_end_points->setflags(EOBJ_TEMPORARY_CALLBACK);
 
     if (m_endpoint_matrix->nrows() == 0) {
-        add_end_point(OS_TRUE, ENET_ENDP_EOBJECTS, ENET_ENDP_SOCKET_IPV4,
-            ENET_DEFAULT_SOCKET_PORT_STR);
-        add_end_point(OS_TRUE, ENET_ENDP_IOCOM, ENET_ENDP_TLS_IPV4,
-            IOC_DEFAULT_SOCKET_PORT_STR, "iocafenet");
+        enable_by_default = (flags & ENET_DEFAULT_NO_END_POINTS) ? OS_FALSE : OS_TRUE;
+        add_end_point(enable_by_default, ENET_ENDP_EOBJECTS, ENET_ENDP_TLS_IPV4,
+            ENET_DEFAULT_TLS_PORT_STR);
+        add_end_point(enable_by_default, ENET_ENDP_IOCOM, ENET_ENDP_TLS_IPV4,
+            IOC_DEFAULT_TLS_PORT_STR);
+
+/* TESTING */
+add_end_point(OS_TRUE, ENET_ENDP_IOCOM, ENET_ENDP_SOCKET_IPV4,
+    IOC_DEFAULT_SOCKET_PORT_STR, "iocafenet");
+
     }
 }
 

@@ -1,7 +1,7 @@
 /**
 
-  @file    elighthouse_client.cpp
-  @brief   Look out for device networks in the same LAN.
+  @file    elighthouse_thread.cpp
+  @brief   Look out for device networks in the same LAN and announce services by UDP multicast.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -38,6 +38,7 @@ eLightHouseService::eLightHouseService(
     m_send_udp_multicasts = OS_FALSE;
     m_publish_count = 0;
     m_publish = OS_TRUE;
+    m_publish_status = ESTATUS_FAILED;
     m_udp_send_initialized = OS_FALSE;
 
     m_counters = new eContainer(this);
@@ -104,9 +105,6 @@ void eLightHouseService::setupclass()
 void eLightHouseService::onmessage(
     eEnvelope *envelope)
 {
-    os_timer ti;
-    osalStatus s;
-
     /* If at final destination for the message.
      */
     if (*envelope->target()=='\0')
@@ -114,13 +112,8 @@ void eLightHouseService::onmessage(
         switch (envelope->command())
         {
             case ECMD_TIMER:
-                if (m_udp_send_initialized) {
-                    os_get_timer(&ti);
-                    s = ioc_run_lighthouse_server(&m_server, &ti);
-                    if (s != OSAL_SUCCESS && s != OSAL_PENDING) {
-                        stop_udp_multicasts();
-                        m_udp_send_initialized = OS_FALSE;
-                    }
+                if (m_publish_status == ESTATUS_SUCCESS) {
+                    run_server();
                 }
                 return;
 
@@ -209,7 +202,7 @@ void eLightHouseService::finish()
     ioc_release_lighthouse_client(&m_client);
 
     if (m_udp_send_initialized) {
-        stop_udp_multicasts();
+        ioc_release_lighthouse_server(&m_server);
         m_udp_send_initialized = OS_FALSE;
     }
 }
@@ -225,34 +218,34 @@ void eLightHouseService::run()
         alive(EALIVE_RETURN_IMMEDIATELY);
         if (exitnow()) break;
 
+        if (m_send_udp_multicasts) {
+            if (m_publish) {
+                if (!m_udp_send_initialized) {
+                    ioc_initialize_lighthouse_server(&m_server, 10);
+                    m_udp_send_initialized = OS_TRUE;
+                }
+
+                m_publish_status = publish();
+                m_publish = OS_FALSE;
+                if (m_publish_status == ESTATUS_SUCCESS) {
+                    run_server();
+                    timer(4500);
+                }
+            }
+        }
+        else if (m_udp_send_initialized)
+        {
+            ioc_release_lighthouse_server(&m_server);
+            m_udp_send_initialized = OS_FALSE;
+            timer(0);
+        }
+
         s = ioc_run_lighthouse_client(&m_client, m_trigger);
         if (s != OSAL_SUCCESS) {
             if (s != OSAL_PENDING) {
 osal_debug_error_int("ioc_run_lighthouse_client failed, s=", s);
             }
             os_sleep(500);
-        }
-
-osal_debug_error("HERE XXX");
-
-        if (m_send_udp_multicasts) {
-            if (m_publish) {
-                m_publish = OS_FALSE;
-                if (m_udp_send_initialized) {
-                    stop_udp_multicasts();
-                    m_udp_send_initialized = OS_FALSE;
-                }
-
-                publish();
-                m_udp_send_initialized = OS_TRUE;
-                timer(5000);
-            }
-        }
-        else if (m_udp_send_initialized)
-        {
-            stop_udp_multicasts();
-            m_udp_send_initialized = OS_FALSE;
-            timer(0);
         }
     }
 }
@@ -335,9 +328,26 @@ void eLightHouseService::callback(
 }
 
 
+void eLightHouseService::run_server()
+{
+    os_timer ti;
+    osalStatus s;
+
+    if (m_udp_send_initialized) {
+        os_get_timer(&ti);
+        s = ioc_run_lighthouse_server(&m_server, &ti);
+        if (s != OSAL_SUCCESS && s != OSAL_PENDING) {
+            ioc_release_lighthouse_server(&m_server);
+            m_udp_send_initialized = OS_FALSE;
+        }
+    }
+}
+
+
 /* Publish (initial or update) the end point information.
+ * @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if notthing to publish.
  */
-void eLightHouseService::publish()
+eStatus eLightHouseService::publish()
 {
     eMatrix *m;
     eObject *conf, *columns, *col;
@@ -348,9 +358,8 @@ void eLightHouseService::publish()
     os_int tls_port, tcp_port;
     enetEndpTransportIx transport_ix;
     enetEndpProtocolIx protocol_ix;
-
-    ioc_initialize_lighthouse_server(&m_server); // ??? HERE ???
-
+    os_char buf[OSAL_NETWORK_NAME_SZ], *p;
+    eStatus s = ESTATUS_FAILED;
 
     localvars = new eContainer(ETEMPORARY);
     list = new eContainer(localvars);
@@ -402,7 +411,10 @@ void eLightHouseService::publish()
         {
 /* Make sure that interface matches. If not skip compare row.
  */
+
 /* If iocom, make sure that network name matches. If not skip compare row.
+            if (protocol_ix == ENET_ENDP_IOCOM) {
+            }
  */
 
             v = item->firstv(is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
@@ -447,24 +459,31 @@ goon:;
         v = item->firstv(ENET_ENDP_PROTOCOL);
         if (v) protocol_ix = (enetEndpProtocolIx)v->getl();
 
-        ioc_lighthouse_add_endpoint(&m_server, eglobal->process_id,
+        if (protocol_ix == ENET_ENDP_IOCOM) {
+            os_strncpy(buf, eglobal->process_name, sizeof(buf));
+            os_strncat(buf, "net", sizeof(buf));
+            p = buf;
+        }
+        else {
+            p = eglobal->process_nr ? eglobal->process_id : eglobal->process_name;
+        }
+
+        ioc_lighthouse_add_endpoint(&m_server, p,
             protocol_ix == ENET_ENDP_IOCOM ? "i" : "o", tls_port, tcp_port, is_ipv6);
+
+        s = ESTATUS_SUCCESS;
     }
 
     delete localvars;
-    return;
+    return s;
 
 getout:
     os_unlock();
     delete localvars;
     osal_debug_error("eLightHouseService::publish failed");
+    return ESTATUS_FAILED;
 }
 
-
-void eLightHouseService::stop_udp_multicasts()
-{
-    ioc_release_lighthouse_server(&m_server);
-}
 
 
 /**

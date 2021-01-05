@@ -111,8 +111,8 @@ void eNetService::setupclass()
 
   Called after eNetService object is created to create data structures and start operation.
 
-  @param  flags Bit fields, combination of ENET_ENABLE_IOCOM_CLIENT, ENET_ENABLE_EOBJECTS_CLIENT,
-          ENET_ENABLE_IOCOM_SERVICE and ENET_ENABLE_EOBJECTS_SERVICE.
+  @param  flags Bit fields, combination of ENET_DEFAULT_NO_END_POINTS, ENET_ENABLE_IOCOM_CLIENT,
+          ENET_ENABLE_EOBJECTS_CLIENT, ENET_ENABLE_IOCOM_SERVICE and ENET_ENABLE_EOBJECTS_SERVICE.
 
 ****************************************************************************************************
 */
@@ -123,7 +123,7 @@ void eNetService::start(
 
     if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_EOBJECTS_SERVICE)) {
         create_user_account_table();
-        create_end_point_table();
+        create_end_point_table(flags);
         create_service_parameters(flags);
     }
     if (flags & (ENET_ENABLE_IOCOM_CLIENT | ENET_ENABLE_EOBJECTS_CLIENT)) {

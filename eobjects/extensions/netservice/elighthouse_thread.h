@@ -1,7 +1,7 @@
 /**
 
-  @file    elighthouse_client.h
-  @brief   Look out for device networks in the same LAN.
+  @file    elighthouse_thread.h
+  @brief   Look out for device networks in the same LAN and announce services by UDP multicast.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -43,6 +43,8 @@ extern const os_char
  */
 #define ENET_DEFAULT_SOCKET_PORT 6371
 #define ENET_DEFAULT_SOCKET_PORT_STR "6371"
+#define ENET_DEFAULT_TLS_PORT 6374
+#define ENET_DEFAULT_TLS_PORT_STR "6374"
 
 /**
 ****************************************************************************************************
@@ -135,9 +137,9 @@ protected:
         LightHouseClientCallbackData *data,
         void *context);
 
-    void publish();
+    void run_server();
 
-    void stop_udp_multicasts();
+    eStatus publish();
 
 
     /**
@@ -183,6 +185,10 @@ protected:
     /** OS_TRUE if initialized for sending UDP multicasts.
      */
     os_boolean m_udp_send_initialized;
+
+    /** If data to publish was set successfully (something to publish)
+     */
+    eStatus m_publish_status;
 };
 
 /* Start light house client.
