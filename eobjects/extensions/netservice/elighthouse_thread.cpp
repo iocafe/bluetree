@@ -341,8 +341,20 @@ void eLightHouseService::publish()
 {
     eMatrix *m;
     eObject *conf, *columns, *col;
-    os_int enable_col, h, y;
+    eContainer *localvars, *list, *item;
+    eVariable *v;
+    os_int enable_col, protocol_col, transport_col, port_col; //, netname_col;
+    os_int h, y, is_ipv6, is_tls, item_id, port_nr;
+    os_int tls_port, tcp_port;
+    enetEndpTransportIx transport_ix;
+    enetEndpProtocolIx protocol_ix;
 
+    ioc_initialize_lighthouse_server(&m_server); // ??? HERE ???
+
+
+    localvars = new eContainer(ETEMPORARY);
+    list = new eContainer(localvars);
+    // list->ns_create();
     os_lock();
 
     m = m_netservice->m_endpoint_matrix;
@@ -351,31 +363,100 @@ void eLightHouseService::publish()
     columns = conf->first(EOID_TABLE_COLUMNS);
     if (columns == OS_NULL) goto getout;
 
-    col = columns->byname("enable");
+    col = columns->byname(enet_endp_enable);
     if (col == OS_NULL) goto getout;
     enable_col = col->oid();
+    col = columns->byname(enet_endp_protocol);
+    if (col == OS_NULL) goto getout;
+    protocol_col = col->oid();
+    col = columns->byname(enet_endp_transport);
+    if (col == OS_NULL) goto getout;
+    transport_col = col->oid();
+    col = columns->byname(enet_endp_port);
+    if (col == OS_NULL) goto getout;
+    port_col = col->oid();
+    /* col = columns->byname(enet_endp_netname);
+    if (col == OS_NULL) goto getout;
+    netname_col = col->oid(); */
 
     h = m->nrows();
-
-    ioc_initialize_lighthouse_server(&m_server);
-    ioc_lighthouse_start_endpoints(&m_server, "manteli");
-    ioc_lighthouse_add_endpoint(&m_server, "naksu", "o", 55577,3233, OS_FALSE);
-
-
     for (y = 0; y<h; y++) {
         if ((m->geti(y, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
         if (m->geti(y, enable_col) == 0) continue;
 
+        protocol_ix = (enetEndpProtocolIx)m->geti(y, protocol_col);
+        port_nr = m->geti(y, port_col);
+        if (port_nr <= 0) continue;
 
+        transport_ix = (enetEndpTransportIx)m->geti(y, transport_col);
+        switch (transport_ix) {
+            case ENET_ENDP_SOCKET_IPV4: is_tls = 0; is_ipv6 = 0; break;
+            case ENET_ENDP_SOCKET_IPV6: is_tls = 0; is_ipv6 = 100; break;
+            case ENET_ENDP_TLS_IPV4:    is_tls = 1; is_ipv6 = 0; break;
+            case ENET_ENDP_TLS_IPV6:    is_tls = 1; is_ipv6 = 100; break;
+            default: goto goon;
+        }
+
+        item_id = protocol_ix + is_ipv6;
+        for (item = list->firstc(item_id); item; item = item->nextc(item_id))
+        {
+/* Make sure that interface matches. If not skip compare row.
+ */
+/* If iocom, make sure that network name matches. If not skip compare row.
+ */
+
+            v = item->firstv(is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
+            if (v == OS_NULL) {
+                v = new eVariable(item, is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
+                v->setl(port_nr);
+                goto goon;
+            }
+            if (v->getl() == port_nr) goto goon;
+        }
+
+        item = new eContainer(list, item_id);
+        v = new eVariable(item, ENET_ENDP_PROTOCOL);
+        v->setl(protocol_ix);
+        v = new eVariable(item, is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
+        v->setl(port_nr);
+        v = new eVariable(item, ENET_ENDP_IPV6);
+        v->setl(is_ipv6 ? OS_TRUE : OS_FALSE);
+        /* v = new eVariable(item, ENET_ENDP_NETNAME);
+        m->getv(y, netname_col, v); */
     }
+goon:;
 
     os_unlock();
 
 
+    ioc_lighthouse_start_endpoints(&m_server, "manteli");
+
+    for (item = list->firstc(); item; item = item->nextc()) {
+        tls_port = 0;
+        v = item->firstv(ENET_ENDP_TLS_PORT);
+        if (v) tls_port = v->getl();
+        tcp_port = 0;
+        v = item->firstv(ENET_ENDP_TCP_PORT);
+        if (v) tcp_port = v->getl();
+
+        is_ipv6 = OS_FALSE;
+        v = item->firstv(ENET_ENDP_IPV6);
+        if (v) is_ipv6 = v->getl();
+
+        protocol_ix = ENET_ENDP_EOBJECTS;
+        v = item->firstv(ENET_ENDP_PROTOCOL);
+        if (v) protocol_ix = (enetEndpProtocolIx)v->getl();
+
+        ioc_lighthouse_add_endpoint(&m_server, eglobal->process_id,
+            protocol_ix == ENET_ENDP_IOCOM ? "i" : "o", tls_port, tcp_port, is_ipv6);
+    }
+
+    delete localvars;
     return;
 
 getout:
     os_unlock();
+    delete localvars;
     osal_debug_error("eLightHouseService::publish failed");
 }
 

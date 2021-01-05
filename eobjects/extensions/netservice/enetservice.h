@@ -20,6 +20,7 @@
 #include "eobjects.h"
 #include "extensions/netservice/elighthouse_thread.h"
 #include "extensions/netservice/enetserv_prm.h"
+#include "extensions/netservice/enetendpoints.h"
 
 
 /**
@@ -150,9 +151,10 @@ protected:
      */
     void add_end_point(
         os_int enable,
-        os_int protocol,
-        os_int transport,
+        enetEndpProtocolIx protocol_ix,
+        enetEndpTransportIx transport_ix,
         const os_char *port,
+        const os_char *netname = OS_NULL,
         os_int row_nr = -1);
 
     /* Create "connections" table.

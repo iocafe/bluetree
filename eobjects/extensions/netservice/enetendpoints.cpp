@@ -16,6 +16,14 @@
 #include "eobjects.h"
 #include "extensions/netservice/enetservice.h"
 
+/* End point table column names.
+ */
+const os_char enet_endp_enable[] = "enable";
+const os_char enet_endp_protocol[] = "protocol";
+const os_char enet_endp_transport[] = "transport";
+const os_char enet_endp_port[] = "port";
+const os_char enet_endp_netname[] = "netname";
+
 
 /**
 ****************************************************************************************************
@@ -66,14 +74,14 @@ void eNetService::create_end_point_table()
     column->setpropertyi(EVARP_TYPE, OS_INT);
 
     column = new eVariable(columns);
-    column->addname("enable", ENAME_NO_MAP);
+    column->addname(enet_endp_enable, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "enable");
     column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
     column->setpropertys(EVARP_TTIP,
         "Enable this end point");
 
     column = new eVariable(columns);
-    column->addname("protocol", ENAME_NO_MAP);
+    column->addname(enet_endp_protocol, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "protocol");
     column->setpropertyi(EVARP_TYPE, OS_CHAR);
     column->setpropertys(EVARP_ATTR, "enum=\"1.eobjects,2.iocom\"");
@@ -83,23 +91,31 @@ void eNetService::create_end_point_table()
         "- \'iocom\': IO device communication protocol.\n");
 
     column = new eVariable(columns);
-    column->addname("transport", ENAME_NO_MAP);
+    column->addname(enet_endp_transport, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "transport");
     column->setpropertyi(EVARP_TYPE, OS_CHAR);
-    column->setpropertys(EVARP_ATTR, "enum=\"1.SOCKET,2.TLS,3.SERIAL\"");
+    column->setpropertys(EVARP_ATTR, "enum=\"1.SOCKET/IPv4,2.SOCKET/IPv6,3.TLS/IPv4,4.TLS/IPv6,5.SERIAL\"");
     column->setpropertys(EVARP_TTIP,
         "Transport to use.\n"
         "- \'SOCKET\': Plain socket connection, unsecured.\n"
         "- \'TLS\': TLS connection.\n"
+        "- \'IPv4\' or 'IPv6\': Internet protocol, usually older \'IPv4\'.\n"
         "- \'SERIAL\': Serial communication.\n");
 
     column = new eVariable(columns);
-    column->addname("port", ENAME_NO_MAP);
+    column->addname(enet_endp_port, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "port/iface");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_TTIP,
         "TCP port number proceeded with IP . Examples: \'6666\',\n"
         "\'192.168.1.222:666\', or \'COM1:115200\'");
+
+    /* column = new eVariable(columns);
+    column->addname(enet_endp_netname, ENAME_NO_MAP);
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_TEXT, "iocom network");
+    column->setpropertys(EVARP_TTIP,
+        "Device network name, used only with IOCOM protocol."); */
 
     column = new eVariable(columns);
     column->addname("active", ENAME_NO_MAP);
@@ -126,8 +142,10 @@ void eNetService::create_end_point_table()
     m_end_points->setflags(EOBJ_TEMPORARY_CALLBACK);
 
     if (m_endpoint_matrix->nrows() == 0) {
-        add_end_point(OS_TRUE, 1, 1, ENET_DEFAULT_SOCKET_PORT_STR);
-        add_end_point(OS_TRUE, 2, 1, IOC_DEFAULT_SOCKET_PORT_STR);
+        add_end_point(OS_TRUE, ENET_ENDP_EOBJECTS, ENET_ENDP_SOCKET_IPV4,
+            ENET_DEFAULT_SOCKET_PORT_STR);
+        add_end_point(OS_TRUE, ENET_ENDP_IOCOM, ENET_ENDP_TLS_IPV4,
+            IOC_DEFAULT_SOCKET_PORT_STR, "iocafenet");
     }
 }
 
@@ -139,15 +157,18 @@ void eNetService::create_end_point_table()
 
   The eNetService::add_end_point function...
 
-  @param  protocol,
+  @param  protocol
+  @param  transport_ix 1 = ENET_ENDP_SOCKET_IPV4, 2 = ENET_ENDP_SOCKET_IPV6, 3 = ENET_ENDP_TLS_IPV4,
+          4 = ENET_ENDP_TLS_IPV6 or 5 = ENET_ENDP_SERIAL.
 
 ****************************************************************************************************
 */
 void eNetService::add_end_point(
     os_int enable,
-    os_int protocol,
-    os_int transport,
+    enetEndpProtocolIx protocol_ix,
+    enetEndpTransportIx transport_ix,
     const os_char *port,
+    const os_char *netname,
     os_int row_nr)
 {
     eContainer row;
@@ -165,17 +186,23 @@ void eNetService::add_end_point(
 
     element = new eVariable(&row);
     element->addname("protocol", ENAME_NO_MAP);
-    element->setl(protocol);
+    element->setl(protocol_ix);
 
     element = new eVariable(&row);
     element->addname("transport", ENAME_NO_MAP);
-    element->setl(transport);
+    element->setl(transport_ix);
 
     if (port) {
         element = new eVariable(&row);
         element->addname("port", ENAME_NO_MAP);
         element->sets(port);
     }
+
+    /* if (netname) {
+        element = new eVariable(&row);
+        element->addname("netname", ENAME_NO_MAP);
+        element->sets(netname);
+    } */
 
     m_endpoint_matrix->insert(&row);
 }
