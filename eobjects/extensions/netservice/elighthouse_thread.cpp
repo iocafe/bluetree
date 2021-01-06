@@ -298,7 +298,6 @@ void eLightHouseService::callback(
     counter = eVariable::cast(ec->m_counters->byname(tmp.gets()));
     if (counter) {
         if (counter->getl() == data->counter) {
-            osal_debug_error_int("repeated lightcouse counter ", data->counter);
             return;
         }
     }
@@ -313,6 +312,10 @@ void eLightHouseService::callback(
     element = new eVariable(row);
     element->addname("name", ENAME_NO_MAP);
     element->sets(data->network_name);
+
+    element = new eVariable(row);
+    element->addname("nick", ENAME_NO_MAP);
+    element->sets(data->nickname);
 
     element = new eVariable(row);
     element->addname("protocol", ENAME_NO_MAP);
@@ -603,6 +606,13 @@ void eNetService::create_services_table()
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_TTIP,
         "IOCOM device network or eobjects process name");
+
+    column = new eVariable(columns);
+    column->addname("nick", ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "nickname");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_TTIP,
+        "IO device's or process'es nickname. Helps user to identify devices, not used by sofware");
 
     column = new eVariable(columns);
     column->addname("protocol", ENAME_NO_MAP);
