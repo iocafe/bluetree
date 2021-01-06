@@ -13,7 +13,6 @@
 
 ****************************************************************************************************
 */
-#include "eobjects.h"
 #include "extensions/netservice/enetservice.h"
 
 /* End point table column names.
@@ -89,8 +88,8 @@ void eNetService::create_end_point_table(
     column = new eVariable(columns);
     column->addname(enet_endp_protocol, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "protocol");
-    column->setpropertyi(EVARP_TYPE, OS_CHAR);
-    column->setpropertys(EVARP_ATTR, "enum=\"1.eobjects,2.iocom\"");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_ATTR, "list=\"ecom,iocom\"");
     column->setpropertys(EVARP_TTIP,
         "Listen for protocol.\n"
         "- \'eobjects\': eobjects communication protocol (for glass user interface, etc).\n"
@@ -169,13 +168,13 @@ void eNetService::create_end_point_table(
 
     if (m_endpoint_matrix->nrows() == 0) {
         enable_by_default = (flags & ENET_DEFAULT_NO_END_POINTS) ? OS_FALSE : OS_TRUE;
-        add_end_point(enable_by_default, ENET_ENDP_EOBJECTS, ENET_ENDP_TLS_IPV4,
+        add_end_point(enable_by_default, "ecom", ENET_ENDP_TLS_IPV4,
             ENET_DEFAULT_TLS_PORT_STR);
-        add_end_point(enable_by_default, ENET_ENDP_IOCOM, ENET_ENDP_TLS_IPV4,
+        add_end_point(enable_by_default, "iocom", ENET_ENDP_TLS_IPV4,
             IOC_DEFAULT_TLS_PORT_STR);
 
 /* TESTING */
-add_end_point(OS_TRUE, ENET_ENDP_IOCOM, ENET_ENDP_SOCKET_IPV4,
+add_end_point(OS_TRUE, "iocom", ENET_ENDP_SOCKET_IPV4,
     IOC_DEFAULT_SOCKET_PORT_STR, "iocafenet");
 
     }
@@ -189,7 +188,7 @@ add_end_point(OS_TRUE, ENET_ENDP_IOCOM, ENET_ENDP_SOCKET_IPV4,
 
   The eNetService::add_end_point function...
 
-  @param  protocol
+  @param  protocol Protocol name to add.
   @param  transport_ix 1 = ENET_ENDP_SOCKET_IPV4, 2 = ENET_ENDP_SOCKET_IPV6, 3 = ENET_ENDP_TLS_IPV4,
           4 = ENET_ENDP_TLS_IPV6 or 5 = ENET_ENDP_SERIAL.
 
@@ -197,7 +196,7 @@ add_end_point(OS_TRUE, ENET_ENDP_IOCOM, ENET_ENDP_SOCKET_IPV4,
 */
 void eNetService::add_end_point(
     os_int enable,
-    enetEndpProtocolIx protocol_ix,
+    const os_char *protocol,
     enetEndpTransportIx transport_ix,
     const os_char *port,
     const os_char *netname,
@@ -218,7 +217,7 @@ void eNetService::add_end_point(
 
     element = new eVariable(&row);
     element->addname("protocol", ENAME_NO_MAP);
-    element->setl(protocol_ix);
+    element->sets(protocol);
 
     element = new eVariable(&row);
     element->addname("transport", ENAME_NO_MAP);
@@ -238,3 +237,14 @@ void eNetService::add_end_point(
 
     m_endpoint_matrix->insert(&row);
 }
+
+
+/* void eNetService::check-end-pointscreate_end_point_table()
+{
+    for (i = )
+
+    if (m_protocols == OS_NULL) {
+
+    }
+}
+*/

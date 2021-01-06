@@ -27,5 +27,4 @@ typedef struct
 }
 eNetServPrm;
 
-
 #endif

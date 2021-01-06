@@ -45,10 +45,4 @@ typedef enum {
 }
 enetEndpTransportIx;
 
-typedef enum {
-    ENET_ENDP_EOBJECTS = 1,
-    ENET_ENDP_IOCOM
-}
-enetEndpProtocolIx;
-
 #endif

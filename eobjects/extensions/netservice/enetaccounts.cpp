@@ -13,7 +13,6 @@
 
 ****************************************************************************************************
 */
-#include "eobjects.h"
 #include "extensions/netservice/enetservice.h"
 
 
@@ -71,14 +70,14 @@ void eNetService::create_user_account_table()
     column = new eVariable(columns);
     column->addname("accept", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "accept");
-    column->setpropertyi(EVARP_TYPE, OS_CHAR);
-    column->setpropertys(EVARP_ATTR, "enum=\"0.none,1.eobjects,2.iocom,7.all protocols\"");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_ATTR, "list=\"none,ecom,iocom,*\"");
     column->setpropertys(EVARP_TTIP,
         "Accepted incoming connections for the user's.\n"
         "- \'none\': Connections by this user are not allowed.\n"
-        "- \'eobjects\': eobjects communication protocol (for glass user interface, etc).\n"
+        "- \'ecom\': eobjects communication protocol (for glass user interface, etc).\n"
         "- \'iocom\': IO device communication protocol.\n"
-        "- \'all protocols\': both \'eobjects\' and \'iocom\' are accepted.\n");
+        "- \'*\': all protocols are accepted.\n");
 
     column = new eVariable(columns);
     column->addname("privileges", ENAME_NO_MAP);

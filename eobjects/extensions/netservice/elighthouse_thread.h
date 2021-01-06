@@ -16,7 +16,7 @@
 #pragma once
 #ifndef ELIGHT_HOUSE_CLIENT_H_
 #define ELIGHT_HOUSE_CLIENT_H_
-#include "iocom.h"
+#include "extensions/netservice/enetservice.h"
 #include "lighthouse.h"
 
 class eNetService;
@@ -122,6 +122,8 @@ public:
      */
     virtual void finish();
 
+    /* Maintain LAN service UDP communication, thread main loop.
+     */
     virtual void run();
 
 
@@ -132,13 +134,19 @@ protected:
     ************************************************************************************************
     */
 
+    /* Process received endpoint information, callback.
+     */
     static void callback(
         struct LighthouseClient *c,
         LightHouseClientCallbackData *data,
         void *context);
 
+    /* Send end point information out as UDP multicast.
+     */
     void run_server();
 
+    /* Publish (initial or update) the end point information.
+     */
     eStatus publish();
 
 
@@ -148,8 +156,8 @@ protected:
     ************************************************************************************************
     */
 
-    /* Set pointer to network service (eNetService is owned by eProcess, oe_lock() must
-       be on to access.
+    /** Set pointer to network service (eNetService is owned by eProcess, oe_lock() must
+        be on to access.
      */
     eNetService *m_netservice;
 

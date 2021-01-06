@@ -13,7 +13,6 @@
 
 ****************************************************************************************************
 */
-#include "eobjects.h"
 #include "extensions/netservice/enetservice.h"
 
 /* Lighthouse UDP service property names.
@@ -138,10 +137,6 @@ void eLightHouseService::onmessage(
   If property is flagged as EPRO_SIMPLE, this function shuold save the property value
   in class members and and return it when simpleproperty() is called.
 
-  Notice for change logging: Previous value is still valid when this function is called.
-  You can get the old value by calling property() function inside onpropertychange()
-  function.
-
   @param   propertynr Property number of changed property.
   @param   x Variable containing the new value.
   @param   flags
@@ -207,8 +202,20 @@ void eLightHouseService::finish()
     }
 }
 
-/* Listen for lighthouse USP multicasts.
- */
+
+/**
+****************************************************************************************************
+
+  @brief Maintain LAN service UDP communication, thread main loop.
+
+  The eLightHouseService::run() function keeps eobjects messaging alive, sends and listens for
+  light house UDP multicasts. This thread handles all lighthouse UDP communication.
+  The data to be published (sent as UDP messages) is collected from "endpoint" table,
+  and received data is stored in "LAN services" table. Both these tables are global
+  and owned by eProcess.
+
+****************************************************************************************************
+*/
 void eLightHouseService::run()
 {
     osalStatus s;
@@ -250,8 +257,26 @@ osal_debug_error_int("ioc_run_lighthouse_client failed, s=", s);
     }
 }
 
-/* Callback by the same thread which calls ioc_run_lighthouse_client()
- */
+
+/**
+****************************************************************************************************
+
+  @brief Process received endpoint information, callback.
+
+  The eLightHouseService::callback() is callback from iocom library's ioc_run_lighthouse_client()
+  function. It is called when information about and endpoint is received by UDP multicast.
+  The data structure as argument contains the information about the end point:
+    - IO network or process name.
+    - Communication protocol supported by the endpoint.
+    - IO address and port numbers for plain socket and TLS.
+    - Nickname of IO device or process.
+
+  @param   c Pointer to the iocom light house client object structure.
+  @param   data Structure containing information about the endpoint.
+  @param   context Pointer to eobjects light house object.
+
+****************************************************************************************************
+*/
 void eLightHouseService::callback(
     LighthouseClient *c,
     LightHouseClientCallbackData *data,
@@ -259,17 +284,18 @@ void eLightHouseService::callback(
 {
     eLightHouseService *ec;
     eContainer *row;
-    eVariable *element, *where, *counter;
+    eVariable *element, *where, *counter, tmp;
+    os_long ti;
+    const os_char *protocol_long;
+    os_char nbuf[OSAL_NBUF_SZ];
 
     ec = (eLightHouseService*)context;
     if (data->network_name == OS_NULL) return;
 
-    osal_debug_error_str("HERE 1 ", data->ip_addr);
-    osal_debug_error_str("HERE 2 ", data->network_name);
-    osal_debug_error_int("HERE 3 ", data->tls_port_nr);
-    osal_debug_error_int("HERE 4 ", osal_rand(1, 1000));
-
-    counter = eVariable::cast(ec->m_counters->byname(data->network_name));
+    tmp.sets(data->network_name);
+    tmp.appends("-");
+    tmp.appends(data->protocol);
+    counter = eVariable::cast(ec->m_counters->byname(tmp.gets()));
     if (counter) {
         if (counter->getl() == data->counter) {
             osal_debug_error_int("repeated lightcouse counter ", data->counter);
@@ -278,7 +304,7 @@ void eLightHouseService::callback(
     }
     else {
         counter = new eVariable(ec->m_counters);
-        counter->addname(data->network_name);
+        counter->addname(tmp.gets());
     }
     counter->setl(data->counter);
 
@@ -291,14 +317,15 @@ void eLightHouseService::callback(
     element = new eVariable(row);
     element->addname("protocol", ENAME_NO_MAP);
     if (!os_strcmp(data->protocol, "i")) {
-        element->sets("iocom");
+        protocol_long = "iocom";
     }
     else if (!os_strcmp(data->protocol, "o")) {
-        element->sets("eobjects");
+        protocol_long = "ecom";
     }
     else {
-        element->sets(data->protocol);
+        protocol_long = data->protocol;
     }
+    element->sets(protocol_long);
 
     element = new eVariable(row);
     element->addname("ip", ENAME_NO_MAP);
@@ -314,13 +341,32 @@ void eLightHouseService::callback(
 
     element = new eVariable(row);
     element->addname("tstamp", ENAME_NO_MAP);
-    element->setl(etime());
+    ti = etime();
+    element->setl(ti);
 
     where = new eVariable(ec, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
-    where->appends("name=\'");
+
+    /* Remove rows with time stamps more than 5 seconds to future or
+       older than 10 minutes.
+     */
+    osal_int_to_str(nbuf, sizeof(nbuf), ti + 5000000);
+    where->sets("tstamp>");
+    where->appends(nbuf);
+#if 1
+    osal_int_to_str(nbuf, sizeof(nbuf), ti - 600L * 1000000L);
+    where->appends(" OR tstamp<");
+    where->appends(nbuf);
+#endif
+    etable_remove(ec, "//netservice/services", OS_NULL, where->gets());
+
+    /* Add row to the LAN services table.
+     */
+    where->sets("name=\'");
     where->appends(data->network_name);
     where->appends("\'");
-
+    where->appends("AND protocol=\'");
+    where->appends(protocol_long);
+    where->appends("\'");
     etable_update(ec, "//netservice/services", OS_NULL, where->gets(), row,
         ETABLE_ADOPT_ARGUMENT|ETABLE_INSERT_OR_UPDATE);
 
@@ -328,6 +374,18 @@ void eLightHouseService::callback(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Send end point information out as UDP multicast.
+
+  The eLightHouseService::run_server function is called periodically (about once every 4 seconds)
+  to send end point information as UDP multicast. The function is called also if end point
+  table is modified. It calls iocom librarie's ioc_run_lighthouse_server() function to
+  send the broadcast, set up earlier by LightHouseService::publish() function.
+
+****************************************************************************************************
+*/
 void eLightHouseService::run_server()
 {
     os_timer ti;
@@ -344,20 +402,31 @@ void eLightHouseService::run_server()
 }
 
 
-/* Publish (initial or update) the end point information.
- * @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if notthing to publish.
- */
+/**
+****************************************************************************************************
+
+  @brief Publish (initial or update) the end point information.
+
+  The eLightHouseService::publish() function is collects data from endpoint table and
+  sets up data within iocom's LighthouseServer structure. This function doesn't send
+  actual UDP multivasts, eLightHouseService::run_server() does that.
+
+  @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if notthing to publish.
+
+****************************************************************************************************
+*/
 eStatus eLightHouseService::publish()
 {
     eMatrix *m;
     eObject *conf, *columns, *col;
     eContainer *localvars, *list, *item;
     eVariable *v;
+    const os_char *protocol_short;
     os_int enable_col, protocol_col, transport_col, port_col; //, netname_col;
     os_int h, y, is_ipv6, is_tls, item_id, port_nr;
     os_int tls_port, tcp_port;
     enetEndpTransportIx transport_ix;
-    enetEndpProtocolIx protocol_ix;
+    eVariable protocol, tmp;
     os_char buf[OSAL_NETWORK_NAME_SZ], *p;
     eStatus s = ESTATUS_FAILED;
 
@@ -393,22 +462,29 @@ eStatus eLightHouseService::publish()
         if ((m->geti(y, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
         if (m->geti(y, enable_col) == 0) continue;
 
-        protocol_ix = (enetEndpProtocolIx)m->geti(y, protocol_col);
+        m->getv(y, protocol_col, &protocol);
         port_nr = m->geti(y, port_col);
         if (port_nr <= 0) continue;
 
         transport_ix = (enetEndpTransportIx)m->geti(y, transport_col);
         switch (transport_ix) {
             case ENET_ENDP_SOCKET_IPV4: is_tls = 0; is_ipv6 = 0; break;
-            case ENET_ENDP_SOCKET_IPV6: is_tls = 0; is_ipv6 = 100; break;
+            case ENET_ENDP_SOCKET_IPV6: is_tls = 0; is_ipv6 = 1; break;
             case ENET_ENDP_TLS_IPV4:    is_tls = 1; is_ipv6 = 0; break;
-            case ENET_ENDP_TLS_IPV6:    is_tls = 1; is_ipv6 = 100; break;
+            case ENET_ENDP_TLS_IPV6:    is_tls = 1; is_ipv6 = 1; break;
             default: goto goon;
         }
 
-        item_id = protocol_ix + is_ipv6;
+        item_id = is_ipv6;
         for (item = list->firstc(item_id); item; item = item->nextc(item_id))
         {
+            /* Make sure that network name matches. If not skip compare row.
+             */
+            v = item->firstv(ENET_ENDP_PROTOCOL);
+            if (protocol.compare(v)) {
+                continue;
+            }
+
 /* Make sure that interface matches. If not skip compare row.
  */
 
@@ -428,15 +504,15 @@ eStatus eLightHouseService::publish()
 
         item = new eContainer(list, item_id);
         v = new eVariable(item, ENET_ENDP_PROTOCOL);
-        v->setl(protocol_ix);
+        v->setv(&protocol);
         v = new eVariable(item, is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
         v->setl(port_nr);
         v = new eVariable(item, ENET_ENDP_IPV6);
         v->setl(is_ipv6 ? OS_TRUE : OS_FALSE);
         /* v = new eVariable(item, ENET_ENDP_NETNAME);
         m->getv(y, netname_col, v); */
-    }
 goon:;
+    }
 
     os_unlock();
 
@@ -455,21 +531,25 @@ goon:;
         v = item->firstv(ENET_ENDP_IPV6);
         if (v) is_ipv6 = v->getl();
 
-        protocol_ix = ENET_ENDP_EOBJECTS;
         v = item->firstv(ENET_ENDP_PROTOCOL);
-        if (v) protocol_ix = (enetEndpProtocolIx)v->getl();
+        protocol.setv(v);
 
-        if (protocol_ix == ENET_ENDP_IOCOM) {
+        if (!os_strcmp(protocol.gets(), "iocom")) {
             os_strncpy(buf, eglobal->process_name, sizeof(buf));
             os_strncat(buf, "net", sizeof(buf));
             p = buf;
+            protocol_short = "i";
         }
         else {
             p = eglobal->process_nr ? eglobal->process_id : eglobal->process_name;
+            protocol_short = protocol.gets();
+            if (!os_strcmp(protocol.gets(), "ecom")) {
+                protocol_short = "o";
+            }
         }
 
         ioc_lighthouse_add_endpoint(&m_server, p,
-            protocol_ix == ENET_ENDP_IOCOM ? "i" : "o", tls_port, tcp_port, is_ipv6);
+            protocol_short, tls_port, tcp_port, is_ipv6);
 
         s = ESTATUS_SUCCESS;
     }
@@ -485,13 +565,15 @@ getout:
 }
 
 
-
 /**
 ****************************************************************************************************
 
-  @brief Create "io device networks and processes" table.
+  @brief Create "LAN services" table.
 
-  The eNetService::create_table function...
+  The eNetService::create_table function creates a global "LAN services" table, which displays
+  services within the local are network segment. This table is used for both user information
+  and to automatically generate connections, etc. The eLightHouseService::callback function
+  populates this table.
 
 ****************************************************************************************************
 */
@@ -525,11 +607,11 @@ void eNetService::create_services_table()
     column = new eVariable(columns);
     column->addname("protocol", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "protocol");
-    column->setpropertyi(EVARP_TYPE, OS_CHAR);
-    column->setpropertys(EVARP_ATTR, "enum=\"1.eobjects,2.iocom\"");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_ATTR, "list=\"ecom,iocom\"");
     column->setpropertys(EVARP_TTIP,
         "Protocols, one of.\n"
-        "- \'eobjects\': eobjects communication protocol (for glass user interface, etc).\n"
+        "- \'ecom\': eobjects communication protocol (for glass user interface, etc).\n"
         "- \'iocom\': IO device communication protocol.\n");
 
     column = new eVariable(columns);
@@ -568,8 +650,16 @@ void eNetService::create_services_table()
 }
 
 
-/* Start light house service.
- */
+/**
+****************************************************************************************************
+
+  @brief Create "LAN services" table.
+
+  The enet_start_lighthouse_thread function adds lighthouse service class, creates a light house
+  thread object and starts to run it. This function is called by eNetService::start().
+
+****************************************************************************************************
+*/
 void enet_start_lighthouse_thread(
     eNetService *netservice,
     os_int flags,

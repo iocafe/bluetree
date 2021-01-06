@@ -153,7 +153,7 @@ protected:
      */
     void add_end_point(
         os_int enable,
-        enetEndpProtocolIx protocol_ix,
+        const os_char *protocol,
         enetEndpTransportIx transport_ix,
         const os_char *port,
         const os_char *netname = OS_NULL,

@@ -13,7 +13,6 @@
 
 ****************************************************************************************************
 */
-#include "eobjects.h"
 #include "extensions/netservice/enetservice.h"
 
 
@@ -75,11 +74,11 @@ void eNetService::create_connect_table()
     column = new eVariable(columns);
     column->addname("protocol", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "protocol");
-    column->setpropertyi(EVARP_TYPE, OS_CHAR);
-    column->setpropertys(EVARP_ATTR, "enum=\"1.eobjects,2.iocom\"");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_ATTR, "list=\"eobjects,iocom\"");
     column->setpropertys(EVARP_TTIP,
         "Connect using this protocol.\n"
-        "- \'eobjects\': eobjects communication protocol (for glass user interface, etc).\n"
+        "- \'ecom\': eobjects communication protocol (for glass user interface, etc).\n"
         "- \'iocom\': IO device communication protocol.\n");
 
     column = new eVariable(columns);
