@@ -97,9 +97,10 @@ public:
       Base class protocol related functions.
     ************************************************************************************************
     */
-    // virtual void add_protocol();
+    virtual eStatus initialize_protocol(
+        void *parameters);
 
-    virtual void remove_protocol();
+    virtual void shutdown_protocol();
 
     virtual eStatus new_end_point(
         void *parameters);

@@ -46,7 +46,7 @@ eProtocol::eProtocol(
 */
 eProtocol::~eProtocol()
 {
-    remove_protocol();
+    shutdown_protocol();
 }
 
 
@@ -119,11 +119,13 @@ eStatus eProtocol::onpropertychange(
 
 ****************************************************************************************************
 */
-/* eProtocol *eProtocol::add_protocol(
-    eObject *parent)
+eStatus eProtocol::initialize_protocol(
+    void *parameters)
 {
     eProtocol::setupclass();
-} */
+
+    return ESTATUS_SUCCESS;
+}
 
 
 /**
@@ -131,12 +133,12 @@ eStatus eProtocol::onpropertychange(
 
   @brief Remove communication protocol (base class implementation).
 
-  The remove_protocol() function...
+  The shutdown_protocol() function...
   Called by destructor.
 
 ****************************************************************************************************
 */
-void eProtocol::remove_protocol()
+void eProtocol::shutdown_protocol()
 {
 }
 

@@ -150,6 +150,14 @@ inline eNameSpace *eglobal_process_ns()
     return eglobal->process_ns;
 }
 
+/* os_lock() must be called when using the returned pointer.
+ */
+inline eContainer *eglobal_root()
+{
+    osal_debug_assert(eglobal->root);
+    return eglobal->root;
+}
+
 /* THIS SHOULD BE AS FAST FUNCTION AS POSSIBLE
  */
 inline eHandle *eget_handle(

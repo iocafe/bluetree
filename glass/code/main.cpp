@@ -62,6 +62,10 @@ eStatus emain(
         return ESTATUS_FAILED;
     }
 
+    enet_initialize_service();
+    os_lock(); /* root pointer used */
+    enet_add_protocol(new eProtocol(eglobal_root()));
+    os_unlock();
     enet_start_service(ENET_DEFAULT_NO_END_POINTS|
         ENET_ENABLE_IOCOM_CLIENT|
         ENET_ENABLE_EOBJECTS_CLIENT|

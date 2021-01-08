@@ -236,9 +236,51 @@ void eNetService::net_event_handler(
 /**
 ****************************************************************************************************
 
-  @brief Start network service.
+  @brief Create global eNetService object.
 
   Setup network service class and creates global network service object.
+  Call to this function must be followed by enet_add_protocol() calls and one
+  enet_start_service() call.
+
+****************************************************************************************************
+*/
+void enet_initialize_service()
+{
+    eNetService::setupclass();
+
+    os_lock();
+    eNetService *netservice = new eNetService(eglobal->process);
+    netservice->addname("//netservice");
+    eglobal->netservice = netservice;
+    os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add a communication protocol for eNetService object.
+
+  @param  protocol Communication protocol object.
+
+****************************************************************************************************
+*/
+void enet_add_protocol(
+    eProtocol *protocol)
+{
+    os_lock();
+    protocol->initialize_protocol(OS_NULL);
+    protocol->adopt(eglobal->netservice);
+    os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Start the network service.
+
+  Start running eNetService task.
 
   @param  flags Bit fields, combination of ENET_ENABLE_IOCOM_CLIENT, ENET_ENABLE_EOBJECTS_CLIENT,
           ENET_ENABLE_IOCOM_SERVICE and ENET_ENABLE_EOBJECTS_SERVICE.
@@ -248,13 +290,8 @@ void eNetService::net_event_handler(
 void enet_start_service(
     os_int flags)
 {
-    eNetService::setupclass();
-
     os_lock();
-    eNetService *netservice = new eNetService(eglobal->process);
-    netservice->addname("//netservice");
-    eglobal->netservice = netservice;
-    netservice->start(flags);
+    eglobal->netservice->start(flags);
     os_unlock();
 }
 

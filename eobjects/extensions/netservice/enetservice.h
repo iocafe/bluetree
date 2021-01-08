@@ -233,6 +233,16 @@ protected:
     ePersistent *m_persistent_serv_prm;
 };
 
+
+/* Create network service object.
+ */
+void enet_initialize_service();
+
+/* Add a communication protocol for the network service object.
+ */
+void enet_add_protocol(
+    eProtocol *protocol);
+
 /* Start network service.
  */
 void enet_start_service(
