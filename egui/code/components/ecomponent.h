@@ -473,7 +473,7 @@ public:
     ePopup *drop_down_list(
         eContainer *list,
         const os_char *propertyname = OS_NULL,
-        os_int value = OS_INT_MAX);
+        eVariable *value = OS_NULL);
 
     /* Add edit mode items into "right click" popup menu.
      */

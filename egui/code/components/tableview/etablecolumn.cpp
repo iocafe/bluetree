@@ -264,6 +264,7 @@ void eTableColumn::draw_edit(
     {
         case E_SHOWAS_CHECKBOX:
         case E_SHOWAS_DROP_DOWN_ENUM:
+        case E_SHOWAS_DROP_DOWN_LIST:
             draw_value(value, view);
             return;
 
@@ -278,9 +279,12 @@ void eTableColumn::draw_edit(
     }
 
     edit_buf = view->edit_buf();
+    if (edit_buf == OS_NULL) {
+        osal_debug_error("eTableColumn::draw_edit() failed");
+        return;
+    }
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
     ImGui::InputText(view->edit_label(), edit_buf, view->edit_sz(), eflags);
-
     if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && view->keyboard_focus_ok())
     {
         eVariable nice_value;
@@ -336,10 +340,10 @@ void eTableColumn::activate(
 {
     eVariable value;
 
+    focus_row->getv(0, focus_column, &value);
     switch (m_attr.showas())
     {
         case E_SHOWAS_CHECKBOX:
-            focus_row->getv(0, focus_column, &value);
             value.setl(!value.getl());
             view->update_table_cell(view->ix_column_name(),
                 view->ix_value(focus_row), m_name.ptr(), &value);
@@ -347,14 +351,20 @@ void eTableColumn::activate(
             break;
 
         case E_SHOWAS_DROP_DOWN_ENUM:
-            focus_row->getv(0, focus_column, &value);
             view->focus_cell(focus_row, focus_column, OS_NULL, 0);
             view->drop_down_list(m_attr.get_list(),
-                ecomp_drop_down_list_select, value.geti());
+                ecomp_drop_down_list_select, &value);
+            break;
+
+        case E_SHOWAS_DROP_DOWN_LIST:
+            enice_value_for_ui(&value, view, &m_attr);
+            view->focus_cell(focus_row, focus_column,
+                value.gets(), 256);
+            view->drop_down_list(m_attr.get_list(),
+                ecomp_drop_down_list_select, &value);
             break;
 
         default:
-            focus_row->getv(0, focus_column, &value);
             enice_value_for_ui(&value, view, &m_attr);
             view->focus_cell(focus_row, focus_column, value.gets(), 256);
             break;

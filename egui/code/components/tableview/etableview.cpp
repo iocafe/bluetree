@@ -287,7 +287,6 @@ eStatus eTableView::draw(
             c->prepare_column_header_for_drawing();
         }
 
-        // ImGui::TableHeadersRow();
         draw_header_row();
 
         m_data_windows_start_y = ImGui::GetCursorScreenPos().y + ys;

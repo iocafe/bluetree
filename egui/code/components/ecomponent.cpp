@@ -832,7 +832,7 @@ void eComponent::open_request(
 
   @param   list List holding values to select from.
   @param   propertyname Name of the property to set (if selected), for example "x".
-  @param   value Value to set if selected.
+  @param   value Current value of item. OS_NULL to get ECOMP_VALUE property.
   @return  Pointer to the new ePopup.
 
 ****************************************************************************************************
@@ -840,10 +840,10 @@ void eComponent::open_request(
 ePopup *eComponent::drop_down_list(
     eContainer *list,
     const os_char *propertyname,
-    os_int value)
+    eVariable *value)
 {
     ePopup *p;
-    eVariable *v, target;
+    eVariable *v, target, *tmpvalue = OS_NULL;
     eButton *b;
     os_int propertynr;
     os_char buf[E_OIXSTR_BUF_SZ];
@@ -855,8 +855,10 @@ ePopup *eComponent::drop_down_list(
         return p;
     }
 
-    if (value == OS_INT_MAX) {
-        value = propertyi(ECOMP_VALUE);
+    if (value == OS_NULL) {
+        tmpvalue = new eVariable(list, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+        propertyv(ECOMP_VALUE, tmpvalue);
+        value = tmpvalue;
     }
 
     oixstr(buf, sizeof(buf));
@@ -875,11 +877,18 @@ ePopup *eComponent::drop_down_list(
 
         b = new eButton(p);
         b->setpropertyv(ECOMP_TEXT, v);
-        b->setpropertyi(ECOMP_VALUE, value);
-        b->setpropertyi(ECOMP_SETVALUE, propertynr);
+        if (propertynr == EOID_CHILD) { /* drop down list with strings */
+            b->setpropertys(ECOMP_VALUE, value->gets());
+            b->setpropertys(ECOMP_SETVALUE, v->gets());
+        }
+        else { /* drop down enum */
+            b->setpropertyi(ECOMP_VALUE, value->geti());
+            b->setpropertyi(ECOMP_SETVALUE, propertynr);
+        }
         b->setpropertyv(ECOMP_TARGET, &target);
     }
 
+    delete tmpvalue;
     return p;
 }
 

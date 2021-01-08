@@ -168,6 +168,13 @@ void eAttrBuffer::initialize(
             goto goon;
         }
 
+        value = osal_str_get_item_value(list_str, "list", &value_sz, OSAL_STRING_DEFAULT);
+        if (value) {
+            m_show_as = E_SHOWAS_DROP_DOWN_LIST;
+            setup_list(value, value_sz);
+            goto goon;
+        }
+
         value = osal_str_get_item_value(list_str, "tstamp", &value_sz, OSAL_STRING_DEFAULT);
         if (value) {
             eVariable tmp;
@@ -308,14 +315,24 @@ void eAttrBuffer::setup_list(
     while (OS_TRUE) {
         s = osal_str_list_iter(buf, sizeof(buf), &p, OSAL_STRING_DEFAULT);
         if (s) break;
-        if (m_show_as == E_SHOWAS_DROP_DOWN_ENUM)
+        switch (m_show_as)
         {
-            id = osal_str_to_int(buf, &bytes);
-            if (id < 0) id = EOID_CHILD;
-            while (buf[bytes] == '.' || osal_char_isspace(buf[bytes])) bytes++;
+            case E_SHOWAS_DROP_DOWN_ENUM:
+                id = osal_str_to_int(buf, &bytes);
+                if (id < 0) id = EOID_CHILD;
+                while (buf[bytes] == '.' || osal_char_isspace(buf[bytes])) bytes++;
 
-            item = new eVariable(m_drop_down_list, id);
-            item->sets(buf + bytes);
+                item = new eVariable(m_drop_down_list, id);
+                item->sets(buf + bytes);
+                break;
+
+            case E_SHOWAS_DROP_DOWN_LIST:
+                item = new eVariable(m_drop_down_list, EOID_CHILD);
+                item->sets(buf);
+                break;
+
+            default:
+                break;
         }
     }
 }

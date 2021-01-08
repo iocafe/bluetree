@@ -861,6 +861,7 @@ void eTreeNode::activate()
             break;
 
         case E_SHOWAS_DROP_DOWN_ENUM:
+        case E_SHOWAS_DROP_DOWN_LIST:
             drop_down_list(m_attr.get_list());
             break;
 
