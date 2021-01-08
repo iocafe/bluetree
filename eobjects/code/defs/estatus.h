@@ -67,6 +67,10 @@ typedef enum
      */
     ESTATUS_STREAM_END = OSAL_END_OF_FILE,
 
+    /** Operation is not supported for this operating system/hardware platform/etc.
+     */
+    ESTATUS_NOT_SUPPORTED = OSAL_STATUS_NOT_SUPPORTED,
+
     /** Object properties, properties not supported for the class.
      */
     ESTATUS_NO_CLASS_PROPERTY_SUPPORT = 500,

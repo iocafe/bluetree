@@ -18,6 +18,7 @@
 #define ENETSERVICE_H_
 #include "iocom.h"
 #include "eobjects.h"
+#include "extensions/netservice/eprotocol.h"
 #include "extensions/netservice/elighthouse_thread.h"
 #include "extensions/netservice/enetserv_prm.h"
 #include "extensions/netservice/enetendpoints.h"

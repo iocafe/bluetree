@@ -70,6 +70,9 @@
 #define ECLASSID_FILE_SYSTEM 50
 #define ECLASSID_NETSERVICE 51
 #define ECLASSID_LIGHT_HOUSE_CLIENT 52
+#define ECLASSID_PROTOCOL 53
+
+/* egui property numbers start from 64 */
 
 /* First class id reserved for applications. All positive 32 bit integers
    starting from ECLASSID_APP_BASE can be used by application.
