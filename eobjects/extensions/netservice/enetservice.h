@@ -20,6 +20,7 @@
 #include "eobjects.h"
 #include "extensions/netservice/eprotocol.h"
 #include "extensions/netservice/elighthouse_thread.h"
+#include "extensions/netservice/enetmaintain_thread.h"
 #include "extensions/netservice/enetserv_prm.h"
 #include "extensions/netservice/enetendpoints.h"
 
@@ -61,6 +62,7 @@ extern const os_char
 class eNetService : public eObject
 {
     friend class eLightHouseService;
+    friend class eNetMaintainThread;
 
 public:
     /* Constructor.
@@ -198,9 +200,13 @@ protected:
      */
     iocRoot m_root;
 
-    /** Lighthouse client thread handle.
+    /** End point and connection management thread handle.
      */
-    eThreadHandle m_lighthouse_client_thread_handle;
+    eThreadHandle m_maintain_thread_handle;
+
+    /** Lighthouse thread handle.
+     */
+    eThreadHandle m_lighthouse_thread_handle;
 
     /* User accounts table (matrix) and persistent object to contain it.
      */

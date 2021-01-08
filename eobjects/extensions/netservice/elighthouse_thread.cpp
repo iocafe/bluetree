@@ -673,7 +673,7 @@ void eNetService::create_services_table()
 void enet_start_lighthouse_thread(
     eNetService *netservice,
     os_int flags,
-    eThreadHandle *lighthouse_client_thread_handle)
+    eThreadHandle *lighthouse_thread_handle)
 {
     struct eLightHouseService *lighthouse;
 
@@ -689,5 +689,5 @@ void enet_start_lighthouse_thread(
     lighthouse->set_netservice(netservice);
     lighthouse->bind(ELIGHTHOUSEP_SEND_UDP_MULTICASTS, "//netservice/servprm/lighthouseserv");
     lighthouse->bind(ELIGHTHOUSEP_PUBLISH, "//netservice", enetservp_endpoint_change_counter);
-    lighthouse->start(lighthouse_client_thread_handle);
+    lighthouse->start(lighthouse_thread_handle);
 }

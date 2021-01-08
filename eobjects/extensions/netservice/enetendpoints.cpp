@@ -239,12 +239,3 @@ void eNetService::add_end_point(
 }
 
 
-/* void eNetService::check-end-pointscreate_end_point_table()
-{
-    for (i = )
-
-    if (m_protocols == OS_NULL) {
-
-    }
-}
-*/

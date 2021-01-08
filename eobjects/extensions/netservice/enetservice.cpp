@@ -167,10 +167,15 @@ void eNetService::start(
     ioc_get_lighthouse_info(m_connconf, &m_lighthouse_server_info);
 #endif
 
+    /* Start the connection and end point management as separate thread. This must be after parmaters
+     * haven been created so binding succeed.
+     */
+    enet_start_maintain_thread(this, flags, &m_maintain_thread_handle);
+
     /* Start the light house service as separate thread. This must be after parmaters
      * haven been created so binding succeed.
      */
-    enet_start_lighthouse_thread(this, flags, &m_lighthouse_client_thread_handle);
+    enet_start_lighthouse_thread(this, flags, &m_lighthouse_thread_handle);
 }
 
 
@@ -178,10 +183,15 @@ void eNetService::start(
  */
 void eNetService::finish()
 {
-    /* Stop light house client.
+    /* Stop light house thread.
      */
-    m_lighthouse_client_thread_handle.terminate();
-    m_lighthouse_client_thread_handle.join();
+    m_lighthouse_thread_handle.terminate();
+    m_lighthouse_thread_handle.join();
+
+    /* Stop network maintenance thread.
+     */
+    m_maintain_thread_handle.terminate();
+    m_maintain_thread_handle.join();
 }
 
 

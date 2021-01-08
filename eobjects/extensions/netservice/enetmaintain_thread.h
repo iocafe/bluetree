@@ -1,7 +1,7 @@
 /**
 
-  @file    elighthouse_thread.h
-  @brief   Look out for device networks in the same LAN and announce services by UDP multicast.
+  @file    emaintain_thread.h
+  @brief   Thread to maintain end points and connections.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -14,10 +14,9 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef ELIGHTHOUSE_THREAD_H_
-#define ELIGHTHOUSE_THREAD_H_
+#ifndef ENETMAINTAIN_THREAD_H_
+#define ENETMAINTAIN_THREAD_H_
 #include "extensions/netservice/enetservice.h"
-#include "lighthouse.h"
 
 class eNetService;
 
@@ -27,56 +26,47 @@ class eNetService;
 ****************************************************************************************************
 */
 
-/* Lighthouse UDP service property numbers.
+/* Property numbers.
  */
-#define ELIGHTHOUSEP_SEND_UDP_MULTICASTS 10
-#define ELIGHTHOUSEP_PUBLISH 15
+#define ENETMAINTAINP_PUBLISH 10
 
-/* Lighthouse UDP service property names.
+/* Property names.
  */
 extern const os_char
-    elighthousep_send_udp_multicasts[],
-    elighthousep_publish[];
+    enetmaintainp_publish[];
 
-
-/* Default socket port number for eobject communication. TCP ports 6371 - 6375 are unassigned.
- */
-#define ENET_DEFAULT_SOCKET_PORT 6371
-#define ENET_DEFAULT_SOCKET_PORT_STR "6371"
-#define ENET_DEFAULT_TLS_PORT 6374
-#define ENET_DEFAULT_TLS_PORT_STR "6374"
 
 /**
 ****************************************************************************************************
-  eLightHouseService class.
+  eNetMaintainThread class.
 ****************************************************************************************************
 */
-class eLightHouseService : public eThread
+class eNetMaintainThread : public eThread
 {
 public:
     /* Constructor.
      */
-    eLightHouseService(
+    eNetMaintainThread(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eLightHouseService();
+    virtual ~eNetMaintainThread();
 
-    /* Casting eObject pointer to eLightHouseService pointer.
+    /* Casting eObject pointer to eNetMaintainThread pointer.
      */
-    inline static eLightHouseService *cast(
+    inline static eNetMaintainThread *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_LIGHT_HOUSE_CLIENT)
-        return (eLightHouseService*)o;
+        e_assert_type(o, ECLASSID_NET_MAINTAIN_CLIENT)
+        return (eNetMaintainThread*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_LIGHT_HOUSE_CLIENT; }
+    virtual os_int classid() {return ECLASSID_NET_MAINTAIN_CLIENT; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -84,12 +74,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eLightHouseService *newobj(
+    static eNetMaintainThread *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eLightHouseService(parent, id, flags);
+        return new eNetMaintainThread(parent, id, flags);
     }
 
     /* Function to process incoming messages.
@@ -134,17 +124,6 @@ protected:
     ************************************************************************************************
     */
 
-    /* Process received endpoint information, callback.
-     */
-    static void callback(
-        struct LighthouseClient *c,
-        LightHouseClientCallbackData *data,
-        void *context);
-
-    /* Send end point information out as UDP multicast.
-     */
-    void run_server();
-
     /* Publish (initial or update) the end point information.
      */
     eStatus publish();
@@ -161,25 +140,6 @@ protected:
      */
     eNetService *m_netservice;
 
-/* CLIENT ************************** */
-    /** eosal lighthouse client structure.
-     */
-    LighthouseClient m_client;
-
-    /** Multicast counters by network service.
-     */
-    eContainer *m_counters;
-
-/* SERVICE ************************* */
-
-    /** eosal lighthouse server structure.
-     */
-    LighthouseServer m_server;
-
-    /** Server side IDP multicasts are enabled.
-     */
-    os_boolean m_send_udp_multicasts;
-
     /** Value of ELIGHTHOUSEP_PUBLISH property. When changed, the end point information is
         published.
      */
@@ -190,21 +150,17 @@ protected:
      */
     os_boolean m_publish;
 
-    /** OS_TRUE if initialized for sending UDP multicasts.
-     */
-    os_boolean m_udp_send_initialized;
-
     /** If data to publish was set successfully (something to publish)
      */
-    eStatus m_publish_status;
+    // eStatus m_publish_status;
 };
 
-/* Start light house thread.
+/* Start enet maintenance thread.
  */
-void enet_start_lighthouse_thread(
+void enet_start_maintain_thread(
     eNetService *netservice,
     os_int flags,
-    eThreadHandle *lighthouse_thread_handle);
+    eThreadHandle *maintain_thread_handle);
 
 
 #endif
