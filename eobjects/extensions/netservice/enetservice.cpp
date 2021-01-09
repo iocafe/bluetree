@@ -45,6 +45,7 @@ eNetService::eNetService(
     m_persistent_serv_prm = OS_NULL;
     m_end_points_config_counter = 0;
     os_memclear(&m_serv_prm, sizeof(eNetServPrm));
+    m_protocols = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
 
     initproperties();
 }
@@ -280,7 +281,7 @@ void enet_add_protocol(
 {
     os_lock();
     protocol->initialize_protocol(OS_NULL);
-    protocol->adopt(eglobal->netservice);
+    protocol->adopt(eglobal->netservice->protocols());
     os_unlock();
 }
 

@@ -153,16 +153,22 @@ void eProtocol::shutdown_protocol()
 ****************************************************************************************************
 */
 eStatus eProtocol::new_end_point(
+    os_int ep_nr,
     void *parameters)
 {
     return ESTATUS_NOT_SUPPORTED;
 }
 
-// eStatus eProtocol::remove_end_pont(
-//
+void eProtocol::delete_end_pont(
+    os_int ep_nr)
+{
+}
 
-// eStatus eProtocol::is_end_point_on(
-//
+eStatus eProtocol::is_end_point_running(
+    os_int ep_nr)
+{
+    return ESTATUS_SUCCESS;
+}
 
 /**
 ****************************************************************************************************

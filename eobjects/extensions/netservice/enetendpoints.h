@@ -31,7 +31,10 @@ typedef enum {
     ENET_ENDP_TLS_PORT,
     ENET_ENDP_TCP_PORT,
     ENET_ENDP_IPV6,
-    ENET_ENDP_NETNAME
+    ENET_ENDP_NETNAME,
+
+    ENET_ENDP_TRANSPORT,
+    ENET_ENDP_PORT
 }
 enetEndpItemId;
 

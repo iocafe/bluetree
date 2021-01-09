@@ -34,6 +34,10 @@ eNetMaintainThread::eNetMaintainThread(
     m_netservice = OS_NULL;
     m_publish_count = 0;
     m_publish = OS_TRUE;
+    m_end_points = new eContainer(this);
+    m_protocols = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+    m_protocols->ns_create();
+
     // m_publish_status = ESTATUS_FAILED;
     initproperties();
 }
@@ -149,6 +153,7 @@ eStatus eNetMaintainThread::onpropertychange(
         case ENETMAINTAINP_PUBLISH:
             count = x->geti();
             if (count != m_publish_count) {
+                maintain_end_points();
                 m_publish_count = count;
                 m_publish = OS_TRUE;
             }
@@ -228,164 +233,155 @@ os_sleep(100);
 /**
 ****************************************************************************************************
 
-  @brief Publish (initial or update) the end point information.
+  @brief Create and delete end points as needed.
 
-  The eNetMaintainThread::publish() function is collects data from endpoint table and
-  sets up data within iocom's LighthouseServer structure. This function doesn't send
-  actual UDP multivasts, eNetMaintainThread::run_server() does that.
+  The eNetMaintainThread::maintain_end_points() function is collects data from endpoint table and
+  sets up data end points for communication protocols.
 
   @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if notthing to publish.
 
 ****************************************************************************************************
 */
-eStatus eNetMaintainThread::publish()
+void eNetMaintainThread::maintain_end_points()
 {
+    eProtocol *proto;
     eMatrix *m;
     eObject *conf, *columns, *col;
-    eContainer *localvars, *list, *item;
-    eVariable *v;
-    // const os_char *protocol_short;
-    os_int enable_col, protocol_col, transport_col, port_col; //, netname_col;
-    os_int h, y, is_ipv6, is_tls, item_id, port_nr;
-    // os_int tls_port, tcp_port;
-    enetEndpTransportIx transport_ix;
-    eVariable protocol, tmp;
-    // os_char buf[OSAL_NETWORK_NAME_SZ], *p;
-    eStatus s = ESTATUS_FAILED;
+    eContainer *localvars, *list, *ep, *next_ep;
+    eVariable *v, *proto_name;
+    os_int enable_col, protocol_col, transport_col, port_col;
+    os_int h, ep_nr;
+    eVariable tmp;
+    eStatus s;
 
     localvars = new eContainer(ETEMPORARY);
-    list = new eContainer(localvars);
+    // list = new eContainer(localvars);
     // list->ns_create();
-    os_lock();
 
+    os_lock();
     m = m_netservice->m_endpoint_matrix;
     conf = m->configuration();
-    if (conf == OS_NULL) goto getout;
+    if (conf == OS_NULL) goto getout_unlock;
     columns = conf->first(EOID_TABLE_COLUMNS);
-    if (columns == OS_NULL) goto getout;
-
+    if (columns == OS_NULL) goto getout_unlock;
     col = columns->byname(enet_endp_enable);
-    if (col == OS_NULL) goto getout;
+    if (col == OS_NULL) goto getout_unlock;
     enable_col = col->oid();
     col = columns->byname(enet_endp_protocol);
-    if (col == OS_NULL) goto getout;
+    if (col == OS_NULL) goto getout_unlock;
     protocol_col = col->oid();
     col = columns->byname(enet_endp_transport);
-    if (col == OS_NULL) goto getout;
+    if (col == OS_NULL) goto getout_unlock;
     transport_col = col->oid();
     col = columns->byname(enet_endp_port);
-    if (col == OS_NULL) goto getout;
+    if (col == OS_NULL) goto getout_unlock;
     port_col = col->oid();
     /* col = columns->byname(enet_endp_netname);
     if (col == OS_NULL) goto getout;
     netname_col = col->oid(); */
-
-    h = m->nrows();
-    for (y = 0; y<h; y++) {
-        if ((m->geti(y, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
-        if (m->geti(y, enable_col) == 0) continue;
-
-        m->getv(y, protocol_col, &protocol);
-        port_nr = m->geti(y, port_col);
-        if (port_nr <= 0) continue;
-
-        transport_ix = (enetEndpTransportIx)m->geti(y, transport_col);
-        switch (transport_ix) {
-            case ENET_ENDP_SOCKET_IPV4: is_tls = 0; is_ipv6 = 0; break;
-            case ENET_ENDP_SOCKET_IPV6: is_tls = 0; is_ipv6 = 1; break;
-            case ENET_ENDP_TLS_IPV4:    is_tls = 1; is_ipv6 = 0; break;
-            case ENET_ENDP_TLS_IPV6:    is_tls = 1; is_ipv6 = 1; break;
-            default: goto goon;
-        }
-
-        item_id = is_ipv6;
-        for (item = list->firstc(item_id); item; item = item->nextc(item_id))
-        {
-            /* Make sure that network name matches. If not skip compare row.
-             */
-            v = item->firstv(ENET_ENDP_PROTOCOL);
-            if (protocol.compare(v)) {
-                continue;
-            }
-
-/* Make sure that interface matches. If not skip compare row.
- */
-
-/* If iocom, make sure that network name matches. If not skip compare row.
-            if (protocol_ix == ENET_ENDP_IOCOM) {
-            }
- */
-
-            v = item->firstv(is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
-            if (v == OS_NULL) {
-                v = new eVariable(item, is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
-                v->setl(port_nr);
-                goto goon;
-            }
-            if (v->getl() == port_nr) goto goon;
-        }
-
-        item = new eContainer(list, item_id);
-        v = new eVariable(item, ENET_ENDP_PROTOCOL);
-        v->setv(&protocol);
-        v = new eVariable(item, is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
-        v->setl(port_nr);
-        v = new eVariable(item, ENET_ENDP_IPV6);
-        v->setl(is_ipv6 ? OS_TRUE : OS_FALSE);
-        /* v = new eVariable(item, ENET_ENDP_NETNAME);
-        m->getv(y, netname_col, v); */
-goon:;
-    }
-
     os_unlock();
 
-#if 0
-    ioc_maintain_start_endpoints(&m_server, "manteli");
+    /* Remove end points which are no longer needed or have changed.
+     */
+    for (ep = m_end_points->firstc(); ep; ep = next_ep)
+    {
+        next_ep = ep->nextc();
+        ep_nr = ep->oid();
+        proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
+        proto = protocol_by_name(proto_name);
+        if (!proto->is_end_point_running(ep_nr)) continue;
 
-    for (item = list->firstc(); item; item = item->nextc()) {
-        tls_port = 0;
-        v = item->firstv(ENET_ENDP_TLS_PORT);
-        if (v) tls_port = v->getl();
-        tcp_port = 0;
-        v = item->firstv(ENET_ENDP_TCP_PORT);
-        if (v) tcp_port = v->getl();
+        os_timeslice();
+        os_lock();
 
-        is_ipv6 = OS_FALSE;
-        v = item->firstv(ENET_ENDP_IPV6);
-        if (v) is_ipv6 = v->getl();
+        if ((m->geti(ep_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) goto delete_it;
+        if (m->geti(ep_nr, enable_col) == 0) goto delete_it;
+        m->getv(ep_nr, protocol_col, &tmp);
+        if (tmp.compare(proto_name)) goto delete_it;
+        v = ep->firstv(ENET_ENDP_TRANSPORT);
+        m->getv(ep_nr, transport_col, &tmp);
+        if (tmp.compare(v)) goto delete_it;
+        v = ep->firstv(ENET_ENDP_PORT);
+        m->getv(ep_nr, transport_col, &tmp);
+        if (tmp.compare(v)) goto delete_it;
 
-        v = item->firstv(ENET_ENDP_PROTOCOL);
-        protocol.setv(v);
+        os_unlock();
+        continue;
 
-        if (!os_strcmp(protocol.gets(), "iocom")) {
-            os_strncpy(buf, eglobal->process_name, sizeof(buf));
-            os_strncat(buf, "net", sizeof(buf));
-            p = buf;
-            protocol_short = "i";
-        }
-        else {
-            p = eglobal->process_nr ? eglobal->process_id : eglobal->process_name;
-            protocol_short = protocol.gets();
-            if (!os_strcmp(protocol.gets(), "ecom")) {
-                protocol_short = "o";
+delete_it:
+        os_unlock();
+        if (proto->is_end_point_running(ep_nr))
+        {
+            proto->delete_end_pont(ep_nr);
+            while (proto->is_end_point_running(ep_nr)) {
+                os_timeslice();
             }
         }
-
-        ioc_maintain_add_endpoint(&m_server, p,
-            protocol_short, tls_port, tcp_port, is_ipv6);
-
-        s = ESTATUS_SUCCESS;
+        delete ep;
     }
-#endif
+
+    /* Generate list of end points to add.
+     */
+    list = new eContainer(localvars);
+    os_lock();
+    h = m->nrows();
+    for (ep_nr = 0; ep_nr < h; ep_nr ++) {
+        if ((m->geti(ep_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
+        if (m->geti(ep_nr, enable_col) == 0) continue;
+        if (m_end_points->first(ep_nr)) continue;
+
+        ep = new eContainer(list, ep_nr);
+        v = new eVariable(ep, ENET_ENDP_PROTOCOL);
+        m->getv(ep_nr, protocol_col, v);
+        v = new eVariable(ep, ENET_ENDP_TRANSPORT);
+        m->getv(ep_nr, transport_col, v);
+        v = new eVariable(ep, ENET_ENDP_PORT);
+        m->getv(ep_nr, port_col, v);
+    }
+    os_unlock();
+
+    /* Add end points (no lock).
+     */
+    for (ep = list->firstc(); ep; ep = next_ep)
+    {
+        next_ep = ep->nextc();
+        ep_nr = ep->oid();
+        proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
+        proto = protocol_by_name(proto_name);
+        if (proto == OS_NULL) {
+            osal_debug_error_str("unknown protocol: ", proto_name->gets());
+            continue;
+        }
+
+        s = proto->new_end_point(ep_nr, OS_NULL);
+
+        // update status in table, status s
+
+        ep->adopt(m_end_points);
+    }
 
     delete localvars;
-    return s;
+    return;
 
-getout:
+getout_unlock:
     os_unlock();
     delete localvars;
     osal_debug_error("eNetMaintainThread::publish failed");
-    return ESTATUS_FAILED;
+}
+
+
+void eNetMaintainThread::add_protocol(
+    eProtocol *proto)
+{
+    proto->adopt(m_protocols);
+    proto->addname("iocom");
+}
+
+
+eProtocol *eNetMaintainThread::protocol_by_name(
+    eVariable *proto_name)
+{
+    return (eProtocol*)m_protocols->byname(proto_name->gets());
 }
 
 
@@ -404,7 +400,8 @@ void enet_start_maintain_thread(
     os_int flags,
     eThreadHandle *maintain_thread_handle)
 {
-    struct eNetMaintainThread *maintain;
+    eNetMaintainThread *maintain;
+    eProtocol *proto;
 
     /* Set up class for use.
      */
@@ -416,8 +413,12 @@ void enet_start_maintain_thread(
     maintain = new eNetMaintainThread();
     maintain->addname("//_netmaintain");
     maintain->set_netservice(netservice);
-    // maintain->bind(ELIGHTHOUSEP_SEND_UDP_MULTICASTS, "//netservice/servprm/maintainserv");
-    maintain->bind(ELIGHTHOUSEP_PUBLISH, "//netservice", enetservp_endpoint_change_counter);
+    // maintain->bind(ENETMAINTAINP_SEND_UDP_MULTICASTS, "//netservice/servprm/maintainserv");
+    maintain->bind(ENETMAINTAINP_PUBLISH, "//netservice", enetservp_endpoint_change_counter);
+
+    while ((proto = (eProtocol*)netservice->protocols()->first())) {
+        maintain->add_protocol(proto);
+    }
     maintain->start(maintain_thread_handle);
 }
 

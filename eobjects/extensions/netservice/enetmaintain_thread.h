@@ -116,6 +116,10 @@ public:
      */
     virtual void run();
 
+    /* Adopt communication protocol object.
+     */
+    void add_protocol(
+        eProtocol *proto);
 
 protected:
     /**
@@ -124,9 +128,15 @@ protected:
     ************************************************************************************************
     */
 
-    /* Publish (initial or update) the end point information.
+    /* Create and delete end points as needed..
      */
-    eStatus publish();
+    void maintain_end_points();
+
+    /* Get protocol by name
+     */
+    eProtocol *protocol_by_name(
+        eVariable *proto_name);
+
 
 
     /**
@@ -139,6 +149,14 @@ protected:
         be on to access.
      */
     eNetService *m_netservice;
+
+    /** Container to hold protocol objects.
+     */
+    eContainer *m_protocols;
+
+    /** List of running end point, data about those.
+     */
+    eContainer *m_end_points;
 
     /** Value of ELIGHTHOUSEP_PUBLISH property. When changed, the end point information is
         published.

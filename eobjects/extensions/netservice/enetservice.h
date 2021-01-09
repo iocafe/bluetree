@@ -119,6 +119,10 @@ public:
      */
     void finish();
 
+    /* Get pointer to protocol container (used for start up only).
+     */
+    inline eContainer *protocols() {return m_protocols; }
+
 
 protected:
     /**
@@ -207,6 +211,10 @@ protected:
     /** Lighthouse thread handle.
      */
     eThreadHandle m_lighthouse_thread_handle;
+
+    /** Container to hold protocol objects during startup before net maintain thread is created.
+     */
+    eContainer *m_protocols;
 
     /* User accounts table (matrix) and persistent object to contain it.
      */

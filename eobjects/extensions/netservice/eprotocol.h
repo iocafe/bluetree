@@ -103,7 +103,14 @@ public:
     virtual void shutdown_protocol();
 
     virtual eStatus new_end_point(
+        os_int ep_nr,
         void *parameters);
+
+    virtual void delete_end_pont(
+        os_int ep_nr);
+
+    virtual eStatus is_end_point_running(
+        os_int ep_nr);
 
     virtual eStatus new_connection(
         void *parameters);

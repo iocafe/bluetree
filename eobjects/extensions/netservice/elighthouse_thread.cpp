@@ -675,7 +675,7 @@ void enet_start_lighthouse_thread(
     os_int flags,
     eThreadHandle *lighthouse_thread_handle)
 {
-    struct eLightHouseService *lighthouse;
+    eLightHouseService *lighthouse;
 
     /* Set up class for use.
      */
