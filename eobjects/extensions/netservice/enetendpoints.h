@@ -34,7 +34,8 @@ typedef enum {
     ENET_ENDP_NETNAME,
 
     ENET_ENDP_TRANSPORT,
-    ENET_ENDP_PORT
+    ENET_ENDP_PORT,
+    ENET_ENDP_PROTOCOL_HANDLE
 }
 enetEndpItemId;
 

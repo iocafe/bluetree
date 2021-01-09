@@ -245,6 +245,7 @@ os_sleep(100);
 void eNetMaintainThread::maintain_end_points()
 {
     eProtocol *proto;
+    eProtocolHandle *handle;
     eMatrix *m;
     eObject *conf, *columns, *col;
     eContainer *localvars, *list, *ep, *next_ep;
@@ -289,7 +290,8 @@ void eNetMaintainThread::maintain_end_points()
         ep_nr = ep->oid();
         proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
         proto = protocol_by_name(proto_name);
-        if (!proto->is_end_point_running(ep_nr)) continue;
+        handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
+        if (!proto->is_end_point_running(handle)) continue;
 
         os_timeslice();
         os_lock();
@@ -310,10 +312,11 @@ void eNetMaintainThread::maintain_end_points()
 
 delete_it:
         os_unlock();
-        if (proto->is_end_point_running(ep_nr))
+        handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
+        if (proto->is_end_point_running(handle))
         {
-            proto->delete_end_pont(ep_nr);
-            while (proto->is_end_point_running(ep_nr)) {
+            proto->delete_end_pont(handle);
+            while (proto->is_end_point_running(handle)) {
                 os_timeslice();
             }
         }
@@ -350,13 +353,20 @@ delete_it:
         proto = protocol_by_name(proto_name);
         if (proto == OS_NULL) {
             osal_debug_error_str("unknown protocol: ", proto_name->gets());
+            // update status in table
             continue;
         }
 
-        s = proto->new_end_point(ep_nr, OS_NULL);
+        handle = proto->new_end_point(ep_nr, OS_NULL, &s);
+        if (handle == OS_NULL) {
+            osal_debug_error_str("unable to create end point: ", proto_name->gets());
+            // update status in table, status s
+            continue;
+        }
+        handle->adopt(ep, ENET_ENDP_PROTOCOL_HANDLE);
 
-        // update status in table, status s
-
+        /* Adopt, successfull created end point.
+         */
         ep->adopt(m_end_points);
     }
 

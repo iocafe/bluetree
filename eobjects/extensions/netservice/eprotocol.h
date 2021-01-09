@@ -102,18 +102,27 @@ public:
 
     virtual void shutdown_protocol();
 
-    virtual eStatus new_end_point(
+    virtual eProtocolHandle *new_end_point(
         os_int ep_nr,
-        void *parameters);
+        void *parameters,
+        eStatus *s);
 
     virtual void delete_end_pont(
-        os_int ep_nr);
+        eProtocolHandle *handle);
 
     virtual eStatus is_end_point_running(
-        os_int ep_nr);
+        eProtocolHandle *handle);
 
-    virtual eStatus new_connection(
-        void *parameters);
+    virtual eProtocolHandle *new_connection(
+        void *parameters,
+        os_int conn_nr,
+        eStatus *s);
+
+    virtual void delete_connection(
+        eProtocolHandle *handle);
+
+    virtual eStatus is_connection_running(
+        eProtocolHandle *handle);
 
 protected:
     /**

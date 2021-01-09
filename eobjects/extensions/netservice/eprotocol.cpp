@@ -113,7 +113,7 @@ eStatus eProtocol::onpropertychange(
 /**
 ****************************************************************************************************
 
-  @brief Add used communication protocol (base class implementation).
+  @brief Initialize communication protocol (base class implementation).
 
   The add_protocol() function...
 
@@ -131,7 +131,7 @@ eStatus eProtocol::initialize_protocol(
 /**
 ****************************************************************************************************
 
-  @brief Remove communication protocol (base class implementation).
+  @brief Finished with communication protocol, clean up (base class implementation).
 
   The shutdown_protocol() function...
   Called by destructor.
@@ -152,20 +152,25 @@ void eProtocol::shutdown_protocol()
 
 ****************************************************************************************************
 */
-eStatus eProtocol::new_end_point(
+eProtocolHandle *eProtocol::new_end_point(
     os_int ep_nr,
-    void *parameters)
+    void *parameters,
+    eStatus *s)
 {
-    return ESTATUS_NOT_SUPPORTED;
+    OSAL_UNUSED(ep_nr);
+    OSAL_UNUSED(parameters);
+
+    *s = ESTATUS_NOT_SUPPORTED;
+    return OS_NULL;
 }
 
 void eProtocol::delete_end_pont(
-    os_int ep_nr)
+    eProtocolHandle *handle)
 {
 }
 
 eStatus eProtocol::is_end_point_running(
-    os_int ep_nr)
+    eProtocolHandle *handle)
 {
     return ESTATUS_SUCCESS;
 }
@@ -179,15 +184,27 @@ eStatus eProtocol::is_end_point_running(
 
 ****************************************************************************************************
 */
-eStatus eProtocol::new_connection(
-    void *parameters)
+eProtocolHandle *eProtocol::new_connection(
+    void *parameters,
+    os_int conn_nr,
+    eStatus *s)
 {
-    return ESTATUS_NOT_SUPPORTED;
+    OSAL_UNUSED(conn_nr);
+    OSAL_UNUSED(parameters);
+
+    *s = ESTATUS_NOT_SUPPORTED;
+    return OS_NULL;
 }
 
 
-// eStatus eProtocol::remove_connection(
-//
+void eProtocol::delete_connection(
+    eProtocolHandle *handle)
+{
+}
 
-// eStatus eProtocol::is_connection_point_on(
-//
+eStatus eProtocol::is_connection_running(
+    eProtocolHandle *handle)
+{
+    return ESTATUS_SUCCESS;
+}
+

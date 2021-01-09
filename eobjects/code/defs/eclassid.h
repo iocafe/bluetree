@@ -72,6 +72,8 @@
 #define ECLASSID_LIGHT_HOUSE_CLIENT 52
 #define ECLASSID_NET_MAINTAIN_CLIENT 53
 #define ECLASSID_PROTOCOL 54
+#define ECLASSID_PROTOCOL_HANDLE 55
+
 
 /* egui property numbers start from 64 */
 
