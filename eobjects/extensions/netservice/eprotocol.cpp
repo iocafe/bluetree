@@ -99,7 +99,7 @@ eStatus eProtocol::onpropertychange(
 {
     switch (propertynr)
     {
-        case EPROTOCOLP_PATH: /* Read only for sandbox security */
+        case EPROTOCOLP_PATH:
             break;
 
         default:

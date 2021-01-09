@@ -55,6 +55,20 @@ void eNetService::create_trusted_certificate_table()
     column->setpropertys(EVARP_TTIP,
         "Path to server certificate trusted by this client");
 
+    for (int i = 0; i<62; i++)
+    {
+        os_char nbuf[OSAL_NBUF_SZ+1];
+
+        nbuf[0] = 'C';
+        osal_int_to_str(nbuf+1, sizeof(nbuf)-1, i);
+        column = new eVariable(columns);
+
+        column->addname(nbuf, ENAME_NO_MAP);
+        column->setpropertys(EVARP_TEXT, nbuf);
+        column->setpropertyi(EVARP_TYPE, OS_STR);
+    }
+
+
     /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
      */
     m_trusted_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);

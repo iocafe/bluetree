@@ -188,7 +188,8 @@ eStatus eParameterList::draw(
         ImGuiTableFlags_NoPadOuterX |
         ImGuiTableFlags_Resizable |
         ImGuiTableFlags_Reorderable |
-        ImGuiTableFlags_SizingPolicyStretchX |
+        // ImGuiTableFlags_SizingPolicyStretchX |
+        ImGuiTableFlags_SizingStretchProp |
         ImGuiTableFlags_NoSavedSettings;
 
 
