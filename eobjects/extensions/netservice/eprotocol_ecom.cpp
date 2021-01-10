@@ -1,16 +1,12 @@
 /**
 
-  @file    eprotocol.cpp
-  @brief   Abstract communication protocol as seen by eNetService.
+  @file    eprotocol_ecom.cpp
+  @brief   The eobjects library communication protocol management, serialized objects.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
 
   Related to: Network connnection and protocol management interface.
-
-  Abstract communication protocol interface is used by eNetService to manage end points and
-  connections. This is the base class, protocol specific derived class will map eNetService
-  calls like "create end point" to communication library functions.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -26,11 +22,11 @@
   Constructor.
 ****************************************************************************************************
 */
-eProtocol::eProtocol(
+eComProtocol::eComProtocol(
     eObject *parent,
     e_oid oid,
     os_int flags)
-    : eObject(parent, oid, flags)
+    : eProtocol(parent, oid, flags)
 {
 }
 
@@ -40,7 +36,7 @@ eProtocol::eProtocol(
   Virtual destructor.
 ****************************************************************************************************
 */
-eProtocol::~eProtocol()
+eComProtocol::~eComProtocol()
 {
     shutdown_protocol();
 }
@@ -58,14 +54,14 @@ eProtocol::~eProtocol()
 
 ****************************************************************************************************
 */
-void eProtocol::setupclass()
+void eComProtocol::setupclass()
 {
-    const os_int cls = ECLASSID_PROTOCOL;
+    const os_int cls = ECLASSID_ECOM_PROTOCOL;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eProtocol");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eComProtocol");
     os_unlock();
 }
 
@@ -79,10 +75,10 @@ void eProtocol::setupclass()
 
 ****************************************************************************************************
 */
-eStatus eProtocol::initialize_protocol(
+eStatus eComProtocol::initialize_protocol(
     void *parameters)
 {
-    eProtocol::setupclass();
+    eComProtocol::setupclass();
 
     return ESTATUS_SUCCESS;
 }
@@ -98,7 +94,7 @@ eStatus eProtocol::initialize_protocol(
 
 ****************************************************************************************************
 */
-void eProtocol::shutdown_protocol()
+void eComProtocol::shutdown_protocol()
 {
 }
 
@@ -123,7 +119,7 @@ void eProtocol::shutdown_protocol()
 
 ****************************************************************************************************
 */
-eProtocolHandle *eProtocol::new_end_point(
+eProtocolHandle *eComProtocol::new_end_point(
     os_int ep_nr,
     void *parameters,
     eStatus *s)
@@ -149,7 +145,7 @@ eProtocolHandle *eProtocol::new_end_point(
 
 ****************************************************************************************************
 */
-void eProtocol::delete_end_pont(
+void eComProtocol::delete_end_pont(
     eProtocolHandle *handle)
 {
 }
@@ -166,7 +162,7 @@ void eProtocol::delete_end_pont(
 
 ****************************************************************************************************
 */
-eStatus eProtocol::is_end_point_running(
+eStatus eComProtocol::is_end_point_running(
     eProtocolHandle *handle)
 {
     return ESTATUS_SUCCESS;
@@ -195,7 +191,7 @@ eStatus eProtocol::is_end_point_running(
 
 ****************************************************************************************************
 */
-eProtocolHandle *eProtocol::new_connection(
+eProtocolHandle *eComProtocol::new_connection(
     os_int conn_nr,
     void *parameters,
     eStatus *s)
@@ -221,7 +217,7 @@ eProtocolHandle *eProtocol::new_connection(
 
 ****************************************************************************************************
 */
-void eProtocol::delete_connection(
+void eComProtocol::delete_connection(
     eProtocolHandle *handle)
 {
 }
@@ -238,7 +234,7 @@ void eProtocol::delete_connection(
 
 ****************************************************************************************************
 */
-eStatus eProtocol::is_connection_running(
+eStatus eComProtocol::is_connection_running(
     eProtocolHandle *handle)
 {
     return ESTATUS_SUCCESS;
