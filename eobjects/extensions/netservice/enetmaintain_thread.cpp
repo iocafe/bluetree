@@ -384,7 +384,7 @@ void eNetMaintainThread::add_protocol(
     eProtocol *proto)
 {
     proto->adopt(m_protocols);
-    proto->addname("iocom");
+    proto->addname(proto->protocol_name());
 }
 
 

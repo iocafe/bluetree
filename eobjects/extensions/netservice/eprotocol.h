@@ -6,6 +6,8 @@
   @version 1.0
   @date    8.9.2020
 
+  Related to: Network connnection and protocol management interface.
+
   Abstract communication protocol interface is used by eNetService to manage end points and
   connections. This is the base class, protocol specific derived class will map eNetService
   calls like "create end point" to communication library functions.
@@ -29,14 +31,6 @@
 ****************************************************************************************************
 */
 
-/* Property numbers.
- */
-#define EPROTOCOLP_PATH 10
-
-/* Property names.
- */
-extern const os_char
-    eprotocolp_path[];
 
 
 /**
@@ -85,42 +79,56 @@ public:
         return new eProtocol(parent, id, flags);
     }
 
-    /* Called when property value changes.
-     */
-    virtual eStatus onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags);
-
     /**
     ************************************************************************************************
-      Base class protocol related functions.
+      Protocol related functions, base class.
     ************************************************************************************************
     */
+
+    /* Get protocol name.
+     */
+    virtual const os_char *protocol_name() {return "none"; }
+
+    /* Initialize communication protocol
+     */
     virtual eStatus initialize_protocol(
         void *parameters);
 
+    /* Finished with communication protocol, clean up
+     */
     virtual void shutdown_protocol();
 
+    /* Create a new end point to listen for this protocol.
+     */
     virtual eProtocolHandle *new_end_point(
         os_int ep_nr,
         void *parameters,
         eStatus *s);
 
+    /* Delete an end point.
+     */
     virtual void delete_end_pont(
         eProtocolHandle *handle);
 
+    /* Check end point status (running).
+     */
     virtual eStatus is_end_point_running(
         eProtocolHandle *handle);
 
+    /* Create a new connection using this protocol.
+     */
     virtual eProtocolHandle *new_connection(
-        void *parameters,
         os_int conn_nr,
+        void *parameters,
         eStatus *s);
 
+    /* Delete a connection.
+     */
     virtual void delete_connection(
         eProtocolHandle *handle);
 
+    /* Check connection status.
+     */
     virtual eStatus is_connection_running(
         eProtocolHandle *handle);
 

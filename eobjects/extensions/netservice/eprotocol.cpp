@@ -6,6 +6,8 @@
   @version 1.0
   @date    8.9.2020
 
+  Related to: Network connnection and protocol management interface.
+
   Abstract communication protocol interface is used by eNetService to manage end points and
   connections. This is the base class, protocol specific derived class will map eNetService
   calls like "create end point" to communication library functions.
@@ -18,11 +20,6 @@
 ****************************************************************************************************
 */
 #include "extensions/netservice/enetservice.h"
-
-/* File system property names.
- */
-const os_char
-    eprotocolp_path[] = "path";
 
 /**
 ****************************************************************************************************
@@ -70,43 +67,7 @@ void eProtocol::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eProtocol");
-    addpropertys(cls, EPROTOCOLP_PATH, eprotocolp_path, "/coderoot/fsys", "path", EPRO_DEFAULT);
-    propertysetdone(cls);
     os_unlock();
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Called to inform the class about property value change (override).
-
-  The onpropertychange() function is called when class'es property changes, unless the
-  property is flagged with EPRO_NOONPRCH.
-
-  @param   propertynr Property number of changed property.
-  @param   x Variable containing the new value.
-  @param   flags
-  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
-           indicate that there was no property with given property number.
-
-****************************************************************************************************
-*/
-eStatus eProtocol::onpropertychange(
-    os_int propertynr,
-    eVariable *x,
-    os_int flags)
-{
-    switch (propertynr)
-    {
-        case EPROTOCOLP_PATH:
-            break;
-
-        default:
-            return eObject::onpropertychange(propertynr, x, flags);
-    }
-
-    return ESTATUS_SUCCESS;
 }
 
 
@@ -146,9 +107,20 @@ void eProtocol::shutdown_protocol()
 /**
 ****************************************************************************************************
 
-  @brief Create a new end point.
+  @brief Create a new end point to listen for this protocol.
 
-  The new_end_point() function...
+  The new_end_point() function creates an end point to listen for specific protocol connections.
+
+  @param   ep_nr End point number. Unique number within process which can be used to create
+           end point thread name, etc. In practice this is end point setup table's row number.
+           There is no must to use this number, it is just for easy identification purposes.
+  @param   parameters Structure containing parameters for the end point.
+  @param   s Pointer to eStatus for function return code. If successfull *s is set to
+           ESTATUS_SUCCESS. Other values indicate an error.
+  @return  Newly allocated protocol handle, used to delete the end point or to check it's status.
+           This should be adopted to application data structure. eProtocolHandle handle may
+           contain protocol specific content, which should be ignored by calling application.
+           If the function fails, the return value is OS_NULL.
 
 ****************************************************************************************************
 */
@@ -164,29 +136,69 @@ eProtocolHandle *eProtocol::new_end_point(
     return OS_NULL;
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Delete an end point.
+
+  The delete_end_point() function deletes an end point created by new_end_point() call. This
+  function releases all resources associated with the end point. Notice that closing listening
+  socket may linger a while in underlyin OS.
+
+  @param   handle   End point handle as returned by new_end_point().
+
+****************************************************************************************************
+*/
 void eProtocol::delete_end_pont(
     eProtocolHandle *handle)
 {
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Check end point status.
+
+  The is_end_point_running() function checks if a specific end point is running.
+
+  @param   handle   End point handle as returned by new_end_point().
+
+****************************************************************************************************
+*/
 eStatus eProtocol::is_end_point_running(
     eProtocolHandle *handle)
 {
     return ESTATUS_SUCCESS;
 }
 
+
 /**
 ****************************************************************************************************
 
-  @brief Create a new connection.
+  @brief Create a new connection using this protocol.
 
-  The new_connection() function...
+  The new_connection() function creates new connection with this protocol. Notice that this
+  function will return quite immediately, and connection object gets created even there
+  may not be physical transport or other end is down for the moment.
+
+  @param   conn_nr Connection number. Unique number within process which can be used to create
+           connection thread name, etc. In practice this is connection table's row number.
+           There is no must to use this number, it is just for easy identification purposes.
+  @param   parameters Structure containing parameters for the connection point.
+  @param   s Pointer to eStatus for function return code. If successfull *s is set to
+           ESTATUS_SUCCESS. Other values indicate an error.
+  @return  Newly allocated protocol handle, used to delete the end point or to check it's status.
+           This should be adopted to application data structure. eProtocolHandle handle may
+           contain protocol specific content, which should be ignored by calling application.
+           If the function fails, the return value is OS_NULL.
 
 ****************************************************************************************************
 */
 eProtocolHandle *eProtocol::new_connection(
-    void *parameters,
     os_int conn_nr,
+    void *parameters,
     eStatus *s)
 {
     OSAL_UNUSED(conn_nr);
@@ -197,11 +209,36 @@ eProtocolHandle *eProtocol::new_connection(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Delete a connection.
+
+  The delete_connection() function deletes a connection created by new_connection() call. This
+  function releases all resources associated with the end point. Notice that closing listening
+  socket may linger a while in underlyin OS.
+
+  @param   handle   Connection handle as returned by new_connection().
+
+****************************************************************************************************
+*/
 void eProtocol::delete_connection(
     eProtocolHandle *handle)
 {
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Check connection status.
+
+  The is_connection_running() function checks if a specific connection is running.
+
+  @param   handle   Connection handle as returned by new_connection().
+
+****************************************************************************************************
+*/
 eStatus eProtocol::is_connection_running(
     eProtocolHandle *handle)
 {
