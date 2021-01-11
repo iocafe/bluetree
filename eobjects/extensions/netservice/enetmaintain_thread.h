@@ -29,11 +29,13 @@ class eNetService;
 /* Property numbers.
  */
 #define ENETMAINTAINP_PUBLISH 10
+#define ENETMAINTAINP_CONFIG_COUNTER 20
 
 /* Property names.
  */
 extern const os_char
-    enetmaintainp_publish[];
+    enetmaintainp_publish[],
+    enetmaintainp_config_counter[];
 
 
 /**
@@ -168,9 +170,13 @@ protected:
      */
     os_boolean m_publish;
 
-    /** If data to publish was set successfully (something to publish)
+    /** Timer value when m_publish flag was set.
      */
-    // eStatus m_publish_status;
+    os_long m_publish_timer;
+
+    /** End point configuration counter.
+     */
+    os_long m_end_point_config_count;
 };
 
 /* Start enet maintenance thread.

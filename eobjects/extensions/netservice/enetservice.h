@@ -35,12 +35,14 @@
 
 /* Net service property numbers.
  */
-#define ENETSERVP_ENDPOINT_CHANGE_COUNTER 10
+#define ENETSERVP_ENDPOINT_CONFIG_CHANGE_COUNTER 10
+#define ENETSERVP_ENDPOINT_CONFIG_COUNTER 20
 
 /* Net service property names.
  */
 extern const os_char
-    enetservp_endpoint_change_counter[];
+    enetservp_endpoint_table_change_counter[],
+    enetservp_endpoint_config_counter[];
 
 /* Default socket port number for eobject communication. TCP ports 6371 - 6375 are unassigned.
  */

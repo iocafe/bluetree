@@ -83,7 +83,7 @@ public:
 
     /* Get protocol name.
      */
-    virtual const os_char *protocol_name() {return "none"; }
+    virtual const os_char *protocol_name() {return "ecom"; }
 
     /* Initialize communication protocol
      */

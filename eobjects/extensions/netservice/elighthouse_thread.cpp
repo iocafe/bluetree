@@ -36,7 +36,7 @@ eLightHouseService::eLightHouseService(
 
     m_send_udp_multicasts = OS_FALSE;
     m_publish_count = 0;
-    m_publish = OS_TRUE;
+    m_publish = OS_FALSE;
     m_publish_status = ESTATUS_FAILED;
     m_udp_send_initialized = OS_FALSE;
 
@@ -78,8 +78,8 @@ void eLightHouseService::setupclass()
     eclasslist_add(cls, (eNewObjFunc)newobj, "eLightHouseService");
     addpropertyb(cls, ELIGHTHOUSEP_SEND_UDP_MULTICASTS, elighthousep_send_udp_multicasts,
         OS_FALSE, "send UDP multicasts", EPRO_PERSISTENT);
-    addpropertyb(cls, ELIGHTHOUSEP_PUBLISH, elighthousep_publish,
-        OS_FALSE, "publish end point info", EPRO_DEFAULT);
+    addpropertyl(cls, ELIGHTHOUSEP_PUBLISH, elighthousep_publish,
+        OS_FALSE, "update end point info in UDP multicasts", EPRO_DEFAULT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -156,7 +156,6 @@ eStatus eLightHouseService::onpropertychange(
     {
         case ELIGHTHOUSEP_SEND_UDP_MULTICASTS:
             m_send_udp_multicasts = (os_boolean)x->getl();
-            if (m_send_udp_multicasts) m_publish = OS_TRUE;
             break;
 
         case ELIGHTHOUSEP_PUBLISH:
@@ -688,6 +687,6 @@ void enet_start_lighthouse_thread(
     lighthouse->addname("//_lighthouse");
     lighthouse->set_netservice(netservice);
     lighthouse->bind(ELIGHTHOUSEP_SEND_UDP_MULTICASTS, "//netservice/servprm/lighthouseserv");
-    lighthouse->bind(ELIGHTHOUSEP_PUBLISH, "//netservice", enetservp_endpoint_change_counter);
+    lighthouse->bind(ELIGHTHOUSEP_PUBLISH, "//netservice", enetservp_endpoint_config_counter);
     lighthouse->start(lighthouse_thread_handle);
 }

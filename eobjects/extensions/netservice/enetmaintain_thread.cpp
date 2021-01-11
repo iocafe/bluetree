@@ -18,7 +18,8 @@
 /* Property names.
  */
 const os_char
-    enetmaintainp_publish[] = "publish";
+    enetmaintainp_publish[] = "publish",
+    enetmaintainp_config_counter[] = "epconfigcnt";
 
 /**
 ****************************************************************************************************
@@ -32,11 +33,12 @@ eNetMaintainThread::eNetMaintainThread(
     : eThread(parent, oid, flags)
 {
     m_netservice = OS_NULL;
-    m_publish_count = 0;
-    m_publish = OS_TRUE;
+    m_publish_count = -1;
+    m_publish = OS_FALSE;
     m_end_points = new eContainer(this);
     m_protocols = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
     m_protocols->ns_create();
+    m_end_point_config_count = 0;
 
     // m_publish_status = ESTATUS_FAILED;
     initproperties();
@@ -73,8 +75,10 @@ void eNetMaintainThread::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eNetMaintainThread");
-    addpropertyb(cls, ENETMAINTAINP_PUBLISH, enetmaintainp_publish,
-        OS_FALSE, "update end points and connections", EPRO_DEFAULT);
+    addpropertyl(cls, ENETMAINTAINP_PUBLISH, enetmaintainp_publish,
+        -1, "update end points and connections", EPRO_DEFAULT);
+    addpropertyl(cls, ENETMAINTAINP_CONFIG_COUNTER, enetmaintainp_config_counter,
+        0, "end point configuration trigger", EPRO_DEFAULT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -99,24 +103,20 @@ void eNetMaintainThread::setupclass()
 void eNetMaintainThread::onmessage(
     eEnvelope *envelope)
 {
-#if 0
     /* If at final destination for the message.
      */
     if (*envelope->target()=='\0')
     {
         switch (envelope->command())
         {
-            case ECMD_TIMER:
-                if (m_publish_status == ESTATUS_SUCCESS) {
-                    run_server();
-                }
+            case ECMD_TIMER: /* No need to do anything, timer is used just to break event wait */
                 return;
 
             default:
                 break;
         }
     }
-#endif
+
     /* Call parent class'es onmessage.
      */
     eThread::onmessage(envelope);
@@ -153,9 +153,11 @@ eStatus eNetMaintainThread::onpropertychange(
         case ENETMAINTAINP_PUBLISH:
             count = x->geti();
             if (count != m_publish_count) {
-                maintain_end_points();
+                // maintain_end_points();
                 m_publish_count = count;
                 m_publish = OS_TRUE;
+                os_get_timer(&m_publish_timer);
+                timer(100);
             }
             break;
 
@@ -186,12 +188,10 @@ void eNetMaintainThread::finish()
 /**
 ****************************************************************************************************
 
-  @brief Maintain LAN service UDP communication, thread main loop.
+  @brief Maintain connections and end points, thread main loop.
 
-  The eNetMaintainThread::run() function keeps eobjects messaging alive, sends and listens for
-  light house UDP multicasts. This thread handles all maintain UDP communication.
-  The data to be published (sent as UDP messages) is collected from "endpoint" table,
-  and received data is stored in "LAN services" table. Both these tables are global
+  The eNetMaintainThread::run() function
+  The data is collected from "connect" and "endpoint" tables, both these tables are global
   and owned by eProcess.
 
 ****************************************************************************************************
@@ -203,29 +203,12 @@ void eNetMaintainThread::run()
         alive(EALIVE_RETURN_IMMEDIATELY);
         if (exitnow()) break;
 
-os_sleep(100);
-#if 0
-        if (m_send_udp_multicasts) {
-            if (m_publish) {
-                if (!m_udp_send_initialized) {
-                    m_udp_send_initialized = OS_TRUE;
-                }
-
-                m_publish_status = publish();
-                m_publish = OS_FALSE;
-                if (m_publish_status == ESTATUS_SUCCESS) {
-                    run_server();
-                    timer(4500);
-                }
-            }
-        }
-        else if (m_udp_send_initialized)
+        if (m_publish) if (os_has_elapsed(&m_publish_timer, 100))
         {
-            ioc_release_maintain_server(&m_server);
-            m_udp_send_initialized = OS_FALSE;
+            maintain_end_points();
             timer(0);
+            m_publish = OS_FALSE;
         }
-#endif
     }
 }
 
@@ -254,6 +237,7 @@ void eNetMaintainThread::maintain_end_points()
     os_int h, ep_nr;
     eVariable tmp;
     eStatus s;
+    os_boolean changed = OS_FALSE;
 
     localvars = new eContainer(ETEMPORARY);
     // list = new eContainer(localvars);
@@ -290,6 +274,11 @@ void eNetMaintainThread::maintain_end_points()
         ep_nr = ep->oid();
         proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
         proto = protocol_by_name(proto_name);
+        if (proto == OS_NULL) {
+            osal_debug_error_str("Program error, unknown proto ", proto_name->gets());
+            delete ep;
+            continue;
+        }
         handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
         if (!proto->is_end_point_running(handle)) continue;
 
@@ -321,6 +310,7 @@ delete_it:
             }
         }
         delete ep;
+        changed = OS_TRUE;
     }
 
     /* Generate list of end points to add.
@@ -352,7 +342,7 @@ delete_it:
         proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
         proto = protocol_by_name(proto_name);
         if (proto == OS_NULL) {
-            osal_debug_error_str("unknown protocol: ", proto_name->gets());
+            osal_debug_error_str("Unknown protocol: ", proto_name->gets());
             // update status in table
             continue;
         }
@@ -368,6 +358,13 @@ delete_it:
         /* Adopt, successfull created end point.
          */
         ep->adopt(m_end_points);
+        changed = OS_TRUE;
+    }
+
+    /* Initiate end point information update in UDP multicasts.
+     */
+    if (changed) {
+        setpropertyl(ENETMAINTAINP_CONFIG_COUNTER, ++m_end_point_config_count);
     }
 
     delete localvars;
@@ -423,9 +420,10 @@ void enet_start_maintain_thread(
     maintain = new eNetMaintainThread();
     maintain->addname("//_netmaintain");
     maintain->set_netservice(netservice);
-    // maintain->bind(ENETMAINTAINP_SEND_UDP_MULTICASTS, "//netservice/servprm/maintainserv");
-    maintain->bind(ENETMAINTAINP_PUBLISH, "//netservice", enetservp_endpoint_change_counter);
-
+    maintain->bind(ENETMAINTAINP_PUBLISH, "//netservice",
+        enetservp_endpoint_table_change_counter);
+    maintain->bind(ENETMAINTAINP_CONFIG_COUNTER, "//netservice",
+        enetservp_endpoint_config_counter, EBIND_CLIENTINIT);
     while ((proto = (eProtocol*)netservice->protocols()->first())) {
         maintain->add_protocol(proto);
     }

@@ -19,7 +19,8 @@
 /* Net service property names.
  */
 const os_char
-    enetservp_endpoint_change_counter[] = "epchangecnt";
+    enetservp_endpoint_table_change_counter[] = "eptabccnt",
+    enetservp_endpoint_config_counter[] = "erecongcnt";
 
 
 /**
@@ -97,8 +98,10 @@ void eNetService::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eNetService");
-    addpropertyl(cls, ENETSERVP_ENDPOINT_CHANGE_COUNTER, enetservp_endpoint_change_counter,
-        0, "end point change counter", EPRO_DEFAULT|EPRO_NOONPRCH);
+    addpropertyl(cls, ENETSERVP_ENDPOINT_CONFIG_CHANGE_COUNTER, enetservp_endpoint_table_change_counter,
+        0, "end point table change counter", EPRO_DEFAULT|EPRO_NOONPRCH);
+    addpropertyl(cls, ENETSERVP_ENDPOINT_CONFIG_COUNTER, enetservp_endpoint_config_counter,
+        0, "end point config counter", EPRO_DEFAULT|EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();
 }
@@ -215,7 +218,7 @@ eStatus eNetService::oncallback(
     if (event == ECALLBACK_PERSISTENT_CHANGED)
     {
         if (obj == m_end_points) {
-            setpropertyl(ENETSERVP_ENDPOINT_CHANGE_COUNTER, ++m_end_points_config_counter);
+            setpropertyl(ENETSERVP_ENDPOINT_CONFIG_CHANGE_COUNTER, ++m_end_points_config_counter);
         }
     }
 
