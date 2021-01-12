@@ -101,16 +101,6 @@ public:
         void *parameters,
         eStatus *s);
 
-    /* Delete an end point.
-     */
-    virtual void delete_end_pont(
-        eProtocolHandle *handle);
-
-    /* Check end point status (running).
-     */
-    virtual eStatus is_end_point_running(
-        eProtocolHandle *handle);
-
     /* Create a new connection using this protocol.
      */
     virtual eProtocolHandle *new_connection(
@@ -118,15 +108,6 @@ public:
         void *parameters,
         eStatus *s);
 
-    /* Delete a connection.
-     */
-    virtual void delete_connection(
-        eProtocolHandle *handle);
-
-    /* Check connection status.
-     */
-    virtual eStatus is_connection_running(
-        eProtocolHandle *handle);
 
 protected:
     /**

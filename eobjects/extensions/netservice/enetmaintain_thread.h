@@ -134,6 +134,9 @@ protected:
      */
     void maintain_end_points();
 
+    void delete_ep(
+        eContainer *ep);
+
     /* Get protocol by name
      */
     eProtocol *protocol_by_name(

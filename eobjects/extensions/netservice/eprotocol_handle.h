@@ -39,13 +39,6 @@ public:
      */
     virtual ~eProtocolHandle();
 
-    /* Clone object.
-     */
-    virtual eObject *clone(
-        eObject *parent,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0);
-
     /* Casting eObject pointer to eProtocolHandle pointer.
      */
     inline static eProtocolHandle *cast(
@@ -74,6 +67,31 @@ public:
     }
 
 
+    /**
+    ************************************************************************************************
+      Protocol handle functions.
+    ************************************************************************************************
+    */
+
+    /* Start a connection or end point thread.
+     */
+    void start_thread(
+        eThread *t,
+        const os_char *threadname);
+
+    /* Terminate connection or end point thread.
+     */
+    void terminate_thread();
+
+    /* Get unique name of a connection or end point.
+     */
+    const os_char *uniquename();
+
+    /* Check if connection or end point is running.
+     */
+    os_boolean isrunning();
+
+
 protected:
     /**
     ************************************************************************************************
@@ -87,6 +105,15 @@ protected:
       Member variables
     ************************************************************************************************
     */
+
+    /* Thread handle. Connections and end points typically run in their own thread.
+       OS_NULL if thread has not been started.
+     */
+    eThreadHandle *m_threadhandle;
+
+    /* Name of commection or end point in process name space.
+     */
+    eVariable *m_threadname;
 
 };
 

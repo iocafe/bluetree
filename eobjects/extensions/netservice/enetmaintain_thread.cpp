@@ -40,7 +40,6 @@ eNetMaintainThread::eNetMaintainThread(
     m_protocols->ns_create();
     m_end_point_config_count = 0;
 
-    // m_publish_status = ESTATUS_FAILED;
     initproperties();
 }
 
@@ -198,10 +197,14 @@ void eNetMaintainThread::finish()
 */
 void eNetMaintainThread::run()
 {
+    eContainer *ep, *next_ep;
+
     while (OS_TRUE)
     {
         alive(EALIVE_RETURN_IMMEDIATELY);
-        if (exitnow()) break;
+        if (exitnow()) {
+            break;
+        }
 
         if (m_publish) if (os_has_elapsed(&m_publish_timer, 100))
         {
@@ -209,6 +212,29 @@ void eNetMaintainThread::run()
             timer(0);
             m_publish = OS_FALSE;
         }
+    }
+
+    /* End points are closed here explicitely to make sure that os_lock() doesn't
+     * cause deadlock.
+     */
+    for (ep = m_end_points->firstc(); ep; ep = next_ep)
+    {
+        next_ep = ep->nextc();
+        delete_ep(ep);
+
+        /* proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
+        proto = protocol_by_name(proto_name);
+        if (proto == OS_NULL) continue;
+        handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
+
+        if (proto->is_end_point_running(handle))
+        {
+            proto->delete_end_pont(handle);
+            while (proto->is_end_point_running(handle)) {
+                os_timeslice();
+            }
+        }
+        delete ep; */
     }
 }
 
@@ -301,7 +327,7 @@ void eNetMaintainThread::maintain_end_points()
 
 delete_it:
         os_unlock();
-        handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
+        /* handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
         if (proto->is_end_point_running(handle))
         {
             proto->delete_end_pont(handle);
@@ -309,7 +335,9 @@ delete_it:
                 os_timeslice();
             }
         }
-        delete ep;
+        delete ep; */
+
+        delete_ep(ep);
         changed = OS_TRUE;
     }
 
@@ -357,7 +385,7 @@ delete_it:
 
         /* Adopt, successfull created end point.
          */
-        ep->adopt(m_end_points);
+        ep->adopt(m_end_points, ep_nr);
         changed = OS_TRUE;
     }
 
@@ -375,6 +403,29 @@ getout_unlock:
     delete localvars;
     osal_debug_error("eNetMaintainThread::publish failed");
 }
+
+void eNetMaintainThread::delete_ep(
+    eContainer *ep)
+{
+    eVariable *proto_name;
+    eProtocol *proto;
+    eProtocolHandle *handle;
+
+    proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
+    proto = protocol_by_name(proto_name);
+    if (proto == OS_NULL) return;
+
+    handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
+    if (proto->is_end_point_running(handle))
+    {
+        proto->delete_end_pont(handle);
+        while (proto->is_end_point_running(handle)) {
+            os_timeslice();
+        }
+    }
+    delete ep;
+}
+
 
 
 void eNetMaintainThread::add_protocol(

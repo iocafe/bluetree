@@ -152,6 +152,9 @@ eProtocolHandle *eProtocol::new_end_point(
 void eProtocol::delete_end_pont(
     eProtocolHandle *handle)
 {
+    if (handle) {
+        handle->terminate_thread();
+    }
 }
 
 
@@ -163,13 +166,17 @@ void eProtocol::delete_end_pont(
   The is_end_point_running() function checks if a specific end point is running.
 
   @param   handle   End point handle as returned by new_end_point().
+  @return  OS_TRUE if end point is running, OS_FALSE if not.
 
 ****************************************************************************************************
 */
-eStatus eProtocol::is_end_point_running(
+os_boolean eProtocol::is_end_point_running(
     eProtocolHandle *handle)
 {
-    return ESTATUS_SUCCESS;
+    if (handle) {
+        return handle->isrunning();
+    }
+    return OS_FALSE;
 }
 
 
@@ -224,6 +231,9 @@ eProtocolHandle *eProtocol::new_connection(
 void eProtocol::delete_connection(
     eProtocolHandle *handle)
 {
+    if (handle) {
+        handle->terminate_thread();
+    }
 }
 
 
@@ -235,12 +245,16 @@ void eProtocol::delete_connection(
   The is_connection_running() function checks if a specific connection is running.
 
   @param   handle   Connection handle as returned by new_connection().
+  @return  OS_TRUE if end point is running, OS_FALSE if not.
 
 ****************************************************************************************************
 */
-eStatus eProtocol::is_connection_running(
+os_boolean eProtocol::is_connection_running(
     eProtocolHandle *handle)
 {
-    return ESTATUS_SUCCESS;
+    if (handle) {
+        return handle->isrunning();
+    }
+    return OS_FALSE;
 }
 

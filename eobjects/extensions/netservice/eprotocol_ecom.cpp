@@ -124,48 +124,25 @@ eProtocolHandle *eComProtocol::new_end_point(
     void *parameters,
     eStatus *s)
 {
+    eProtocolHandle *p;
+    eThread *t;
+
     OSAL_UNUSED(ep_nr);
     OSAL_UNUSED(parameters);
 
-    *s = ESTATUS_NOT_SUPPORTED;
-    return OS_NULL;
-}
+    /* Create and start end point thread to listen for incoming socket connections,
+       name it "myendpoint".
+     */
+    t = new eEndPoint();
+    p = new eProtocolHandle(ETEMPORARY);
+    p->start_thread(t, "endofdays");
 
+    setpropertys_msg(p->uniquename(),
 
-/**
-****************************************************************************************************
+         "socket::" IOC_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr);
 
-  @brief Delete an end point.
-
-  The delete_end_point() function deletes an end point created by new_end_point() call. This
-  function releases all resources associated with the end point. Notice that closing listening
-  socket may linger a while in underlyin OS.
-
-  @param   handle   End point handle as returned by new_end_point().
-
-****************************************************************************************************
-*/
-void eComProtocol::delete_end_pont(
-    eProtocolHandle *handle)
-{
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Check end point status.
-
-  The is_end_point_running() function checks if a specific end point is running.
-
-  @param   handle   End point handle as returned by new_end_point().
-
-****************************************************************************************************
-*/
-eStatus eComProtocol::is_end_point_running(
-    eProtocolHandle *handle)
-{
-    return ESTATUS_SUCCESS;
+    *s = ESTATUS_SUCCESS;
+    return p;
 }
 
 
@@ -203,40 +180,4 @@ eProtocolHandle *eComProtocol::new_connection(
     return OS_NULL;
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Delete a connection.
-
-  The delete_connection() function deletes a connection created by new_connection() call. This
-  function releases all resources associated with the end point. Notice that closing listening
-  socket may linger a while in underlyin OS.
-
-  @param   handle   Connection handle as returned by new_connection().
-
-****************************************************************************************************
-*/
-void eComProtocol::delete_connection(
-    eProtocolHandle *handle)
-{
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Check connection status.
-
-  The is_connection_running() function checks if a specific connection is running.
-
-  @param   handle   Connection handle as returned by new_connection().
-
-****************************************************************************************************
-*/
-eStatus eComProtocol::is_connection_running(
-    eProtocolHandle *handle)
-{
-    return ESTATUS_SUCCESS;
-}
 

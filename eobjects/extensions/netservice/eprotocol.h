@@ -112,7 +112,7 @@ public:
 
     /* Check end point status (running).
      */
-    virtual eStatus is_end_point_running(
+    virtual os_boolean is_end_point_running(
         eProtocolHandle *handle);
 
     /* Create a new connection using this protocol.
@@ -129,7 +129,7 @@ public:
 
     /* Check connection status.
      */
-    virtual eStatus is_connection_running(
+    virtual os_boolean is_connection_running(
         eProtocolHandle *handle);
 
 protected:
