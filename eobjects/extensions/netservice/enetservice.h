@@ -37,12 +37,14 @@
  */
 #define ENETSERVP_ENDPOINT_CONFIG_CHANGE_COUNTER 10
 #define ENETSERVP_ENDPOINT_CONFIG_COUNTER 20
+#define ENETSERVP_CONNECT_CONFIG_CHANGE_COUNTER 30
 
 /* Net service property names.
  */
 extern const os_char
     enetservp_endpoint_table_change_counter[],
-    enetservp_endpoint_config_counter[];
+    enetservp_endpoint_config_counter[],
+    enetservp_connect_table_change_counter[];
 
 /* Default socket port number for eobject communication. TCP ports 6371 - 6375 are unassigned.
  */
@@ -235,6 +237,7 @@ protected:
      */
     eMatrix *m_connection_matrix;
     ePersistent *m_connect;
+    os_long m_connect_config_counter;
 
     /* Services table (matrix).
      */

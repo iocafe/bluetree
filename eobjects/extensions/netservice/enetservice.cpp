@@ -20,7 +20,8 @@
  */
 const os_char
     enetservp_endpoint_table_change_counter[] = "eptabccnt",
-    enetservp_endpoint_config_counter[] = "erecongcnt";
+    enetservp_endpoint_config_counter[] = "erecongcnt",
+    enetservp_connect_table_change_counter[] = "contabccnt";
 
 
 /**
@@ -45,6 +46,7 @@ eNetService::eNetService(
     m_persistent_trusted = OS_NULL;
     m_persistent_serv_prm = OS_NULL;
     m_end_points_config_counter = 0;
+    m_connect_config_counter = 0;
     os_memclear(&m_serv_prm, sizeof(eNetServPrm));
     m_protocols = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
 
@@ -65,10 +67,6 @@ eNetService::~eNetService()
         OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
 
 #if 0
-    /* Finished with lighthouse.
-     */
-    ioc_release_lighthouse_server(&m_lighthouse_server);
-
     /* Release any memory allocated for node configuration.
     */
     ioc_release_node_config(&m_nodeconf);
@@ -102,6 +100,8 @@ void eNetService::setupclass()
         0, "end point table change counter", EPRO_DEFAULT|EPRO_NOONPRCH);
     addpropertyl(cls, ENETSERVP_ENDPOINT_CONFIG_COUNTER, enetservp_endpoint_config_counter,
         0, "end point config counter", EPRO_DEFAULT|EPRO_NOONPRCH);
+    addpropertyl(cls, ENETSERVP_CONNECT_CONFIG_CHANGE_COUNTER, enetservp_connect_table_change_counter,
+        0, "connect table change counter", EPRO_DEFAULT|EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();
 }
@@ -165,10 +165,6 @@ void eNetService::start(
      */
     // ioc_set_root_callback(&iocom_root, app_root_callback, OS_NULL);
 
-    /* Get service TCP port number and transport (IOC_TLS_SOCKET or IOC_TCP_SOCKET).
-     */
-    m_connconf = ioc_get_connection_conf(&m_nodeconf);
-    ioc_get_lighthouse_info(m_connconf, &m_lighthouse_server_info);
 #endif
 
     /* Start the connection and end point management as separate thread. This must be after parmaters
@@ -219,6 +215,10 @@ eStatus eNetService::oncallback(
     {
         if (obj == m_end_points) {
             setpropertyl(ENETSERVP_ENDPOINT_CONFIG_CHANGE_COUNTER, ++m_end_points_config_counter);
+        }
+
+        if (obj == m_connect) {
+            setpropertyl(ENETSERVP_CONNECT_CONFIG_CHANGE_COUNTER, ++m_connect_config_counter);
         }
     }
 

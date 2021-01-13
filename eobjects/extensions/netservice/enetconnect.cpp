@@ -137,6 +137,7 @@ void eNetService::create_connect_table()
     m_connection_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
 
     m_connect->load_file("connections.eo");
+    m_connect->setflags(EOBJ_TEMPORARY_CALLBACK);
 
     if (m_connection_matrix->nrows() == 0) {
         add_connection(OS_TRUE, 1, "*", "*", 1);

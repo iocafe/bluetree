@@ -30,12 +30,14 @@ class eNetService;
  */
 #define ENETMAINTAINP_PUBLISH 10
 #define ENETMAINTAINP_CONFIG_COUNTER 20
+#define ENETMAINTAINP_CONNECT 30
 
 /* Property names.
  */
 extern const os_char
     enetmaintainp_publish[],
-    enetmaintainp_config_counter[];
+    enetmaintainp_config_counter[],
+    enetmaintainp_connect[];
 
 
 /**
@@ -130,9 +132,13 @@ protected:
     ************************************************************************************************
     */
 
-    /* Create and delete end points as needed..
+    /* Create and delete end points.
      */
     void maintain_end_points();
+
+    /* Create and delete connections.
+     */
+    void maintain_connections();
 
     void delete_ep(
         eContainer *ep);
@@ -163,13 +169,13 @@ protected:
      */
     eContainer *m_end_points;
 
-    /** Value of ELIGHTHOUSEP_PUBLISH property. When changed, the end point information is
-        published.
+    /** Value of ELIGHTHOUSEP_PUBLISH property. When changed, the end points are to be configured.
      */
     os_int m_publish_count;
 
-    /** Publish function is not called immediately when m_publish_count changed, but instead
-        m_publish is set. This allows multiple publish requests to result in one publish() call.
+    /** The maintain_end_points() function is not called immediately when m_publish_count
+        changes, but instead m_publish is set. This allows multiple publish requests to result
+        in one maintain_end_points() call.
      */
     os_boolean m_publish;
 
@@ -180,6 +186,20 @@ protected:
     /** End point configuration counter.
      */
     os_long m_end_point_config_count;
+
+    /** Value of ELIGHTHOUSEP_CONNECT property. When changed, the connections are to be configured..
+     */
+    os_int m_connect_count;
+
+    /** The maintain_connections() function is not called immediately when m_connect_count
+        changes, but instead m_connect is set. This allows multiple connect requests to
+        result in one maintain_connections() call.
+     */
+    os_boolean m_connect;
+
+    /** Timer value when m_connect flag was set.
+     */
+    os_long m_connect_timer;
 };
 
 /* Start enet maintenance thread.

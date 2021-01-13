@@ -135,10 +135,9 @@ eProtocolHandle *eComProtocol::new_end_point(
      */
     t = new eEndPoint();
     p = new eProtocolHandle(ETEMPORARY);
-    p->start_thread(t, "endofdays");
+    p->start_thread(t, "myendpoint");
 
     setpropertys_msg(p->uniquename(),
-
          "socket::" IOC_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr);
 
     *s = ESTATUS_SUCCESS;
@@ -173,11 +172,24 @@ eProtocolHandle *eComProtocol::new_connection(
     void *parameters,
     eStatus *s)
 {
+    eProtocolHandle *p;
+    eThread *t;
+
     OSAL_UNUSED(conn_nr);
     OSAL_UNUSED(parameters);
 
-    *s = ESTATUS_NOT_SUPPORTED;
-    return OS_NULL;
+    /* Create and start end point thread to listen for incoming socket connections,
+       name it "myendpoint".
+     */
+    t = new eConnection();
+    p = new eProtocolHandle(ETEMPORARY);
+    p->start_thread(t, "myconnection");
+
+    setpropertys_msg(p->uniquename(),
+         "socket:localhost", econnp_ipaddr);
+
+    *s = ESTATUS_SUCCESS;
+    return p;
 }
 
 

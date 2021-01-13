@@ -19,7 +19,8 @@
  */
 const os_char
     enetmaintainp_publish[] = "publish",
-    enetmaintainp_config_counter[] = "epconfigcnt";
+    enetmaintainp_config_counter[] = "epconfigcnt",
+    enetmaintainp_connect[] = "connect";
 
 /**
 ****************************************************************************************************
@@ -39,6 +40,8 @@ eNetMaintainThread::eNetMaintainThread(
     m_protocols = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
     m_protocols->ns_create();
     m_end_point_config_count = 0;
+    m_connect_count = -1;
+    m_connect = OS_FALSE;
 
     initproperties();
 }
@@ -75,9 +78,11 @@ void eNetMaintainThread::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eNetMaintainThread");
     addpropertyl(cls, ENETMAINTAINP_PUBLISH, enetmaintainp_publish,
-        -1, "update end points and connections", EPRO_DEFAULT);
+        -1, "update end points", EPRO_DEFAULT);
     addpropertyl(cls, ENETMAINTAINP_CONFIG_COUNTER, enetmaintainp_config_counter,
         0, "end point configuration trigger", EPRO_DEFAULT);
+    addpropertyl(cls, ENETMAINTAINP_CONNECT, enetmaintainp_connect,
+        -1, "update connections", EPRO_DEFAULT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -152,10 +157,19 @@ eStatus eNetMaintainThread::onpropertychange(
         case ENETMAINTAINP_PUBLISH:
             count = x->geti();
             if (count != m_publish_count) {
-                // maintain_end_points();
                 m_publish_count = count;
                 m_publish = OS_TRUE;
                 os_get_timer(&m_publish_timer);
+                timer(100);
+            }
+            break;
+
+        case ENETMAINTAINP_CONNECT:
+            count = x->geti();
+            if (count != m_connect_count) {
+                m_connect_count = count;
+                m_connect = OS_TRUE;
+                os_get_timer(&m_connect_timer);
                 timer(100);
             }
             break;
@@ -212,6 +226,13 @@ void eNetMaintainThread::run()
             timer(0);
             m_publish = OS_FALSE;
         }
+
+        if (m_connect) if (os_has_elapsed(&m_connect_timer, 100))
+        {
+            maintain_connections();
+            timer(0);
+            m_connect = OS_FALSE;
+        }
     }
 
     /* End points are closed here explicitely to make sure that os_lock() doesn't
@@ -221,20 +242,6 @@ void eNetMaintainThread::run()
     {
         next_ep = ep->nextc();
         delete_ep(ep);
-
-        /* proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
-        proto = protocol_by_name(proto_name);
-        if (proto == OS_NULL) continue;
-        handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
-
-        if (proto->is_end_point_running(handle))
-        {
-            proto->delete_end_pont(handle);
-            while (proto->is_end_point_running(handle)) {
-                os_timeslice();
-            }
-        }
-        delete ep; */
     }
 }
 
@@ -266,8 +273,6 @@ void eNetMaintainThread::maintain_end_points()
     os_boolean changed = OS_FALSE;
 
     localvars = new eContainer(ETEMPORARY);
-    // list = new eContainer(localvars);
-    // list->ns_create();
 
     os_lock();
     m = m_netservice->m_endpoint_matrix;
@@ -327,16 +332,6 @@ void eNetMaintainThread::maintain_end_points()
 
 delete_it:
         os_unlock();
-        /* handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
-        if (proto->is_end_point_running(handle))
-        {
-            proto->delete_end_pont(handle);
-            while (proto->is_end_point_running(handle)) {
-                os_timeslice();
-            }
-        }
-        delete ep; */
-
         delete_ep(ep);
         changed = OS_TRUE;
     }
@@ -427,6 +422,162 @@ void eNetMaintainThread::delete_ep(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Create and delete connections as needed.
+
+  The eNetMaintainThread::maintain_connections() function is collects data from connect table and
+  sets up connections for communication protocols.
+
+  @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if notthing to publish.
+
+****************************************************************************************************
+*/
+void eNetMaintainThread::maintain_connections()
+{
+    eProtocol *proto;
+    eProtocolHandle *handle;
+    eMatrix *m;
+    eObject *conf, *columns, *col;
+    eContainer *localvars, *list, *ep, *next_ep;
+    eVariable *v, *proto_name;
+    os_int enable_col, protocol_col, transport_col, port_col;
+    os_int h, ep_nr;
+    eVariable tmp;
+    eStatus s;
+    os_boolean changed = OS_FALSE;
+
+    localvars = new eContainer(ETEMPORARY);
+
+    os_lock();
+    m = m_netservice->m_endpoint_matrix;
+    conf = m->configuration();
+    if (conf == OS_NULL) goto getout_unlock;
+    columns = conf->first(EOID_TABLE_COLUMNS);
+    if (columns == OS_NULL) goto getout_unlock;
+    col = columns->byname(enet_endp_enable);
+    if (col == OS_NULL) goto getout_unlock;
+    enable_col = col->oid();
+    col = columns->byname(enet_endp_protocol);
+    if (col == OS_NULL) goto getout_unlock;
+    protocol_col = col->oid();
+    col = columns->byname(enet_endp_transport);
+    if (col == OS_NULL) goto getout_unlock;
+    transport_col = col->oid();
+    col = columns->byname(enet_endp_port);
+    if (col == OS_NULL) goto getout_unlock;
+    port_col = col->oid();
+    /* col = columns->byname(enet_endp_netname);
+    if (col == OS_NULL) goto getout;
+    netname_col = col->oid(); */
+    os_unlock();
+
+    /* Remove end points which are no longer needed or have changed.
+     */
+    for (ep = m_end_points->firstc(); ep; ep = next_ep)
+    {
+        next_ep = ep->nextc();
+        ep_nr = ep->oid();
+        proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
+        proto = protocol_by_name(proto_name);
+        if (proto == OS_NULL) {
+            osal_debug_error_str("Program error, unknown proto ", proto_name->gets());
+            delete ep;
+            continue;
+        }
+        handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
+        if (!proto->is_end_point_running(handle)) continue;
+
+        os_timeslice();
+        os_lock();
+
+        if ((m->geti(ep_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) goto delete_it;
+        if (m->geti(ep_nr, enable_col) == 0) goto delete_it;
+        m->getv(ep_nr, protocol_col, &tmp);
+        if (tmp.compare(proto_name)) goto delete_it;
+        v = ep->firstv(ENET_ENDP_TRANSPORT);
+        m->getv(ep_nr, transport_col, &tmp);
+        if (tmp.compare(v)) goto delete_it;
+        v = ep->firstv(ENET_ENDP_PORT);
+        m->getv(ep_nr, transport_col, &tmp);
+        if (tmp.compare(v)) goto delete_it;
+
+        os_unlock();
+        continue;
+
+delete_it:
+        os_unlock();
+        delete_ep(ep);
+        changed = OS_TRUE;
+    }
+
+    /* Generate list of end points to add.
+     */
+    list = new eContainer(localvars);
+    os_lock();
+    h = m->nrows();
+    for (ep_nr = 0; ep_nr < h; ep_nr ++) {
+        if ((m->geti(ep_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
+        if (m->geti(ep_nr, enable_col) == 0) continue;
+        if (m_end_points->first(ep_nr)) continue;
+
+        ep = new eContainer(list, ep_nr);
+        v = new eVariable(ep, ENET_ENDP_PROTOCOL);
+        m->getv(ep_nr, protocol_col, v);
+        v = new eVariable(ep, ENET_ENDP_TRANSPORT);
+        m->getv(ep_nr, transport_col, v);
+        v = new eVariable(ep, ENET_ENDP_PORT);
+        m->getv(ep_nr, port_col, v);
+    }
+    os_unlock();
+
+    /* Add end points (no lock).
+     */
+    for (ep = list->firstc(); ep; ep = next_ep)
+    {
+        next_ep = ep->nextc();
+        ep_nr = ep->oid();
+        proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
+        proto = protocol_by_name(proto_name);
+        if (proto == OS_NULL) {
+            osal_debug_error_str("Unknown protocol: ", proto_name->gets());
+            // update status in table
+            continue;
+        }
+
+        handle = proto->new_end_point(ep_nr, OS_NULL, &s);
+        if (handle == OS_NULL) {
+            osal_debug_error_str("unable to create end point: ", proto_name->gets());
+            // update status in table, status s
+            continue;
+        }
+        handle->adopt(ep, ENET_ENDP_PROTOCOL_HANDLE);
+
+        /* Adopt, successfull created end point.
+         */
+        ep->adopt(m_end_points, ep_nr);
+        changed = OS_TRUE;
+    }
+
+    /* Initiate end point information update in UDP multicasts.
+     */
+    if (changed) {
+        setpropertyl(ENETMAINTAINP_CONFIG_COUNTER, ++m_end_point_config_count);
+    }
+
+    delete localvars;
+    return;
+
+getout_unlock:
+    os_unlock();
+    delete localvars;
+    osal_debug_error("eNetMaintainThread::publish failed");
+}
+
+
+
+
 
 void eNetMaintainThread::add_protocol(
     eProtocol *proto)
@@ -460,6 +611,7 @@ void enet_start_maintain_thread(
 {
     eNetMaintainThread *maintain;
     eProtocol *proto;
+    const os_char netservice_name[] = "//netservice";
 
     /* Set up class for use.
      */
@@ -471,10 +623,13 @@ void enet_start_maintain_thread(
     maintain = new eNetMaintainThread();
     maintain->addname("//_netmaintain");
     maintain->set_netservice(netservice);
-    maintain->bind(ENETMAINTAINP_PUBLISH, "//netservice",
+    maintain->bind(ENETMAINTAINP_PUBLISH, netservice_name,
         enetservp_endpoint_table_change_counter);
-    maintain->bind(ENETMAINTAINP_CONFIG_COUNTER, "//netservice",
+    maintain->bind(ENETMAINTAINP_CONFIG_COUNTER, netservice_name,
         enetservp_endpoint_config_counter, EBIND_CLIENTINIT);
+    maintain->bind(ENETMAINTAINP_CONNECT, netservice_name,
+        enetservp_connect_table_change_counter);
+
     while ((proto = (eProtocol*)netservice->protocols()->first())) {
         maintain->add_protocol(proto);
     }
