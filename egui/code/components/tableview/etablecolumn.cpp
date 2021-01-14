@@ -340,6 +340,10 @@ void eTableColumn::activate(
 {
     eVariable value;
 
+    if (rdonly()) {
+        return;
+    }
+
     focus_row->getv(0, focus_column, &value);
     switch (m_attr.showas())
     {

@@ -41,7 +41,7 @@ void eNetService::create_service_parameters(
     os_int flags)
 {
     m_persistent_serv_prm = new ePersistent(this);
-    m_persistent_serv_prm->addname("servprm");
+    m_persistent_serv_prm->addname("parameters");
     m_persistent_serv_prm->ns_create();
     m_persistent_serv_prm->setpropertys(EPERP_TEXT, "net parameters");
 

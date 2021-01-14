@@ -178,11 +178,11 @@ protected:
 
     /* Add a row for a connection to "connections" table.
      */
-    void add_connection(
+    void add_connect(
         os_int enable,
-        os_int protocol,
-        const os_char *connection,
-        const os_char *devices,
+        const os_char *protocol,
+        const os_char *ip,
+        const os_char *name,
         os_int transport,
         os_int row_nr = -1);
 

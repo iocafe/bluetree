@@ -99,6 +99,12 @@ public:
     inline os_short digs()
         {return m_digs; }
 
+    inline os_boolean rdonly()
+        {return m_rdonly; }
+
+    inline os_boolean nosave()
+        {return m_nosave; }
+
     inline os_short tstr_flags()
         {return m_tstr_flags; }
 
@@ -163,6 +169,9 @@ protected:
 
     os_short m_tstr_flags;
     os_short m_dstr_flags;
+
+    os_boolean m_rdonly;
+    os_boolean m_nosave;
 
     eContainer *m_drop_down_list;
 };

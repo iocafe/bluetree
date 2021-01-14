@@ -30,6 +30,8 @@ eAttrBuffer::eAttrBuffer()
     m_drop_down_list = OS_NULL;
     m_tstr_flags = ETIMESTR_DISABLED;
     m_dstr_flags = EDATESTR_DISABLED;
+    m_rdonly = OS_FALSE;
+    m_nosave = OS_FALSE;
 }
 
 
@@ -160,6 +162,9 @@ void eAttrBuffer::initialize(
                 }
             }
         }
+
+        m_rdonly = os_strstr(list_str, "rdonly", OSAL_STRING_SEARCH_ITEM_NAME) ? OS_TRUE : OS_FALSE;
+        m_nosave = os_strstr(list_str, "nosave", OSAL_STRING_SEARCH_ITEM_NAME) ? OS_TRUE : OS_FALSE;
 
         value = osal_str_get_item_value(list_str, "enum", &value_sz, OSAL_STRING_DEFAULT);
         if (value) {

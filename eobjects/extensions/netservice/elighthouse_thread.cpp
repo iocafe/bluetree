@@ -686,7 +686,7 @@ void enet_start_lighthouse_thread(
     lighthouse = new eLightHouseService();
     lighthouse->addname("//_lighthouse");
     lighthouse->set_netservice(netservice);
-    lighthouse->bind(ELIGHTHOUSEP_SEND_UDP_MULTICASTS, "//netservice/servprm/lighthouseserv");
+    lighthouse->bind(ELIGHTHOUSEP_SEND_UDP_MULTICASTS, "//netservice/parameters/lighthouseserv");
     lighthouse->bind(ELIGHTHOUSEP_PUBLISH, "//netservice", enetservp_endpoint_config_counter);
     lighthouse->start(lighthouse_thread_handle);
 }

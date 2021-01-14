@@ -115,6 +115,8 @@ public:
         eTableView *view);
 
     inline eShowAs showas() {return m_attr.showas(); }
+    inline os_boolean rdonly() {return m_attr.rdonly();}
+    inline os_boolean nosave() {return m_attr.nosave();}
 
 protected:
     eStrBuffer m_name;

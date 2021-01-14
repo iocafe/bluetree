@@ -40,6 +40,7 @@ void eTableView::edit_row_dialog(
     eContainer *rscols;
     eVariable *v;
     eName *n;
+    eTableColumn *c;
     eMatrix *m;
     eVariable value;
     eButton *button;
@@ -69,6 +70,15 @@ void eTableView::edit_row_dialog(
     {
         n = v->primaryname();
         if (n == OS_NULL) continue;
+
+        if (m_columns) {
+            c = eTableColumn::cast(m_columns->first(col_nr));
+            if (c) {
+                if (c->rdonly() || c->nosave()) {
+                    continue;
+                }
+            }
+        }
 
         e = new eLineEdit(p);
         e->addname(n->gets(), ENAME_NO_MAP);

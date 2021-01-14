@@ -422,6 +422,10 @@ ecompoPosCheckRval eLineEdit::check_pos(
 */
 void eLineEdit::activate()
 {
+    if (m_attr.rdonly()) {
+        return;
+    }
+
     switch (m_attr.showas())
     {
         case E_SHOWAS_CHECKBOX:
