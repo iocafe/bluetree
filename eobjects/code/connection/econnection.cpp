@@ -203,6 +203,39 @@ eStatus eConnection::simpleproperty(
 /**
 ****************************************************************************************************
 
+  @brief Add "_r" to object's name space for browsing.
+
+  The eConnection::browse_list_namespace function lists named children, grandchildren, etc,
+  when name is mapped to name space of this object. Each list item is a variable.
+
+  @param   content Pointer to container into which to place list items.
+  @param   target When browsing structure which is not made out of eObjects,
+           this can be path within the object (like file system, etc).
+  @param   None.
+
+****************************************************************************************************
+*/
+void eConnection::browse_list_namespace(
+    eContainer *content,
+    const os_char *target)
+{
+    eVariable *item;
+    eSet *appendix;
+
+    item = new eVariable(content, EBROWSE_NSPACE);
+    appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
+    appendix->sets(EBROWSE_PATH, "_r");
+    //        appendix->sets(EBROWSE_ITEM_TYPE, listitem->isdir ? "d" : "f");
+    appendix->sets(EBROWSE_IPATH, "_r");
+    item->setpropertys(EVARP_TEXT, "route");
+
+    eThread::browse_list_namespace(content, target);
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Process messages.
 
   The onmessage function handles message envelopes received by the eConnection. If message
@@ -222,13 +255,25 @@ eStatus eConnection::simpleproperty(
 void eConnection::onmessage(
     eEnvelope *envelope)
 {
-    os_char c;
+    os_char *p, c;
+
+    /* If target string start with "_r/" or is "_r", route. This is for browsing.
+     */
+    p = envelope->target();
+    c = *p;
+    if (c == '_' && p[1] == 'r') if (p[2] == '\0' || p[2] == '/')
+    {
+        /* Skip "_r" oe "_r/"
+         */
+        envelope->move_target_pos(p[2] == '\0' ? 2 : 3);
+        goto routeit;
+    }
 
     /* If this is envelope to be routed trough connection.
      */
-    c = *envelope->target();
     if (c != '_' && c != '\0')
     {
+routeit:
         /* If currently connected, write envelope immediately.
          */
         if (m_connected)
@@ -833,7 +878,12 @@ eStatus eConnection::read()
         return s;
     }
 
-    m_envelope->prependtarget("/");
+    if (*m_envelope->target() == '\0') {
+        m_envelope->prependtarget("//");
+    }
+    else {
+        m_envelope->prependtarget("/");
+    }
 
     if ((m_envelope->mflags() & EMSG_NO_REPLIES) == 0)
     {
@@ -844,4 +894,5 @@ eStatus eConnection::read()
     m_envelope = OS_NULL;
     return ESTATUS_SUCCESS;
 }
+
 

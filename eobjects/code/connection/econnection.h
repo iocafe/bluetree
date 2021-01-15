@@ -85,6 +85,11 @@ public:
         return new eConnection(parent, id, flags);
     }
 
+    /* Function to process messages to this object.
+     */
+    virtual void onmessage(
+        eEnvelope *envelope);
+
     /* Called when property value changes.
      */
     virtual eStatus onpropertychange(
@@ -98,10 +103,12 @@ public:
         os_int propertynr,
         eVariable *x);
 
-    /* Function to process messages to this object.
+    /* List names in this object's namespace. Here we list files and folders.
      */
-    virtual void onmessage(
-        eEnvelope *envelope);
+    virtual void browse_list_namespace(
+        eContainer *content,
+        const os_char *target);
+
 
     /* Initialize the object.
      */

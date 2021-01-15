@@ -138,7 +138,7 @@ eProtocolHandle *eComProtocol::new_end_point(
     p->start_thread(t, "myendpoint");
 
     setpropertys_msg(p->uniquename(),
-         "socket::" IOC_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr);
+         "socket::" ENET_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr);
 
     *s = ESTATUS_SUCCESS;
     return p;
@@ -186,7 +186,7 @@ eProtocolHandle *eComProtocol::new_connection(
     p->start_thread(t, "myconnection");
 
     setpropertys_msg(p->uniquename(),
-         "socket:localhost", econnp_ipaddr);
+         "socket:localhost:" ENET_DEFAULT_SOCKET_PORT_STR, econnp_ipaddr);
 
     *s = ESTATUS_SUCCESS;
     return p;
