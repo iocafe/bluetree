@@ -212,26 +212,26 @@ void eNetService::add_end_point(
     }
 
     element = new eVariable(&row);
-    element->addname("enable", ENAME_NO_MAP);
+    element->addname(enet_endp_enable, ENAME_NO_MAP);
     element->setl(enable);
 
     element = new eVariable(&row);
-    element->addname("protocol", ENAME_NO_MAP);
+    element->addname(enet_endp_protocol, ENAME_NO_MAP);
     element->sets(protocol);
 
     element = new eVariable(&row);
-    element->addname("transport", ENAME_NO_MAP);
+    element->addname(enet_endp_transport, ENAME_NO_MAP);
     element->setl(transport_ix);
 
     if (port) {
         element = new eVariable(&row);
-        element->addname("port", ENAME_NO_MAP);
+        element->addname(enet_endp_port, ENAME_NO_MAP);
         element->sets(port);
     }
 
     /* if (netname) {
         element = new eVariable(&row);
-        element->addname("netname", ENAME_NO_MAP);
+        element->addname(enet_endp_netname, ENAME_NO_MAP);
         element->sets(netname);
     } */
 
@@ -317,7 +317,7 @@ void eNetMaintainThread::maintain_end_points()
         m->getv(ep_nr, transport_col, &tmp);
         if (tmp.compare(v)) goto delete_it;
         v = ep->firstv(ENET_ENDP_PORT);
-        m->getv(ep_nr, transport_col, &tmp);
+        m->getv(ep_nr, port_col, &tmp);
         if (tmp.compare(v)) goto delete_it;
 
         os_unlock();
@@ -389,5 +389,5 @@ delete_it:
 getout_unlock:
     os_unlock();
     delete localvars;
-    osal_debug_error("eNetMaintainThread::publish failed");
+    osal_debug_error("maintain_end_points() failed");
 }

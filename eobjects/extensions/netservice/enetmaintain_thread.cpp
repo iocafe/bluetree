@@ -42,6 +42,7 @@ eNetMaintainThread::eNetMaintainThread(
     m_end_point_config_count = 0;
     m_connect_count = -1;
     m_connect = OS_FALSE;
+    m_connections = new eContainer(this);
 
     initproperties();
 }
@@ -212,6 +213,7 @@ void eNetMaintainThread::finish()
 void eNetMaintainThread::run()
 {
     eContainer *ep, *next_ep;
+    eContainer *con, *next_con;
 
     while (OS_TRUE)
     {
@@ -235,16 +237,20 @@ void eNetMaintainThread::run()
         }
     }
 
-    /* End points are closed here explicitely to make sure that os_lock() doesn't
-     * cause deadlock.
+    /* Connections and end points are closed here explicitely to make sure
+       that os_lock() doesn't cause deadlock.
      */
+    for (con = m_connections->firstc(); con; con = next_con)
+    {
+        next_con = con->nextc();
+        delete_con(con);
+    }
     for (ep = m_end_points->firstc(); ep; ep = next_ep)
     {
         next_ep = ep->nextc();
         delete_ep(ep);
     }
 }
-
 
 
 void eNetMaintainThread::delete_ep(
@@ -269,6 +275,28 @@ void eNetMaintainThread::delete_ep(
     delete ep;
 }
 
+
+void eNetMaintainThread::delete_con(
+    eContainer *con)
+{
+    eVariable *proto_name;
+    eProtocol *proto;
+    eProtocolHandle *handle;
+
+    proto_name = con->firstv(ENET_CONN_PROTOCOL);
+    proto = protocol_by_name(proto_name);
+    if (proto == OS_NULL) return;
+
+    handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
+    if (proto->is_connection_running(handle))
+    {
+        proto->delete_connection(handle);
+        while (proto->is_connection_running(handle)) {
+            os_timeslice();
+        }
+    }
+    delete con;
+}
 
 
 

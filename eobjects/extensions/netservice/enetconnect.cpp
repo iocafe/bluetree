@@ -16,6 +16,12 @@
 #include "extensions/netservice/enetservice.h"
 
 
+const os_char enet_conn_enable[] = "enable";
+const os_char enet_conn_name[] = "name";
+const os_char enet_conn_protocol[] = "protocol";
+const os_char enet_conn_ip[] = "ip";
+const os_char enet_conn_transport[] = "transport";
+
 /**
 ****************************************************************************************************
 
@@ -65,7 +71,7 @@ void eNetService::create_connect_table()
     column->setpropertyi(EVARP_TYPE, OS_INT);
 
     column = new eVariable(columns);
-    column->addname("enable", ENAME_NO_MAP);
+    column->addname(enet_conn_enable, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "enable");
     column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
     column->setpropertyi(EVARP_DEFAULT, OS_TRUE);
@@ -73,7 +79,16 @@ void eNetService::create_connect_table()
         "Enable this row.");
 
     column = new eVariable(columns);
-    column->addname("protocol", ENAME_NO_MAP);
+    column->addname("name", ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, enet_conn_name);
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_DEFAULT, "*");
+    column->setpropertys(EVARP_TTIP,
+        "Process name or IO network name to connect to. This can be a list, if detecting\n"
+        "services by lighthouse. Wildcard \'*\' indicates that any name will be connected to.");
+
+    column = new eVariable(columns);
+    column->addname(enet_conn_protocol, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "protocol");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_ATTR, "list=\"ecom,iocom\"");
@@ -84,7 +99,7 @@ void eNetService::create_connect_table()
         "- \'iocom\': IO device communication protocol.\n");
 
     column = new eVariable(columns);
-    column->addname("ip", ENAME_NO_MAP);
+    column->addname(enet_conn_ip, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "address/port");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_DEFAULT, "localhost");
@@ -94,16 +109,7 @@ void eNetService::create_connect_table()
         "or \'COM1:115200\'");
 
     column = new eVariable(columns);
-    column->addname("name", ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "name");
-    column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_DEFAULT, "*");
-    column->setpropertys(EVARP_TTIP,
-        "Process name or IO network name to connect to. This can be a list, if detecting\n"
-        "services by lighthouse. Wildcard \'*\' indicates that any name will be connected to.");
-
-    column = new eVariable(columns);
-    column->addname("transport", ENAME_NO_MAP);
+    column->addname(enet_conn_transport, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "transport");
     column->setpropertyi(EVARP_TYPE, OS_CHAR);
     column->setpropertys(EVARP_ATTR, "enum=\"1.SOCKET,2.TLS,3.SERIAL\"");
@@ -128,7 +134,7 @@ void eNetService::create_connect_table()
     column->setpropertys(EVARP_TEXT, "active");
     column->setpropertys(EVARP_ATTR, "nosave,rdonly");
     column->setpropertys(EVARP_TTIP,
-        "Number of active connections on resulting this end point.");
+        "Number of active connections on resulting this row.");
 
     column = new eVariable(columns);
     column->addname("tstamp", ENAME_NO_MAP);
@@ -181,34 +187,33 @@ void eNetService::add_connect(
     }
 
     element = new eVariable(&row);
-    element->addname("enable", ENAME_NO_MAP);
+    element->addname(enet_conn_enable, ENAME_NO_MAP);
     element->setl(enable);
+
+    if (name) {
+        element = new eVariable(&row);
+        element->addname(enet_conn_name, ENAME_NO_MAP);
+        element->sets(name);
+    }
 
     if (protocol) {
         element = new eVariable(&row);
-        element->addname("protocol", ENAME_NO_MAP);
+        element->addname(enet_conn_protocol, ENAME_NO_MAP);
         element->sets(protocol);
     }
 
     if (ip) {
         element = new eVariable(&row);
-        element->addname("ip", ENAME_NO_MAP);
+        element->addname(enet_conn_ip, ENAME_NO_MAP);
         element->sets(ip);
     }
 
-    if (name) {
-        element = new eVariable(&row);
-        element->addname("name", ENAME_NO_MAP);
-        element->sets(name);
-    }
-
     element = new eVariable(&row);
-    element->addname("transport", ENAME_NO_MAP);
+    element->addname(enet_conn_transport, ENAME_NO_MAP);
     element->setl(transport);
 
     m_connection_matrix->insert(&row);
 }
-
 
 
 /**
@@ -229,10 +234,10 @@ void eNetMaintainThread::maintain_connections()
     eProtocolHandle *handle;
     eMatrix *m;
     eObject *conf, *columns, *col;
-    eContainer *localvars, *list, *ep, *next_ep;
+    eContainer *localvars, *list, *con, *next_con;
     eVariable *v, *proto_name;
-    os_int enable_col, protocol_col, transport_col, port_col;
-    os_int h, ep_nr;
+    os_int enable_col, name_col, protocol_col, transport_col, ip_col;
+    os_int h, con_nr;
     eVariable tmp;
     eStatus s;
     os_boolean changed = OS_FALSE;
@@ -240,56 +245,60 @@ void eNetMaintainThread::maintain_connections()
     localvars = new eContainer(ETEMPORARY);
 
     os_lock();
-    m = m_netservice->m_endpoint_matrix;
+    m = m_netservice->m_connection_matrix;
     conf = m->configuration();
     if (conf == OS_NULL) goto getout_unlock;
     columns = conf->first(EOID_TABLE_COLUMNS);
     if (columns == OS_NULL) goto getout_unlock;
-    col = columns->byname(enet_endp_enable);
+    col = columns->byname(enet_conn_enable);
     if (col == OS_NULL) goto getout_unlock;
     enable_col = col->oid();
-    col = columns->byname(enet_endp_protocol);
+
+    col = columns->byname(enet_conn_name);
+    if (col == OS_NULL) goto getout_unlock;
+    name_col = col->oid();
+
+    col = columns->byname(enet_conn_protocol);
     if (col == OS_NULL) goto getout_unlock;
     protocol_col = col->oid();
-    col = columns->byname(enet_endp_transport);
+
+    col = columns->byname(enet_conn_ip);
+    if (col == OS_NULL) goto getout_unlock;
+    ip_col = col->oid();
+
+    col = columns->byname(enet_conn_transport);
     if (col == OS_NULL) goto getout_unlock;
     transport_col = col->oid();
-    col = columns->byname(enet_endp_port);
-    if (col == OS_NULL) goto getout_unlock;
-    port_col = col->oid();
-    /* col = columns->byname(enet_endp_netname);
-    if (col == OS_NULL) goto getout;
-    netname_col = col->oid(); */
     os_unlock();
 
-    /* Remove end points which are no longer needed or have changed.
+    /* Remove connections which are no longer needed or have changed.
      */
-    for (ep = m_end_points->firstc(); ep; ep = next_ep)
+    for (con = m_connections->firstc(); con; con = next_con)
     {
-        next_ep = ep->nextc();
-        ep_nr = ep->oid();
-        proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
+        next_con = con->nextc();
+        con_nr = con->oid();
+        proto_name = con->firstv(ENET_CONN_PROTOCOL);
         proto = protocol_by_name(proto_name);
         if (proto == OS_NULL) {
             osal_debug_error_str("Program error, unknown proto ", proto_name->gets());
-            delete ep;
+            delete con;
             continue;
         }
-        handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
-        if (!proto->is_end_point_running(handle)) continue;
+        handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
+        if (!proto->is_connection_running(handle)) continue;
 
         os_timeslice();
         os_lock();
 
-        if ((m->geti(ep_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) goto delete_it;
-        if (m->geti(ep_nr, enable_col) == 0) goto delete_it;
-        m->getv(ep_nr, protocol_col, &tmp);
+        if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) goto delete_it;
+        if (m->geti(con_nr, enable_col) == 0) goto delete_it;
+        m->getv(con_nr, protocol_col, &tmp);
         if (tmp.compare(proto_name)) goto delete_it;
-        v = ep->firstv(ENET_ENDP_TRANSPORT);
-        m->getv(ep_nr, transport_col, &tmp);
+        v = con->firstv(ENET_CONN_TRANSPORT);
+        m->getv(con_nr, transport_col, &tmp);
         if (tmp.compare(v)) goto delete_it;
-        v = ep->firstv(ENET_ENDP_PORT);
-        m->getv(ep_nr, transport_col, &tmp);
+        v = con->firstv(ENET_CONN_IP);
+        m->getv(con_nr, ip_col, &tmp);
         if (tmp.compare(v)) goto delete_it;
 
         os_unlock();
@@ -297,37 +306,37 @@ void eNetMaintainThread::maintain_connections()
 
 delete_it:
         os_unlock();
-        delete_ep(ep);
+        delete_con(con);
         changed = OS_TRUE;
     }
 
-    /* Generate list of end points to add.
+    /* Generate list of connections to add.
      */
     list = new eContainer(localvars);
     os_lock();
     h = m->nrows();
-    for (ep_nr = 0; ep_nr < h; ep_nr ++) {
-        if ((m->geti(ep_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
-        if (m->geti(ep_nr, enable_col) == 0) continue;
-        if (m_end_points->first(ep_nr)) continue;
+    for (con_nr = 0; con_nr < h; con_nr ++) {
+        if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
+        if (m->geti(con_nr, enable_col) == 0) continue;
+        if (m_connections->first(con_nr)) continue;
 
-        ep = new eContainer(list, ep_nr);
-        v = new eVariable(ep, ENET_ENDP_PROTOCOL);
-        m->getv(ep_nr, protocol_col, v);
-        v = new eVariable(ep, ENET_ENDP_TRANSPORT);
-        m->getv(ep_nr, transport_col, v);
-        v = new eVariable(ep, ENET_ENDP_PORT);
-        m->getv(ep_nr, port_col, v);
+        con = new eContainer(list, con_nr);
+        v = new eVariable(con, ENET_CONN_PROTOCOL);
+        m->getv(con_nr, protocol_col, v);
+        v = new eVariable(con, ENET_CONN_TRANSPORT);
+        m->getv(con_nr, transport_col, v);
+        v = new eVariable(con, ENET_CONN_IP);
+        m->getv(con_nr, ip_col, v);
     }
     os_unlock();
 
-    /* Add end points (no lock).
+    /* Add connections (no lock).
      */
-    for (ep = list->firstc(); ep; ep = next_ep)
+    for (con = list->firstc(); con; con = next_con)
     {
-        next_ep = ep->nextc();
-        ep_nr = ep->oid();
-        proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
+        next_con = con->nextc();
+        con_nr = con->oid();
+        proto_name = con->firstv(ENET_CONN_PROTOCOL);
         proto = protocol_by_name(proto_name);
         if (proto == OS_NULL) {
             osal_debug_error_str("Unknown protocol: ", proto_name->gets());
@@ -335,24 +344,18 @@ delete_it:
             continue;
         }
 
-        handle = proto->new_end_point(ep_nr, OS_NULL, &s);
+        handle = proto->new_connection(con_nr, OS_NULL, &s);
         if (handle == OS_NULL) {
-            osal_debug_error_str("unable to create end point: ", proto_name->gets());
+            osal_debug_error_str("unable to create connection: ", proto_name->gets());
             // update status in table, status s
             continue;
         }
-        handle->adopt(ep, ENET_ENDP_PROTOCOL_HANDLE);
+        handle->adopt(con, ENET_CONN_PROTOCOL_HANDLE);
 
-        /* Adopt, successfull created end point.
+        /* Adopt, successfull created connection.
          */
-        ep->adopt(m_end_points, ep_nr);
+        con->adopt(m_connections, con_nr);
         changed = OS_TRUE;
-    }
-
-    /* Initiate end point information update in UDP multicasts.
-     */
-    if (changed) {
-        setpropertyl(ENETMAINTAINP_CONFIG_COUNTER, ++m_end_point_config_count);
     }
 
     delete localvars;
@@ -361,5 +364,5 @@ delete_it:
 getout_unlock:
     os_unlock();
     delete localvars;
-    osal_debug_error("eNetMaintainThread::publish failed");
+    osal_debug_error("maintain_connections() failed");
 }

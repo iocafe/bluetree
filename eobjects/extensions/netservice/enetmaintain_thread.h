@@ -140,8 +140,15 @@ protected:
      */
     void maintain_connections();
 
+    /* Delete end point (stops end point thread and cleans up)
+     */
     void delete_ep(
         eContainer *ep);
+
+    /* Delete connection (stops connection thread and cleans up)
+     */
+    void delete_con(
+        eContainer *con);
 
     /* Get protocol by name
      */
@@ -165,6 +172,8 @@ protected:
      */
     eContainer *m_protocols;
 
+/* --- Maintain end points --- */
+
     /** List of running end point, data about those.
      */
     eContainer *m_end_points;
@@ -187,6 +196,7 @@ protected:
      */
     os_long m_end_point_config_count;
 
+/* --- Maintain connections --- */
     /** Value of ELIGHTHOUSEP_CONNECT property. When changed, the connections are to be configured..
      */
     os_int m_connect_count;
@@ -200,6 +210,11 @@ protected:
     /** Timer value when m_connect flag was set.
      */
     os_long m_connect_timer;
+
+    /** List of running connections, data about those.
+     */
+    eContainer *m_connections;
+
 };
 
 /* Start enet maintenance thread.

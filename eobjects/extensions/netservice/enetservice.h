@@ -25,6 +25,7 @@
 #include "extensions/netservice/enetmaintain_thread.h"
 #include "extensions/netservice/enetserv_prm.h"
 #include "extensions/netservice/enetendpoints.h"
+#include "extensions/netservice/enetconnect.h"
 
 
 /**
