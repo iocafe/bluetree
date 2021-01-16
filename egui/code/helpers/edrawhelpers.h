@@ -19,6 +19,8 @@
 #define EDRAWHELPERS_H_
 #include "egui.h"
 
+#define EDRAW_VALUE_DEFAULT 0
+#define EDRAW_VALUE_TABLE 1
 
 #define EDRAW_TTIP_DEFAULT 0
 #define EDRAW_TTIP_CELL_VALUE 1
@@ -31,7 +33,8 @@ void edraw_value(
     eComponent *compo, // for redirs, tool tip, etc
     eAttrBuffer& attr,
     os_int value_w = -1,
-    eRect *r = OS_NULL);
+    eRect *r = OS_NULL,
+    os_int dflags = EDRAW_VALUE_DEFAULT);
 
 void edraw_tooltip(
     eObject *obj,

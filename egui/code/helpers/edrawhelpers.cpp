@@ -32,12 +32,12 @@ void edraw_value(
     eComponent *compo, // for redirs, tool tip, etc
     eAttrBuffer& attr,
     os_int value_w,
-    eRect *r)
+    eRect *r,
+    os_int dflags)
 {
     const os_char *text;
     ImVec2 pos, pos_max;
-    ImU32 color, check_col;
-    // ImVec4 fcolor;
+    ImU32 check_col;
     ImDrawList *draw_list;
     int extra_w, x_pos;
     const os_int pad = 2;
@@ -80,17 +80,28 @@ void edraw_value(
             pos_max.y += square_sz;
 
             if (state_bits == OSAL_STATE_CONNECTED) {
-                color = ImGui::GetColorU32(ImGuiCol_Border);
+                if (checked) {
+                    check_col = ImGui::GetColorU32(attr.rdonly() ? ImGuiCol_Border : ImGuiCol_CheckMark);
+                }
+                else {
+                    check_col = ImGui::GetColorU32(ImGuiCol_Button);
+                }
             }
             else {
-                color = edraw_get_state_color(state_bits);
+                check_col = edraw_get_state_color(state_bits);
             }
+
             draw_list = ImGui::GetWindowDrawList();
-            draw_list->AddRect(pos, pos_max, color, 0);
+            // draw_list->AddRect(pos, pos_max, color, 0);
             if (checked) {
-                check_col = ImGui::GetColorU32(ImGuiCol_CheckMark);
                 pos.x++;
                 ImGui::RenderCheckMark(draw_list, pos, check_col, square_sz - pad);
+            }
+            else if ((dflags & EDRAW_VALUE_TABLE) == 0 || state_bits != OSAL_STATE_CONNECTED)
+            {
+                pos.x += square_sz/2;
+                pos.y += square_sz/2;
+                ImGui::RenderBullet(draw_list, pos, check_col);
             }
             break;
 

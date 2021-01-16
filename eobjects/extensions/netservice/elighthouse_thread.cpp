@@ -477,7 +477,7 @@ eStatus eLightHouseService::publish()
         ss = osal_socket_get_ip_and_port(port->gets(),
             iface_addr_bin, sizeof(iface_addr_bin),
             &port_nr, &is_ipv6, OSAL_STREAM_LISTEN, 0);
-        osal_debug_assert(ss);
+        osal_debug_assert(ss == OSAL_SUCCESS);
         if (port_nr <= 0) continue;
 
         transport_ix = (enetEndpTransportIx)m->geti(y, transport_col);
