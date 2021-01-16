@@ -109,7 +109,7 @@ public:
         eVariable *x,
         os_int flags);
 
-    /* Process a callback from a child object.
+    /* A callback by a child object.
      */
     virtual eStatus oncallback(
         eCallbackEvent event,

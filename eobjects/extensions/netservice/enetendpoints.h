@@ -24,6 +24,7 @@ extern const os_char enet_endp_enable[];
 extern const os_char enet_endp_protocol[];
 extern const os_char enet_endp_transport[];
 extern const os_char enet_endp_port[];
+extern const os_char enet_endp_ok[];
 extern const os_char enet_endp_netname[];
 
 typedef enum {

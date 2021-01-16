@@ -21,6 +21,7 @@ const os_char enet_endp_enable[] = "enable";
 const os_char enet_endp_protocol[] = "protocol";
 const os_char enet_endp_transport[] = "transport";
 const os_char enet_endp_port[] = "port";
+const os_char enet_endp_ok[] = "ok";
 const os_char enet_endp_netname[] = "netname";
 
 
@@ -77,11 +78,13 @@ void eNetService::create_end_point_table(
     column->addname("ix", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "row");
     column->setpropertyi(EVARP_TYPE, OS_INT);
+    column->setpropertys(EVARP_ATTR, "rdonly");
 
     column = new eVariable(columns);
     column->addname(enet_endp_enable, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "enable");
     column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
+    column->setpropertyl(EVARP_DEFAULT, OS_TRUE);
     column->setpropertys(EVARP_TTIP,
         "Create end point for this row.");
 
@@ -90,6 +93,7 @@ void eNetService::create_end_point_table(
     column->setpropertys(EVARP_TEXT, "protocol");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_ATTR, "list=\"ecom,iocom\"");
+    column->setpropertys(EVARP_DEFAULT, "iocom");
     column->setpropertys(EVARP_TTIP,
         "Communication protocol.\n"
         "- \'ecom\': object based protocol (for glass user interface, etc).\n"
@@ -100,6 +104,7 @@ void eNetService::create_end_point_table(
     column->setpropertys(EVARP_TEXT, "transport");
     column->setpropertyi(EVARP_TYPE, OS_CHAR);
     column->setpropertys(EVARP_ATTR, "enum=\"1.SOCKET,2.TLS,3.SERIAL\"");
+    column->setpropertyl(EVARP_DEFAULT, ENET_ENDP_TLS);
     column->setpropertys(EVARP_TTIP,
         "Transport:\n"
         "- \'SOCKET\': unsecured socket connection, .\n"
@@ -110,6 +115,7 @@ void eNetService::create_end_point_table(
     column->addname(enet_endp_port, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "port");
     column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_DEFAULT, "6360");
     column->setpropertys(EVARP_TTIP,
         "Port to listen, typical:\n"
         "- \'6371\': ecom socket.\n"
@@ -120,6 +126,15 @@ void eNetService::create_end_point_table(
         "Netwok interface can be specified for example \'192.168.1.222:6371\'.\n"
         "Use brackets around IP address to mark IPv6 address, for\n"
         "example \'[localhost]:12345\', or \'[]:12345\' for empty IP.");
+
+    column = new eVariable(columns);
+    column->addname(enet_endp_ok, ENAME_NO_MAP);
+    column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
+    column->setpropertys(EVARP_TEXT, "ready");
+    column->setpropertys(EVARP_ATTR, "nosave,rdonly");
+    column->setpropertys(EVARP_TTIP,
+        "Checked if all is good and end point is listening.");
+
 
     /* column = new eVariable(columns);
     column->addname(enet_endp_netname, ENAME_NO_MAP);
@@ -321,6 +336,12 @@ void eNetMaintainThread::maintain_end_points()
 delete_it:
         os_unlock();
         delete_ep(ep);
+
+        /* Uncheck io in endpoints table.
+         */
+        tmp.setl(OS_FALSE);
+        set_ep_status(ep_nr, enet_endp_ok, &tmp);
+
         changed = OS_TRUE;
     }
 
@@ -341,6 +362,7 @@ delete_it:
         m->getv(ep_nr, transport_col, v);
         v = new eVariable(ep, ENET_ENDP_PORT);
         m->getv(ep_nr, port_col, v);
+        ep->setflags(EOBJ_PERSISTENT_CALLBACK);
     }
     os_unlock();
 
@@ -370,6 +392,7 @@ delete_it:
             continue;
         }
         handle->adopt(ep, ENET_ENDP_PROTOCOL_HANDLE);
+        handle->setflags(EOBJ_PERSISTENT_CALLBACK);
 
         /* Adopt, successfull created end point.
          */
@@ -390,4 +413,67 @@ getout_unlock:
     os_unlock();
     delete localvars;
     osal_debug_error("maintain_end_points() failed");
+}
+
+
+void eNetMaintainThread::delete_ep(
+    eContainer *ep)
+{
+    eVariable *proto_name;
+    eProtocol *proto;
+    eProtocolHandle *handle;
+
+    proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
+    proto = protocol_by_name(proto_name);
+    if (proto == OS_NULL) return;
+
+    handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
+    if (proto->is_end_point_running(handle))
+    {
+        proto->delete_end_pont(handle);
+        while (proto->is_end_point_running(handle)) {
+            os_timeslice();
+        }
+    }
+    delete ep;
+}
+
+/* Update end point status "ok", etc.
+ */
+void eNetMaintainThread::ep_status_changed(
+    eContainer *ep)
+{
+    eVariable *tmp;
+
+    eProtocolHandle *handle;
+    handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
+
+    tmp = new eVariable(ETEMPORARY);
+    handle->propertyv(EPROHANDP_ISOPEN, tmp);
+    set_ep_status(ep->oid(), enet_endp_ok, tmp);
+    delete tmp;
+}
+
+void eNetMaintainThread::set_ep_status(
+    os_int row_nr,
+    const os_char *column_name,
+    eVariable *value)
+{
+    eVariable *element, *where;
+    eContainer *row;
+
+    where = new eVariable(ETEMPORARY);
+    row = new eContainer(ETEMPORARY);
+
+    element = new eVariable(row);
+    element->addname(column_name, ENAME_NO_MAP);
+    element->setv(value);
+
+    where->sets("[");
+    where->appendl(row_nr + 1);
+    where->appends("]");
+    etable_update(this, "//netservice/endpoints", OS_NULL, where->gets(), row,
+        ETABLE_ADOPT_ARGUMENT);
+
+    delete where;
 }

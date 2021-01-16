@@ -127,7 +127,7 @@ eProtocolHandle *eComProtocol::new_end_point(
     eProtocolHandle *p;
     eThread *t;
     eVariable tmp;
-    const os_char *transport_name;
+    const os_char *transport_name, *un;
 
     OSAL_UNUSED(parameters);
 
@@ -163,14 +163,20 @@ eProtocolHandle *eComProtocol::new_end_point(
     tmp.appends(transport_name);
     p->start_thread(t, tmp.gets());
 
+    /* Bind property handles "is open" property to end point's same property.
+     */
+    un = p->uniquename();
+    p->bind(EPROHANDP_ISOPEN, un, eendpp_isopen, EBIND_TEMPORARY);
+
+    /* Set end point parameters as string.
+     */
     tmp.sets(transport_name);
     tmp.appends(":");
     if (os_strchr(parameters->port, ':') == OS_NULL) {
         tmp.appends(":");
     }
     tmp.appends(parameters->port);
-    setpropertys_msg(p->uniquename(), tmp.gets(), eendpp_ipaddr);
-         /* "socket::" ENET_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr); */
+    setpropertys_msg(un, tmp.gets(), eendpp_ipaddr);
 
     *s = ESTATUS_SUCCESS;
     return p;

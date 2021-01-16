@@ -111,8 +111,9 @@ void eConnection::setupclass()
     eclasslist_add(cls, (eNewObjFunc)newobj, "eConnection");
     addproperty(cls, ECONNP_CLASSID, econnp_classid, "class ID", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty(cls, ECONNP_IPADDR, econnp_ipaddr, "IP", EPRO_PERSISTENT|EPRO_SIMPLE);
-    p = addpropertyl(cls, ECONNP_ISOPEN, econnp_isopen, OS_FALSE, "is open", EPRO_NOONPRCH);
-    p->setpropertys(EVARP_ATTR, "rdonly;chkbox");
+    p = addpropertyb(cls, ECONNP_ISOPEN, econnp_isopen, OS_FALSE, "is open", EPRO_NOONPRCH);
+    p->setpropertys(EVARP_ATTR, "rdonly");
+    propertysetdone(cls);
     os_unlock();
 }
 

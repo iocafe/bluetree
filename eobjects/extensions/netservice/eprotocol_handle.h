@@ -18,6 +18,20 @@
 #define EPROTOCOL_HANDLE_H_
 #include "extensions/netservice/enetservice.h"
 
+/**
+****************************************************************************************************
+  Defines
+****************************************************************************************************
+*/
+
+/* Property numbers.
+ */
+#define EPROHANDP_ISOPEN 10
+
+/* Property names.
+ */
+extern const os_char
+    eprohandp_isopen[];
 
 
 /**
@@ -66,6 +80,13 @@ public:
         return new eProtocolHandle(parent, id, flags);
     }
 
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
 
     /**
     ************************************************************************************************
@@ -106,15 +127,18 @@ protected:
     ************************************************************************************************
     */
 
-    /* Thread handle. Connections and end points typically run in their own thread.
-       OS_NULL if thread has not been started.
+    /** Thread handle. Connections and end points typically run in their own thread.
+        OS_NULL if thread has not been started.
      */
     eThreadHandle *m_threadhandle;
 
-    /* Name of commection or end point in process name space.
+    /** Name of commection or end point in process name space.
      */
     eVariable *m_threadname;
 
+    /** Communication channel open flag.
+     */
+    os_boolean m_is_open;
 };
 
 

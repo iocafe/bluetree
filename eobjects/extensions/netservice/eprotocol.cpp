@@ -82,8 +82,6 @@ void eProtocol::setupclass()
 eStatus eProtocol::initialize_protocol(
     void *parameters)
 {
-    eProtocol::setupclass();
-
     return ESTATUS_SUCCESS;
 }
 

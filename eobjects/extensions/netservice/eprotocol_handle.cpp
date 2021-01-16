@@ -15,6 +15,11 @@
 */
 #include "extensions/netservice/enetservice.h"
 
+/* Property names.
+ */
+const os_char
+    eprohandp_isopen[] = "isopen";
+
 
 /**
 ****************************************************************************************************
@@ -29,6 +34,7 @@ eProtocolHandle::eProtocolHandle(
 {
     m_threadhandle = OS_NULL;
     m_threadname = new eVariable(this);
+    m_is_open = OS_FALSE;
 }
 
 
@@ -58,13 +64,65 @@ eProtocolHandle::~eProtocolHandle()
 void eProtocolHandle::setupclass()
 {
     const os_int cls = ECLASSID_PROTOCOL_HANDLE;
+    eVariable *p;
 
     /* Add the class to class list.
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eProtocolHandle");
+    p = addpropertyb(cls, EPROHANDP_ISOPEN, eprohandp_isopen, OS_FALSE, "is open", EPRO_DEFAULT);
+    p->setpropertys(EVARP_ATTR, "rdonly");
+    propertysetdone(cls);
     os_unlock();
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Called to inform the class about property value change (override).
+
+  The onpropertychange() function is called when class'es property changes, unless the
+  property is flagged with EPRO_NOONPRCH.
+  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
+  in class members and and return it when simpleproperty() is called.
+
+  Notice for change logging: Previous value is still valid when this function is called.
+  You can get the old value by calling property() function inside onpropertychange()
+  function.
+
+  @param   propertynr Property number of changed property.
+  @param   x Variable containing the new value.
+  @param   flags
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
+           indicate that there was no property with given property number.
+
+****************************************************************************************************
+*/
+eStatus eProtocolHandle::onpropertychange(
+    os_int propertynr,
+    eVariable *x,
+    os_int flags)
+{
+    os_boolean is_open;
+
+    switch (propertynr)
+    {
+        case EPROHANDP_ISOPEN:
+            is_open = x->geti();
+            if (is_open != m_is_open) {
+                m_is_open = is_open;
+                docallback(ECALLBACK_STATUS_CHANGED);
+            }
+            return ESTATUS_SUCCESS;
+
+        default:
+            break;
+    }
+
+    return eObject::onpropertychange(propertynr, x, flags);
+}
+
 
 
 /**

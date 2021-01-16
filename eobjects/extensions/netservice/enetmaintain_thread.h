@@ -136,25 +136,43 @@ protected:
      */
     void maintain_end_points();
 
-    /* Create and delete connections.
-     */
-    void maintain_connections();
 
     /* Delete end point (stops end point thread and cleans up)
      */
     void delete_ep(
         eContainer *ep);
 
+    /* End point status change.
+     */
+    void ep_status_changed(
+        eContainer *ep);
+
+    void set_ep_status(
+        os_int row_nr,
+        const os_char *column_name,
+        eVariable *value);
+
+    /* Create and delete connections.
+     */
+    void maintain_connections();
+
+
     /* Delete connection (stops connection thread and cleans up)
      */
     void delete_con(
         eContainer *con);
 
+    /* A callback by a child object.
+     */
+    virtual eStatus oncallback(
+        eCallbackEvent event,
+        eObject *obj,
+        eObject *appendix);
+
     /* Get protocol by name
      */
     eProtocol *protocol_by_name(
         eVariable *proto_name);
-
 
 
     /**

@@ -37,6 +37,7 @@ eNetMaintainThread::eNetMaintainThread(
     m_publish_count = -1;
     m_publish = OS_FALSE;
     m_end_points = new eContainer(this);
+    m_end_points->setflags(EOBJ_PERSISTENT_CALLBACK);
     m_protocols = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
     m_protocols->ns_create();
     m_end_point_config_count = 0;
@@ -253,51 +254,48 @@ void eNetMaintainThread::run()
 }
 
 
-void eNetMaintainThread::delete_ep(
-    eContainer *ep)
+
+
+
+
+/**
+****************************************************************************************************
+
+  @brief Process a callback from a child object.
+
+  The ePersistent::oncallback function
+
+****************************************************************************************************
+*/
+eStatus eNetMaintainThread::oncallback(
+    eCallbackEvent event,
+    eObject *obj,
+    eObject *appendix)
 {
-    eVariable *proto_name;
-    eProtocol *proto;
-    eProtocolHandle *handle;
+    // os_int nr;
 
-    proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
-    proto = protocol_by_name(proto_name);
-    if (proto == OS_NULL) return;
-
-    handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
-    if (proto->is_end_point_running(handle))
+    switch (event)
     {
-        proto->delete_end_pont(handle);
-        while (proto->is_end_point_running(handle)) {
-            os_timeslice();
-        }
+        case ECALLBACK_STATUS_CHANGED:
+            if (appendix == OS_NULL) break;
+            // nr = appendix->oid();
+            if (obj == m_end_points) {
+                ep_status_changed(eContainer::cast(appendix));
+            }
+            break;
+
+        default:
+            break;
     }
-    delete ep;
-}
 
-
-void eNetMaintainThread::delete_con(
-    eContainer *con)
-{
-    eVariable *proto_name;
-    eProtocol *proto;
-    eProtocolHandle *handle;
-
-    proto_name = con->firstv(ENET_CONN_PROTOCOL);
-    proto = protocol_by_name(proto_name);
-    if (proto == OS_NULL) return;
-
-    handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
-    if (proto->is_connection_running(handle))
-    {
-        proto->delete_connection(handle);
-        while (proto->is_connection_running(handle)) {
-            os_timeslice();
-        }
+    /* If we need to pass callback to parent class.
+     */
+    if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
+        eThread::oncallback(event, obj, appendix);
     }
-    delete con;
-}
 
+    return ESTATUS_SUCCESS;
+}
 
 
 void eNetMaintainThread::add_protocol(
@@ -333,10 +331,6 @@ void enet_start_maintain_thread(
     eNetMaintainThread *maintain;
     eProtocol *proto;
     const os_char netservice_name[] = "//netservice";
-
-    /* Set up class for use.
-     */
-    eNetMaintainThread::setupclass();
 
     /* Create and start thread to listen for maintain UDP multicasts,
        name it "_maintain" in process name space.
