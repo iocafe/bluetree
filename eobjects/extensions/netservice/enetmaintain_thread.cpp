@@ -18,9 +18,9 @@
 /* Property names.
  */
 const os_char
-    enetmaintainp_publish[] = "publish",
-    enetmaintainp_config_counter[] = "epconfigcnt",
-    enetmaintainp_connect[] = "connect";
+    enetmp_end_pont_table_modif_count[] = "publish",
+    enetmp_end_point_config_count[] = "epconfigcnt",
+    enetmp_connect_table_modif_count[] = "connect";
 
 /**
 ****************************************************************************************************
@@ -34,16 +34,20 @@ eNetMaintainThread::eNetMaintainThread(
     : eThread(parent, oid, flags)
 {
     m_netservice = OS_NULL;
-    m_publish_count = -1;
-    m_publish = OS_FALSE;
+    m_end_point_table_modif_count = -1;
+    m_configure_end_points = OS_FALSE;
+    m_end_point_config_timer = 0;
+    m_end_point_config_count = 0;
+
     m_end_points = new eContainer(this);
     m_end_points->setflags(EOBJ_PERSISTENT_CALLBACK);
     m_protocols = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
     m_protocols->ns_create();
-    m_end_point_config_count = 0;
-    m_connect_count = -1;
-    m_connect = OS_FALSE;
+    m_connect_table_modif_count = -1;
+    m_configure_connections = OS_FALSE;
+    m_connect_timer = 0;
     m_connections = new eContainer(this);
+    m_timer_set = OS_FALSE;
 
     initproperties();
 }
@@ -79,11 +83,11 @@ void eNetMaintainThread::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eNetMaintainThread");
-    addpropertyl(cls, ENETMAINTAINP_PUBLISH, enetmaintainp_publish,
+    addpropertyl(cls, ENETMP_END_POINT_TABLE_MODIF_COUNT, enetmp_end_pont_table_modif_count,
         -1, "update end points", EPRO_DEFAULT);
-    addpropertyl(cls, ENETMAINTAINP_CONFIG_COUNTER, enetmaintainp_config_counter,
-        0, "end point configuration trigger", EPRO_DEFAULT);
-    addpropertyl(cls, ENETMAINTAINP_CONNECT, enetmaintainp_connect,
+    addpropertyl(cls, ENETMP_END_POINT_CONFIG_COUNT, enetmp_end_point_config_count,
+        0, "end point configuration trigger", EPRO_NOONPRCH);
+    addpropertyl(cls, ENETP_CONNECT_TABLE_MODIF_COUNT, enetmp_connect_table_modif_count,
         -1, "update connections", EPRO_DEFAULT);
     propertysetdone(cls);
     os_unlock();
@@ -156,23 +160,25 @@ eStatus eNetMaintainThread::onpropertychange(
 
     switch (propertynr)
     {
-        case ENETMAINTAINP_PUBLISH:
+        case ENETMP_END_POINT_TABLE_MODIF_COUNT:
             count = x->geti();
-            if (count != m_publish_count) {
-                m_publish_count = count;
-                m_publish = OS_TRUE;
-                os_get_timer(&m_publish_timer);
+            if (count != m_end_point_table_modif_count) {
+                m_end_point_table_modif_count = count;
+                m_configure_end_points = OS_TRUE;
+                os_get_timer(&m_end_point_config_timer);
                 timer(100);
+                m_timer_set = OS_TRUE;
             }
             break;
 
-        case ENETMAINTAINP_CONNECT:
+        case ENETP_CONNECT_TABLE_MODIF_COUNT:
             count = x->geti();
-            if (count != m_connect_count) {
-                m_connect_count = count;
-                m_connect = OS_TRUE;
+            if (count != m_connect_table_modif_count) {
+                m_connect_table_modif_count = count;
+                m_configure_connections = OS_TRUE;
                 os_get_timer(&m_connect_timer);
                 timer(100);
+                m_timer_set = OS_TRUE;
             }
             break;
 
@@ -218,23 +224,28 @@ void eNetMaintainThread::run()
 
     while (OS_TRUE)
     {
-        alive(EALIVE_RETURN_IMMEDIATELY);
+        alive();
         if (exitnow()) {
             break;
         }
 
-        if (m_publish) if (os_has_elapsed(&m_publish_timer, 100))
+        if (m_configure_end_points) if (os_has_elapsed(&m_end_point_config_timer, 90))
         {
             maintain_end_points();
-            timer(0);
-            m_publish = OS_FALSE;
+            m_configure_end_points = OS_FALSE;
         }
 
-        if (m_connect) if (os_has_elapsed(&m_connect_timer, 100))
+        if (m_configure_connections) if (os_has_elapsed(&m_connect_timer, 90))
         {
             maintain_connections();
+            m_configure_connections = OS_FALSE;
+        }
+
+        if (!m_configure_end_points &&
+            !m_configure_connections)
+        {
             timer(0);
-            m_connect = OS_FALSE;
+            m_timer_set = OS_FALSE;
         }
     }
 
@@ -338,11 +349,11 @@ void enet_start_maintain_thread(
     maintain = new eNetMaintainThread();
     maintain->addname("//_netmaintain");
     maintain->set_netservice(netservice);
-    maintain->bind(ENETMAINTAINP_PUBLISH, netservice_name,
+    maintain->bind(ENETMP_END_POINT_TABLE_MODIF_COUNT, netservice_name,
         enetservp_endpoint_table_change_counter);
-    maintain->bind(ENETMAINTAINP_CONFIG_COUNTER, netservice_name,
+    maintain->bind(ENETMP_END_POINT_CONFIG_COUNT, netservice_name,
         enetservp_endpoint_config_counter, EBIND_CLIENTINIT);
-    maintain->bind(ENETMAINTAINP_CONNECT, netservice_name,
+    maintain->bind(ENETP_CONNECT_TABLE_MODIF_COUNT, netservice_name,
         enetservp_connect_table_change_counter);
 
     while ((proto = (eProtocol*)netservice->protocols()->first())) {

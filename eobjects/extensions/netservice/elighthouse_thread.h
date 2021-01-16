@@ -190,6 +190,8 @@ protected:
      */
     os_boolean m_publish;
 
+    os_timer m_publish_timer;
+
     /** OS_TRUE if initialized for sending UDP multicasts.
      */
     os_boolean m_udp_send_initialized;
@@ -197,6 +199,8 @@ protected:
     /** If data to publish was set successfully (something to publish)
      */
     eStatus m_publish_status;
+
+    os_boolean m_run_server_now;
 };
 
 /* Start light house thread.

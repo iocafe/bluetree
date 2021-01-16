@@ -144,14 +144,6 @@ void eNetService::create_end_point_table(
         "Device network name, used only with IOCOM protocol."); */
 
     /* column = new eVariable(columns);
-    column->addname(enet_endp_serv_cert, ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "server certificate");
-    column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_TTIP,
-        "Server certificate for this end point.\n"
-        "If empty, the common cerver certificate is used."); */
-
-    /* column = new eVariable(columns);
     column->addname("active", ENAME_NO_MAP);
     column->setpropertyi(EVARP_TYPE, OS_INT);
     column->setpropertys(EVARP_TEXT, "active connections");
@@ -313,8 +305,6 @@ void eNetMaintainThread::maintain_end_points()
             delete ep;
             continue;
         }
-        handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
-        if (!proto->is_end_point_running(handle)) continue;
 
         os_timeslice();
         os_lock();
@@ -403,7 +393,7 @@ delete_it:
     /* Initiate end point information update in UDP multicasts.
      */
     if (changed) {
-        setpropertyl(ENETMAINTAINP_CONFIG_COUNTER, ++m_end_point_config_count);
+        setpropertyl(ENETMP_END_POINT_CONFIG_COUNT, ++m_end_point_config_count);
     }
 
     delete localvars;
@@ -451,6 +441,7 @@ void eNetMaintainThread::ep_status_changed(
     tmp = new eVariable(ETEMPORARY);
     handle->propertyv(EPROHANDP_ISOPEN, tmp);
     set_ep_status(ep->oid(), enet_endp_ok, tmp);
+    setpropertyl(ENETMP_END_POINT_CONFIG_COUNT, ++m_end_point_config_count);
     delete tmp;
 }
 

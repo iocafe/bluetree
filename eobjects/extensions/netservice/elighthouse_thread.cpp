@@ -37,6 +37,7 @@ eLightHouseService::eLightHouseService(
     m_send_udp_multicasts = OS_FALSE;
     m_publish_count = 0;
     m_publish = OS_FALSE;
+    m_publish_timer = 0;
     m_publish_status = ESTATUS_FAILED;
     m_udp_send_initialized = OS_FALSE;
 
@@ -112,7 +113,7 @@ void eLightHouseService::onmessage(
         {
             case ECMD_TIMER:
                 if (m_publish_status == ESTATUS_SUCCESS) {
-                    run_server();
+                    m_run_server_now = OS_TRUE;
                 }
                 return;
 
@@ -163,6 +164,10 @@ eStatus eLightHouseService::onpropertychange(
             if (count != m_publish_count) {
                 m_publish_count = count;
                 m_publish = OS_TRUE;
+                os_get_timer(&m_publish_timer);
+                if (m_send_udp_multicasts) {
+                    timer(100);
+                }
             }
             break;
 
@@ -225,7 +230,7 @@ void eLightHouseService::run()
         if (exitnow()) break;
 
         if (m_send_udp_multicasts) {
-            if (m_publish) {
+            if (m_publish) if (os_has_elapsed(&m_publish_timer, 90)){
                 if (!m_udp_send_initialized) {
                     ioc_initialize_lighthouse_server(&m_server, 10);
                     m_udp_send_initialized = OS_TRUE;
@@ -234,9 +239,14 @@ void eLightHouseService::run()
                 m_publish_status = publish();
                 m_publish = OS_FALSE;
                 if (m_publish_status == ESTATUS_SUCCESS) {
-                    run_server();
+                    m_run_server_now = OS_TRUE;
                     timer(4500);
                 }
+            }
+
+            if (m_run_server_now) {
+                run_server();
+                m_run_server_now = OS_FALSE;
             }
         }
         else if (m_udp_send_initialized)
@@ -424,7 +434,7 @@ eStatus eLightHouseService::publish()
     eContainer *localvars, *list, *item;
     eVariable *v, *port;
     const os_char *protocol_short;
-    os_int enable_col, protocol_col, transport_col, port_col; //, netname_col;
+    os_int enable_col, ok_col, protocol_col, transport_col, port_col; //, netname_col;
     os_int h, y, is_tls, item_id, port_nr;
     os_int tls_port, tcp_port;
     enetEndpTransportIx transport_ix;
@@ -450,6 +460,9 @@ eStatus eLightHouseService::publish()
     col = columns->byname(enet_endp_enable);
     if (col == OS_NULL) goto getout;
     enable_col = col->oid();
+    col = columns->byname(enet_endp_ok);
+    if (col == OS_NULL) goto getout;
+    ok_col = col->oid();
     col = columns->byname(enet_endp_protocol);
     if (col == OS_NULL) goto getout;
     protocol_col = col->oid();
@@ -467,6 +480,7 @@ eStatus eLightHouseService::publish()
     for (y = 0; y<h; y++) {
         if ((m->geti(y, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
         if (m->geti(y, enable_col) == 0) continue;
+        if (m->geti(y, ok_col) == 0) continue;
 
         m->getv(y, protocol_col, protocol);
         m->getv(y, port_col, port);
@@ -474,10 +488,16 @@ eStatus eLightHouseService::publish()
         /* We resolve is this is IPv4 or IPv6 address, port number
          * and interface.
          */
-        ss = osal_socket_get_ip_and_port(port->gets(),
-            iface_addr_bin, sizeof(iface_addr_bin),
-            &port_nr, &is_ipv6, OSAL_STREAM_LISTEN, 0);
-        osal_debug_assert(ss == OSAL_SUCCESS);
+        if (os_strchr(port->gets(), ':')) {
+            ss = osal_socket_get_ip_and_port(port->gets(),
+                iface_addr_bin, sizeof(iface_addr_bin),
+                &port_nr, &is_ipv6, OSAL_STREAM_LISTEN, 0);
+            osal_debug_assert(ss == OSAL_SUCCESS);
+        }
+        else {
+            port_nr = port->geti();
+            is_ipv6 = OS_FALSE;
+        }
         if (port_nr <= 0) continue;
 
         transport_ix = (enetEndpTransportIx)m->geti(y, transport_col);
@@ -608,11 +628,13 @@ void eNetService::create_services_table()
     column->addname("ix", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "row");
     column->setpropertyi(EVARP_TYPE, OS_INT);
+    column->setpropertys(EVARP_ATTR, "rdonly");
 
     column = new eVariable(columns);
     column->addname("name", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "name");
     column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_ATTR, "rdonly");
     column->setpropertys(EVARP_TTIP,
         "IOCOM device network or eobjects process name");
 
@@ -620,6 +642,7 @@ void eNetService::create_services_table()
     column->addname("nick", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "nickname");
     column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_ATTR, "rdonly");
     column->setpropertys(EVARP_TTIP,
         "IO device's or process'es nickname. Helps user to identify devices, not used by sofware");
 
@@ -627,7 +650,7 @@ void eNetService::create_services_table()
     column->addname("protocol", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "protocol");
     column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_ATTR, "list=\"ecom,iocom\"");
+    column->setpropertys(EVARP_ATTR, "rdonly");
     column->setpropertys(EVARP_TTIP,
         "Protocols, one of.\n"
         "- \'ecom\': eobjects communication protocol (for glass user interface, etc).\n"
@@ -637,6 +660,7 @@ void eNetService::create_services_table()
     column->addname("ip", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "IP address");
     column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_ATTR, "rdonly");
     column->setpropertys(EVARP_TTIP,
         "Listening IP address");
 
@@ -644,6 +668,7 @@ void eNetService::create_services_table()
     column->addname("tlsport", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "TLS port");
     column->setpropertyi(EVARP_TYPE, OS_INT);
+    column->setpropertys(EVARP_ATTR, "rdonly");
     column->setpropertys(EVARP_TTIP,
         "Listening secure TLS socket port number.");
 
@@ -651,6 +676,7 @@ void eNetService::create_services_table()
     column->addname("tcpport", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "TCP port");
     column->setpropertyi(EVARP_TYPE, OS_INT);
+    column->setpropertys(EVARP_ATTR, "rdonly");
     column->setpropertys(EVARP_TTIP,
         "Listening TCP socket port number (not secured).");
 
@@ -658,7 +684,7 @@ void eNetService::create_services_table()
     column->addname("tstamp", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "timestamp");
     column->setpropertyi(EVARP_TYPE, OS_LONG);
-    column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\",nosave");
+    column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\",nosave,rdonly");
     column->setpropertys(EVARP_TTIP,
         "Time when this information was last updated");
 

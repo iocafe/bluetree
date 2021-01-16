@@ -28,16 +28,16 @@ class eNetService;
 
 /* Property numbers.
  */
-#define ENETMAINTAINP_PUBLISH 10
-#define ENETMAINTAINP_CONFIG_COUNTER 20
-#define ENETMAINTAINP_CONNECT 30
+#define ENETMP_END_POINT_TABLE_MODIF_COUNT 10
+#define ENETMP_END_POINT_CONFIG_COUNT 20
+#define ENETP_CONNECT_TABLE_MODIF_COUNT 30
 
 /* Property names.
  */
 extern const os_char
-    enetmaintainp_publish[],
-    enetmaintainp_config_counter[],
-    enetmaintainp_connect[];
+    enetmp_end_pont_table_modif_count[],
+    enetmp_end_point_config_count[],
+    enetmp_connect_table_modif_count[];
 
 
 /**
@@ -197,37 +197,22 @@ protected:
     eContainer *m_end_points;
 
     /** Value of ELIGHTHOUSEP_PUBLISH property. When changed, the end points are to be configured.
-     */
-    os_int m_publish_count;
-
-    /** The maintain_end_points() function is not called immediately when m_publish_count
+        The maintain_end_points() function is not called immediately when m_publish_count
         changes, but instead m_publish is set. This allows multiple publish requests to result
         in one maintain_end_points() call.
+        Timer value when m_publish flag was set.
      */
-    os_boolean m_publish;
+    os_int m_end_point_table_modif_count;
+    os_boolean m_configure_end_points;
+    os_long m_end_point_config_timer;
 
-    /** Timer value when m_publish flag was set.
-     */
-    os_long m_publish_timer;
+    os_int m_end_point_config_count;
 
-    /** End point configuration counter.
-     */
-    os_long m_end_point_config_count;
-
-/* --- Maintain connections --- */
-    /** Value of ELIGHTHOUSEP_CONNECT property. When changed, the connections are to be configured..
-     */
-    os_int m_connect_count;
-
-    /** The maintain_connections() function is not called immediately when m_connect_count
-        changes, but instead m_connect is set. This allows multiple connect requests to
-        result in one maintain_connections() call.
-     */
-    os_boolean m_connect;
-
-    /** Timer value when m_connect flag was set.
-     */
+    os_long m_connect_table_modif_count;
+    os_boolean m_configure_connections;
     os_long m_connect_timer;
+
+    os_boolean m_timer_set;
 
     /** List of running connections, data about those.
      */
