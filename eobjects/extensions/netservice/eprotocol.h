@@ -30,7 +30,13 @@
   Defines
 ****************************************************************************************************
 */
+typedef struct
+{
+    enetEndpTransportIx transport;
 
+    const os_char *port;
+}
+eEndPointParameters;
 
 
 /**
@@ -102,7 +108,7 @@ public:
      */
     virtual eProtocolHandle *new_end_point(
         os_int ep_nr,
-        void *parameters,
+        eEndPointParameters *parameters,
         eStatus *s);
 
     /* Delete an end point.

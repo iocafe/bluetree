@@ -121,24 +121,56 @@ void eComProtocol::shutdown_protocol()
 */
 eProtocolHandle *eComProtocol::new_end_point(
     os_int ep_nr,
-    void *parameters,
+    eEndPointParameters *parameters,
     eStatus *s)
 {
     eProtocolHandle *p;
     eThread *t;
+    eVariable tmp;
+    const os_char *transport_name;
 
-    OSAL_UNUSED(ep_nr);
     OSAL_UNUSED(parameters);
+
+    /* Name of the transport.
+     */
+    switch (parameters->transport) {
+        case ENET_ENDP_SOCKET:
+            transport_name = "socket";
+            break;
+
+        case ENET_ENDP_TLS:
+            transport_name = "tls";
+            break;
+
+        case ENET_ENDP_SERIAL:
+            transport_name = "serial";
+            break;
+
+        default:
+            *s = ESTATUS_FAILED;
+            osal_debug_error_int("Unknown end point transport: ", parameters->transport);
+            return OS_NULL;
+    }
 
     /* Create and start end point thread to listen for incoming socket connections,
        name it "myendpoint".
      */
     t = new eEndPoint();
     p = new eProtocolHandle(ETEMPORARY);
-    p->start_thread(t, "myendpoint");
+    tmp.sets("endpoint");
+    tmp.appendl(ep_nr + 1);
+    tmp.appends("_");
+    tmp.appends(transport_name);
+    p->start_thread(t, tmp.gets());
 
-    setpropertys_msg(p->uniquename(),
-         "socket::" ENET_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr);
+    tmp.sets(transport_name);
+    tmp.appends(":");
+    if (os_strchr(parameters->port, ':') == OS_NULL) {
+        tmp.appends(":");
+    }
+    tmp.appends(parameters->port);
+    setpropertys_msg(p->uniquename(), tmp.gets(), eendpp_ipaddr);
+         /* "socket::" ENET_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr); */
 
     *s = ESTATUS_SUCCESS;
     return p;

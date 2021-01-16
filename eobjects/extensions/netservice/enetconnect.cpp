@@ -236,6 +236,7 @@ void eNetMaintainThread::maintain_connections()
     eObject *conf, *columns, *col;
     eContainer *localvars, *list, *con, *next_con;
     eVariable *v, *proto_name;
+    const os_char *p;
     os_int enable_col, name_col, protocol_col, transport_col, ip_col;
     os_int h, con_nr;
     eVariable tmp;
@@ -300,6 +301,19 @@ void eNetMaintainThread::maintain_connections()
         v = con->firstv(ENET_CONN_IP);
         m->getv(con_nr, ip_col, &tmp);
         if (tmp.compare(v)) goto delete_it;
+        v = con->firstv(ENET_CONN_NAME);
+        if (v) {
+            /* MISSING: We need wildcard match !!!!!!!!!!!
+             */
+            m->getv(con_nr, name_col, &tmp);
+            p = tmp.gets();
+            if (*p != '\0' && os_strstr(p, "*", OSAL_STRING_SEARCH_ITEM_NAME) == OS_NULL)
+            {
+                if (os_strstr(p, v->gets(), OSAL_STRING_SEARCH_ITEM_NAME) == OS_NULL) {
+                    if (tmp.compare(v)) goto delete_it;
+                }
+            }
+        }
 
         os_unlock();
         continue;
@@ -321,6 +335,8 @@ delete_it:
         if (m_connections->first(con_nr)) continue;
 
         con = new eContainer(list, con_nr);
+        v = new eVariable(con, ENET_CONN_NAME);
+        m->getv(con_nr, name_col, v);
         v = new eVariable(con, ENET_CONN_PROTOCOL);
         m->getv(con_nr, protocol_col, v);
         v = new eVariable(con, ENET_CONN_TRANSPORT);

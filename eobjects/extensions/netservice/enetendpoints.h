@@ -41,11 +41,9 @@ enetEndpItemId;
 
 
 typedef enum {
-    ENET_ENDP_SOCKET_IPV4 = 1,
-    ENET_ENDP_SOCKET_IPV6,
-    ENET_ENDP_TLS_IPV4,
-    ENET_ENDP_TLS_IPV6,
-    ENET_ENDP_SERIAL
+    ENET_ENDP_SOCKET = 1,
+    ENET_ENDP_TLS = 2,
+    ENET_ENDP_SERIAL = 3
 }
 enetEndpTransportIx;
 

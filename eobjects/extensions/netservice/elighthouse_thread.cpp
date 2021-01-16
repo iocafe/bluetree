@@ -422,19 +422,23 @@ eStatus eLightHouseService::publish()
     eMatrix *m;
     eObject *conf, *columns, *col;
     eContainer *localvars, *list, *item;
-    eVariable *v;
+    eVariable *v, *port;
     const os_char *protocol_short;
     os_int enable_col, protocol_col, transport_col, port_col; //, netname_col;
-    os_int h, y, is_ipv6, is_tls, item_id, port_nr;
+    os_int h, y, is_tls, item_id, port_nr;
     os_int tls_port, tcp_port;
     enetEndpTransportIx transport_ix;
-    eVariable protocol, tmp;
+    eVariable *protocol;
     os_char buf[OSAL_NETWORK_NAME_SZ], *p;
+    os_char iface_addr_bin[OSAL_IP_BIN_ADDR_SZ];
+    os_boolean is_ipv6;
+    osalStatus ss;
     eStatus s = ESTATUS_FAILED;
 
     localvars = new eContainer(ETEMPORARY);
     list = new eContainer(localvars);
-    // list->ns_create();
+    port = new eVariable(localvars);
+    protocol = new eVariable(localvars);
     os_lock();
 
     m = m_netservice->m_endpoint_matrix;
@@ -464,16 +468,22 @@ eStatus eLightHouseService::publish()
         if ((m->geti(y, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
         if (m->geti(y, enable_col) == 0) continue;
 
-        m->getv(y, protocol_col, &protocol);
-        port_nr = m->geti(y, port_col);
+        m->getv(y, protocol_col, protocol);
+        m->getv(y, port_col, port);
+
+        /* We resolve is this is IPv4 or IPv6 address, port number
+         * and interface.
+         */
+        ss = osal_socket_get_ip_and_port(port->gets(),
+            iface_addr_bin, sizeof(iface_addr_bin),
+            &port_nr, &is_ipv6, OSAL_STREAM_LISTEN, 0);
+        osal_debug_assert(ss);
         if (port_nr <= 0) continue;
 
         transport_ix = (enetEndpTransportIx)m->geti(y, transport_col);
         switch (transport_ix) {
-            case ENET_ENDP_SOCKET_IPV4: is_tls = 0; is_ipv6 = 0; break;
-            case ENET_ENDP_SOCKET_IPV6: is_tls = 0; is_ipv6 = 1; break;
-            case ENET_ENDP_TLS_IPV4:    is_tls = 1; is_ipv6 = 0; break;
-            case ENET_ENDP_TLS_IPV6:    is_tls = 1; is_ipv6 = 1; break;
+            case ENET_ENDP_SOCKET: is_tls = 0; break;
+            case ENET_ENDP_TLS:    is_tls = 1; break;
             default: goto goon;
         }
 
@@ -483,7 +493,7 @@ eStatus eLightHouseService::publish()
             /* Make sure that network name matches. If not skip compare row.
              */
             v = item->firstv(ENET_ENDP_PROTOCOL);
-            if (protocol.compare(v)) {
+            if (protocol->compare(v)) {
                 continue;
             }
 
@@ -506,7 +516,7 @@ eStatus eLightHouseService::publish()
 
         item = new eContainer(list, item_id);
         v = new eVariable(item, ENET_ENDP_PROTOCOL);
-        v->setv(&protocol);
+        v->setv(protocol);
         v = new eVariable(item, is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
         v->setl(port_nr);
         v = new eVariable(item, ENET_ENDP_IPV6);
@@ -534,9 +544,9 @@ goon:;
         if (v) is_ipv6 = v->getl();
 
         v = item->firstv(ENET_ENDP_PROTOCOL);
-        protocol.setv(v);
+        protocol->setv(v);
 
-        if (!os_strcmp(protocol.gets(), "iocom")) {
+        if (!os_strcmp(protocol->gets(), "iocom")) {
             os_strncpy(buf, eglobal->process_name, sizeof(buf));
             os_strncat(buf, "net", sizeof(buf));
             p = buf;
@@ -544,8 +554,8 @@ goon:;
         }
         else {
             p = eglobal->process_nr ? eglobal->process_id : eglobal->process_name;
-            protocol_short = protocol.gets();
-            if (!os_strcmp(protocol.gets(), "ecom")) {
+            protocol_short = protocol->gets();
+            if (!os_strcmp(protocol->gets(), "ecom")) {
                 protocol_short = "o";
             }
         }

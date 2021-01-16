@@ -29,11 +29,8 @@ extern const os_char enet_conn_transport[];
 
 typedef enum {
     ENET_CONN_PROTOCOL,
-    // ENET_ENDP_TLS_PORT,
-    // ENET_ENDP_TCP_PORT,
     // ENET_ENDP_IPV6,
-    // ENET_ENDP_NETNAME,
-
+    ENET_CONN_NAME,
     ENET_CONN_TRANSPORT,
     ENET_CONN_IP,
 

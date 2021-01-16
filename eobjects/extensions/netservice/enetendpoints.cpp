@@ -83,7 +83,7 @@ void eNetService::create_end_point_table(
     column->setpropertys(EVARP_TEXT, "enable");
     column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
     column->setpropertys(EVARP_TTIP,
-        "Enable this end point");
+        "Create end point for this row.");
 
     column = new eVariable(columns);
     column->addname(enet_endp_protocol, ENAME_NO_MAP);
@@ -91,41 +91,35 @@ void eNetService::create_end_point_table(
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_ATTR, "list=\"ecom,iocom\"");
     column->setpropertys(EVARP_TTIP,
-        "Listen for protocol.\n"
-        "- \'eobjects\': eobjects communication protocol (for glass user interface, etc).\n"
-        "- \'iocom\': IO device communication protocol.\n");
+        "Communication protocol.\n"
+        "- \'ecom\': object based protocol (for glass user interface, etc).\n"
+        "- \'iocom\': IO device communication.\n");
 
     column = new eVariable(columns);
     column->addname(enet_endp_transport, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "transport");
     column->setpropertyi(EVARP_TYPE, OS_CHAR);
-    column->setpropertys(EVARP_ATTR, "enum=\"1.SOCKET/IPv4,2.SOCKET/IPv6,3.TLS/IPv4,4.TLS/IPv6,5.SERIAL\"");
+    column->setpropertys(EVARP_ATTR, "enum=\"1.SOCKET,2.TLS,3.SERIAL\"");
     column->setpropertys(EVARP_TTIP,
-        "Transport to use.\n"
-        "- \'SOCKET\': Plain socket connection, unsecured.\n"
-        "- \'TLS\': TLS connection.\n"
-        "- \'IPv4\' or 'IPv6\': Internet protocol, usually older \'IPv4\'.\n"
-        "- \'SERIAL\': Serial communication.\n");
+        "Transport:\n"
+        "- \'SOCKET\': unsecured socket connection, .\n"
+        "- \'TLS\': secure TLS connection.\n"
+        "- \'SERIAL\': serial communication.\n");
 
     column = new eVariable(columns);
     column->addname(enet_endp_port, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "port");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_TTIP,
-        "TCP port number to listen to. Typical:\n"
-        "- \'6371\' eobjects socket.\n"
-        "- \'6374\' eobjects TLS.\n"
-        "- \'6368\' iocom socket.\n"
-        "- \'6369\' iocom TLS.\n"
-        "- \'COM1:115200\' serial port");
-
-    /* column = new eVariable(columns);
-    column->addname(enet_endp_iface, ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "interface");
-    column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_TTIP,
-        "Bind the end point only to a specific network interface.");
-     */
+        "Port to listen, typical:\n"
+        "- \'6371\': ecom socket.\n"
+        "- \'6374\': ecom TLS.\n"
+        "- \'6368\': ecom socket.\n"
+        "- \'6369\': ecom TLS.\n"
+        "- \'COM1:115200\' serial port\n"
+        "Netwok interface can be specified for example \'192.168.1.222:6371\'.\n"
+        "Use brackets around IP address to mark IPv6 address, for\n"
+        "example \'[localhost]:12345\', or \'[]:12345\' for empty IP.");
 
     /* column = new eVariable(columns);
     column->addname(enet_endp_netname, ENAME_NO_MAP);
@@ -168,13 +162,13 @@ void eNetService::create_end_point_table(
 
     if (m_endpoint_matrix->nrows() == 0) {
         enable_by_default = (flags & ENET_DEFAULT_NO_END_POINTS) ? OS_FALSE : OS_TRUE;
-        add_end_point(enable_by_default, "ecom", ENET_ENDP_TLS_IPV4,
+        add_end_point(enable_by_default, "ecom", ENET_ENDP_TLS,
             ENET_DEFAULT_TLS_PORT_STR);
-        add_end_point(enable_by_default, "iocom", ENET_ENDP_TLS_IPV4,
+        add_end_point(enable_by_default, "iocom", ENET_ENDP_TLS,
             IOC_DEFAULT_TLS_PORT_STR);
 
 /* TESTING */
-add_end_point(OS_TRUE, "iocom", ENET_ENDP_SOCKET_IPV4,
+add_end_point(OS_TRUE, "iocom", ENET_ENDP_SOCKET,
     IOC_DEFAULT_SOCKET_PORT_STR, "iocafenet");
 
     }
@@ -255,6 +249,7 @@ void eNetMaintainThread::maintain_end_points()
 {
     eProtocol *proto;
     eProtocolHandle *handle;
+    eEndPointParameters prm;
     eMatrix *m;
     eObject *conf, *columns, *col;
     eContainer *localvars, *list, *ep, *next_ep;
@@ -334,7 +329,7 @@ delete_it:
     list = new eContainer(localvars);
     os_lock();
     h = m->nrows();
-    for (ep_nr = 0; ep_nr < h; ep_nr ++) {
+    for (ep_nr = 0; ep_nr < h; ep_nr++) {
         if ((m->geti(ep_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
         if (m->geti(ep_nr, enable_col) == 0) continue;
         if (m_end_points->first(ep_nr)) continue;
@@ -363,7 +358,12 @@ delete_it:
             continue;
         }
 
-        handle = proto->new_end_point(ep_nr, OS_NULL, &s);
+        os_memclear(&prm, sizeof(prm));
+        v = ep->firstv(ENET_ENDP_PORT);
+        prm.port = v->gets();
+        v = ep->firstv(ENET_ENDP_TRANSPORT);
+        prm.transport = (enetEndpTransportIx)v->getl();
+        handle = proto->new_end_point(ep_nr, &prm, &s);
         if (handle == OS_NULL) {
             osal_debug_error_str("unable to create end point: ", proto_name->gets());
             // update status in table, status s
