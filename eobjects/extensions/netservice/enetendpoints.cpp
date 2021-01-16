@@ -151,7 +151,7 @@ void eNetService::create_end_point_table(
         "Server certificate for this end point.\n"
         "If empty, the common cerver certificate is used."); */
 
-    column = new eVariable(columns);
+    /* column = new eVariable(columns);
     column->addname("active", ENAME_NO_MAP);
     column->setpropertyi(EVARP_TYPE, OS_INT);
     column->setpropertys(EVARP_TEXT, "active connections");
@@ -165,7 +165,7 @@ void eNetService::create_end_point_table(
     column->setpropertyi(EVARP_TYPE, OS_LONG);
     column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\",nosave");
     column->setpropertys(EVARP_TTIP,
-        "Time stamp of the last successfull connect");
+        "Time stamp of the last successfull connect"); */
 
     /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
      */

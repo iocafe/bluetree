@@ -157,7 +157,7 @@ eProtocolHandle *eComProtocol::new_end_point(
      */
     t = new eEndPoint();
     p = new eProtocolHandle(ETEMPORARY);
-    tmp.sets("endpoint");
+    tmp.sets("ecom_ep");
     tmp.appendl(ep_nr + 1);
     tmp.appends("_");
     tmp.appends(transport_name);

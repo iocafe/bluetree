@@ -43,6 +43,7 @@ eEndPoint::eEndPoint(
     m_open_failed = OS_FALSE;
     m_stream_classid = ECLASSID_OSSTREAM;
     m_ipaddr = new eVariable(this);
+    m_accept_count = 0;
 }
 
 
@@ -219,6 +220,9 @@ void eEndPoint::run()
     osalSelectData selectdata;
     eStream *newstream;
     eConnection *c;
+    eVariable *name;
+    eName *n;
+    os_char *p;
     eStatus s;
 
     while (!exitnow())
@@ -244,14 +248,29 @@ void eEndPoint::run()
             if (newstream)
             {
                 c = new eConnection();
-                c->addname("//connection");
+                // c->addname("//connection");
+
                 s = c->accepted(newstream);
                 if (s) {
                     delete c;
                     osal_debug_error_int("accepted() failed: ", s);
                 }
                 else {
+                    name = new eVariable(ETEMPORARY);
+                    name->sets("//ecom");;
+                    n = primaryname();
+                    if (n) {
+                        p = n->gets();
+                        p = os_strchr(p, '_');
+                        if (p) name->appends(p);
+                    }
+                    name->appends("_accepted");;
+                    name->appendl(++m_accept_count);
+                    c->addname(name->gets());
+                    delete name;
+
                     c->start(); /* After this c pointer is useless */
+
                     osal_trace3("stream accepted");
                 }
             }

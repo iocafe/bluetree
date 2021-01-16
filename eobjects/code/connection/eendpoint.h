@@ -150,6 +150,10 @@ protected:
      */
     eStream *m_stream;
 
+    /** Accepted connection count.
+     */
+    os_long m_accept_count;
+
     /** End point object initailized flag.
      */
     os_boolean m_initialized;
