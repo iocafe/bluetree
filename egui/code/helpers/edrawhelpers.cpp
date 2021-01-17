@@ -143,6 +143,18 @@ void edraw_value(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Convert state bits to Dear ImGUi color.
+
+  The state bits are used to indicate if an IO signal, etc is connected.
+
+  @param  state_bits OSAL_STATE_CONNECTED, OSAL_STATE_YELLOW, OSAL_STATE_ORANGE, OSAL_STATE_RED
+  @return Imgui color.
+
+****************************************************************************************************
+*/
 static ImU32 edraw_get_state_color(
     os_int state_bits)
 {
@@ -172,7 +184,6 @@ static ImU32 edraw_get_state_color(
 
     return ImGui::GetColorU32(ImGuiCol_TextDisabled);
 }
-
 
 
 /**

@@ -63,7 +63,7 @@ public:
 
     /* Virtual destructor.
      */
-    virtual ~eLightHouseService();
+    /* virtual ~eLightHouseService(); */
 
     /* Casting eObject pointer to eLightHouseService pointer.
      */

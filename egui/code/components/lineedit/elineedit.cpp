@@ -277,6 +277,7 @@ void eLineEdit::draw_value(
         }
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
+        if (value_w < 0) ImGui::SetNextItemWidth(-FLT_MIN);
         ImGui::InputText(label, m_edit_buf.ptr(), m_edit_buf.sz(), eflags);
         if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && m_prev_edit_value)
         {

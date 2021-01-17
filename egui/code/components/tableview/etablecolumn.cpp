@@ -284,6 +284,7 @@ void eTableColumn::draw_edit(
         return;
     }
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
+    ImGui::SetNextItemWidth(-FLT_MIN);
     ImGui::InputText(view->edit_label(), edit_buf, view->edit_sz(), eflags);
     if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && view->keyboard_focus_ok())
     {

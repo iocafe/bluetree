@@ -31,11 +31,13 @@ void eGui::setup_desktop_application()
 {
     eWindow *w;
     eParameterList *p;
-    // eLineEdit *e;
+    eLineEdit *e;
     eTreeNode *n;
-    // eTableView *t;
-    eValueX x;
+
 #if 0
+    eTableView *t;
+    eValueX x;
+
     w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "Muuttujia");
 
@@ -106,26 +108,26 @@ void eGui::setup_desktop_application()
     e->setpropertys(ECOMP_TEXT, "kasse ja ma");
     e->setpropertyi(ECOMP_TYPE, OS_DOUBLE);
     e->setpropertyi(ECOMP_DIGS, 5);
-#endif
-    /* w = new eWindow(this);
+
+    w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "test table");
 
-    t = new eTableView(w);
-    t->setpropertys(ECOMP_PATH, "//mymtx");
+    /* t = new eTableView(w);
+    t->setpropertys(ECOMP_PATH, "//mymtx"); */
 
     w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "kayttajat");
 
     t = new eTableView(w);
     t->setpropertys(ECOMP_PATH, "//netservice/accounts");
-    */
 
-    /* w = new eWindow(this);
+    w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "Browseri");
 
     n = new eTreeNode(w);
     n->setpropertys(ECOMP_PATH, "//");
-    n->setpropertys(ECOMP_IPATH, "//"); */
+    n->setpropertys(ECOMP_IPATH, "//");
+#endif
 
     w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "browser");
@@ -134,17 +136,6 @@ void eGui::setup_desktop_application()
     n = new eTreeNode(p);
     n->setpropertys(ECOMP_PATH, "//");
     n->setpropertys(ECOMP_IPATH, "//");
-
-
-    /* e = new eLineEdit(w);
-    e->setpropertys(ECOMP_VALUE, "Jakke ja suutari");
-    e->setpropertys(ECOMP_TEXT, "Editti");
-    e->setpropertys(ECOMP_UNIT, "%");
-
-    e = new eLineEdit(w);
-    e->setpropertys(ECOMP_VALUE, "Tijana maalaa");
-    e->setpropertys(ECOMP_TEXT, "Mut on kaksi");
-    */
 
 
     setpropertys(EGUIP_TEXT, eglobal->process_name);

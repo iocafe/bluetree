@@ -52,9 +52,9 @@ eLightHouseService::eLightHouseService(
   Virtual destructor.
 ****************************************************************************************************
 */
-eLightHouseService::~eLightHouseService()
+/* eLightHouseService::~eLightHouseService()
 {
-}
+} */
 
 
 /**
@@ -369,7 +369,7 @@ void eLightHouseService::callback(
     where->appends(" OR tstamp<");
     where->appends(nbuf);
 #endif
-    etable_remove(ec, "//netservice/services", OS_NULL, where->gets());
+    etable_remove(ec, "//netservice/LAN", OS_NULL, where->gets());
 
     /* Add row to the LAN services table.
      */
@@ -379,7 +379,7 @@ void eLightHouseService::callback(
     where->appends("AND protocol=\'");
     where->appends(protocol_long);
     where->appends("\'");
-    etable_update(ec, "//netservice/services", OS_NULL, where->gets(), row,
+    etable_update(ec, "//netservice/LAN", OS_NULL, where->gets(), row,
         ETABLE_ADOPT_ARGUMENT|ETABLE_INSERT_OR_UPDATE);
 
     delete where;
@@ -615,7 +615,7 @@ void eNetService::create_services_table()
     eVariable *column;
 
     m_services_matrix = new eMatrix(this);
-    m_services_matrix->addname("services");
+    m_services_matrix->addname("LAN");
     m_services_matrix->setpropertys(ETABLEP_TEXT, "LAN");
 
     configuration = new eContainer(this);
@@ -698,7 +698,7 @@ void eNetService::create_services_table()
 /**
 ****************************************************************************************************
 
-  @brief Create "LAN services" table.
+  @brief Start light house.
 
   The enet_start_lighthouse_thread function adds lighthouse service class, creates a light house
   thread object and starts to run it. This function is called by eNetService::start().
