@@ -31,10 +31,10 @@ void eGui::setup_desktop_application()
 {
     eWindow *w;
     eParameterList *p;
-    eLineEdit *e;
     eTreeNode *n;
 
 #if 0
+    eLineEdit *e;
     eTableView *t;
     eValueX x;
 

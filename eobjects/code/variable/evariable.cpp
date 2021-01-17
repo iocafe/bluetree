@@ -1371,7 +1371,7 @@ void eVariable::appendv(
 
   If eVariable::compare function...
 
-  @param   x Variable to compare to.
+  @param   x Variable to compare to. If x is OS_NULL, then the function always returns 1.
 
   @return  -1:this < x, 0:this == x,1:this > x.
 
@@ -1399,6 +1399,10 @@ os_int eVariable::compare(
 
     os_char
         nbuf[32];
+
+    if (x == OS_NULL) {
+        return 1;
+    }
 
     /* Arrange by type id enum, so that type number of x is smaller than y's.
      */

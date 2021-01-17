@@ -117,6 +117,15 @@ public:
     void trigdata_append_insert_or_update(
         os_long ix_value);
 
+    /* Clear trigged "remove row" and "insert/update row" data in bindings.
+     */
+    void trigdata_clear();
+
+    /* Send trigged "remove row" and "insert/update row" data to bindings.
+     */
+    void trigdata_send();
+
+
 protected:
     /**
     ************************************************************************************************
@@ -184,14 +193,6 @@ protected:
     /* Generate merged trigged data based on all server side row set bindings.
      */
     void generate_trigger_data();
-
-    /* Clear trigged "remove row" and "insert/update row" data in bindings.
-     */
-    void trigdata_clear();
-
-    /* Send trigged "remove row" and "insert/update row" data to bindings.
-     */
-    void trigdata_send();
 
     /**
     ************************************************************************************************

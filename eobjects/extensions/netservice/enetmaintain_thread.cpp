@@ -196,7 +196,7 @@ eStatus eNetMaintainThread::onpropertychange(
 void eNetMaintainThread::initialize(
     eContainer *params)
 {
-    create_connect_processess_list();
+    create_socket_list();
 }
 
 
@@ -239,6 +239,7 @@ void eNetMaintainThread::run()
 
         if (m_configure_connections) if (os_has_elapsed(&m_connect_timer, 90))
         {
+            merge_to_socket_list();
             maintain_connections();
             m_configure_connections = OS_FALSE;
         }

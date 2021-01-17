@@ -153,9 +153,13 @@ protected:
         eVariable *value);
 
 
-    /* Create internal "connect processed" table.
+    /* Create internal "socket list" table.
      */
-    void create_connect_processess_list();
+    void create_socket_list();
+
+    /* Merge "connect to" and "LAN services" into socket list.
+     */
+    void merge_to_socket_list();
 
     /* Create and delete connections.
      */
@@ -219,7 +223,7 @@ protected:
 
     /* The "connect processess" matrix hold one row for each socket to create.
      */
-    eMatrix *m_connect_processes_matrix;
+    eMatrix *m_socket_list_matrix;
 
     os_boolean m_timer_set;
 

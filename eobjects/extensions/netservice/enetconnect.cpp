@@ -223,9 +223,9 @@ void eNetService::add_connect(
 /**
 ****************************************************************************************************
 
-  @brief Create "connect processess" table.
+  @brief Create "socket list" table.
 
-  The connect processess hold one row for each socket to create.
+  The socket list has one row for each socket (or other connection) to create.
 
   It is a temporary table created by merging "connect to" and "LAN services" tables to create
   connection list where each row represents a process to connect to.
@@ -240,14 +240,14 @@ void eNetService::add_connect(
 
 ****************************************************************************************************
 */
-void eNetMaintainThread::create_connect_processess_list()
+void eNetMaintainThread::create_socket_list()
 {
     eContainer *configuration, *columns;
     eVariable *column;
 
-    m_connect_processes_matrix = new eMatrix(this);
-    m_connect_processes_matrix->addname("socketlist");
-    m_connect_processes_matrix->setpropertys(ETABLEP_TEXT, "socket list");
+    m_socket_list_matrix = new eMatrix(this);
+    m_socket_list_matrix->addname("socketlist");
+    m_socket_list_matrix->setpropertys(ETABLEP_TEXT, "socket list");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
@@ -301,8 +301,102 @@ void eNetMaintainThread::create_connect_processess_list()
 
     /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
      */
-    m_connect_processes_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
+    m_socket_list_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Create list of sockets to create.
+
+  Merges "connect" to and "LAN services" tables to create list of sockets (or other connections)
+  to create.
+
+  Source tables belong to eNetService (eProcess) and thus os_lock() must be on when accessing
+  these. Destination table belongs to eNetMaintainThread, no lock needed.
+
+****************************************************************************************************
+*/
+void eNetMaintainThread::merge_to_socket_list()
+{
+    eMatrix *m;
+    eObject *conf, *columns, *col;
+    eContainer *localvars, *row, *rows;
+    eVariable *name, *protocol, *transport, *ip;
+    os_int enable_col, name_col, protocol_col, transport_col, ip_col;
+    os_int h, con_nr;
+
+    localvars = new eContainer(ETEMPORARY);
+
+    os_lock();
+    m = m_netservice->m_connect_to_matrix;
+    conf = m->configuration();
+    if (conf == OS_NULL) goto getout_unlock;
+    columns = conf->first(EOID_TABLE_COLUMNS);
+    if (columns == OS_NULL) goto getout_unlock;
+    col = columns->byname(enet_conn_enable);
+    if (col == OS_NULL) goto getout_unlock;
+    enable_col = col->oid();
+
+    col = columns->byname(enet_conn_name);
+    if (col == OS_NULL) goto getout_unlock;
+    name_col = col->oid();
+
+    col = columns->byname(enet_conn_protocol);
+    if (col == OS_NULL) goto getout_unlock;
+    protocol_col = col->oid();
+
+    col = columns->byname(enet_conn_ip);
+    if (col == OS_NULL) goto getout_unlock;
+    ip_col = col->oid();
+
+    col = columns->byname(enet_conn_transport);
+    if (col == OS_NULL) goto getout_unlock;
+    transport_col = col->oid();
+    os_unlock();
+
+    m_socket_list_matrix->remove("1");
+
+    rows = new eContainer(localvars);
+    os_lock();
+    h = m->nrows();
+    for (con_nr = 0; con_nr < h; con_nr ++) {
+        if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
+        if (m->geti(con_nr, enable_col) == 0) continue;
+
+        row = new eContainer(rows);
+
+        name = new eVariable(row);
+        name->addname(enet_conn_name, ENAME_NO_MAP);
+        m->getv(con_nr, name_col, name);
+
+        protocol = new eVariable(row);
+        protocol->addname(enet_conn_protocol, ENAME_NO_MAP);
+        m->getv(con_nr, protocol_col, protocol);
+
+        transport = new eVariable(row);
+        transport->addname(enet_conn_transport, ENAME_NO_MAP);
+        m->getv(con_nr, transport_col, transport);
+
+        ip = new eVariable(row);
+        ip->addname(enet_conn_ip, ENAME_NO_MAP);
+        m->getv(con_nr, ip_col, ip);
+    }
+    os_unlock();
+
+    m_socket_list_matrix->insert(rows, ETABLE_ADOPT_ARGUMENT);
+
+
+    delete localvars;
+    return;
+
+getout_unlock:
+    os_unlock();
+    delete localvars;
+    osal_debug_error("maintain_connections() failed");
+}
+
 
 
 /**

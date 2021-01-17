@@ -110,7 +110,9 @@ eContainer *eMatrix::configuration()
   @param   rows For single for: eContainer holding a eVariables for each element to set.
            Multiple rows: eContainer holding a eContainers for each row to insert. Each row
            container contains eVariable for each element to set.
-  @param   tflags Reserved for future, set 0 for now.
+  @param   tflags If ETABLE_ADOPT_ARGUMENT ETABLE_ADOPT_ARGUMENT is specified, the row given as
+           argument is deleted by this function.
+           Set 0 for default operation.
   @param   dbm Pointer to eDBM to forward changes by trigger. OS_NULL if not needed.
 
 ****************************************************************************************************
@@ -121,25 +123,42 @@ void eMatrix::insert(
     eDBM *dbm)
 {
     eContainer *row;
+    os_boolean local_dbm_use = OS_FALSE;
 
     if (rows == OS_NULL || m_columns == OS_NULL) {
         osal_debug_error("eMatrix::insert: Not configured as table or inserting NULL");
-        return;
     }
-
-    row = rows->firstc();
-    if (row == OS_NULL) {
-        insert_one_row(rows, -1, dbm);
-    }
-
     else {
-        do {
-            insert_one_row(row, -1, dbm);
-            row = row->nextc();
+        if (dbm == OS_NULL) {
+            dbm = eDBM::cast(first(EOID_DBM));
+            if (dbm) {
+                local_dbm_use = OS_TRUE;
+                dbm->trigdata_clear();
+            }
         }
-        while (row);
+
+        row = rows->firstc();
+        if (row == OS_NULL) {
+            insert_one_row(rows, -1, dbm);
+        }
+
+        else {
+            do {
+                insert_one_row(row, -1, dbm);
+                row = row->nextc();
+            }
+            while (row);
+        }
+        docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+
+        if (local_dbm_use) {
+            dbm->trigdata_send();
+        }
     }
-    docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+
+    if (tflags & ETABLE_ADOPT_ARGUMENT) {
+        delete rows;
+    }
 }
 
 
@@ -335,6 +354,8 @@ eName *eMatrix::find_index_column_name()
            to update. eVariable name is column name.
   @param   tflags Set 0 for default operation.
            - ETABLE_INSERT_OR_UPDATE. Update existing row(s). If no row updated, insert as a new row.
+           - ETABLE_ADOPT_ARGUMENT is specified, the row given as argument is deleted by this function.
+           Set 0 for default operation.
   @param   dbm Pointer to eDBM to forward changes by trigger. OS_NULL if not needed.
 
   @return  ESTATUS_SUCCESS if ok.
@@ -349,21 +370,41 @@ eStatus eMatrix::update(
 {
     eStatus s;
     os_boolean row_to_update_found;
+    os_boolean local_dbm_use = OS_FALSE;
+
+    if (dbm == OS_NULL) {
+        dbm = eDBM::cast(first(EOID_DBM));
+        if (dbm) {
+            local_dbm_use = OS_TRUE;
+            dbm->trigdata_clear();
+        }
+    }
 
     s = select_update_remove(EMTX_UPDATE, where_clause, row, OS_NULL, tflags, dbm, &row_to_update_found);
     if ((tflags & ETABLE_INSERT_OR_UPDATE) && !row_to_update_found)
     {
         insert_one_row(row, -1, dbm);
         docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
-        return ESTATUS_SUCCESS;
-    }
-
-    if (s == ESTATUS_NO_CHANGES) {
         s = ESTATUS_SUCCESS;
     }
-    else if (s == ESTATUS_SUCCESS) {
-       docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+
+    else {
+        if (s == ESTATUS_NO_CHANGES) {
+            s = ESTATUS_SUCCESS;
+        }
+        else if (s == ESTATUS_SUCCESS) {
+           docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+        }
     }
+
+    if (local_dbm_use) {
+        dbm->trigdata_send();
+    }
+
+    if (tflags & ETABLE_ADOPT_ARGUMENT) {
+        delete row;
+    }
+
     return s;
 }
 
@@ -386,12 +427,26 @@ void eMatrix::remove(
     eDBM *dbm)
 {
     eStatus s;
+    os_boolean local_dbm_use = OS_FALSE;
+
+    if (dbm == OS_NULL) {
+        dbm = eDBM::cast(first(EOID_DBM));
+        if (dbm) {
+            local_dbm_use = OS_TRUE;
+            dbm->trigdata_clear();
+        }
+    }
+
     s = select_update_remove(EMTX_REMOVE, where_clause, OS_NULL, OS_NULL, tflags, dbm, OS_NULL);
     if (s == ESTATUS_NO_CHANGES) {
         s = ESTATUS_SUCCESS;
     }
     else if (s == ESTATUS_SUCCESS) {
         docallback(ECALLBACK_TABLE_CONTENT_CHANGED);
+    }
+
+    if (local_dbm_use) {
+        dbm->trigdata_send();
     }
 }
 
