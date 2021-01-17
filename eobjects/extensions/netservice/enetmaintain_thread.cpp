@@ -50,6 +50,7 @@ eNetMaintainThread::eNetMaintainThread(
     m_timer_set = OS_FALSE;
 
     initproperties();
+    ns_create();
 }
 
 
@@ -84,11 +85,11 @@ void eNetMaintainThread::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eNetMaintainThread");
     addpropertyl(cls, ENETMP_END_POINT_TABLE_MODIF_COUNT, enetmp_end_pont_table_modif_count,
-        -1, "update end points", EPRO_DEFAULT);
+        -1, "end point table modif count", EPRO_DEFAULT);
     addpropertyl(cls, ENETMP_END_POINT_CONFIG_COUNT, enetmp_end_point_config_count,
-        0, "end point configuration trigger", EPRO_NOONPRCH);
+        0, "end point config count", EPRO_NOONPRCH);
     addpropertyl(cls, ENETP_CONNECT_TABLE_MODIF_COUNT, enetmp_connect_table_modif_count,
-        -1, "update connections", EPRO_DEFAULT);
+        -1, "connect table modif count", EPRO_DEFAULT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -195,6 +196,7 @@ eStatus eNetMaintainThread::onpropertychange(
 void eNetMaintainThread::initialize(
     eContainer *params)
 {
+    create_connect_processess_list();
 }
 
 
@@ -255,7 +257,7 @@ void eNetMaintainThread::run()
     for (con = m_connections->firstc(); con; con = next_con)
     {
         next_con = con->nextc();
-        delete_con(con);
+        deactivate_con(con);
     }
     for (ep = m_end_points->firstc(); ep; ep = next_ep)
     {

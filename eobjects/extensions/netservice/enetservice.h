@@ -236,7 +236,7 @@ protected:
 
     /* Connection table (matrix) and persistent object to contain it.
      */
-    eMatrix *m_connection_matrix;
+    eMatrix *m_connect_to_matrix;
     ePersistent *m_connect;
     os_long m_connect_config_counter;
 

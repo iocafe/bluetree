@@ -40,7 +40,7 @@ eNetService::eNetService(
     m_end_points = OS_NULL;
     m_endpoint_matrix = OS_NULL;
     m_connect = OS_NULL;
-    m_connection_matrix = OS_NULL;
+    m_connect_to_matrix = OS_NULL;
     m_services_matrix = OS_NULL;
     m_trusted_matrix = OS_NULL;
     m_persistent_trusted = OS_NULL;

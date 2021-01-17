@@ -152,6 +152,11 @@ protected:
         const os_char *column_name,
         eVariable *value);
 
+
+    /* Create internal "connect processed" table.
+     */
+    void create_connect_processess_list();
+
     /* Create and delete connections.
      */
     void maintain_connections();
@@ -159,7 +164,7 @@ protected:
 
     /* Delete connection (stops connection thread and cleans up)
      */
-    void delete_con(
+    void deactivate_con(
         eContainer *con);
 
     /* A callback by a child object.
@@ -211,6 +216,10 @@ protected:
     os_long m_connect_table_modif_count;
     os_boolean m_configure_connections;
     os_long m_connect_timer;
+
+    /* The "connect processess" matrix hold one row for each socket to create.
+     */
+    eMatrix *m_connect_processes_matrix;
 
     os_boolean m_timer_set;
 

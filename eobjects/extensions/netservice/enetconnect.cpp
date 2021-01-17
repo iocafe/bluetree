@@ -25,9 +25,10 @@ const os_char enet_conn_transport[] = "transport";
 /**
 ****************************************************************************************************
 
-  @brief Create "connect" table.
+  @brief Create "connect to" table.
 
-  The connect table specifies ecom and iocom connection to establish.
+  The connect table specifies ecom and iocom connection to establish. This table can be edited
+  by user.
 
     "connect": [{
                 "transport": "none",
@@ -55,9 +56,9 @@ void eNetService::create_connect_table()
     eVariable *column;
 
     m_connect = new ePersistent(this);
-    m_connection_matrix = new eMatrix(m_connect);
-    m_connection_matrix->addname("connect");
-    m_connection_matrix->setpropertys(ETABLEP_TEXT, "connect to");
+    m_connect_to_matrix = new eMatrix(m_connect);
+    m_connect_to_matrix->addname("connect");
+    m_connect_to_matrix->setpropertys(ETABLEP_TEXT, "connect to");
 
     configuration = new eContainer(this);
     columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
@@ -69,6 +70,7 @@ void eNetService::create_connect_table()
     column->addname("ix", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "row");
     column->setpropertyi(EVARP_TYPE, OS_INT);
+    column->setpropertys(EVARP_ATTR, "rdonly");
 
     column = new eVariable(columns);
     column->addname(enet_conn_enable, ENAME_NO_MAP);
@@ -120,6 +122,7 @@ void eNetService::create_connect_table()
         "- \'TLS\': TLS connection.\n"
         "- \'SERIAL\': Serial communication.\n");
 
+#if 0
     column = new eVariable(columns);
     column->addname("found", ENAME_NO_MAP);
     column->setpropertyi(EVARP_TYPE, OS_STR);
@@ -143,16 +146,17 @@ void eNetService::create_connect_table()
     column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\",nosave,rdonly");
     column->setpropertys(EVARP_TTIP,
         "Time stamp of the last successfull connect.");
+#endif
 
     /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
      */
-    m_connection_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
-    m_connection_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
+    m_connect_to_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
+    m_connect_to_matrix->setflags(EOBJ_TEMPORARY_CALLBACK);
 
     m_connect->load_file("connect.eo");
     m_connect->setflags(EOBJ_TEMPORARY_CALLBACK);
 
-    if (m_connection_matrix->nrows() == 0) {
+    if (m_connect_to_matrix->nrows() == 0) {
         add_connect(OS_TRUE, "ecom", "localhost", "*", 1);
         add_connect(OS_FALSE, "ecom", "*", "*", 1);
         add_connect(OS_FALSE, "iocom", "*", "*", 1);
@@ -212,7 +216,92 @@ void eNetService::add_connect(
     element->addname(enet_conn_transport, ENAME_NO_MAP);
     element->setl(transport);
 
-    m_connection_matrix->insert(&row);
+    m_connect_to_matrix->insert(&row);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Create "connect processess" table.
+
+  The connect processess hold one row for each socket to create.
+
+  It is a temporary table created by merging "connect to" and "LAN services" tables to create
+  connection list where each row represents a process to connect to.
+
+  The source tables "connect to" and "LAN services" do belong to eNetService (eProcess) and thus
+  os_lock() must be on when accessing these. The "LAN services can also have wildcard IP
+  addressess where one tow represents connection to multiple processedd.
+
+  The connect processess table belongs to eNetMaintainThread, no lock needed. It contains
+  precisely one for row each socket or other connection to create.
+
+
+****************************************************************************************************
+*/
+void eNetMaintainThread::create_connect_processess_list()
+{
+    eContainer *configuration, *columns;
+    eVariable *column;
+
+    m_connect_processes_matrix = new eMatrix(this);
+    m_connect_processes_matrix->addname("socketlist");
+    m_connect_processes_matrix->setpropertys(ETABLEP_TEXT, "socket list");
+
+    configuration = new eContainer(this);
+    columns = new eContainer(configuration, EOID_TABLE_COLUMNS);
+    columns->addname("columns", ENAME_NO_MAP);
+
+    /* For matrix as a table row number is always the first column in configuration.
+     */
+    column = new eVariable(columns);
+    column->addname("ix", ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "row");
+    column->setpropertyi(EVARP_TYPE, OS_INT);
+    column->setpropertys(EVARP_ATTR, "rdonly");
+
+    column = new eVariable(columns);
+    column->addname("name", ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, enet_conn_name);
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_ATTR, "rdonly");
+    column->setpropertys(EVARP_TTIP,
+        "Process or IO network name to connect to. This can be a list, if detecting\n"
+        "services by lighthouse. Wildcard \'*\' indicates that any name will be connected to.");
+
+    column = new eVariable(columns);
+    column->addname(enet_conn_protocol, ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "protocol");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_ATTR, "rdonly");
+    column->setpropertys(EVARP_TTIP,
+        "Communication protocol.\n"
+        "- \'ecom\': eobjects communication protocol (for glass user interface, etc).\n"
+        "- \'iocom\': IO device communication protocol.\n");
+
+    column = new eVariable(columns);
+    column->addname(enet_conn_ip, ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "address/port");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_ATTR, "rdonly");
+    column->setpropertys(EVARP_TTIP,
+        "IP andress and port number, COM port");
+
+    column = new eVariable(columns);
+    column->addname(enet_conn_transport, ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "transport");
+    column->setpropertyi(EVARP_TYPE, OS_CHAR);
+    column->setpropertys(EVARP_ATTR, "enum=\"1.SOCKET,2.TLS,3.SERIAL\",rdonly");
+    column->setpropertys(EVARP_TTIP,
+        "Transport to use.\n"
+        "- \'SOCKET\': unsecured socket.\n"
+        "- \'TLS\': secure TLS socket.\n"
+        "- \'SERIAL\': serial communication.\n");
+
+    /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
+     */
+    m_connect_processes_matrix->configure(configuration, ETABLE_ADOPT_ARGUMENT);
 }
 
 
@@ -246,7 +335,7 @@ void eNetMaintainThread::maintain_connections()
     localvars = new eContainer(ETEMPORARY);
 
     os_lock();
-    m = m_netservice->m_connection_matrix;
+    m = m_netservice->m_connect_to_matrix;
     conf = m->configuration();
     if (conf == OS_NULL) goto getout_unlock;
     columns = conf->first(EOID_TABLE_COLUMNS);
@@ -272,7 +361,15 @@ void eNetMaintainThread::maintain_connections()
     transport_col = col->oid();
     os_unlock();
 
-    /* Remove connections which are no longer needed or have changed.
+    /* Merge connect to and LAN services tables to create connection
+       list where each row represents a process to connect to.
+       Source tables belong to eNetService (eProcess) and thus os_lock()
+       must be on when accessing these. Destination table belongs to
+       eNetMaintainThread, no lock needed.
+     */
+
+
+    /* Deactivate connections which are no longer needed or have changed.
      */
     for (con = m_connections->firstc(); con; con = next_con)
     {
@@ -320,7 +417,7 @@ void eNetMaintainThread::maintain_connections()
 
 delete_it:
         os_unlock();
-        delete_con(con);
+        deactivate_con(con);
         changed = OS_TRUE;
     }
 
@@ -384,7 +481,7 @@ getout_unlock:
 }
 
 
-void eNetMaintainThread::delete_con(
+void eNetMaintainThread::deactivate_con(
     eContainer *con)
 {
     eVariable *proto_name;
