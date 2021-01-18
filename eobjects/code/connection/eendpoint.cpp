@@ -319,7 +319,7 @@ void eEndPoint::open()
     const os_char *parameters, *e;
     os_boolean is_tls, is_socket, is_ipv6;
     os_uchar binaddr[OSAL_IP_BIN_ADDR_SZ];
-    os_char straddr[OSAL_IPADDR_SZ];
+    os_char straddr[OSAL_IPADDR_AND_PORT_SZ];
     os_int default_port_nr, port_nr;
     eVariable tmp;
     osalStatus ss;
@@ -348,13 +348,18 @@ void eEndPoint::open()
             return;
         }
 
-        osal_ip_to_str(straddr, sizeof(straddr), binaddr,
+        osal_make_ip_str(straddr, sizeof(straddr), binaddr,
+            port_nr, is_ipv6);
+        tmp += straddr;
+
+        /* osal_ip_to_str(straddr, sizeof(straddr), binaddr,
             is_ipv6 ? OSAL_IPV6_BIN_ADDR_SZ  : OSAL_IPV4_BIN_ADDR_SZ);
         if (is_ipv6) { tmp.appends("["); }
         tmp += straddr;
         if (is_ipv6) { tmp.appends("]"); }
         tmp.appends(":");
         tmp.appendl(port_nr);
+        */
         parameters = tmp.gets();
     }
 

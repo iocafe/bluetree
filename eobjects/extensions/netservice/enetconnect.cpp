@@ -322,14 +322,21 @@ void eNetMaintainThread::create_socket_list_table()
 void eNetMaintainThread::merge_to_socket_list()
 {
     eMatrix *m, *lh;
-    eContainer *localvars, *row, *rows, *conf, *columns, *index, *c;
+    eContainer *localvars, *rows, *conf, *columns, *index, *c;
     eVariable *name, *protocol, *transport, *ip, *tmp;
-    os_int enable_col, name_col, protocol_col, transport_col, ip_col;
-    os_int lh_name_col, lh_nick_col, lh_protocol_col, lh_ip_col, lh_tlsport_col, lh_tcpport_col;
+    os_char *ip_str;
+    //os_uchar binaddr[OSAL_IP_BIN_ADDR_SZ];
+    os_int enable_col, name_col, protocol_col, transport_col, ip_col, port_nr;
+    os_int lh_name_col, lh_protocol_col, lh_ip_col, lh_tlsport_col, lh_tcpport_col;
     os_int h, con_nr, i;
+    os_boolean is_ipv6;
 
     localvars = new eContainer(ETEMPORARY);
     tmp = new eVariable(localvars);
+    name = new eVariable(localvars);
+    protocol = new eVariable(localvars);
+    transport = new eVariable(localvars);
+    ip = new eVariable(localvars);
 
     os_lock();
 
@@ -353,7 +360,6 @@ void eNetMaintainThread::merge_to_socket_list()
     if (conf == OS_NULL) goto getout_unlock;
     columns = conf->firstc(EOID_TABLE_COLUMNS);
     lh_name_col = etable_column_ix(enet_lansrv_name, columns);
-    lh_nick_col = etable_column_ix(enet_lansrv_nick, columns);
     lh_protocol_col = etable_column_ix(enet_lansrv_protocol, columns);
     lh_ip_col = etable_column_ix(enet_lansrv_ip, columns);
     lh_tlsport_col = etable_column_ix(enet_lansrv_tlsport, columns);
@@ -385,25 +391,31 @@ void eNetMaintainThread::merge_to_socket_list()
         if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
         if (m->geti(con_nr, enable_col) == 0) continue;
 
-        m->getv(con_nr, ip_col, ip);
-
-        row = new eContainer(rows);
-
-        name = new eVariable(row);
-        name->addname(enet_conn_name, ENAME_NO_MAP);
         m->getv(con_nr, name_col, name);
-
-        protocol = new eVariable(row);
-        protocol->addname(enet_conn_protocol, ENAME_NO_MAP);
+        m->getv(con_nr, ip_col, ip);
         m->getv(con_nr, protocol_col, protocol);
-
-        transport = new eVariable(row);
-        transport->addname(enet_conn_transport, ENAME_NO_MAP);
         m->getv(con_nr, transport_col, transport);
 
-        ip = new eVariable(row);
-        ip->addname(enet_conn_ip, ENAME_NO_MAP);
-        m->getv(con_nr, ip_col, ip);
+        /* If no ip set, we use lighthouse
+         */
+        ip_str = ip->gets();
+        if (!os_strcmp(ip_str, "*") || *ip_str == '\0')
+        {
+            continue;
+        }
+
+        /* Get port number (set 0 if unspecified) and is_tls flag
+         */
+        osal_socket_get_ip_and_port(ip_str,
+            OS_NULL, 0, &port_nr, &is_ipv6, OSAL_STREAM_CONNECT, 0);
+
+        /* If we have no port number, check if we can find one by lighthouse
+         */
+        if (port_nr == 0) {
+
+        }
+
+        add_socket_to_list(name, protocol, transport, ip, rows);
     }
     os_unlock();
 
@@ -419,6 +431,36 @@ getout_unlock:
     osal_debug_error("maintain_connections() failed");
 }
 
+/* Add a row to socket list.
+ */
+void eNetMaintainThread::add_socket_to_list(
+    eVariable *name,
+    eVariable *protocol,
+    eVariable *transport,
+    eVariable *ip,
+    eContainer *rows)
+{
+    eContainer *row;
+    eVariable *v;
+
+    row = new eContainer(rows);
+
+    v = new eVariable(row);
+    v->addname(enet_conn_name, ENAME_NO_MAP);
+    v->setv(name);
+
+    v = new eVariable(row);
+    v->addname(enet_conn_protocol, ENAME_NO_MAP);
+    v->setv(protocol);
+
+    v = new eVariable(row);
+    v->addname(enet_conn_transport, ENAME_NO_MAP);
+    v->setv(transport);
+
+    v = new eVariable(row);
+    v->addname(enet_conn_ip, ENAME_NO_MAP);
+    v->setv(ip);
+}
 
 
 /**

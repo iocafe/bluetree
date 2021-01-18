@@ -161,6 +161,15 @@ protected:
      */
     void merge_to_socket_list();
 
+    /* Add a row to socket list.
+     */
+    void add_socket_to_list(
+        eVariable *name,
+        eVariable *protocol,
+        eVariable *transport,
+        eVariable *ip,
+        eContainer *rows);
+
     /* Create and delete connections.
      */
     void maintain_connections();
