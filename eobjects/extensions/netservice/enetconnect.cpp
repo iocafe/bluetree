@@ -15,7 +15,8 @@
 */
 #include "extensions/netservice/enetservice.h"
 
-
+/* "connect to" table column names.
+ */
 const os_char enet_conn_enable[] = "enable";
 const os_char enet_conn_name[] = "name";
 const os_char enet_conn_protocol[] = "protocol";
@@ -324,6 +325,7 @@ void eNetMaintainThread::merge_to_socket_list()
     eContainer *localvars, *row, *rows, *conf, *columns;
     eVariable *name, *protocol, *transport, *ip;
     os_int enable_col, name_col, protocol_col, transport_col, ip_col;
+    os_int lh_name_col, lh_nick_col, lh_protocol_col, lh_ip_col, lh_tlsport_col, lh_tcpport_col;
     os_int h, con_nr;
 
     localvars = new eContainer(ETEMPORARY);
@@ -341,6 +343,17 @@ void eNetMaintainThread::merge_to_socket_list()
     protocol_col = etable_column_ix(enet_conn_protocol, columns);
     ip_col = etable_column_ix(enet_conn_ip, columns);
     transport_col = etable_column_ix(enet_conn_transport, columns);
+    os_unlock();
+
+    /* Get "LAN services" matrix column numbers.
+     */
+    os_lock();
+    lh_name_col = etable_column_ix(enet_lansrv_name, columns);
+    lh_nick_col = etable_column_ix(enet_lansrv_nick, columns);
+    lh_protocol_col = etable_column_ix(enet_lansrv_protocol, columns);
+    lh_ip_col = etable_column_ix(enet_lansrv_ip, columns);
+    lh_tlsport_col = etable_column_ix(enet_lansrv_tlsport, columns);
+    lh_tcpport_col = etable_column_ix(enet_lansrv_tcpport, columns);
     os_unlock();
 
     m_socket_list_matrix->remove("1");

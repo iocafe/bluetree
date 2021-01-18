@@ -18,7 +18,7 @@
 #define ENETCONNECT_H_
 #include "extensions/netservice/enetservice.h"
 
-/* End point table column names.
+/* "connect to" table column names.
  */
 extern const os_char enet_conn_enable[];
 extern const os_char enet_conn_name[];
@@ -29,7 +29,6 @@ extern const os_char enet_conn_transport[];
 
 typedef enum {
     ENET_CONN_PROTOCOL,
-    // ENET_ENDP_IPV6,
     ENET_CONN_NAME,
     ENET_CONN_TRANSPORT,
     ENET_CONN_IP,

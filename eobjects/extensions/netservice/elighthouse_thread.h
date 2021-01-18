@@ -38,6 +38,16 @@ extern const os_char
     elighthousep_send_udp_multicasts[],
     elighthousep_publish[];
 
+/* "LAN services" table column names.
+ */
+extern const os_char enet_lansrv_name[];
+extern const os_char enet_lansrv_nick[];
+extern const os_char enet_lansrv_protocol[];
+extern const os_char enet_lansrv_ip[];
+extern const os_char enet_lansrv_tlsport[];
+extern const os_char enet_lansrv_tcpport[];
+extern const os_char enet_lansrv_tstamp[];
+
 
 /**
 ****************************************************************************************************

@@ -21,6 +21,17 @@ const os_char
     elighthousep_send_udp_multicasts[] = "send_multicasts",
     elighthousep_publish[] = "publish";
 
+/* "LAN services" table column names.
+ */
+const os_char enet_lansrv_name[] = "name";
+const os_char enet_lansrv_nick[] = "nick";
+const os_char enet_lansrv_protocol[] = "protocol";
+const os_char enet_lansrv_ip[] = "ip";
+const os_char enet_lansrv_tlsport[] = "tlsport";
+const os_char enet_lansrv_tcpport[] = "tcpport";
+const os_char enet_lansrv_tstamp[] = "tstamp";
+
+
 /**
 ****************************************************************************************************
   Constructor.
@@ -319,15 +330,15 @@ void eLightHouseService::callback(
     row = new eContainer(ec, EOID_TEMPORARY, EOBJ_TEMPORARY_ATTACHMENT);
 
     element = new eVariable(row);
-    element->addname("name", ENAME_NO_MAP);
+    element->addname(enet_lansrv_name, ENAME_NO_MAP);
     element->sets(data->network_name);
 
     element = new eVariable(row);
-    element->addname("nick", ENAME_NO_MAP);
+    element->addname(enet_lansrv_nick, ENAME_NO_MAP);
     element->sets(data->nickname);
 
     element = new eVariable(row);
-    element->addname("protocol", ENAME_NO_MAP);
+    element->addname(enet_lansrv_protocol, ENAME_NO_MAP);
     if (!os_strcmp(data->protocol, "i")) {
         protocol_long = "iocom";
     }
@@ -340,19 +351,19 @@ void eLightHouseService::callback(
     element->sets(protocol_long);
 
     element = new eVariable(row);
-    element->addname("ip", ENAME_NO_MAP);
+    element->addname(enet_lansrv_ip, ENAME_NO_MAP);
     element->sets(data->ip_addr);
 
     element = new eVariable(row);
-    element->addname("tlsport", ENAME_NO_MAP);
+    element->addname(enet_lansrv_tlsport, ENAME_NO_MAP);
     if (data->tls_port_nr) element->setl(data->tls_port_nr);
 
     element = new eVariable(row);
-    element->addname("tcpport", ENAME_NO_MAP);
+    element->addname(enet_lansrv_tcpport, ENAME_NO_MAP);
     if (data->tcp_port_nr) element->setl(data->tcp_port_nr);
 
     element = new eVariable(row);
-    element->addname("tstamp", ENAME_NO_MAP);
+    element->addname(enet_lansrv_tstamp, ENAME_NO_MAP);
     ti = etime();
     element->setl(ti);
 
@@ -636,7 +647,7 @@ void eNetService::create_services_table()
     column->setpropertys(EVARP_ATTR, "rdonly");
 
     column = new eVariable(columns);
-    column->addname("name", ENAME_NO_MAP);
+    column->addname(enet_lansrv_name, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "name");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_ATTR, "rdonly");
@@ -644,7 +655,7 @@ void eNetService::create_services_table()
         "IOCOM device network or eobjects process name");
 
     column = new eVariable(columns);
-    column->addname("nick", ENAME_NO_MAP);
+    column->addname(enet_lansrv_nick, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "nickname");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_ATTR, "rdonly");
@@ -652,7 +663,7 @@ void eNetService::create_services_table()
         "IO device's or process'es nickname. Helps user to identify devices, not used by sofware");
 
     column = new eVariable(columns);
-    column->addname("protocol", ENAME_NO_MAP);
+    column->addname(enet_lansrv_protocol, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "protocol");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_ATTR, "rdonly");
@@ -662,7 +673,7 @@ void eNetService::create_services_table()
         "- \'iocom\': IO device communication protocol.\n");
 
     column = new eVariable(columns);
-    column->addname("ip", ENAME_NO_MAP);
+    column->addname(enet_lansrv_ip, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "IP address");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_ATTR, "rdonly");
@@ -670,7 +681,7 @@ void eNetService::create_services_table()
         "Listening IP address");
 
     column = new eVariable(columns);
-    column->addname("tlsport", ENAME_NO_MAP);
+    column->addname(enet_lansrv_tlsport, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "TLS port");
     column->setpropertyi(EVARP_TYPE, OS_INT);
     column->setpropertys(EVARP_ATTR, "rdonly");
@@ -678,7 +689,7 @@ void eNetService::create_services_table()
         "Listening secure TLS socket port number.");
 
     column = new eVariable(columns);
-    column->addname("tcpport", ENAME_NO_MAP);
+    column->addname(enet_lansrv_tcpport, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "TCP port");
     column->setpropertyi(EVARP_TYPE, OS_INT);
     column->setpropertys(EVARP_ATTR, "rdonly");
@@ -686,7 +697,7 @@ void eNetService::create_services_table()
         "Listening TCP socket port number (not secured).");
 
     column = new eVariable(columns);
-    column->addname("tstamp", ENAME_NO_MAP);
+    column->addname(enet_lansrv_tstamp, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "timestamp");
     column->setpropertyi(EVARP_TYPE, OS_LONG);
     column->setpropertys(EVARP_ATTR, "tstamp=\"yy,sec\",nosave,rdonly");
