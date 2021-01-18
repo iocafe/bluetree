@@ -74,6 +74,7 @@ void eobjects_shutdown();
 #include "code/table/erange.h"
 #include "code/table/etable.h"
 #include "code/table/erowset.h"
+#include "code/table/etablehelpers.h"
 #include "code/binding/erowsetbinding.h"
 #include "code/table/edbm.h"
 #include "code/table/etablemessages.h"

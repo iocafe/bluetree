@@ -196,7 +196,7 @@ eStatus eNetMaintainThread::onpropertychange(
 void eNetMaintainThread::initialize(
     eContainer *params)
 {
-    create_socket_list();
+    create_socket_list_table();
 }
 
 

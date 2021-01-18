@@ -320,7 +320,6 @@ void eEndPoint::open()
     os_boolean is_tls, is_socket, is_ipv6;
     os_uchar binaddr[OSAL_IP_BIN_ADDR_SZ];
     os_char straddr[OSAL_IPADDR_SZ];
-    os_char nbuf[OSAL_NBUF_SZ];
     os_int default_port_nr, port_nr;
     eVariable tmp;
     osalStatus ss;

@@ -251,8 +251,7 @@ void eNetMaintainThread::maintain_end_points()
     eProtocolHandle *handle;
     eEndPointParameters prm;
     eMatrix *m;
-    eObject *conf, *columns, *col;
-    eContainer *localvars, *list, *ep, *next_ep;
+    eContainer *localvars, *list, *ep, *next_ep, *conf, *columns;
     eVariable *v, *proto_name;
     os_int enable_col, protocol_col, transport_col, port_col;
     os_int h, ep_nr;
@@ -262,27 +261,18 @@ void eNetMaintainThread::maintain_end_points()
 
     localvars = new eContainer(ETEMPORARY);
 
+    /* Get used "end points" table column numbers.
+     */
     os_lock();
     m = m_netservice->m_endpoint_matrix;
     conf = m->configuration();
     if (conf == OS_NULL) goto getout_unlock;
-    columns = conf->first(EOID_TABLE_COLUMNS);
+    columns = conf->firstc(EOID_TABLE_COLUMNS);
     if (columns == OS_NULL) goto getout_unlock;
-    col = columns->byname(enet_endp_enable);
-    if (col == OS_NULL) goto getout_unlock;
-    enable_col = col->oid();
-    col = columns->byname(enet_endp_protocol);
-    if (col == OS_NULL) goto getout_unlock;
-    protocol_col = col->oid();
-    col = columns->byname(enet_endp_transport);
-    if (col == OS_NULL) goto getout_unlock;
-    transport_col = col->oid();
-    col = columns->byname(enet_endp_port);
-    if (col == OS_NULL) goto getout_unlock;
-    port_col = col->oid();
-    /* col = columns->byname(enet_endp_netname);
-    if (col == OS_NULL) goto getout;
-    netname_col = col->oid(); */
+    enable_col = etable_column_ix(enet_endp_enable, columns);
+    protocol_col = etable_column_ix(enet_endp_protocol, columns);
+    transport_col = etable_column_ix(enet_endp_transport, columns);
+    port_col = etable_column_ix(enet_endp_port, columns);
     os_unlock();
 
     /* Remove end points which are no longer needed or have changed.

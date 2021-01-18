@@ -240,7 +240,7 @@ void eNetService::add_connect(
 
 ****************************************************************************************************
 */
-void eNetMaintainThread::create_socket_list()
+void eNetMaintainThread::create_socket_list_table()
 {
     eContainer *configuration, *columns;
     eVariable *column;
@@ -321,39 +321,26 @@ void eNetMaintainThread::create_socket_list()
 void eNetMaintainThread::merge_to_socket_list()
 {
     eMatrix *m;
-    eObject *conf, *columns, *col;
-    eContainer *localvars, *row, *rows;
+    eContainer *localvars, *row, *rows, *conf, *columns;
     eVariable *name, *protocol, *transport, *ip;
     os_int enable_col, name_col, protocol_col, transport_col, ip_col;
     os_int h, con_nr;
 
     localvars = new eContainer(ETEMPORARY);
 
+    /* Get "connect to" matrix column numbers.
+     */
     os_lock();
     m = m_netservice->m_connect_to_matrix;
     conf = m->configuration();
     if (conf == OS_NULL) goto getout_unlock;
-    columns = conf->first(EOID_TABLE_COLUMNS);
+    columns = conf->firstc(EOID_TABLE_COLUMNS);
     if (columns == OS_NULL) goto getout_unlock;
-    col = columns->byname(enet_conn_enable);
-    if (col == OS_NULL) goto getout_unlock;
-    enable_col = col->oid();
-
-    col = columns->byname(enet_conn_name);
-    if (col == OS_NULL) goto getout_unlock;
-    name_col = col->oid();
-
-    col = columns->byname(enet_conn_protocol);
-    if (col == OS_NULL) goto getout_unlock;
-    protocol_col = col->oid();
-
-    col = columns->byname(enet_conn_ip);
-    if (col == OS_NULL) goto getout_unlock;
-    ip_col = col->oid();
-
-    col = columns->byname(enet_conn_transport);
-    if (col == OS_NULL) goto getout_unlock;
-    transport_col = col->oid();
+    enable_col = etable_column_ix(enet_conn_enable, columns);
+    name_col = etable_column_ix(enet_conn_name, columns);
+    protocol_col = etable_column_ix(enet_conn_protocol, columns);
+    ip_col = etable_column_ix(enet_conn_ip, columns);
+    transport_col = etable_column_ix(enet_conn_transport, columns);
     os_unlock();
 
     m_socket_list_matrix->remove("1");

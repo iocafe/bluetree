@@ -429,16 +429,14 @@ void eLightHouseService::run_server()
 */
 eStatus eLightHouseService::publish()
 {
+    eContainer *localvars, *list, *item, *conf, *columns;
     eMatrix *m;
-    eObject *conf, *columns, *col;
-    eContainer *localvars, *list, *item;
-    eVariable *v, *port;
+    eVariable *v, *port, *protocol;
     const os_char *protocol_short;
     os_int enable_col, ok_col, protocol_col, transport_col, port_col; //, netname_col;
     os_int h, y, is_tls, item_id, port_nr;
     os_int tls_port, tcp_port, default_port_nr;
     enetEndpTransportIx transport_ix;
-    eVariable *protocol;
     os_char buf[OSAL_NETWORK_NAME_SZ], *p;
     os_boolean is_ipv6;
     eStatus s = ESTATUS_FAILED;
@@ -452,27 +450,14 @@ eStatus eLightHouseService::publish()
     m = m_netservice->m_endpoint_matrix;
     conf = m->configuration();
     if (conf == OS_NULL) goto getout;
-    columns = conf->first(EOID_TABLE_COLUMNS);
+    columns = conf->firstc(EOID_TABLE_COLUMNS);
     if (columns == OS_NULL) goto getout;
 
-    col = columns->byname(enet_endp_enable);
-    if (col == OS_NULL) goto getout;
-    enable_col = col->oid();
-    col = columns->byname(enet_endp_ok);
-    if (col == OS_NULL) goto getout;
-    ok_col = col->oid();
-    col = columns->byname(enet_endp_protocol);
-    if (col == OS_NULL) goto getout;
-    protocol_col = col->oid();
-    col = columns->byname(enet_endp_transport);
-    if (col == OS_NULL) goto getout;
-    transport_col = col->oid();
-    col = columns->byname(enet_endp_port);
-    if (col == OS_NULL) goto getout;
-    port_col = col->oid();
-    /* col = columns->byname(enet_endp_netname);
-    if (col == OS_NULL) goto getout;
-    netname_col = col->oid(); */
+    enable_col = etable_column_ix(enet_endp_enable, columns);
+    ok_col = etable_column_ix(enet_endp_ok, columns);
+    protocol_col = etable_column_ix(enet_endp_protocol, columns);
+    transport_col = etable_column_ix(enet_endp_transport, columns);
+    port_col = etable_column_ix(enet_endp_port, columns);
 
     h = m->nrows();
     for (y = 0; y<h; y++) {

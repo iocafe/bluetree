@@ -155,7 +155,7 @@ protected:
 
     /* Create internal "socket list" table.
      */
-    void create_socket_list();
+    void create_socket_list_table();
 
     /* Merge "connect to" and "LAN services" into socket list.
      */
