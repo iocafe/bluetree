@@ -115,9 +115,9 @@ void eNetService::create_end_point_table(
     column->addname(enet_endp_port, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "port");
     column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_DEFAULT, "6360");
+    column->setpropertys(EVARP_DEFAULT, "*");
     column->setpropertys(EVARP_TTIP,
-        "Port to listen, typical:\n"
+        "Port to listen, \'*\' defaults:\n"
         "- \'6371\': ecom socket.\n"
         "- \'6374\': ecom TLS.\n"
         "- \'6368\': ecom socket.\n"
@@ -169,15 +169,8 @@ void eNetService::create_end_point_table(
 
     if (m_endpoint_matrix->nrows() == 0) {
         enable_by_default = (flags & ENET_DEFAULT_NO_END_POINTS) ? OS_FALSE : OS_TRUE;
-        add_end_point(enable_by_default, "ecom", ENET_ENDP_TLS,
-            ENET_DEFAULT_TLS_PORT_STR);
-        add_end_point(enable_by_default, "iocom", ENET_ENDP_TLS,
-            IOC_DEFAULT_TLS_PORT_STR);
-
-/* TESTING */
-add_end_point(OS_TRUE, "iocom", ENET_ENDP_SOCKET,
-    IOC_DEFAULT_SOCKET_PORT_STR, "iocafenet");
-
+        add_end_point(enable_by_default, "ecom", ENET_ENDP_TLS, "*");
+        add_end_point(enable_by_default, "iocom", ENET_ENDP_TLS, "*");
     }
 }
 

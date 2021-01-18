@@ -172,9 +172,9 @@ eProtocolHandle *eComProtocol::new_end_point(
      */
     tmp.sets(transport_name);
     tmp.appends(":");
-    if (os_strchr(parameters->port, ':') == OS_NULL) {
+    /* if (os_strchr(parameters->port, ':') == OS_NULL) {
         tmp.appends(":");
-    }
+    } */
     tmp.appends(parameters->port);
     setpropertys_msg(un, tmp.gets(), eendpp_ipaddr);
 

@@ -436,13 +436,11 @@ eStatus eLightHouseService::publish()
     const os_char *protocol_short;
     os_int enable_col, ok_col, protocol_col, transport_col, port_col; //, netname_col;
     os_int h, y, is_tls, item_id, port_nr;
-    os_int tls_port, tcp_port;
+    os_int tls_port, tcp_port, default_port_nr;
     enetEndpTransportIx transport_ix;
     eVariable *protocol;
     os_char buf[OSAL_NETWORK_NAME_SZ], *p;
-    os_char iface_addr_bin[OSAL_IP_BIN_ADDR_SZ];
     os_boolean is_ipv6;
-    osalStatus ss;
     eStatus s = ESTATUS_FAILED;
 
     localvars = new eContainer(ETEMPORARY);
@@ -483,29 +481,50 @@ eStatus eLightHouseService::publish()
         if (m->geti(y, ok_col) == 0) continue;
 
         m->getv(y, protocol_col, protocol);
+        p = protocol->gets();
         m->getv(y, port_col, port);
+
+        transport_ix = (enetEndpTransportIx)m->geti(y, transport_col);
+        if (!os_strcmp(p, "ecom")) {
+            switch (transport_ix) {
+                case ENET_ENDP_SOCKET:
+                    is_tls = 0;
+                    default_port_nr = ENET_DEFAULT_SOCKET_PORT;
+                    break;
+
+                case ENET_ENDP_TLS:
+                    is_tls = 1;
+                    default_port_nr = ENET_DEFAULT_TLS_PORT;
+                    break;
+
+                default:
+                    goto goon;
+            }
+        }
+        else {
+            switch (transport_ix) {
+                case ENET_ENDP_SOCKET:
+                    is_tls = 0;
+                    default_port_nr = IOC_DEFAULT_SOCKET_PORT;
+                    break;
+
+                case ENET_ENDP_TLS:
+                    is_tls = 1;
+                    default_port_nr = IOC_DEFAULT_TLS_PORT;
+                    break;
+
+                default:
+                    goto goon;
+            }
+        }
 
         /* We resolve is this is IPv4 or IPv6 address, port number
          * and interface.
          */
-        if (os_strchr(port->gets(), ':')) {
-            ss = osal_socket_get_ip_and_port(port->gets(),
-                iface_addr_bin, sizeof(iface_addr_bin),
-                &port_nr, &is_ipv6, OSAL_STREAM_LISTEN, 0);
-            osal_debug_assert(ss == OSAL_SUCCESS);
-        }
-        else {
-            port_nr = port->geti();
-            is_ipv6 = OS_FALSE;
-        }
+        osal_socket_get_ip_and_port(port->gets(),
+            OS_NULL, 0,
+            &port_nr, &is_ipv6, OSAL_STREAM_LISTEN, default_port_nr);
         if (port_nr <= 0) continue;
-
-        transport_ix = (enetEndpTransportIx)m->geti(y, transport_col);
-        switch (transport_ix) {
-            case ENET_ENDP_SOCKET: is_tls = 0; break;
-            case ENET_ENDP_TLS:    is_tls = 1; break;
-            default: goto goon;
-        }
 
         item_id = is_ipv6;
         for (item = list->firstc(item_id); item; item = item->nextc(item_id))
@@ -565,8 +584,9 @@ goon:;
 
         v = item->firstv(ENET_ENDP_PROTOCOL);
         protocol->setv(v);
+        p = protocol->gets();
 
-        if (!os_strcmp(protocol->gets(), "iocom")) {
+        if (!os_strcmp(p, "iocom")) {
             os_strncpy(buf, eglobal->process_name, sizeof(buf));
             os_strncat(buf, "net", sizeof(buf));
             p = buf;
@@ -575,7 +595,7 @@ goon:;
         else {
             p = eglobal->process_nr ? eglobal->process_id : eglobal->process_name;
             protocol_short = protocol->gets();
-            if (!os_strcmp(protocol->gets(), "ecom")) {
+            if (!os_strcmp(p, "ecom")) {
                 protocol_short = "o";
             }
         }
