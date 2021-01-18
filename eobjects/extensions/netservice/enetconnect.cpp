@@ -321,18 +321,20 @@ void eNetMaintainThread::create_socket_list_table()
 */
 void eNetMaintainThread::merge_to_socket_list()
 {
-    eMatrix *m;
-    eContainer *localvars, *row, *rows, *conf, *columns;
-    eVariable *name, *protocol, *transport, *ip;
+    eMatrix *m, *lh;
+    eContainer *localvars, *row, *rows, *conf, *columns, *index, *c;
+    eVariable *name, *protocol, *transport, *ip, *tmp;
     os_int enable_col, name_col, protocol_col, transport_col, ip_col;
     os_int lh_name_col, lh_nick_col, lh_protocol_col, lh_ip_col, lh_tlsport_col, lh_tcpport_col;
-    os_int h, con_nr;
+    os_int h, con_nr, i;
 
     localvars = new eContainer(ETEMPORARY);
+    tmp = new eVariable(localvars);
+
+    os_lock();
 
     /* Get "connect to" matrix column numbers.
      */
-    os_lock();
     m = m_netservice->m_connect_to_matrix;
     conf = m->configuration();
     if (conf == OS_NULL) goto getout_unlock;
@@ -343,27 +345,47 @@ void eNetMaintainThread::merge_to_socket_list()
     protocol_col = etable_column_ix(enet_conn_protocol, columns);
     ip_col = etable_column_ix(enet_conn_ip, columns);
     transport_col = etable_column_ix(enet_conn_transport, columns);
-    os_unlock();
 
     /* Get "LAN services" matrix column numbers.
      */
-    os_lock();
+    lh = m_netservice->m_services_matrix;
+    conf = lh->configuration();
+    if (conf == OS_NULL) goto getout_unlock;
+    columns = conf->firstc(EOID_TABLE_COLUMNS);
     lh_name_col = etable_column_ix(enet_lansrv_name, columns);
     lh_nick_col = etable_column_ix(enet_lansrv_nick, columns);
     lh_protocol_col = etable_column_ix(enet_lansrv_protocol, columns);
     lh_ip_col = etable_column_ix(enet_lansrv_ip, columns);
     lh_tlsport_col = etable_column_ix(enet_lansrv_tlsport, columns);
     lh_tcpport_col = etable_column_ix(enet_lansrv_tcpport, columns);
+
+    /* Generate index "name" -> "row number for LAN services.
+     */
+    index = new eContainer(localvars);
+    index->ns_create();
+    h = lh->nrows();
+    for (i = 0; i < h; i++) {
+        if ((m->geti(i, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
+
+        c = new eContainer(index, i);
+        lh->getv(i, lh_name_col, tmp);
+        c->addname(tmp->gets());
+    }
+
     os_unlock();
 
+    /* Remove all rows from socket list.
+     */
     m_socket_list_matrix->remove("1");
 
     rows = new eContainer(localvars);
     os_lock();
     h = m->nrows();
-    for (con_nr = 0; con_nr < h; con_nr ++) {
+    for (con_nr = 0; con_nr < h; con_nr++) {
         if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
         if (m->geti(con_nr, enable_col) == 0) continue;
+
+        m->getv(con_nr, ip_col, ip);
 
         row = new eContainer(rows);
 
