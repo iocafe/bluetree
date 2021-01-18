@@ -178,7 +178,7 @@ eStatus eOsStream::open(
             break;
         }
     }
-    if (item == OS_NULL) {
+    if (item->name == OS_NULL) {
         osal_debug_error("eOsStream::open: interface, like \"tls:\" not in open() parameters");
         return ESTATUS_FAILED;
     }

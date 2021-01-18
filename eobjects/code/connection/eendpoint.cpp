@@ -316,18 +316,57 @@ void eEndPoint::run()
 void eEndPoint::open()
 {
     eStatus s;
+    const os_char *parameters, *e;
+    os_boolean is_tls, is_socket, is_ipv6;
+    os_uchar binaddr[OSAL_IP_BIN_ADDR_SZ];
+    os_char straddr[OSAL_IPADDR_SZ];
+    os_char nbuf[OSAL_NBUF_SZ];
+    os_int default_port_nr, port_nr;
+    eVariable tmp;
+    osalStatus ss;
 
     m_open_failed = OS_FALSE;
     if (m_stream || !m_initialized || m_ipaddr->isempty()) return;
+    parameters = m_ipaddr->gets();
+
+    /* Set default port and resolve host name.
+     */
+    is_tls = !os_strncmp(parameters, "tls:", 4);
+    is_socket = !os_strncmp(parameters, "socket:", 7);
+    if (is_tls || is_socket) {
+        default_port_nr = is_tls ? ENET_DEFAULT_TLS_PORT : ENET_DEFAULT_SOCKET_PORT;
+
+        e = os_strchr(parameters, ':') + 1;
+        tmp.appends_nbytes(parameters, e - parameters);
+        parameters = e;
+
+        ss = osal_socket_get_ip_and_port(parameters,
+            (os_char*)binaddr, sizeof(binaddr),
+            &port_nr, &is_ipv6, OSAL_STREAM_LISTEN, default_port_nr);
+        if (ss) {
+            osal_debug_error_str("host:port resolution failed: ", m_ipaddr->gets());
+            m_open_failed = OS_TRUE;
+            return;
+        }
+
+        osal_ip_to_str(straddr, sizeof(straddr), binaddr,
+            is_ipv6 ? OSAL_IPV6_BIN_ADDR_SZ  : OSAL_IPV4_BIN_ADDR_SZ);
+        if (is_ipv6) { tmp.appends("["); }
+        tmp += straddr;
+        if (is_ipv6) { tmp.appends("]"); }
+        tmp.appends(":");
+        tmp.appendl(port_nr);
+        parameters = tmp.gets();
+    }
 
     /* New stream by class ID.
      */
     m_stream = (eStream*)newchild(m_stream_classid);
 
-    s = m_stream->open(m_ipaddr->gets(), OSAL_STREAM_LISTEN|OSAL_STREAM_SELECT);
+    s = m_stream->open(parameters, OSAL_STREAM_LISTEN|OSAL_STREAM_SELECT);
     if (s)
     {
-        osal_debug_error_str("Opening listening stream failed", m_ipaddr->gets());
+        osal_debug_error_str("Opening listening stream failed: ", m_ipaddr->gets());
         delete m_stream;
         m_stream = OS_NULL;
         m_open_failed = OS_TRUE;
