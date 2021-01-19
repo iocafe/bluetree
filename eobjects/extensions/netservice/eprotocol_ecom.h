@@ -105,7 +105,7 @@ public:
      */
     virtual eProtocolHandle *new_connection(
         os_int conn_nr,
-        void *parameters,
+        eConnectParameters *parameters,
         eStatus *s);
 
 

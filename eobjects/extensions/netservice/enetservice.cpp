@@ -21,7 +21,8 @@
 const os_char
     enetservp_endpoint_table_change_counter[] = "eptabccnt",
     enetservp_endpoint_config_counter[] = "erecongcnt",
-    enetservp_connect_table_change_counter[] = "contabccnt";
+    enetservp_connect_table_change_counter[] = "contabccnt",
+    enetservp_lighthouse_change_counter[] = "lhcnt";
 
 
 /**
@@ -47,6 +48,7 @@ eNetService::eNetService(
     m_persistent_serv_prm = OS_NULL;
     m_end_points_config_counter = 0;
     m_connect_config_counter = 0;
+    m_lighthouse_change_counter = 0;
     os_memclear(&m_serv_prm, sizeof(eNetServPrm));
     m_protocols = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
 
@@ -102,6 +104,9 @@ void eNetService::setupclass()
         0, "end point config counter", EPRO_DEFAULT|EPRO_NOONPRCH);
     addpropertyl(cls, ENETSERVP_CONNECT_CONFIG_CHANGE_COUNTER, enetservp_connect_table_change_counter,
         0, "connect table change counter", EPRO_DEFAULT|EPRO_NOONPRCH);
+    addpropertyl(cls, ENETSERVP_LIGHTHOUSE_CHANGE_COUNTER, enetservp_lighthouse_change_counter,
+        0, "LAN services change count", EPRO_NOONPRCH);
+
     propertysetdone(cls);
     os_unlock();
 }
@@ -219,6 +224,13 @@ eStatus eNetService::oncallback(
 
         if (obj == m_connect) {
             setpropertyl(ENETSERVP_CONNECT_CONFIG_CHANGE_COUNTER, ++m_connect_config_counter);
+        }
+    }
+
+    if (event == ECALLBACK_TABLE_CONTENT_CHANGED)
+    {
+        if (obj == m_services_matrix) {
+            setpropertyl(ENETSERVP_LIGHTHOUSE_CHANGE_COUNTER, ++m_lighthouse_change_counter);
         }
     }
 

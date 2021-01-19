@@ -207,7 +207,7 @@ eProtocolHandle *eComProtocol::new_end_point(
 */
 eProtocolHandle *eComProtocol::new_connection(
     os_int conn_nr,
-    void *parameters,
+    eConnectParameters *parameters,
     eStatus *s)
 {
     eProtocolHandle *p;

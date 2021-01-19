@@ -326,19 +326,24 @@ void eNetMaintainThread::merge_to_socket_list()
     eContainer *addr_blocklist, *name_blocklist;
     eVariable *namelist, *protocol, *ip;
     os_char *ip_and_port_str, name_str[IOC_DEVICE_ID_SZ], ip_str[OSAL_IPADDR_SZ];
-    const os_char *p, *lh_name_str, *lh_ip_str;
+    const os_char *p, *lh_name_str, *lh_ip_str, *lh_nick_str;
     os_int enable_col, name_col, protocol_col, transport_col, ip_col, port_nr;
-    eVariable *lh_name, *lh_protocol, *lh_ip;
-    os_int lh_name_col, lh_protocol_col, lh_ip_col, lh_tlsport_col, lh_tcpport_col;
+    eVariable *lh_name, *lh_nick, *lh_protocol, *lh_ip;
+    os_int lh_name_col, lh_nick_col, lh_protocol_col, lh_ip_col, lh_tlsport_col, lh_tcpport_col;
     os_int h, lh_h, con_nr, i;
     enetConnTransportIx transport_ix;
     os_boolean is_ipv6;
+
+    /* Keep track if remakr
+     */
+    m_trigger_connect_check_by_lighthouse = OS_FALSE;
 
     localvars = new eContainer(ETEMPORARY);
     namelist = new eVariable(localvars);
     protocol = new eVariable(localvars);
     ip = new eVariable(localvars);
     lh_name = new eVariable(localvars);
+    lh_nick = new eVariable(localvars);
     lh_protocol = new eVariable(localvars);
     lh_ip = new eVariable(localvars);
 
@@ -364,6 +369,7 @@ void eNetMaintainThread::merge_to_socket_list()
     if (conf == OS_NULL) goto getout_unlock;
     columns = conf->firstc(EOID_TABLE_COLUMNS);
     lh_name_col = etable_column_ix(enet_lansrv_name, columns);
+    lh_nick_col = etable_column_ix(enet_lansrv_nick, columns);
     lh_protocol_col = etable_column_ix(enet_lansrv_protocol, columns);
     lh_ip_col = etable_column_ix(enet_lansrv_ip, columns);
     lh_tlsport_col = etable_column_ix(enet_lansrv_tlsport, columns);
@@ -446,21 +452,34 @@ void eNetMaintainThread::merge_to_socket_list()
                 continue;
             }
 
+            /* We need to redu merge when lighthouse data is received.
+             */
+            m_trigger_connect_check_by_lighthouse = OS_TRUE;
+
             /* No ip set, we use lighthouse.
              */
             for (i = 0; i < lh_h; i++) {
                 lh->getv(i, lh_name_col, lh_name);
                 lh_name_str = lh_name->gets();
+                lh->getv(i, lh_nick_col, lh_nick);
+                lh_nick_str = lh_nick->gets();
                 lh->getv(i, lh_ip_col, lh_ip);
                 lh_ip_str = lh_ip->gets();
 
                 /* Skip ones which do not match wildcard name or no matching protocol.
                  */
-                if (!osal_pattern_match(lh_name_str, name_str, 0)) continue;
+                if (!osal_pattern_match(lh_name_str, name_str, 0) &&
+                    !osal_pattern_match(lh_nick_str, name_str, 0))
+                {
+                    continue;
+                }
                 lh->getv(i, lh_protocol_col, lh_protocol);
                 if (lh_protocol->compare(protocol)) continue;
 
-                if (!osal_pattern_match(lh_name_str, ip_str, 0)) continue;
+                if (!osal_pattern_match(lh_ip_str, ip_str, 0))
+                {
+                    continue;
+                }
 
                 if (transport_ix == ENET_CONN_TLS) {
                     port_nr = lh->getl(i, lh_tlsport_col);
@@ -568,6 +587,7 @@ void eNetMaintainThread::maintain_connections()
 {
     eProtocol *proto;
     eProtocolHandle *handle;
+    eConnectParameters prm;
     eMatrix *m;
     eObject *conf, *columns, *col;
     eContainer *localvars, *list, *con, *next_con;
@@ -704,7 +724,13 @@ delete_it:
             continue;
         }
 
-        handle = proto->new_connection(con_nr, OS_NULL, &s);
+        os_memclear (&prm, sizeof(prm));
+        v = con->firstv(ENET_CONN_IP);
+        prm.parameters = v->gets();
+        v = con->firstv(ENET_CONN_TRANSPORT);
+        prm.transport = (enetConnTransportIx)v->getl();
+
+        handle = proto->new_connection(con_nr, &prm, &s);
         if (handle == OS_NULL) {
             osal_debug_error_str("unable to create connection: ", proto_name->gets());
             // update status in table, status s

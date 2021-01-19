@@ -39,6 +39,14 @@ typedef struct
 eEndPointParameters;
 
 
+typedef struct
+{
+    enetConnTransportIx transport;
+
+    const os_char *parameters;
+}
+eConnectParameters;
+
 /**
 ****************************************************************************************************
   eProtocol class.
@@ -125,7 +133,7 @@ public:
      */
     virtual eProtocolHandle *new_connection(
         os_int conn_nr,
-        void *parameters,
+        eConnectParameters *parameters,
         eStatus *s);
 
     /* Delete a connection.

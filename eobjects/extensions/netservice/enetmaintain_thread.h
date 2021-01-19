@@ -29,15 +29,17 @@ class eNetService;
 /* Property numbers.
  */
 #define ENETMP_END_POINT_TABLE_MODIF_COUNT 10
-#define ENETMP_END_POINT_CONFIG_COUNT 20
-#define ENETP_CONNECT_TABLE_MODIF_COUNT 30
+#define ENETMP_END_POINT_CONFIG_COUNT 15
+#define ENETMP_CONNECT_TABLE_MODIF_COUNT 20
+#define ENETMP_LIGHTHOUSE_CHANGE_COUNT 25
 
 /* Property names.
  */
 extern const os_char
     enetmp_end_pont_table_modif_count[],
     enetmp_end_point_config_count[],
-    enetmp_connect_table_modif_count[];
+    enetmp_connect_table_modif_count[],
+    enetmp_lighthouse_change_count[];
 
 
 /**
@@ -233,6 +235,9 @@ protected:
     os_long m_connect_table_modif_count;
     os_boolean m_configure_connections;
     os_long m_connect_timer;
+
+    os_boolean m_trigger_connect_check_by_lighthouse;
+    os_long m_lighthouse_modif_count;
 
     /* The "connect processess" matrix hold one row for each socket to create.
      */

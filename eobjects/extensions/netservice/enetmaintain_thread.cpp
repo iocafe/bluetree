@@ -20,7 +20,8 @@
 const os_char
     enetmp_end_pont_table_modif_count[] = "publish",
     enetmp_end_point_config_count[] = "epconfigcnt",
-    enetmp_connect_table_modif_count[] = "connect";
+    enetmp_connect_table_modif_count[] = "connect",
+    enetmp_lighthouse_change_count[] = "lighthouse";
 
 /**
 ****************************************************************************************************
@@ -45,9 +46,11 @@ eNetMaintainThread::eNetMaintainThread(
     m_protocols->ns_create();
     m_connect_table_modif_count = -1;
     m_configure_connections = OS_FALSE;
+    m_trigger_connect_check_by_lighthouse = OS_FALSE;
     m_connect_timer = 0;
     m_connections = new eContainer(this);
     m_timer_set = OS_FALSE;
+    m_lighthouse_modif_count = 0;
 
     initproperties();
     ns_create();
@@ -88,8 +91,10 @@ void eNetMaintainThread::setupclass()
         -1, "end point table modif count", EPRO_DEFAULT);
     addpropertyl(cls, ENETMP_END_POINT_CONFIG_COUNT, enetmp_end_point_config_count,
         0, "end point config count", EPRO_NOONPRCH);
-    addpropertyl(cls, ENETP_CONNECT_TABLE_MODIF_COUNT, enetmp_connect_table_modif_count,
+    addpropertyl(cls, ENETMP_CONNECT_TABLE_MODIF_COUNT, enetmp_connect_table_modif_count,
         -1, "connect table modif count", EPRO_DEFAULT);
+    addpropertyl(cls, ENETMP_LIGHTHOUSE_CHANGE_COUNT, enetmp_lighthouse_change_count,
+        0, "lighthouse change count", EPRO_DEFAULT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -172,7 +177,7 @@ eStatus eNetMaintainThread::onpropertychange(
             }
             break;
 
-        case ENETP_CONNECT_TABLE_MODIF_COUNT:
+        case ENETMP_CONNECT_TABLE_MODIF_COUNT:
             count = x->geti();
             if (count != m_connect_table_modif_count) {
                 m_connect_table_modif_count = count;
@@ -180,6 +185,19 @@ eStatus eNetMaintainThread::onpropertychange(
                 os_get_timer(&m_connect_timer);
                 timer(100);
                 m_timer_set = OS_TRUE;
+            }
+            break;
+
+        case ENETMP_LIGHTHOUSE_CHANGE_COUNT            :
+            count = x->geti();
+            if (count != m_lighthouse_modif_count) {
+                m_lighthouse_modif_count = count;
+                if (m_trigger_connect_check_by_lighthouse) {
+                    m_configure_connections = OS_TRUE;
+                    os_get_timer(&m_connect_timer);
+                    timer(100);
+                    m_timer_set = OS_TRUE;
+                }
             }
             break;
 
@@ -356,8 +374,10 @@ void enet_start_maintain_thread(
         enetservp_endpoint_table_change_counter);
     maintain->bind(ENETMP_END_POINT_CONFIG_COUNT, netservice_name,
         enetservp_endpoint_config_counter, EBIND_CLIENTINIT);
-    maintain->bind(ENETP_CONNECT_TABLE_MODIF_COUNT, netservice_name,
+    maintain->bind(ENETMP_CONNECT_TABLE_MODIF_COUNT, netservice_name,
         enetservp_connect_table_change_counter);
+    maintain->bind(ENETMP_LIGHTHOUSE_CHANGE_COUNT, netservice_name,
+        enetservp_lighthouse_change_counter);
 
     while ((proto = (eProtocol*)netservice->protocols()->first())) {
         maintain->add_protocol(proto);

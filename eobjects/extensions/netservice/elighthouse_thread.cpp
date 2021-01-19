@@ -91,7 +91,7 @@ void eLightHouseService::setupclass()
     addpropertyb(cls, ELIGHTHOUSEP_SEND_UDP_MULTICASTS, elighthousep_send_udp_multicasts,
         OS_FALSE, "send UDP multicasts", EPRO_PERSISTENT);
     addpropertyl(cls, ELIGHTHOUSEP_PUBLISH, elighthousep_publish,
-        OS_FALSE, "update end point info in UDP multicasts", EPRO_DEFAULT);
+        0, "update end point info in UDP multicasts", EPRO_DEFAULT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -564,7 +564,7 @@ goon:;
     os_unlock();
 
 
-os_char nick[64];
+os_char nick[IOC_NAME_SZ];
 ioc_generate_nickname(nick, sizeof(nick));
 
     ioc_lighthouse_start_endpoints(&m_server, nick);

@@ -202,7 +202,7 @@ os_boolean eProtocol::is_end_point_running(
 */
 eProtocolHandle *eProtocol::new_connection(
     os_int conn_nr,
-    void *parameters,
+    eConnectParameters *parameters,
     eStatus *s)
 {
     OSAL_UNUSED(conn_nr);

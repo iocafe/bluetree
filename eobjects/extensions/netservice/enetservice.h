@@ -37,15 +37,17 @@
 /* Net service property numbers.
  */
 #define ENETSERVP_ENDPOINT_CONFIG_CHANGE_COUNTER 10
-#define ENETSERVP_ENDPOINT_CONFIG_COUNTER 20
-#define ENETSERVP_CONNECT_CONFIG_CHANGE_COUNTER 30
+#define ENETSERVP_ENDPOINT_CONFIG_COUNTER 15
+#define ENETSERVP_CONNECT_CONFIG_CHANGE_COUNTER 20
+#define ENETSERVP_LIGHTHOUSE_CHANGE_COUNTER 25
 
 /* Net service property names.
  */
 extern const os_char
     enetservp_endpoint_table_change_counter[],
     enetservp_endpoint_config_counter[],
-    enetservp_connect_table_change_counter[];
+    enetservp_connect_table_change_counter[],
+    enetservp_lighthouse_change_counter[];
 
 /* Default socket port number for eobject communication. TCP ports 6371 - 6375 are unassigned.
  */
@@ -243,6 +245,7 @@ protected:
     /* Services table (matrix).
      */
     eMatrix *m_services_matrix;
+    os_long m_lighthouse_change_counter;
 
     /* Trusted client certificate table (matrix) and persistent object to contain it.
      */
