@@ -164,11 +164,15 @@ protected:
     /* Add a row to socket list.
      */
     void add_socket_to_list(
-        eVariable *name,
+        const os_char *name,
         eVariable *protocol,
-        eVariable *transport,
-        eVariable *ip,
-        eContainer *rows);
+        enetConnTransportIx transport_ix,
+        const os_char *ip,
+        os_int port_nr,
+        os_boolean is_ipv6,
+        eContainer *rows,
+        eContainer *addr_blocklist,
+        eContainer *name_blocklist);
 
     /* Create and delete connections.
      */

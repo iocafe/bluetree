@@ -318,11 +318,9 @@ void eEndPoint::open()
     eStatus s;
     const os_char *parameters, *e;
     os_boolean is_tls, is_socket, is_ipv6;
-    os_uchar binaddr[OSAL_IP_BIN_ADDR_SZ];
-    os_char straddr[OSAL_IPADDR_AND_PORT_SZ];
+    os_char straddr[OSAL_IPADDR_SZ];
     os_int default_port_nr, port_nr;
     eVariable tmp;
-    osalStatus ss;
 
     m_open_failed = OS_FALSE;
     if (m_stream || !m_initialized || m_ipaddr->isempty()) return;
@@ -339,27 +337,15 @@ void eEndPoint::open()
         tmp.appends_nbytes(parameters, e - parameters);
         parameters = e;
 
-        ss = osal_socket_get_ip_and_port(parameters,
-            (os_char*)binaddr, sizeof(binaddr),
+        osal_socket_get_ip_and_port(parameters,
+            straddr, -sizeof(straddr),
             &port_nr, &is_ipv6, OSAL_STREAM_LISTEN, default_port_nr);
-        if (ss) {
-            osal_debug_error_str("host:port resolution failed: ", m_ipaddr->gets());
-            m_open_failed = OS_TRUE;
-            return;
-        }
 
-        osal_make_ip_str(straddr, sizeof(straddr), binaddr,
-            port_nr, is_ipv6);
-        tmp += straddr;
-
-        /* osal_ip_to_str(straddr, sizeof(straddr), binaddr,
-            is_ipv6 ? OSAL_IPV6_BIN_ADDR_SZ  : OSAL_IPV4_BIN_ADDR_SZ);
         if (is_ipv6) { tmp.appends("["); }
         tmp += straddr;
         if (is_ipv6) { tmp.appends("]"); }
         tmp.appends(":");
         tmp.appendl(port_nr);
-        */
         parameters = tmp.gets();
     }
 

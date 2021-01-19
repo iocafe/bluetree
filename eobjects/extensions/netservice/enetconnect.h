@@ -37,15 +37,12 @@ typedef enum {
 }
 enetConnItemId;
 
-/*
 typedef enum {
-    ENET_ENDP_SOCKET_IPV4 = 1,
-    ENET_ENDP_SOCKET_IPV6,
-    ENET_ENDP_TLS_IPV4,
-    ENET_ENDP_TLS_IPV6,
-    ENET_ENDP_SERIAL
+    ENET_CONN_SOCKET = 1,
+    ENET_CONN_TLS = 2,
+    ENET_CONN_SERIAL = 3,
 }
-enetEndpTransportIx;
-*/
+enetConnTransportIx;
+
 
 #endif

@@ -564,7 +564,10 @@ goon:;
     os_unlock();
 
 
-    ioc_lighthouse_start_endpoints(&m_server, "manteli");
+os_char nick[64];
+ioc_generate_nickname(nick, sizeof(nick));
+
+    ioc_lighthouse_start_endpoints(&m_server, nick);
 
     for (item = list->firstc(); item; item = item->nextc()) {
         tls_port = 0;
