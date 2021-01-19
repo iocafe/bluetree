@@ -187,9 +187,8 @@ os_boolean eProtocol::is_end_point_running(
   function will return quite immediately, and connection object gets created even there
   may not be physical transport or other end is down for the moment.
 
-  @param   conn_nr Connection number. Unique number within process which can be used to create
-           connection thread name, etc. In practice this is connection table's row number.
-           There is no must to use this number, it is just for easy identification purposes.
+  @param   con_name Connection name. Identifier created from IP address, port, protocol and
+           transport.
   @param   parameters Structure containing parameters for the connection point.
   @param   s Pointer to eStatus for function return code. If successfull *s is set to
            ESTATUS_SUCCESS. Other values indicate an error.
@@ -201,11 +200,11 @@ os_boolean eProtocol::is_end_point_running(
 ****************************************************************************************************
 */
 eProtocolHandle *eProtocol::new_connection(
-    os_int conn_nr,
+    eVariable *con_name,
     eConnectParameters *parameters,
     eStatus *s)
 {
-    OSAL_UNUSED(conn_nr);
+    OSAL_UNUSED(con_name);
     OSAL_UNUSED(parameters);
 
     *s = ESTATUS_NOT_SUPPORTED;
@@ -238,9 +237,60 @@ void eProtocol::delete_connection(
 /**
 ****************************************************************************************************
 
+  @brief Reactivate a deactivated connection or modify parameters.
+
+  This function is used to pause communication or modify existing connection parameters so that
+  connection can be resumed without losing binding state.
+
+  ecom specific: Difference between first deleting a connection and creating new one, compared
+  to deactivating/reactivating it is: The connection object is never deleted, and binding
+  information stored in connection objects is preserved. If connection comes back existsing
+  binding from client to server do restored.
+
+  @param   handle   Connection handle as returned by new_connection().
+  @param   parameters Structure containing parameters for the connection point.
+  @return  Pointer to eStatus for function return code. If successfull, the function returns
+           ESTATUS_SUCCESS. Other values indicate an error.
+
+****************************************************************************************************
+*/
+eStatus eProtocol::activate_connection(
+    eProtocolHandle *handle,
+    eConnectParameters *parameters)
+{
+    OSAL_UNUSED(handle);
+    OSAL_UNUSED(parameters);
+
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Deacivate a connection.
+
+  The deactivate_connection() function disables a connection object so that it is inavtive
+  and does not run actual communication. But it doesn't change eConnection parameters
+  or stored client binding data.
+
+  @param   handle   Connection handle as returned by new_connection().
+
+****************************************************************************************************
+*/
+void eProtocol::deactivate_connection(
+    eProtocolHandle *handle)
+{
+    OSAL_UNUSED(handle);
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Check connection status.
 
-  The is_connection_running() function checks if a specific connection is running.
+  The is_connection_running() function checks if a specific connection object is running.
 
   @param   handle   Connection handle as returned by new_connection().
   @return  OS_TRUE if end point is running, OS_FALSE if not.

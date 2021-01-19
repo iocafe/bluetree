@@ -104,7 +104,7 @@ public:
     /* Create a new connection using this protocol.
      */
     virtual eProtocolHandle *new_connection(
-        os_int conn_nr,
+        eVariable *con_name,
         eConnectParameters *parameters,
         eStatus *s);
 

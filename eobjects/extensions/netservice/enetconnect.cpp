@@ -576,8 +576,8 @@ void eNetMaintainThread::add_socket_to_list(
 
   @brief Create and delete connections as needed.
 
-  The eNetMaintainThread::maintain_connections() function is collects data from connect table and
-  sets up connections for communication protocols.
+  The eNetMaintainThread::maintain_connections() function processes socket list and crates,
+  deletes or updates socket connections.
 
   @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if notthing to publish.
 
@@ -589,53 +589,85 @@ void eNetMaintainThread::maintain_connections()
     eProtocolHandle *handle;
     eConnectParameters prm;
     eMatrix *m;
-    eObject *conf, *columns, *col;
-    eContainer *localvars, *list, *con, *next_con;
+    eObject *conf,  *col;
+    eContainer *localvars, *columns, *list, *con, *next_con, *index, *c;
     eVariable *v, *proto_name;
+    eVariable *con_name, *ip, *protocol;
+    eVariable *ip_p, *protocol_p, *transport_p;
     const os_char *p;
-    os_int enable_col, name_col, protocol_col, transport_col, ip_col;
-    os_int h, con_nr;
-    eVariable tmp;
+    os_int name_col, protocol_col, transport_col, ip_col;
+    os_int h, i, con_nr;
+    enetConnTransportIx transport_ix;
     eStatus s;
     os_boolean changed = OS_FALSE;
 
     localvars = new eContainer(ETEMPORARY);
+    con_name = new eVariable(localvars);
+    ip = new eVariable(localvars);
+    protocol = new eVariable(localvars);
 
-    os_lock();
-    m = m_netservice->m_connect_to_matrix;
+    m = m_socket_list_matrix;
     conf = m->configuration();
-    if (conf == OS_NULL) goto getout_unlock;
-    columns = conf->first(EOID_TABLE_COLUMNS);
-    if (columns == OS_NULL) goto getout_unlock;
-    col = columns->byname(enet_conn_enable);
-    if (col == OS_NULL) goto getout_unlock;
-    enable_col = col->oid();
+    if (conf == OS_NULL) goto getout;
+    columns = conf->firstc(EOID_TABLE_COLUMNS);
+    if (columns == OS_NULL) goto getout;
 
-    col = columns->byname(enet_conn_name);
-    if (col == OS_NULL) goto getout_unlock;
-    name_col = col->oid();
+    name_col = etable_column_ix(enet_conn_name, columns);
+    protocol_col = etable_column_ix(enet_conn_protocol, columns);
+    ip_col = etable_column_ix(enet_conn_ip, columns);
+    transport_col = etable_column_ix(enet_conn_transport, columns);
 
-    col = columns->byname(enet_conn_protocol);
-    if (col == OS_NULL) goto getout_unlock;
-    protocol_col = col->oid();
+    /* Make index for current connections.
+     */
+    index = new eContainer(localvars);
+    index->ns_create();
+    h = m->nrows();
+    for (i = 0; i < h; i++)
+    {
+        if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
 
-    col = columns->byname(enet_conn_ip);
-    if (col == OS_NULL) goto getout_unlock;
-    ip_col = col->oid();
+        m->getv(con_nr, ip_col, ip);
+        m->getv(con_nr, protocol_col, protocol);
+        transport_ix = (enetConnTransportIx)m->getl(con_nr, transport_col);
+        make_connection_name(con_name, protocol, ip, transport_ix);
 
-    col = columns->byname(enet_conn_transport);
-    if (col == OS_NULL) goto getout_unlock;
-    transport_col = col->oid();
-    os_unlock();
+        c = new eContainer(list, i);
+        c->addname(con_name->gets());
+    }
 
-    /* Merge connect to and LAN services tables to create connection
-       list where each row represents a process to connect to.
-       Source tables belong to eNetService (eProcess) and thus os_lock()
-       must be on when accessing these. Destination table belongs to
-       eNetMaintainThread, no lock needed.
+    /* Deactivate connections which are no longer needed.
+     */
+    for (con = m_connections->firstc(); con; con = next_con)
+    {
+        next_con = con->nextc();
+
+        ip_p = con->firstv(ENET_CONN_IP);
+        protocol_p = con->firstv(ENET_CONN_PROTOCOL);
+        transport_p = con->firstv(ENET_CONN_TRANSPORT);
+        if (ip_p == OS_NULL || protocol_p == OS_NULL || transport_p == OS_NULL) {
+            osal_debug_error("maintain_connections error 1");
+            continue;
+        }
+        transport_ix = (enetConnTransportIx)transport_p->getl();
+
+        make_connection_name(con_name, protocol_p, ip_p, transport_ix);
+        if (m_connections->byname(con_name->gets())) continue;
+
+        proto = protocol_by_name(protocol);
+        handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
+        if (proto == OS_NULL || handle) {
+            osal_debug_error("maintain_connections error 2");
+            continue;
+        }
+        proto->deactivate_connection(handle);
+    }
+
+    /* Update exisiting connections.
      */
 
-
+    /* Create new connections.
+     */
+#if 0
     /* Deactivate connections which are no longer needed or have changed.
      */
     for (con = m_connections->firstc(); con; con = next_con)
@@ -653,7 +685,6 @@ void eNetMaintainThread::maintain_connections()
         if (!proto->is_connection_running(handle)) continue;
 
         os_timeslice();
-        os_lock();
 
         if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) goto delete_it;
         if (m->geti(con_nr, enable_col) == 0) goto delete_it;
@@ -679,19 +710,16 @@ void eNetMaintainThread::maintain_connections()
             }
         }
 
-        os_unlock();
         continue;
 
 delete_it:
-        os_unlock();
-        deactivate_con(con);
+        delete_con(con);
         changed = OS_TRUE;
     }
 
     /* Generate list of connections to add.
      */
     list = new eContainer(localvars);
-    os_lock();
     h = m->nrows();
     for (con_nr = 0; con_nr < h; con_nr ++) {
         if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
@@ -708,9 +736,8 @@ delete_it:
         v = new eVariable(con, ENET_CONN_IP);
         m->getv(con_nr, ip_col, v);
     }
-    os_unlock();
 
-    /* Add connections (no lock).
+    /* Add connections
      */
     for (con = list->firstc(); con; con = next_con)
     {
@@ -743,18 +770,82 @@ delete_it:
         con->adopt(m_connections, con_nr);
         changed = OS_TRUE;
     }
+#endif
 
     delete localvars;
     return;
 
-getout_unlock:
-    os_unlock();
+getout:
     delete localvars;
     osal_debug_error("maintain_connections() failed");
 }
 
+/* Generate name for a connection.
+ * Connection name is used to identify connection to specific process (ip and port)
+   @param   con_name Pointer to eVariable where to store resulting connection name.
+ */
+void eNetMaintainThread::make_connection_name(
+    eVariable *con_name,
+    eVariable *protocol,
+    eVariable *ip,
+    enetConnTransportIx transport_ix)
+{
+    os_char *p, c, buf[OSAL_IPADDR_AND_PORT_SZ + 64], *d, *buf_stop;
+    const os_char *transport_name;
 
-void eNetMaintainThread::deactivate_con(
+    con_name->setv(protocol);
+    switch (transport_ix)
+    {
+        case ENET_CONN_SOCKET: transport_name = "_socket_"; break;
+        case ENET_CONN_TLS:    transport_name = "_tls_"; break;
+        case ENET_CONN_SERIAL: transport_name = "_serial_"; break;
+        default: transport_name = "_unknown_"; break;
+    }
+
+    con_name->appends("_c_");
+    con_name->appends(transport_name);
+    p = ip->gets();
+    d = buf;
+    buf_stop = buf + sizeof(buf) - 6;
+    while ((c = *p) != '\0' && d < buf_stop) {
+        if (osal_char_isprint(c))
+        {
+            switch (c) {
+                case '[':
+                    *(d++) = '_';
+                    *(d++) = 't';
+                    *(d++) = 'l';
+                    *(d++) = 's';
+                    *(d++) = '_';
+                    break;
+
+                case ']':
+                    break;
+
+                case '.':
+                    *(d++) = '.';
+                    break;
+
+                default:
+                    if (osal_char_isaplha(c) || osal_char_isdigit(c)) {
+                        *(d++) = c;
+                    }
+                    else {
+                        *(d++) = '_';
+                    }
+                    break;
+            }
+        }
+        else {
+            *(d++) = '_';
+        }
+        p++;
+    }
+    con_name->appends(buf);
+}
+
+
+void eNetMaintainThread::delete_con(
     eContainer *con)
 {
     eVariable *proto_name;

@@ -26,7 +26,6 @@ extern const os_char enet_conn_protocol[];
 extern const os_char enet_conn_ip[];
 extern const os_char enet_conn_transport[];
 
-
 typedef enum {
     ENET_CONN_PROTOCOL,
     ENET_CONN_NAME,
@@ -43,8 +42,5 @@ typedef enum {
     ENET_CONN_SERIAL = 3,
 }
 enetConnTransportIx;
-
-
-
 
 #endif

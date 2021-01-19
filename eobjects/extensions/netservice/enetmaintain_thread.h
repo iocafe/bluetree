@@ -180,10 +180,17 @@ protected:
      */
     void maintain_connections();
 
+    /* Generate name for a connection.
+     */
+    void make_connection_name(
+        eVariable *con_name,
+        eVariable *protocol,
+        eVariable *ip,
+        enetConnTransportIx transport_ix);
 
     /* Delete connection (stops connection thread and cleans up)
      */
-    void deactivate_con(
+    void delete_con(
         eContainer *con);
 
     /* A callback by a child object.

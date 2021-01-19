@@ -124,6 +124,17 @@ public:
     virtual void delete_end_pont(
         eProtocolHandle *handle);
 
+    /* Reactivate a deactivated connection or modify parameters.
+     */
+    eStatus activate_connection(
+        eProtocolHandle *handle,
+        eConnectParameters *parameters);
+
+    /* Deacivate a connection.
+     */
+    void deactivate_connection(
+        eProtocolHandle *handle);
+
     /* Check end point status (running).
      */
     virtual os_boolean is_end_point_running(
@@ -132,7 +143,7 @@ public:
     /* Create a new connection using this protocol.
      */
     virtual eProtocolHandle *new_connection(
-        os_int conn_nr,
+        eVariable *con_name,
         eConnectParameters *parameters,
         eStatus *s);
 

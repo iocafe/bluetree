@@ -192,9 +192,8 @@ eProtocolHandle *eComProtocol::new_end_point(
   function will return quite immediately, and connection object gets created even there
   may not be physical transport or other end is down for the moment.
 
-  @param   conn_nr Connection number. Unique number within process which can be used to create
-           connection thread name, etc. In practice this is connection table's row number.
-           There is no must to use this number, it is just for easy identification purposes.
+  @param   con_name Connection name. Identifier created from IP address, port, protocol and
+           transport.
   @param   parameters Structure containing parameters for the connection point.
   @param   s Pointer to eStatus for function return code. If successfull *s is set to
            ESTATUS_SUCCESS. Other values indicate an error.
@@ -206,14 +205,14 @@ eProtocolHandle *eComProtocol::new_end_point(
 ****************************************************************************************************
 */
 eProtocolHandle *eComProtocol::new_connection(
-    os_int conn_nr,
+    eVariable *con_name,
     eConnectParameters *parameters,
     eStatus *s)
 {
     eProtocolHandle *p;
     eThread *t;
 
-    OSAL_UNUSED(conn_nr);
+    OSAL_UNUSED(con_name);
     OSAL_UNUSED(parameters);
 
     /* Create and start end point thread to listen for incoming socket connections,

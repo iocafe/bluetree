@@ -49,6 +49,7 @@ eNetMaintainThread::eNetMaintainThread(
     m_trigger_connect_check_by_lighthouse = OS_FALSE;
     m_connect_timer = 0;
     m_connections = new eContainer(this);
+    m_connections->ns_create();
     m_timer_set = OS_FALSE;
     m_lighthouse_modif_count = 0;
 
@@ -276,7 +277,7 @@ void eNetMaintainThread::run()
     for (con = m_connections->firstc(); con; con = next_con)
     {
         next_con = con->nextc();
-        deactivate_con(con);
+        delete_con(con);
     }
     for (ep = m_end_points->firstc(); ep; ep = next_ep)
     {
@@ -284,9 +285,6 @@ void eNetMaintainThread::run()
         delete_ep(ep);
     }
 }
-
-
-
 
 
 
