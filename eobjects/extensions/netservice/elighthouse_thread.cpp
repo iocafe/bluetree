@@ -434,7 +434,7 @@ void eLightHouseService::run_server()
   sets up data within iocom's LighthouseServer structure. This function doesn't send
   actual UDP multivasts, eLightHouseService::run_server() does that.
 
-  @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if notthing to publish.
+  @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if nothing to publish.
 
 ****************************************************************************************************
 */

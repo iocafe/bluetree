@@ -290,7 +290,7 @@ void eProtocol::deactivate_connection(
 
   @brief Check connection status.
 
-  The is_connection_running() function checks if a specific connection object is running.
+  The is_connection_running() function checks if a specific connection object exists.
 
   @param   handle   Connection handle as returned by new_connection().
   @return  OS_TRUE if end point is running, OS_FALSE if not.

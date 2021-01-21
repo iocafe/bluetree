@@ -241,7 +241,7 @@ void eNetService::add_end_point(
   The eNetMaintainThread::maintain_end_points() function is collects data from endpoint table and
   sets up data end points for communication protocols.
 
-  @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if notthing to publish.
+  @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if nothing to publish.
 
 ****************************************************************************************************
 */

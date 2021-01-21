@@ -30,16 +30,18 @@
 
 /* Enumeration of connection's properties.
  */
-#define ECONNP_CLASSID 2
-#define ECONNP_IPADDR 4
-#define ECONNP_ISOPEN 6
+#define ECONNP_CLASSID 5
+#define ECONNP_IPADDR 10
+#define ECONNP_ISOPEN 15
+#define ECONNP_ENABLE 20
 
 /* Connection property names.
  */
 extern const os_char
     econnp_classid[],
     econnp_ipaddr[],
-    econnp_isopen[];
+    econnp_isopen[],
+    econnp_enable[];
 
 
 /**
@@ -222,9 +224,13 @@ protected:
      */
     os_boolean m_connected;
 
-    /** Connecttion has been attempted and it has failed at least once.
+    /** Connection has been attempted and it has failed at least once.
      */
     os_boolean m_connectetion_failed_once;
+
+    /** Connection is enabled, property setting.
+     */
+    os_boolean m_enable;
 
     /** Reconnect timer enabled. -1 = not set, 0 = slow timer, 1 = fast timer.
      */

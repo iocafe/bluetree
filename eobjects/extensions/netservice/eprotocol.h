@@ -143,13 +143,13 @@ public:
 
     /* Reactivate a deactivated connection or modify parameters.
      */
-    eStatus activate_connection(
+    virtual eStatus activate_connection(
         eProtocolHandle *handle,
         eConnectParameters *parameters);
 
     /* Deacivate a connection.
      */
-    void deactivate_connection(
+    virtual void deactivate_connection(
         eProtocolHandle *handle);
 
     /* Check connection status.

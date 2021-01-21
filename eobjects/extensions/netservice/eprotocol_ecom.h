@@ -108,6 +108,16 @@ public:
         eConnectParameters *parameters,
         eStatus *s);
 
+    /* Reactivate a deactivated connection or modify parameters.
+     */
+    virtual eStatus activate_connection(
+        eProtocolHandle *handle,
+        eConnectParameters *parameters);
+
+    /* Deacivate a connection.
+     */
+    virtual void deactivate_connection(
+        eProtocolHandle *handle);
 
 protected:
     /**
@@ -115,6 +125,10 @@ protected:
       Internal functions.
     ************************************************************************************************
     */
+
+    void make_connect_parameter_string(
+        eVariable *parameter_str,
+        eConnectParameters *parameters);
 
 
     /**

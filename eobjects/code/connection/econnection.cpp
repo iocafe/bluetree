@@ -32,7 +32,8 @@
 const os_char
     econnp_classid[] = "classid",
     econnp_ipaddr[] = "ipaddr",
-    econnp_isopen[] = "isopen";
+    econnp_isopen[] = "isopen",
+    econnp_enable[] = "enable";
 
 
 /**
@@ -63,6 +64,7 @@ eConnection::eConnection(
     m_fast_timer_enabled = -1;
     m_delete_on_error = OS_FALSE;
     m_envelope = OS_NULL;
+    m_enable = OS_TRUE;
     m_client_bindings = new eContainer(this);
     m_client_bindings->ns_create();
     m_server_bindings = new eContainer(this);
@@ -113,6 +115,7 @@ void eConnection::setupclass()
     addproperty(cls, ECONNP_IPADDR, econnp_ipaddr, "IP", EPRO_PERSISTENT|EPRO_SIMPLE);
     p = addpropertyb(cls, ECONNP_ISOPEN, econnp_isopen, OS_FALSE, "is open", EPRO_NOONPRCH);
     p->setpropertys(EVARP_ATTR, "rdonly");
+    addpropertyb(cls, ECONNP_ENABLE, econnp_enable, OS_TRUE, "enable", EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();
 }
@@ -154,6 +157,13 @@ eStatus eConnection::onpropertychange(
                 m_ipaddr->setv(x);
                 close();
                 open();
+            }
+            break;
+
+        case ECONNP_ENABLE:
+            m_enable = (os_boolean)x->getl();
+            if (!m_enable) {
+                close();
             }
             break;
 
@@ -562,10 +572,10 @@ void eConnection::open()
 {
     eStatus s;
 
-    /* If we are socket exists, initialize() has not been called or we do not have IP address,
-       then do nothing.
+    /* Do nothing if we are socket exists, initialize() has not been called, we do not have
+       IP address, or connection is disabled.
      */
-    if (m_stream || !m_initialized || m_ipaddr->isempty())
+    if (m_stream || !m_initialized || m_ipaddr->isempty() || !m_enable)
     {
         return;
     }

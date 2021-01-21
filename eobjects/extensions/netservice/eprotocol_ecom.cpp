@@ -129,8 +129,6 @@ eProtocolHandle *eComProtocol::new_end_point(
     eVariable tmp;
     const os_char *transport_name, *un;
 
-    OSAL_UNUSED(parameters);
-
     /* Name of the transport.
      */
     switch (parameters->transport) {
@@ -168,13 +166,10 @@ eProtocolHandle *eComProtocol::new_end_point(
     un = p->uniquename();
     p->bind(EPROHANDP_ISOPEN, un, eendpp_isopen, EBIND_TEMPORARY);
 
-    /* Set end point parameters as string.
+    /* Set end point parameters as string (transport, IP address, TCP port, etc).
      */
     tmp.sets(transport_name);
     tmp.appends(":");
-    /* if (os_strchr(parameters->port, ':') == OS_NULL) {
-        tmp.appends(":");
-    } */
     tmp.appends(parameters->port);
     setpropertys_msg(un, tmp.gets(), eendpp_ipaddr);
 
@@ -211,22 +206,129 @@ eProtocolHandle *eComProtocol::new_connection(
 {
     eProtocolHandle *p;
     eThread *t;
-
-    OSAL_UNUSED(con_name);
-    OSAL_UNUSED(parameters);
+    eVariable tmp;
+    const os_char *un;
 
     /* Create and start end point thread to listen for incoming socket connections,
        name it "myendpoint".
      */
     t = new eConnection();
     p = new eProtocolHandle(ETEMPORARY);
-    p->start_thread(t, "myconnection");
+    p->start_thread(t, con_name->gets());
 
-    setpropertys_msg(p->uniquename(),
-         "socket:localhost:" ENET_DEFAULT_SOCKET_PORT_STR, econnp_ipaddr);
+    /* Bind property handles "is open" property to connection's same property.
+     */
+    un = p->uniquename();
+    p->bind(EPROHANDP_ISOPEN, un, econnp_isopen, EBIND_TEMPORARY);
+
+    /* Set connect parameters as string (transport, IP address, TCP port, etc).
+     */
+    make_connect_parameter_string(&tmp, parameters);
+    setpropertys_msg(un, tmp.gets(), econnp_ipaddr);
 
     *s = ESTATUS_SUCCESS;
     return p;
 }
 
 
+
+/**
+****************************************************************************************************
+
+  @brief Reactivate a deactivated connection or modify parameters.
+
+  This function is used to pause communication or modify existing connection parameters so that
+  connection can be resumed without losing binding state.
+
+  ecom specific: Difference between first deleting a connection and creating new one, compared
+  to deactivating/reactivating it is: The connection object is never deleted, and binding
+  information stored in connection objects is preserved. If connection comes back existsing
+  binding from client to server do restored.
+
+  @param   handle   Connection handle as returned by new_connection().
+  @param   parameters Structure containing parameters for the connection point.
+  @return  Pointer to eStatus for function return code. If successfull, the function returns
+           ESTATUS_SUCCESS. Other values indicate an error.
+
+****************************************************************************************************
+*/
+eStatus eComProtocol::activate_connection(
+    eProtocolHandle *handle,
+    eConnectParameters *parameters)
+{
+    eVariable tmp;
+    const os_char *un;
+
+    if (handle == OS_NULL || parameters == OS_NULL) {
+        return ESTATUS_FAILED;
+    }
+
+    make_connect_parameter_string(&tmp, parameters);
+    un = handle->uniquename();
+    setpropertys_msg(un, tmp.gets(), econnp_ipaddr);
+    setpropertyl_msg(un, OS_TRUE, econnp_enable);
+
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Deacivate a connection.
+
+  The deactivate_connection() function disables a connection object so that it is inavtive
+  and does not run actual communication. But it doesn't change eConnection parameters
+  or stored client binding data.
+
+  @param   handle   Connection handle as returned by new_connection().
+
+****************************************************************************************************
+*/
+void eComProtocol::deactivate_connection(
+    eProtocolHandle *handle)
+{
+    const os_char *un;
+
+    if (handle == OS_NULL) {
+        return;
+    }
+
+    un = handle->uniquename();
+    setpropertyl_msg(un, OS_FALSE, econnp_enable);
+}
+
+
+void eComProtocol::make_connect_parameter_string(
+    eVariable *parameter_str,
+    eConnectParameters *parameters)
+{
+    const os_char *transport_name;
+
+    /* Name of the transport.
+     */
+    switch (parameters->transport) {
+        case ENET_CONN_SOCKET:
+            transport_name = "socket";
+            break;
+
+        case ENET_CONN_TLS:
+            transport_name = "tls";
+            break;
+
+        case ENET_CONN_SERIAL:
+            transport_name = "serial";
+            break;
+
+        default:
+            transport_name = "unknown";
+            osal_debug_error_int("Unknown connection transport: ", parameters->transport);
+            break;
+    }
+
+    /* Set end point parameters as string (transport, IP address, TCP port, etc).
+     */
+    parameter_str->sets(transport_name);
+    parameter_str->appends(":");
+    parameter_str->appends(parameters->parameters);
+}

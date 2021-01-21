@@ -652,10 +652,8 @@ void eNetMaintainThread::maintain_connections()
 
         proto = protocol_by_name(protocol_p);
         handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
-        if (proto == OS_NULL || handle) {
-            osal_debug_error("maintain_connections error 2");
-            continue;
-        }
+        osal_debug_assert(proto != OS_NULL);
+        osal_debug_assert(handle != OS_NULL);
         proto->deactivate_connection(handle);
     }
 
@@ -682,6 +680,8 @@ void eNetMaintainThread::maintain_connections()
         if (con) {
             proto = protocol_by_name(protocol);
             handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
+            osal_debug_assert(proto != OS_NULL);
+            osal_debug_assert(handle != OS_NULL);
 
             os_memclear(&prm, sizeof(prm));
             prm.parameters = ip->gets();
@@ -722,6 +722,12 @@ void eNetMaintainThread::maintain_connections()
             os_memclear(&prm, sizeof(prm));
             prm.parameters = ip->gets();
             prm.transport = transport_ix;
+
+            proto = protocol_by_name(protocol);
+            if (proto == OS_NULL) {
+                osal_debug_error_str("new_connection: unknown protocol: ", protocol->gets());
+                continue;
+            }
 
             handle = proto->new_connection(con_name, &prm, &s);
             if (s) {
@@ -766,13 +772,13 @@ void eNetMaintainThread::make_connection_name(
     con_name->setv(protocol);
     switch (transport_ix)
     {
-        case ENET_CONN_SOCKET: transport_name = "_socket_"; break;
-        case ENET_CONN_TLS:    transport_name = "_tls_"; break;
-        case ENET_CONN_SERIAL: transport_name = "_serial_"; break;
+        case ENET_CONN_SOCKET: transport_name = "socket_"; break;
+        case ENET_CONN_TLS:    transport_name = "tls_"; break;
+        case ENET_CONN_SERIAL: transport_name = "serial_"; break;
         default: transport_name = "_unknown_"; break;
     }
 
-    con_name->appends("_c_");
+    con_name->appends("_c");
     con_name->appends(transport_name);
     p = ip->gets();
     d = buf;
@@ -811,6 +817,7 @@ void eNetMaintainThread::make_connection_name(
         }
         p++;
     }
+    *(d++) = '\0';
     con_name->appends(buf);
 }
 
