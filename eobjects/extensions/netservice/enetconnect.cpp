@@ -576,10 +576,8 @@ void eNetMaintainThread::add_socket_to_list(
 
   @brief Create and delete connections as needed.
 
-  The eNetMaintainThread::maintain_connections() function processes socket list and crates,
+  The eNetMaintainThread::maintain_connections() function processes socket list and creates,
   deletes or updates socket connections.
-
-  @return ESTATUS_SUCCESS if all is fine, oe ESTATUS_FAILED if notthing to publish.
 
 ****************************************************************************************************
 */
@@ -589,17 +587,14 @@ void eNetMaintainThread::maintain_connections()
     eProtocolHandle *handle;
     eConnectParameters prm;
     eMatrix *m;
-    eObject *conf,  *col;
-    eContainer *localvars, *columns, *list, *con, *next_con, *index, *c;
-    eVariable *v, *proto_name;
+    eObject *conf;
+    eContainer *localvars, *columns, *con, *next_con, *index, *c, *next_c;
     eVariable *con_name, *ip, *protocol;
     eVariable *ip_p, *protocol_p, *transport_p;
-    const os_char *p;
-    os_int name_col, protocol_col, transport_col, ip_col;
-    os_int h, i, con_nr;
+    os_int protocol_col, transport_col, ip_col;
+    os_int h, con_nr;
     enetConnTransportIx transport_ix;
     eStatus s;
-    os_boolean changed = OS_FALSE;
 
     localvars = new eContainer(ETEMPORARY);
     con_name = new eVariable(localvars);
@@ -612,17 +607,17 @@ void eNetMaintainThread::maintain_connections()
     columns = conf->firstc(EOID_TABLE_COLUMNS);
     if (columns == OS_NULL) goto getout;
 
-    name_col = etable_column_ix(enet_conn_name, columns);
+    // name_col = etable_column_ix(enet_conn_name, columns);
     protocol_col = etable_column_ix(enet_conn_protocol, columns);
     ip_col = etable_column_ix(enet_conn_ip, columns);
     transport_col = etable_column_ix(enet_conn_transport, columns);
 
-    /* Make index for current connections.
+    /* Make index "name->row nr" for socket list.
      */
     index = new eContainer(localvars);
     index->ns_create();
     h = m->nrows();
-    for (i = 0; i < h; i++)
+    for (con_nr = 0; con_nr < h; con_nr++)
     {
         if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
 
@@ -631,7 +626,7 @@ void eNetMaintainThread::maintain_connections()
         transport_ix = (enetConnTransportIx)m->getl(con_nr, transport_col);
         make_connection_name(con_name, protocol, ip, transport_ix);
 
-        c = new eContainer(list, i);
+        c = new eContainer(index, con_nr);
         c->addname(con_name->gets());
     }
 
@@ -649,11 +644,13 @@ void eNetMaintainThread::maintain_connections()
             continue;
         }
         transport_ix = (enetConnTransportIx)transport_p->getl();
-
         make_connection_name(con_name, protocol_p, ip_p, transport_ix);
-        if (m_connections->byname(con_name->gets())) continue;
 
-        proto = protocol_by_name(protocol);
+        /* If connection is still needed, do not deactivate.
+         */
+        if (index->byname(con_name->gets())) continue;
+
+        proto = protocol_by_name(protocol_p);
         handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
         if (proto == OS_NULL || handle) {
             osal_debug_error("maintain_connections error 2");
@@ -662,115 +659,88 @@ void eNetMaintainThread::maintain_connections()
         proto->deactivate_connection(handle);
     }
 
-    /* Update exisiting connections.
+    /* Update exisiting connections. Loop using socket list index.
      */
-
-    /* Create new connections.
-     */
-#if 0
-    /* Deactivate connections which are no longer needed or have changed.
-     */
-    for (con = m_connections->firstc(); con; con = next_con)
+    for (c = index->firstc(); c; c = next_c)
     {
-        next_con = con->nextc();
-        con_nr = con->oid();
-        proto_name = con->firstv(ENET_CONN_PROTOCOL);
-        proto = protocol_by_name(proto_name);
-        if (proto == OS_NULL) {
-            osal_debug_error_str("Program error, unknown proto ", proto_name->gets());
-            delete con;
-            continue;
-        }
-        handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
-        if (!proto->is_connection_running(handle)) continue;
+        next_c = c->nextc();
 
-        os_timeslice();
-
-        if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) goto delete_it;
-        if (m->geti(con_nr, enable_col) == 0) goto delete_it;
-        m->getv(con_nr, protocol_col, &tmp);
-        if (tmp.compare(proto_name)) goto delete_it;
-        v = con->firstv(ENET_CONN_TRANSPORT);
-        m->getv(con_nr, transport_col, &tmp);
-        if (tmp.compare(v)) goto delete_it;
-        v = con->firstv(ENET_CONN_IP);
-        m->getv(con_nr, ip_col, &tmp);
-        if (tmp.compare(v)) goto delete_it;
-        v = con->firstv(ENET_CONN_NAME);
-        if (v) {
-            /* MISSING: We need wildcard match !!!!!!!!!!!
-             */
-            m->getv(con_nr, name_col, &tmp);
-            p = tmp.gets();
-            if (*p != '\0' && os_strstr(p, "*", OSAL_STRING_SEARCH_ITEM_NAME) == OS_NULL)
-            {
-                if (os_strstr(p, v->gets(), OSAL_STRING_SEARCH_ITEM_NAME) == OS_NULL) {
-                    if (tmp.compare(v)) goto delete_it;
-                }
-            }
-        }
-
-        continue;
-
-delete_it:
-        delete_con(con);
-        changed = OS_TRUE;
-    }
-
-    /* Generate list of connections to add.
-     */
-    list = new eContainer(localvars);
-    h = m->nrows();
-    for (con_nr = 0; con_nr < h; con_nr ++) {
-        if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
-        if (m->geti(con_nr, enable_col) == 0) continue;
-        if (m_connections->first(con_nr)) continue;
-
-        con = new eContainer(list, con_nr);
-        v = new eVariable(con, ENET_CONN_NAME);
-        m->getv(con_nr, name_col, v);
-        v = new eVariable(con, ENET_CONN_PROTOCOL);
-        m->getv(con_nr, protocol_col, v);
-        v = new eVariable(con, ENET_CONN_TRANSPORT);
-        m->getv(con_nr, transport_col, v);
-        v = new eVariable(con, ENET_CONN_IP);
-        m->getv(con_nr, ip_col, v);
-    }
-
-    /* Add connections
-     */
-    for (con = list->firstc(); con; con = next_con)
-    {
-        next_con = con->nextc();
-        con_nr = con->oid();
-        proto_name = con->firstv(ENET_CONN_PROTOCOL);
-        proto = protocol_by_name(proto_name);
-        if (proto == OS_NULL) {
-            osal_debug_error_str("Unknown protocol: ", proto_name->gets());
-            // update status in table
-            continue;
-        }
-
-        os_memclear (&prm, sizeof(prm));
-        v = con->firstv(ENET_CONN_IP);
-        prm.parameters = v->gets();
-        v = con->firstv(ENET_CONN_TRANSPORT);
-        prm.transport = (enetConnTransportIx)v->getl();
-
-        handle = proto->new_connection(con_nr, &prm, &s);
-        if (handle == OS_NULL) {
-            osal_debug_error_str("unable to create connection: ", proto_name->gets());
-            // update status in table, status s
-            continue;
-        }
-        handle->adopt(con, ENET_CONN_PROTOCOL_HANDLE);
-
-        /* Adopt, successfull created connection.
+        /* Row of socket list table is:
          */
-        con->adopt(m_connections, con_nr);
-        changed = OS_TRUE;
+        con_nr = c->oid();
+
+        /* Make connection name
+         */
+        m->getv(con_nr, ip_col, ip);
+        m->getv(con_nr, protocol_col, protocol);
+        transport_ix = (enetConnTransportIx)m->getl(con_nr, transport_col);
+        make_connection_name(con_name, protocol, ip, transport_ix);
+
+        /* If we already have this connection, activate it. Either
+         */
+        con = eContainer::cast(m_connections->byname(con_name->gets()));
+        if (con) {
+            proto = protocol_by_name(protocol);
+            handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
+
+            os_memclear(&prm, sizeof(prm));
+            prm.parameters = ip->gets();
+            prm.transport = transport_ix;
+
+            s = proto->activate_connection(handle, &prm);
+            if (s) {
+                osal_debug_error_int("proto->activate_connection: ", s);
+            }
+
+            /* Remove from connection index (just small speed optimization)
+             */
+            delete c;
+        }
     }
-#endif
+
+    /* Create new connections. Loop using socket list index.
+     */
+    for (c = index->firstc(); c; c = next_c)
+    {
+        next_c = c->nextc();
+
+        /* Row of socket list table is:
+         */
+        con_nr = c->oid();
+
+        /* Make connection name
+         */
+        m->getv(con_nr, ip_col, ip);
+        m->getv(con_nr, protocol_col, protocol);
+        transport_ix = (enetConnTransportIx)m->getl(con_nr, transport_col);
+        make_connection_name(con_name, protocol, ip, transport_ix);
+
+        /* If we do not have this connection, create it.
+         */
+        if (m_connections->byname(con_name->gets()) == OS_NULL)
+        {
+            os_memclear(&prm, sizeof(prm));
+            prm.parameters = ip->gets();
+            prm.transport = transport_ix;
+
+            handle = proto->new_connection(con_name, &prm, &s);
+            if (s) {
+                osal_debug_error_int("proto->new_connection: ", s);
+                delete handle;
+                continue;
+            }
+
+            con = new eContainer(m_connections);
+            con->addname(con_name->gets());
+            ip_p = new eVariable(con, ENET_CONN_IP);
+            ip_p->setv(ip);
+            protocol_p = new eVariable(con, ENET_CONN_PROTOCOL);
+            protocol_p->setv(protocol);
+            transport_p = new eVariable(con, ENET_CONN_TRANSPORT);
+            transport_p->setl(transport_ix);
+            handle->adopt(con, ENET_CONN_PROTOCOL_HANDLE);
+        }
+    }
 
     delete localvars;
     return;
