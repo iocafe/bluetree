@@ -654,7 +654,13 @@ void eNetMaintainThread::maintain_connections()
         handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
         osal_debug_assert(proto != OS_NULL);
         osal_debug_assert(handle != OS_NULL);
-        proto->deactivate_connection(handle);
+
+        if (proto->is_connection_running(handle)) {
+            proto->deactivate_connection(handle);
+        }
+        else {
+            delete con;
+        }
     }
 
     /* Update exisiting connections. Loop using socket list index.
@@ -687,14 +693,19 @@ void eNetMaintainThread::maintain_connections()
             prm.parameters = ip->gets();
             prm.transport = transport_ix;
 
-            s = proto->activate_connection(handle, &prm);
-            if (s) {
-                osal_debug_error_int("proto->activate_connection: ", s);
-            }
+            if (proto->is_connection_running(handle)) {
+                s = proto->activate_connection(handle, &prm);
+                if (s) {
+                    osal_debug_error_int("proto->activate_connection: ", s);
+                }
 
-            /* Remove from connection index (just small speed optimization)
-             */
-            delete c;
+                /* Remove from connection index (just small speed optimization)
+                 */
+                delete c;
+            }
+            else {
+                delete con;
+            }
         }
     }
 

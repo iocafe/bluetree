@@ -168,6 +168,11 @@ protected:
     void monitor_binds(
         eEnvelope *envelope);
 
+    /* Monitor messages for bind and unbind.
+     */
+    os_boolean has_client_bindings()
+        {return m_client_bindings->childcount() > 0; }
+
     /* Write an envelope to the connection.
      */
     eStatus write(
@@ -226,7 +231,7 @@ protected:
 
     /** Connection has been attempted and it has failed at least once.
      */
-    os_boolean m_connectetion_failed_once;
+    os_boolean m_connection_failed_once;
 
     /** Connection is enabled, property setting.
      */

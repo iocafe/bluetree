@@ -120,6 +120,7 @@ void eGui::setup_desktop_application()
 
     t = new eTableView(w);
     t->setpropertys(ECOMP_PATH, "//netservice/accounts");
+#endif
 
     w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "Browseri");
@@ -127,7 +128,6 @@ void eGui::setup_desktop_application()
     n = new eTreeNode(w);
     n->setpropertys(ECOMP_PATH, "//");
     n->setpropertys(ECOMP_IPATH, "//");
-#endif
 
     w = new eWindow(this);
     w->setpropertys(ECOMP_TEXT, "browser");

@@ -59,7 +59,7 @@ eConnection::eConnection(
     m_initbuffer = new eContainer(this);
     m_initialized = OS_FALSE;
     m_connected = OS_FALSE;
-    m_connectetion_failed_once = OS_FALSE;
+    m_connection_failed_once = OS_FALSE;
     m_new_writes = OS_FALSE;
     m_fast_timer_enabled = -1;
     m_delete_on_error = OS_FALSE;
@@ -115,7 +115,7 @@ void eConnection::setupclass()
     addproperty(cls, ECONNP_IPADDR, econnp_ipaddr, "IP", EPRO_PERSISTENT|EPRO_SIMPLE);
     p = addpropertyb(cls, ECONNP_ISOPEN, econnp_isopen, OS_FALSE, "is open", EPRO_NOONPRCH);
     p->setpropertys(EVARP_ATTR, "rdonly");
-    addpropertyb(cls, ECONNP_ENABLE, econnp_enable, OS_TRUE, "enable", EPRO_NOONPRCH);
+    addpropertyb(cls, ECONNP_ENABLE, econnp_enable, OS_TRUE, "enable", EPRO_DEFAULT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -306,7 +306,7 @@ routeit:
             /* If connection has not failed yet, buffer message envelopes
                to be sent when connection is established for the first time.
              */
-            if (!m_connectetion_failed_once)
+            if (!m_connection_failed_once)
             {
                 if (envelope->flags() & EMSG_CAN_BE_ADOPTED)
                 {
@@ -452,7 +452,6 @@ void eConnection::run()
                 continue;
             }
 
-
             if (!m_connected)
             {
                 connected();
@@ -510,7 +509,8 @@ void eConnection::run()
 
             alive(EALIVE_RETURN_IMMEDIATELY);
 
-            if (/* m_connectetion_failed_once && */ m_delete_on_error)
+            if (/* m_connection_failed_once && */ m_delete_on_error ||
+                (!m_enable && !has_client_bindings()))
             {
                 break;
             }
@@ -756,7 +756,7 @@ void eConnection::disconnected()
 
     m_connected = OS_FALSE;
     setpropertyl(ECONNP_ISOPEN, OS_FALSE);
-    m_connectetion_failed_once = OS_TRUE;
+    m_connection_failed_once = OS_TRUE;
     m_initbuffer->clear();
 }
 
@@ -898,7 +898,11 @@ eStatus eConnection::read()
 
     if ((m_envelope->mflags() & EMSG_NO_REPLIES) == 0)
     {
-        m_envelope->prependsourceoix(this);
+        os_char buf[E_OIXSTR_BUF_SZ+3];
+        oixstr(buf, sizeof(buf));
+        os_strncat(buf, "/_r", sizeof(buf));
+        m_envelope->prependsource(buf);
+        /* m_envelope->prependsourceoix(this); */
     }
     m_envelope->addmflags(EMSG_NO_NEW_SOURCE_OIX);
     message(m_envelope);

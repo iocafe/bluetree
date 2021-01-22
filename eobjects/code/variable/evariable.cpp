@@ -2187,6 +2187,13 @@ os_boolean eVariable::clean_to_append_oix()
             }
             return OS_TRUE;
         }
+        else if (path[e] == '_') {
+            if (path[e+1] == 'r') {
+                if (path[e+2] == '/' || path[e+2] == '\0')  {
+                    return OS_FALSE;
+                }
+            }
+        }
         e--;
     }
 
