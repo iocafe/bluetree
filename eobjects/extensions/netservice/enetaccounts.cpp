@@ -30,7 +30,7 @@
             "password": "pass"
         },
         {
-            "user": "frank*.iocafenet",
+            "user": "frank*.cafenet",
             "privileges": "server",
             "password": "pass"
         }
@@ -65,7 +65,7 @@ void eNetService::create_user_account_table()
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_TTIP,
         "User or device name. Examples: \'candy3\',\n"
-        "\'ispy*\', or \'frank*.iocafenet\'");
+        "\'ispy*\', or \'frank*.cafenet\'");
 
     column = new eVariable(columns);
     column->addname("accept", ENAME_NO_MAP);
