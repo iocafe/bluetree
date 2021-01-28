@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\code\binding\ebinding.h" />
+    <ClInclude Include="..\..\code\binding\epropertybinding.h" />
+    <ClInclude Include="..\..\code\binding\erowsetbinding.h" />
+    <ClInclude Include="..\..\code\connection\econnection.h" />
+    <ClInclude Include="..\..\code\connection\eendpoint.h" />
+    <ClInclude Include="..\..\code\container\econtainer.h" />
+    <ClInclude Include="..\..\code\container\epersistent.h" />
+    <ClInclude Include="..\..\code\defs\eclassid.h" />
+    <ClInclude Include="..\..\code\defs\ecommands.h" />
+    <ClInclude Include="..\..\code\defs\edefs.h" />
+    <ClInclude Include="..\..\code\defs\emacros.h" />
+    <ClInclude Include="..\..\code\defs\eoid.h" />
+    <ClInclude Include="..\..\code\defs\estatus.h" />
+    <ClInclude Include="..\..\code\defs\etypes.h" />
+    <ClInclude Include="..\..\code\envelope\eenvelope.h" />
+    <ClInclude Include="..\..\code\fsys\edirectory.h" />
+    <ClInclude Include="..\..\code\fsys\efilesystem.h" />
+    <ClInclude Include="..\..\code\global\eclasslist.h" />
+    <ClInclude Include="..\..\code\global\eglobal.h" />
+    <ClInclude Include="..\..\code\global\eprocess.h" />
+    <ClInclude Include="..\..\code\helpers\eliststr_helpers.h" />
+    <ClInclude Include="..\..\code\helpers\eobjflags_helpers.h" />
+    <ClInclude Include="..\..\code\helpers\etypeenum_helpers.h" />
+    <ClInclude Include="..\..\code\main\emain.h" />
+    <ClInclude Include="..\..\code\matrix\ematrix.h" />
+    <ClInclude Include="..\..\code\name\ename.h" />
+    <ClInclude Include="..\..\code\name\enamespace.h" />
+    <ClInclude Include="..\..\code\object\ehandle.h" />
+    <ClInclude Include="..\..\code\object\ehandleroot.h" />
+    <ClInclude Include="..\..\code\object\ehandletable.h" />
+    <ClInclude Include="..\..\code\object\eobject.h" />
+    <ClInclude Include="..\..\code\pointer\epointer.h" />
+    <ClInclude Include="..\..\code\root\eroot.h" />
+    <ClInclude Include="..\..\code\set\eset.h" />
+    <ClInclude Include="..\..\code\stream\ebuffer.h" />
+    <ClInclude Include="..\..\code\stream\ebufferedstream.h" />
+    <ClInclude Include="..\..\code\stream\eosstream.h" />
+    <ClInclude Include="..\..\code\stream\equeue.h" />
+    <ClInclude Include="..\..\code\stream\estream.h" />
+    <ClInclude Include="..\..\code\string\eint2str.h" />
+    <ClInclude Include="..\..\code\syncmsg\esyncconnector.h" />
+    <ClInclude Include="..\..\code\syncmsg\esynchronized.h" />
+    <ClInclude Include="..\..\code\table\edbm.h" />
+    <ClInclude Include="..\..\code\table\erange.h" />
+    <ClInclude Include="..\..\code\table\erowset.h" />
+    <ClInclude Include="..\..\code\table\etable.h" />
+    <ClInclude Include="..\..\code\table\etablehelpers.h" />
+    <ClInclude Include="..\..\code\table\etablemessages.h" />
+    <ClInclude Include="..\..\code\table\ewhere.h" />
+    <ClInclude Include="..\..\code\thread\ethread.h" />
+    <ClInclude Include="..\..\code\thread\ethreadhandle.h" />
+    <ClInclude Include="..\..\code\timer\etimer.h" />
+    <ClInclude Include="..\..\code\time\etime.h" />
+    <ClInclude Include="..\..\code\valuex\evaluex.h" />
+    <ClInclude Include="..\..\code\variable\evariable.h" />
+    <ClInclude Include="..\..\eobjects.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\code\binding\ebinding.cpp" />
+    <ClCompile Include="..\..\code\binding\epropertybinding.cpp" />
+    <ClCompile Include="..\..\code\binding\erowsetbinding.cpp" />
+    <ClCompile Include="..\..\code\connection\econnection.cpp" />
+    <ClCompile Include="..\..\code\connection\eendpoint.cpp" />
+    <ClCompile Include="..\..\code\container\econtainer.cpp" />
+    <ClCompile Include="..\..\code\container\epersistent.cpp" />
+    <ClCompile Include="..\..\code\defs\etypes.cpp" />
+    <ClCompile Include="..\..\code\envelope\eenvelope.cpp" />
+    <ClCompile Include="..\..\code\fsys\edirectory.cpp" />
+    <ClCompile Include="..\..\code\fsys\efilesystem.cpp" />
+    <ClCompile Include="..\..\code\global\eclasslist.cpp" />
+    <ClCompile Include="..\..\code\global\eglobal.cpp" />
+    <ClCompile Include="..\..\code\global\einitialize.cpp" />
+    <ClCompile Include="..\..\code\global\eprocess.cpp" />
+    <ClCompile Include="..\..\code\helpers\eliststr_helpers.cpp" />
+    <ClCompile Include="..\..\code\helpers\eobjflags_helpers.cpp" />
+    <ClCompile Include="..\..\code\helpers\etypeenum_helpers.cpp" />
+    <ClCompile Include="..\..\code\matrix\ematrix.cpp" />
+    <ClCompile Include="..\..\code\matrix\ematrix_as_table.cpp" />
+    <ClCompile Include="..\..\code\name\ename.cpp" />
+    <ClCompile Include="..\..\code\name\enamespace.cpp" />
+    <ClCompile Include="..\..\code\object\ehandle.cpp" />
+    <ClCompile Include="..\..\code\object\ehandleroot.cpp" />
+    <ClCompile Include="..\..\code\object\ehandletable.cpp" />
+    <ClCompile Include="..\..\code\object\eobject.cpp" />
+    <ClCompile Include="..\..\code\object\eobject_bindings.cpp" />
+    <ClCompile Include="..\..\code\object\eobject_callback.cpp" />
+    <ClCompile Include="..\..\code\object\eobject_json.cpp" />
+    <ClCompile Include="..\..\code\object\eobject_messages.cpp" />
+    <ClCompile Include="..\..\code\object\eobject_namespace.cpp" />
+    <ClCompile Include="..\..\code\object\eobject_properties.cpp" />
+    <ClCompile Include="..\..\code\object\eobject_save_load.cpp" />
+    <ClCompile Include="..\..\code\object\eobject_serialize.cpp" />
+    <ClCompile Include="..\..\code\pointer\epointer.cpp" />
+    <ClCompile Include="..\..\code\root\eroot.cpp" />
+    <ClCompile Include="..\..\code\set\eset.cpp" />
+    <ClCompile Include="..\..\code\stream\ebuffer.cpp" />
+    <ClCompile Include="..\..\code\stream\ebufferedstream.cpp" />
+    <ClCompile Include="..\..\code\stream\eosstream.cpp" />
+    <ClCompile Include="..\..\code\stream\equeue.cpp" />
+    <ClCompile Include="..\..\code\stream\estream.cpp" />
+    <ClCompile Include="..\..\code\string\eint2str.cpp" />
+    <ClCompile Include="..\..\code\syncmsg\esyncconnector.cpp" />
+    <ClCompile Include="..\..\code\syncmsg\esynchronized.cpp" />
+    <ClCompile Include="..\..\code\table\edbm.cpp" />
+    <ClCompile Include="..\..\code\table\erange.cpp" />
+    <ClCompile Include="..\..\code\table\erowset.cpp" />
+    <ClCompile Include="..\..\code\table\etable.cpp" />
+    <ClCompile Include="..\..\code\table\etablehelpers.cpp" />
+    <ClCompile Include="..\..\code\table\etablemessages.cpp" />
+    <ClCompile Include="..\..\code\table\ewhere.cpp" />
+    <ClCompile Include="..\..\code\thread\ethread.cpp" />
+    <ClCompile Include="..\..\code\thread\ethreadhandle.cpp" />
+    <ClCompile Include="..\..\code\timer\etimer.cpp" />
+    <ClCompile Include="..\..\code\time\etimestr.cpp" />
+    <ClCompile Include="..\..\code\time\etime_linux.cpp" />
+    <ClCompile Include="..\..\code\valuex\evaluex.cpp" />
+    <ClCompile Include="..\..\code\variable\evariable.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{E54534F6-30CF-4951-8394-76006662F159}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>iocom</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\static-win32-library.props" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\debug-vs2019.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\static-win32-library.props" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\release-vs2019.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\static-win64-library.props" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\debug-vs2019.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\static-win64-library.props" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\release-vs2019.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

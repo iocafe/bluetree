@@ -291,7 +291,7 @@ eStatus eMatrix::onpropertychange(
             if (m_own_change == 0) {
                 v = x->getl();
                 m_own_change++;
-                resize(m_datatype, v, m_ncolumns);
+                resize(m_datatype, (os_int)v, m_ncolumns);
                 m_own_change--;
             }
             break;
@@ -300,7 +300,7 @@ eStatus eMatrix::onpropertychange(
             if (m_own_change == 0) {
                 v = x->getl();
                 m_own_change++;
-                resize(m_datatype, m_nrows, v);
+                resize(m_datatype, m_nrows, (os_int)v);
                 m_own_change--;
             }
             break;
@@ -551,8 +551,8 @@ eStatus eMatrix::elementwrite(
 {
     eBuffer *buffer = OS_NULL;
     eMatrixDataItem mo;
-    eObject *o;
-    os_char *s, *dataptr, *typeptr;
+    eObject *o = OS_NULL;
+    os_char *s = OS_NULL, *dataptr, *typeptr;
     os_long l;
     os_double d;
     os_float f;
@@ -603,7 +603,7 @@ eStatus eMatrix::elementwrite(
                         break;
 
                     case OS_DOUBLE:
-                        d = mo.l;
+                        d = (os_double)mo.l;
                         datatype = OS_DOUBLE;
                         break;
 

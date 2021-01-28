@@ -338,7 +338,7 @@ void eEndPoint::open()
         parameters = e;
 
         osal_socket_get_ip_and_port(parameters,
-            straddr, -sizeof(straddr),
+            straddr, -(os_memsz)sizeof(straddr),
             &port_nr, &is_ipv6, OSAL_STREAM_LISTEN, default_port_nr);
 
         if (is_ipv6) { tmp.appends("["); }
