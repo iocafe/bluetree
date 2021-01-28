@@ -142,7 +142,7 @@
     <ClCompile Include="..\..\code\thread\ethreadhandle.cpp" />
     <ClCompile Include="..\..\code\timer\etimer.cpp" />
     <ClCompile Include="..\..\code\time\etimestr.cpp" />
-    <ClCompile Include="..\..\code\time\etime_linux.cpp" />
+    <ClCompile Include="..\..\code\time\etime_windows.cpp" />
     <ClCompile Include="..\..\code\valuex\evaluex.cpp" />
     <ClCompile Include="..\..\code\variable\evariable.cpp" />
     <ClCompile Include="..\..\extensions\netservice\elighthouse_thread.cpp" />
