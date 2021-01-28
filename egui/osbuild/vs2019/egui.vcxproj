@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\code\components\button\ebutton.h" />
+    <ClInclude Include="..\..\code\components\ecomponent.h" />
+    <ClInclude Include="..\..\code\components\lineedit\elineedit.h" />
+    <ClInclude Include="..\..\code\components\parameterlist\eparameterlist.h" />
+    <ClInclude Include="..\..\code\components\popup\epopup.h" />
+    <ClInclude Include="..\..\code\components\tableview\etablecolumn.h" />
+    <ClInclude Include="..\..\code\components\tableview\etableview.h" />
+    <ClInclude Include="..\..\code\components\treenode\etreenode.h" />
+    <ClInclude Include="..\..\code\components\window\ewindow.h" />
+    <ClInclude Include="..\..\code\defs\eguiclassid.h" />
+    <ClInclude Include="..\..\code\defs\eguioid.h" />
+    <ClInclude Include="..\..\code\gui\eguix.h" />
+    <ClInclude Include="..\..\code\helpers\eattrbuffer.h" />
+    <ClInclude Include="..\..\code\helpers\eautolabel.h" />
+    <ClInclude Include="..\..\code\helpers\edrawhelpers.h" />
+    <ClInclude Include="..\..\code\helpers\eeditbuffer.h" />
+    <ClInclude Include="..\..\code\helpers\enicevalue.h" />
+    <ClInclude Include="..\..\code\helpers\estrbuffer.h" />
+    <ClInclude Include="..\..\code\imgui\imconfig.h" />
+    <ClInclude Include="..\..\code\imgui\imgui.h" />
+    <ClInclude Include="..\..\code\imgui\imgui_internal.h" />
+    <ClInclude Include="..\..\code\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\..\code\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\..\code\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\..\code\imgui_iface\eimgui_iface.h" />
+    <ClInclude Include="..\..\code\initialize\eguiclasslist.h" />
+    <ClInclude Include="..\..\code\initialize\eguiglobal.h" />
+    <ClInclude Include="..\..\egui.h" />
+    <ClInclude Include="..\..\glfw_opengl3\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="..\..\glfw_opengl3\imgui\imgui_impl_opengl3.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\code\components\button\ebutton.cpp" />
+    <ClCompile Include="..\..\code\components\ecomponent.cpp" />
+    <ClCompile Include="..\..\code\components\lineedit\elineedit.cpp" />
+    <ClCompile Include="..\..\code\components\parameterlist\eparameterlist.cpp" />
+    <ClCompile Include="..\..\code\components\popup\epopup.cpp" />
+    <ClCompile Include="..\..\code\components\tableview\etablecolumn.cpp" />
+    <ClCompile Include="..\..\code\components\tableview\etablerowdialog.cpp" />
+    <ClCompile Include="..\..\code\components\tableview\etableview.cpp" />
+    <ClCompile Include="..\..\code\components\treenode\etreenode.cpp" />
+    <ClCompile Include="..\..\code\components\window\ewindow.cpp" />
+    <ClCompile Include="..\..\code\gui\edesktop.cpp" />
+    <ClCompile Include="..\..\code\gui\egui.cpp" />
+    <ClCompile Include="..\..\code\gui\egui_open.cpp" />
+    <ClCompile Include="..\..\code\helpers\eattrbuffer.cpp" />
+    <ClCompile Include="..\..\code\helpers\eautolabel.cpp" />
+    <ClCompile Include="..\..\code\helpers\edrawhelpers.cpp" />
+    <ClCompile Include="..\..\code\helpers\eeditbuffer.cpp" />
+    <ClCompile Include="..\..\code\helpers\enicevalue.cpp" />
+    <ClCompile Include="..\..\code\helpers\esstrbuffer.cpp" />
+    <ClCompile Include="..\..\code\imgui\imgui.cpp" />
+    <ClCompile Include="..\..\code\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\..\code\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\code\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\..\code\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\..\code\initialize\eguiclasslist.cpp" />
+    <ClCompile Include="..\..\code\initialize\eguiinitialize.cpp" />
+    <ClCompile Include="..\..\glfw_opengl3\eimgui_iface\eimgui_iface_glfw_opengl3.cpp" />
+    <ClCompile Include="..\..\glfw_opengl3\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\..\glfw_opengl3\imgui\imgui_impl_opengl3.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{E54534F6-30CF-4951-8394-76006662F159}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>iocom</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\static-win32-library.props" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\debug-vs2019.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\static-win32-library.props" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\release-vs2019.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\static-win64-library.props" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\debug-vs2019.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\static-win64-library.props" />
+    <Import Project="..\..\..\..\eosal\osbuild\vs2019\release-vs2019.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

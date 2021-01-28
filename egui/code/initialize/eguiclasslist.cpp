@@ -42,8 +42,6 @@ void eguiclasslist_initialize()
     eTableView::setupclass();
     eTableColumn::setupclass();
     eParameterList::setupclass();
-
-    eiocCheckbox::setupclass();
 }
 
 /* Release resources allocated for the class list.
