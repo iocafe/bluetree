@@ -118,9 +118,10 @@ void eMatrix::setupclass()
      * actually get when we request OEMATRIX_APPROX_BUF_SZ bytes. It can be significantly
      * more and we do not want to leave it unused.
      */
-    eBuffer buf;
+    /* eBuffer buf;
     buf.allocate(OEMATRIX_APPROX_BUF_SZ);
-    eglobal->matrix_buffer_allocation_sz = buf.allocated();
+    eglobal->matrix_buffer_allocation_sz = (os_int)buf.allocated(); */
+    eglobal->matrix_buffer_allocation_sz = OEMATRIX_APPROX_BUF_SZ;
 }
 
 

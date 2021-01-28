@@ -227,7 +227,7 @@ public:
 
     /* Get number of childern.
      */
-    os_long childcount(
+    os_int childcount(
         e_oid id = EOID_CHILD);
 
     /* Get first child object identified by oid.

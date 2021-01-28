@@ -66,12 +66,6 @@ public:
         return new eSyncConnector(parent, id, flags);
     }
 
-    /* Get value of simple property.
-     */
-    virtual eStatus simpleproperty(
-        os_int propertynr,
-        eVariable *x);
-
     /* Process received messages
      */
     virtual void onmessage(

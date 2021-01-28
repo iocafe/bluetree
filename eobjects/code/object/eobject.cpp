@@ -167,18 +167,33 @@ eObject::~eObject()
         }
 
         root = first(EOID_ROOT_HELPER);
-        if (root) {
-            delete root;
-        }
 
         if (mm_parent)
         {
-            mm_parent->mm_handle->rbtree_remove(mm_handle);
+            if (mm_parent->mm_handle) {
+                mm_parent->mm_handle->rbtree_remove(mm_handle);
+            }
+#if OSAL_DEBUG
+            else {
+                osal_debug_error("mm_parent->mm_handle is NULL");
+            }
+#endif
         }
 
         /* Handle no longer needed.
          */
-        mm_handle->m_root->freehandle(mm_handle);
+        if (mm_handle->m_root) {
+            mm_handle->m_root->freehandle(mm_handle);
+        }
+#if OSAL_DEBUG
+        else {
+            osal_debug_error("mm_handle->m_root is NULL");
+        }
+#endif
+        if (root) {
+            delete root;
+            mm_handle->m_root = OS_NULL;
+        }
 
         os_unlock();
     }

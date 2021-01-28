@@ -189,8 +189,8 @@ eStatus eMatrix::insert_one_row(
     eName *name;
     os_char *namestr;
     eContainer *trig_cols;
-    os_long row_nr, ix_value;
-    os_int column_nr, flags_val;
+    os_long ix_value;
+    os_int row_nr, column_nr, flags_val;
     eStatus rval = ESTATUS_NO_CHANGES;
 
     /* If this matrix needs to call parent (ESTATUS_NO_CHANGES not needed for select).
@@ -216,7 +216,7 @@ eStatus eMatrix::insert_one_row(
         }
     }
     else {
-        row_nr = index_element->getl() - 1;
+        row_nr = index_element->geti() - 1; 
         if (row_nr < 0) {
             if (use_row_nr < 0) {
                 for (row_nr = 0; row_nr < m_nrows; row_nr++) {

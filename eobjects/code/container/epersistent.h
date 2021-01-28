@@ -171,11 +171,11 @@ protected:
 
     /* Save changes at this many milliseconds after last change.
      */
-    os_long m_save_time;
+    os_int m_save_time;
 
     /* Save changes at latest after this many milliseconds.
      */
-    os_long m_save_latest_time;
+    os_int m_save_latest_time;
 
     /* Flag indicating that a timer has started.
      */

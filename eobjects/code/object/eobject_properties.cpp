@@ -21,7 +21,7 @@ void eObject::setpropertyv_msg(
     const os_char *remotepath,
     eVariable *x,
     const os_char *propertyname,
-    os_boolean adopt_x)
+    os_int mflags)
 {
     eVariable path;
 
@@ -39,20 +39,18 @@ void eObject::setpropertyv_msg(
         }
     }
 
-    message(ECMD_SETPROPERTY, remotepath, OS_NULL, x,
-        adopt_x ? EMSG_DEL_CONTENT|EMSG_NO_REPLIES
-                : EMSG_KEEP_CONTENT|EMSG_NO_REPLIES);
+    message(ECMD_SETPROPERTY, remotepath, OS_NULL, x, mflags);
 }
 
 void eObject::setpropertyo_msg(
     const os_char *remotepath,
     eObject *x,
     const os_char *propertyname,
-    os_boolean adopt_x)
+    os_int mflags)
 {
     eVariable *v = new eVariable();
-    v->seto(x, adopt_x);
-    setpropertyv_msg(remotepath, v, propertyname, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
+    v->seto(x, (mflags & EMSG_DEL_CONTENT) ? OS_TRUE : OS_FALSE);
+    setpropertyv_msg(remotepath, v, propertyname, mflags|EMSG_DEL_CONTENT);
 }
 
 

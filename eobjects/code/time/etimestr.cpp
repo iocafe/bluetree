@@ -117,7 +117,7 @@ eStatus etime_parse_str(
 
     p = str;
     for (n = 0; n < ETIMESTR_ITEMS; n++) {
-        item[n] = osal_str_to_int(p, &count);
+        item[n] = (os_short)osal_str_to_int(p, &count);
         if (count == 0) break;
         p += count;
         sep = (n <= 1 ? format->time_sep : format->millisecond_sep);
@@ -134,9 +134,9 @@ eStatus etime_parse_str(
         return ESTATUS_FAILED;
     }
 
-    local_time->hour = item[0];
-    local_time->minute = item[1];
-    if (n >= 3) local_time->second = item[2];
+    local_time->hour = (os_char)item[0];
+    local_time->minute = (os_char)item[1];
+    if (n >= 3) local_time->second = (os_char)item[2];
     if (n >= 4) local_time->millisecond = item[3];
     if (n >= 5) local_time->microsecond = item[4];
 
@@ -162,7 +162,7 @@ eStatus edate_make_str(
     }
 
     date_sep = format->date_sep;
-    sep_len = os_strlen(date_sep) - 1;
+    sep_len = (os_int)os_strlen(date_sep) - 1;
 
     year = local_time->year;
     year_len = 4;
@@ -252,7 +252,7 @@ eStatus edate_parse_str(
     p = str;
     used_sep_ch = 0;
     for (n = 0; n < EDATESTR_ITEMS; n++) {
-        item[n] = osal_str_to_int(p, &count);
+        item[n] = (os_short)osal_str_to_int(p, &count);
         if (count == 0) break;
         p += count;
         sep = format->date_sep;
@@ -302,8 +302,8 @@ eStatus edate_parse_str(
 
     local_time->year = item[i0];
     if (local_time->year < 1000) local_time->year += 2000;
-    local_time->month = item[i1];
-    local_time->day = item[i2];
+    local_time->month = (os_char)item[i1];
+    local_time->day = (os_char)item[i2];
 
     if (n_chars_parsed) *n_chars_parsed = p - str;
     return ESTATUS_SUCCESS;

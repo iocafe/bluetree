@@ -597,10 +597,10 @@ void eComponent::draw_edit_mode_decorations(
     float thickness;
     float rounding = 4.0f;
 
-    top_left.x = m_rect.x1;
-    top_left.y = m_rect.y1;
-    bottom_right.x = m_rect.x2;
-    bottom_right.y = m_rect.y2;
+    top_left.x = (os_float)m_rect.x1;
+    top_left.y = (os_float)m_rect.y1;
+    bottom_right.x = (os_float)m_rect.x2;
+    bottom_right.y = (os_float)m_rect.y2;
 
     if (m_select || mouse_over) {
         thickness = 2.0f;

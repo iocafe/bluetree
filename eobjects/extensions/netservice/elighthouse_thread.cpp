@@ -572,14 +572,14 @@ ioc_generate_nickname(nick, sizeof(nick));
     for (item = list->firstc(); item; item = item->nextc()) {
         tls_port = 0;
         v = item->firstv(ENET_ENDP_TLS_PORT);
-        if (v) tls_port = v->getl();
+        if (v) tls_port = v->geti();
         tcp_port = 0;
         v = item->firstv(ENET_ENDP_TCP_PORT);
-        if (v) tcp_port = v->getl();
+        if (v) tcp_port = v->geti();
 
         is_ipv6 = OS_FALSE;
         v = item->firstv(ENET_ENDP_IPV6);
-        if (v) is_ipv6 = v->getl();
+        if (v) is_ipv6 = (os_boolean)v->getl();
 
         v = item->firstv(ENET_ENDP_PROTOCOL);
         protocol->setv(v);

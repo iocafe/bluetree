@@ -2073,7 +2073,7 @@ void eVariable::singleline()
         m_value.strptr.used = used;
     }
     else {
-        m_value.strbuf.used = used;
+        m_value.strbuf.used = (os_uchar)used;
     }
 }
 
@@ -2133,7 +2133,8 @@ void eVariable::tolower()
 */
 os_boolean eVariable::clean_to_append_oix()
 {
-    os_int trailing_slash, vsz, e;
+    os_int trailing_slash;
+    os_memsz vsz, e;
     os_char *path;
 
     if (type() != OS_STR) return OS_FALSE;
@@ -2183,7 +2184,7 @@ os_boolean eVariable::clean_to_append_oix()
                 m_value.strptr.used = vsz;
             }
             else {
-                m_value.strbuf.used  = vsz;
+                m_value.strbuf.used = (os_uchar)vsz;
             }
             return OS_TRUE;
         }

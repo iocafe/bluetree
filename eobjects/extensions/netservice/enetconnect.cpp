@@ -482,10 +482,10 @@ void eNetMaintainThread::merge_to_socket_list()
                 }
 
                 if (transport_ix == ENET_CONN_TLS) {
-                    port_nr = lh->getl(i, lh_tlsport_col);
+                    port_nr = lh->geti(i, lh_tlsport_col);
                 }
                 else {
-                    port_nr = lh->getl(i, lh_tcpport_col);
+                    port_nr = lh->geti(i, lh_tcpport_col);
                 }
 
                 add_socket_to_list(lh_name_str, protocol, transport_ix, lh_ip_str, port_nr,

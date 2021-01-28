@@ -105,43 +105,6 @@ void eSynchronized::setupclass()
 /**
 ****************************************************************************************************
 
-  @brief Get value of simple property (override).
-
-  The simpleproperty() function stores current value of simple property into variable x.
-
-  @param   propertynr Property number to get.
-  @param   x Variable into which to store the property value.
-  @return  If property with property number was stored in x, the function returns
-           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
-           given number was not among simple properties.
-
-****************************************************************************************************
-*/
-eStatus eSynchronized::simpleproperty(
-    os_int propertynr,
-    eVariable *x)
-{
-    switch (propertynr)
-    {
-        /* case ERSETP_LIMIT:
-            if (m_pstruct.limit == 0) goto clear_x;
-            x->setl(m_pstruct.limit);
-            break; */
-
-        default:
-            return eObject::simpleproperty(propertynr, x);
-    }
-    return ESTATUS_SUCCESS;
-
-// clear_x:
-    x->clear();
-    return ESTATUS_SUCCESS;
-}
-
-
-/**
-****************************************************************************************************
-
   @brief Initialize eSynchronized for data transfer.
 
   The eSynchronized::initialize_synch_transfer function.
@@ -462,7 +425,7 @@ os_int eSynchronized::in_air_count()
 */
 eStatus eSynchronized::sync_wait(
     os_int count,
-    os_long timeout_ms)
+    os_int timeout_ms)
 {
     os_int c;
 

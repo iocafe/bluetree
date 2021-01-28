@@ -952,7 +952,7 @@ void eRowSetBinding::trigdata_append_insert_or_update(
 
     m = new eMatrix(m_trigged_changes);
     list = columns();
-    m->allocate(OS_OBJECT, 1, (os_int)list->childcount()); // ??????????????????? CHECK CAN DATA TYPE BE OPTIMIZED
+    m->allocate(OS_OBJECT, 1, list->childcount()); // ??????????????????? CHECK CAN DATA TYPE BE OPTIMIZED
     if (list) {
         for (v = list->firstv(), col_nr = 0; v; v = v->nextv(), col_nr++) {
             n = v->primaryname();

@@ -370,7 +370,7 @@ public:
 
     /** Get number of childern.
      */
-    inline os_long childcount(
+    inline os_int childcount(
         e_oid id = EOID_CHILD)
     {
         if (mm_handle) return mm_handle->childcount(id);
@@ -725,13 +725,13 @@ public:
         const os_char *remotepath,
         eVariable *x,
         const os_char *propertyname = OS_NULL,
-        os_boolean adopt_x = OS_FALSE);
+        os_int mflags = EMSG_KEEP_CONTENT|EMSG_NO_REPLIES);
 
     void setpropertyo_msg(
         const os_char *remotepath,
         eObject *x,
         const os_char *propertyname = OS_NULL,
-        os_boolean adopt_x = OS_FALSE);
+        os_int mflags = EMSG_KEEP_CONTENT|EMSG_NO_REPLIES);
 
     void setpropertyl_msg(
         const os_char *remotepath,

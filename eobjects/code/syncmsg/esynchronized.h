@@ -86,12 +86,6 @@ public:
         return new eSynchronized(parent, id, flags);
     }
 
-    /* Get value of simple property.
-     */
-    virtual eStatus simpleproperty(
-        os_int propertynr,
-        eVariable *x);
-
 
     /**
     ************************************************************************************************
@@ -126,7 +120,7 @@ public:
      */
     eStatus sync_wait(
         os_int in_air_count,
-        os_long timeout_ms);
+        os_int timeout_ms);
 
 protected:
 

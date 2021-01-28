@@ -179,7 +179,7 @@ void eObject::srvbind(
         osal_debug_error("srvbind without parameters");
         return;
     }
-    bf = set->getl(ERSET_BINDING_FLAGS);
+    bf = set->geti(ERSET_BINDING_FLAGS);
     if (bf & EBIND_BIND_ROWSET) {
         cid = ECLASSID_ROW_SET_BINDING;
         pnr = EOID_TABLE_SERVER_BINDING;

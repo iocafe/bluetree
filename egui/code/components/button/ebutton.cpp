@@ -177,8 +177,8 @@ eStatus eButton::draw(
     }
 
     ImVec2 cpos = ImGui::GetCursorScreenPos();
-    m_rect.x1 = cpos.x;
-    m_rect.y1 = cpos.y;
+    m_rect.x1 = (os_int)cpos.x;
+    m_rect.y1 = (os_int)cpos.y;
 
     sz.x = sz.y = 0;
 
@@ -207,7 +207,7 @@ eStatus eButton::draw(
             }
         }
         else {
-            os_int www = ImGui::CalcTextSize(label).x;
+            os_int www = (os_int)ImGui::CalcTextSize(label).x;
             ImVec2 inner_spacing = ImGui::GetStyle().ItemInnerSpacing;
             ImVec2 button_padding(50, inner_spacing.y);
             button_padding.x -= www/2;
@@ -247,8 +247,8 @@ eStatus eButton::draw(
 
     sz = ImGui::GetItemRectSize();
 
-    m_rect.x2 = m_rect.x1 + sz.x - 1;
-    m_rect.y2 = m_rect.y1 + sz.y - 1;
+    m_rect.x2 = m_rect.x1 + (os_int)sz.x - 1;
+    m_rect.y2 = m_rect.y1 + (os_int)sz.y - 1;
 
     /* Let base class implementation handle the rest.
      */

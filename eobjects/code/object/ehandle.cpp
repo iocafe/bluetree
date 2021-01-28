@@ -96,10 +96,10 @@ eHandle::eHandle()
 
 ****************************************************************************************************
 */
-os_long eHandle::childcount(
+os_int eHandle::childcount(
     e_oid id)
 {
-    os_long
+    os_int
         count;
 
     eHandle
