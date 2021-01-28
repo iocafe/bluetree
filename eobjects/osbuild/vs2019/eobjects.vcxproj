@@ -75,6 +75,15 @@
     <ClInclude Include="..\..\code\valuex\evaluex.h" />
     <ClInclude Include="..\..\code\variable\evariable.h" />
     <ClInclude Include="..\..\eobjects.h" />
+    <ClInclude Include="..\..\extensions\netservice\elighthouse_thread.h" />
+    <ClInclude Include="..\..\extensions\netservice\enetconnect.h" />
+    <ClInclude Include="..\..\extensions\netservice\enetendpoints.h" />
+    <ClInclude Include="..\..\extensions\netservice\enetmaintain_thread.h" />
+    <ClInclude Include="..\..\extensions\netservice\enetservice.h" />
+    <ClInclude Include="..\..\extensions\netservice\enetserv_prm.h" />
+    <ClInclude Include="..\..\extensions\netservice\eprotocol.h" />
+    <ClInclude Include="..\..\extensions\netservice\eprotocol_ecom.h" />
+    <ClInclude Include="..\..\extensions\netservice\eprotocol_handle.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\code\binding\ebinding.cpp" />
@@ -136,10 +145,21 @@
     <ClCompile Include="..\..\code\time\etime_linux.cpp" />
     <ClCompile Include="..\..\code\valuex\evaluex.cpp" />
     <ClCompile Include="..\..\code\variable\evariable.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\elighthouse_thread.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\enetaccounts.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\enetconnect.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\enetendpoints.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\enetmaintain_thread.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\enetservice.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\enetserv_prm.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\enettrusted.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\eprotocol.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\eprotocol_ecom.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\eprotocol_handle.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{E54534F6-30CF-4951-8394-76006662F159}</ProjectGuid>
+    <ProjectGuid>{F187B8DA-B7E3-428E-B852-CC59031394F0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>iocom</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>

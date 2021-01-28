@@ -495,7 +495,7 @@ public:
         os_int sflags)
     {
         osal_debug_error("serialization failed, writer not implemented");
-        return eStatus::ESTATUS_FAILED;
+        return ESTATUS_FAILED;
     }
 
     /* Called by read() to read class specific object content.

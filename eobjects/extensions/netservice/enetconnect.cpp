@@ -409,7 +409,7 @@ void eNetMaintainThread::merge_to_socket_list()
         port_nr = 0;
         if (transport_ix == ENET_CONN_SOCKET || transport_ix == ENET_CONN_TLS)
         {
-            osal_socket_get_ip_and_port(ip_and_port_str, ip_str, -sizeof(ip_str),
+            osal_socket_get_ip_and_port(ip_and_port_str, ip_str, -(os_memsz)sizeof(ip_str),
                 &port_nr, &is_ipv6, OSAL_STREAM_CONNECT, 0);
             if (ip_str[0] == '\0') {
                 os_strncpy(ip_str, "*", sizeof(ip_str));
