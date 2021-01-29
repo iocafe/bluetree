@@ -122,7 +122,7 @@ eObject *eSet::clone(
     if (m_items)
     {
         clonedobj->m_items = (os_uchar*)os_malloc(m_used, &sz);
-        clonedobj->m_used = m_used;
+        clonedobj->m_used = 0;
         clonedobj->m_alloc = (os_int)sz;
 
         /* Prepare to go trough items.
@@ -398,7 +398,7 @@ eStatus eSet::reader(
      */
     if (stream->getl(&lval)) goto failed;
     m_used = (os_int)lval;
-    if (m_used == 0) goto skipit;
+    if (m_used <= 0) goto skipit;
 
     /* Allocate buffer containing items
      */
@@ -412,7 +412,7 @@ eStatus eSet::reader(
 
     /* Search id from items until match found.
      */
-    while (p < e)
+    while (p + 3 <= e)
     {
         if (stream->getl(&lval)) goto failed;
         iid = (os_uchar)lval;
@@ -424,6 +424,10 @@ eStatus eSet::reader(
         *(os_schar*)(p++) = itype;
         ibytes = (os_uchar)osal_type_size((osalTypeId)itype);
         *ibytes_pos = ibytes;
+        if (p + ibytes > e) {
+            osal_debug_error("eSet::reader: corrupted stream 1");
+            goto failed;
+        }
 
         switch (itype & OSAL_TYPEID_MASK)
         {
@@ -457,6 +461,10 @@ eStatus eSet::reader(
             case OS_STR:
                 if (stream->getl(&lval)) goto failed;
                 ibytes = (os_uchar)lval;
+                if (p + ibytes > e) {
+                    osal_debug_error("eSet::reader: corrupted stream 2");
+                    goto failed;
+                }
                 if (stream->read((os_char*)p, ibytes)) goto failed;
                 *ibytes_pos = ibytes;
                 break;
@@ -473,6 +481,10 @@ skipit:
     /* End the object.
      */
     if (stream->read_end_block()) goto failed;
+
+#if OSAL_MEMORY_DEBUG
+    osal_memory_check(m_items, m_alloc);
+#endif
 
     /* Object succesfully read.
      */
@@ -852,6 +864,7 @@ void eSet::setv(
         p += ibytes;
     }
     m_used = (os_int)(p - m_items);
+
     goto getout;
 
 store_as_var:
@@ -864,6 +877,10 @@ getout:
     if (sflags & ESET_DELETE_X) {
         delete x;
     }
+
+#if OSAL_MEMORY_DEBUG
+    osal_memory_check(m_items, m_alloc);
+#endif
 }
 
 
@@ -1037,6 +1054,10 @@ os_boolean eSet::getv(
     /* continues...
      */
 getout:
+#if OSAL_MEMORY_DEBUG
+    osal_memory_check(m_items, m_alloc);
+#endif
+
     x->clear();
     return OS_FALSE;
 }
