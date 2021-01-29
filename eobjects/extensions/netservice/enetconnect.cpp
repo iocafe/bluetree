@@ -488,8 +488,10 @@ void eNetMaintainThread::merge_to_socket_list()
                     port_nr = lh->geti(i, lh_tcpport_col);
                 }
 
-                add_socket_to_list(lh_name_str, protocol, transport_ix, lh_ip_str, port_nr,
-                    is_ipv6, rows, addr_blocklist, name_blocklist);
+                if (port_nr) {
+                    add_socket_to_list(lh_name_str, protocol, transport_ix, lh_ip_str, port_nr,
+                        is_ipv6, rows, addr_blocklist, name_blocklist);
+                }
             }
         }
     }
