@@ -167,10 +167,6 @@ eObject::~eObject()
         }
 
         root = first(EOID_ROOT_HELPER);
-        if (root) {
-            delete root;
-            mm_handle->m_root = OS_NULL;
-        }
 
         if (mm_parent)
         {
@@ -194,6 +190,9 @@ eObject::~eObject()
             osal_debug_error("mm_handle->m_root is NULL");
         }
 #endif
+        if (root) {
+            delete root;
+        }
 
         os_unlock();
     }
