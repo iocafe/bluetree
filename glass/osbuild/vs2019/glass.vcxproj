@@ -103,6 +103,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>lighthoused.lib;eobjectsd.lib;eguid.lib;glew32sd.lib;glfw3d.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\coderoot\bluetree\egui\deps\windows\win32_vs2019;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>MSVCRTD</IgnoreSpecificDefaultLibraries>
     </Link>
     <PreBuildEvent />
   </ItemDefinitionGroup>

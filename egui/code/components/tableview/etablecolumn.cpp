@@ -165,7 +165,7 @@ void eTableColumn::draw_column_header(
     while (OS_TRUE) {
         e = os_strchr(p, '\n');
         if (e) {
-            sz = e - p + 1;
+            sz = e - p + (os_memsz)1;
             if (sz > (os_memsz)sizeof(buf)) {
                 sz = sizeof(buf);
             }
@@ -285,7 +285,7 @@ void eTableColumn::draw_edit(
     }
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, zero_pad);
     ImGui::SetNextItemWidth(-FLT_MIN);
-    ImGui::InputText(view->edit_label(), edit_buf, view->edit_sz(), eflags);
+    ImGui::InputText(view->edit_label(), edit_buf, (size_t)view->edit_sz(), eflags);
     if ((!ImGui::IsItemActive() || ImGui::IsItemDeactivatedAfterEdit()) && view->keyboard_focus_ok())
     {
         eVariable nice_value;
