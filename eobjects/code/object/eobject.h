@@ -890,7 +890,7 @@ public:
     void setpropertyo(
         os_int propertynr,
         eObject *x,
-        os_boolean adopt_x = OS_FALSE);
+        os_int mflags = EMSG_KEEP_CONTENT);
 
     /* Set property value as integer.
      */

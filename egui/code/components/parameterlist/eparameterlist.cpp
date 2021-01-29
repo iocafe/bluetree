@@ -207,13 +207,13 @@ eStatus eParameterList::draw(
     {
         rmax = ImGui::GetContentRegionMax();
         origin = ImGui::GetCursorPos();
-        ys = ImGui::GetScrollY();
-        total_w = rmax.x - origin.x;
-        total_h = rmax.y - origin.y;
+        ys = (os_int)ImGui::GetScrollY();
+        total_w = (os_int)(rmax.x - origin.x);
+        total_h = (os_int)(rmax.y - origin.y);
 
         cpos = ImGui::GetCursorScreenPos();
-        m_rect.x1 = cpos.x;
-        m_rect.y1 = cpos.y + ys;
+        m_rect.x1 = (os_int)cpos.x;
+        m_rect.y1 = (os_int)cpos.y + ys;
 
         m_rect.x2 = m_rect.x1 + total_w - 1;
         m_rect.y2 = m_rect.y1 + total_h - 1;
@@ -236,7 +236,7 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
 
         ImGui::TableSetupColumn("name", ImGuiTableColumnFlags_NoHide,
-            m_treebrowser_row_count ? 200 : 150);
+            (float)(m_treebrowser_row_count ? 200 : 150));
         ImGui::TableSetupColumn("value", ImGuiTableColumnFlags_NoHide, 150);
         ImGui::TableSetupColumn("unit", ImGuiTableColumnFlags_NoHide, 30);
         if (m_treebrowser_row_count) {
@@ -295,13 +295,13 @@ void eParameterList::generate_component_array()
     nro_components = 4;
 
 try_again:
-    max_components = m_component_array_sz / sizeof(ePrmListComponent);
+    max_components = (os_int)(m_component_array_sz / sizeof(ePrmListComponent));
     if (m_component == OS_NULL || nro_components > max_components)
     {
         os_free(m_component, m_component_array_sz);
         sz = (nro_components + 4) * sizeof(ePrmListComponent);
         m_component = (ePrmListComponent*)os_malloc(sz, &m_component_array_sz);
-        max_components = m_component_array_sz / sizeof(ePrmListComponent);
+        max_components = (os_int)(m_component_array_sz / sizeof(ePrmListComponent));
     }
 
     m_treebrowser_row_count = 0;

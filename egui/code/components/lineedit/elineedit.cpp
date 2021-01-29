@@ -177,18 +177,18 @@ eStatus eLineEdit::draw(
     add_to_zorder(prm.window, prm.layer);
     m_attr.for_variable(this);
 
-    relative_x2 = ImGui::GetContentRegionMax().x;
-    total_w = relative_x2 - ImGui::GetCursorPosX();
+    relative_x2 = (os_int)ImGui::GetContentRegionMax().x;
+    total_w = relative_x2 - (os_int)ImGui::GetCursorPosX();
 
     ImVec2 cpos = ImGui::GetCursorScreenPos();
-    m_rect.x1 = cpos.x;
-    m_rect.y1 = cpos.y;
+    m_rect.x1 = (os_int)cpos.x;
+    m_rect.y1 = (os_int)cpos.y;
 
     ImGui::TextUnformatted(m_text.get(this, ECOMP_TEXT, &m_attr, ESTRBUF_SINGLELINE));
-    total_h = ImGui::GetItemRectSize().y;
+    total_h = (os_int)ImGui::GetItemRectSize().y;
 
     if (m_attr.showas() == E_SHOWAS_CHECKBOX) {
-        edit_w = ImGui::GetFrameHeight();
+        edit_w = (os_int)ImGui::GetFrameHeight();
     }
     else {
         edit_w = 200;
@@ -196,17 +196,17 @@ eStatus eLineEdit::draw(
     unit_w = 60;
     unit_spacer = 6;
 
-    ImGui::SameLine(relative_x2 - edit_w - unit_spacer - unit_w);
-    ImGui::SetNextItemWidth(edit_w);
+    ImGui::SameLine((float)(relative_x2 - edit_w - unit_spacer - unit_w));
+    ImGui::SetNextItemWidth((float)edit_w);
 
     draw_value(prm, edit_w, &total_h);
 
     unit = m_unit.get(this, ECOMP_UNIT, &m_attr, ESTRBUF_SINGLELINE);
     if (*unit != '\0') {
-        ImGui::SameLine(relative_x2 - unit_w);
-        ImGui::SetNextItemWidth(unit_w);
+        ImGui::SameLine((float)(relative_x2 - unit_w));
+        ImGui::SetNextItemWidth((float)unit_w);
         ImGui::TextUnformatted(unit);
-        h = ImGui::GetItemRectSize().y;
+        h = (os_int)ImGui::GetItemRectSize().y;
         if (h > total_h) total_h = h;
     }
 
@@ -301,7 +301,7 @@ void eLineEdit::draw_value(
             }
         }
 
-        h = ImGui::GetItemRectSize().y;
+        h = (os_int)ImGui::GetItemRectSize().y;
         if (h > *total_h) *total_h = h;
 
         ImGui::PopStyleVar();

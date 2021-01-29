@@ -265,14 +265,14 @@ eStatus eTableView::draw(
     {
         rmax = ImGui::GetContentRegionMax();
         origin = ImGui::GetCursorPos();
-        ys = ImGui::GetScrollY();
+        ys = (os_int)ImGui::GetScrollY();
 
-        total_w = rmax.x - origin.x;
-        total_h = rmax.y - origin.y + ys;
+        total_w = (os_int)(rmax.x - origin.x);
+        total_h = (os_int)(rmax.y - origin.y) + ys;
 
         cpos = ImGui::GetCursorScreenPos();
-        m_rect.x1 = cpos.x;
-        m_rect.y1 = cpos.y + ys;
+        m_rect.x1 = (os_int)cpos.x;
+        m_rect.y1 = (os_int)cpos.y + ys;
 
         m_rect.x2 = m_rect.x1 + total_w - 1;
         m_rect.y2 = m_rect.y1 + total_h - 1;
@@ -289,14 +289,14 @@ eStatus eTableView::draw(
 
         draw_header_row();
 
-        m_data_windows_start_y = ImGui::GetCursorScreenPos().y + ys;
+        m_data_windows_start_y = (os_int)ImGui::GetCursorScreenPos().y + ys;
 
         first_row = OS_TRUE;
         focused_m = eMatrix::cast(m_focused_row->get());
         value = new eVariable(this);
         clipper.Begin(nrows);
-        m_logical_data_start_y = clipper.StartPosY;
-        m_data_row_h = TEXT_BASE_HEIGHT;
+        m_logical_data_start_y = (os_int)clipper.StartPosY;
+        m_data_row_h = (os_int)TEXT_BASE_HEIGHT;
         while (clipper.Step())
         {
             for (row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
@@ -320,7 +320,7 @@ eStatus eTableView::draw(
                     // a column is not visible, which can be used for clipping.
                     if (first_row) {
                         c->set_visible(ImGui::TableSetColumnIndex(column));
-                        m_data_windows_start_y = ImGui::GetCursorScreenPos().y + ys;
+                        m_data_windows_start_y = (os_int)ImGui::GetCursorScreenPos().y + ys;
                     }
 
                     if (!c->visible()) {

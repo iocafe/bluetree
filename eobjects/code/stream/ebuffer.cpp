@@ -500,7 +500,7 @@ os_char *eBuffer::allocate(
 
     /* Copy and clear.
      */
-    if (copysz) os_memcpy(newbuf, m_ptr, copysz);
+    if (copysz && m_ptr) os_memcpy(newbuf, m_ptr, copysz);
     if (clearsz) os_memclear(newbuf+copysz, clearsz);
 
     /* Free old buffer.

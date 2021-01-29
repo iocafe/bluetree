@@ -323,7 +323,7 @@ void eAttrBuffer::setup_list(
         switch (m_show_as)
         {
             case E_SHOWAS_DROP_DOWN_ENUM:
-                id = osal_str_to_int(buf, &bytes);
+                id = (os_int)osal_str_to_int(buf, &bytes);
                 if (id < 0) id = EOID_CHILD;
                 while (buf[bytes] == '.' || osal_char_isspace(buf[bytes])) bytes++;
 

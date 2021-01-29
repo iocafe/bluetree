@@ -295,20 +295,20 @@ ImGui::SetNextWindowSize(ImVec2(900, 200), ImGuiCond_FirstUseEver);
      */
     pos = ImGui::GetWindowPos();
     sz = ImGui::GetWindowSize();
-    m_rect.x1 = pos.x;
-    m_rect.y1 = pos.y;
-    m_rect.x2 = m_rect.x1 + sz.x - 1;
-    m_rect.y2 = m_rect.y1 + sz.y - 1;
+    m_rect.x1 = (os_int)pos.x;
+    m_rect.y1 = (os_int)pos.y;
+    m_rect.x2 = m_rect.x1 + (os_int)sz.x - 1;
+    m_rect.y2 = m_rect.y1 + (os_int)sz.y - 1;
 
     /* This is what we need, window content rectangle excluding framing.
      */
     pos = ImGui::GetWindowPos();
     sz = ImGui::GetWindowContentRegionMin();
-    m_rect.x1 = sz.x + pos.x;
-    m_rect.y1 = sz.y + pos.y;
+    m_rect.x1 = (os_int)(sz.x + pos.x);
+    m_rect.y1 = (os_int)(sz.y + pos.y);
     sz = ImGui::GetWindowContentRegionMax();
-    m_rect.x2 = sz.x + pos.x - 1;
-    m_rect.y2 = sz.y + pos.y - 1;
+    m_rect.x2 = (os_int)(sz.x + pos.x) - 1;
+    m_rect.y2 = (os_int)(sz.y + pos.y) - 1;
 
     eComponent::draw(wprm);
 

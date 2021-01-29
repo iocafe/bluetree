@@ -562,8 +562,8 @@ void eGui::handle_mouse()
     m_draw_prm.mouse_dragging[EIMGUI_LEFT_MOUSE_BUTTON] = OS_FALSE;
     m_draw_prm.mouse_dragging[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
 
-    m_draw_prm.mouse_pos.x = m_draw_prm.io->MousePos.x;
-    m_draw_prm.mouse_pos.y = m_draw_prm.io->MousePos.y;
+    m_draw_prm.mouse_pos.x = (os_int)m_draw_prm.io->MousePos.x;
+    m_draw_prm.mouse_pos.y = (os_int)m_draw_prm.io->MousePos.y;
 
     for (i = 0; i < EIMGUI_NRO_MOUSE_BUTTONS; i++)
     {

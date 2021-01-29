@@ -45,15 +45,15 @@ void edraw_value(
     bool checked;
 
     if (value_w < 0) {
-        value_w = ImGui::GetColumnWidth();
+        value_w = (os_int)ImGui::GetColumnWidth();
     }
 
     if (r) {
         pos = ImGui::GetCursorScreenPos();
-        r->x1 = pos.x;
-        r->y1 = pos.y;
-        r->x2 = pos.x + value_w;
-        r->y2 = pos.y + ImGui::GetFrameHeight();
+        r->x1 = (os_int)pos.x;
+        r->y1 = (os_int)pos.y;
+        r->x2 = r->x1 + value_w;
+        r->y2 = r->y1 + (os_int)ImGui::GetFrameHeight();
     }
 
     switch (attr.showas())
@@ -61,7 +61,7 @@ void edraw_value(
         case E_SHOWAS_CHECKBOX:
             checked = (bool)value->getl();
 
-            square_sz = ImGui::GetFrameHeight();
+            square_sz = (os_int)ImGui::GetFrameHeight();
             square_sz -= 3 * pad;
 
             pos = ImGui::GetCursorScreenPos();
@@ -95,7 +95,7 @@ void edraw_value(
             // draw_list->AddRect(pos, pos_max, color, 0);
             if (checked) {
                 pos.x++;
-                ImGui::RenderCheckMark(draw_list, pos, check_col, square_sz - pad);
+                ImGui::RenderCheckMark(draw_list, pos, check_col, (float)(square_sz - pad));
             }
             else if ((dflags & EDRAW_VALUE_TABLE) == 0 || state_bits != OSAL_STATE_CONNECTED)
             {
@@ -112,11 +112,11 @@ void edraw_value(
             /* Align left, center, or right.
              */
             if (attr.alignment() != E_ALIGN_LEFT) {
-                extra_w = value_w - ImGui::CalcTextSize(text).x;
+                extra_w = value_w - (os_int)ImGui::CalcTextSize(text).x;
                 if (extra_w > 0) {
-                    x_pos = ImGui::GetCursorPosX();
+                    x_pos = (os_int)ImGui::GetCursorPosX();
                     x_pos += (attr.alignment() == E_ALIGN_RIGHT) ? extra_w : extra_w/2;
-                    ImGui::SetCursorPosX(x_pos);
+                    ImGui::SetCursorPosX((float)x_pos);
                 }
             }
 

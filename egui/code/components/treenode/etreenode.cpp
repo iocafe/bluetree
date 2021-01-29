@@ -479,11 +479,11 @@ eStatus eTreeNode::draw(
     add_to_zorder(prm.window, prm.layer);
     m_attr.for_variable(this);
 
-    relative_x2 = ImGui::GetContentRegionMax().x;
-    total_w = relative_x2 - ImGui::GetCursorPosX();
+    relative_x2 = (os_int)ImGui::GetContentRegionMax().x;
+    total_w = relative_x2 - (os_int)ImGui::GetCursorPosX();
     ImVec2 cpos = ImGui::GetCursorScreenPos();
-    m_rect.x1 = cpos.x;
-    m_rect.y1 = cpos.y;
+    m_rect.x1 = (os_int)cpos.x;
+    m_rect.y1 = (os_int)cpos.y;
 
     if (m_autoopen)
     {
@@ -506,14 +506,14 @@ eStatus eTreeNode::draw(
         clear_row_count();
     }
 
-    total_h = ImGui::GetItemRectSize().y;
+    total_h = (os_int)ImGui::GetItemRectSize().y;
 
     /* Decide on column widths.
      */
     text_w = 350;
     full_edit_w = 200;
     if (m_attr.showas() == E_SHOWAS_CHECKBOX) {
-        edit_w = ImGui::GetFrameHeight();
+        edit_w = (os_int)ImGui::GetFrameHeight();
     }
     else {
         edit_w = full_edit_w;
@@ -553,38 +553,38 @@ eStatus eTreeNode::draw(
         full_edit_w += w_left;
     }
 
-    ImGui::SameLine(relative_x2 - edit_w - unit_spacer - unit_w - path_w - ipath_w);
-    ImGui::SetNextItemWidth(edit_w);
+    ImGui::SameLine((float)(relative_x2 - edit_w - unit_spacer - unit_w - path_w - ipath_w));
+    ImGui::SetNextItemWidth((float)edit_w);
 
     draw_value(prm, edit_w, &total_h);
 
     if (unit_w > 0) {
         unit = m_unit.get(this, ECOMP_UNIT);
         if (*unit != '\0') {
-            ImGui::SameLine(relative_x2 - unit_w - path_w - ipath_w);
-            ImGui::SetNextItemWidth(unit_w);
+            ImGui::SameLine((float)(relative_x2 - unit_w - path_w - ipath_w));
+            ImGui::SetNextItemWidth((float)unit_w);
             ImGui::TextUnformatted(unit);
-            h = ImGui::GetItemRectSize().y;
+            h = (os_int)ImGui::GetItemRectSize().y;
             if (h > total_h) total_h = h;
         }
     }
     if (path_w > 0) {
         path = m_path.get(this, ECOMP_PATH);
         if (*path != '\0') {
-            ImGui::SameLine(relative_x2 - path_w - ipath_w);
-            ImGui::SetNextItemWidth(path_w);
+            ImGui::SameLine((float)(relative_x2 - path_w - ipath_w));
+            ImGui::SetNextItemWidth((float)path_w);
             ImGui::TextUnformatted(path);
-            h = ImGui::GetItemRectSize().y;
+            h = (os_int)ImGui::GetItemRectSize().y;
             if (h > total_h) total_h = h;
         }
     }
     if (ipath_w > 0) {
         path = m_ipath.get(this, ECOMP_IPATH);
         if (*path != '\0') {
-            ImGui::SameLine(relative_x2 - ipath_w);
-            ImGui::SetNextItemWidth(ipath_w);
+            ImGui::SameLine((float)(relative_x2 - ipath_w));
+            ImGui::SetNextItemWidth((float)ipath_w);
             ImGui::TextUnformatted(path);
-            h = ImGui::GetItemRectSize().y;
+            h = (os_int)ImGui::GetItemRectSize().y;
             if (h > total_h) total_h = h;
         }
     }
@@ -740,7 +740,7 @@ void eTreeNode::draw_value(
             }
         }
 
-        h = ImGui::GetItemRectSize().y;
+        h = (os_int)ImGui::GetItemRectSize().y;
         if (h > *total_h) *total_h = h;
 
         ImGui::PopStyleVar();
@@ -774,10 +774,10 @@ void eTreeNode::draw_underline(
     ImVec2 top_left, bottom_right;
     ImU32 col;
 
-    top_left.x = m_rect.x1;
-    top_left.y = y;
-    bottom_right.x = m_rect.x2;
-    bottom_right.y = y+1;
+    top_left.x = (float)m_rect.x1;
+    top_left.y = (float)y;
+    bottom_right.x = (float)m_rect.x2;
+    bottom_right.y = (float)(y + 1);
 
     draw_list = ImGui::GetWindowDrawList();
     col = IM_COL32(128, 128, 128, 20);

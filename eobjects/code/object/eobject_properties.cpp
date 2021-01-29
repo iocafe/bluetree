@@ -742,11 +742,13 @@ getout:
 void eObject::setpropertyo(
     os_int propertynr,
     eObject *x,
-    os_boolean adopt_x)
+    os_int mflags)
 {
-    eVariable v;
-    v.seto(x, adopt_x);
-    setpropertyv(propertynr, &v);
+    eVariable *v;
+    v = new eVariable(ETEMPORARY);
+    v->seto(x, (mflags & EMSG_DEL_CONTENT) ? OS_TRUE : OS_FALSE);
+    setpropertyv(propertynr, v);
+    delete v;
 }
 
 

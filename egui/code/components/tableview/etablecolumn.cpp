@@ -177,11 +177,11 @@ void eTableColumn::draw_column_header(
         }
 
         if (m_attr.alignment() != E_ALIGN_LEFT) {
-            extra_w = ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x;
+            extra_w = (os_int)(ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x);
             if (extra_w > 0) {
-                x_pos = ImGui::GetCursorPosX();
+                x_pos = (os_int)ImGui::GetCursorPosX();
                 x_pos += (m_attr.alignment() == E_ALIGN_RIGHT) ? extra_w : extra_w/2;
-                ImGui::SetCursorPosX(x_pos);
+                ImGui::SetCursorPosX((float)x_pos);
             }
         }
         if (is_first) ImGui::TableHeader(text);
@@ -205,11 +205,11 @@ void eTableColumn::draw_column_header(
          */
         text = m_unit.ptr();
         if (m_attr.alignment() != E_ALIGN_LEFT) {
-            extra_w = ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x;
+            extra_w = (os_int)(ImGui::GetColumnWidth() - ImGui::CalcTextSize(text).x);
             if (extra_w > 0) {
-                x_pos = ImGui::GetCursorPosX();
+                x_pos = (os_int)ImGui::GetCursorPosX();
                 x_pos += (m_attr.alignment() == E_ALIGN_RIGHT) ? extra_w : extra_w/2;
-                ImGui::SetCursorPosX(x_pos);
+                ImGui::SetCursorPosX((float)x_pos);
             }
         }
         // ImGui::TableHeader(text);

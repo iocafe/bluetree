@@ -452,7 +452,7 @@ public:
      */
     inline const os_char *operator+=(const os_char *x) { appends(x); return x; }
     inline void operator+=(eVariable& x) { appendv(&x); }
-    inline void operator+=(long x) { appendl(x); } // MORE CONFUSING THAN USEFUL?
+    inline void operator+=(os_long x) { appendl(x); } // MORE CONFUSING THAN USEFUL?
 
 
 protected:
