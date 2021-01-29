@@ -285,7 +285,7 @@ void eObject::message_process_ns(
         return;
     }
 
-    /* Get pointer to process namespace. This is never NULL (or if it is, it is programming error).
+    /* Get pointer to process namespace. This is never NULL (or it is programming error).
      */
     process_ns = eglobal_process_ns();
 
@@ -546,8 +546,13 @@ void eObject::message_oix(
     /* Otherwise different threads.
      */
     osal_debug_assert(handle->m_root);
-    thread = eThread::cast(handle->m_root->parent());
-    if (thread == handle->m_object) envelope->move_target_over_objname(count);
+    if (handle->m_root) {
+        thread = eThread::cast(handle->m_root->parent());
+        if (thread == handle->m_object) envelope->move_target_over_objname(count);
+    }
+    else {
+        thread = OS_NULL;
+    }
 
     /* Place the envelope in thread's message queue.
      */
