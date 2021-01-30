@@ -76,6 +76,7 @@ void eStrBuffer::setv(
     if (value == OS_NULL) {
         clear();
         m_buf_sz = BUF_SZ_EMPTY_STR;
+        return;
     }
 
     ptr = value->gets(&sz);
