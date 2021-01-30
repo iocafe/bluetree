@@ -113,7 +113,8 @@ eObject *eSet::clone(
 {
     eSet *clonedobj;
     os_uchar *src, *dst;
-    os_uchar ibytes, itype;
+    os_uchar itype;
+    os_short ibytes; /* + 3 -> must be 16 bit */
     os_int spos, dpos;
     os_memsz sz;
 
@@ -864,7 +865,6 @@ void eSet::setv(
         p += ibytes;
     }
     m_used = (os_int)(p - m_items);
-
     goto getout;
 
 store_as_var:
