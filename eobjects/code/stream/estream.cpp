@@ -329,8 +329,13 @@ eStatus eStream::getl(
     /* Read as much more dat as there is to this number.
      */
     more = osal_intser_more_bytes(buf[0]);
-    if (more)
-    {
+    
+    if (more) {
+        if (more > sizeof(buf)) {
+            *x = 0;
+            return ESTATUS_FAILED;
+        }
+
         rval = read(buf+1, more);
         if (rval) goto getout;
     }
