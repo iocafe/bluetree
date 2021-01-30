@@ -50,7 +50,7 @@ eNetMaintainThread::eNetMaintainThread(
     m_connect_timer = 0;
     m_connections = new eContainer(this);
     m_connections->ns_create();
-    m_timer_set = OS_FALSE;
+    m_timer_ms = 0;
     m_lighthouse_modif_count = 0;
 
     initproperties();
@@ -173,8 +173,7 @@ eStatus eNetMaintainThread::onpropertychange(
                 m_end_point_table_modif_count = count;
                 m_configure_end_points = OS_TRUE;
                 os_get_timer(&m_end_point_config_timer);
-                timer(100);
-                m_timer_set = OS_TRUE;
+                set_timer(100);
             }
             break;
 
@@ -184,8 +183,7 @@ eStatus eNetMaintainThread::onpropertychange(
                 m_connect_table_modif_count = count;
                 m_configure_connections = OS_TRUE;
                 os_get_timer(&m_connect_timer);
-                timer(100);
-                m_timer_set = OS_TRUE;
+                set_timer(100);
             }
             break;
 
@@ -196,8 +194,7 @@ eStatus eNetMaintainThread::onpropertychange(
                 if (m_trigger_connect_check_by_lighthouse) {
                     m_configure_connections = OS_TRUE;
                     os_get_timer(&m_connect_timer);
-                    timer(100);
-                    m_timer_set = OS_TRUE;
+                    set_timer(100);
                 }
             }
             break;
@@ -266,8 +263,7 @@ void eNetMaintainThread::run()
         if (!m_configure_end_points &&
             !m_configure_connections)
         {
-            timer(0);
-            m_timer_set = OS_FALSE;
+            set_timer(0);
         }
     }
 
@@ -325,6 +321,29 @@ eStatus eNetMaintainThread::oncallback(
     }
 
     return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Set timer period, how often to recive timer messages.
+
+  This function sets how oftern onmessage() is called with ECMD_TIMER argument by timer.
+  Call this function instead of calling timer() directlt to avois repeated set or clear
+  of the timer period.
+
+  @param timer_ms Timer hit period in milliseconds, repeated. Set 0 to disable timer.
+
+****************************************************************************************************
+*/
+void eNetMaintainThread::set_timer(
+    os_int timer_ms)
+{
+    if (timer_ms != m_timer_ms) {
+        m_timer_ms = timer_ms;
+        timer(timer_ms);
+    }
 }
 
 

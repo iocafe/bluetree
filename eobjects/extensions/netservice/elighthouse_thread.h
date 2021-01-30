@@ -148,6 +148,11 @@ protected:
      */
     void run_server();
 
+    /* Set timer period, how often to recive timer messages.
+     */
+    void set_timer(
+        os_int timer_ms);
+
     /* Publish (initial or update) the end point information.
      */
     eStatus publish();
@@ -202,6 +207,10 @@ protected:
     /** If data to publish was set successfully (something to publish)
      */
     eStatus m_publish_status;
+
+    /** Current periodic of timer messages.
+     */
+    os_int m_timer_ms;
 
     os_boolean m_run_server_now;
 };
