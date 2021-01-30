@@ -109,7 +109,7 @@ eObject *eVariable::clone(
 
     /* This must be eVariable, not class derived from it.
      */
-    e_assert_type(this, ECLASSID_VARIABLE)
+    osal_debug_assert(classid() == ECLASSID_VARIABLE);
 
     clonedobj = new eVariable(parent, id == EOID_CHILD ? oid() : id, flags());
 
@@ -987,6 +987,7 @@ os_long eVariable::getl()
             if (ex) {
                 return ex->getl();
             }
+            x = 0;
             break;
 
         default:
@@ -1042,6 +1043,7 @@ os_double eVariable::getd()
             if (ex) {
                 return ex->getd();
             }
+            x = 0;
             break;
 
         default:
@@ -1399,6 +1401,8 @@ os_int eVariable::compare(
 
     os_char
         nbuf[32];
+
+    OSAL_UNUSED(flags);
 
     if (x == OS_NULL) {
         return 1;

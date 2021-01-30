@@ -457,7 +457,7 @@ eContainer *eObject::propertyset(
     os_unlock();
 
 #ifdef OSAL_DEBUG
-    if (pset == OS_NULL && (flags|EMSG_NO_ERRORS) == 0) {
+    if (pset == OS_NULL && (flags & EMSG_NO_ERRORS) == 0) {
         osal_debug_error("setproperty: Class has no property support "
             "(did you call setupclass for it?)");
     }

@@ -63,7 +63,7 @@ class eRowSetBinding;
 #if OSAL_DEBUG == 0
   #define e_assert_type(o,id)
 #else
-  #define e_assert_type(o,id) if (o) osal_debug_assert((o)->classid()==(id));
+  #define e_assert_type(o,id) if (o) osal_debug_assert((o)->classid() == (id));
 #endif
 
 /* Flags for addproperty() function.
