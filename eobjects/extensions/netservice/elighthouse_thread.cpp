@@ -51,6 +51,7 @@ eLightHouseService::eLightHouseService(
     m_publish_timer = 0;
     m_publish_status = ESTATUS_FAILED;
     m_udp_send_initialized = OS_FALSE;
+    m_timer_ms = 0;
 
     m_counters = new eContainer(this);
     m_counters->ns_create();
@@ -177,7 +178,7 @@ eStatus eLightHouseService::onpropertychange(
                 m_publish = OS_TRUE;
                 os_get_timer(&m_publish_timer);
                 if (m_send_udp_multicasts) {
-                    timer(100);
+                    set_timer(100);
                 }
             }
             break;
@@ -251,7 +252,7 @@ void eLightHouseService::run()
                 m_publish = OS_FALSE;
                 if (m_publish_status == ESTATUS_SUCCESS) {
                     m_run_server_now = OS_TRUE;
-                    timer(4500);
+                    set_timer(4500);
                 }
             }
 
@@ -264,7 +265,7 @@ void eLightHouseService::run()
         {
             ioc_release_lighthouse_server(&m_server);
             m_udp_send_initialized = OS_FALSE;
-            timer(0);
+            set_timer(0);
         }
 
         s = ioc_run_lighthouse_client(&m_client, m_trigger);
@@ -421,6 +422,29 @@ void eLightHouseService::run_server()
             ioc_release_lighthouse_server(&m_server);
             m_udp_send_initialized = OS_FALSE;
         }
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Set timer period, how often to recive timer messages.
+
+  This function sets how oftern onmessage() is called with ECMD_TIMER argument by timer.
+  Call this function instead of calling timer() directlt to avois repeated set or clear
+  of the timer period.
+
+  @param timer_ms Timer hit period in milliseconds, repeated. Set 0 to disable timer.
+
+****************************************************************************************************
+*/
+void eLightHouseService::set_timer(
+    os_int timer_ms)
+{
+    if (timer_ms != m_timer_ms) {
+        m_timer_ms = timer_ms;
+        timer(timer_ms);
     }
 }
 
@@ -745,3 +769,4 @@ void enet_start_lighthouse_thread(
     lighthouse->bind(ELIGHTHOUSEP_PUBLISH, "//netservice", enetservp_endpoint_config_counter);
     lighthouse->start(lighthouse_thread_handle);
 }
+

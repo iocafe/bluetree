@@ -156,6 +156,11 @@ protected:
         eMatrix *dstm,
         eMatrix *srcm);
 
+    /* Set timer period, how often to recive timer messages.
+     */
+    void set_timer(
+        os_int timer_ms);
+
     /**
     ************************************************************************************************
       Member variables
@@ -177,9 +182,9 @@ protected:
      */
     os_int m_save_latest_time;
 
-    /* Flag indicating that a timer has started.
+    /** Current periodic of timer messages.
      */
-    os_boolean m_timer_set;
+    os_int m_timer_ms;
 };
 
 #endif

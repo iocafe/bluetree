@@ -944,7 +944,7 @@ void eObject::object_info(
     if (first(EOID_ALL)) {
         browse_flags |= EBROWSE_ALL_CHILDREN;
     }
-    if (propertyset()) {
+    if (propertyset(EMSG_NO_ERRORS)) {
         browse_flags |= EBROWSE_PROPERTIES;
     }
 

@@ -48,7 +48,7 @@ ePersistent::ePersistent(
     m_oldest_touch = 0;
     m_save_time = 201;
     m_save_latest_time = 2001;
-    m_timer_set = OS_FALSE;
+    m_timer_ms = 0;
 
     initproperties();
 }
@@ -261,10 +261,7 @@ void ePersistent::touch()
         m_oldest_touch = m_latest_touch;
     }
 
-    if (!m_timer_set) {
-        m_timer_set = OS_TRUE;
-        timer(m_save_time);
-    }
+    set_timer(m_save_time);
 }
 
 
@@ -281,7 +278,7 @@ void ePersistent::check_save_timer()
 {
     os_timer now_t;
 
-    if (m_timer_set)
+    if (m_timer_ms)
     {
         os_get_timer(&now_t);
         if (os_has_elapsed_since(&m_latest_touch, &now_t, m_save_time) ||
@@ -290,8 +287,7 @@ void ePersistent::check_save_timer()
             save_as_message();
             m_latest_touch = 0;
             m_oldest_touch = 0;
-            m_timer_set = OS_FALSE;
-            timer(0);
+            set_timer(0);
         }
     }
 }
@@ -366,9 +362,7 @@ void ePersistent::load_file(
         content->adopt(this, EOID_TEMPORARY, EOBJ_NO_MAP|EOBJ_IS_ATTACHMENT);
         use_loded_content(ePersistent::cast(content));
         delete content;
-
-        m_timer_set = OS_FALSE;
-        timer(0);
+        set_timer(0);
     }
 }
 
@@ -529,4 +523,27 @@ void ePersistent::copy_loaded_matrix(
      */
     delete tmp;
     os_free(column_ix_tab, max_src_cols * sizeof(os_int));
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Set timer period, how often to recive timer messages.
+
+  This function sets how oftern onmessage() is called with ECMD_TIMER argument by timer.
+  Call this function instead of calling timer() directlt to avois repeated set or clear
+  of the timer period.
+
+  @param timer_ms Timer hit period in milliseconds, repeated. Set 0 to disable timer.
+
+****************************************************************************************************
+*/
+void ePersistent::set_timer(
+    os_int timer_ms)
+{
+    if (timer_ms != m_timer_ms) {
+        m_timer_ms = timer_ms;
+        timer(timer_ms);
+    }
 }

@@ -886,6 +886,7 @@ eStatus eConnection::read()
     if (s)
     {
         delete(m_envelope);
+        m_envelope = OS_NULL;
         return s;
     }
 

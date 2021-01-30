@@ -200,6 +200,11 @@ protected:
         eObject *obj,
         eObject *appendix);
 
+    /* Set timer period, how often to recive timer messages.
+     */
+    void set_timer(
+        os_int timer_ms);
+
     /* Get protocol by name
      */
     eProtocol *protocol_by_name(
@@ -250,7 +255,9 @@ protected:
      */
     eMatrix *m_socket_list_matrix;
 
-    os_boolean m_timer_set;
+    /** Current periodic of timer messages.
+     */
+    os_int m_timer_ms;
 
     /** List of running connections, data about those.
      */

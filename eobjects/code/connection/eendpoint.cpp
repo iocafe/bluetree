@@ -298,8 +298,6 @@ void eEndPoint::run()
                 alive(EALIVE_WAIT_FOR_EVENT);
             }
         }
-
-        osal_trace2("eEndPoint running");
     }
 }
 
