@@ -213,8 +213,7 @@ eStatus eContainer::reader(
     eStream *stream,
     os_int flags)
 {
-    /* Version number. Used to check which versions item's are in serialized data.
-     */
+    eObject *child;
     os_int version;
     os_long count;
 
@@ -229,7 +228,8 @@ eStatus eContainer::reader(
     /* Read children
      */
     while (count-- > 0) {
-        read(stream, flags);
+        child = read(stream, flags);
+        if (child == OS_NULL) goto failed;
     }
 
     /* End the object.
