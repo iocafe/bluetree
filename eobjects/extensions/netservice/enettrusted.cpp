@@ -49,6 +49,14 @@ void eNetService::create_trusted_certificate_table()
     column->setpropertyi(EVARP_TYPE, OS_INT);
 
     column = new eVariable(columns);
+    column->addname(enet_conn_enable, ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "enable");
+    column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
+    column->setpropertyi(EVARP_DEFAULT, OS_TRUE);
+    column->setpropertys(EVARP_TTIP,
+        "Trust this certificate.");
+
+    column = new eVariable(columns);
     column->addname("certificate file", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "");
     column->setpropertyi(EVARP_TYPE, OS_STR);
