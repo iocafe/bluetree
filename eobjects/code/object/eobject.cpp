@@ -76,7 +76,7 @@ eObject::eObject(
 
         /* If not root object constructor?
            Otherwise normal child object.  Copy parent's root object pointer
-           and allocate handle for the new child object object.
+           and allocate handle for the new child object object. 
         */
         else if (id != EOID_ROOT_HELPER)
         {
