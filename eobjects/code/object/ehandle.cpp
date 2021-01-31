@@ -752,6 +752,10 @@ void eHandle::verify_whole_tree()
         pobj = topmost->m_object->mm_parent;
         if (pobj == OS_NULL) break;
         topmost = pobj->mm_handle;
+        if (topmost == OS_NULL) {
+            osal_debug_assert("Corrupted tree");
+            return;
+        }
     }
 
     /* Verify that root object is child of top object.
