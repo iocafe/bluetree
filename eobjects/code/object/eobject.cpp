@@ -88,7 +88,9 @@ eObject::eObject(
             }
 
             root = parent->mm_handle->m_root;
-            root->newhandle(this, parent, id, flags);
+            if (root) {
+                root->newhandle(this, parent, id, flags);
+            }
         }
     }
 }
