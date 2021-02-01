@@ -87,3 +87,5 @@ CMakeCache.txt
 **/.vscode/ipch
 **/menuconfig/build
 
+imgui.ini
+
