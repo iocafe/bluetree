@@ -1,16 +1,12 @@
 /**
 
-  @file    eprotocol.cpp
-  @brief   Abstract communication protocol as seen by eNetService.
+  @file    eprotocol_ecom.cpp
+  @brief   The eobjects library communication protocol management, serialized objects.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
 
   Related to: Network connnection and protocol management interface.
-
-  Abstract communication protocol interface is used by eNetService to manage end points and
-  connections. This is the base class, protocol specific derived class will map eNetService
-  calls like "create end point" to communication library functions.
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
@@ -19,18 +15,18 @@
 
 ****************************************************************************************************
 */
-#include "extensions/netservice/enetservice.h"
+#include "extensions/eiocom/eiocom.h"
 
 /**
 ****************************************************************************************************
   Constructor.
 ****************************************************************************************************
 */
-eProtocol::eProtocol(
+eioProtocol::eioProtocol(
     eObject *parent,
     e_oid oid,
     os_int flags)
-    : eObject(parent, oid, flags)
+    : eProtocol(parent, oid, flags)
 {
 }
 
@@ -40,7 +36,7 @@ eProtocol::eProtocol(
   Virtual destructor.
 ****************************************************************************************************
 */
-eProtocol::~eProtocol()
+eioProtocol::~eioProtocol()
 {
     shutdown_protocol();
 }
@@ -58,14 +54,14 @@ eProtocol::~eProtocol()
 
 ****************************************************************************************************
 */
-void eProtocol::setupclass()
+void eioProtocol::setupclass()
 {
-    const os_int cls = ECLASSID_PROTOCOL;
+    const os_int cls = ECLASSID_EIO_PROTOCOL;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eProtocol");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioProtocol");
     os_unlock();
 }
 
@@ -79,12 +75,13 @@ void eProtocol::setupclass()
 
 ****************************************************************************************************
 */
-eStatus eProtocol::initialize_protocol(
+eStatus eioProtocol::initialize_protocol(
     class eNetService *netservice,
     void *parameters)
 {
-    addname(protocol_name());
-    return ESTATUS_SUCCESS;
+    eioProtocol::setupclass();
+
+    return eProtocol::initialize_protocol(netservice, parameters);
 }
 
 
@@ -98,7 +95,7 @@ eStatus eProtocol::initialize_protocol(
 
 ****************************************************************************************************
 */
-void eProtocol::shutdown_protocol()
+void eioProtocol::shutdown_protocol()
 {
 }
 
@@ -123,60 +120,62 @@ void eProtocol::shutdown_protocol()
 
 ****************************************************************************************************
 */
-eProtocolHandle *eProtocol::new_end_point(
+eProtocolHandle *eioProtocol::new_end_point(
     os_int ep_nr,
     eEndPointParameters *parameters,
     eStatus *s)
 {
-    OSAL_UNUSED(ep_nr);
-    OSAL_UNUSED(parameters);
+    eProtocolHandle *p;
+    eThread *t;
+    eVariable tmp;
+    const os_char *transport_name, *un;
 
-    *s = ESTATUS_NOT_SUPPORTED;
-    return OS_NULL;
-}
+    /* Name of the transport.
+     */
+    switch (parameters->transport) {
+        case ENET_ENDP_SOCKET:
+            transport_name = "socket";
+            break;
 
+        case ENET_ENDP_TLS:
+            transport_name = "tls";
+            break;
 
-/**
-****************************************************************************************************
+        case ENET_ENDP_SERIAL:
+            transport_name = "serial";
+            break;
 
-  @brief Delete an end point.
-
-  The delete_end_point() function deletes an end point created by new_end_point() call. This
-  function releases all resources associated with the end point. Notice that closing listening
-  socket may linger a while in underlyin OS.
-
-  @param   handle   End point handle as returned by new_end_point().
-
-****************************************************************************************************
-*/
-void eProtocol::delete_end_pont(
-    eProtocolHandle *handle)
-{
-    if (handle) {
-        handle->terminate_thread();
+        default:
+            *s = ESTATUS_FAILED;
+            osal_debug_error_int("Unknown end point transport: ", parameters->transport);
+            return OS_NULL;
     }
-}
 
+    /* Create and start end point thread to listen for incoming socket connections,
+       name it "myendpoint".
+     */
+    t = new eEndPoint();
+    p = new eProtocolHandle(ETEMPORARY);
+    tmp.sets("ecom_ep");
+    tmp.appendl(ep_nr + 1);
+    tmp.appends("_");
+    tmp.appends(transport_name);
+    p->start_thread(t, tmp.gets());
 
-/**
-****************************************************************************************************
+    /* Bind property handles "is open" property to end point's same property.
+     */
+    un = p->uniquename();
+    p->bind(EPROHANDP_ISOPEN, un, eendpp_isopen, EBIND_TEMPORARY);
 
-  @brief Check end point status.
+    /* Set end point parameters as string (transport, IP address, TCP port, etc).
+     */
+    tmp.sets(transport_name);
+    tmp.appends(":");
+    tmp.appends(parameters->port);
+    setpropertys_msg(un, tmp.gets(), eendpp_ipaddr);
 
-  The is_end_point_running() function checks if a specific end point is running.
-
-  @param   handle   End point handle as returned by new_end_point().
-  @return  OS_TRUE if end point is running, OS_FALSE if not.
-
-****************************************************************************************************
-*/
-os_boolean eProtocol::is_end_point_running(
-    eProtocolHandle *handle)
-{
-    if (handle) {
-        return handle->isrunning();
-    }
-    return OS_FALSE;
+    *s = ESTATUS_SUCCESS;
+    return p;
 }
 
 
@@ -201,39 +200,37 @@ os_boolean eProtocol::is_end_point_running(
 
 ****************************************************************************************************
 */
-eProtocolHandle *eProtocol::new_connection(
+eProtocolHandle *eioProtocol::new_connection(
     eVariable *con_name,
     eConnectParameters *parameters,
     eStatus *s)
 {
-    OSAL_UNUSED(con_name);
-    OSAL_UNUSED(parameters);
+    eProtocolHandle *p;
+    eThread *t;
+    eVariable tmp;
+    const os_char *un;
 
-    *s = ESTATUS_NOT_SUPPORTED;
-    return OS_NULL;
+    /* Create and start end point thread to listen for incoming socket connections,
+       name it "myendpoint".
+     */
+    t = new eConnection();
+    p = new eProtocolHandle(ETEMPORARY);
+    p->start_thread(t, con_name->gets());
+
+    /* Bind property handles "is open" property to connection's same property.
+     */
+    un = p->uniquename();
+    p->bind(EPROHANDP_ISOPEN, un, econnp_isopen, EBIND_TEMPORARY);
+
+    /* Set connect parameters as string (transport, IP address, TCP port, etc).
+     */
+    make_connect_parameter_string(&tmp, parameters);
+    setpropertys_msg(un, tmp.gets(), econnp_ipaddr);
+
+    *s = ESTATUS_SUCCESS;
+    return p;
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Delete a connection.
-
-  The delete_connection() function deletes a connection created by new_connection() call. This
-  function releases all resources associated with the end point. Notice that closing listening
-  socket may linger a while in underlyin OS.
-
-  @param   handle   Connection handle as returned by new_connection().
-
-****************************************************************************************************
-*/
-void eProtocol::delete_connection(
-    eProtocolHandle *handle)
-{
-    if (handle) {
-        handle->terminate_thread();
-    }
-}
 
 
 /**
@@ -256,12 +253,21 @@ void eProtocol::delete_connection(
 
 ****************************************************************************************************
 */
-eStatus eProtocol::activate_connection(
+eStatus eioProtocol::activate_connection(
     eProtocolHandle *handle,
     eConnectParameters *parameters)
 {
-    OSAL_UNUSED(handle);
-    OSAL_UNUSED(parameters);
+    eVariable tmp;
+    const os_char *un;
+
+    if (handle == OS_NULL || parameters == OS_NULL) {
+        return ESTATUS_FAILED;
+    }
+
+    make_connect_parameter_string(&tmp, parameters);
+    un = handle->uniquename();
+    setpropertys_msg(un, tmp.gets(), econnp_ipaddr);
+    setpropertyl_msg(un, OS_TRUE, econnp_enable);
 
     return ESTATUS_SUCCESS;
 }
@@ -280,31 +286,59 @@ eStatus eProtocol::activate_connection(
 
 ****************************************************************************************************
 */
-void eProtocol::deactivate_connection(
+void eioProtocol::deactivate_connection(
     eProtocolHandle *handle)
 {
-    OSAL_UNUSED(handle);
+    const os_char *un;
+
+    if (handle == OS_NULL) {
+        return;
+    }
+
+    un = handle->uniquename();
+    setpropertyl_msg(un, OS_FALSE, econnp_enable);
 }
 
 
 /**
 ****************************************************************************************************
 
-  @brief Check connection status.
+  @brief Generate string containing transport, IP address and port.
 
-  The is_connection_running() function checks if a specific connection object exists.
-
-  @param   handle   Connection handle as returned by new_connection().
-  @return  OS_TRUE if end point is running, OS_FALSE if not.
+  The make_connect_parameter_string() function....
 
 ****************************************************************************************************
 */
-os_boolean eProtocol::is_connection_running(
-    eProtocolHandle *handle)
+void eioProtocol::make_connect_parameter_string(
+    eVariable *parameter_str,
+    eConnectParameters *parameters)
 {
-    if (handle) {
-        return handle->isrunning();
-    }
-    return OS_FALSE;
-}
+    const os_char *transport_name;
 
+    /* Name of the transport.
+     */
+    switch (parameters->transport) {
+        case ENET_CONN_SOCKET:
+            transport_name = "socket";
+            break;
+
+        case ENET_CONN_TLS:
+            transport_name = "tls";
+            break;
+
+        case ENET_CONN_SERIAL:
+            transport_name = "serial";
+            break;
+
+        default:
+            transport_name = "unknown";
+            osal_debug_error_int("Unknown connection transport: ", parameters->transport);
+            break;
+    }
+
+    /* Set end point parameters as string (transport, IP address, TCP port, etc).
+     */
+    parameter_str->sets(transport_name);
+    parameter_str->appends(":");
+    parameter_str->appends(parameters->parameters);
+}

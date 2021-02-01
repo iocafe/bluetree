@@ -26,7 +26,7 @@
 #include "extensions/netservice/eprotocol_ecom.h"
 #include "extensions/netservice/elighthouse_thread.h"
 #include "extensions/netservice/enetmaintain_thread.h"
-
+#include "extensions/eiocom/eiocom.h"
 
 /**
 ****************************************************************************************************
@@ -211,7 +211,7 @@ protected:
 
     /** IOCOM root object!
      */
-    iocRoot m_root;
+    iocRoot m_iocom_root;
 
     /** End point and connection management thread handle.
      */

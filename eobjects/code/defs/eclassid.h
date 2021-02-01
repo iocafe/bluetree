@@ -74,6 +74,8 @@
 #define ECLASSID_PROTOCOL 54
 #define ECLASSID_PROTOCOL_HANDLE 55
 #define ECLASSID_ECOM_PROTOCOL 56
+#define ECLASSID_EIO_ROOT 57
+#define ECLASSID_EIO_PROTOCOL 58
 
 
 /* egui property numbers start from 64 */

@@ -50,7 +50,13 @@ eNetService::eNetService(
     m_connect_config_counter = 0;
     m_lighthouse_change_counter = 0;
     os_memclear(&m_serv_prm, sizeof(eNetServPrm));
+
+    addname("//netservice");
+    ns_create();
+
     m_protocols = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+    m_protocols->addname("protocols");
+    m_protocols->ns_create();
 
     initproperties();
 }
@@ -74,7 +80,7 @@ eNetService::~eNetService()
     ioc_release_node_config(&m_nodeconf);
 #endif
 
-    ioc_release_root(&m_root);
+    ioc_release_root(&m_iocom_root);
 }
 
 
@@ -127,8 +133,6 @@ void eNetService::setupclass()
 void eNetService::start(
     os_int flags)
 {
-    ns_create();
-
     if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_EOBJECTS_SERVICE)) {
         create_user_account_table();
         create_end_point_table(flags);
@@ -145,9 +149,9 @@ void eNetService::start(
     osal_set_net_event_handler(net_event_handler, this,
         OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
 
-    /* Initialize communication root object.
+    /* Initialize iocom communication root object and iocom protocol related stuff.
      */
-    ioc_initialize_root(&m_root);
+    ioc_initialize_root(&m_iocom_root);
 
 #if 0
     /* Use devicedir library for development testing, initialize.
@@ -279,7 +283,6 @@ void enet_initialize_service()
 
     os_lock();
     eNetService *netservice = new eNetService(eglobal->process);
-    netservice->addname("//netservice");
     eglobal->netservice = netservice;
     os_unlock();
 }
@@ -298,8 +301,8 @@ void enet_add_protocol(
     eProtocol *protocol)
 {
     os_lock();
-    protocol->initialize_protocol(OS_NULL);
     protocol->adopt(eglobal->netservice->protocols());
+    protocol->initialize_protocol(eglobal->netservice, OS_NULL);
     os_unlock();
 }
 

@@ -22,7 +22,7 @@
   Constructor.
 ****************************************************************************************************
 */
-eComProtocol::eComProtocol(
+ecomProtocol::ecomProtocol(
     eObject *parent,
     e_oid oid,
     os_int flags)
@@ -36,7 +36,7 @@ eComProtocol::eComProtocol(
   Virtual destructor.
 ****************************************************************************************************
 */
-eComProtocol::~eComProtocol()
+ecomProtocol::~ecomProtocol()
 {
     shutdown_protocol();
 }
@@ -54,14 +54,14 @@ eComProtocol::~eComProtocol()
 
 ****************************************************************************************************
 */
-void eComProtocol::setupclass()
+void ecomProtocol::setupclass()
 {
     const os_int cls = ECLASSID_ECOM_PROTOCOL;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eComProtocol");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "ecomProtocol");
     os_unlock();
 }
 
@@ -75,12 +75,13 @@ void eComProtocol::setupclass()
 
 ****************************************************************************************************
 */
-eStatus eComProtocol::initialize_protocol(
+eStatus ecomProtocol::initialize_protocol(
+    class eNetService *netservice,
     void *parameters)
 {
-    eComProtocol::setupclass();
+    ecomProtocol::setupclass();
 
-    return ESTATUS_SUCCESS;
+    return eProtocol::initialize_protocol(netservice, parameters);
 }
 
 
@@ -94,7 +95,7 @@ eStatus eComProtocol::initialize_protocol(
 
 ****************************************************************************************************
 */
-void eComProtocol::shutdown_protocol()
+void ecomProtocol::shutdown_protocol()
 {
 }
 
@@ -119,7 +120,7 @@ void eComProtocol::shutdown_protocol()
 
 ****************************************************************************************************
 */
-eProtocolHandle *eComProtocol::new_end_point(
+eProtocolHandle *ecomProtocol::new_end_point(
     os_int ep_nr,
     eEndPointParameters *parameters,
     eStatus *s)
@@ -199,7 +200,7 @@ eProtocolHandle *eComProtocol::new_end_point(
 
 ****************************************************************************************************
 */
-eProtocolHandle *eComProtocol::new_connection(
+eProtocolHandle *ecomProtocol::new_connection(
     eVariable *con_name,
     eConnectParameters *parameters,
     eStatus *s)
@@ -252,7 +253,7 @@ eProtocolHandle *eComProtocol::new_connection(
 
 ****************************************************************************************************
 */
-eStatus eComProtocol::activate_connection(
+eStatus ecomProtocol::activate_connection(
     eProtocolHandle *handle,
     eConnectParameters *parameters)
 {
@@ -285,7 +286,7 @@ eStatus eComProtocol::activate_connection(
 
 ****************************************************************************************************
 */
-void eComProtocol::deactivate_connection(
+void ecomProtocol::deactivate_connection(
     eProtocolHandle *handle)
 {
     const os_char *un;
@@ -299,7 +300,16 @@ void eComProtocol::deactivate_connection(
 }
 
 
-void eComProtocol::make_connect_parameter_string(
+/**
+****************************************************************************************************
+
+  @brief Generate string containing transport, IP address and port.
+
+  The make_connect_parameter_string() function....
+
+****************************************************************************************************
+*/
+void ecomProtocol::make_connect_parameter_string(
     eVariable *parameter_str,
     eConnectParameters *parameters)
 {

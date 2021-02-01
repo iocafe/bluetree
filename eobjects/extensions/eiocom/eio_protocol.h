@@ -1,7 +1,7 @@
 /**
 
-  @file    eprotocol_ecom.h
-  @brief   The eobjects library communication protocol management, serialized objects.
+  @file    eio_protocol.h
+  @brief   IOCOM protocol management.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -16,8 +16,8 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EPROTOCOL_COM_H_
-#define EPROTOCOL_COM_H_
+#ifndef EIO_PROTOCOL_H_
+#define EIO_PROTOCOL_H_
 #include "extensions/netservice/enetservice.h"
 
 
@@ -31,35 +31,35 @@
 
 /**
 ****************************************************************************************************
-  ecomProtocol class.
+  eioProtocol class.
 ****************************************************************************************************
 */
-class ecomProtocol : public eProtocol
+class eioProtocol : public eProtocol
 {
 public:
     /* Constructor.
      */
-    ecomProtocol(
+    eioProtocol(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~ecomProtocol();
+    virtual ~eioProtocol();
 
-    /* Casting eObject pointer to ecomProtocol pointer.
+    /* Casting eObject pointer to eioProtocol pointer.
      */
-    inline static ecomProtocol *cast(
+    inline static eioProtocol *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_ECOM_PROTOCOL)
-        return (ecomProtocol*)o;
+        e_assert_type(o, ECLASSID_EIO_PROTOCOL)
+        return (eioProtocol*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_ECOM_PROTOCOL; }
+    virtual os_int classid() {return ECLASSID_EIO_PROTOCOL; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -67,12 +67,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static ecomProtocol *newobj(
+    static eioProtocol *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new ecomProtocol(parent, id, flags);
+        return new eioProtocol(parent, id, flags);
     }
 
     /**
@@ -83,7 +83,7 @@ public:
 
     /* Get protocol name.
      */
-    virtual const os_char *protocol_name() {return "ecom"; }
+    virtual const os_char *protocol_name() {return "iocom"; }
 
     /* Initialize communication protocol
      */

@@ -106,6 +106,7 @@ public:
     /* Initialize communication protocol
      */
     virtual eStatus initialize_protocol(
+        class eNetService *netservice,
         void *parameters);
 
     /* Finished with communication protocol, clean up
