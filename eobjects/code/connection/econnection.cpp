@@ -512,7 +512,7 @@ void eConnection::run()
             if (/* m_connection_failed_once && */ m_delete_on_error ||
                 (!m_enable && !has_client_bindings()))
             {
-                continue;
+                break;
             }
 
             open();
