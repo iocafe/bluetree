@@ -97,12 +97,7 @@ osal_debug_error(msg.gets()); /* We need better error handling */
         os_memclear(&security, sizeof(security));
         /* security.server_cert_file = "myhome.crt";
         security.server_key_file = "secret/myhome.key";
-        security.trusted_cert_file = "myhome-bundle.crt"; */
-
-        security.server_cert_file = "myhome.crt";
-        security.server_key_file = "secret/myhome.key";
-        security.trusted_cert_file = "rootca.crt";
-        security.share_cert_file = "rootca.crt";
+        security.client_cert_chain_file = "myhome-bundle.crt";
 
         osal_tls_initialize(OS_NULL, 0, OS_NULL, 0, &security);
 #else

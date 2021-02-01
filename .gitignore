@@ -73,6 +73,7 @@ CMakeFiles
 *.dir
 *.vcxproj.*
 *.VC.db
+enc_temp_folder
 CMakeCache.txt
 
 *.pdb
