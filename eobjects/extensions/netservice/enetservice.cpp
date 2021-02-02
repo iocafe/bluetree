@@ -49,7 +49,8 @@ eNetService::eNetService(
     m_end_points_config_counter = 0;
     m_connect_config_counter = 0;
     m_lighthouse_change_counter = 0;
-    os_memclear(&m_serv_prm, sizeof(eNetServPrm));
+    os_memclear(&m_serv_prm, sizeof(m_serv_prm));
+    os_memclear(&m_iocom_root, sizeof(m_iocom_root));
 
     addname("//netservice");
     ns_create();
@@ -69,18 +70,6 @@ eNetService::eNetService(
 */
 eNetService::~eNetService()
 {
-    /* Remove eosal network event handler.
-     */
-    osal_set_net_event_handler(OS_NULL, this,
-        OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
-
-#if 0
-    /* Release any memory allocated for node configuration.
-    */
-    ioc_release_node_config(&m_nodeconf);
-#endif
-
-    ioc_release_root(&m_iocom_root);
 }
 
 
@@ -182,6 +171,13 @@ void eNetService::finish()
      */
     m_maintain_thread_handle.terminate();
     m_maintain_thread_handle.join();
+
+    /* Remove eosal network event handler.
+     */
+    osal_set_net_event_handler(OS_NULL, this,
+        OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
+
+    ioc_release_root(&m_iocom_root);
 }
 
 
