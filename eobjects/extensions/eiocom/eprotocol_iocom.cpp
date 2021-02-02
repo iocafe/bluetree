@@ -136,8 +136,8 @@ eProtocolHandle *eioProtocol::new_end_point(
     /* Get IOCOM transport interface and flags.
      */
     switch (parameters->transport) {
-        case ENET_ENDP_SOCKET: iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
-        case ENET_ENDP_TLS:    iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
+        case ENET_ENDP_SOCKET: iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
+        case ENET_ENDP_TLS:    iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
         case ENET_ENDP_SERIAL: iface = OSAL_SERIAL_IFACE; cflags = IOC_SERIAL; break;
         default:
             *s = ESTATUS_FAILED;
@@ -184,8 +184,8 @@ eProtocolHandle *eioProtocol::new_connection(
     /* Get IOCOM transport interface and flags.
      */
     switch (parameters->transport) {
-        case ENET_CONN_SOCKET: iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
-        case ENET_CONN_TLS:    iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
+        case ENET_CONN_SOCKET: iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
+        case ENET_CONN_TLS:    iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
         case ENET_CONN_SERIAL: iface = OSAL_SERIAL_IFACE; cflags = IOC_SERIAL; break;
         default:
             *s = ESTATUS_FAILED;
@@ -205,20 +205,20 @@ eProtocolHandle *eioProtocol::new_con_helper(
     os_short cflags,
     eStatus *s)
 {
-    iocEndPoint *ep = OS_NULL;
+    iocEndPoint *ep;
     iocEndPointParams epprm;
-    iocConnection *con = OS_NULL;
+    iocConnection *con;
     iocConnectionParams conprm;
-    eProtocolHandle *p;
+    eioProtocolHandle *p;
     osalStatus ss;
 
     *s = ESTATUS_SUCCESS;
-
     p = new eioProtocolHandle(ETEMPORARY);
 
     if ((cflags & (IOC_SOCKET|IOC_LISTENER)) == (IOC_SOCKET|IOC_LISTENER))
     {
-        ep = ioc_initialize_end_point(OS_NULL, m_iocom_root);
+        ep = p->epoint();
+        ioc_initialize_end_point(ep, m_iocom_root);
         os_memclear(&epprm, sizeof(epprm));
         epprm.iface = iface;
         epprm.flags = cflags;
@@ -228,7 +228,8 @@ eProtocolHandle *eioProtocol::new_con_helper(
     }
     else
     {
-        con = ioc_initialize_connection(OS_NULL, m_iocom_root);
+        con = p->con();
+        ioc_initialize_connection(con, m_iocom_root);
         os_memclear(&conprm, sizeof(conprm));
         conprm.iface = iface;
         conprm.flags = cflags;
@@ -237,7 +238,65 @@ eProtocolHandle *eioProtocol::new_con_helper(
         if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
     }
 
+    p->set_isrunning(OS_TRUE);
+    p->setpropertyi(EPROHANDP_ISOPEN, OS_TRUE);
     return p;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Delete an end point.
+
+  The delete_end_point() function deletes an end point created by new_end_point() call. This
+  function releases all resources associated with the end point. Notice that closing listening
+  socket may linger a while in underlyin OS.
+
+  @param   handle   End point handle as returned by new_end_point().
+
+****************************************************************************************************
+*/
+void eioProtocol::delete_end_point(
+    eProtocolHandle *handle)
+{
+    eioProtocolHandle *p;
+
+    if (handle == OS_NULL) return;
+    p = (eioProtocolHandle*)handle;
+    if (!p->isrunning()) return;
+
+    ioc_release_end_point(p->epoint());
+    p->set_isrunning(OS_FALSE);
+    p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Delete a connection.
+
+  The delete_connection() function deletes a connection created by new_connection() call. This
+  function releases all resources associated with the end point. Notice that closing listening
+  socket may linger a while in underlyin OS.
+
+  @param   handle   Connection handle as returned by new_connection().
+
+****************************************************************************************************
+*/
+void eioProtocol::delete_connection(
+    eProtocolHandle *handle)
+{
+    eioProtocolHandle *p;
+
+    if (handle == OS_NULL) return;
+    p = (eioProtocolHandle*)handle;
+    if (!p->isrunning()) return;
+
+    ioc_release_connection(p->con());
+    p->set_isrunning(OS_FALSE);
+    p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
 }
 
 
@@ -265,18 +324,6 @@ eStatus eioProtocol::activate_connection(
     eProtocolHandle *handle,
     eConnectParameters *parameters)
 {
-    /* eVariable tmp;
-    const os_char *un; */
-
-    if (handle == OS_NULL || parameters == OS_NULL) {
-        return ESTATUS_FAILED;
-    }
-
-    /* make_connect_parameter_string(&tmp, parameters);
-    un = handle->uniquename();
-    setpropertys_msg(un, tmp.gets(), econnp_ipaddr);
-    setpropertyl_msg(un, OS_TRUE, econnp_enable); */
-
     return ESTATUS_SUCCESS;
 }
 
@@ -297,14 +344,7 @@ eStatus eioProtocol::activate_connection(
 void eioProtocol::deactivate_connection(
     eProtocolHandle *handle)
 {
-    /* const os_char *un;
-
-    if (handle == OS_NULL) {
-        return;
-    } */
-
-    /* un = handle->uniquename();
-    setpropertyl_msg(un, OS_FALSE, econnp_enable); */
+    delete_connection(handle);
 }
 
 

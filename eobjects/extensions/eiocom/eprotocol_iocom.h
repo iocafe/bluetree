@@ -102,12 +102,22 @@ public:
         eEndPointParameters *parameters,
         eStatus *s);
 
+    /* Delete an end point.
+     */
+    virtual void delete_end_point(
+        eProtocolHandle *handle);
+
     /* Create a new connection using this protocol.
      */
     virtual eProtocolHandle *new_connection(
         eVariable *con_name,
         eConnectParameters *parameters,
         eStatus *s);
+
+    /* Delete a connection.
+     */
+    virtual void delete_connection(
+        eProtocolHandle *handle);
 
     /* Reactivate a deactivated connection or modify parameters.
      */

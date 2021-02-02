@@ -122,7 +122,7 @@ public:
 
     /* Delete an end point.
      */
-    virtual void delete_end_pont(
+    virtual void delete_end_point(
         eProtocolHandle *handle);
 
     /* Check end point status (running).

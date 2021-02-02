@@ -27,9 +27,9 @@ eioProtocolHandle::eioProtocolHandle(
     os_int flags)
     : eProtocolHandle(parent, oid, flags)
 {
-    m_threadhandle = OS_NULL;
-    m_threadname = new eVariable(this);
+    os_memclear(&m_iocom, sizeof(m_iocom)); //  eiocomStateStruct m_iocom;
     m_is_open = OS_FALSE;
+    m_isrunning = OS_FALSE;
 }
 
 
@@ -136,16 +136,6 @@ void eioProtocolHandle::start_thread(
     eThread *t,
     const os_char *threadname)
 {
-    if (m_threadhandle) {
-        osal_debug_error_str("Thread for the protocol handle already exists: ", threadname);
-        return;
-    }
-
-    t->addname(threadname, ENAME_PROCESS_NS|ENAME_PRIMARY);
-    m_threadname->sets(threadname);
-
-    m_threadhandle = new eThreadHandle(this);
-    t->start(m_threadhandle);
 }
 
 
@@ -161,11 +151,6 @@ void eioProtocolHandle::start_thread(
 */
 void eioProtocolHandle::terminate_thread()
 {
-    if (m_threadhandle) {
-        m_threadhandle->terminate();
-        m_threadhandle->join();
-        m_threadhandle = OS_NULL;
-    }
 }
 
 
@@ -184,41 +169,6 @@ void eioProtocolHandle::terminate_thread()
 */
 const os_char *eioProtocolHandle::uniquename()
 {
-    if (m_threadhandle) {
-        return m_threadhandle->uniquename();
-    }
-    osal_debug_error("No unique connection/end point name, thread not started.");
     return OS_NULL;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Check if connection or end point is running.
-
-  The eioProtocolHandle::isrunning() function checks if a specific connection or end point
-  is running for the protocol handle. This is done by checking if the name exists in process
-  name space.
-
-  @return  OS_TRUE if end point is running, OS_FALSE if not.
-
-****************************************************************************************************
-*/
-os_boolean eioProtocolHandle::isrunning()
-{
-    eNameSpace *ns;
-    eName *name;
-
-    if (m_threadhandle == OS_NULL) {
-        osal_debug_error("No unique connection/end point name, thread not started.");
-        return OS_FALSE;
-    }
-
-    os_lock();
-    ns = eglobal->process_ns;
-    name = ns->findname(m_threadname);
-    os_unlock();
-    return name ? OS_TRUE : OS_FALSE;
 }
 

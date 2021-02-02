@@ -149,7 +149,7 @@ eProtocolHandle *eProtocol::new_end_point(
 
 ****************************************************************************************************
 */
-void eProtocol::delete_end_pont(
+void eProtocol::delete_end_point(
     eProtocolHandle *handle)
 {
     if (handle) {

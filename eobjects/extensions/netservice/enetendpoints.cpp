@@ -371,6 +371,12 @@ delete_it:
          */
         ep->adopt(m_end_points, ep_nr);
         changed = OS_TRUE;
+
+        /* If handle was opened before callback were set.
+         */
+        if (handle->propertyi(EPROHANDP_ISOPEN)) {
+            handle->docallback(ECALLBACK_STATUS_CHANGED);
+        }
     }
 
     /* Initiate end point information update in UDP multicasts.
@@ -403,7 +409,7 @@ void eNetMaintainThread::delete_ep(
     handle = (eProtocolHandle*)ep->first(ENET_ENDP_PROTOCOL_HANDLE);
     if (proto->is_end_point_running(handle))
     {
-        proto->delete_end_pont(handle);
+        proto->delete_end_point(handle);
         while (proto->is_end_point_running(handle)) {
             os_timeslice();
         }

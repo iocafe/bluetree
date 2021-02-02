@@ -25,6 +25,13 @@
 */
 
 
+typedef union {
+    iocConnection con;
+    iocEndPoint epoint;
+}
+eiocomStateStruct;
+
+
 
 /**
 ****************************************************************************************************
@@ -102,7 +109,11 @@ public:
 
     /* Check if connection or end point is running.
      */
-    virtual os_boolean isrunning();
+    virtual os_boolean isrunning() {return m_isrunning; }
+
+    inline iocEndPoint *epoint() {return &m_iocom.epoint; }
+    inline iocConnection *con() {return &m_iocom.con; }
+    inline void set_isrunning(os_boolean running) {m_isrunning = running; }
 
 
 protected:
@@ -118,19 +129,10 @@ protected:
       Member variables
     ************************************************************************************************
     */
+    eiocomStateStruct m_iocom;
 
-    /** Thread handle. Connections and end points typically run in their own thread.
-        OS_NULL if thread has not been started.
-     */
-    eThreadHandle *m_threadhandle;
-
-    /** Name of commection or end point in process name space.
-     */
-    eVariable *m_threadname;
-
-    /** Communication channel open flag.
-     */
     os_boolean m_is_open;
+    os_boolean m_isrunning;
 };
 
 
