@@ -1,7 +1,7 @@
 /**
 
-  @file    eprotocolhandle.cpp
-  @brief   Abstract communication protocol handle.
+  @file    eprotocol_handle_iocom.cpp
+  @brief   IOCOM protocol handle.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -13,7 +13,7 @@
 
 ****************************************************************************************************
 */
-#include "extensions/eiocom/eiocom.h"
+#include "extensions/iocom/eiocom.h"
 
 
 /**

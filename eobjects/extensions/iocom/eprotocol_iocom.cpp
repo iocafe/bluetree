@@ -1,7 +1,7 @@
 /**
 
-  @file    eprotocol_ecom.cpp
-  @brief   The eobjects library communication protocol management, serialized objects.
+  @file    eprotocol_iocom.cpp
+  @brief   IOCOM  protocol management.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -15,7 +15,7 @@
 
 ****************************************************************************************************
 */
-#include "extensions/eiocom/eiocom.h"
+#include "extensions/iocom/eiocom.h"
 
 /**
 ****************************************************************************************************

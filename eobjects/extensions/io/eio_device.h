@@ -1,7 +1,7 @@
 /**
 
-  @file    eio_root.h
-  @brief   enet service implementation.
+  @file    eio_device.h
+  @brief   Object representing and IO device.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -14,56 +14,56 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EIO_ROOT_H_
-#define EIO_ROOT_H_
-#include "extensions/eiocom/eiocom.h"
-
-#if 0
-
-class eNetService;
-
-/**
-****************************************************************************************************
-  Defines, etc.
-****************************************************************************************************
-*/
-
+#ifndef EIO_DEVICE_H_
+#define EIO_DEVICE_H_
+#include "extensions/io/eio.h"
 
 
 /**
 ****************************************************************************************************
-  eioRoot class.
+  Defines
 ****************************************************************************************************
 */
-class eioRoot : public eObject
+
+
+/**
+****************************************************************************************************
+  eioDevice is like a box of objects.
+****************************************************************************************************
+*/
+class eioDevice : public eContainer
 {
-    friend class eLightHouseService;
-    friend class eNetMaintainThread;
-
 public:
     /* Constructor.
      */
-    eioRoot(
+    eioDevice(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eioRoot();
+    virtual ~eioDevice();
 
-    /* Casting eObject pointer to eioRoot pointer.
+    /* Clone object.
      */
-    inline static eioRoot *cast(
+    virtual eObject *clone(
+        eObject *parent,
+        e_oid id = EOID_CHILD,
+        os_int aflags = 0);
+
+    /* Casting eObject pointer to eioDevice pointer.
+     */
+    inline static eioDevice *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_EIO_ROOT)
-        return (eioRoot*)o;
+        e_assert_type(o, ECLASSID_EIO_DEVICE)
+        return (eioDevice*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_EIO_ROOT; }
+    virtual os_int classid() {return ECLASSID_EIO_DEVICE; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -71,37 +71,32 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eioRoot *newobj(
+    static eioDevice *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eioRoot(parent, id, flags);
+        return new eioDevice(parent, id, flags);
     }
 
-    /* Process a callback from a child object.
+    /* Function to process incoming messages.
+     */
+    virtual void onmessage(
+        eEnvelope *envelope);
+
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
+    /* A callback by a child object.
      */
     virtual eStatus oncallback(
         eCallbackEvent event,
         eObject *obj,
         eObject *appendix);
-
-    /* Called after eioRoot object is created to start it.
-     */
-    void start(
-        os_int flags);
-
-    /* Start closing net service (no process lock).
-     */
-    void finish();
-
-    inline struct eNetService *netservice()
-    {
-        return m_netservice;
-    }
-
-    void set_netservice(
-        class eNetService *netservice);
 
 
 protected:
@@ -111,39 +106,15 @@ protected:
     ************************************************************************************************
     */
 
-    /* Network event/error handler to move information by callbacks to messages.
+    /* Flags the peristent object changed (needs to be saved).
      */
-    static void net_event_handler(
-        osalErrorLevel level,
-        const os_char *module,
-        os_int code,
-        const os_char *description,
-        void *context);
-
-    /* Create "io device networks and processes" table.
-     */
-    void create_services_table();
-
+    // void touch();
 
     /**
     ************************************************************************************************
       Member variables
     ************************************************************************************************
     */
-
-    /** IOCOM root object (owned by netservice)!
-     */
-    iocRoot *m_iocom_root;
-
-    class eNetService *m_netservice;
-
-    /* Services table (matrix).
-     */
-    eMatrix *m_services_matrix;
-    os_long m_lighthouse_change_counter;
 };
-
-
-#endif
 
 #endif

@@ -27,7 +27,7 @@
 #include "extensions/netservice/eprotocol_ecom.h"
 #include "extensions/netservice/elighthouse_thread.h"
 #include "extensions/netservice/enetmaintain_thread.h"
-#include "extensions/eiocom/eiocom.h"
+#include "extensions/iocom/eiocom.h"
 
 /**
 ****************************************************************************************************

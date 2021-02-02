@@ -1,6 +1,6 @@
 /**
 
-  @file    eio_protocol.h
+  @file    eprotocol_iocom.h
   @brief   IOCOM protocol management.
   @author  Pekka Lehtikoski
   @version 1.0
