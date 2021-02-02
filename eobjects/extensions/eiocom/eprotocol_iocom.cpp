@@ -84,8 +84,8 @@ eStatus eioProtocol::initialize_protocol(
     eioProtocolHandle::setupclass();
 
     m_iocom_root = netservice->iocom_root();
-
-    return eProtocol::initialize_protocol(netservice, parameters);
+    addname(protocol_name());
+    return ESTATUS_SUCCESS;
 }
 
 

@@ -62,37 +62,6 @@ public:
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Virtual destructor.
-     */
-    virtual ~eProtocol();
-
-    /* Casting eObject pointer to eProtocol pointer.
-     */
-    inline static eProtocol *cast(
-        eObject *o)
-    {
-        e_assert_type(o, ECLASSID_PROTOCOL)
-        return (eProtocol*)o;
-    }
-
-    /* Get class identifier.
-     */
-    virtual os_int classid() {return ECLASSID_PROTOCOL; }
-
-    /* Static function to add class to propertysets and class list.
-     */
-    static void setupclass();
-
-    /* Static constructor function for generating instance by class list.
-     */
-    static eProtocol *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eProtocol(parent, id, flags);
-    }
-
     /**
     ************************************************************************************************
       Protocol related functions, base class.
@@ -107,23 +76,23 @@ public:
      */
     virtual eStatus initialize_protocol(
         class eNetService *netservice,
-        void *parameters);
+        void *parameters) = 0;
 
     /* Finished with communication protocol, clean up
      */
-    virtual void shutdown_protocol();
+    virtual void shutdown_protocol() = 0;
 
     /* Create a new end point to listen for this protocol.
      */
     virtual eProtocolHandle *new_end_point(
         os_int ep_nr,
         eEndPointParameters *parameters,
-        eStatus *s);
+        eStatus *s) = 0;
 
     /* Delete an end point.
      */
     virtual void delete_end_point(
-        eProtocolHandle *handle);
+        eProtocolHandle *handle) = 0;
 
     /* Check end point status (running).
      */
@@ -135,44 +104,28 @@ public:
     virtual eProtocolHandle *new_connection(
         eVariable *con_name,
         eConnectParameters *parameters,
-        eStatus *s);
+        eStatus *s) = 0;
 
     /* Delete a connection.
      */
     virtual void delete_connection(
-        eProtocolHandle *handle);
+        eProtocolHandle *handle) = 0;
 
     /* Reactivate a deactivated connection or modify parameters.
      */
     virtual eStatus activate_connection(
         eProtocolHandle *handle,
-        eConnectParameters *parameters);
+        eConnectParameters *parameters) = 0;
 
     /* Deacivate a connection.
      */
     virtual void deactivate_connection(
-        eProtocolHandle *handle);
+        eProtocolHandle *handle) = 0;
 
     /* Check connection status.
      */
     virtual os_boolean is_connection_running(
         eProtocolHandle *handle);
-
-protected:
-    /**
-    ************************************************************************************************
-      Internal functions.
-    ************************************************************************************************
-    */
-
-
-    /**
-    ************************************************************************************************
-      Member variables
-    ************************************************************************************************
-    */
-
 };
-
 
 #endif

@@ -49,29 +49,11 @@ public:
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Virtual destructor.
-     */
-//     virtual ~eProtocolHandle();
-
     /**
     ************************************************************************************************
       Protocol handle functions.
     ************************************************************************************************
     */
-
-    /* Start a connection or end point thread.
-     */
-    virtual void start_thread(
-        eThread *t,
-        const os_char *threadname) = 0;
-
-    /* Terminate connection or end point thread.
-     */
-    virtual void terminate_thread() = 0;
-
-    /* Get unique name of a connection or end point.
-     */
-    virtual const os_char *uniquename() = 0;
 
     /* Check if connection or end point is running.
      */

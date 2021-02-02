@@ -45,15 +45,6 @@ public:
      */
     virtual ~ecomProtocolHandle();
 
-    /* Casting eObject pointer to ecomProtocolHandle pointer.
-     */
-    inline static ecomProtocolHandle *cast(
-        eObject *o)
-    {
-        e_assert_type(o, ECLASSID_ECOM_PROTOCOL_HANDLE)
-        return (ecomProtocolHandle*)o;
-    }
-
     /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_ECOM_PROTOCOL_HANDLE; }
@@ -88,17 +79,17 @@ public:
 
     /* Start a connection or end point thread.
      */
-    virtual void start_thread(
+    void start_thread(
         eThread *t,
         const os_char *threadname);
 
     /* Terminate connection or end point thread.
      */
-    virtual void terminate_thread();
+    void terminate_thread();
 
     /* Get unique name of a connection or end point.
      */
-    virtual const os_char *uniquename();
+    const os_char *uniquename();
 
     /* Check if connection or end point is running.
      */

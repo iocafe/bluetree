@@ -35,16 +35,6 @@ eioProtocolHandle::eioProtocolHandle(
 
 /**
 ****************************************************************************************************
-  Virtual destructor.
-****************************************************************************************************
-*/
-eioProtocolHandle::~eioProtocolHandle()
-{
-    terminate_thread();
-}
-
-/**
-****************************************************************************************************
 
   @brief Add the class to class list and class'es properties to it's property set.
 
@@ -116,59 +106,3 @@ eStatus eioProtocolHandle::onpropertychange(
 
     return eObject::onpropertychange(propertynr, x, flags);
 }
-
-
-
-/**
-****************************************************************************************************
-
-  @brief Start a connection or end point thread.
-
-  The eioProtocolHandle::start_thread names and starts running pre created eThread object as
-  separate thread.
-
-  @param   t Thread object to start.
-  @param   threadname Name to give to thread in process name space.
-
-****************************************************************************************************
-*/
-void eioProtocolHandle::start_thread(
-    eThread *t,
-    const os_char *threadname)
-{
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Terminate connection or end point thread.
-
-  If there is a connection or end point running for the protocol handle, the function
-  sends terminate request to the thread and waits for the thread to exit.
-
-****************************************************************************************************
-*/
-void eioProtocolHandle::terminate_thread()
-{
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Get unique name of a connection or end point.
-
-  The eioProtocolHandle::uniquename() function returns unique name of a connection or end point.
-  The unique name is typically used to set or modify properties of running object.
-
-  @return  Unique name of connection or end point object in process name space. OS_NULL if
-           there is no such thread running for the protocol handle.
-
-****************************************************************************************************
-*/
-const os_char *eioProtocolHandle::uniquename()
-{
-    return OS_NULL;
-}
-

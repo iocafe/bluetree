@@ -48,19 +48,6 @@ public:
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Virtual destructor.
-     */
-    virtual ~eioProtocolHandle();
-
-    /* Casting eObject pointer to eioProtocolHandle pointer.
-     */
-    inline static eioProtocolHandle *cast(
-        eObject *o)
-    {
-        e_assert_type(o, ECLASSID_IOCOM_PROTOCOL_HANDLE)
-        return (eioProtocolHandle*)o;
-    }
-
     /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_IOCOM_PROTOCOL_HANDLE; }
@@ -92,20 +79,6 @@ public:
       Protocol handle functions.
     ************************************************************************************************
     */
-
-    /* Start a connection or end point thread.
-     */
-    virtual void start_thread(
-        eThread *t,
-        const os_char *threadname);
-
-    /* Terminate connection or end point thread.
-     */
-    virtual void terminate_thread();
-
-    /* Get unique name of a connection or end point.
-     */
-    virtual const os_char *uniquename();
 
     /* Check if connection or end point is running.
      */

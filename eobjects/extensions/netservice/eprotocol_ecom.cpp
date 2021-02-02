@@ -82,7 +82,8 @@ eStatus ecomProtocol::initialize_protocol(
     ecomProtocol::setupclass();
     ecomProtocolHandle::setupclass();
 
-    return eProtocol::initialize_protocol(netservice, parameters);
+    addname(protocol_name());
+    return ESTATUS_SUCCESS;
 }
 
 
@@ -126,7 +127,7 @@ eProtocolHandle *ecomProtocol::new_end_point(
     eEndPointParameters *parameters,
     eStatus *s)
 {
-    eProtocolHandle *p;
+    ecomProtocolHandle *p;
     eThread *t;
     eVariable tmp;
     const os_char *transport_name, *un;
@@ -183,6 +184,28 @@ eProtocolHandle *ecomProtocol::new_end_point(
 /**
 ****************************************************************************************************
 
+  @brief Delete an end point.
+
+  The delete_end_point() function deletes an end point created by new_end_point() call. This
+  function releases all resources associated with the end point. Notice that closing listening
+  socket may linger a while in underlyin OS.
+
+  @param   handle   End point handle as returned by new_end_point().
+
+****************************************************************************************************
+*/
+void ecomProtocol::delete_end_point(
+    eProtocolHandle *handle)
+{
+    if (handle) {
+        ((ecomProtocolHandle*)handle)->terminate_thread();
+    }
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Create a new connection using this protocol.
 
   The new_connection() function creates new connection with this protocol. Notice that this
@@ -206,7 +229,7 @@ eProtocolHandle *ecomProtocol::new_connection(
     eConnectParameters *parameters,
     eStatus *s)
 {
-    eProtocolHandle *p;
+    ecomProtocolHandle *p;
     eThread *t;
     eVariable tmp;
     const os_char *un;
@@ -232,6 +255,27 @@ eProtocolHandle *ecomProtocol::new_connection(
     return p;
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Delete a connection.
+
+  The delete_connection() function deletes a connection created by new_connection() call. This
+  function releases all resources associated with the end point. Notice that closing listening
+  socket may linger a while in underlyin OS.
+
+  @param   handle   Connection handle as returned by new_connection().
+
+****************************************************************************************************
+*/
+void ecomProtocol::delete_connection(
+    eProtocolHandle *handle)
+{
+    if (handle) {
+        ((ecomProtocolHandle*)handle)->terminate_thread();
+    }
+}
 
 
 /**
@@ -266,7 +310,7 @@ eStatus ecomProtocol::activate_connection(
     }
 
     make_connect_parameter_string(&tmp, parameters);
-    un = handle->uniquename();
+    un = ((ecomProtocolHandle*)handle)->uniquename();
     setpropertys_msg(un, tmp.gets(), econnp_ipaddr);
     setpropertyl_msg(un, OS_TRUE, econnp_enable);
 
@@ -296,7 +340,7 @@ void ecomProtocol::deactivate_connection(
         return;
     }
 
-    un = handle->uniquename();
+    un = ((ecomProtocolHandle*)handle)->uniquename();
     setpropertyl_msg(un, OS_FALSE, econnp_enable);
 }
 
