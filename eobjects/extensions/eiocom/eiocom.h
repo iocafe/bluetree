@@ -21,7 +21,7 @@
 #include "extensions/eiocom/eprotocol_handle_iocom.h"
 #include "extensions/eiocom/eprotocol_iocom.h"
 
-struct eNetService;
+class eNetService;
 
 /**
 ****************************************************************************************************
@@ -41,7 +41,7 @@ struct eNetService;
 /* Initialize iocom data structures, etc.
  */
 void eio_initialize(
-    struct eNetService *net_service);
+    class eNetService *net_service);
 
 /* Release resources allocated for iocom data structures.
  */

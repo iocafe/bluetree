@@ -75,6 +75,9 @@
     <ClInclude Include="..\..\code\valuex\evaluex.h" />
     <ClInclude Include="..\..\code\variable\evariable.h" />
     <ClInclude Include="..\..\eobjects.h" />
+    <ClInclude Include="..\..\extensions\eiocom\eiocom.h" />
+    <ClInclude Include="..\..\extensions\eiocom\eprotocol_handle_iocom.h" />
+    <ClInclude Include="..\..\extensions\eiocom\eprotocol_iocom.h" />
     <ClInclude Include="..\..\extensions\netservice\elighthouse_thread.h" />
     <ClInclude Include="..\..\extensions\netservice\enetconnect.h" />
     <ClInclude Include="..\..\extensions\netservice\enetendpoints.h" />
@@ -84,6 +87,7 @@
     <ClInclude Include="..\..\extensions\netservice\eprotocol.h" />
     <ClInclude Include="..\..\extensions\netservice\eprotocol_ecom.h" />
     <ClInclude Include="..\..\extensions\netservice\eprotocol_handle.h" />
+    <ClInclude Include="..\..\extensions\netservice\eprotocol_handle_ecom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\code\binding\ebinding.cpp" />
@@ -145,6 +149,8 @@
     <ClCompile Include="..\..\code\time\etime_windows.cpp" />
     <ClCompile Include="..\..\code\valuex\evaluex.cpp" />
     <ClCompile Include="..\..\code\variable\evariable.cpp" />
+    <ClCompile Include="..\..\extensions\eiocom\eprotocol_handle_iocom.cpp" />
+    <ClCompile Include="..\..\extensions\eiocom\eprotocol_iocom.cpp" />
     <ClCompile Include="..\..\extensions\netservice\elighthouse_thread.cpp" />
     <ClCompile Include="..\..\extensions\netservice\enetaccounts.cpp" />
     <ClCompile Include="..\..\extensions\netservice\enetconnect.cpp" />
@@ -156,6 +162,7 @@
     <ClCompile Include="..\..\extensions\netservice\eprotocol.cpp" />
     <ClCompile Include="..\..\extensions\netservice\eprotocol_ecom.cpp" />
     <ClCompile Include="..\..\extensions\netservice\eprotocol_handle.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\eprotocol_handle_ecom.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
