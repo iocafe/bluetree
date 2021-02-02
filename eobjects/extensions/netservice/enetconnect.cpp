@@ -653,7 +653,7 @@ void eNetMaintainThread::maintain_connections()
         if (index->byname(con_name->gets())) continue;
 
         proto = protocol_by_name(protocol_p);
-        handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
+        handle = (eProtocolHandle*)con->first(ENET_CONN_PROTOCOL_HANDLE);
         osal_debug_assert(proto != OS_NULL);
         osal_debug_assert(handle != OS_NULL);
 
@@ -687,7 +687,7 @@ void eNetMaintainThread::maintain_connections()
         con = eContainer::cast(m_connections->byname(con_name->gets()));
         if (con) {
             proto = protocol_by_name(protocol);
-            handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
+            handle = (eProtocolHandle*)con->first(ENET_CONN_PROTOCOL_HANDLE);
             osal_debug_assert(proto != OS_NULL);
             osal_debug_assert(handle != OS_NULL);
 
@@ -846,7 +846,7 @@ void eNetMaintainThread::delete_con(
     proto = protocol_by_name(proto_name);
     if (proto == OS_NULL) return;
 
-    handle = eProtocolHandle::cast(con->first(ENET_CONN_PROTOCOL_HANDLE));
+    handle = (eProtocolHandle*)con->first(ENET_CONN_PROTOCOL_HANDLE);
     if (proto->is_connection_running(handle))
     {
         proto->delete_connection(handle);

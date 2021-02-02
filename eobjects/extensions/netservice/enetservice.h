@@ -19,6 +19,7 @@
 #include "iocom.h"
 #include "eobjects.h"
 #include "extensions/netservice/eprotocol_handle.h"
+#include "extensions/netservice/eprotocol_handle_ecom.h"
 #include "extensions/netservice/enetserv_prm.h"
 #include "extensions/netservice/enetendpoints.h"
 #include "extensions/netservice/enetconnect.h"
@@ -132,6 +133,9 @@ public:
      */
     inline eContainer *protocols() {return m_protocols; }
 
+    /* Get pointer to IOCOM root objects.
+     */
+    inline iocRoot *iocom_root() {return &m_iocom_root; }
 
 protected:
     /**

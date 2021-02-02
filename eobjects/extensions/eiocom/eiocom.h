@@ -16,10 +16,10 @@
 #pragma once
 #ifndef EIOCOM_H_
 #define EIOCOM_H_
-#include "iocom.h"
-#include "eobjects.h"
-#include "extensions/eiocom/eio_root.h"
-#include "extensions/eiocom/eio_protocol.h"
+#include "extensions/netservice/enetservice.h"
+// #include "extensions/eiocom/eio_root.h"
+#include "extensions/eiocom/eprotocol_handle_iocom.h"
+#include "extensions/eiocom/eprotocol_iocom.h"
 
 struct eNetService;
 

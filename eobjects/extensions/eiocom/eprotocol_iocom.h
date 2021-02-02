@@ -53,13 +53,13 @@ public:
     inline static eioProtocol *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_EIO_PROTOCOL)
+        e_assert_type(o, ECLASSID_IOCOM_PROTOCOL)
         return (eioProtocol*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_EIO_PROTOCOL; }
+    virtual os_int classid() {return ECLASSID_IOCOM_PROTOCOL; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -127,9 +127,11 @@ protected:
     ************************************************************************************************
     */
 
-    void make_connect_parameter_string(
-        eVariable *parameter_str,
-        eConnectParameters *parameters);
+    eProtocolHandle *new_con_helper(
+        const os_char *prmstr,
+        const osalStreamInterface *iface,
+        os_short cflags,
+        eStatus *s);
 
 
     /**
@@ -137,6 +139,7 @@ protected:
       Member variables
     ************************************************************************************************
     */
+    iocRoot *m_iocom_root;
 
 };
 

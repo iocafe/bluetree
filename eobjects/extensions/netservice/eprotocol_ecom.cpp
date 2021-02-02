@@ -80,6 +80,7 @@ eStatus ecomProtocol::initialize_protocol(
     void *parameters)
 {
     ecomProtocol::setupclass();
+    ecomProtocolHandle::setupclass();
 
     return eProtocol::initialize_protocol(netservice, parameters);
 }
@@ -155,7 +156,7 @@ eProtocolHandle *ecomProtocol::new_end_point(
        name it "myendpoint".
      */
     t = new eEndPoint();
-    p = new eProtocolHandle(ETEMPORARY);
+    p = new ecomProtocolHandle(ETEMPORARY);
     tmp.sets("ecom_ep");
     tmp.appendl(ep_nr + 1);
     tmp.appends("_");
@@ -214,7 +215,7 @@ eProtocolHandle *ecomProtocol::new_connection(
        name it "myendpoint".
      */
     t = new eConnection();
-    p = new eProtocolHandle(ETEMPORARY);
+    p = new ecomProtocolHandle(ETEMPORARY);
     p->start_thread(t, con_name->gets());
 
     /* Bind property handles "is open" property to connection's same property.

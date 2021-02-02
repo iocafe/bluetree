@@ -400,7 +400,7 @@ void eNetMaintainThread::delete_ep(
     proto = protocol_by_name(proto_name);
     if (proto == OS_NULL) return;
 
-    handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
+    handle = (eProtocolHandle*)ep->first(ENET_ENDP_PROTOCOL_HANDLE);
     if (proto->is_end_point_running(handle))
     {
         proto->delete_end_pont(handle);
@@ -419,7 +419,7 @@ void eNetMaintainThread::ep_status_changed(
     eVariable *tmp;
 
     eProtocolHandle *handle;
-    handle = eProtocolHandle::cast(ep->first(ENET_ENDP_PROTOCOL_HANDLE));
+    handle = (eProtocolHandle*)ep->first(ENET_ENDP_PROTOCOL_HANDLE);
 
     tmp = new eVariable(ETEMPORARY);
     handle->propertyv(EPROHANDP_ISOPEN, tmp);

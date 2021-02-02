@@ -28,6 +28,7 @@ eioProtocol::eioProtocol(
     os_int flags)
     : eProtocol(parent, oid, flags)
 {
+    m_iocom_root = OS_NULL;
 }
 
 
@@ -56,7 +57,7 @@ eioProtocol::~eioProtocol()
 */
 void eioProtocol::setupclass()
 {
-    const os_int cls = ECLASSID_EIO_PROTOCOL;
+    const os_int cls = ECLASSID_IOCOM_PROTOCOL;
 
     /* Add the class to class list.
      */
@@ -80,6 +81,9 @@ eStatus eioProtocol::initialize_protocol(
     void *parameters)
 {
     eioProtocol::setupclass();
+    eioProtocolHandle::setupclass();
+
+    m_iocom_root = netservice->iocom_root();
 
     return eProtocol::initialize_protocol(netservice, parameters);
 }
@@ -125,57 +129,25 @@ eProtocolHandle *eioProtocol::new_end_point(
     eEndPointParameters *parameters,
     eStatus *s)
 {
-    eProtocolHandle *p;
-    eThread *t;
-    eVariable tmp;
-    const os_char *transport_name, *un;
+    const os_char *prmstr;
+    const osalStreamInterface *iface;
+    os_short cflags;
 
-    /* Name of the transport.
+    /* Get IOCOM transport interface and flags.
      */
     switch (parameters->transport) {
-        case ENET_ENDP_SOCKET:
-            transport_name = "socket";
-            break;
-
-        case ENET_ENDP_TLS:
-            transport_name = "tls";
-            break;
-
-        case ENET_ENDP_SERIAL:
-            transport_name = "serial";
-            break;
-
+        case ENET_ENDP_SOCKET: iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
+        case ENET_ENDP_TLS:    iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
+        case ENET_ENDP_SERIAL: iface = OSAL_SERIAL_IFACE; cflags = IOC_SERIAL; break;
         default:
             *s = ESTATUS_FAILED;
-            osal_debug_error_int("Unknown end point transport: ", parameters->transport);
+            osal_debug_error_int("Unknown transport for iocom end point: ", parameters->transport);
             return OS_NULL;
     }
 
-    /* Create and start end point thread to listen for incoming socket connections,
-       name it "myendpoint".
-     */
-    t = new eEndPoint();
-    p = new eProtocolHandle(ETEMPORARY);
-    tmp.sets("ecom_ep");
-    tmp.appendl(ep_nr + 1);
-    tmp.appends("_");
-    tmp.appends(transport_name);
-    p->start_thread(t, tmp.gets());
-
-    /* Bind property handles "is open" property to end point's same property.
-     */
-    un = p->uniquename();
-    p->bind(EPROHANDP_ISOPEN, un, eendpp_isopen, EBIND_TEMPORARY);
-
-    /* Set end point parameters as string (transport, IP address, TCP port, etc).
-     */
-    tmp.sets(transport_name);
-    tmp.appends(":");
-    tmp.appends(parameters->port);
-    setpropertys_msg(un, tmp.gets(), eendpp_ipaddr);
-
-    *s = ESTATUS_SUCCESS;
-    return p;
+    prmstr = parameters->port;
+    cflags |= IOC_LISTENER|IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
+    return new_con_helper(prmstr, iface, cflags, s);
 }
 
 
@@ -205,32 +177,68 @@ eProtocolHandle *eioProtocol::new_connection(
     eConnectParameters *parameters,
     eStatus *s)
 {
-    eProtocolHandle *p;
-    eThread *t;
-    eVariable tmp;
-    const os_char *un;
+    const os_char *prmstr;
+    const osalStreamInterface *iface;
+    os_short cflags;
 
-    /* Create and start end point thread to listen for incoming socket connections,
-       name it "myendpoint".
+    /* Get IOCOM transport interface and flags.
      */
-    t = new eConnection();
-    p = new eProtocolHandle(ETEMPORARY);
-    p->start_thread(t, con_name->gets());
+    switch (parameters->transport) {
+        case ENET_CONN_SOCKET: iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
+        case ENET_CONN_TLS:    iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
+        case ENET_CONN_SERIAL: iface = OSAL_SERIAL_IFACE; cflags = IOC_SERIAL; break;
+        default:
+            *s = ESTATUS_FAILED;
+            osal_debug_error_int("Unknown transport for iocom connection: ", parameters->transport);
+            return OS_NULL;
+    }
 
-    /* Bind property handles "is open" property to connection's same property.
-     */
-    un = p->uniquename();
-    p->bind(EPROHANDP_ISOPEN, un, econnp_isopen, EBIND_TEMPORARY);
-
-    /* Set connect parameters as string (transport, IP address, TCP port, etc).
-     */
-    make_connect_parameter_string(&tmp, parameters);
-    setpropertys_msg(un, tmp.gets(), econnp_ipaddr);
-
-    *s = ESTATUS_SUCCESS;
-    return p;
+    prmstr = parameters->parameters;
+    cflags |= IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
+    return new_con_helper(prmstr, iface, cflags, s);
 }
 
+
+eProtocolHandle *eioProtocol::new_con_helper(
+    const os_char *prmstr,
+    const osalStreamInterface *iface,
+    os_short cflags,
+    eStatus *s)
+{
+    iocEndPoint *ep = OS_NULL;
+    iocEndPointParams epprm;
+    iocConnection *con = OS_NULL;
+    iocConnectionParams conprm;
+    eProtocolHandle *p;
+    osalStatus ss;
+
+    *s = ESTATUS_SUCCESS;
+
+    p = new eioProtocolHandle(ETEMPORARY);
+
+    if ((cflags & (IOC_SOCKET|IOC_LISTENER)) == (IOC_SOCKET|IOC_LISTENER))
+    {
+        ep = ioc_initialize_end_point(OS_NULL, m_iocom_root);
+        os_memclear(&epprm, sizeof(epprm));
+        epprm.iface = iface;
+        epprm.flags = cflags;
+        epprm.parameters = prmstr;
+        ss = ioc_listen(ep, &epprm);
+        if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
+    }
+    else
+    {
+        con = ioc_initialize_connection(OS_NULL, m_iocom_root);
+        os_memclear(&conprm, sizeof(conprm));
+        conprm.iface = iface;
+        conprm.flags = cflags;
+        conprm.parameters = prmstr;
+        ss = ioc_connect(con, &conprm);
+        if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
+    }
+
+    return p;
+}
 
 
 /**
@@ -257,17 +265,17 @@ eStatus eioProtocol::activate_connection(
     eProtocolHandle *handle,
     eConnectParameters *parameters)
 {
-    eVariable tmp;
-    const os_char *un;
+    /* eVariable tmp;
+    const os_char *un; */
 
     if (handle == OS_NULL || parameters == OS_NULL) {
         return ESTATUS_FAILED;
     }
 
-    make_connect_parameter_string(&tmp, parameters);
+    /* make_connect_parameter_string(&tmp, parameters);
     un = handle->uniquename();
     setpropertys_msg(un, tmp.gets(), econnp_ipaddr);
-    setpropertyl_msg(un, OS_TRUE, econnp_enable);
+    setpropertyl_msg(un, OS_TRUE, econnp_enable); */
 
     return ESTATUS_SUCCESS;
 }
@@ -289,56 +297,14 @@ eStatus eioProtocol::activate_connection(
 void eioProtocol::deactivate_connection(
     eProtocolHandle *handle)
 {
-    const os_char *un;
+    /* const os_char *un;
 
     if (handle == OS_NULL) {
         return;
-    }
+    } */
 
-    un = handle->uniquename();
-    setpropertyl_msg(un, OS_FALSE, econnp_enable);
+    /* un = handle->uniquename();
+    setpropertyl_msg(un, OS_FALSE, econnp_enable); */
 }
 
 
-/**
-****************************************************************************************************
-
-  @brief Generate string containing transport, IP address and port.
-
-  The make_connect_parameter_string() function....
-
-****************************************************************************************************
-*/
-void eioProtocol::make_connect_parameter_string(
-    eVariable *parameter_str,
-    eConnectParameters *parameters)
-{
-    const os_char *transport_name;
-
-    /* Name of the transport.
-     */
-    switch (parameters->transport) {
-        case ENET_CONN_SOCKET:
-            transport_name = "socket";
-            break;
-
-        case ENET_CONN_TLS:
-            transport_name = "tls";
-            break;
-
-        case ENET_CONN_SERIAL:
-            transport_name = "serial";
-            break;
-
-        default:
-            transport_name = "unknown";
-            osal_debug_error_int("Unknown connection transport: ", parameters->transport);
-            break;
-    }
-
-    /* Set end point parameters as string (transport, IP address, TCP port, etc).
-     */
-    parameter_str->sets(transport_name);
-    parameter_str->appends(":");
-    parameter_str->appends(parameters->parameters);
-}

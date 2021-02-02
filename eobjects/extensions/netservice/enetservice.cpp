@@ -152,29 +152,10 @@ void eNetService::start(
     /* Initialize iocom communication root object and iocom protocol related stuff.
      */
     ioc_initialize_root(&m_iocom_root);
+    ioc_initialize_dynamic_root(&m_iocom_root);
 
-#if 0
-    /* Use devicedir library for development testing, initialize.
-     */
-    io_initialize_device_console(&m_console, &m_root);
-
-    /* Load device/network configuration and device/user account congiguration
-       (persistent storage is typically either file system or micro-controller's flash).
-       Defaults are set in network-defaults.json and in account-defaults.json.
-     */
-    ioc_load_node_config(&m_nodeconf, prm->network_defaults,
-        prm->network_defaults_sz, device_name, IOC_LOAD_PBNR_NODE_CONF);
-    m_device_id = ioc_get_device_id(&m_nodeconf);
-    ioc_set_iodevice_id(&m_root, device_name, m_device_id->device_nr,
-        m_device_id->password, m_device_id->network_name);
-
-    ioc_initialize_dynamic_root(&m_root);
-
-    /* Set callback function to receive information about new dynamic memory blocks.
-     */
-    // ioc_set_root_callback(&iocom_root, app_root_callback, OS_NULL);
-
-#endif
+    /* ioc_set_iodevice_id(&m_root, device_name, m_device_id->device_nr,
+        m_device_id->password, m_device_id->network_name); */
 
     /* Start the connection and end point management as separate thread. This must be after parmaters
      * haven been created so binding succeed.
@@ -279,7 +260,6 @@ void enet_initialize_service()
     eNetService::setupclass();
     eNetMaintainThread::setupclass();
     eProtocol::setupclass();
-    eProtocolHandle::setupclass();
 
     os_lock();
     eNetService *netservice = new eNetService(eglobal->process);
