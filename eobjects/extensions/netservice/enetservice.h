@@ -201,6 +201,10 @@ protected:
      */
     void create_trusted_certificate_table();
 
+    /* Create process status table.
+     */
+    void create_process_status_table();
+
     /* Create parameters for service.
      */
     void create_service_parameters(
@@ -260,6 +264,11 @@ protected:
      */
     eNetServPrm m_serv_prm;
     ePersistent *m_persistent_serv_prm;
+
+    /* Process status table.
+     */
+    eMatrix *m_status_matrix;
+    ePersistent *m_persistent_status;
 };
 
 

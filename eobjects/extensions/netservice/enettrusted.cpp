@@ -1,7 +1,7 @@
 /**
 
   @file    enettrusted.cpp
-  @brief   User trusted.
+  @brief   Trusted certificates.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -49,7 +49,7 @@ void eNetService::create_trusted_certificate_table()
     column->setpropertyi(EVARP_TYPE, OS_INT);
 
     column = new eVariable(columns);
-    column->addname(enet_conn_enable, ENAME_NO_MAP);
+    column->addname("enable", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "enable");
     column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
     column->setpropertyi(EVARP_DEFAULT, OS_TRUE);

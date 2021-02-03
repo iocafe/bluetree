@@ -122,6 +122,7 @@ void eNetService::setupclass()
 void eNetService::start(
     os_int flags)
 {
+    create_process_status_table();
     if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_EOBJECTS_SERVICE)) {
         create_user_account_table();
         create_end_point_table(flags);
