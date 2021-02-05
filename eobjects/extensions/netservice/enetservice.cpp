@@ -142,7 +142,7 @@ void eNetService::start(
     /* Initialize iocom communication root object and iocom protocol related stuff.
      */
     ioc_initialize_root(&m_iocom_root);
-    ioc_initialize_dynamic_root(&m_iocom_root);
+    ioc_initialize_dynamic_root(&m_iocom_root, OS_NULL);
 
     /* ioc_set_iodevice_id(&m_root, device_name, m_device_id->device_nr,
         m_device_id->password, m_device_id->network_name); */
