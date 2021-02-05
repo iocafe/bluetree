@@ -556,11 +556,9 @@ void eName::setnamespaceid(
 */
 eStatus eName::mapname()
 {
-    eNameSpace
-        *ns;
-
-    os_int
-        info;
+    eNameSpace *ns;
+    eObject *p;
+    os_int info;
 
     /* If this name is mapped already, do nothing.
      */
@@ -568,8 +566,15 @@ eStatus eName::mapname()
 
     /* Find name space to map to. If none, return error.
      */
-    ns = findnamespace(namespaceid(), &info);
-    if (ns == OS_NULL) return ESTATUS_NAME_MAPPING_FAILED;
+    p = parent();
+    if (p == OS_NULL) {
+        return ESTATUS_NAME_MAPPING_FAILED;
+    }
+    ns = p->findnamespace(namespaceid(), &info);
+
+    if (ns == OS_NULL) {
+        return ESTATUS_NAME_MAPPING_FAILED;
+    }
 
     return mapname2(ns, info);
 }

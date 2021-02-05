@@ -28,6 +28,7 @@ eioGroup::eioGroup(
     : eContainer(parent, oid, flags)
 {
     initproperties();
+    ns_create();
 }
 
 

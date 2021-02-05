@@ -28,6 +28,7 @@ eioMblk::eioMblk(
     : eContainer(parent, oid, flags)
 {
     initproperties();
+    ns_create();
 }
 
 
@@ -89,6 +90,7 @@ void eioMblk::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioMblk");
     addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
+    addpropertyl(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -155,6 +157,9 @@ eStatus eioMblk::onpropertychange(
     switch (propertynr)
     {
         case EIOP_TEXT:
+            break;
+
+        case EIOP_CONNECTED:
             break;
 
         default:

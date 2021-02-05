@@ -28,6 +28,7 @@ eioRoot::eioRoot(
     : eContainer(parent, oid, flags)
 {
     initproperties();
+    ns_create();
 }
 
 
@@ -243,43 +244,40 @@ void eioRoot::io_root_callback(
     struct iocMemoryBlock *mblk,
     void *context)
 {
-    eioRoot *e = (eioRoot*)context;
-    const os_char *network_name;
-    const os_char *device_name;
-    const os_char *mblk_name;
-    os_uint device_nr;
+    eioRoot *t = (eioRoot*)context;
+    eioMblkInfo minfo;
 
-    network_name = OS_NULL;
+    os_memclear(&minfo, sizeof(minfo));
+    minfo.network_name = osal_str_empty;
     if (dnetwork)
     {
-        network_name = dnetwork->network_name;
+        minfo.network_name = dnetwork->network_name;
     }
     if (mblk)
     {
 #if IOC_MBLK_SPECIFIC_DEVICE_NAME
-        network_name = mblk->network_name;
-        device_name = mblk->device_name;
-        device_nr = mblk->device_nr;
+        minfo.network_name = mblk->network_name;
+        minfo.device_name = mblk->device_name;
+        minfo.device_nr = mblk->device_nr;
 #else
-        network_name = root->network_name;
-        device_name = root->device_name;
-        device_nr = root->device_nr;
+        minfo.network_name = root->network_name;
+        minfo.device_name = root->device_name;
+        minfo.device_nr = root->device_nr;
 #endif
-        mblk_name = mblk->mblk_name;
+        minfo.mblk_name = mblk->mblk_name;
     }
     else
     {
-        device_name = OS_NULL;
-        device_nr
-
-         = 0;
-        mblk_name = OS_NULL;
+        minfo.device_name = osal_str_empty;
+        minfo.device_nr = 0;
+        minfo.mblk_name = osal_str_empty;
     }
 
+    os_lock();
     switch (event)
     {
         case IOC_NEW_MEMORY_BLOCK:
-            // new_mblk();
+            t->network_connected(&minfo);
             break;
 
         case IOC_MBLK_CONNECTED_AS_SOURCE:
@@ -291,13 +289,80 @@ void eioRoot::io_root_callback(
             break;
 
         case IOC_NEW_NETWORK:
+            // t->network_connected(&minfo);
+            break;
+
         case IOC_NETWORK_DISCONNECTED:
+            // t->network_disconnected(&minfo);
             break;
 
         case IOC_NEW_DEVICE:
         case IOC_DEVICE_DISCONNECTED:
             break;
     }
+    os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Find or create a IO network object.
+
+  The eioRoot::network_connected function checks if a network exists. If so it makes sure that
+  network is set as connected returns pointer to network object. If not, it creates new
+  network object and marks it connected.
+
+  returns Pointer to network object OS_NULL if network name is empty.
+
+****************************************************************************************************
+*/
+eioNetwork *eioRoot::network_connected(
+    eioMblkInfo *minfo)
+{
+    eioNetwork *network;
+
+    if (minfo->network_name == '\0') {
+        return OS_NULL;
+    }
+
+    network = eioNetwork::cast(byname(minfo->network_name));
+    if (network) {
+        network->setpropertyl(EIOP_CONNECTED, OS_TRUE);
+    }
+    else {
+        network = new eioNetwork(this);
+        network->addname(minfo->network_name);
+    }
+
+    network->device_connected(minfo);
+    return network;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Mark network object disconnected and delete it, if it is unused.
+
+  The eioRoot::network_disconnected function...
+
+  returns Pointer to disconnected network object. OS_NULL if network with given name does no
+          longer exist.
+
+****************************************************************************************************
+*/
+eioNetwork *eioRoot::network_disconnected(
+    eioMblkInfo *minfo)
+{
+    eioNetwork *network;
+
+    network = eioNetwork::cast(byname(minfo->network_name));
+    if (network) {
+        network->setpropertyl(EIOP_CONNECTED, OS_FALSE);
+        return network;
+    }
+    return OS_NULL;
 }
 
 

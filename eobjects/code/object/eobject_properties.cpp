@@ -688,9 +688,16 @@ void eObject::setpropertyv(
         }
 
         /* Find stored property value. If matches value to set, do nothing.
+           If we have no property value stored, we are using default value:
+           Compare to it, and skip if we are setting same default value.
          */
         properties->getv(propertynr, v);
-        if (!v->compare(x)) goto getout;
+        if (v->type() == OS_UNDEFINED_TYPE) {
+            if (!p->compare(x)) goto getout;
+        }
+        else {
+            if (!v->compare(x)) goto getout;
+        }
 
         /* Early call class'es onpropertychange function.
          */

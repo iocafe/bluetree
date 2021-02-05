@@ -18,6 +18,7 @@
 #define EIO_NETWORK_H_
 #include "extensions/io/eio.h"
 
+struct eioMblkInfo;
 
 /**
 ****************************************************************************************************
@@ -98,6 +99,14 @@ public:
         eObject *obj,
         eObject *appendix);
 
+
+    /**
+    ************************************************************************************************
+      Maintain IO network hierarchy.
+    ************************************************************************************************
+    */
+    eioDevice *device_connected(
+        struct eioMblkInfo *minfo);
 
 protected:
     /**

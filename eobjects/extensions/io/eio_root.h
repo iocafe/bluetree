@@ -25,6 +25,13 @@
 ****************************************************************************************************
 */
 
+typedef struct eioMblkInfo {
+    const os_char *device_name;
+    os_uint device_nr;
+    const os_char *mblk_name;
+    const os_char *network_name;
+}
+eioMblkInfo;
 
 /**
 ****************************************************************************************************
@@ -124,6 +131,17 @@ protected:
         struct iocDynamicNetwork *dnetwork,
         struct iocMemoryBlock *mblk,
         void *context);
+
+    /* Find or create a IO network object.
+     */
+    eioNetwork *network_connected(
+        eioMblkInfo *minfo);
+
+    /* Mark network object disconnected and delete it, if it is unused.
+     */
+    eioNetwork *network_disconnected(
+        eioMblkInfo *minfo);
+
 
     /* Flags the peristent object changed (needs to be saved).
      */
