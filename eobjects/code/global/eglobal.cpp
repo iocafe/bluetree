@@ -111,5 +111,7 @@ void eglobal_initialize(
     os_strncpy(eglobal->process_name, process_name, EGLOBAL_PROCESS_NAME_SZ);
     eglobal->process_nr = process_nr;
     os_strncpy(eglobal->process_id, process_name, EGLOBAL_PROCESS_ID_SZ);
-    os_strncat(eglobal->process_id, process_nr_str, EGLOBAL_PROCESS_ID_SZ);
+    if (process_nr) {
+        os_strncat(eglobal->process_id, process_nr_str, EGLOBAL_PROCESS_ID_SZ);
+    }
 }

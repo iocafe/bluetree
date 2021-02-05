@@ -193,6 +193,7 @@ eStatus eioRoot::oncallback(
             break;
     } */
 
+
     /* If we need to pass callback to parent class.
      */
     if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
@@ -243,6 +244,60 @@ void eioRoot::io_root_callback(
     void *context)
 {
     eioRoot *e = (eioRoot*)context;
+    const os_char *network_name;
+    const os_char *device_name;
+    const os_char *mblk_name;
+    os_uint device_nr;
+
+    network_name = OS_NULL;
+    if (dnetwork)
+    {
+        network_name = dnetwork->network_name;
+    }
+    if (mblk)
+    {
+#if IOC_MBLK_SPECIFIC_DEVICE_NAME
+        network_name = mblk->network_name;
+        device_name = mblk->device_name;
+        device_nr = mblk->device_nr;
+#else
+        network_name = root->network_name;
+        device_name = root->device_name;
+        device_nr = root->device_nr;
+#endif
+        mblk_name = mblk->mblk_name;
+    }
+    else
+    {
+        device_name = OS_NULL;
+        device_nr
+
+         = 0;
+        mblk_name = OS_NULL;
+    }
+
+    switch (event)
+    {
+        case IOC_NEW_MEMORY_BLOCK:
+            // new_mblk();
+            break;
+
+        case IOC_MBLK_CONNECTED_AS_SOURCE:
+        case IOC_MBLK_CONNECTED_AS_TARGET:
+            break;
+
+        default:
+        case IOC_MEMORY_BLOCK_DELETED:
+            break;
+
+        case IOC_NEW_NETWORK:
+        case IOC_NETWORK_DISCONNECTED:
+            break;
+
+        case IOC_NEW_DEVICE:
+        case IOC_DEVICE_DISCONNECTED:
+            break;
+    }
 }
 
 

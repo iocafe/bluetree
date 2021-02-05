@@ -610,13 +610,14 @@ ioc_generate_nickname(nick, sizeof(nick));
         p = protocol->gets();
 
         if (!os_strcmp(p, "iocom")) {
-            os_strncpy(buf, eglobal->process_name, sizeof(buf));
-            os_strncat(buf, "net", sizeof(buf));
+            os_strncpy(buf, eglobal->process_id, sizeof(buf));
+            // os_strncat(buf, "N", sizeof(buf));
             p = buf;
             protocol_short = "i";
         }
         else {
-            p = eglobal->process_nr ? eglobal->process_id : eglobal->process_name;
+            // p = eglobal->process_nr ? eglobal->process_id : eglobal->process_name;
+            p = eglobal->process_id;
             protocol_short = protocol->gets();
             if (!os_strcmp(p, "ecom")) {
                 protocol_short = "o";

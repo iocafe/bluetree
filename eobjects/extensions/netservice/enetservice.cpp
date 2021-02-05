@@ -122,6 +122,8 @@ void eNetService::setupclass()
 void eNetService::start(
     os_int flags)
 {
+    os_char buf[OSAL_NETWORK_NAME_SZ];
+
     create_process_status_table();
     if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_EOBJECTS_SERVICE)) {
         create_user_account_table();
@@ -142,12 +144,14 @@ void eNetService::start(
     /* Initialize iocom communication root object and iocom protocol related stuff.
      */
     ioc_initialize_root(&m_iocom_root);
+
+    os_strncpy(buf, eglobal->process_id, sizeof(buf));
+    // os_strncat(buf, "N", sizeof(buf));
+    ioc_set_iodevice_id(&m_iocom_root, eglobal->process_name, eglobal->process_nr,
+        OS_NULL, buf);
     m_eio_root = new eioRoot(this);
     m_eio_root->addname("//io");
     m_eio_root->setup(&m_iocom_root);
-
-    /* ioc_set_iodevice_id(&m_root, device_name, m_device_id->device_nr,
-        m_device_id->password, m_device_id->network_name); */
 
     /* Start the connection and end point management as separate thread. This must be after parmaters
      * haven been created so binding succeed.
