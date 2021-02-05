@@ -19,6 +19,7 @@
 #include "extensions/netservice/enetservice.h"
 #include "extensions/io/eio_defs.h"
 #include "extensions/io/eio_variable.h"
+#include "extensions/io/eio_mblk.h"
 #include "extensions/io/eio_group.h"
 #include "extensions/io/eio_device.h"
 #include "extensions/io/eio_network.h"

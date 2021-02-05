@@ -142,7 +142,9 @@ void eNetService::start(
     /* Initialize iocom communication root object and iocom protocol related stuff.
      */
     ioc_initialize_root(&m_iocom_root);
-    ioc_initialize_dynamic_root(&m_iocom_root, OS_NULL);
+    m_eio_root = new eioRoot(this);
+    m_eio_root->addname("//io");
+    m_eio_root->setup(&m_iocom_root);
 
     /* ioc_set_iodevice_id(&m_root, device_name, m_device_id->device_nr,
         m_device_id->password, m_device_id->network_name); */
@@ -178,6 +180,7 @@ void eNetService::finish()
     osal_set_net_event_handler(OS_NULL, this,
         OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
 
+    delete m_eio_root;
     ioc_release_root(&m_iocom_root);
 }
 
@@ -256,6 +259,7 @@ void enet_initialize_service()
 {
     eNetService::setupclass();
     eNetMaintainThread::setupclass();
+    eio_initialize();
 
     os_lock();
     eNetService *netservice = new eNetService(eglobal->process);

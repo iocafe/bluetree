@@ -28,6 +28,9 @@
 #include "extensions/netservice/elighthouse_thread.h"
 #include "extensions/netservice/enetmaintain_thread.h"
 #include "extensions/iocom/eiocom.h"
+#include "extensions/io/eio.h"
+
+class eioRoot;
 
 /**
 ****************************************************************************************************
@@ -220,6 +223,10 @@ protected:
     /** IOCOM root object!
      */
     iocRoot m_iocom_root;
+
+    /** IO object structure root.
+     */
+    eioRoot *m_eio_root;
 
     /** End point and connection management thread handle.
      */

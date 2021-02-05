@@ -1,7 +1,7 @@
 /**
 
-  @file    eio_root.cpp
-  @brief   Object representing and IO root.
+  @file    eio_mblk.cpp
+  @brief   Object representing and IO memory block.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -21,7 +21,7 @@
   Constructor.
 ****************************************************************************************************
 */
-eioRoot::eioRoot(
+eioMblk::eioMblk(
     eObject *parent,
     e_oid oid,
     os_int flags)
@@ -36,7 +36,7 @@ eioRoot::eioRoot(
   Virtual destructor.
 ****************************************************************************************************
 */
-eioRoot::~eioRoot()
+eioMblk::~eioMblk()
 {
 }
 
@@ -46,7 +46,7 @@ eioRoot::~eioRoot()
 
   @brief Clone object
 
-  The eioRoot::clone function clones and object including object's children.
+  The eioMblk::clone function clones and object including object's children.
   Names will be left detached in clone.
 
   @param  parent Parent for the clone.
@@ -56,13 +56,13 @@ eioRoot::~eioRoot()
 
 ****************************************************************************************************
 */
-eObject *eioRoot::clone(
+eObject *eioMblk::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
     eObject *clonedobj;
-    clonedobj = new eioRoot(parent, id == EOID_CHILD ? oid() : id, flags());
+    clonedobj = new eioMblk(parent, id == EOID_CHILD ? oid() : id, flags());
     clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
     return clonedobj;
 }
@@ -73,21 +73,21 @@ eObject *eioRoot::clone(
 
   @brief Add the class to class list and class'es properties to it's property set.
 
-  The eioRoot::setupclass function adds the class to class list and class'es properties to
+  The eioMblk::setupclass function adds the class to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
 ****************************************************************************************************
 */
-void eioRoot::setupclass()
+void eioMblk::setupclass()
 {
-    const os_int cls = ECLASSID_EIO_ROOT;
+    const os_int cls = ECLASSID_EIO_MBLK;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioRoot");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioMblk");
     addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
@@ -108,7 +108,7 @@ void eioRoot::setupclass()
 
 ****************************************************************************************************
 */
-void eioRoot::onmessage(
+void eioMblk::onmessage(
     eEnvelope *envelope)
 {
     /* If at final destination for the message.
@@ -147,7 +147,7 @@ void eioRoot::onmessage(
 
 ****************************************************************************************************
 */
-eStatus eioRoot::onpropertychange(
+eStatus eioMblk::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -173,11 +173,11 @@ call_parent:
 
   @brief Process a callback from a child object.
 
-  The eioRoot::oncallback function
+  The eioMblk::oncallback function
 
 ****************************************************************************************************
 */
-eStatus eioRoot::oncallback(
+eStatus eioMblk::oncallback(
     eCallbackEvent event,
     eObject *obj,
     eObject *appendix)
@@ -206,56 +206,13 @@ eStatus eioRoot::oncallback(
 /**
 ****************************************************************************************************
 
-  @brief Connect root object to IOCOM.
-
-  The eioRoot::setup function...
-
-  @param   iocom_root Pointer to IOCOM root object.
-
-****************************************************************************************************
-*/
-void eioRoot::setup(
-    iocRoot *iocom_root)
-{
-    m_iocom_root = iocom_root;
-    ioc_set_root_callback(iocom_root, io_root_callback, this);
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Root callback function (process network and device connect/disconnect, etc).
-
-  The eioRoot::io_root_callback function is called by IOCOM library when a new thread, etc
-  is created.
-
-  This function can be called by any thread, and thus use os_lock() to synchronize access
-  to global objects.
-
-****************************************************************************************************
-*/
-void eioRoot::io_root_callback(
-    struct iocRoot *root,
-    iocEvent event,
-    struct iocDynamicNetwork *dnetwork,
-    struct iocMemoryBlock *mblk,
-    void *context)
-{
-    eioRoot *e = (eioRoot*)context;
-}
-
-
-/**
-****************************************************************************************************
-
   @brief Flags the peristent object changed (needs to be saved).
 
-  The eioRoot::touch function
+  The eioMblk::touch function
 
 ****************************************************************************************************
 */
-/* void eioRoot::touch()
+/* void eioMblk::touch()
 {
     os_get_timer(&m_latest_touch);
     if (m_oldest_touch == 0) {
@@ -265,24 +222,3 @@ void eioRoot::io_root_callback(
     set_timer(m_save_time);
 }
 */
-
-
-
-/**
-****************************************************************************************************
-
-  @brief Initialize IO network structure classes.
-
-  The eioRoot::touch function
-
-****************************************************************************************************
-*/
-void eio_initialize()
-{
-    eioRoot::setupclass();
-    eioNetwork::setupclass();
-    eioDevice::setupclass();
-    eioMblk::setupclass();
-    eioGroup::setupclass();
-    eioVariable::setupclass();
-}

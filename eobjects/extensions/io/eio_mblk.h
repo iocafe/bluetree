@@ -1,7 +1,7 @@
 /**
 
-  @file    eio_root.h
-  @brief   Object representing and IO root.
+  @file    eio_mblk.h
+  @brief   Object representing and IO memory block.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -14,8 +14,8 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EIO_ROOT_H_
-#define EIO_ROOT_H_
+#ifndef EIO_MBLK_H_
+#define EIO_MBLK_H_
 #include "extensions/io/eio.h"
 
 
@@ -28,22 +28,22 @@
 
 /**
 ****************************************************************************************************
-  eioRoot is like a box of objects.
+  eioMblk is like a box of objects.
 ****************************************************************************************************
 */
-class eioRoot : public eContainer
+class eioMblk : public eContainer
 {
 public:
     /* Constructor.
      */
-    eioRoot(
+    eioMblk(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eioRoot();
+    virtual ~eioMblk();
 
     /* Clone object.
      */
@@ -52,18 +52,18 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to eioRoot pointer.
+    /* Casting eObject pointer to eioMblk pointer.
      */
-    inline static eioRoot *cast(
+    inline static eioMblk *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_EIO_ROOT)
-        return (eioRoot*)o;
+        e_assert_type(o, ECLASSID_EIO_MBLK)
+        return (eioMblk*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_EIO_ROOT; }
+    virtual os_int classid() {return ECLASSID_EIO_MBLK; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -71,12 +71,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eioRoot *newobj(
+    static eioMblk *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eioRoot(parent, id, flags);
+        return new eioMblk(parent, id, flags);
     }
 
     /* Function to process incoming messages.
@@ -98,16 +98,6 @@ public:
         eObject *obj,
         eObject *appendix);
 
-    /**
-    ************************************************************************************************
-      X..
-    ************************************************************************************************
-    */
-
-    /* Connect root object to IOCOM.
-     */
-    void setup(iocRoot *iocom_root);
-
 
 protected:
     /**
@@ -115,15 +105,6 @@ protected:
       Internal functions.
     ************************************************************************************************
     */
-
-    /* Root callback function (process network and device connect/disconnect, etc).
-     */
-    static void io_root_callback(
-        struct iocRoot *root,
-        iocEvent event,
-        struct iocDynamicNetwork *dnetwork,
-        struct iocMemoryBlock *mblk,
-        void *context);
 
     /* Flags the peristent object changed (needs to be saved).
      */
@@ -134,15 +115,6 @@ protected:
       Member variables
     ************************************************************************************************
     */
-
-    /** IOCOM root object!
-     */
-    iocRoot *m_iocom_root;
 };
-
-
-/* Initialize IO network structure classes.
- */
-void eio_initialize();
 
 #endif

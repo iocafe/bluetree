@@ -199,6 +199,15 @@ eProtocolHandle *eioProtocol::new_connection(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Helper function for new_connection() and new_end_point().
+
+  The new_con_helper() function...
+
+****************************************************************************************************
+*/
 eProtocolHandle *eioProtocol::new_con_helper(
     const os_char *prmstr,
     const osalStreamInterface *iface,
