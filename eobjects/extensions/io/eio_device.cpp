@@ -210,6 +210,59 @@ eStatus eioDevice::oncallback(
 
 /**
 ****************************************************************************************************
+  Create IO network objects to represent connection.
+****************************************************************************************************
+*/
+void eioDevice::connected(
+    struct eioMblkInfo *minfo)
+{
+    eioMblk *mblk;
+
+    if (minfo->mblk_name == '\0') {
+        return;
+    }
+
+    mblk = eioMblk::cast(byname(minfo->mblk_name));
+    if (mblk == OS_NULL) {
+        mblk = new eioMblk(this);
+        mblk->addname(minfo->mblk_name);
+    }
+
+    mblk->connected(minfo);
+    setpropertyl(EIOP_CONNECTED, OS_TRUE);
+}
+
+
+/**
+****************************************************************************************************
+  Mark IO network objects to disconnected and delete unused ones.
+****************************************************************************************************
+*/
+void eioDevice::disconnected(
+    eioMblkInfo *minfo)
+{
+    eioMblk *mblk;
+
+    mblk = eioMblk::cast(byname(minfo->mblk_name));
+    if (mblk) {
+        mblk->disconnected(minfo);
+    }
+
+    for (mblk = eioMblk::cast(first());
+         mblk;
+         mblk = eioMblk::cast(mblk->next()))
+    {
+        if (mblk->propertyl(EIOP_CONNECTED)) {
+            return;
+        }
+    }
+
+    setpropertyl(EIOP_CONNECTED, OS_FALSE);
+}
+
+
+/**
+****************************************************************************************************
 
   @brief Flags the peristent object changed (needs to be saved).
 

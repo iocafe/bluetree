@@ -90,7 +90,7 @@ void eioNetwork::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioNetwork");
     addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
-    addpropertyl(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
+    addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -210,25 +210,17 @@ eStatus eioNetwork::oncallback(
 
 /**
 ****************************************************************************************************
-
-  @brief Find or create a IO device object.
-
-  The eioRoot::device_connected function checks if an IO device exists. If so it makes sure that
-  network is set as connected returns pointer to network object. If not, it creates new
-  network object and marks it connected.
-
-  returns Pointer to network object OS_NULL if network name is empty.
-
+  Create IO network objects to represent connection.
 ****************************************************************************************************
 */
-eioDevice *eioNetwork::device_connected(
+void eioNetwork::connected(
     struct eioMblkInfo *minfo)
 {
     eioDevice *device;
     os_char buf[IOC_DEVICE_ID_SZ], nbuf[OSAL_NBUF_SZ];
 
     if (minfo->device_name == '\0') {
-        return OS_NULL;
+        return;
     }
 
     os_strncpy(buf, minfo->device_name, sizeof(buf));
@@ -236,16 +228,46 @@ eioDevice *eioNetwork::device_connected(
     os_strncat(buf, nbuf, sizeof(buf));
 
     device = eioDevice::cast(byname(buf));
-    if (device) {
-        device->setpropertyl(EIOP_CONNECTED, OS_TRUE);
-    }
-    else {
+    if (device == OS_NULL) {
         device = new eioDevice(this);
         device->addname(buf);
     }
 
-    // device->mblk_connected(&minfo);
-    return device;
+    device->connected(minfo);
+    setpropertyl(EIOP_CONNECTED, OS_TRUE);
+}
+
+
+/**
+****************************************************************************************************
+  Mark IO network objects to disconnected and delete unused ones.
+****************************************************************************************************
+*/
+void eioNetwork::disconnected(
+    eioMblkInfo *minfo)
+{
+    eioDevice *device;
+    os_char buf[IOC_DEVICE_ID_SZ], nbuf[OSAL_NBUF_SZ];
+
+    os_strncpy(buf, minfo->device_name, sizeof(buf));
+    osal_int_to_str(nbuf, sizeof(nbuf), minfo->device_nr);
+    os_strncat(buf, nbuf, sizeof(buf));
+
+    device = eioDevice::cast(byname(buf));
+    if (device) {
+        device->disconnected(minfo);
+    }
+
+    for (device = eioDevice::cast(first());
+         device;
+         device = eioDevice::cast(device->next()))
+    {
+        if (device->propertyl(EIOP_CONNECTED)) {
+            return;
+        }
+    }
+
+    setpropertyl(EIOP_CONNECTED, OS_FALSE);
 }
 
 

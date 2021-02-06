@@ -90,7 +90,7 @@ void eioMblk::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioMblk");
     addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
-    addpropertyl(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
+    addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -205,6 +205,30 @@ eStatus eioMblk::oncallback(
     }
 
     return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+  Create IO network objects to represent connection.
+****************************************************************************************************
+*/
+void eioMblk::connected(
+    struct eioMblkInfo *minfo)
+{
+    setpropertyl(EIOP_CONNECTED, OS_TRUE);
+}
+
+
+/**
+****************************************************************************************************
+  Mark IO network objects to disconnected and delete unused ones.
+****************************************************************************************************
+*/
+void eioMblk::disconnected(
+    eioMblkInfo *minfo)
+{
+    setpropertyl(EIOP_CONNECTED, OS_FALSE);
 }
 
 

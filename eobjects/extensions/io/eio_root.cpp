@@ -90,6 +90,7 @@ void eioRoot::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioRoot");
     addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
+    addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -277,28 +278,31 @@ void eioRoot::io_root_callback(
     switch (event)
     {
         case IOC_NEW_MEMORY_BLOCK:
-            t->network_connected(&minfo);
+            t->connected(&minfo);
             break;
 
         case IOC_MBLK_CONNECTED_AS_SOURCE:
         case IOC_MBLK_CONNECTED_AS_TARGET:
             break;
 
-        default:
         case IOC_MEMORY_BLOCK_DELETED:
+            t->disconnected(&minfo);
             break;
 
-        case IOC_NEW_NETWORK:
-            // t->network_connected(&minfo);
+        /* case IOC_NEW_NETWORK:
+            // t->connected(&minfo);
             break;
 
         case IOC_NETWORK_DISCONNECTED:
-            // t->network_disconnected(&minfo);
+            // t->disconnected(&minfo);
             break;
 
         case IOC_NEW_DEVICE:
         case IOC_DEVICE_DISCONNECTED:
-            break;
+            break; */
+
+        default:
+             break;
     }
     os_unlock();
 }
@@ -306,63 +310,54 @@ void eioRoot::io_root_callback(
 
 /**
 ****************************************************************************************************
-
-  @brief Find or create a IO network object.
-
-  The eioRoot::network_connected function checks if a network exists. If so it makes sure that
-  network is set as connected returns pointer to network object. If not, it creates new
-  network object and marks it connected.
-
-  returns Pointer to network object OS_NULL if network name is empty.
-
+  Create IO network objects to represent connection.
 ****************************************************************************************************
 */
-eioNetwork *eioRoot::network_connected(
+void eioRoot::connected(
     eioMblkInfo *minfo)
 {
     eioNetwork *network;
 
     if (minfo->network_name == '\0') {
-        return OS_NULL;
+        return;
     }
 
     network = eioNetwork::cast(byname(minfo->network_name));
-    if (network) {
-        network->setpropertyl(EIOP_CONNECTED, OS_TRUE);
-    }
-    else {
+    if (network == OS_NULL) {
         network = new eioNetwork(this);
         network->addname(minfo->network_name);
     }
 
-    network->device_connected(minfo);
-    return network;
+    network->connected(minfo);
+    setpropertyl(EIOP_CONNECTED, OS_TRUE);
 }
 
 
 /**
 ****************************************************************************************************
-
-  @brief Mark network object disconnected and delete it, if it is unused.
-
-  The eioRoot::network_disconnected function...
-
-  returns Pointer to disconnected network object. OS_NULL if network with given name does no
-          longer exist.
-
+  Mark IO network objects to disconnected and delete unused ones.
 ****************************************************************************************************
 */
-eioNetwork *eioRoot::network_disconnected(
+void eioRoot::disconnected(
     eioMblkInfo *minfo)
 {
     eioNetwork *network;
 
     network = eioNetwork::cast(byname(minfo->network_name));
     if (network) {
-        network->setpropertyl(EIOP_CONNECTED, OS_FALSE);
-        return network;
+        network->disconnected(minfo);
     }
-    return OS_NULL;
+
+    for (network = eioNetwork::cast(first());
+         network;
+         network = eioNetwork::cast(network->next()))
+    {
+        if (network->propertyl(EIOP_CONNECTED)) {
+            return;
+        }
+    }
+
+    setpropertyl(EIOP_CONNECTED, OS_FALSE);
 }
 
 

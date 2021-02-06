@@ -105,8 +105,12 @@ public:
       Maintain IO network hierarchy.
     ************************************************************************************************
     */
-    eioDevice *device_connected(
+    void connected(
         struct eioMblkInfo *minfo);
+
+    void disconnected(
+        eioMblkInfo *minfo);
+
 
 protected:
     /**

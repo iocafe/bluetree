@@ -134,12 +134,12 @@ protected:
 
     /* Find or create a IO network object.
      */
-    eioNetwork *network_connected(
+    void connected(
         eioMblkInfo *minfo);
 
     /* Mark network object disconnected and delete it, if it is unused.
      */
-    eioNetwork *network_disconnected(
+    void disconnected(
         eioMblkInfo *minfo);
 
 

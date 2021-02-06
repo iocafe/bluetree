@@ -98,6 +98,16 @@ public:
         eObject *obj,
         eObject *appendix);
 
+    /**
+    ************************************************************************************************
+      Maintain IO network hierarchy.
+    ************************************************************************************************
+    */
+    void connected(
+        struct eioMblkInfo *minfo);
+
+    void disconnected(
+        eioMblkInfo *minfo);
 
 protected:
     /**
