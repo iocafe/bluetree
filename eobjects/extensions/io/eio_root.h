@@ -115,6 +115,11 @@ public:
      */
     void setup(iocRoot *iocom_root);
 
+    inline iocRoot *iocom_root() {return m_iocom_root; }
+
+    /** IO thread handle.
+     */
+    eThreadHandle m_io_thread_handle;
 
 protected:
     /**
@@ -142,10 +147,19 @@ protected:
     void disconnected(
         eioMblkInfo *minfo);
 
+    /* Callback function to add dynamic device information.
+     */
+    static void info_callback(
+        struct iocHandle *handle,
+        os_int start_addr,
+        os_int end_addr,
+        os_ushort flags,
+        void *context);
 
     /* Flags the peristent object changed (needs to be saved).
      */
     // void touch();
+
 
     /**
     ************************************************************************************************
@@ -156,11 +170,19 @@ protected:
     /** IOCOM root object!
      */
     iocRoot *m_iocom_root;
+
 };
 
 
-/* Initialize IO network structure classes.
+/* Initialize IO network structure classes and start IO thread.
  */
-void eio_initialize();
+eioRoot *eio_initialize(
+    iocRoot *iocom_root,
+    eObject *parent);
+
+/* Stop IO thread.
+ */
+void eio_stop_io_thread(
+    eioRoot *eio_root);
 
 #endif

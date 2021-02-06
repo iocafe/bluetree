@@ -24,4 +24,5 @@
 #include "extensions/io/eio_device.h"
 #include "extensions/io/eio_network.h"
 #include "extensions/io/eio_root.h"
+#include "extensions/io/eio_thread.h"
 #endif

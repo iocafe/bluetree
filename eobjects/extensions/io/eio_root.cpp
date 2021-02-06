@@ -27,6 +27,8 @@ eioRoot::eioRoot(
     os_int flags)
     : eContainer(parent, oid, flags)
 {
+    os_memclear(&m_io_thread_handle, sizeof(m_io_thread_handle));
+
     initproperties();
     ns_create();
 }
@@ -278,6 +280,10 @@ void eioRoot::io_root_callback(
     switch (event)
     {
         case IOC_NEW_MEMORY_BLOCK:
+            if (!os_strcmp(minfo.mblk_name, "info")) {
+                ioc_add_callback(&mblk->handle, info_callback, context);
+            }
+
             t->connected(&minfo);
             break;
 
@@ -288,18 +294,6 @@ void eioRoot::io_root_callback(
         case IOC_MEMORY_BLOCK_DELETED:
             t->disconnected(&minfo);
             break;
-
-        /* case IOC_NEW_NETWORK:
-            // t->connected(&minfo);
-            break;
-
-        case IOC_NETWORK_DISCONNECTED:
-            // t->disconnected(&minfo);
-            break;
-
-        case IOC_NEW_DEVICE:
-        case IOC_DEVICE_DISCONNECTED:
-            break; */
 
         default:
              break;
@@ -364,6 +358,88 @@ void eioRoot::disconnected(
 /**
 ****************************************************************************************************
 
+  @brief Callback function to add dynamic device information.
+
+  The eioRoot::info_callback() function is called when device information data is received from
+  connection or when connection status changes.
+
+  @param   handle Memory block handle.
+  @param   start_addr Address of first changed byte.
+  @param   end_addr Address of the last changed byte.
+  @param   flags Reserved  for future.
+  @param   context Application specific pointer passed to this callback function.
+
+  @return  None.
+
+****************************************************************************************************
+*/
+void eioRoot::info_callback(
+    struct iocHandle *handle,
+    os_int start_addr,
+    os_int end_addr,
+    os_ushort flags,
+    void *context)
+{
+    eioRoot *t = (eioRoot*)context;
+    iocRoot *root;
+    iocMemoryBlock *mblk;
+    osalJsonIndex jindex;
+    osalStatus s;
+    // iocAddDinfoState state;
+    OSAL_UNUSED(start_addr);
+    OSAL_UNUSED(flags);
+    OSAL_UNUSED(context);
+
+    /* If actual data received (not connection status change).
+     */
+    if (end_addr < 0) return;
+
+    /* Get memory block pointer and start synchronization.
+     */
+    mblk = ioc_handle_lock_to_mblk(handle, &root);
+    if (mblk == OS_NULL) return;
+
+    {
+        ioc_add_dynamic_info(handle, OS_FALSE);
+    }
+
+    s = osal_create_json_indexer(&jindex, mblk->buf, mblk->nbytes, 0);
+    if (s) goto getout;
+
+    /* s = ioc_dinfo_process_block(droot, &state, osal_str_empty, &jindex);
+    if (s) goto getout; */
+
+    ioc_unlock(root);
+    os_lock();
+
+
+
+    os_unlock();
+    mblk = ioc_handle_lock_to_mblk(handle, &root);
+    if (mblk == OS_NULL) return;
+
+    /* Informn application about new networks and devices.
+     */
+    /* if (state.dnetwork->new_network)
+    {
+        ioc_new_root_event(root, IOC_NEW_NETWORK, state.dnetwork, OS_NULL, root->callback_context);
+        state.dnetwork->new_network = OS_FALSE;
+    }
+    ioc_new_root_event(root, IOC_NEW_DEVICE, state.dnetwork, mblk, root->callback_context);
+    */
+
+    /* Flag for basic server (iocBServer). Check for missing certificate chain and
+       flash program versions.
+     */
+    // root->check_cert_chain_etc = OS_TRUE;
+
+getout:
+    ioc_unlock(root);
+}
+
+/**
+****************************************************************************************************
+
   @brief Flags the peristent object changed (needs to be saved).
 
   The eioRoot::touch function
@@ -386,18 +462,45 @@ void eioRoot::disconnected(
 /**
 ****************************************************************************************************
 
-  @brief Initialize IO network structure classes.
-
-  The eioRoot::touch function
+  @brief Initialize IO network structure classes and start IO thread.
 
 ****************************************************************************************************
 */
-void eio_initialize()
+eioRoot *eio_initialize(
+    iocRoot *iocom_root,
+    eObject *parent)
 {
+    eioRoot *eio_root;
+
     eioRoot::setupclass();
     eioNetwork::setupclass();
     eioDevice::setupclass();
     eioMblk::setupclass();
     eioGroup::setupclass();
     eioVariable::setupclass();
+    eioThread::setupclass();
+
+    eio_root = new eioRoot(parent);
+    eio_root->addname("//io");
+    eio_root->setup(iocom_root);
+
+    eio_start_thread(eio_root, &eio_root->m_io_thread_handle);
+
+    return eio_root;
+}
+
+/**
+****************************************************************************************************
+
+  @brief Stop IO thread.
+
+****************************************************************************************************
+*/
+void eio_stop_io_thread(
+    eioRoot *eio_root)
+{
+    /* Stop network maintenance thread.
+     */
+    eio_root->m_io_thread_handle.terminate();
+    eio_root->m_io_thread_handle.join();
 }

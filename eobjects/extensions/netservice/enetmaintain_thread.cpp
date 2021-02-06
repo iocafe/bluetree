@@ -365,7 +365,7 @@ eProtocol *eNetMaintainThread::protocol_by_name(
 /**
 ****************************************************************************************************
 
-  @brief Create "LAN services" table.
+  @brief Create thread to main net service.
 
   The enet_start_maintain_thread function adds maintain service class, creates a light house
   thread object and starts to run it. This function is called by eNetService::start().

@@ -149,9 +149,8 @@ void eNetService::start(
     // os_strncat(buf, "N", sizeof(buf));
     ioc_set_iodevice_id(&m_iocom_root, eglobal->process_name, eglobal->process_nr,
         OS_NULL, buf);
-    m_eio_root = new eioRoot(this);
-    m_eio_root->addname("//io");
-    m_eio_root->setup(&m_iocom_root);
+
+    m_eio_root = eio_initialize(&m_iocom_root, this);
 
     /* Start the connection and end point management as separate thread. This must be after parmaters
      * haven been created so binding succeed.
@@ -184,8 +183,11 @@ void eNetService::finish()
     osal_set_net_event_handler(OS_NULL, this,
         OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
 
-    delete m_eio_root;
+    eio_stop_io_thread(m_eio_root);
     ioc_release_root(&m_iocom_root);
+
+    delete m_eio_root;
+    m_eio_root = OS_NULL;
 }
 
 
@@ -263,7 +265,6 @@ void enet_initialize_service()
 {
     eNetService::setupclass();
     eNetMaintainThread::setupclass();
-    eio_initialize();
 
     os_lock();
     eNetService *netservice = new eNetService(eglobal->process);
