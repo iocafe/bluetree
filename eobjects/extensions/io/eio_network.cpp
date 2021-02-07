@@ -213,14 +213,15 @@ eStatus eioNetwork::oncallback(
   Create IO network objects to represent connection.
 ****************************************************************************************************
 */
-void eioNetwork::connected(
+eioMblk *eioNetwork::connected(
     struct eioMblkInfo *minfo)
 {
     eioDevice *device;
+    eioMblk *mblk;
     os_char buf[IOC_DEVICE_ID_SZ], nbuf[OSAL_NBUF_SZ];
 
     if (minfo->device_name == '\0') {
-        return;
+        return OS_NULL;
     }
 
     os_strncpy(buf, minfo->device_name, sizeof(buf));
@@ -233,8 +234,9 @@ void eioNetwork::connected(
         device->addname(buf);
     }
 
-    device->connected(minfo);
+    mblk = device->connected(minfo);
     setpropertyl(EIOP_CONNECTED, OS_TRUE);
+    return mblk;
 }
 
 

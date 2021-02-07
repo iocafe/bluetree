@@ -105,7 +105,7 @@ public:
       Maintain IO network hierarchy.
     ************************************************************************************************
     */
-    void connected(
+    eioMblk *connected(
         struct eioMblkInfo *minfo);
 
     void disconnected(

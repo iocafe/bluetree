@@ -307,13 +307,14 @@ void eioRoot::io_root_callback(
   Create IO network objects to represent connection.
 ****************************************************************************************************
 */
-void eioRoot::connected(
+eioMblk *eioRoot::connected(
     eioMblkInfo *minfo)
 {
     eioNetwork *network;
+    eioMblk *mblk;
 
     if (minfo->network_name == '\0') {
-        return;
+        return OS_NULL;
     }
 
     network = eioNetwork::cast(byname(minfo->network_name));
@@ -322,8 +323,9 @@ void eioRoot::connected(
         network->addname(minfo->network_name);
     }
 
-    network->connected(minfo);
+    mblk = network->connected(minfo);
     setpropertyl(EIOP_CONNECTED, OS_TRUE);
+    return mblk;
 }
 
 
@@ -358,105 +360,109 @@ void eioRoot::disconnected(
 /**
 ****************************************************************************************************
 
-  @brief Callback function to add dynamic device information.
+  @brief Configure signal by information.
 
-  The eioRoot::info_callback() function is called when device information data is received from
-  connection or when connection status changes.
+  The eioRoot::new_signal() function adds information about a signal based on "info" memory
+  block configuration for the IO device network. If signal already exists, function jsut returns
+  pointer to it. Synchronization ioc_lock() must be on when this function is called.
 
-  @param   handle Memory block handle.
-  @param   start_addr Address of first changed byte.
-  @param   end_addr Address of the last changed byte.
-  @param   flags Reserved  for future.
-  @param   context Application specific pointer passed to this callback function.
+  @param   dnetwork Pointer to dynamic network structure.
+  @param   signal_name Signal name.
+  @param   mblk_name Memory block name.
+  @param   device_name Device name.
+  @param   device_nr Device number, if there are several same kind of IO devices, they must
+           have different numbers.
+  @param   addr Starting address of the signal in memory block.
 
-  @return  None.
+  @param   n For strings n can be number of bytes in memory block for the string. For arrays n is
+           number of elements reserved in memory block. Use value 1 for single variables.
+  @param   ncolumns If a matrix of data is stored as an array, number of matrix columns.
+           Otherwise value 1.
+  @param   flags: OS_BOOLEAN, OS_CHAR, OS_UCHAR, OS_SHORT, OS_USHORT, OS_INT, OS_UINT,
+           OS_LONG, OS_FLOAT, OS_DOUBLE, or OS_STR.
+
+  @return  Pointer to dynamic signal. OS_NULL if memory allocation failed.
 
 ****************************************************************************************************
 */
-void eioRoot::info_callback(
-    struct iocHandle *handle,
-    os_int start_addr,
-    os_int end_addr,
-    os_ushort flags,
-    void *context)
+eioVariable *eioRoot::new_signal(
+    eioMblkInfo *minfo,
+    eioSignalInfo *sinfo,
+    os_char flags)
 {
-    eioRoot *t = (eioRoot*)context;
-    iocRoot *root;
-    iocMemoryBlock *mblk;
-    osalJsonIndex jindex;
-    osalStatus s;
-    // iocAddDinfoState state;
-    OSAL_UNUSED(start_addr);
-    OSAL_UNUSED(flags);
-    OSAL_UNUSED(context);
+    eioMblk *mblk;
+    eioDevice *device;
+    eioGroup *group;
 
-    /* If actual data received (not connection status change).
+    mblk = connected(minfo);
+    if (mblk == OS_NULL) {
+        osal_debug_error_str("new_signal: Mblk could not be created: ", minfo->device_name);
+        return OS_NULL;
+    }
+
+    device = eioDevice::cast(mblk->grandparent());
+
+    group = eioGroup::cast(device->byname(sinfo->group_name));
+    if (group == OS_NULL) {
+        group = new eioGroup(device);
+        group->addname(sinfo->group_name);
+    }
+
+
+#if 0
+    iocDynamicSignal *dsignal, *prev_dsignal;
+    os_uint hash_ix;
+
+    /* If we have existing IO network with this name,
+       just return pointer to it.
      */
-    if (end_addr < 0) return;
-
-    /* Get memory block pointer and start synchronization.
-     */
-    mblk = ioc_handle_lock_to_mblk(handle, &root);
-    if (mblk == OS_NULL) return;
-
+    hash_ix = ioc_hash(signal_name) % IOC_DNETWORK_HASH_TAB_SZ;
+    prev_dsignal = OS_NULL;
+    for (dsignal = dnetwork->hash[hash_ix];
+         dsignal;
+         dsignal = dsignal->next)
     {
-        ioc_add_dynamic_info(handle, OS_FALSE);
+        if (!os_strcmp(signal_name, dsignal->signal_name))
+        {
+            if (!os_strcmp(mblk_name, dsignal->mblk_name) &&
+                !os_strcmp(device_name, dsignal->device_name) &&
+                device_nr == dsignal->device_nr)
+            {
+                return dsignal;
+            }
+        }
+
+        prev_dsignal = dsignal;
     }
 
-    s = osal_create_json_indexer(&jindex, mblk->buf, mblk->nbytes, 0);
-    if (s) goto getout;
-
-    /* s = ioc_dinfo_process_block(droot, &state, osal_str_empty, &jindex);
-    if (s) goto getout; */
-
-    ioc_unlock(root);
-    os_lock();
-
-
-
-    os_unlock();
-    mblk = ioc_handle_lock_to_mblk(handle, &root);
-    if (mblk == OS_NULL) return;
-
-    /* Informn application about new networks and devices.
+    /* Allocate and initialize a new IO network object.
      */
-    /* if (state.dnetwork->new_network)
+    dsignal = ioc_initialize_dynamic_signal(signal_name);
+    if (dsignal == OS_NULL) return OS_NULL;
+    dsignal->dnetwork = dnetwork;
+    os_strncpy(dsignal->mblk_name, mblk_name, IOC_NAME_SZ);
+    os_strncpy(dsignal->device_name, device_name, IOC_NAME_SZ);
+    dsignal->device_nr = device_nr;
+    dsignal->addr = addr;
+    dsignal->n = n;
+    dsignal->ncolumns = ncolumns;
+    dsignal->flags = flags;
+
+    /* Join it as last to linked list for the hash index.
+     */
+    if (prev_dsignal)
     {
-        ioc_new_root_event(root, IOC_NEW_NETWORK, state.dnetwork, OS_NULL, root->callback_context);
-        state.dnetwork->new_network = OS_FALSE;
+        prev_dsignal->next = dsignal;
     }
-    ioc_new_root_event(root, IOC_NEW_DEVICE, state.dnetwork, mblk, root->callback_context);
-    */
-
-    /* Flag for basic server (iocBServer). Check for missing certificate chain and
-       flash program versions.
-     */
-    // root->check_cert_chain_etc = OS_TRUE;
-
-getout:
-    ioc_unlock(root);
-}
-
-/**
-****************************************************************************************************
-
-  @brief Flags the peristent object changed (needs to be saved).
-
-  The eioRoot::touch function
-
-****************************************************************************************************
-*/
-/* void eioRoot::touch()
-{
-    os_get_timer(&m_latest_touch);
-    if (m_oldest_touch == 0) {
-        m_oldest_touch = m_latest_touch;
+    else
+    {
+        dnetwork->hash[hash_ix] = dsignal;
     }
 
-    set_timer(m_save_time);
+    return dsignal;
+#endif
+    return OS_NULL;
 }
-*/
-
 
 
 /**

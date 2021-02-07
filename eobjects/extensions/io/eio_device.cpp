@@ -27,6 +27,7 @@ eioDevice::eioDevice(
     os_int flags)
     : eContainer(parent, oid, flags)
 {
+    m_mblks = OS_NULL;
     initproperties();
     ns_create();
 }
@@ -213,23 +214,30 @@ eStatus eioDevice::oncallback(
   Create IO network objects to represent connection.
 ****************************************************************************************************
 */
-void eioDevice::connected(
+eioMblk *eioDevice::connected(
     struct eioMblkInfo *minfo)
 {
     eioMblk *mblk;
 
     if (minfo->mblk_name == '\0') {
-        return;
+        return OS_NULL;
     }
 
-    mblk = eioMblk::cast(byname(minfo->mblk_name));
+    if (m_mblks == OS_NULL) {
+        m_mblks = new eContainer(this);
+        m_mblks->addname("mblks");
+        m_mblks->ns_create();
+    }
+
+    mblk = eioMblk::cast(m_mblks->byname(minfo->mblk_name));
     if (mblk == OS_NULL) {
-        mblk = new eioMblk(this);
+        mblk = new eioMblk(m_mblks);
         mblk->addname(minfo->mblk_name);
     }
 
     mblk->connected(minfo);
     setpropertyl(EIOP_CONNECTED, OS_TRUE);
+    return mblk;
 }
 
 
@@ -243,12 +251,16 @@ void eioDevice::disconnected(
 {
     eioMblk *mblk;
 
-    mblk = eioMblk::cast(byname(minfo->mblk_name));
+    if (m_mblks == OS_NULL) {
+        return;
+    }
+
+    mblk = eioMblk::cast(m_mblks->byname(minfo->mblk_name));
     if (mblk) {
         mblk->disconnected(minfo);
     }
 
-    for (mblk = eioMblk::cast(first());
+    for (mblk = eioMblk::cast(m_mblks->first());
          mblk;
          mblk = eioMblk::cast(mblk->next()))
     {

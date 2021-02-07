@@ -15,14 +15,6 @@
 */
 #include "extensions/io/eio.h"
 
-/* Property names.
- */
-/* const os_char
-    eiothreadp_end_pont_table_modif_count[] = "publish",
-    eiothreadp_end_point_config_count[] = "epconfigcnt",
-    eiothreadp_connect_table_modif_count[] = "connect",
-    eiothreadp_lighthouse_change_count[] = "lighthouse";
-*/
 
 /**
 ****************************************************************************************************
@@ -34,18 +26,6 @@ eioThread::eioThread(
     e_oid oid,
     os_int flags)
     : eThread(parent, oid, flags)
-{
-    // initproperties();
-    // ns_create();
-}
-
-
-/**
-****************************************************************************************************
-  Virtual destructor.
-****************************************************************************************************
-*/
-eioThread::~eioThread()
 {
 }
 
@@ -69,16 +49,7 @@ void eioThread::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioThread");
-    /* addpropertyl(cls, EIOTHREADP_END_POINT_TABLE_MODIF_COUNT, eiothreadp_end_pont_table_modif_count,
-        -1, "end point table modif count", EPRO_DEFAULT);
-    addpropertyl(cls, EIOTHREADP_END_POINT_CONFIG_COUNT, eiothreadp_end_point_config_count,
-        0, "end point config count", EPRO_NOONPRCH);
-    addpropertyl(cls, EIOTHREADP_CONNECT_TABLE_MODIF_COUNT, eiothreadp_connect_table_modif_count,
-        -1, "connect table modif count", EPRO_DEFAULT);
-    addpropertyl(cls, EIOTHREADP_LIGHTHOUSE_CHANGE_COUNT, eiothreadp_lighthouse_change_count,
-        0, "lighthouse change count", EPRO_DEFAULT);
-    propertysetdone(cls); */
+    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioThread");
     os_unlock();
 }
 
@@ -125,68 +96,6 @@ void eioThread::onmessage(
 /**
 ****************************************************************************************************
 
-  @brief Called to inform the class about property value change (override).
-
-  The onpropertychange() function is called when class'es property changes, unless the
-  property is flagged with EPRO_NOONPRCH.
-  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
-  in class members and and return it when simpleproperty() is called.
-
-  @param   propertynr Property number of changed property.
-  @param   x Variable containing the new value.
-  @param   flags
-  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
-           indicate that there was no property with given property number.
-
-****************************************************************************************************
-*/
-/* eStatus eioThread::onpropertychange(
-    os_int propertynr,
-    eVariable *x,
-    os_int flags)
-{
-    os_int count;
-
-    switch (propertynr)
-    {
-        case EIOTHREADP_END_POINT_TABLE_MODIF_COUNT:
-            count = x->geti();
-            if (count != m_end_point_table_modif_count) {
-                m_end_point_table_modif_count = count;
-                m_configure_end_points = OS_TRUE;
-                os_get_timer(&m_end_point_config_timer);
-                set_timer(100);
-            }
-            break;
-
-
-        default:
-            return eObject::onpropertychange(propertynr, x, flags);
-    }
-
-    return ESTATUS_SUCCESS;
-} */
-
-
-/* Overloaded eThread function to initialize new thread. Called after eioThread object is created.
- */
-void eioThread::initialize(
-    eContainer *params)
-{
-}
-
-
-/* Overloaded eThread function to perform thread specific cleanup when thread exists: Release
-   resources allocated for maintain client. This is a "pair" to initialize function.
- */
-void eioThread::finish()
-{
-}
-
-
-/**
-****************************************************************************************************
-
   @brief Maintain connections and end points, thread main loop.
 
   The eioThread::run() function
@@ -197,6 +106,7 @@ void eioThread::finish()
 */
 void eioThread::run()
 {
+    timer(2000);
 
     while (OS_TRUE)
     {
@@ -205,45 +115,12 @@ void eioThread::run()
             break;
         }
 
+        ioc_receive_all(m_iocom_root);
+        ioc_send_all(m_iocom_root);
 
 osal_debug_error("HERE IO THREAD LOOP")        ;
-
-        /* if (!m_configure_end_points &&
-            !m_configure_connections)
-        {
-            set_timer(0);
-        } */
-    }
-
-}
-
-
-
-
-
-/**
-****************************************************************************************************
-
-  @brief Set timer period, how often to recive timer messages.
-
-  This function sets how oftern onmessage() is called with ECMD_TIMER argument by timer.
-  Call this function instead of calling timer() directlt to avois repeated set or clear
-  of the timer period.
-
-  @param timer_ms Timer hit period in milliseconds, repeated. Set 0 to disable timer.
-
-****************************************************************************************************
-*/
-/* void eioThread::set_timer(
-    os_int timer_ms)
-{
-    if (timer_ms != m_timer_ms) {
-        m_timer_ms = timer_ms;
-        timer(timer_ms);
     }
 }
-*/
-
 
 
 /**
@@ -266,10 +143,6 @@ void eio_start_thread(
     t->addname("//_iothread");
 
     t->set_iocom_root(eio_root->iocom_root());
-
-    /* t->bind(EIOTHREADP_END_POINT_TABLE_MODIF_COUNT, netservice_name,
-        enetservp_endpoint_table_change_counter); */
-
     t->start(io_thread_handle);
 }
 

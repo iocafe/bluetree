@@ -25,22 +25,6 @@
 ****************************************************************************************************
 */
 
-/* Property numbers.
- */
-/* #define EIOTHREADP_END_POINT_TABLE_MODIF_COUNT 10
-#define EIOTHREADP_END_POINT_CONFIG_COUNT 15
-#define EIOTHREADP_CONNECT_TABLE_MODIF_COUNT 20
-#define EIOTHREADP_LIGHTHOUSE_CHANGE_COUNT 25
-*/
-
-/* Property names.
- */
-/* extern const os_char
-    eiothreadp_end_pont_table_modif_count[],
-    eiothreadp_end_point_config_count[],
-    eiothreadp_connect_table_modif_count[],
-    eiothreadp_lighthouse_change_count[]; */
-
 
 /**
 ****************************************************************************************************
@@ -57,48 +41,14 @@ public:
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Virtual destructor.
-     */
-    virtual ~eioThread();
-
-    /* Casting eObject pointer to eioThread pointer.
-     */
-    inline static eioThread *cast(
-        eObject *o)
-    {
-        e_assert_type(o, ECLASSID_EIO_THREAD)
-        return (eioThread*)o;
-    }
-
-    /* Get class identifier.
-     */
-    virtual os_int classid() {return ECLASSID_EIO_THREAD; }
-
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
-
-    /* Static constructor function for generating instance by class list.
-     */
-    static eioThread *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eioThread(parent, id, flags);
-    }
 
     /* Function to process incoming messages.
      */
     virtual void onmessage(
         eEnvelope *envelope);
-
-    /* Called when property value changes.
-     */
-/*     virtual eStatus onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags); */
 
     /* Set pointer to network service (eNetService is owned by eProcess, oe_lock() must
        be on to access.
@@ -109,19 +59,9 @@ public:
         m_iocom_root = iocom_root;
     }
 
-    /* Overloaded eThread function to initialize new thread.
-     */
-    virtual void initialize(
-        eContainer *params = OS_NULL);
-
-    /* Overloaded eThread function to perform thread specific cleanup when thread exists.
-     */
-    virtual void finish();
-
-    /* Maintain LAN service UDP communication, thread main loop.
+    /* RUN IOCOM communication, thread main loop.
      */
     virtual void run();
-
 
 
 protected:
@@ -130,11 +70,6 @@ protected:
       Internal functions.
     ************************************************************************************************
     */
-
-    /* Set timer period, how often to recive timer messages.
-     */
-    void set_timer(
-        os_int timer_ms);
 
     /**
     ************************************************************************************************
@@ -145,14 +80,8 @@ protected:
     /** IOCOM root object!
      */
     iocRoot *m_iocom_root;
-
-    /** Set pointer to network service (eNetService is owned by eProcess, oe_lock() must
-        be on to access.
-     */
-//    eNetService *m_netservice;
-
-
 };
+
 
 /* Start enet maintenance thread.
  */

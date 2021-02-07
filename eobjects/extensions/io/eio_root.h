@@ -18,6 +18,7 @@
 #define EIO_ROOT_H_
 #include "extensions/io/eio.h"
 
+struct eioInfoParserState;
 
 /**
 ****************************************************************************************************
@@ -32,6 +33,16 @@ typedef struct eioMblkInfo {
     const os_char *network_name;
 }
 eioMblkInfo;
+
+typedef struct eioSignalInfo {
+    const os_char *signal_name;
+    const os_char *group_name;
+    os_int addr;
+    os_int n;                   /* Number of elements in array, 1 if not array */
+    os_int ncolumns;            /* Number of columns when array holds matrix, 1 otherwise. */
+}
+eioSignalInfo;
+
 
 /**
 ****************************************************************************************************
@@ -124,7 +135,7 @@ public:
 protected:
     /**
     ************************************************************************************************
-      Internal functions.
+      Internal functions, eio_root.cpp
     ************************************************************************************************
     */
 
@@ -139,7 +150,7 @@ protected:
 
     /* Find or create a IO network object.
      */
-    void connected(
+    eioMblk *connected(
         eioMblkInfo *minfo);
 
     /* Mark network object disconnected and delete it, if it is unused.
@@ -147,6 +158,16 @@ protected:
     void disconnected(
         eioMblkInfo *minfo);
 
+    eioVariable *new_signal(
+        eioMblkInfo *minfo,
+        eioSignalInfo *sinfo,
+        os_char flags);
+
+    /**
+    ************************************************************************************************
+      Internal functions, eio_info.cpp
+    ************************************************************************************************
+    */
     /* Callback function to add dynamic device information.
      */
     static void info_callback(
@@ -155,6 +176,23 @@ protected:
         os_int end_addr,
         os_ushort flags,
         void *context);
+
+    eStatus process_info_block(
+        struct eioInfoParserState *state,
+        const os_char *array_tag,
+        osalJsonIndex *jindex);
+
+    eStatus process_info_array(
+        eioInfoParserState *state,
+        const os_char *array_tag,
+        osalJsonIndex *jindex);
+
+    eStatus ioc_new_signal_by_info(
+        eioInfoParserState *state);
+
+    void resize_memory_block_by_info(
+        eioInfoParserState *state);
+
 
     /* Flags the peristent object changed (needs to be saved).
      */
