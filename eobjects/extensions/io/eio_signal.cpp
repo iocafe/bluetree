@@ -37,6 +37,7 @@ eioSignal::eioSignal(
 {
     m_state_bits = OSAL_STATE_CONNECTED;
     m_timestamp = 0;
+    m_variable_ref = new ePointer(this);
 }
 
 
@@ -203,3 +204,11 @@ eStatus eioSignal::simpleproperty(
     return ESTATUS_SUCCESS;
 }
 
+
+void eioSignal::setup(
+    eioVariable *variable,
+    struct eioSignalInfo *sinfo,
+    os_int flags)
+{
+    m_variable_ref->set(variable);
+}

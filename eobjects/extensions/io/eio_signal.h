@@ -20,7 +20,7 @@
 #define EIO_SIGNAL_H_
 #include "eobjects.h"
 
-
+class eioVariable;
 
 /**
 ****************************************************************************************************
@@ -105,7 +105,20 @@ public:
     inline void set_sbits(os_int x) {m_state_bits = x;}
     inline void set_tstamp(os_long x) {m_timestamp = x;}
 
+
+    /**
+    ************************************************************************************************
+      Extended value functions
+    ************************************************************************************************
+    */
+    void setup(
+        eioVariable *variable,
+        struct eioSignalInfo *sinfo,
+        os_int flags);
+
 protected:
+    ePointer *m_variable_ref;
+
     os_int m_state_bits;
     os_long m_timestamp;
 };

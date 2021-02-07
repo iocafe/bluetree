@@ -388,13 +388,14 @@ void eioRoot::disconnected(
 eioVariable *eioRoot::new_signal(
     eioMblkInfo *minfo,
     eioSignalInfo *sinfo,
-    os_char flags)
+    os_int flags)
 {
     eioMblk *mblk;
     eioSignal *signal;
     eioDevice *device;
     eioGroup *group;
     eioVariable *variable;
+    const os_char *signal_name;
 
     mblk = connected(minfo);
     if (mblk == OS_NULL) {
@@ -402,10 +403,12 @@ eioVariable *eioRoot::new_signal(
         return OS_NULL;
     }
 
-    signal = eioSignal::cast(mblk->byname(sinfo->signal_name));
-    if (signal == OS_NULL) {
-        signal = new eioSignal(mblk);
-        signal->addname(sinfo->signal_name);
+    /* Skip "set_" in signal name. We are merging in and out of parameter settings
+       as one variable.
+     */
+    signal_name = sinfo->signal_name;
+    if (!os_strncmp(signal_name, "set_", 4)) {
+        signal_name += 4;
     }
 
     device = eioDevice::cast(mblk->grandparent());
@@ -416,12 +419,26 @@ eioVariable *eioRoot::new_signal(
         group->addname(sinfo->group_name);
     }
 
-    variable = eioVariable::cast(group->byname(sinfo->signal_name));
+    variable = eioVariable::cast(group->byname(signal_name));
     if (variable == OS_NULL) {
         variable = new eioVariable(group);
         variable->addname(sinfo->signal_name);
-        variable->setpropertys(EVARP_TEXT, sinfo->signal_name);
+        variable->setpropertys(EVARP_TEXT, signal_name);
     }
+    variable->setup(minfo, sinfo, flags);
+
+
+    signal = eioSignal::cast(mblk->byname(sinfo->signal_name));
+    if (signal) if (signal->oid() != sinfo->addr) {
+        delete signal;
+        signal = OS_NULL;
+    }
+    if (signal == OS_NULL) {
+        signal = new eioSignal(mblk, sinfo->addr);
+        signal->addname(sinfo->signal_name);
+    }
+    signal->setup(variable, sinfo, flags);
+
 
 #if 0
     iocDynamicSignal *dsignal, *prev_dsignal;

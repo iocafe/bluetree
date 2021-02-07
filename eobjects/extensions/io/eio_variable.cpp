@@ -35,6 +35,9 @@ eioVariable::eioVariable(
     os_int flags)
     : eVariable(parent, id, flags)
 {
+    os_memclear(&m_in, sizeof(m_in));
+    os_memclear(&m_out, sizeof(m_out));
+
     m_state_bits = OSAL_STATE_CONNECTED;
     m_timestamp = 0;
 }
@@ -204,3 +207,11 @@ eStatus eioVariable::simpleproperty(
     return ESTATUS_SUCCESS;
 }
 
+
+void eioVariable::setup(
+    struct eioMblkInfo *minfo,
+    struct eioSignalInfo *sinfo,
+    os_int flags)
+{
+
+}

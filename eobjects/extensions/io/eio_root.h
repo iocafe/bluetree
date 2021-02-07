@@ -161,7 +161,7 @@ protected:
     eioVariable *new_signal(
         eioMblkInfo *minfo,
         eioSignalInfo *sinfo,
-        os_char flags);
+        os_int flags);
 
     /**
     ************************************************************************************************
