@@ -27,6 +27,9 @@ eioMblk::eioMblk(
     os_int flags)
     : eContainer(parent, oid, flags)
 {
+    os_memclear(&m_handle, sizeof(m_handle));
+    m_handle_set = OS_FALSE;
+
     initproperties();
     ns_create();
 }
@@ -39,6 +42,11 @@ eioMblk::eioMblk(
 */
 eioMblk::~eioMblk()
 {
+    if (m_handle_set) {
+        ioc_remove_callback(&m_handle, callback, this);
+        ioc_release_handle(&m_handle);
+        m_handle_set = OS_FALSE;
+    }
 }
 
 
@@ -216,6 +224,17 @@ eStatus eioMblk::oncallback(
 void eioMblk::connected(
     struct eioMblkInfo *minfo)
 {
+    if (minfo->mblk) if (os_strcmp(minfo->mblk_name, "info")) {
+        if (m_handle_set) {
+            ioc_remove_callback(&m_handle, callback, this);
+            ioc_release_handle(&m_handle);
+        }
+
+        ioc_setup_handle(&m_handle, minfo->root, minfo->mblk);
+        ioc_add_callback(&m_handle, callback, this);
+        m_handle_set = OS_TRUE;
+    }
+
     setpropertyl(EIOP_CONNECTED, OS_TRUE);
 }
 
@@ -228,7 +247,57 @@ void eioMblk::connected(
 void eioMblk::disconnected(
     eioMblkInfo *minfo)
 {
+    if (m_handle_set) {
+        ioc_remove_callback(&m_handle, callback, this);
+        ioc_release_handle(&m_handle);
+        m_handle_set = OS_FALSE;
+    }
+
     setpropertyl(EIOP_CONNECTED, OS_FALSE);
+}
+
+
+void eioMblk::callback(
+    struct iocHandle *handle,
+    os_int start_addr,
+    os_int end_addr,
+    os_ushort flags,
+    void *context)
+{
+    eObject *f, *l, *sig;
+    eioMblk *t;
+
+    if ((flags & IOC_MBLK_CALLBACK_RECEIVE) == 0) return;
+    t = (eioMblk*)context;
+
+    f = t->first(start_addr, OS_FALSE);
+    if (f) {
+        f = f->prev();
+    }
+    if (f == OS_NULL) {
+        f = t->first(0, OS_FALSE);
+        if (f == OS_NULL) return;
+    }
+
+    l = t->first(end_addr, OS_FALSE);
+    if (l == OS_NULL) {
+        l = t->last();
+        if (l == OS_NULL) return;
+    }
+
+    sig = f;
+    while (sig)
+    {
+        if (sig->classid() == ECLASSID_EIO_SIGNAL) {
+
+        }
+
+        if (sig == l) {
+            break;
+        }
+        sig = sig->next();
+    }
+
 }
 
 
@@ -251,3 +320,4 @@ void eioMblk::disconnected(
     set_timer(m_save_time);
 }
 */
+

@@ -76,7 +76,7 @@ eObject::eObject(
 
         /* If not root object constructor?
            Otherwise normal child object.  Copy parent's root object pointer
-           and allocate handle for the new child object object. 
+           and allocate handle for the new child object object.
         */
         else if (id != EOID_ROOT_HELPER)
         {
@@ -637,16 +637,18 @@ os_boolean eObject::isdecendentof(
            child objects, regardless wether these are attachment or not. Other values
            specify object identifier, only children with that specified object identifier
            are searched for.
+  @param   exact match. If doesn't need to match exactly, follower will do.
 
   @return  Pointer to the first child object, or OS_NULL if none found.
 
 ****************************************************************************************************
 */
 eObject *eObject::first(
-    e_oid id)
+    e_oid id,
+    os_boolean exact_match)
 {
     if (mm_handle == OS_NULL) return OS_NULL;
-    eHandle *h = mm_handle->first(id);
+    eHandle *h = mm_handle->first(id, exact_match);
     if (h == OS_NULL) return OS_NULL;
     return h->m_object;
 }

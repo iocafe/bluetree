@@ -31,6 +31,9 @@ typedef struct eioMblkInfo {
     os_uint device_nr;
     const os_char *mblk_name;
     const os_char *network_name;
+
+    iocMemoryBlock *mblk;
+    iocRoot *root;
 }
 eioMblkInfo;
 

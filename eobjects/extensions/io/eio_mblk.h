@@ -116,15 +116,22 @@ protected:
     ************************************************************************************************
     */
 
-    /* Flags the peristent object changed (needs to be saved).
-     */
-    // void touch();
+    static void callback(
+        struct iocHandle *handle,
+        os_int start_addr,
+        os_int end_addr,
+        os_ushort flags,
+        void *context);
+
 
     /**
     ************************************************************************************************
       Member variables
     ************************************************************************************************
     */
+
+    iocHandle m_handle;
+    os_boolean m_handle_set;
 };
 
 #endif

@@ -137,11 +137,13 @@ os_int eHandle::childcount(
 ****************************************************************************************************
 */
 eHandle *eHandle::first(
-    e_oid id)
+    e_oid id,
+    os_boolean exact_match)
 {
     eHandle
         *n,
-        *m;
+        *m,
+        *follower;
 
     /* Set n to point root of child object's red/black tree.
      */
@@ -175,6 +177,7 @@ eHandle *eHandle::first(
     /* Handle normal case where child object is searched by exactly
        matching object identifier.
      */
+    follower = OS_NULL;
     while (n != OS_NULL)
     {
         /* If object identifier matches, check if there
@@ -185,13 +188,14 @@ eHandle *eHandle::first(
             while ((m = n->prev(id))) {
                 n = m;
             }
-            break;
+            return n;
         }
 
         /* Smaller, search to the left.
          */
         else if (id < n->m_oid)
         {
+            follower = n;
             n = n->m_left;
         }
 
@@ -203,9 +207,15 @@ eHandle *eHandle::first(
         }
     }
 
-    /* Return object pointer or OS_NULL if none found.
+    /* If name match is not required, return pointer one which would follow x in order.
      */
-    return n;
+    if (!exact_match) {
+        return follower;
+    }
+
+    /* Return OS_NULL, none found.
+     */
+    return OS_NULL;
 }
 
 
@@ -1526,144 +1536,3 @@ void eHandle::delete_case6(
         rotate_right(n->m_up);
     }
 }
-
-
-/**
-****************************************************************************************************
-
-  @brief Write object to stream.
-
-  The eHandle::write() function writes object with class information, attachments, etc to
-  the stream.
-
-  @param  stream The stream to write to.
-  @param  flags Serialization flags.
-
-  @return If successfull the function returns ESTATUS_SUCCESS (0). If writing object to stream
-          fails, value ESTATUS_WRITING_OBJ_FAILED is returned. Assume that all nonzero values
-          indicate an error.
-
-****************************************************************************************************
-*/
-#if 0
-eStatus eHandle::write(
-    eStream *stream,
-    os_int flags)
-{
-    eHandle
-        *child;
-
-    os_long
-        n_attachements;
-
-    /* Write class identifier, object identifier and persistant object flags.
-     */
-    if (*stream << classid()) goto failed;
-    if (*stream << oid()) goto failed;
-    if (*stream << flags() & (EOBJ_SERIALIZATION_MASK)) goto failed;
-
-    /* Calculate and write number of attachments.
-     */
-    n_attachements = 0;
-    for (child = first(EOID_ALL); child; child = child->next(EOID_ALL))
-    {
-        if (child->isserattachment()) n_attachements++;
-    }
-    if (*stream << n_attachements) goto failed;
-
-    /* Write the object content.
-     */
-    if (writer(stream, flags)) goto failed;
-
-    /* Write attachments.
-     */
-    for (child = first(EOID_ALL); child; child = child->next(EOID_ALL))
-    {
-        if (child->isserattachment())
-        {
-            if (child->write(stream, flags)) goto failed;
-        }
-    }
-
-    /* Object succesfully written.
-     */
-    return ESTATUS_SUCCESS;
-
-    /* Writing object failed.
-     */
-failed:
-    return ESTATUS_WRITING_OBJ_FAILED;
-}
-#endif
-
-/**
-****************************************************************************************************
-
-  @brief Read object from stream.
-
-  The eHandle::read() function reads class information, etc from the stream, creates new
-  child object and reads child object content and attachments.
-
-  @param  stream The stream to write to.
-  @param  flags Serialization flags.
-
-  @return If successfull the function returns pointer to te new child object.
-          If reading object from stream fails, value OS_NULL is returned.
-
-****************************************************************************************************
-*/
-#if 0
-eHandle *eHandle::read(
-    eStream *stream,
-    os_int flags)
-{
-    os_int
-        cid,
-        oid,
-        oflags;
-
-    os_long
-        n_attachements,
-        i;
-
-    eHandle
-        *child;
-
-    /* Read class identifier, object identifier, persistant object flags
-       and number of attachments.
-     */
-    if (*stream >> cid) goto failed;
-    if (*stream >> oid) goto failed;
-    if (*stream >> oflags) goto failed;
-    if (*stream >> n_attachements) goto failed;
-
-    /* Generate new object.
-     */
-    child = newchild(cid, oid);
-    if (child == OS_NULL) goto failed;
-
-    /* Set flags.
-     */
-    child->setflags(oflags);
-
-    /* Read the object content.
-     */
-    if (child->reader(stream, flags)) goto failed;
-
-    /* Read attachments.
-     */
-    for (i = 0; i<n_attachements; i++)
-    {
-        if (read(stream, flags) == OS_NULL) goto failed;
-    }
-
-    /* Object succesfully read, return pointer to it.
-     */
-    return child;
-
-    /* Reading object failed.
-     */
-failed:
-    return OS_NULL;
-}
-#endif

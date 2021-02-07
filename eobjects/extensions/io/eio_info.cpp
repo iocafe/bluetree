@@ -109,8 +109,6 @@ void eioRoot::info_callback(
     s = osal_create_json_indexer(&jindex, mblk->buf, mblk->nbytes, 0);
     if (s) goto getout;
 
-
-//    ioc_unlock(root);
     os_memclear(&state, sizeof(state));
     state.root = root;
 #if IOC_MBLK_SPECIFIC_DEVICE_NAME

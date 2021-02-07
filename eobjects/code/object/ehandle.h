@@ -233,7 +233,8 @@ public:
     /* Get first child object identified by oid.
      */
     eHandle *first(
-        e_oid id = EOID_CHILD);
+        e_oid id = EOID_CHILD,
+        os_boolean exact_match = OS_TRUE);
 
     /* Get last child object identified by oid.
      */

@@ -268,6 +268,8 @@ void eioRoot::io_root_callback(
         minfo.device_nr = root->device_nr;
 #endif
         minfo.mblk_name = mblk->mblk_name;
+        minfo.mblk = mblk;
+        minfo.root = root;
     }
     else
     {
@@ -284,7 +286,13 @@ void eioRoot::io_root_callback(
                 ioc_add_callback(&mblk->handle, info_callback, context);
             }
 
-            t->connected(&minfo);
+            if (mblk) {
+                t->connected(&minfo);
+            }
+            else {
+                osal_debug_error("IOC_NEW_MEMORY_BLOCK: NULL mblk");
+            }
+
             break;
 
         case IOC_MBLK_CONNECTED_AS_SOURCE:
@@ -292,7 +300,12 @@ void eioRoot::io_root_callback(
             break;
 
         case IOC_MEMORY_BLOCK_DELETED:
-            t->disconnected(&minfo);
+            if (mblk) {
+                t->disconnected(&minfo);
+            }
+            else {
+                osal_debug_error("IOC_MEMORY_BLOCK_DELETED: NULL mblk");
+            }
             break;
 
         default:
@@ -426,7 +439,6 @@ eioVariable *eioRoot::new_signal(
         variable->setpropertys(EVARP_TEXT, signal_name);
     }
     variable->setup(minfo, sinfo, flags);
-
 
     signal = eioSignal::cast(mblk->byname(sinfo->signal_name));
     if (signal) if (signal->oid() != sinfo->addr) {

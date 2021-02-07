@@ -415,7 +415,8 @@ public:
     /* Get the first child object identified by oid.
      */
     eObject *first(
-        e_oid id = EOID_CHILD);
+        e_oid id = EOID_CHILD,
+        os_boolean exact_match = OS_TRUE);
 
     /* Get the first child eVariable identified by oid.
      */
