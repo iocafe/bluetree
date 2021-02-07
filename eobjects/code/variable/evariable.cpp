@@ -240,13 +240,15 @@ void eVariable::object_info(
 
     propertyv(EVARP_TEXT, &value);
     if (!value.isempty()) {
-        eVariable value2;
-        value2 += "\"";
-        value2 += value;
-        value2 += "\" ";
-        item->propertyv(EVARP_TEXT, &value);
-        value2 += value;
-        item->setpropertyv(EVARP_TEXT, &value2);
+        eVariable modif_text;
+        item->propertyv(EVARP_TEXT, &modif_text);
+        if (!modif_text.starts_with(value.gets()))
+        {
+            modif_text += ", \"";
+            modif_text += value;
+            modif_text += "\"";
+            item->setpropertyv(EVARP_TEXT, &modif_text);
+        }
     }
 
     i = 0;
@@ -2117,6 +2119,31 @@ void eVariable::tolower()
         }
         p++;
     }
+}
+
+/**
+****************************************************************************************************
+
+  @brief Check if variable value as string starts with text given as argument.
+
+  Check if name variable value starts with specified string, but doesn't continue with text.
+
+****************************************************************************************************
+*/
+os_boolean eVariable::starts_with(
+    os_char *text)
+{
+    os_memsz text_len;
+    const os_char *p;
+    os_boolean starts_with_it;
+
+    p = gets();
+    text_len = os_strlen(text) - 1;
+    starts_with_it = OS_FALSE;
+    if (!os_strncmp(p, text, text_len)) {
+        starts_with_it = !osal_char_isalpha(p[text_len]);
+    }
+    return starts_with_it;
 }
 
 

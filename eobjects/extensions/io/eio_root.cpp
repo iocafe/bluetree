@@ -391,13 +391,21 @@ eioVariable *eioRoot::new_signal(
     os_char flags)
 {
     eioMblk *mblk;
+    eioSignal *signal;
     eioDevice *device;
     eioGroup *group;
+    eioVariable *variable;
 
     mblk = connected(minfo);
     if (mblk == OS_NULL) {
         osal_debug_error_str("new_signal: Mblk could not be created: ", minfo->device_name);
         return OS_NULL;
+    }
+
+    signal = eioSignal::cast(mblk->byname(sinfo->signal_name));
+    if (signal == OS_NULL) {
+        signal = new eioSignal(mblk);
+        signal->addname(sinfo->signal_name);
     }
 
     device = eioDevice::cast(mblk->grandparent());
@@ -408,6 +416,12 @@ eioVariable *eioRoot::new_signal(
         group->addname(sinfo->group_name);
     }
 
+    variable = eioVariable::cast(group->byname(sinfo->signal_name));
+    if (variable == OS_NULL) {
+        variable = new eioVariable(group);
+        variable->addname(sinfo->signal_name);
+        variable->setpropertys(EVARP_TEXT, sinfo->signal_name);
+    }
 
 #if 0
     iocDynamicSignal *dsignal, *prev_dsignal;
@@ -484,6 +498,7 @@ eioRoot *eio_initialize(
     eioMblk::setupclass();
     eioGroup::setupclass();
     eioVariable::setupclass();
+    eioSignal::setupclass();
     eioThread::setupclass();
 
     eio_root = new eioRoot(parent);

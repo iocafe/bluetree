@@ -816,7 +816,7 @@ void eNetMaintainThread::make_connection_name(
                     break;
 
                 default:
-                    if (osal_char_isaplha(c) || osal_char_isdigit(c)) {
+                    if (osal_char_isalpha(c) || osal_char_isdigit(c)) {
                         *(d++) = c;
                     }
                     else {

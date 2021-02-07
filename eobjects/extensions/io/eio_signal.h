@@ -1,7 +1,7 @@
 /**
 
-  @file    eio_variable.h
-  @brief   IO variable class.
+  @file    esignal.h
+  @brief   Object representing an IO signal.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    2.10.2020
@@ -16,20 +16,20 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EIO_VARIABLE_H_
-#define EIO_VARIABLE_H_
+#ifndef EIO_SIGNAL_H_
+#define EIO_SIGNAL_H_
 #include "eobjects.h"
 
 
 
 /**
 ****************************************************************************************************
-  The eioVariable is a class derived from eVariable. It adds time stamp and state bits.
+  The eioSignal is a class derived from eVariable. It adds time stamp and state bits.
 ****************************************************************************************************
 */
-class eioVariable : public eVariable
+class eioSignal : public eVariable
 {
-    friend class eioVariableSpace;
+    friend class eioSignalSpace;
 
     /**
     ************************************************************************************************
@@ -39,34 +39,34 @@ class eioVariable : public eVariable
 public:
     /* Constructor.
      */
-    eioVariable(
+    eioSignal(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_EROOT_OPTIONAL);
 
     /* Virtual destructor.
      */
-    virtual ~eioVariable();
+    virtual ~eioSignal();
 
-    /* Clone the eioVariable.
+    /* Clone the eioSignal.
      */
     virtual eObject *clone(
         eObject *parent,
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Cast eObject pointer to eioVariable pointer.
+    /* Cast eObject pointer to eioSignal pointer.
      */
-    inline static eioVariable *cast(
+    inline static eioSignal *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_EIO_VARIABLE)
-        return (eioVariable*)o;
+        e_assert_type(o, ECLASSID_EIO_SIGNAL)
+        return (eioSignal*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_EIO_VARIABLE;}
+    virtual os_int classid() {return ECLASSID_EIO_SIGNAL;}
 
     /* Static function to add class to propertysets and class list.
      */
@@ -87,12 +87,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eioVariable *newobj(
+    static eioSignal *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eioVariable(parent, id, flags);
+        return new eioSignal(parent, id, flags);
     }
 
     /**

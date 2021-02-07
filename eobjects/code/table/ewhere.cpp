@@ -569,14 +569,14 @@ os_boolean eWhere::number_or_column_name()
 
     /* If column name.
      */
-    if (osal_char_isaplha(*m_pos) || *m_pos == '_')
+    if (osal_char_isalpha(*m_pos) || *m_pos == '_')
     {
         end = m_pos;
         do
         {
             c = *(++end);
         }
-        while (osal_char_isaplha(c) ||
+        while (osal_char_isalpha(c) ||
                osal_char_isdigit(c) ||
                c == '_');
 
@@ -804,7 +804,7 @@ os_char *eWhere::getword()
     const os_char *p;
 
     p = m_pos;
-    while (osal_char_isaplha(*p) && *p != '\n') p++;
+    while (osal_char_isalpha(*p) && *p != '\n') p++;
 
     m_word->sets(m_pos, p - m_pos);
     m_pos = p;

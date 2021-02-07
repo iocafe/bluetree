@@ -225,7 +225,7 @@ eioMblk *eioDevice::connected(
 
     if (m_mblks == OS_NULL) {
         m_mblks = new eContainer(this);
-        m_mblks->addname("mblks");
+        m_mblks->addname("_mblks");
         m_mblks->ns_create();
     }
 

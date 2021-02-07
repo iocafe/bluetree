@@ -1,7 +1,7 @@
 /**
 
-  @file    eio_variable.cpp
-  @brief   IO variable class.
+  @file    esignal.cpp
+  @brief   Object representing an IO signal.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    2.10.2020
@@ -29,7 +29,7 @@
 
 ****************************************************************************************************
 */
-eioVariable::eioVariable(
+eioSignal::eioSignal(
     eObject *parent,
     e_oid id,
     os_int flags)
@@ -51,7 +51,7 @@ eioVariable::eioVariable(
 
 ****************************************************************************************************
 */
-eioVariable::~eioVariable()
+eioSignal::~eioSignal()
 {
 }
 
@@ -71,13 +71,13 @@ eioVariable::~eioVariable()
 
 ****************************************************************************************************
 */
-eObject *eioVariable::clone(
+eObject *eioSignal::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
-    eioVariable *clonedobj;
-    clonedobj = new eioVariable(parent, id == EOID_CHILD ? oid() : id, flags());
+    eioSignal *clonedobj;
+    clonedobj = new eioSignal(parent, id == EOID_CHILD ? oid() : id, flags());
 
     /* Copy variable value.
      */
@@ -89,7 +89,6 @@ eObject *eioVariable::clone(
     clonedobj->m_state_bits = m_state_bits;
     clonedobj->m_timestamp = m_timestamp;
 
-
     /* Copy clonable attachments.
      */
     clonegeneric(clonedobj, aflags);
@@ -100,23 +99,23 @@ eObject *eioVariable::clone(
 /**
 ****************************************************************************************************
 
-  @brief Add eioVariable to class list and class'es properties to it's property set.
+  @brief Add eioSignal to class list and class'es properties to it's property set.
 
-  The eioVariable::setupclass function adds eioVariable to class list and class'es properties to
+  The eioSignal::setupclass function adds eioSignal to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
 ****************************************************************************************************
 */
-void eioVariable::setupclass()
+void eioSignal::setupclass()
 {
-    const os_int cls = ECLASSID_EIO_VARIABLE;
+    const os_int cls = ECLASSID_EIO_SIGNAL;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioVariable");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioSignal");
     eVariable::setupproperties(cls);
     addproperty (cls, EIOP_SBITS, eiop_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty (cls, EIOP_TSTAMP, eiop_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
@@ -146,7 +145,7 @@ void eioVariable::setupclass()
 
 ****************************************************************************************************
 */
-eStatus eioVariable::onpropertychange(
+eStatus eioSignal::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -184,7 +183,7 @@ eStatus eioVariable::onpropertychange(
 
 ****************************************************************************************************
 */
-eStatus eioVariable::simpleproperty(
+eStatus eioSignal::simpleproperty(
     os_int propertynr,
     eVariable *x)
 {

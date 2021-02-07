@@ -411,6 +411,11 @@ public:
      */
     void tolower();
 
+    /* Check if variable value as string starts with text given as argument.
+     */
+    os_boolean starts_with(
+        os_char *text);
+
     /* Remove stuff from path what becomes unnecessary when oix is appended to it.
      */
     os_boolean clean_to_append_oix();
