@@ -20,19 +20,6 @@
 #define EIO_VARIABLE_H_
 #include "eobjects.h"
 
-typedef struct eioSignalMaping
-{
-    /** Memory block name, max 15 characters.
-     */
-    os_char mblk_name[IOC_NAME_SZ];
-
-    /** Memory block handle.
-     */
-    iocHandle handle;
-
-}
-eioSignalMaping;
-
 
 /**
 ****************************************************************************************************
@@ -112,10 +99,10 @@ public:
       Extended value functions
     ************************************************************************************************
     */
-    inline os_int sbits() {return m_state_bits;}
+    /* inline os_int sbits() {return m_state_bits;}
     inline os_long tstamp() {return m_timestamp;}
     inline void set_sbits(os_int x) {m_state_bits = x;}
-    inline void set_tstamp(os_long x) {m_timestamp = x;}
+    inline void set_tstamp(os_long x) {m_timestamp = x;} */
 
     /**
     ************************************************************************************************
@@ -123,17 +110,19 @@ public:
     ************************************************************************************************
     */
     void setup(
+        struct eioSignal *signal,
         struct eioMblkInfo *minfo,
         struct eioSignalInfo *sinfo);
 
     void up(eValueX *x);
 
-protected:
-    eioSignalMaping m_in;
-    eioSignalMaping m_out;
+    void down();
 
-    os_int m_state_bits;
-    os_long m_timestamp;
+protected:
+    // ePointer *m_up;
+    ePointer *m_down_ref;
+
+    os_short m_my_own_change;
 };
 
 #endif

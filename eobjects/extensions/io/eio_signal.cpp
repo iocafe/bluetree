@@ -281,7 +281,8 @@ void eioSignal::up()
         else {
             p = os_malloc(p_sz, OS_NULL);
         }
-        state_bits = ioc_move_str(&m_signal, p, p_sz, OSAL_STATE_CONNECTED, OS_STR|IOC_SIGNAL_NO_THREAD_SYNC);
+        state_bits = ioc_move_str(&m_signal, p, p_sz,
+            OSAL_STATE_CONNECTED, OS_STR|IOC_SIGNAL_NO_THREAD_SYNC);
         x->set_sbits(state_bits);
         *x = p;
 
@@ -297,7 +298,8 @@ void eioSignal::up()
         p_sz = m_signal.n * type_sz;
         p = os_malloc(p_sz, OS_NULL);
 
-        state_bits = ioc_move_array(&m_signal, 0, p, m_signal.n, OSAL_STATE_CONNECTED, IOC_SIGNAL_NO_THREAD_SYNC);
+        state_bits = ioc_move_array(&m_signal, 0, p, m_signal.n,
+            OSAL_STATE_CONNECTED, IOC_SIGNAL_NO_THREAD_SYNC);
         x->set_sbits(state_bits);
 
         nrows = (m_signal.n + m_ncolumns - 1) / m_ncolumns;

@@ -35,11 +35,8 @@ eioVariable::eioVariable(
     os_int flags)
     : eVariable(parent, id, flags)
 {
-    os_memclear(&m_in, sizeof(m_in));
-    os_memclear(&m_out, sizeof(m_out));
-
-    m_state_bits = OSAL_STATE_CONNECTED;
-    m_timestamp = 0;
+    m_down_ref = OS_NULL;
+    m_my_own_change = 0;
 }
 
 
@@ -87,12 +84,6 @@ eObject *eioVariable::clone(
     clonedobj->setv(this);
     clonedobj->setdigs(digs());
 
-    /* Copy state bits and time stamp.
-     */
-    clonedobj->m_state_bits = m_state_bits;
-    clonedobj->m_timestamp = m_timestamp;
-
-
     /* Copy clonable attachments.
      */
     clonegeneric(clonedobj, aflags);
@@ -121,8 +112,8 @@ void eioVariable::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioVariable");
     eVariable::setupproperties(cls);
-    addproperty (cls, EIOP_SBITS, eiop_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addproperty (cls, EIOP_TSTAMP, eiop_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
+//    addproperty (cls, EIOP_SBITS, eiop_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
+//    addproperty (cls, EIOP_TSTAMP, eiop_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();
 }
@@ -156,13 +147,21 @@ eStatus eioVariable::onpropertychange(
 {
     switch (propertynr)
     {
-        case EIOP_SBITS:
+        /* case EIOP_SBITS:
             m_state_bits = (os_int)x->getl();
             break;
 
         case EIOP_TSTAMP:
             m_timestamp = x->getl();
+            break; */
+
+        case EVARP_VALUE:
+            if (compare(x)) {
+                eVariable::onpropertychange(propertynr, x, flags);
+                down();
+            }
             break;
+
 
         default:
             return eVariable::onpropertychange(propertynr, x, flags);
@@ -193,13 +192,13 @@ eStatus eioVariable::simpleproperty(
 {
     switch (propertynr)
     {
-        case EIOP_SBITS:
+        /* case EIOP_SBITS:
             x->setl(m_state_bits);
             break;
 
         case EIOP_TSTAMP:
             x->setl(m_timestamp);
-            break;
+            break; */
 
         default:
             return eVariable::simpleproperty(propertynr, x);
@@ -209,18 +208,39 @@ eStatus eioVariable::simpleproperty(
 
 
 void eioVariable::setup(
+    struct eioSignal *signal,
     struct eioMblkInfo *minfo,
     struct eioSignalInfo *sinfo)
 {
+    os_short mblk_flags;
 
+    mblk_flags = signal->mblk_flags();
+
+    if (mblk_flags & IOC_MBLK_DOWN) {
+        if (m_down_ref == OS_NULL) {
+            m_down_ref = new ePointer(this);
+        }
+
+        m_down_ref->set(signal);
+
+        if ((mblk_flags & IOC_MBLK_UP) == 0) {
+            down();
+        }
+    }
 }
 
 /* Adopts x.
  */
 void eioVariable::up(eValueX *x)
 {
-    // myownchange++
+    m_my_own_change++;
     setpropertyo(EVARP_VALUE, x, EMSG_DEL_CONTENT);
 
-    // myownchange--
+    m_my_own_change--;
+}
+
+void eioVariable::down()
+{
+
+    // setpropertyo(EVARP_VALUE, x, EMSG_DEL_CONTENT);
 }

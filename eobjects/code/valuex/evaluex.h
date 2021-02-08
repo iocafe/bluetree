@@ -120,6 +120,11 @@ public:
         eStream *stream,
         os_int flags);
 
+    /* Compare two variables.
+     */
+    virtual os_int compare(
+        eVariable *x,
+        os_int flags = 0);
 
     /**
     ************************************************************************************************

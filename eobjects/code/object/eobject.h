@@ -285,7 +285,7 @@ public:
 
     /**
     ************************************************************************************************
-      Object flags
+      Object flags, etc
     ************************************************************************************************
     */
 
@@ -337,6 +337,15 @@ public:
         return OS_FALSE;
     }
 
+    /** Compare base class funcion returns -1 except if comparing to object itseld.
+        The function allows us to call compare on eObject base class.
+     */
+    virtual os_int compare(
+        eVariable *x,
+        os_int flags = 0)
+    {
+        return ((eObject*)x == this) ? 0 : -1;
+    }
 
     /**
     ************************************************************************************************

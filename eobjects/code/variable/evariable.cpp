@@ -1389,6 +1389,10 @@ os_int eVariable::compare(
         *y,
         *tmp;
 
+    eObject
+        *ox,
+        *oy;
+
     os_int
         rval = 0,
         reverse;
@@ -1532,6 +1536,16 @@ os_int eVariable::compare(
             break;
 
         case OS_OBJECT:
+            rval = -1;
+            if (y->type() != OS_OBJECT) {
+                break;
+            }
+            ox = m_value.valbuf.v.o;
+            oy = y->m_value.valbuf.v.o;
+            if (ox == OS_NULL || oy == OS_NULL) {
+                break;
+            }
+            rval = oy->compare(eVariable::cast(ox));
             break;
 
         case OS_POINTER:

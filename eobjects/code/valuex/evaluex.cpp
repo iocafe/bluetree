@@ -305,3 +305,41 @@ eStatus eValueX::reader(
 failed:
     return ESTATUS_READING_OBJ_FAILED;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Compare value of this variable to another variable.
+
+  If eVariable::compare function...
+
+  @param   x Variable to compare to. If x is OS_NULL, then the function always returns 1.
+
+  @return  -1:this < x, 0:this == x,1:this > x.
+
+****************************************************************************************************
+*/
+os_int eValueX::compare(
+    eVariable *x,
+    os_int flags)
+{
+    os_int rval;
+    eValueX *ex;
+
+    rval = eVariable::compare(x, flags);
+    if (rval) return rval;
+
+    if (x->classid() != ECLASSID_VALUEX) {
+        return 0;
+    }
+
+    ex = eValueX::cast(x);
+    if (m_timestamp != ex->m_timestamp) {
+        return m_timestamp > ex->m_timestamp ? 1 : -1;
+    }
+    if (m_state_bits != ex->m_state_bits) {
+        return m_state_bits > ex->m_state_bits ? 1 : -1;
+    }
+    return 0;
+}

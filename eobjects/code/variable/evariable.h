@@ -377,7 +377,7 @@ public:
     */
     /* Compare two variables.
      */
-    os_int compare(
+    virtual os_int compare(
         eVariable *x,
         os_int flags = 0);
 

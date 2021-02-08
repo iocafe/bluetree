@@ -98,17 +98,6 @@ public:
 
     /**
     ************************************************************************************************
-      Extended value functions
-    ************************************************************************************************
-    */
-    /* inline os_int sbits() {return m_state_bits;}
-    inline os_long tstamp() {return m_timestamp;}
-    inline void set_sbits(os_int x) {m_state_bits = x;}
-    inline void set_tstamp(os_long x) {m_timestamp = x;} */
-
-
-    /**
-    ************************************************************************************************
       X
     ************************************************************************************************
     */
@@ -117,9 +106,11 @@ public:
         struct eioMblkInfo *minfo,
         struct eioSignalInfo *sinfo);
 
-    iocSignal *iosignal() {return &m_signal; }
 
     void up();
+
+    inline iocSignal *iosignal() {return &m_signal; }
+    inline os_short mblk_flags() {return m_mblk_flags;}
 
 protected:
     /* IO object hierarchy root (time stamps).
@@ -136,9 +127,6 @@ protected:
     os_short m_mblk_flags;
 
     os_int m_ncolumns;
-
-    //os_int m_state_bits;
-    // os_long m_timestamp;
 };
 
 #endif

@@ -439,7 +439,6 @@ void eioRoot::new_signal(
         variable->addname(sinfo->signal_name);
         variable->setpropertys(EVARP_TEXT, signal_name);
     }
-    variable->setup(minfo, sinfo);
 
     esignals = mblk->esignals();
     signal = eioSignal::cast(esignals->byname(sinfo->signal_name));
@@ -452,6 +451,7 @@ void eioRoot::new_signal(
         signal->addname(sinfo->signal_name);
     }
     signal->setup(variable, minfo, sinfo);
+    variable->setup(signal, minfo, sinfo);
 }
 
 
