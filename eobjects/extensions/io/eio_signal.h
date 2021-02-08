@@ -27,7 +27,7 @@ class eioVariable;
   The eioSignal is a class derived from eVariable. It adds time stamp and state bits.
 ****************************************************************************************************
 */
-class eioSignal : public eVariable
+class eioSignal : public eObject
 {
     friend class eioSignalSpace;
 
@@ -100,10 +100,10 @@ public:
       Extended value functions
     ************************************************************************************************
     */
-    inline os_int sbits() {return m_state_bits;}
+    /* inline os_int sbits() {return m_state_bits;}
     inline os_long tstamp() {return m_timestamp;}
     inline void set_sbits(os_int x) {m_state_bits = x;}
-    inline void set_tstamp(os_long x) {m_timestamp = x;}
+    inline void set_tstamp(os_long x) {m_timestamp = x;} */
 
 
     /**
@@ -124,8 +124,8 @@ protected:
 
     iocSignal m_signal;
 
-    os_int m_state_bits;
-    os_long m_timestamp;
+    //os_int m_state_bits;
+    // os_long m_timestamp;
 };
 
 #endif

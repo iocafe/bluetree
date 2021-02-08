@@ -21,4 +21,8 @@ const os_char
     eiop_text[] = "text",
     eiop_sbits[] = "sbits",
     eiop_tstamp[] = "tstamp",
-    eiop_connected[] = "connected";
+    eiop_connected[] = "connected",
+
+    eiop_sig_addr[] = "addr",
+    eiop_sig_n[] = "n",
+    eiop_sig_type[] = "type";

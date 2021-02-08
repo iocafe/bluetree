@@ -29,6 +29,7 @@ const os_char *etype_to_label(
  */
 void emake_type_enum_str(
     eVariable *str,
-    os_boolean append_it = OS_FALSE);
+    os_boolean append_it = OS_FALSE,
+    os_boolean all_types = OS_FALSE);
 
 #endif

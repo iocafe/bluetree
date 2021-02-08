@@ -58,7 +58,8 @@ const os_char *etype_to_label(
  */
 void emake_type_enum_str(
     eVariable *str,
-    os_boolean append_it)
+    os_boolean append_it,
+    os_boolean all_types)
 {
     os_int i;
 
@@ -73,13 +74,27 @@ void emake_type_enum_str(
 
     str->appends("enum=\"");
 
+    /* Append all types.
+     */
+    if (all_types) {
+        for (i = OS_UNDEFINED_TYPE; i <= OS_POINTER; i++)
+        {
+            if (i) *str += ",";
+            str->appendl(i);
+            str->appends(". ");
+            str->appends(osal_typeid_to_name((osalTypeId)i));
+        }
+    }
+
     /* Append regular types.
      */
-    for (i = 0; i<EENUM_NRO_REGULAR_TYPES; i++) {
-        if (i) *str += ",";
-        str->appendl(regular_types[i].type_id);
-        str->appends(". ");
-        str->appends(regular_types[i].label);
+    else {
+        for (i = 0; i<EENUM_NRO_REGULAR_TYPES; i++) {
+            if (i) *str += ",";
+            str->appendl(regular_types[i].type_id);
+            str->appends(". ");
+            str->appends(regular_types[i].label);
+        }
     }
 
     str->appends("\"");

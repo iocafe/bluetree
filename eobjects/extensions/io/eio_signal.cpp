@@ -33,12 +33,12 @@ eioSignal::eioSignal(
     eObject *parent,
     e_oid id,
     os_int flags)
-    : eVariable(parent, id, flags)
+    : eObject(parent, id, flags)
 {
     os_memclear(&m_signal, sizeof(m_signal));
 
-    m_state_bits = OSAL_STATE_CONNECTED;
-    m_timestamp = 0;
+    // m_state_bits = OSAL_STATE_CONNECTED;
+    // m_timestamp = 0;
     m_variable_ref = new ePointer(this);
 }
 
@@ -82,15 +82,12 @@ eObject *eioSignal::clone(
     eioSignal *clonedobj;
     clonedobj = new eioSignal(parent, id == EOID_CHILD ? oid() : id, flags());
 
-    /* Copy variable value.
-     */
-    clonedobj->setv(this);
-    clonedobj->setdigs(digs());
+    os_memcpy(&clonedobj->m_signal, &m_signal, sizeof(iocSignal));
 
     /* Copy state bits and time stamp.
      */
-    clonedobj->m_state_bits = m_state_bits;
-    clonedobj->m_timestamp = m_timestamp;
+    // clonedobj->m_state_bits = m_state_bits;
+    // clonedobj->m_timestamp = m_timestamp;
 
     /* Copy clonable attachments.
      */
@@ -114,14 +111,19 @@ eObject *eioSignal::clone(
 void eioSignal::setupclass()
 {
     const os_int cls = ECLASSID_EIO_SIGNAL;
+    eVariable *vtype;
+    eVariable tmp;
 
     /* Add the class to class list.
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioSignal");
-    eVariable::setupproperties(cls);
-    addproperty (cls, EIOP_SBITS, eiop_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addproperty (cls, EIOP_TSTAMP, eiop_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, EIOP_SIG_ADDR, eiop_sig_addr, "address", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, EIOP_SIG_N, eiop_sig_n, "n", EPRO_PERSISTENT|EPRO_SIMPLE);
+    vtype = addpropertyl(cls, EIOP_SIG_TYPE, eiop_sig_type, "type", EPRO_PERSISTENT|EPRO_SIMPLE);
+    emake_type_enum_str(&tmp, OS_FALSE, OS_TRUE);
+    vtype->setpropertyv(EVARP_ATTR, &tmp);
+
     propertysetdone(cls);
     os_unlock();
 }
@@ -155,16 +157,14 @@ eStatus eioSignal::onpropertychange(
 {
     switch (propertynr)
     {
-        case EIOP_SBITS:
-            m_state_bits = (os_int)x->getl();
+        case EIOP_SIG_ADDR: /* read only */
+        case EIOP_SIG_N:
+        case EIOP_SIG_TYPE:
             break;
 
-        case EIOP_TSTAMP:
-            m_timestamp = x->getl();
-            break;
 
         default:
-            return eVariable::onpropertychange(propertynr, x, flags);
+            return eObject::onpropertychange(propertynr, x, flags);
     }
 
     return ESTATUS_SUCCESS;
@@ -192,16 +192,20 @@ eStatus eioSignal::simpleproperty(
 {
     switch (propertynr)
     {
-        case EIOP_SBITS:
-            x->setl(m_state_bits);
+        case EIOP_SIG_ADDR:
+            x->setl(m_signal.addr);
             break;
 
-        case EIOP_TSTAMP:
-            x->setl(m_timestamp);
+        case EIOP_SIG_N:
+            x->setl(m_signal.n);
+            break;
+
+        case EIOP_SIG_TYPE:
+            x->setl(m_signal.flags & OSAL_TYPEID_MASK);
             break;
 
         default:
-            return eVariable::simpleproperty(propertynr, x);
+            return eObject::simpleproperty(propertynr, x);
     }
     return ESTATUS_SUCCESS;
 }
