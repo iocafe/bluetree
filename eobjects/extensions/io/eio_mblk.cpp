@@ -30,6 +30,7 @@ eioMblk::eioMblk(
     os_memclear(&m_handle, sizeof(m_handle));
     m_handle_set = OS_FALSE;
     m_esignals = OS_NULL;
+    m_mblk_flags = 0;
 
     initproperties();
     ns_create();
@@ -225,17 +226,30 @@ eStatus eioMblk::oncallback(
 void eioMblk::connected(
     struct eioMblkInfo *minfo)
 {
-    if (minfo->mblk) if (os_strcmp(minfo->mblk_name, "info")) {
-        if (m_handle_set) {
-            ioc_remove_callback(&m_handle, callback, this);
-            ioc_release_handle(&m_handle);
-        }
+    /* If we kno the memory block pointer.
+     */
+    if (minfo->mblk) {
+        /* Save/update memory block flags.
+         */
+        m_mblk_flags = minfo->mblk->flags;
 
-        ioc_setup_handle(&m_handle, minfo->root, minfo->mblk);
-        ioc_add_callback(&m_handle, callback, this);
-        m_handle_set = OS_TRUE;
+        /* Set callback function, when "info" block is received.
+         */
+        if (os_strcmp(minfo->mblk_name, "info"))
+        {
+            if (m_handle_set) {
+                ioc_remove_callback(&m_handle, callback, this);
+                ioc_release_handle(&m_handle);
+            }
+
+            ioc_setup_handle(&m_handle, minfo->root, minfo->mblk);
+            ioc_add_callback(&m_handle, callback, this);
+            m_handle_set = OS_TRUE;
+        }
     }
 
+    /* Mark connected.
+     */
     setpropertyl(EIOP_CONNECTED, OS_TRUE);
 }
 
@@ -292,10 +306,12 @@ void eioMblk::callback(
         return;
     }
 
+    os_lock();
+
     t = (eioMblk*)context;
     esignals = t->m_esignals;
     if (esignals == OS_NULL) {
-        return;
+        goto getout;
     }
 
     f = esignals->first(start_addr, OS_FALSE);
@@ -304,13 +320,13 @@ void eioMblk::callback(
     }
     if (f == OS_NULL) {
         f = esignals->first(0, OS_FALSE);
-        if (f == OS_NULL) return;
+        if (f == OS_NULL) goto getout;
     }
 
     l = esignals->first(end_addr, OS_FALSE);
     if (l == OS_NULL) {
         l = esignals->last();
-        if (l == OS_NULL) return;
+        if (l == OS_NULL) goto getout;
     }
 
     sig = f;
@@ -330,6 +346,9 @@ void eioMblk::callback(
         sig = sig->next();
     }
 
+getout:
+    os_unlock();
+    return;
 }
 
 

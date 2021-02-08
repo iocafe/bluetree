@@ -28,6 +28,7 @@ eioRoot::eioRoot(
     : eContainer(parent, oid, flags)
 {
     os_memclear(&m_io_thread_handle, sizeof(m_io_thread_handle));
+    m_time_now = 0;
 
     initproperties();
     ns_create();
@@ -252,6 +253,7 @@ void eioRoot::io_root_callback(
 
     os_memclear(&minfo, sizeof(minfo));
     minfo.network_name = osal_str_empty;
+    minfo.eio_root = t;
     if (dnetwork)
     {
         minfo.network_name = dnetwork->network_name;
@@ -449,7 +451,7 @@ void eioRoot::new_signal(
         signal = new eioSignal(esignals, sinfo->addr);
         signal->addname(sinfo->signal_name);
     }
-    signal->setup(variable, sinfo);
+    signal->setup(variable, minfo, sinfo);
 }
 
 

@@ -214,3 +214,13 @@ void eioVariable::setup(
 {
 
 }
+
+/* Adopts x.
+ */
+void eioVariable::up(eValueX *x)
+{
+    // myownchange++
+    setpropertyo(EVARP_VALUE, x, EMSG_DEL_CONTENT);
+
+    // myownchange--
+}

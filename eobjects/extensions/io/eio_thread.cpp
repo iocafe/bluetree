@@ -27,6 +27,8 @@ eioThread::eioThread(
     os_int flags)
     : eThread(parent, oid, flags)
 {
+    m_eio_root = OS_NULL;
+    m_iocom_root = OS_NULL;
 }
 
 
@@ -106,6 +108,7 @@ void eioThread::onmessage(
 */
 void eioThread::run()
 {
+    os_long ti;
     timer(2000);
 
     while (OS_TRUE)
@@ -114,6 +117,13 @@ void eioThread::run()
         if (exitnow()) {
             break;
         }
+
+        /* We have one time stamp, so changes happening same time have same time value.
+         */
+        ti = etime();
+        os_lock();
+        m_eio_root->set_time_now(ti);
+        os_unlock();
 
         ioc_receive_all(m_iocom_root);
         ioc_send_all(m_iocom_root);
@@ -143,6 +153,7 @@ void eio_start_thread(
     t->addname("//_iothread");
 
     t->set_iocom_root(eio_root->iocom_root());
+    t->set_eio_root(eio_root);
     t->start(io_thread_handle);
 }
 

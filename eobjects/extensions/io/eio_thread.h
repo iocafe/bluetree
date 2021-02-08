@@ -59,6 +59,14 @@ public:
         m_iocom_root = iocom_root;
     }
 
+    /* Save object hierarchy root. This is used only setting time stamps.
+     */
+    inline void set_eio_root(
+        eioRoot *eio_root)
+    {
+        m_eio_root = eio_root;
+    }
+
     /* RUN IOCOM communication, thread main loop.
      */
     virtual void run();
@@ -80,6 +88,10 @@ protected:
     /** IOCOM root object!
      */
     iocRoot *m_iocom_root;
+
+    /** IO object hierarchy root (time stamps).
+     */
+    eioRoot *m_eio_root;
 };
 
 

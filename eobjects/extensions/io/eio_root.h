@@ -32,8 +32,9 @@ typedef struct eioMblkInfo {
     const os_char *mblk_name;
     const os_char *network_name;
 
-    iocMemoryBlock *mblk;
-    iocRoot *root;
+    iocRoot *root;              /* Pointer to iocom root object */
+    iocMemoryBlock *mblk;       /* Pointer to IOCOM memory block */
+    eioRoot *eio_root;          /* IO object hierarchy root (time stamps). */
 }
 eioMblkInfo;
 
@@ -132,6 +133,9 @@ public:
 
     inline iocRoot *iocom_root() {return m_iocom_root; }
 
+    void set_time_now(os_long ti) { m_time_now = ti; }
+    os_long time_now() {return m_time_now; }
+
     /** IO thread handle.
      */
     eThreadHandle m_io_thread_handle;
@@ -212,6 +216,9 @@ protected:
      */
     iocRoot *m_iocom_root;
 
+    /* Time stamp now.
+     */
+    os_long m_time_now;
 };
 
 

@@ -126,6 +126,8 @@ public:
         struct eioMblkInfo *minfo,
         struct eioSignalInfo *sinfo);
 
+    void up(eValueX *x);
+
 protected:
     eioSignalMaping m_in;
     eioSignalMaping m_out;

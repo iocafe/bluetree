@@ -111,7 +111,8 @@ public:
 
     eContainer *esignals();
 
-    iocHandle *handle_ptr() {return &m_handle;}
+    inline iocHandle *handle_ptr() {return &m_handle;}
+    inline os_short mblk_flags() {return m_mblk_flags; }
 
 protected:
     /**
@@ -135,6 +136,8 @@ protected:
 
     iocHandle m_handle;
     os_boolean m_handle_set;
+
+    os_short m_mblk_flags;       /* Memory block flags, bit fields: IOC_MBLK_DOWN, IOC_MBLK_UP. */
 
     eContainer *m_esignals;
 };

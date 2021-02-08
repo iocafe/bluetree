@@ -123,6 +123,7 @@ void eioRoot::info_callback(
     state.minfo.device_nr = root->device_nr;
     state.minfo.network_name = mblk->network_name;
 #endif
+    state.minfo.eio_root = t;
     state.resize_mblks = OS_TRUE; // resize_mblks;
 
     os_lock();

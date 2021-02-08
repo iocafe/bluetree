@@ -21,6 +21,7 @@
 #include "eobjects.h"
 
 class eioVariable;
+class eioRoot;
 
 /**
 ****************************************************************************************************
@@ -113,6 +114,7 @@ public:
     */
     void setup(
         eioVariable *variable,
+        struct eioMblkInfo *minfo,
         struct eioSignalInfo *sinfo);
 
     iocSignal *iosignal() {return &m_signal; }
@@ -120,9 +122,20 @@ public:
     void up();
 
 protected:
+    /* IO object hierarchy root (time stamps).
+     */
+    eioRoot *m_eio_root;
+
     ePointer *m_variable_ref;
 
     iocSignal m_signal;
+
+    /* Memory block flags, bit fields: IOC_MBLK_DOWN, IOC_MBLK_UP. Copied here so no need to
+       look up every time from eioMlk.
+     */
+    os_short m_mblk_flags;
+
+    os_int m_ncolumns;
 
     //os_int m_state_bits;
     // os_long m_timestamp;
