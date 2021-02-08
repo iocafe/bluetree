@@ -109,6 +109,10 @@ public:
     void disconnected(
         eioMblkInfo *minfo);
 
+    eContainer *esignals();
+
+    iocHandle *handle_ptr() {return &m_handle;}
+
 protected:
     /**
     ************************************************************************************************
@@ -123,7 +127,6 @@ protected:
         os_ushort flags,
         void *context);
 
-
     /**
     ************************************************************************************************
       Member variables
@@ -132,6 +135,8 @@ protected:
 
     iocHandle m_handle;
     os_boolean m_handle_set;
+
+    eContainer *m_esignals;
 };
 
 #endif

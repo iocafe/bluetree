@@ -210,8 +210,7 @@ eStatus eioVariable::simpleproperty(
 
 void eioVariable::setup(
     struct eioMblkInfo *minfo,
-    struct eioSignalInfo *sinfo,
-    os_int flags)
+    struct eioSignalInfo *sinfo)
 {
 
 }

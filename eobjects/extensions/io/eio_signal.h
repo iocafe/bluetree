@@ -108,16 +108,21 @@ public:
 
     /**
     ************************************************************************************************
-      Extended value functions
+      X
     ************************************************************************************************
     */
     void setup(
         eioVariable *variable,
-        struct eioSignalInfo *sinfo,
-        os_int flags);
+        struct eioSignalInfo *sinfo);
+
+    iocSignal *iosignal() {return &m_signal; }
+
+    void up();
 
 protected:
     ePointer *m_variable_ref;
+
+    iocSignal m_signal;
 
     os_int m_state_bits;
     os_long m_timestamp;

@@ -57,6 +57,9 @@ typedef struct eioInfoParserState
      */
     osalJsonIndex mblk_groups_jindex;
     os_boolean mblk_groups_jindex_set;
+    osalJsonIndex mblk_signals_jindex;
+    os_boolean mblk_signals_jindex_set;
+
 }
 eioInfoParserState;
 
@@ -212,10 +215,10 @@ eStatus eioRoot::process_info_block(
              */
             if (is_signal_block)
             {
-                if (state->minfo.mblk_name == OS_NULL) {
+                if (state->minfo.mblk_name == OS_NULL || state->sinfo.group_name == OS_NULL) {
                     return ESTATUS_SUCCESS;
                 }
-                return ioc_new_signal_by_info(state);
+                return new_signal_by_info(state);
             }
             if (is_mblk_block && state->resize_mblks)
             {
@@ -243,6 +246,10 @@ eStatus eioRoot::process_info_block(
                     state->mblk_groups_jindex = *jindex;
                     state->mblk_groups_jindex_set = OS_TRUE;
                 }
+                if (!os_strcmp(array_tag_buf, "signals") && state->sinfo.group_name == OS_NULL) {
+                    state->mblk_signals_jindex = *jindex;
+                    state->mblk_signals_jindex_set = OS_TRUE;
+                }
                 es = process_info_array(state, array_tag_buf, jindex);
                 if (es) return es;
                 break;
@@ -263,10 +270,10 @@ eStatus eioRoot::process_info_block(
                     else if (!os_strcmp(array_tag, "groups"))
                     {
                         state->sinfo.group_name = item.value.s;
-                        if (!os_strcmp(state->sinfo.group_name, "inputs") ||
-                            !os_strcmp(state->sinfo.group_name, "outputs"))
-                        {
-                            state->current_type_id = OS_BOOLEAN;
+
+                        if (state->mblk_signals_jindex_set) {
+                            es = process_info_array(state, "signals", &state->mblk_signals_jindex);
+                            if (es) return es;
                         }
                     }
 
@@ -361,6 +368,12 @@ eStatus eioRoot::process_info_array(
             state->mblk_groups_jindex_set = OS_FALSE;
         }
 
+        if (!os_strcmp(array_tag, "groups"))
+        {
+            state->sinfo.group_name = OS_NULL;
+            state->mblk_signals_jindex_set = OS_FALSE;
+        }
+
         state->tag = item.tag_name;
 
         switch (item.code)
@@ -397,7 +410,7 @@ eStatus eioRoot::process_info_array(
 
   @brief Add IO signal to dynamic information.
 
-  The ioc_new_signal_by_info() function adds a new IO signal to dynamic information. This
+  The new_signal_by_info() function adds a new IO signal to dynamic information. This
   function is called when parting packed JSON in info block. Synchronization ioc_lock()
   must be on when this function is called.
 
@@ -406,7 +419,7 @@ eStatus eioRoot::process_info_array(
 
 ****************************************************************************************************
 */
-eStatus eioRoot::ioc_new_signal_by_info(
+eStatus eioRoot::new_signal_by_info(
     eioInfoParserState *state)
 {
     osalTypeId signal_type_id;
@@ -431,7 +444,8 @@ eStatus eioRoot::ioc_new_signal_by_info(
     n = state->sinfo.n;
     if (n < 1) n = 1;
 
-    new_signal(&state->minfo, &state->sinfo, signal_type_id);
+    state->sinfo.flags = signal_type_id;
+    new_signal(&state->minfo, &state->sinfo);
 
 
     switch(signal_type_id)

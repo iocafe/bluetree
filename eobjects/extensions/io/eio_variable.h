@@ -124,8 +124,7 @@ public:
     */
     void setup(
         struct eioMblkInfo *minfo,
-        struct eioSignalInfo *sinfo,
-        os_int flags);
+        struct eioSignalInfo *sinfo);
 
 protected:
     eioSignalMaping m_in;

@@ -35,6 +35,8 @@ eioSignal::eioSignal(
     os_int flags)
     : eVariable(parent, id, flags)
 {
+    os_memclear(&m_signal, sizeof(m_signal));
+
     m_state_bits = OSAL_STATE_CONNECTED;
     m_timestamp = 0;
     m_variable_ref = new ePointer(this);
@@ -207,8 +209,56 @@ eStatus eioSignal::simpleproperty(
 
 void eioSignal::setup(
     eioVariable *variable,
-    struct eioSignalInfo *sinfo,
-    os_int flags)
+    struct eioSignalInfo *sinfo)
 {
+    eioMblk *mblk;
+
+    mblk = eioMblk::cast(grandparent());
+
     m_variable_ref->set(variable);
+
+    m_signal.handle = mblk->handle_ptr();
+    m_signal.addr = sinfo->addr;
+    m_signal.flags = sinfo->flags;
+    m_signal.n = sinfo->n;
+
+    if (1) up();
+
+        // sinfo->ncolumns;
+
+}
+
+
+void eioSignal::up()
+{
+    eioVariable *v;
+    iocValue vv;
+    os_short type_id;
+
+    v = eioVariable::cast(m_variable_ref->get());
+    if (v == OS_NULL) {
+        return;
+    }
+
+    type_id = m_signal.flags & OSAL_TYPEID_MASK;
+
+
+    if (type_id == OS_STR) {
+        //vv[i].state_bits = ioc_move_str(sig, nbuf, sizeof(nbuf), OSAL_STATE_CONNECTED, flags);
+    }
+    else {
+        ioc_move(&m_signal, &vv, 1, IOC_SIGNAL_NO_THREAD_SYNC);
+
+        switch (type_id)
+        {
+            default:
+                v->setl(vv.value.l);
+                break;
+
+            case OS_FLOAT:
+            case OS_DOUBLE:
+                v->setd(vv.value.d);
+                break;
+        }
+    }
 }

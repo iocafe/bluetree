@@ -394,26 +394,25 @@ void eioRoot::disconnected(
   @param   flags: OS_BOOLEAN, OS_CHAR, OS_UCHAR, OS_SHORT, OS_USHORT, OS_INT, OS_UINT,
            OS_LONG, OS_FLOAT, OS_DOUBLE, or OS_STR.
 
-  @return  Pointer to dynamic signal. OS_NULL if memory allocation failed.
 
 ****************************************************************************************************
 */
-eioVariable *eioRoot::new_signal(
+void eioRoot::new_signal(
     eioMblkInfo *minfo,
-    eioSignalInfo *sinfo,
-    os_int flags)
+    eioSignalInfo *sinfo)
 {
     eioMblk *mblk;
     eioSignal *signal;
     eioDevice *device;
     eioGroup *group;
     eioVariable *variable;
+    eContainer *esignals;
     const os_char *signal_name;
 
     mblk = connected(minfo);
     if (mblk == OS_NULL) {
         osal_debug_error_str("new_signal: Mblk could not be created: ", minfo->device_name);
-        return OS_NULL;
+        return;
     }
 
     /* Skip "set_" in signal name. We are merging in and out of parameter settings
@@ -438,73 +437,19 @@ eioVariable *eioRoot::new_signal(
         variable->addname(sinfo->signal_name);
         variable->setpropertys(EVARP_TEXT, signal_name);
     }
-    variable->setup(minfo, sinfo, flags);
+    variable->setup(minfo, sinfo);
 
-    signal = eioSignal::cast(mblk->byname(sinfo->signal_name));
+    esignals = mblk->esignals();
+    signal = eioSignal::cast(esignals->byname(sinfo->signal_name));
     if (signal) if (signal->oid() != sinfo->addr) {
         delete signal;
         signal = OS_NULL;
     }
     if (signal == OS_NULL) {
-        signal = new eioSignal(mblk, sinfo->addr);
+        signal = new eioSignal(esignals, sinfo->addr);
         signal->addname(sinfo->signal_name);
     }
-    signal->setup(variable, sinfo, flags);
-
-
-#if 0
-    iocDynamicSignal *dsignal, *prev_dsignal;
-    os_uint hash_ix;
-
-    /* If we have existing IO network with this name,
-       just return pointer to it.
-     */
-    hash_ix = ioc_hash(signal_name) % IOC_DNETWORK_HASH_TAB_SZ;
-    prev_dsignal = OS_NULL;
-    for (dsignal = dnetwork->hash[hash_ix];
-         dsignal;
-         dsignal = dsignal->next)
-    {
-        if (!os_strcmp(signal_name, dsignal->signal_name))
-        {
-            if (!os_strcmp(mblk_name, dsignal->mblk_name) &&
-                !os_strcmp(device_name, dsignal->device_name) &&
-                device_nr == dsignal->device_nr)
-            {
-                return dsignal;
-            }
-        }
-
-        prev_dsignal = dsignal;
-    }
-
-    /* Allocate and initialize a new IO network object.
-     */
-    dsignal = ioc_initialize_dynamic_signal(signal_name);
-    if (dsignal == OS_NULL) return OS_NULL;
-    dsignal->dnetwork = dnetwork;
-    os_strncpy(dsignal->mblk_name, mblk_name, IOC_NAME_SZ);
-    os_strncpy(dsignal->device_name, device_name, IOC_NAME_SZ);
-    dsignal->device_nr = device_nr;
-    dsignal->addr = addr;
-    dsignal->n = n;
-    dsignal->ncolumns = ncolumns;
-    dsignal->flags = flags;
-
-    /* Join it as last to linked list for the hash index.
-     */
-    if (prev_dsignal)
-    {
-        prev_dsignal->next = dsignal;
-    }
-    else
-    {
-        dnetwork->hash[hash_ix] = dsignal;
-    }
-
-    return dsignal;
-#endif
-    return OS_NULL;
+    signal->setup(variable, sinfo);
 }
 
 

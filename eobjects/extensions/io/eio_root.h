@@ -43,6 +43,7 @@ typedef struct eioSignalInfo {
     os_int addr;
     os_int n;                   /* Number of elements in array, 1 if not array */
     os_int ncolumns;            /* Number of columns when array holds matrix, 1 otherwise. */
+    os_int flags;               /* Signal type + flags */
 }
 eioSignalInfo;
 
@@ -161,10 +162,9 @@ protected:
     void disconnected(
         eioMblkInfo *minfo);
 
-    eioVariable *new_signal(
+    void new_signal(
         eioMblkInfo *minfo,
-        eioSignalInfo *sinfo,
-        os_int flags);
+        eioSignalInfo *sinfo);
 
     /**
     ************************************************************************************************
@@ -190,7 +190,7 @@ protected:
         const os_char *array_tag,
         osalJsonIndex *jindex);
 
-    eStatus ioc_new_signal_by_info(
+    eStatus new_signal_by_info(
         eioInfoParserState *state);
 
     void resize_memory_block_by_info(

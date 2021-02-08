@@ -29,6 +29,7 @@ eioMblk::eioMblk(
 {
     os_memclear(&m_handle, sizeof(m_handle));
     m_handle_set = OS_FALSE;
+    m_esignals = OS_NULL;
 
     initproperties();
     ns_create();
@@ -257,6 +258,24 @@ void eioMblk::disconnected(
 }
 
 
+/**
+****************************************************************************************************
+  Get pointer to signal container, create if needed.
+****************************************************************************************************
+*/
+eContainer *eioMblk::esignals()
+{
+    if (m_esignals == OS_NULL) {
+        m_esignals = new eContainer(this);
+        m_esignals->addname("signals");
+        m_esignals->ns_create();
+    }
+    return m_esignals;
+}
+
+
+
+
 void eioMblk::callback(
     struct iocHandle *handle,
     os_int start_addr,
@@ -266,30 +285,43 @@ void eioMblk::callback(
 {
     eObject *f, *l, *sig;
     eioMblk *t;
+    eioSignal *p;
+    eContainer *esignals;
 
-    if ((flags & IOC_MBLK_CALLBACK_RECEIVE) == 0) return;
+    if ((flags & IOC_MBLK_CALLBACK_RECEIVE) == 0) {
+        return;
+    }
+
     t = (eioMblk*)context;
+    esignals = t->m_esignals;
+    if (esignals == OS_NULL) {
+        return;
+    }
 
-    f = t->first(start_addr, OS_FALSE);
+    f = esignals->first(start_addr, OS_FALSE);
     if (f) {
         f = f->prev();
     }
     if (f == OS_NULL) {
-        f = t->first(0, OS_FALSE);
+        f = esignals->first(0, OS_FALSE);
         if (f == OS_NULL) return;
     }
 
-    l = t->first(end_addr, OS_FALSE);
+    l = esignals->first(end_addr, OS_FALSE);
     if (l == OS_NULL) {
-        l = t->last();
+        l = esignals->last();
         if (l == OS_NULL) return;
     }
 
     sig = f;
     while (sig)
     {
-        if (sig->classid() == ECLASSID_EIO_SIGNAL) {
-
+        if (sig->classid() == ECLASSID_EIO_SIGNAL)
+        {
+            p = (eioSignal*)sig;
+            if (ioc_is_my_address(p->iosignal(), start_addr, end_addr)) {
+                p->up();
+            }
         }
 
         if (sig == l) {
