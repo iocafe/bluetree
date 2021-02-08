@@ -338,6 +338,7 @@ os_int eValueX::compare(
     if (m_timestamp != ex->m_timestamp) {
         return m_timestamp > ex->m_timestamp ? 1 : -1;
     }
+
     if (m_state_bits != ex->m_state_bits) {
         return m_state_bits > ex->m_state_bits ? 1 : -1;
     }

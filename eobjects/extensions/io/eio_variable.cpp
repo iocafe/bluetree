@@ -233,7 +233,23 @@ void eioVariable::setup(
  */
 void eioVariable::up(eValueX *x)
 {
+    eObject *ox;
+
+    /* Do nothing if value has not chaned.
+     */
+    if (type() == OS_OBJECT) {
+        ox = m_value.valbuf.v.o;
+        if (ox) {
+            if (!ox->compare(eVariable::cast(x))) {
+                return;
+            }
+        }
+    }
+
     m_my_own_change++;
+
+
+
     setpropertyo(EVARP_VALUE, x, EMSG_DEL_CONTENT);
 
     m_my_own_change--;
