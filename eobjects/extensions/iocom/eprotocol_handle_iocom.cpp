@@ -53,7 +53,7 @@ void eioProtocolHandle::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioProtocolHandle");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioProtocolHandle", ECLASSID_PROTOCOL_HANDLE);
     p = addpropertyb(cls, EPROHANDP_ISOPEN, eprohandp_isopen, OS_FALSE, "is open", EPRO_DEFAULT);
     p->setpropertys(EVARP_ATTR, "rdonly");
     propertysetdone(cls);

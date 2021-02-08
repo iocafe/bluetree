@@ -116,6 +116,10 @@ public:
      */
     virtual os_int classid() {return ECLASSID_BINDING;}
 
+    /* Static function to add class to propertysets and class list.
+     */
+    static void setupclass();
+
     /* Write binding content to stream.
      */
     virtual eStatus writer(

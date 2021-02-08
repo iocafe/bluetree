@@ -75,7 +75,7 @@ void eProcess::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, OS_NULL, "eProcess");
+    eclasslist_add(cls, OS_NULL, "eProcess", ECLASSID_THREAD);
     os_unlock();
 }
 

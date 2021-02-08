@@ -150,10 +150,6 @@ public:
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Virtual destructor.
-     */
-    virtual ~eStream();
-
     /* Casting eObject pointer to eStream pointer.
      */
     inline static eStream *cast(
@@ -167,6 +163,9 @@ public:
      */
     virtual os_int classid() {return ECLASSID_STREAM; }
 
+    /* Static function to add class to propertysets and class list.
+     */
+    static void setupclass();
 
     /**
     ************************************************************************************************

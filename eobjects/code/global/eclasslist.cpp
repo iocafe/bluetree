@@ -34,9 +34,10 @@
 void eclasslist_add(
     os_int cid,
     eNewObjFunc nfunc,
-    const os_char *classname)
+    const os_char *classname,
+    os_int baseclass_id)
 {
-    eVariable *pointer;
+    eVariable *pointer, *baseclass_ix;
 
     /* Syncronization neeeded for eclasslist_add() function.
      */
@@ -57,6 +58,11 @@ void eclasslist_add(
     pointer = new eVariable(eglobal->classlist, cid);
     pointer->setp((os_pointer)nfunc);
     pointer->addname(classname);
+
+    if (baseclass_id != ECLASSID_OBJECT) {
+        baseclass_ix = new eVariable(pointer, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
+        baseclass_ix->setl(baseclass_id);
+    }
 
 getout:
     /* Finished with synchronization.
@@ -171,6 +177,7 @@ void eclasslist_initialize()
     eValueX::setupclass();
     ePointer::setupclass();
     eEnvelope::setupclass();
+    eBinding::setupclass();
     ePropertyBinding::setupclass();
     eRowSetBinding::setupclass();
     eSynchronized::setupclass();
@@ -187,6 +194,7 @@ void eclasslist_initialize()
     eThread::setupclass();
     eProcess::setupclass();
     eRoot::setupclass();
+    eStream::setupclass();
     eOsStream::setupclass();
     eFileSystem::setupclass();
 }

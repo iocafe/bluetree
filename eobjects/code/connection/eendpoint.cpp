@@ -78,7 +78,7 @@ void eEndPoint::setupclass()
     /* Synchronize, add the class to class list and properties to property set.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eEndPoint");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eEndPoint", ECLASSID_THREAD);
     addproperty(cls, EENDPP_CLASSID, eendpp_classid, "class ID", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty(cls, EENDPP_IPADDR, eendpp_ipaddr, "IP", EPRO_PERSISTENT|EPRO_SIMPLE);
     p = addpropertyb(cls, EENDPP_ISOPEN, eendpp_isopen, OS_FALSE, "is open", EPRO_NOONPRCH);

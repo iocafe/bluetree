@@ -92,7 +92,7 @@ void eQueue::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eQueue");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eQueue", ECLASSID_STREAM);
     os_unlock();
 }
 

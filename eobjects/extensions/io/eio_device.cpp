@@ -89,7 +89,7 @@ void eioDevice::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioDevice");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioDevice", ECLASSID_CONTAINER);
     addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
     addpropertyl(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);

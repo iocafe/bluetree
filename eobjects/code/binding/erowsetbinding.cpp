@@ -86,7 +86,7 @@ void eRowSetBinding::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eRowSetBinding");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eRowSetBinding", ECLASSID_BINDING);
     addpropertys(cls, ERSETP_DBM_PATH, ersetp_dbm_path, "DBM path", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertys(cls, ERSETP_TABLE_NAME, ersetp_table_name, "table", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertys(cls, ERSETP_WHERE_CLAUSE, ersetp_where_clause, "where", EPRO_PERSISTENT|EPRO_SIMPLE);

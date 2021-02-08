@@ -89,7 +89,7 @@ void eParameterList::setupclass()
     const os_int cls = EGUICLASSID_PARAMETER_LIST;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eParameterList");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eParameterList", EGUICLASSID_COMPONENT);
     setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     propertysetdone(cls);
     os_unlock();

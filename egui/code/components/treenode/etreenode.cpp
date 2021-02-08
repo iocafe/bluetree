@@ -110,7 +110,7 @@ void eTreeNode::setupclass()
     const os_int cls = EGUICLASSID_TREE_NODE;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eTreeNode");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eTreeNode", EGUICLASSID_COMPONENT);
     setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     addpropertys(cls, ECOMP_PATH, ecomp_path, "path");
     addpropertys(cls, ECOMP_IPATH, ecomp_ipath, "ipath");

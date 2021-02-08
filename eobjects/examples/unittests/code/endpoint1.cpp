@@ -59,7 +59,7 @@ public:
         const os_int cls = MY_CLASS_ID_1;
 
         os_lock();
-        eclasslist_add(cls, (eNewObjFunc)newobj, "epMyClass");
+        eclasslist_add(cls, (eNewObjFunc)newobj, "epMyClass", ECLASSID_THREAD);
         addproperty(cls, EMYCLASS1P_A, emyclass1p_a, "A");
         addproperty(cls, EMYCLASS1P_B, emyclass1p_b, "B");
         os_unlock();

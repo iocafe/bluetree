@@ -104,36 +104,7 @@ eObject *eObject3D::clone(
     return clonedobj;
 }
 
-#if 0
-/**
-****************************************************************************************************
 
-  @brief Add the class to class list and class'es properties to it's property set.
-
-  The eVariable::setupclass function adds the class to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier,
-  which is used for serialization reader functions. The property set stores static list of
-  class'es properties and metadata for those.
-
-****************************************************************************************************
-*/
-void eEnvelope::setupclass()
-{
-    const os_int cls = ECLASSID_ENVELOPE;
-
-    /* Add the class to class list.
-     */
-    os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eEnvelope");
-
-    addpropertyl(cls, EENVP_COMMAND, eenvp_command, "command", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertys(cls, EENVP_TARGET, eenvp_target, "target", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertys(cls, EENVP_SOURCE, eenvp_source, "source", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addproperty (cls, EENVP_CONTENT, eenvp_content, "content", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addproperty (cls, EENVP_CONTEXT, eenvp_context, "context", EPRO_PERSISTENT|EPRO_SIMPLE);
-    os_unlock();
-}
-#endif
 
 
 /**

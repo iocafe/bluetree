@@ -112,7 +112,7 @@ void ePropertyBinding::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "ePropertyBinding");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "ePropertyBinding", ECLASSID_BINDING);
     os_unlock();
 }
 

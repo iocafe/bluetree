@@ -121,7 +121,7 @@ void eName::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eName");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eName", ECLASSID_VARIABLE);
     eVariable::setupproperties(cls);
     propertysetdone(cls);
     os_unlock();

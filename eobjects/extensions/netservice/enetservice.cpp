@@ -265,6 +265,8 @@ void enet_initialize_service()
 {
     eNetService::setupclass();
     eNetMaintainThread::setupclass();
+    eProtocol::setupclass();
+    eProtocolHandle::setupclass();
 
     os_lock();
     eNetService *netservice = new eNetService(eglobal->process);

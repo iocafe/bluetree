@@ -96,7 +96,7 @@ void eTimer::setupclass()
     /* Synchronize, add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eTimer");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eTimer", ECLASSID_THREAD);
     os_unlock();
 }
 

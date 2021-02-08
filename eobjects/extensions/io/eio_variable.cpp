@@ -110,7 +110,7 @@ void eioVariable::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioVariable");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioVariable", ECLASSID_VARIABLE);
     eVariable::setupproperties(cls);
 //    addproperty (cls, EIOP_SBITS, eiop_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
 //    addproperty (cls, EIOP_TSTAMP, eiop_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
@@ -241,19 +241,17 @@ void eioVariable::up(eValueX *x)
         ox = m_value.valbuf.v.o;
         if (ox) {
             if (!ox->compare(eVariable::cast(x))) {
+                delete x;
                 return;
             }
         }
     }
 
     m_my_own_change++;
-
-
-
     setpropertyo(EVARP_VALUE, x, EMSG_DEL_CONTENT);
-
     m_my_own_change--;
 }
+
 
 void eioVariable::down()
 {

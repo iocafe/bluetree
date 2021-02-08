@@ -51,7 +51,7 @@ void eioThread::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioThread");
+    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioThread", ECLASSID_THREAD);
     os_unlock();
 }
 

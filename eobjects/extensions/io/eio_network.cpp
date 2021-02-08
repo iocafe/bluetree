@@ -88,7 +88,7 @@ void eioNetwork::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioNetwork");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioNetwork", ECLASSID_CONTAINER);
     addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
     addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);

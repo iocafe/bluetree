@@ -87,7 +87,7 @@ void eNetMaintainThread::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eNetMaintainThread");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eNetMaintainThread", ECLASSID_THREAD);
     addpropertyl(cls, ENETMP_END_POINT_TABLE_MODIF_COUNT, enetmp_end_pont_table_modif_count,
         -1, "end point table modif count", EPRO_DEFAULT);
     addpropertyl(cls, ENETMP_END_POINT_CONFIG_COUNT, enetmp_end_point_config_count,

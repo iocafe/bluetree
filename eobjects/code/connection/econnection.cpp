@@ -110,7 +110,7 @@ void eConnection::setupclass()
     /* Synchronize, add the class to class list and properties to property set.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eConnection");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eConnection", ECLASSID_THREAD);
     addproperty(cls, ECONNP_CLASSID, econnp_classid, "class ID", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty(cls, ECONNP_IPADDR, econnp_ipaddr, "IP", EPRO_PERSISTENT|EPRO_SIMPLE);
     p = addpropertyb(cls, ECONNP_ISOPEN, econnp_isopen, OS_FALSE, "is open", EPRO_NOONPRCH);

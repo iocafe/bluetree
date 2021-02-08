@@ -111,7 +111,7 @@ void ePersistent::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "ePersistent");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "ePersistent", ECLASSID_CONTAINER);
     addpropertys(cls, EPERP_TEXT, eperp_text, "text", EPRO_PERSISTENT);
     addpropertys(cls, EPERP_ROOT_PATH, eperp_root_path, "//fsys", "root path", EPRO_DEFAULT);
     addproperty (cls, EPERP_RELATIVE_PATH, eperp_relative_path, "relative path", EPRO_DEFAULT);

@@ -61,7 +61,7 @@ void ecomProtocol::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "ecomProtocol");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "ecomProtocol", ECLASSID_PROTOCOL);
     os_unlock();
 }
 

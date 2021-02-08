@@ -103,7 +103,7 @@ void eTableView::setupclass()
     const os_int cls = EGUICLASSID_TABLE_VIEW;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eTableView");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eTableView", EGUICLASSID_COMPONENT);
     // setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     addpropertys(cls, ECOMP_PATH, ecomp_path, "path", EPRO_PERSISTENT);
     addpropertyl(cls, ECOMP_DROP_DOWN_LIST_SELECT, ecomp_drop_down_list_select,

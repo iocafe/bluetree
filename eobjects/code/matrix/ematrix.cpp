@@ -103,7 +103,7 @@ void eMatrix::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eMatrix");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eMatrix", ECLASSID_TABLE);
     addpropertyl(cls, EMTXP_DATATYPE, emtxp_datatype, "data type", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertyl(cls, EMTXP_NROWS, emtxp_nrows, "nro rows", EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertyl(cls, EMTXP_NCOLUMNS, emtxp_ncolumns, "nro columns", EPRO_PERSISTENT|EPRO_SIMPLE);
@@ -120,7 +120,7 @@ void eMatrix::setupclass()
      */
     eBuffer buf;
     buf.allocate(OEMATRIX_APPROX_BUF_SZ);
-    eglobal->matrix_buffer_allocation_sz = (os_int)buf.allocated(); 
+    eglobal->matrix_buffer_allocation_sz = (os_int)buf.allocated();
     // eglobal->matrix_buffer_allocation_sz = OEMATRIX_APPROX_BUF_SZ;
 }
 

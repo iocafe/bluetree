@@ -62,7 +62,7 @@ void eioProtocol::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioProtocol");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioProtocol", ECLASSID_PROTOCOL);
     os_unlock();
 }
 

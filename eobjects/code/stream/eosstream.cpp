@@ -75,7 +75,7 @@ void eOsStream::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eOsStream");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eOsStream", ECLASSID_STREAM);
     os_unlock();
 }
 

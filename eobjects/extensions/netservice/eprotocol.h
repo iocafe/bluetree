@@ -62,6 +62,14 @@ public:
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
+    /* Get class identifier.
+     */
+    virtual os_int classid() {return ECLASSID_PROTOCOL;}
+
+    /* Static function to add class to propertysets and class list.
+     */
+    static void setupclass();
+
     /**
     ************************************************************************************************
       Protocol related functions, base class.

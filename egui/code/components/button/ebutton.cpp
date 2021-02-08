@@ -86,7 +86,7 @@ void eButton::setupclass()
     const os_int cls = EGUICLASSID_BUTTON;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eButton");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eButton", EGUICLASSID_COMPONENT);
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
     addpropertys(cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
     addproperty (cls, ECOMP_VALUE, ecomp_value, "value");

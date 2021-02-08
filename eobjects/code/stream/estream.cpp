@@ -34,11 +34,25 @@ eStream::eStream(
 
 /**
 ****************************************************************************************************
-  Virtual destructor.
+
+  @brief Add the class to class list and class'es properties to it's property set.
+
+  The eVariable::setupclass function adds the class to class list and class'es properties to
+  it's property set. The class list enables creating new objects dynamically by class identifier,
+  which is used for serialization reader functions. The property set stores static list of
+  class'es properties and metadata for those.
+
 ****************************************************************************************************
 */
-eStream::~eStream()
+void eStream::setupclass()
 {
+    const os_int cls = ECLASSID_STREAM;
+
+    /* Add the class to class list.
+     */
+    os_lock();
+    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eStream");
+    os_unlock();
 }
 
 

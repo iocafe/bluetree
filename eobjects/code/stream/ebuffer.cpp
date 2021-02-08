@@ -74,7 +74,7 @@ void eBuffer::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eBuffer");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eBuffer", ECLASSID_STREAM);
     os_unlock();
 }
 

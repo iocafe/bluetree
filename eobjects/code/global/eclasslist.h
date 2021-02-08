@@ -30,7 +30,8 @@ typedef eObject *(*eNewObjFunc)(
 void eclasslist_add(
     os_int cid,
     eNewObjFunc nfunc,
-    const os_char *classname);
+    const os_char *classname,
+    os_int baseclass_id = ECLASSID_OBJECT);
 
 /* Get static object constuctor function pointer by class ID.
  */

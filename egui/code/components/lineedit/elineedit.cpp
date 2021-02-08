@@ -88,7 +88,7 @@ void eLineEdit::setupclass()
     const os_int cls = EGUICLASSID_LINE_EDIT;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eLineEdit");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eLineEdit", EGUICLASSID_COMPONENT);
     setupproperties(cls, ECOMP_VALUE_PROPERITES|ECOMP_EXTRA_UI_PROPERITES);
     propertysetdone(cls);
     os_unlock();

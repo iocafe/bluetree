@@ -88,7 +88,7 @@ void eLightHouseService::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eLightHouseService");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eLightHouseService", ECLASSID_THREAD);
     addpropertyb(cls, ELIGHTHOUSEP_SEND_UDP_MULTICASTS, elighthousep_send_udp_multicasts,
         OS_FALSE, "send UDP multicasts", EPRO_PERSISTENT);
     addpropertyl(cls, ELIGHTHOUSEP_PUBLISH, elighthousep_publish,

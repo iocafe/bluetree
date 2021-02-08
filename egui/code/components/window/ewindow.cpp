@@ -94,7 +94,7 @@ void eWindow::setupclass()
     const os_int cls = EGUICLASSID_WINDOW;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eWindow");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eWindow", EGUICLASSID_COMPONENT);
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
     addpropertys(cls, ECOMP_NAME, ecomp_text, "name", EPRO_PERSISTENT);
     addpropertys(cls, ECOMP_TEXT, ecomp_text, "title text", EPRO_PERSISTENT);

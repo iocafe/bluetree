@@ -87,7 +87,7 @@ void ePopup::setupclass()
     const os_int cls = EGUICLASSID_POPUP;
 
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "ePopup");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "ePopup", EGUICLASSID_COMPONENT);
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
     propertysetdone(cls);
     os_unlock();

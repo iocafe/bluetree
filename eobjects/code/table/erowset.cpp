@@ -94,7 +94,7 @@ void eRowSet::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eRowSet");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eRowSet", ECLASSID_TABLE);
     addpropertyl(cls, ERSETP_NROWS, ersetp_nrows, "nro rows", EPRO_SIMPLE);
     addpropertyl(cls, ERSETP_NCOLUMNS, ersetp_ncolumns, "nro columns", EPRO_SIMPLE);
 

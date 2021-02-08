@@ -92,7 +92,7 @@ void eFileSystem::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eFileSystem");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eFileSystem", ECLASSID_THREAD);
     addpropertys(cls, EFSYSP_PATH, efsysp_path, "/coderoot/fsys", "path", EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();

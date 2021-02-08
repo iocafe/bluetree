@@ -122,7 +122,7 @@ void eValueX::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eValueX");
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eValueX", ECLASSID_VARIABLE);
     eVariable::setupproperties(cls);
     addproperty (cls, EVALXP_SBITS, evalxp_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty (cls, EVALXP_TSTAMP, evalxp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
