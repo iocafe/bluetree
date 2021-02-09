@@ -29,6 +29,7 @@ eioRoot::eioRoot(
 {
     os_memclear(&m_io_thread_handle, sizeof(m_io_thread_handle));
     m_time_now = 0;
+    m_io_trigger = OS_NULL;
 
     initproperties();
     ns_create();
@@ -486,18 +487,3 @@ eioRoot *eio_initialize(
     return eio_root;
 }
 
-/**
-****************************************************************************************************
-
-  @brief Stop IO thread.
-
-****************************************************************************************************
-*/
-void eio_stop_io_thread(
-    eioRoot *eio_root)
-{
-    /* Stop network maintenance thread.
-     */
-    eio_root->m_io_thread_handle.terminate();
-    eio_root->m_io_thread_handle.join();
-}

@@ -102,4 +102,9 @@ void eio_start_thread(
     eThreadHandle *io_thread_handle);
 
 
+/* Stop IO thread.
+ */
+void eio_stop_io_thread(
+    eioRoot *eio_root);
+
 #endif

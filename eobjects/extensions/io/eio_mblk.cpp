@@ -31,6 +31,7 @@ eioMblk::eioMblk(
     m_handle_set = OS_FALSE;
     m_esignals = OS_NULL;
     m_mblk_flags = 0;
+    m_eio_root = OS_NULL;
 
     initproperties();
     ns_create();
@@ -232,6 +233,7 @@ void eioMblk::connected(
         /* Save/update memory block flags.
          */
         m_mblk_flags = minfo->mblk->flags;
+        m_eio_root = minfo->eio_root;
 
         /* Set callback function, when "info" block is received.
          */
@@ -288,8 +290,6 @@ eContainer *eioMblk::esignals()
 }
 
 
-
-
 void eioMblk::callback(
     struct iocHandle *handle,
     os_int start_addr,
@@ -302,50 +302,61 @@ void eioMblk::callback(
     eioSignal *p;
     eContainer *esignals;
 
-    if ((flags & IOC_MBLK_CALLBACK_RECEIVE) == 0) {
+    if ((flags & (IOC_MBLK_CALLBACK_RECEIVE|IOC_MBLK_CALLBACK_WRITE_TRIGGER|
+        IOC_MBLK_CALLBACK_RECEIVE_TRIGGER)) == 0)
+    {
         return;
     }
 
     os_lock();
 
     t = (eioMblk*)context;
-    esignals = t->m_esignals;
-    if (esignals == OS_NULL) {
-        goto getout;
-    }
 
-    f = esignals->first(start_addr, OS_FALSE);
-    if (f) {
-        f = f->prev();
-    }
-    if (f == OS_NULL) {
-        f = esignals->first(0, OS_FALSE);
-        if (f == OS_NULL) goto getout;
-    }
-
-    l = esignals->first(end_addr, OS_FALSE);
-    if (l == OS_NULL) {
-        l = esignals->last();
-        if (l == OS_NULL) goto getout;
-    }
-
-    sig = f;
-    while (sig)
+    if (flags & (IOC_MBLK_CALLBACK_WRITE_TRIGGER|IOC_MBLK_CALLBACK_RECEIVE_TRIGGER))
     {
-        if (sig->classid() == ECLASSID_EIO_SIGNAL)
-        {
-            p = (eioSignal*)sig;
-            if (ioc_is_my_address(p->iosignal(), start_addr, end_addr)) {
-                p->up();
-            }
+        if (t->m_eio_root) {
+            t->m_eio_root->trig_io();
         }
-
-        if (sig == l) {
-            break;
-        }
-        sig = sig->next();
     }
 
+    if (flags & IOC_MBLK_CALLBACK_RECEIVE) {
+        esignals = t->m_esignals;
+        if (esignals == OS_NULL) {
+            goto getout;
+        }
+
+        f = esignals->first(start_addr, OS_FALSE);
+        if (f) {
+            f = f->prev();
+        }
+        if (f == OS_NULL) {
+            f = esignals->first(0, OS_FALSE);
+            if (f == OS_NULL) goto getout;
+        }
+
+        l = esignals->first(end_addr, OS_FALSE);
+        if (l == OS_NULL) {
+            l = esignals->last();
+            if (l == OS_NULL) goto getout;
+        }
+
+        sig = f;
+        while (sig)
+        {
+            if (sig->classid() == ECLASSID_EIO_SIGNAL)
+            {
+                p = (eioSignal*)sig;
+                if (ioc_is_my_address(p->iosignal(), start_addr, end_addr)) {
+                    p->up();
+                }
+            }
+
+            if (sig == l) {
+                break;
+            }
+            sig = sig->next();
+        }
+    }
 getout:
     os_unlock();
     return;

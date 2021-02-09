@@ -151,9 +151,27 @@ void eio_start_thread(
      */
     t = new eioThread();
     t->addname("//_iothread");
-
+    eio_root->save_io_trigger(t->trigger());
     t->set_iocom_root(eio_root->iocom_root());
     t->set_eio_root(eio_root);
     t->start(io_thread_handle);
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Stop IO thread.
+
+****************************************************************************************************
+*/
+void eio_stop_io_thread(
+    eioRoot *eio_root)
+{
+    eio_root->save_io_trigger(OS_NULL);
+
+    /* Stop network maintenance thread.
+     */
+    eio_root->m_io_thread_handle.terminate();
+    eio_root->m_io_thread_handle.join();
+}

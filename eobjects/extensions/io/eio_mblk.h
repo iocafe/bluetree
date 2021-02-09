@@ -133,7 +133,7 @@ protected:
       Member variables
     ************************************************************************************************
     */
-
+    eioRoot *m_eio_root;
     iocHandle m_handle;
     os_boolean m_handle_set;
 

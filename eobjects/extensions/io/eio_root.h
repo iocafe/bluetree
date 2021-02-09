@@ -133,8 +133,12 @@ public:
 
     inline iocRoot *iocom_root() {return m_iocom_root; }
 
-    void set_time_now(os_long ti) { m_time_now = ti; }
-    os_long time_now() {return m_time_now; }
+    inline void set_time_now(os_long ti) { m_time_now = ti; }
+    inline os_long time_now() {return m_time_now; }
+
+    inline osalEvent io_trigger() {return m_io_trigger; }
+    inline void save_io_trigger(osalEvent io_trigger) {m_io_trigger = io_trigger; }
+    inline void trig_io() {if (m_io_trigger) osal_event_set(m_io_trigger); }
 
     /** IO thread handle.
      */
@@ -219,6 +223,8 @@ protected:
     /* Time stamp now.
      */
     os_long m_time_now;
+
+    osalEvent m_io_trigger;
 };
 
 
@@ -227,10 +233,5 @@ protected:
 eioRoot *eio_initialize(
     iocRoot *iocom_root,
     eObject *parent);
-
-/* Stop IO thread.
- */
-void eio_stop_io_thread(
-    eioRoot *eio_root);
 
 #endif
