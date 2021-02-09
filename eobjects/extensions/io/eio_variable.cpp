@@ -37,6 +37,7 @@ eioVariable::eioVariable(
 {
     m_down_ref = OS_NULL;
     m_my_own_change = 0;
+    m_value_set_by_user = OS_FALSE;
 }
 
 
@@ -156,9 +157,12 @@ eStatus eioVariable::onpropertychange(
             break; */
 
         case EVARP_VALUE:
+            m_value_set_by_user = !m_my_own_change;
             if (compare(x)) {
                 eVariable::onpropertychange(propertynr, x, flags);
-                down();
+                if (m_value_set_by_user) {
+                    down();
+                }
             }
             break;
 
@@ -213,8 +217,22 @@ void eioVariable::setup(
     struct eioSignalInfo *sinfo)
 {
     os_short mblk_flags;
+    os_int type_id;
+    os_long min_value, max_value;
 
     mblk_flags = signal->mblk_flags();
+
+    type_id = (sinfo->flags & OSAL_TYPEID_MASK);
+    if (OSAL_IS_INTEGER_TYPE(type_id))
+    {
+        osal_type_range((osalTypeId)type_id, &min_value, &max_value);
+        if (max_value > min_value) {
+            setpropertyl(EVARP_MIN, min_value);
+            setpropertyl(EVARP_MAX, max_value);
+        }
+        type_id = OS_LONG;
+    }
+    setpropertyl(EVARP_TYPE, type_id);
 
     if (mblk_flags & IOC_MBLK_DOWN) {
         if (m_down_ref == OS_NULL) {
@@ -223,13 +241,14 @@ void eioVariable::setup(
 
         m_down_ref->set(signal);
 
-        if ((mblk_flags & IOC_MBLK_UP) == 0) {
+        if (m_value_set_by_user && (mblk_flags & IOC_MBLK_UP) == 0) {
             down();
         }
     }
 }
 
 /* Adopts x.
+ * os_lock() must be on when thi when this function is called.
  */
 void eioVariable::up(eValueX *x)
 {
@@ -255,6 +274,12 @@ void eioVariable::up(eValueX *x)
 
 void eioVariable::down()
 {
+    eioSignal *sig;
 
-    // setpropertyo(EVARP_VALUE, x, EMSG_DEL_CONTENT);
+    if (m_down_ref) {
+        sig = eioSignal::cast(m_down_ref->get());
+        if (sig) {
+            sig->down(this);
+        }
+    }
 }

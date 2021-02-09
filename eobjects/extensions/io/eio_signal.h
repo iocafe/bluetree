@@ -108,6 +108,7 @@ public:
 
 
     void up();
+    void down(eVariable *x);
 
     inline iocSignal *iosignal() {return &m_signal; }
     inline os_short mblk_flags() {return m_mblk_flags;}

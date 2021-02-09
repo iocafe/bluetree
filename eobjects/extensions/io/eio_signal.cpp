@@ -248,7 +248,8 @@ void eioSignal::setup(
 #endif
 }
 
-
+/* os_lock() must be on when this function is called.
+ */
 void eioSignal::up()
 {
     eioVariable *v;
@@ -283,7 +284,7 @@ void eioSignal::up()
         }
         state_bits = ioc_move_str(&m_signal, p, p_sz,
             OSAL_STATE_CONNECTED, OS_STR|IOC_SIGNAL_NO_THREAD_SYNC);
-        x->set_sbits(state_bits);
+        x->set_sbits(state_bits & ~OSAL_STATE_BOOLEAN_VALUE);
         *x = p;
 
         if (p != buf) {
@@ -299,7 +300,7 @@ void eioSignal::up()
         p = os_malloc(p_sz, OS_NULL);
 
         state_bits = ioc_move_array(&m_signal, 0, p, m_signal.n,
-            OSAL_STATE_CONNECTED, IOC_SIGNAL_NO_THREAD_SYNC);
+            OSAL_STATE_CONNECTED, IOC_SIGNAL_NO_THREAD_SYNC|type_id);
         x->set_sbits(state_bits);
 
         nrows = (m_signal.n + m_ncolumns - 1) / m_ncolumns;
@@ -342,16 +343,85 @@ void eioSignal::up()
         {
             default:
                 *x = vv.value.l;
-                x->set_sbits(vv.state_bits);
                 break;
 
             case OS_FLOAT:
             case OS_DOUBLE:
                 *x = vv.value.d;
-                x->set_sbits(vv.state_bits);
                 break;
         }
+        x->set_sbits(vv.state_bits & ~OSAL_STATE_BOOLEAN_VALUE);
     }
 
     v->up(x);
+}
+
+/* Does not modify x */
+void eioSignal::down(eVariable *x)
+{
+//     eMatrix *m;
+    iocValue vv;
+//     os_memsz p_sz, type_sz;
+//     os_int nrows, row, col;
+    osalTypeId type_id;
+    os_char  *p, state_bits;
+
+    state_bits = (os_char)x->sbits();
+    type_id = (osalTypeId)(m_signal.flags & OSAL_TYPEID_MASK);
+
+    /* If string.
+     */
+    if (type_id == OS_STR) {
+        p = x->gets();
+        state_bits = ioc_move_str(&m_signal, p, os_strlen(p),
+            state_bits, OS_STR|IOC_SIGNAL_NO_THREAD_SYNC|IOC_SIGNAL_WRITE);
+    }
+
+    /* If array.
+     */
+    else if (m_signal.n > 1) {
+#if 0
+        type_sz = osal_type_size(type_id);
+        p_sz = m_signal.n * type_sz;
+        p = os_malloc(p_sz, OS_NULL);
+
+        state_bits = ioc_move_array(&m_signal, 0, p, m_signal.n,
+            OSAL_STATE_CONNECTED, IOC_SIGNAL_NO_THREAD_SYNC);
+        x->set_sbits(state_bits);
+
+        nrows = (m_signal.n + m_ncolumns - 1) / m_ncolumns;
+        m = new eMatrix(ETEMPORARY);
+
+        l_ptr = (os_long*)p;
+        for (row = 0; row < nrows; row++) {
+            for (col = 0; col < m_ncolumns; col++) {
+                switch (type_id) {
+                    case OS_LONG: m->setl(row, col, *(l_ptr++)); break;
+                    default: break;
+                }
+            }
+        }
+
+        os_free(p, p_sz);
+#endif
+    }
+
+    /* Otherwise plain signal.
+     */
+    else {
+
+        switch (type_id)
+        {
+            default:
+                vv.value.l = x->getl();
+                break;
+
+            case OS_FLOAT:
+            case OS_DOUBLE:
+                vv.value.d = x->getd();
+                break;
+        }
+        vv.state_bits = state_bits;
+        ioc_move(&m_signal, &vv, 1, IOC_SIGNAL_NO_THREAD_SYNC|IOC_SIGNAL_WRITE);
+    }
 }

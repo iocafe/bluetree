@@ -143,7 +143,7 @@ void eNetService::start(
 
     /* Initialize iocom communication root object and iocom protocol related stuff.
      */
-    ioc_initialize_root(&m_iocom_root);
+    ioc_initialize_root(&m_iocom_root, IOC_USE_EOSAL_MUTEX);
 
     os_strncpy(buf, eglobal->process_id, sizeof(buf));
     // os_strncat(buf, "N", sizeof(buf));

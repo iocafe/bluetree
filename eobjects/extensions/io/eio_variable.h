@@ -123,6 +123,7 @@ protected:
     ePointer *m_down_ref;
 
     os_short m_my_own_change;
+    os_boolean m_value_set_by_user;
 };
 
 #endif
