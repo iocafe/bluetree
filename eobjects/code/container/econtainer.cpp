@@ -367,10 +367,6 @@ void eContainer::send_open_info(
     eContainer *request, *reply;
     eVariable *v;
     os_int command = EBROWSE_OPEN;
-    eObject *o;
-    eVariable *item;
-    eName *name;
-    os_int cid;
 
     /* Get command
      */
@@ -397,17 +393,7 @@ void eContainer::send_open_info(
             reply->setpropertyv(ECONTP_TEXT, &tmp);
         }
 
-        for (name = eObject::ns_firstv(); name; name = name->ns_next(OS_FALSE))
-        {
-            o = name->parent();
-            cid = o->classid();
-            if (cid != ECLASSID_VARIABLE && cid != ECLASSID_MATRIX) {
-                continue;
-            }
-
-            item = new eVariable(reply, cid);
-            item->setv(name);
-        }
+        send_open_info_helper(reply);
 
         /* Send reply to caller
          */
@@ -419,5 +405,50 @@ void eContainer::send_open_info(
      */
     else {
         eObject::send_open_info(envelope);
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Helper function for send_open_info()
+
+****************************************************************************************************
+*/
+void eContainer::send_open_info_helper(
+    eContainer *reply)
+{
+    eObject *o;
+    eName *name;
+    eVariable *item;
+    eContainer *cont;
+    os_int cid;
+    os_boolean is_variable, is_container, is_matrix;
+
+    for (name = eObject::ns_firstv(); name; name = name->ns_next(OS_FALSE))
+    {
+        o = name->parent();
+        cid = o->classid();
+
+        is_variable = eclasslist_isinstanceof(cid, ECLASSID_VARIABLE);
+        is_container = is_matrix = OS_FALSE;
+        if (!is_variable) {
+            is_container = eclasslist_isinstanceof(cid, ECLASSID_CONTAINER);
+            if (!is_container) {
+                is_matrix = eclasslist_isinstanceof(cid, ECLASSID_MATRIX);
+            }
+        }
+
+        if (is_variable || is_matrix || is_container)
+        {
+            item = new eVariable(reply, cid);
+            item->setv(name);
+            if (is_container) {
+                cont = new eContainer(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
+                ((eContainer*)o)->send_open_info_helper(cont);
+                if (cont->childcount() < 1) delete cont;
+            }
+        }
     }
 }

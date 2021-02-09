@@ -141,6 +141,12 @@ protected:
     virtual void send_open_info(
         eEnvelope *envelope);
 
+    /* Helper function for send_open_info().
+     */
+    void send_open_info_helper(
+        eContainer *reply);
+
+
 };
 
 #endif

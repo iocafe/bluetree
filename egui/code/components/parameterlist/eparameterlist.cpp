@@ -264,7 +264,6 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
                     continue;
                 }
                 c->draw_in_parameter_list(prm);
-
             }
         }
 
@@ -324,8 +323,6 @@ try_again:
     }
     m_nro_components = nro_components;
 }
-
-
 
 
 /**

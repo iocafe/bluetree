@@ -55,56 +55,78 @@ void eGui::open_content(
     eObject *context)
 {
     eWindow *w;
+    OSAL_UNUSED(context);
+
+    w = OS_NULL;
+    open_content_helper(path, content, &w);
+}
+
+void eGui::open_content_helper(
+    const os_char *path,
+    eObject *content,
+    eWindow **win)
+{
+    eWindow *w;
     eTableView *t;
-    eParameterList *p;
+    eParameterList *p = OS_NULL;
     eLineEdit *e;
     eVariable *v, mypath, tmp;
+    eContainer *appendix;
+    os_int cid;
+    os_boolean is_variable, is_container, is_matrix;
 
-    for (v = content->firstv(ECLASSID_MATRIX); v; v = v->nextv(ECLASSID_MATRIX))
+    for (v = content->firstv(); v; v = v->nextv())
     {
+        cid = v->oid();
+
+        is_variable = eclasslist_isinstanceof(cid, ECLASSID_VARIABLE);
+        is_container = OS_FALSE;
+        if (!is_variable) {
+            is_container = eclasslist_isinstanceof(cid, ECLASSID_CONTAINER);
+            if (!is_container) {
+                is_matrix = eclasslist_isinstanceof(cid, ECLASSID_MATRIX);
+            }
+        }
+
+        if (!is_variable && !is_container && !is_matrix) {
+            continue;
+        }
+
+        if (*win == OS_NULL)
+        {
+            w = new eWindow(this);
+            content->propertyv(ECONTP_TEXT, &tmp);
+            if (tmp.isempty()) {
+                tmp.sets("unnamed");
+            }
+            w->setpropertyv(ECOMP_TEXT, &tmp);
+            w->setpropertyv(ECOMP_NAME, &tmp);
+            *win = w;
+        }
+
         mypath.sets(path);
         if (!v->isempty()) {
             mypath.appends("/");
             mypath.appendv(v);
         }
 
-        w = new eWindow(this);
-
-        content->propertyv(ECONTP_TEXT, &tmp);
-        if (tmp.isempty()) {
-            tmp.sets("table");
-        }
-        w->setpropertyv(ECOMP_TEXT, &tmp);
-        w->setpropertyv(ECOMP_NAME, &tmp);
-
-        t = new eTableView(w);
-        t->setpropertys(ECOMP_PATH, mypath.gets());
-    }
-
-    if (content->firstv(ECLASSID_VARIABLE))
-    {
-        w = new eWindow(this);
-        content->propertyv(ECONTP_TEXT, &tmp);
-        if (tmp.isempty()) {
-            tmp.sets("variables");
-        }
-        w->setpropertyv(ECOMP_TEXT, &tmp);
-        w->setpropertyv(ECOMP_NAME, &tmp);
-
-        p = new eParameterList(w);
-
-        for (v = content->firstv(ECLASSID_VARIABLE); v; v = v->nextv(ECLASSID_VARIABLE))
-        {
-            mypath.sets(path);
-            if (!v->isempty()) {
-                mypath.appends("/");
-                mypath.appendv(v);
+        if (is_variable) {
+            if (p == OS_NULL) {
+                p = new eParameterList(*win);
             }
-
             e = new eLineEdit(p);
             e->bind(ECOMP_VALUE, mypath.gets(), EBIND_METADATA);
         }
+        else if (is_container) {
+            appendix = eContainer::cast(v->first(EOID_APPENDIX));
+            if (appendix) {
+                open_content_helper(mypath.gets(), appendix, win);
+            }
+        }
+        else if (is_matrix) {
+            t = new eTableView(w);
+            t->setpropertys(ECOMP_PATH, mypath.gets());
+        }
     }
 }
-
 

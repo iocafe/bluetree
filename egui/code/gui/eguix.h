@@ -247,6 +247,11 @@ protected:
     void drag(os_int mouse_button_nr);
     void drop_modification(os_int mouse_button_nr);
 
+    void open_content_helper(
+        const os_char *path,
+        eObject *content,
+        eWindow **win);
+
     /* Viewport, corresponds to operating system window, etc.
      */
     eViewPort *m_viewport;
