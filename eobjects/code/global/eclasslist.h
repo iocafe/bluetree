@@ -38,6 +38,12 @@ void eclasslist_add(
 eNewObjFunc eclasslist_newobj(
     os_int cid);
 
+/* Check if a class is derived from a base class, or instance of the base class.
+ */
+os_boolean eclasslist_isinstanceof(
+    os_int this_cid,
+    os_int base_class_cid);
+
 /* Get class name.
  */
 os_char *eclasslist_classname(

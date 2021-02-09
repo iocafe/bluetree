@@ -311,7 +311,7 @@ void eObject::clonegeneric(
 
   The eObject::classname function returns clas name matching to class id (cid).
 
-  @param   cid Class ifentifier to look for.
+  @param   cid Class identifier to look for.
   @return  Class name, or OS_NULL if none found.
 
 ****************************************************************************************************
@@ -319,6 +319,28 @@ void eObject::clonegeneric(
 const os_char *eObject::classname()
 {
     return eclasslist_classname(classid());
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Check if object is instance of class, or instance of a derived class.
+
+  The eObject::isinstanceof function check is this object is instance of class identidied
+  by class identifier, or instance of a derived class.
+
+  @param   cid Class identifier.
+  @return  The function returns OS_TRUE, if this object is instance of the class.
+           If not, the function returns OS_FALSE (0).
+
+****************************************************************************************************
+*/
+os_boolean eObject::isinstanceof(
+    os_int cid)
+{
+    if (cid == classid()) return OS_TRUE;
+    return eclasslist_isinstanceof(classid(), cid);
 }
 
 
@@ -542,7 +564,7 @@ eThread *eObject::thread()
 
         /* If this is thread, return pointer.
          */
-        if (o->isthread()) return (eThread*)o;
+        if (o->isinstanceof(ECLASSID_THREAD)) return (eThread*)o;
     }
     return OS_NULL;
 }

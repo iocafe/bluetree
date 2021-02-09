@@ -78,7 +78,7 @@ getout:
 
   The eclasslist_newobj function...
 
-  @param   cid Class ifentifier to look for.
+  @param   cid Class identifier to look for.
   @return  Pointer to static constructor function, or OS_NULL if none found.
 
 ****************************************************************************************************
@@ -108,6 +108,61 @@ eNewObjFunc eclasslist_newobj(
     return nfunc;
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Check if a class is derived from a base class, or instance of the base class.
+
+  The eclasslist_isinstanceof function check is this_cid identifies a class derived from
+  base_class_cid, or is simply instance of base_class_cid.
+
+  @param   this_cid Class identifier to check.
+  @param   base_class_cid Base class identifier.
+
+  @return  The function returns OS_TRUE, if class idenfified by this_cid is derived from
+           base class or instance of the base class. If not, the function returns OS_FALSE (0).
+
+****************************************************************************************************
+*/
+os_boolean eclasslist_isinstanceof(
+    os_int this_cid,
+    os_int base_class_cid)
+{
+    eVariable *pointer, *appendix;
+    os_boolean rval;
+
+    if (this_cid == base_class_cid || base_class_cid == ECLASSID_OBJECT) {
+        return OS_TRUE;
+    }
+
+    os_lock();
+
+    rval = OS_FALSE;
+    while (OS_TRUE) {
+        pointer = eglobal->classlist->firstv(this_cid);
+        if (pointer == OS_NULL) {
+            osal_debug_error_int("eclasslist_isinstanceof: Class not found, cid=", this_cid);
+            break;
+        }
+
+        appendix = pointer->firstv(EOID_APPENDIX);
+        if (appendix == OS_NULL) {
+            break;
+        }
+
+        this_cid = appendix->geti();
+        if (this_cid == base_class_cid) {
+            rval = OS_TRUE;
+            break;
+        }
+    }
+
+    os_unlock();
+    return rval;
+}
+
+
 /**
 ****************************************************************************************************
 
@@ -115,7 +170,7 @@ eNewObjFunc eclasslist_newobj(
 
   The eclasslist_classname function returns clas name matching to class id (cid).
 
-  @param   cid Class ifentifier to look for.
+  @param   cid Class identifier to look for.
   @return  Class name, or OS_NULL if none found.
 
 ****************************************************************************************************

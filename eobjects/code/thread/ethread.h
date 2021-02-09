@@ -57,7 +57,7 @@ public:
     {
         if (o)
         {
-            if (o->isthread()) return (eThread*)o;
+            if (o->isinstanceof(ECLASSID_THREAD)) return (eThread*)o;
             osal_debug_assert(0);
         }
         return OS_NULL;
@@ -70,13 +70,6 @@ public:
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
-
-    /* Return OS_TRUE if object is thread (derived).
-     */
-    virtual os_boolean isthread()
-    {
-        return OS_TRUE;
-    }
 
     /* Static constructor function for generating instance by class list.
      */

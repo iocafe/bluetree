@@ -57,13 +57,12 @@ class eRowSetBinding;
 #define EMSG_HAS_CONTENT 2 /* Special flag to be passed over connection only */
 #define EMSG_HAS_CONTEXT 4 /* Special flag to be passed over connection only */
 
-
 /* Macro to debug object type casts.
  */
 #if OSAL_DEBUG == 0
   #define e_assert_type(o,id)
 #else
-  #define e_assert_type(o,id) if (o) osal_debug_assert((o)->classid() == (id));
+  #define e_assert_type(o,id) if (o) osal_debug_assert(eclasslist_isinstanceof((o)->classid(), (id)));
 #endif
 
 /* Flags for addproperty() function.
@@ -223,12 +222,10 @@ public:
     virtual os_int classid() {return ECLASSID_OBJECT; }
     const os_char *classname();
 
-    /* Return OS_TRUE if object is thread (derived).
+    /* Check if object is instance of class, or instance of a derived class.
      */
-    virtual os_boolean isthread()
-    {
-        return OS_FALSE;
-    }
+    os_boolean isinstanceof(
+        os_int cid);
 
     /* Allocate new child object by class identifier.
      */

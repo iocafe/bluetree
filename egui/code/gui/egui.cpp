@@ -84,11 +84,6 @@ eObject *eGui::clone(
     eGui *clonedobj;
     clonedobj = new eGui(parent, id == EOID_CHILD ? oid() : id, flags());
 
-    /** Copy variable value.
-     */
-    // clonedobj->setv(this);
-    // clonedobj->setdigs(digs());
-
     /* Copy clonable attachments.
      */
     clonegeneric(clonedobj, aflags);
