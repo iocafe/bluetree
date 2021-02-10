@@ -217,7 +217,7 @@ eioMblk *eioNetwork::connected(
     eioMblk *mblk;
     os_char buf[IOC_DEVICE_ID_SZ], nbuf[OSAL_NBUF_SZ];
 
-    if (minfo->device_name == '\0') {
+    if (minfo->device_name[0] == '\0') {
         return OS_NULL;
     }
 

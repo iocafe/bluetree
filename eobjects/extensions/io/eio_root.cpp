@@ -27,7 +27,6 @@ eioRoot::eioRoot(
     os_int flags)
     : eContainer(parent, oid, flags)
 {
-    os_memclear(&m_io_thread_handle, sizeof(m_io_thread_handle));
     m_time_now = 0;
     m_io_trigger = OS_NULL;
 
@@ -286,7 +285,7 @@ eioMblk *eioRoot::connected(
     eioNetwork *network;
     eioMblk *mblk;
 
-    if (minfo->network_name == '\0') {
+    if (minfo->network_name[0] == '\0') {
         return OS_NULL;
     }
 
