@@ -229,6 +229,8 @@ eStatus eWindow::draw(
 
 ImGui::SetNextWindowSize(ImVec2(900, 200), ImGuiCond_FirstUseEver);
 
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
     /* Create a window.
      */
     label = m_label_title.get(this, ECOMP_TEXT, ECOMP_NAME);
@@ -245,6 +247,7 @@ ImGui::SetNextWindowSize(ImVec2(900, 200), ImGuiCond_FirstUseEver);
     // Early out if the window is collapsed, as an optimization.
     if (!ok) {
         ImGui::End();
+        ImGui::PopStyleVar();
         return ESTATUS_SUCCESS;
     }
 
@@ -336,6 +339,7 @@ ImGui::SetNextWindowSize(ImVec2(900, 200), ImGuiCond_FirstUseEver);
     /* Finished with the window.
      */
     ImGui::End();
+    ImGui::PopStyleVar();
 
     if (!show_window) {
         gui()->delete_later(this);

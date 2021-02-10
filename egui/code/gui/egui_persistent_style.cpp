@@ -41,7 +41,7 @@ void ImGuiSetuptyle( bool bStyleDark_, float alpha_  )
     style.Colors[ImGuiCol_FrameBgActive]         = ImVec4(0.44f, 0.96f, 0.96f, 0.67f);
     style.Colors[ImGuiCol_TitleBg]               = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);
     style.Colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(1.00f, 1.00f, 1.00f, 0.51f);
-    style.Colors[ImGuiCol_TitleBgActive]         = ImVec4(0.44f, 0.96f, 0.96f, 1.00f);
+    style.Colors[ImGuiCol_TitleBgActive]         = ImVec4(0.96f, 0.74f, 0.44f, 1.00f);
     style.Colors[ImGuiCol_MenuBarBg]             = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
     style.Colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.98f, 0.98f, 0.98f, 0.53f);
     style.Colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.69f, 0.69f, 0.69f, 1.00f);
@@ -75,7 +75,13 @@ void ImGuiSetuptyle( bool bStyleDark_, float alpha_  )
     style.Colors[ImGuiCol_TableBorderStrong]     = ImVec4(0.68f, 0.68f, 0.68f, 0.75f);
     style.Colors[ImGuiCol_TableBorderLight]      = ImVec4(0.68f, 0.68f, 0.68f, 0.50f);
 
-    style.WindowPadding = ImVec2(0, 0);
+    style.Colors[ImGuiCol_Tab]                   = ImVec4(1.00f, 1.00f, 1.00f, 0.25f);
+    style.Colors[ImGuiCol_TabHovered]            = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    style.Colors[ImGuiCol_TabActive]             = ImVec4(1.00f, 1.00f, 1.00f, 0.90f);
+    style.Colors[ImGuiCol_TabUnfocused]          = ImVec4(0.77f, 0.77f, 0.77f, 0.86f);
+    style.Colors[ImGuiCol_TabUnfocusedActive]    = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+
+    style.WindowPadding = ImVec2(8, 8);
     style.WindowRounding = 0.0f;
     style.ChildRounding = 0.0f;
     style.FrameRounding = 0.0f;
