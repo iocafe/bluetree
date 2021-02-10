@@ -149,10 +149,13 @@ eStatus eimgui_initialize()
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
-    // ImGui::StyleColorsDark();
-    // ImGui::StyleColorsClassic();
+#if 1
     ImGui::StyleColorsLight();
     ImGuiSetuptyle(false, 1.0F);
+#else
+    ImGui::StyleColorsDark();
+    ImGuiSetuptyle(true, 1.0F);
+#endif
     eVariable full_path;
     eglobal_make_full_data_file_path("imgui_style.ini", &full_path);
     if (!ImGuiLoadStyle(full_path.gets(),ImGui::GetStyle())) {
