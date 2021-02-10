@@ -28,6 +28,10 @@ class eDBM;
 ****************************************************************************************************
 */
 
+/* Generic table property number(s), must not be used twice by derived classes.
+ */
+#define ETABLEP_TEXT 50
+
 /** Select callback function.
  */
 typedef eStatus etable_select_callback(
@@ -276,7 +280,6 @@ public:
 
     eWhere *set_where(
         const os_char *where_clause);
-
 
     /* eWhere *get_where(); */
 };

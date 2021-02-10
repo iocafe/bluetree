@@ -244,6 +244,7 @@ void eclasslist_initialize()
     eMatrix::setupclass();
     eRowSet::setupclass();
     eDBM::setupclass();
+    eBitmap::setupclass();
     eConnection::setupclass();
     eEndPoint::setupclass();
     eThread::setupclass();

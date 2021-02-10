@@ -384,7 +384,7 @@ eStatus eMatrix::simpleproperty(
 
   @brief Write matrix to stream.
 
-  The eMatrix::writer() function serializes the eBuffer to stream. This writes only the
+  The eMatrix::writer() function serializes the eMatrix to stream. This writes only the
   content, use eObject::write() to save also class information, attachements, etc.
 
   @param  stream The stream to write to.
@@ -712,7 +712,7 @@ failed:
 
   @brief Read a matrix from stream.
 
-  The eMatrix::reader() function reads serialized eBuffer from stream. This function
+  The eMatrix::reader() function reads serialized eMatrix from stream. This function
   reads only the object content. To read whole object including attachments, names, etc,
   use eObject::read().
 

@@ -27,11 +27,7 @@ class eDBM;
 ****************************************************************************************************
 */
 
-/* Generic table property numbers. These property numbers must not be used by derived class.
- */
-#define ETABLEP_TEXT 50
-
-/* Matrix property numbers.
+/* Matrix property numbers, notice that ETABLEP_TEXT (50) is reserved.
  */
 #define EMTXP_DATATYPE 20
 #define EMTXP_NROWS 21

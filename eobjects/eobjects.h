@@ -79,6 +79,7 @@ void eobjects_shutdown();
 #include "code/table/edbm.h"
 #include "code/table/etablemessages.h"
 #include "code/matrix/ematrix.h"
+#include "code/bitmap/ebitmap.h"
 #include "code/thread/ethreadhandle.h"
 #include "code/thread/ethread.h"
 #include "code/timer/etimer.h"
