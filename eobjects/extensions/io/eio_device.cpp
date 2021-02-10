@@ -216,7 +216,7 @@ eioMblk *eioDevice::connected(
 {
     eioMblk *mblk;
 
-    if (minfo->mblk_name == '\0') {
+    if (minfo->mblk_name[0] == '\0') {
         return OS_NULL;
     }
 
