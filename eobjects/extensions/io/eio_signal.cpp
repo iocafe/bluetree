@@ -424,4 +424,6 @@ void eioSignal::down(eVariable *x)
         vv.state_bits = state_bits;
         ioc_move(&m_signal, &vv, 1, IOC_SIGNAL_NO_THREAD_SYNC|IOC_SIGNAL_WRITE);
     }
+
+    m_eio_root->trig_io();
 }

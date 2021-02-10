@@ -243,6 +243,14 @@ void eAttrBuffer::initialize(
             goto goon;
         }
     }
+    else {
+        m_show_as = E_SHOWAS_STRING;
+        m_align = E_ALIGN_LEFT;
+        m_tstr_flags = ETIMESTR_DISABLED;
+        m_dstr_flags = EDATESTR_DISABLED;
+        m_rdonly = OS_FALSE;
+        m_nosave = OS_FALSE;
+    }
 
     if (OSAL_IS_UNDEFINED_TYPE(type))
     {

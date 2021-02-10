@@ -18,7 +18,6 @@
 /* Property names.
  */
 const os_char
-    eiop_text[] = "text",
     eiop_sbits[] = "sbits",
     eiop_tstamp[] = "tstamp",
     eiop_connected[] = "connected",

@@ -20,7 +20,6 @@
 
 /* Property numbers.
  */
-#define EIOP_TEXT EVARP_TEXT
 #define EIOP_SBITS 20
 #define EIOP_TSTAMP 21
 #define EIOP_CONNECTED 30
@@ -32,7 +31,6 @@
 /* Property names.
  */
 extern const os_char
-    eiop_text[],
     eiop_sbits[],
     eiop_tstamp[],
     eiop_connected[],
@@ -42,3 +40,4 @@ extern const os_char
     eiop_sig_type[];
 
 #endif
+

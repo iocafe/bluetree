@@ -89,7 +89,7 @@ void eioNetwork::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioNetwork", ECLASSID_CONTAINER);
-    addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
+    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
@@ -156,9 +156,6 @@ eStatus eioNetwork::onpropertychange(
 {
     switch (propertynr)
     {
-        case EIOP_TEXT:
-            break;
-
         case EIOP_CONNECTED:
             break;
 
@@ -230,7 +227,11 @@ eioMblk *eioNetwork::connected(
 
     device = eioDevice::cast(byname(buf));
     if (device == OS_NULL) {
+        eVariable tmp;
         device = new eioDevice(this);
+        tmp = buf;
+        tmp += " IO";
+        device->setpropertyv(ECONTP_TEXT, &tmp);
         device->addname(buf);
     }
 

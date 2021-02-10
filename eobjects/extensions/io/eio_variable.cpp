@@ -219,6 +219,7 @@ void eioVariable::setup(
     os_short mblk_flags;
     os_int type_id;
     os_long min_value, max_value;
+    os_boolean is_rdonly;
 
     mblk_flags = signal->mblk_flags();
 
@@ -245,6 +246,12 @@ void eioVariable::setup(
             down();
         }
     }
+
+    is_rdonly = OS_TRUE;
+    if (m_down_ref) if (m_down_ref->get()) {
+        is_rdonly = OS_FALSE;
+    }
+    setpropertys(EVARP_ATTR, is_rdonly ? "rdonly" : "");
 }
 
 /* Adopts x.

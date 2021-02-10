@@ -90,7 +90,7 @@ void eioDevice::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioDevice", ECLASSID_CONTAINER);
-    addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
+    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertyl(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
@@ -157,9 +157,6 @@ eStatus eioDevice::onpropertychange(
 {
     switch (propertynr)
     {
-        case EIOP_TEXT:
-            break;
-
         case EIOP_CONNECTED:
             break;
 

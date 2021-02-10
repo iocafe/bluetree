@@ -93,7 +93,7 @@ void eioRoot::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioRoot", ECLASSID_CONTAINER);
-    addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
+    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
@@ -128,49 +128,6 @@ void eioRoot::onmessage(
     /* Default thread message processing.
      */
     eContainer::onmessage(envelope);
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Called to inform the class about property value change (override).
-
-  The onpropertychange() function is called when class'es property changes, unless the
-  property is flagged with EPRO_NOONPRCH.
-  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
-  in class members and and return it when simpleproperty() is called.
-
-  Notice for change logging: Previous value is still valid when this function is called.
-  You can get the old value by calling property() function inside onpropertychange()
-  function.
-
-  @param   propertynr Property number of changed property.
-  @param   x Variable containing the new value.
-  @param   flags
-  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
-           indicate that there was no property with given property number.
-
-****************************************************************************************************
-*/
-eStatus eioRoot::onpropertychange(
-    os_int propertynr,
-    eVariable *x,
-    os_int flags)
-{
-    switch (propertynr)
-    {
-        case EIOP_TEXT:
-            break;
-
-        default:
-            goto call_parent;
-    }
-
-    return ESTATUS_SUCCESS;
-
-call_parent:
-    return eContainer::onpropertychange(propertynr, x, flags);
 }
 
 
@@ -335,7 +292,11 @@ eioMblk *eioRoot::connected(
 
     network = eioNetwork::cast(byname(minfo->network_name));
     if (network == OS_NULL) {
+        eVariable tmp;
         network = new eioNetwork(this);
+        tmp = minfo->network_name;
+        tmp += " IO network";
+        network->setpropertyv(ECONTP_TEXT, &tmp);
         network->addname(minfo->network_name);
     }
 
@@ -479,6 +440,7 @@ eioRoot *eio_initialize(
     eioThread::setupclass();
 
     eio_root = new eioRoot(parent);
+    eio_root->setpropertys(ECONTP_TEXT, "IO root");
     eio_root->addname("//io");
     eio_root->setup(iocom_root);
 

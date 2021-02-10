@@ -89,7 +89,7 @@ void eioGroup::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioGroup", ECLASSID_CONTAINER);
-    addpropertys(cls, EIOP_TEXT, eiop_text, "text", EPRO_PERSISTENT);
+    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();
 }
@@ -153,11 +153,8 @@ eStatus eioGroup::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-    switch (propertynr)
+/*     switch (propertynr)
     {
-        case EIOP_TEXT:
-            break;
-
         default:
             goto call_parent;
     }
@@ -165,6 +162,7 @@ eStatus eioGroup::onpropertychange(
     return ESTATUS_SUCCESS;
 
 call_parent:
+*/
     return eContainer::onpropertychange(propertynr, x, flags);
 }
 

@@ -95,7 +95,7 @@ void eContainer::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eContainer");
-    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT);
+    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();
 }
@@ -366,6 +366,7 @@ void eContainer::send_open_info(
 {
     eContainer *request, *reply;
     eVariable *v;
+    eName *name;
     os_int command = EBROWSE_OPEN;
 
     /* Get command
@@ -389,6 +390,10 @@ void eContainer::send_open_info(
 
         eVariable tmp;
         propertyv(ECONTP_TEXT, &tmp);
+        if (tmp.isempty()) {
+            name = primaryname();
+            if (name) tmp = *name;
+        }
         if (!tmp.isempty()) {
             reply->setpropertyv(ECONTP_TEXT, &tmp);
         }

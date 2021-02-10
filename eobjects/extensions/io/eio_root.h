@@ -107,13 +107,6 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
-    /* Called when property value changes.
-     */
-    virtual eStatus onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags);
-
     /* A callback by a child object.
      */
     virtual eStatus oncallback(
