@@ -282,6 +282,10 @@ protected:
     /* Pointers to object to be deleted by gui.
      */
     eContainer *m_delete_list;
+
+    bool m_show_app_metrics;
+    bool m_show_app_about;
+    bool m_show_app_style_editor;
 };
 
 

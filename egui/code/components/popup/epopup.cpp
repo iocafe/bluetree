@@ -210,6 +210,8 @@ eStatus ePopup::draw(
         m_open_popup_called = OS_TRUE;
     }
 
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 8.0f));
+
     if (ImGui::BeginPopup(label))
     {
         for (c = firstcomponent();
@@ -220,8 +222,12 @@ eStatus ePopup::draw(
         }
 
         ImGui::EndPopup();
+        ImGui::PopStyleVar();
+
         return ESTATUS_SUCCESS;
     }
+
+   ImGui::PopStyleVar();
 
     return ESTATUS_FAILED;
 }

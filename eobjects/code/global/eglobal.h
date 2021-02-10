@@ -174,5 +174,10 @@ void eglobal_initialize(
     os_int argc,
     os_char *argv[]);
 
+/* Generate full operating system path to data file.
+ */
+void eglobal_make_full_data_file_path(
+    const os_char *file_name,
+    eVariable *full_path);
 
 #endif

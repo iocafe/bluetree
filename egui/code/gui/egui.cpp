@@ -47,6 +47,8 @@ eGui::eGui(
     ns_create("gui");
 
     m_delete_list = new eContainer(this, EOID_GUI_TO_BE_DELETED, EOBJ_TEMPORARY_ATTACHMENT);
+
+    m_show_app_metrics = m_show_app_about = m_show_app_style_editor = false;
 }
 
 
@@ -324,7 +326,26 @@ eStatus eGui::onpropertychange(
             break;
 
         case EGUIP_OPEN:
-            // setdigs((os_int)x->getl());
+            if (!os_strcmp(x->gets(), "imguistyle")) {
+                m_show_app_style_editor = !m_show_app_style_editor;
+                setpropertys(EGUIP_OPEN, osal_str_empty);
+            }
+            else if (!os_strcmp(x->gets(), "imguimetrics")) {
+                m_show_app_metrics = !m_show_app_metrics;
+                setpropertys(EGUIP_OPEN, osal_str_empty);
+            }
+            else if (!os_strcmp(x->gets(), "imguiabout")) {
+                m_show_app_about = !m_show_app_about;
+                setpropertys(EGUIP_OPEN, osal_str_empty);
+            }
+            else if (!os_strcmp(x->gets(), "saveimguistyle")) {
+                eVariable full_path;
+                eglobal_make_full_data_file_path("imgui_style.ini", &full_path);
+                if (!ImGuiSaveStyle(full_path.gets(),ImGui::GetStyle()))   {
+                    osal_debug_error_str("saving imgui_style.ini failed, path = ", full_path.gets());
+                }
+                setpropertys(EGUIP_OPEN, osal_str_empty);
+            }
             break;
 
         default:
@@ -496,6 +517,19 @@ eStatus eGui::run()
         for (c = firstcomponent(EOID_GUI_WINDOW); c; c = c->nextcomponent(EOID_GUI_WINDOW))
         {
             c->draw(m_draw_prm);
+        }
+
+        if (m_show_app_metrics) {
+            ImGui::ShowMetricsWindow(&m_show_app_metrics);
+        }
+        if (m_show_app_about) {
+            ImGui::ShowAboutWindow(&m_show_app_about);
+        }
+        if (m_show_app_style_editor)
+        {
+            ImGui::Begin("style editor", &m_show_app_style_editor);
+            ImGui::ShowStyleEditor();
+            ImGui::End();
         }
 
         for (mouse_button_nr = 0;
@@ -837,3 +871,4 @@ void eGui::delete_pending()
         delete p;
     }
 }
+

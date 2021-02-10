@@ -56,6 +56,7 @@ void egui_shutdown();
 #include "code/initialize/eguiglobal.h"
 #include "code/initialize/eguiclasslist.h"
 #include "code/imgui_iface/eimgui_iface.h"
+#include "code/gui/egui_persistent_style.h"
 #include "code/helpers/eautolabel.h"
 #include "code/helpers/eeditbuffer.h"
 #include "code/helpers/estrbuffer.h"

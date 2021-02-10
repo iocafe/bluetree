@@ -115,3 +115,24 @@ void eglobal_initialize(
         os_strncat(eglobal->process_id, process_nr_str, EGLOBAL_PROCESS_ID_SZ);
     }
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Generate full operating system path to data file.
+
+  The eglobal_make_full_data_file_path...
+
+****************************************************************************************************
+*/
+void eglobal_make_full_data_file_path(
+    const os_char *file_name,
+    eVariable *full_path)
+{
+    full_path->sets(eglobal->root_path);
+    full_path->appends("/");
+    full_path->appends(eglobal->data_dir);
+    full_path->appends("/");
+    full_path->appends(file_name);
+}
