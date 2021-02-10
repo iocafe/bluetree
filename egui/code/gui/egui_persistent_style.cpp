@@ -39,7 +39,7 @@ void ImGuiSetuptyle( bool bStyleDark_, float alpha_  )
     style.Colors[ImGuiCol_FrameBg]               = ImVec4(0.50f, 0.50f, 0.50f, 0.14f);
     style.Colors[ImGuiCol_FrameBgHovered]        = ImVec4(0.50f, 0.50f, 0.50f, 0.50f);
     style.Colors[ImGuiCol_FrameBgActive]         = ImVec4(0.44f, 0.96f, 0.96f, 0.67f);
-    style.Colors[ImGuiCol_TitleBg]               = ImVec4(0.94f, 0.94f, 0.94f, 1.00f);
+    style.Colors[ImGuiCol_TitleBg]               = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
     style.Colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(1.00f, 1.00f, 1.00f, 0.51f);
     style.Colors[ImGuiCol_TitleBgActive]         = ImVec4(0.96f, 0.74f, 0.44f, 1.00f);
     style.Colors[ImGuiCol_MenuBarBg]             = ImVec4(0.86f, 0.86f, 0.86f, 1.00f);
