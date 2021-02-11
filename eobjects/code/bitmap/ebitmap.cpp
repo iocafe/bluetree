@@ -14,6 +14,7 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
+#include "eosal_jpeg.h"
 
 /* Bitmap property names.
  */
@@ -52,7 +53,6 @@ eBitmap::eBitmap(
     m_jpeg = OS_NULL;
     m_jpeg_sz = m_jpeg_alloc_sz = 0;
 }
-
 
 
 /**
@@ -98,7 +98,8 @@ void eBitmap::setupclass()
         "enum=\"8.grayscale/8,"
         "16.grayscale/16,"
         "152.color/24,"
-        "160.color/32\"");
+        "160.color/32,"
+        "224.color/32+alpha\"");
     addpropertyl(cls, EBITMAPP_WIDTH, ebitmapp_width, "nro columns",
         EPRO_PERSISTENT|EPRO_SIMPLE);
     addpropertyl(cls, EBITMAPP_HEIGHT, ebitmapp_height, "nro rows",
@@ -592,6 +593,7 @@ void eBitmap::resize(
     {
         if (m_buf && !keep_content) {
             os_memclear(m_buf, m_buf_sz);
+            clear_compress();
         }
         return;
     }
@@ -614,6 +616,7 @@ void eBitmap::resize(
             os_memclear(m_buf, buf_sz);
         }
         else {
+            clear_compress();
             os_memclear(m_buf, buf_sz);
         }
 
@@ -668,6 +671,35 @@ void eBitmap::clear()
 */
 void eBitmap::compress()
 {
+    osalStream dst_stream;
+    osalStatus s;
+    os_memsz nbytes;
+    os_int quality;
+
+    /* If we got the jpeg, do not recompress.
+     */
+    if (m_jpeg) return;
+
+    if (m_buf == OS_NULL) {
+        osal_debug_error("eBitmap: noting to compress");
+        return;
+    }
+
+    switch (m_compression)
+    {
+        case EBITMAP_LIGHT_COMPRESSION:  quality = 80; break;
+        default:
+        case EBITMAP_MEDIUM_COMPRESSION: quality = 60; break;
+        case EBITMAP_HEAVY_COMPRESSION:  quality = 40; break;
+    }
+
+    s = os_compress_JPEG(
+        m_buf, m_width, m_height, m_row_nbytes,m_format, quality, dst_stream,
+            OS_NULL, 0, &nbytes, OSAL_JPEG_DEFAULT);
+    if (s) {
+    }
+
+    // adopt_jpeg()
 }
 
 
@@ -680,6 +712,11 @@ void eBitmap::compress()
 */
 void eBitmap::clear_compress()
 {
+    if (m_jpeg) {
+        os_free(m_jpeg, m_jpeg_alloc_sz);
+    }
+    m_jpeg = OS_NULL;
+    m_jpeg_sz = m_jpeg_alloc_sz = 0;
 }
 
 
@@ -694,6 +731,7 @@ void eBitmap::clear_compress()
 */
 void eBitmap::uncompress()
 {
+
 }
 
 
