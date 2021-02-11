@@ -22,6 +22,8 @@ const os_char
     ebitmapp_format[] = "type",
     ebitmapp_width[] = "width",
     ebitmapp_height[] = "height",
+    ebitmapp_pixel_width_um[] = "pixw",
+    ebitmapp_pixel_height_um[] = "pixw",
     ebitmapp_compression[] = "compression",
     ebitmapp_metadata[] = "metagata";
 
@@ -42,9 +44,13 @@ eBitmap::eBitmap(
     m_pixel_nbytes = 3;
     m_row_nbytes = 0;
     m_width = m_height = 0;
-    m_compression = 0;
+    m_pixel_width_um = m_pixel_height_um = 0.0;
+    m_compression = EBITMAP_MEDIUM_COMPRESSION;
     m_timestamp = 0;
+    m_buf = OS_NULL;
+    m_buf_alloc_sz = m_buf_sz = 0;
 }
+
 
 
 /**
@@ -80,17 +86,34 @@ void eBitmap::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eBitmap", ECLASSID_TABLE);
-    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addproperty (cls, EBITMAPP_TSTAMP, ebitmapp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
-    v = addpropertyl(cls, EBITMAPP_FORMAT, ebitmapp_format, "format", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, ECONTP_TEXT, econtp_text, "text",
+        EPRO_PERSISTENT|EPRO_NOONPRCH);
+    addproperty (cls, EBITMAPP_TSTAMP, ebitmapp_tstamp, "timestamp",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
+    v = addpropertyl(cls, EBITMAPP_FORMAT, ebitmapp_format, "format",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
     v->setpropertys(EVARP_ATTR,
         "enum=\"8.grayscale/8,"
         "16.grayscale/16,"
         "152.color/24,"
         "160.color/32\"");
-    addpropertyl(cls, EBITMAPP_WIDTH, ebitmapp_width, "nro columns", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertyl(cls, EBITMAPP_HEIGHT, ebitmapp_height, "nro rows", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertyl(cls, EBITMAPP_COMPRESSION, ebitmapp_compression, "compression", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, EBITMAPP_WIDTH, ebitmapp_width, "nro columns",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, EBITMAPP_HEIGHT, ebitmapp_height, "nro rows",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
+    v = addpropertyd(cls, EBITMAPP_PIXEL_WIDTH_UM, ebitmapp_pixel_width_um, "pixel width",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
+    v->setpropertys(EVARP_UNIT, "um");
+    v = addpropertyd(cls, EBITMAPP_PIXEL_HEIGHT_UM, ebitmapp_pixel_height_um, "pixel height",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
+    v->setpropertys(EVARP_UNIT, "um");
+    v = addpropertyl(cls, EBITMAPP_COMPRESSION, ebitmapp_compression, "compression",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
+    v->setpropertys(EVARP_ATTR,
+        "enum=\"0.uncompressed,"
+        "10.light,"
+        "20.medium,"
+        "30.heavy\"");
     addproperty (cls, EBITMAPP_METADATA, ebitmapp_metadata, "metadata",
         EPRO_PERSISTENT|EPRO_NOONPRCH);
     propertysetdone(cls);
@@ -122,6 +145,9 @@ eObject *eBitmap::clone(
     clonedobj = new eBitmap(parent, id == EOID_CHILD ? oid() : id, flags());
     clonedobj->m_compression = m_compression;
     clonedobj->m_timestamp = m_timestamp;
+    clonedobj->m_pixel_width_um = 0.0;
+    clonedobj->m_pixel_height_um = 0.0;
+
     clonedobj->allocate(m_format, m_width, m_height, m_bflags);
     clonegeneric(clonedobj, aflags);
     return clonedobj;
@@ -165,21 +191,29 @@ eStatus eBitmap::onpropertychange(
 
         case EBITMAPP_FORMAT:
             v = x->geti();
-            resize((osalBitmapFormat)v, m_width, m_height, m_bflags);
+            resize((osalBitmapFormat)v, m_width, m_height, m_bflags|EBITMAP_KEEP_CONTENT);
             break;
 
         case EBITMAPP_WIDTH:
             v = x->geti();
-            resize(m_format, v, m_height, m_bflags);
+            resize(m_format, v, m_height, m_bflags|EBITMAP_KEEP_CONTENT);
             break;
 
         case EBITMAPP_HEIGHT:
             v = x->geti();
-            resize(m_format, m_width, v, m_bflags);
+            resize(m_format, m_width, v, m_bflags|EBITMAP_KEEP_CONTENT);
+            break;
+
+        case EBITMAPP_PIXEL_WIDTH_UM:
+            m_pixel_width_um = x->getd();
+            break;
+
+        case EBITMAPP_PIXEL_HEIGHT_UM:
+            m_pixel_height_um = x->getd();
             break;
 
         case EBITMAPP_COMPRESSION:
-            m_compression = x->geti();
+            m_compression = (eBitmapCompression)x->geti();
             break;
 
         default:
@@ -227,6 +261,14 @@ eStatus eBitmap::simpleproperty(
             x->setl(m_height);
             break;
 
+        case EBITMAPP_PIXEL_WIDTH_UM:
+            x->setd(m_pixel_width_um);
+            break;
+
+        case EBITMAPP_PIXEL_HEIGHT_UM:
+            x->setd(m_pixel_height_um);
+            break;
+
         case EBITMAPP_COMPRESSION:
             x->setl(m_compression);
             break;
@@ -272,6 +314,8 @@ eStatus eBitmap::writer(
     if (stream->putl(m_format)) goto failed;
     if (stream->putl(m_width)) goto failed;
     if (stream->putl(m_height)) goto failed;
+    if (stream->putd(m_pixel_width_um)) goto failed;
+    if (stream->putd(m_pixel_height_um)) goto failed;
     if (stream->putl(m_compression)) goto failed;
     if (stream->putl(m_timestamp)) goto failed;
 
@@ -330,8 +374,10 @@ eStatus eBitmap::reader(
     if (stream->getl(&format)) goto failed;
     if (stream->getl(&width)) goto failed;
     if (stream->getl(&height)) goto failed;
+    if (stream->getd(&m_pixel_width_um)) goto failed;
+    if (stream->getd(&m_pixel_height_um)) goto failed;
     if (stream->getl(&tmp)) goto failed;
-    m_compression = tmp;
+    m_compression = (eBitmapCompression)tmp;
     if (stream->getl(&tmp)) goto failed;
     m_timestamp = tmp;
     resize((osalBitmapFormat)format, (os_int)width, (os_int)height, m_bflags);
@@ -374,82 +420,7 @@ eStatus eBitmap::json_writer(
     os_int sflags,
     os_int indent)
 {
-    os_boolean comma1;
-    os_int row;
-
-    indent++;
-    if (json_puts(stream, "[")) goto failed;
-    comma1 = OS_FALSE;
-    for (row = 0; row < m_width; row++)
-    {
-        if (comma1) {
-            if (json_puts(stream, ",")) goto failed;
-        }
-        comma1 = OS_TRUE;
-
-        if (json_indent(stream, indent, EJSON_NEW_LINE_BEFORE /* , &comma */)) goto failed;
-        if (json_puts(stream, "[")) goto failed;
-
-#if 0
-        comma2 = OS_FALSE;
-        for (column = 0; column < m_height; column++)
-        {
-            if (comma2) {
-                if (json_puts(stream, ",")) goto failed;
-            }
-            comma2 = OS_TRUE;
-
-            /* If this is a table, we want to show row number instead of flags column.
-             */
-            if (m_columns && column == EBITMAP_FLAGS_COLUMN_NR) {
-                // setl(row_nr, EBITMAP_FLAGS_COLUMN_NR, EBITMAP_FLAGS_ROW_OK);
-                tmp.setl(row + 1);
-                has_value = OS_TRUE;
-            }
-            else {
-                has_value = getv(row, column, &tmp);
-            }
-
-            if (has_value)
-            {
-                type_id = tmp.type();
-                if (OSAL_IS_BOOLEAN_TYPE(type_id) ||
-                    OSAL_IS_INTEGER_TYPE(type_id) ||
-                    OSAL_IS_FLOAT_TYPE(type_id))
-                {
-                    if (json_puts(stream, tmp.gets())) goto failed;
-                }
-                else if (type_id == OS_OBJECT)
-                {
-                    o = tmp.geto();
-                    if (o) {
-                        if (o->json_write(stream, sflags, indent)) goto failed;
-                    }
-                    else {
-                        if (json_putqs(stream, "")) goto failed;
-                    }
-                }
-                else
-                {
-                    if (json_putqs(stream, tmp.gets())) goto failed;
-                }
-            }
-            else {
-                if (json_putqs(stream, "")) goto failed;
-            }
-        }
-#endif
-
-        if (json_puts(stream, "]")) goto failed;
-    }
-
-    if (json_indent(stream, --indent, EJSON_NEW_LINE_BEFORE /* , &comma */)) goto failed;
-    if (json_puts(stream, "]")) goto failed;
-
-    return ESTATUS_SUCCESS;
-
-failed:
-    return ESTATUS_FAILED;
+    return eContainer::json_writer(stream, sflags, indent);
 }
 #endif
 
@@ -466,7 +437,8 @@ failed:
           OSAL_GRAYSCALE8 (8), OSAL_GRAYSCALE16 (16), OSAL_RGB24 (152) or OSAL_RGBA32 (160).
   @param  width New image width in pixels.
   @param  height New image height in pixels.
-  @param  bflags Reserved for future, set 0 for not.
+  @param  bflags EBITMAP_CLEAR_CONTENT or EBITMAP_KEEP_CONTENT, wether to preserve old bitmap
+          content if size doesn't cahnge.
 
 ****************************************************************************************************
 */
@@ -494,7 +466,8 @@ void eBitmap::allocate(
           OSAL_GRAYSCALE8 (8), OSAL_GRAYSCALE16 (16), OSAL_RGB24 (152) or OSAL_RGBA32 (160).
   @param  width New image width in pixels.
   @param  height New image height in pixels.
-  @param  bflags Reserved for future, set 0 for not.
+  @param  bflags EBITMAP_CLEAR_CONTENT or EBITMAP_KEEP_CONTENT, wether to preserve old bitmap
+          content if size doesn't cahnge.
 
 ****************************************************************************************************
 */
@@ -504,13 +477,57 @@ void eBitmap::resize(
     os_int height,
     os_short bflags)
 {
+    os_short pixel_nbytes;
+    os_int row_nbytes;
+    os_memsz buf_sz;
+    os_short keep_content;
+
+    keep_content = (bflags & EBITMAP_KEEP_CONTENT);
+    bflags &= ~EBITMAP_KEEP_CONTENT;
+
+    /* If nothing has changed.
+     */
+    if (m_format == format && m_bflags == bflags && m_height == height && m_width == width)
+    {
+        if (m_buf && !keep_content) {
+            os_memclear(m_buf, m_buf_sz);
+        }
+        return;
+    }
+
+    pixel_nbytes = OSAL_BITMAP_BYTES_PER_PIX(format);
+    row_nbytes = pixel_nbytes * width;
+
+    /* RGB24: Align rows to 4 byte boundary.
+     */
+    if (pixel_nbytes == 3) {
+        row_nbytes = (row_nbytes + 3) / 4;
+        row_nbytes *= 4;
+    }
+
+    buf_sz = (os_memsz)row_nbytes * (os_memsz)height;
+    if (buf_sz > 0) {
+        if (buf_sz > m_buf_alloc_sz || buf_sz < m_buf_alloc_sz / 2) {
+            clear();
+            m_buf = (os_uchar*)os_malloc(buf_sz, &m_buf_alloc_sz);
+            os_memclear(m_buf, buf_sz);
+        }
+        else {
+            os_memclear(m_buf, buf_sz);
+        }
+
+    }
+    else {
+        clear();
+    }
+
     m_format = format;
-    m_bflags = bflags;
-    m_height = height;
+    m_bflags = (bflags & ~EBITMAP_KEEP_CONTENT);
     m_width = width;
-
-    m_pixel_nbytes = 3;
-
+    m_height = height;
+    m_pixel_nbytes = pixel_nbytes;
+    m_row_nbytes = row_nbytes;
+    m_buf_sz = buf_sz;
 }
 
 
@@ -525,6 +542,16 @@ void eBitmap::resize(
 */
 void eBitmap::clear()
 {
+    if (m_buf) {
+        os_free(m_buf, m_buf_alloc_sz);
+        m_buf = OS_NULL;
+        m_buf_alloc_sz = 0;
+    }
+    m_width = m_height = 0;
+    m_pixel_nbytes = 0;
+    m_row_nbytes = 0;
+    m_format = OSAL_RGB24;
+    m_bflags = 0;
 }
 
 

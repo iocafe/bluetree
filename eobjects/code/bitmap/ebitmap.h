@@ -30,7 +30,9 @@
 #define EBITMAPP_FORMAT 20
 #define EBITMAPP_WIDTH 21
 #define EBITMAPP_HEIGHT 22
-#define EBITMAPP_COMPRESSION 23
+#define EBITMAPP_PIXEL_WIDTH_UM 23
+#define EBITMAPP_PIXEL_HEIGHT_UM 24
+#define EBITMAPP_COMPRESSION 25
 #define EBITMAPP_METADATA 30
 
 /* Bitmap property names.
@@ -40,8 +42,25 @@ extern const os_char
     ebitmapp_format[],
     ebitmapp_width[],
     ebitmapp_height[],
+    ebitmapp_pixel_width_um[],
+    ebitmapp_pixel_height_um[],
     ebitmapp_compression[],
     ebitmapp_metadata[];
+
+/* Bitmap compression (when serializing).
+ */
+typedef enum eBitmapCompression {
+  EBITMAP_UNCOMPRESSED = 0,
+  EBITMAP_LIGHT_COMPRESSION = 10,
+  EBITMAP_MEDIUM_COMPRESSION = 20,
+  EBITMAP_HEAVY_COMPRESSION = 30,
+}
+eBitmapCompression;
+
+/* eBitmap::allocate argument bflags
+ */
+#define EBITMAP_CLEAR_CONTENT 0
+#define EBITMAP_KEEP_CONTENT 1
 
 
 /**
@@ -167,10 +186,6 @@ public:
      */
     inline osalBitmapFormat format() {return m_format; }
 
-    /* Get pixel size in bytes.
-     */
-    inline os_int pixel_nbytes() {return m_pixel_nbytes; }
-
     /* Get bitmap width.
      */
     inline os_int width() {return m_width; }
@@ -178,6 +193,18 @@ public:
     /* Get bitmap height.
      */
     inline os_int height() {return m_height; }
+
+    /* Get width of single pixel, micrometers. 0.0 if not set.
+     */
+    inline os_double pixel_width_um() {return m_pixel_width_um; }
+
+    /* Get height of single pixel, micrometers. 0.0 if not set.
+     */
+    inline os_double pixel_height_um() {return m_pixel_height_um; }
+
+    /* Get pixel size in bytes.
+     */
+    inline os_int pixel_nbytes() {return m_pixel_nbytes; }
 
     /* Get bitmap width in bytes (this may not be same as with() * pixel_sz(), since rows
        can be aligned to 4 byte boundary, etc.
@@ -249,11 +276,31 @@ protected:
 
     /** Bitmap compression, when serializing the bitmap.
      */
-    os_int m_compression;
+    eBitmapCompression m_compression;
+
+    /** Width of single pixel, micrometers. 0.0 if not set.
+     */
+    os_double m_pixel_width_um;
+
+    /** Height of single pixel, micrometers. 0.0 if not set.
+     */
+    os_double m_pixel_height_um;
 
     /** Bitmap time stamp, 0 if not set.
      */
     os_long m_timestamp;
+
+    /** Pointer to bitmap buffer.
+     */
+    os_uchar *m_buf;
+
+    /** Buffer allocation size in bytes, 0 if not allocated.
+     */
+    os_memsz m_buf_alloc_sz;
+
+    /** User buffer size in bytes, 0 if not allocated.
+     */
+    os_memsz m_buf_sz;
 };
 
 #endif
