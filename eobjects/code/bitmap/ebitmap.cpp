@@ -48,7 +48,9 @@ eBitmap::eBitmap(
     m_compression = EBITMAP_MEDIUM_COMPRESSION;
     m_timestamp = 0;
     m_buf = OS_NULL;
-    m_buf_alloc_sz = m_buf_sz = 0;
+    m_buf_sz = m_buf_alloc_sz = 0;
+    m_jpeg = OS_NULL;
+    m_jpeg_sz = m_jpeg_alloc_sz = 0;
 }
 
 
@@ -147,8 +149,24 @@ eObject *eBitmap::clone(
     clonedobj->m_timestamp = m_timestamp;
     clonedobj->m_pixel_width_um = 0.0;
     clonedobj->m_pixel_height_um = 0.0;
-
     clonedobj->allocate(m_format, m_width, m_height, m_bflags);
+
+    if (m_buf) {
+        clonedobj->m_buf = (os_uchar*)os_malloc(m_buf_sz, &(clonedobj->m_buf_alloc_sz));
+        if (clonedobj->m_buf) {
+            os_memcpy(clonedobj->m_buf, m_buf, m_buf_sz);
+            clonedobj->m_buf_sz = m_buf_sz;
+        }
+    }
+
+    if (m_jpeg) {
+        clonedobj->m_jpeg = (os_uchar*)os_malloc(m_jpeg_sz, &(clonedobj->m_jpeg_alloc_sz));
+        if (clonedobj->m_jpeg) {
+            os_memcpy(clonedobj->m_jpeg, m_jpeg, m_jpeg_sz);
+            clonedobj->m_jpeg_sz = m_jpeg_sz;
+        }
+    }
+
     clonegeneric(clonedobj, aflags);
     return clonedobj;
 }
@@ -301,6 +319,9 @@ eStatus eBitmap::writer(
     eStream *stream,
     os_int sflags)
 {
+    const os_char *p;
+    os_memsz n;
+    os_int y;
     const os_int version = 0;
     OSAL_UNUSED(sflags);
 
@@ -318,6 +339,46 @@ eStatus eBitmap::writer(
     if (stream->putd(m_pixel_height_um)) goto failed;
     if (stream->putl(m_compression)) goto failed;
     if (stream->putl(m_timestamp)) goto failed;
+
+    /* Write the bitmap, either uncompressed or as jpeg.
+     */
+    if (m_buf_sz) {
+        if (m_compression == EBITMAP_UNCOMPRESSED)
+        {
+            if (m_buf == OS_NULL) {
+                goto failed;
+            }
+
+            n = m_pixel_nbytes * m_width;
+            if (n == m_row_nbytes) {
+                if (stream->write((const os_char*)m_buf,
+                    (os_memsz)m_row_nbytes * (os_memsz)m_height))
+                {
+                    goto failed;
+                }
+            }
+
+            else {
+                p = (const os_char*)m_buf;
+                for (y = 0; y < m_height; y++) {
+                    if (stream->write(p, n)) goto failed;
+                    p += m_row_nbytes;
+                }
+            }
+        }
+        else
+        {
+            if (m_jpeg == OS_NULL) {
+                compress();
+                if (m_jpeg == OS_NULL) goto failed;
+            }
+
+            if (stream->putl(m_jpeg_sz)) goto failed;
+            if (stream->write((const os_char*)m_jpeg, m_jpeg_sz)) {
+                goto failed;
+            }
+        }
+    }
 
     /* End the object.
      */
@@ -356,8 +417,9 @@ eStatus eBitmap::reader(
     eStream *stream,
     os_int sflags)
 {
+    os_char *p;
     os_long format, height, width, tmp;
-    os_int version;
+    os_int version, n, y;
     OSAL_UNUSED(sflags);
 
     /* If we have old data, delete it.
@@ -381,6 +443,45 @@ eStatus eBitmap::reader(
     if (stream->getl(&tmp)) goto failed;
     m_timestamp = tmp;
     resize((osalBitmapFormat)format, (os_int)width, (os_int)height, m_bflags);
+
+    /* Write the bitmap, either uncompressed or as jpeg.
+     */
+    if (m_width * m_height) {
+        if (m_buf == OS_NULL) {
+            goto failed;
+        }
+
+        if (m_compression == EBITMAP_UNCOMPRESSED) {
+            n = m_pixel_nbytes * m_width;
+            if (n == m_row_nbytes) {
+                if (stream->read((os_char*)m_buf,
+                    (os_memsz)m_row_nbytes * (os_memsz)m_height))
+                {
+                    goto failed;
+                }
+            }
+            else {
+                p = (os_char*)m_buf;
+                for (y = 0; y < m_height; y++) {
+                    if (stream->read(p, n)) goto failed;
+                    p += m_row_nbytes;
+                }
+            }
+        }
+        else {
+            if (stream->getl(&m_jpeg_sz)) goto failed;
+            if (m_jpeg_sz <= 0) goto failed;
+
+            m_jpeg = (os_uchar*)os_malloc(m_jpeg_sz, &m_jpeg_alloc_sz);
+            if (m_jpeg <= 0) goto failed;
+
+            if (stream->read((os_char*)m_jpeg, m_jpeg_sz)) {
+                goto failed;
+            }
+
+            uncompress();
+        }
+    }
 
     /* End the object.
      */
@@ -542,6 +643,7 @@ void eBitmap::resize(
 */
 void eBitmap::clear()
 {
+    clear_compress();
     if (m_buf) {
         os_free(m_buf, m_buf_alloc_sz);
         m_buf = OS_NULL;
@@ -552,6 +654,46 @@ void eBitmap::clear()
     m_row_nbytes = 0;
     m_format = OSAL_RGB24;
     m_bflags = 0;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Compress bitmap as JPEG within eBitmap object.
+
+  The compress function creates JPEG in eBitmap's internal buffer.
+
+****************************************************************************************************
+*/
+void eBitmap::compress()
+{
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Free memory allocated for compressed JPEG bitmap, if any.
+
+****************************************************************************************************
+*/
+void eBitmap::clear_compress()
+{
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Uncompress JPEG to flat bitmap buffer.
+
+  The uncompress function uncompressess bitmap in internal buffer.
+
+****************************************************************************************************
+*/
+void eBitmap::uncompress()
+{
 }
 
 
@@ -645,3 +787,4 @@ void eBitmap::send_open_info(
         eObject::send_open_info(envelope);
     }
 }
+

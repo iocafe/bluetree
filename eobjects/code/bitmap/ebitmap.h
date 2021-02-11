@@ -215,6 +215,18 @@ public:
      */
     inline os_short bflags() {return m_bflags; }
 
+    /* Compress bitmap as JPEG within eBitmap object.
+     */
+    void compress();
+
+    /* Free memory allocated for compressed JPEG bitmap, if any.
+     */
+    void clear_compress();
+
+    /* Uncompress JPEG to flat bitmap buffer.
+     */
+    void uncompress();
+
 
 protected:
     /**
@@ -274,7 +286,8 @@ protected:
      */
     os_int m_height;
 
-    /** Bitmap compression, when serializing the bitmap.
+    /** Bitmap compression, when serializing the bitmap. One of: EBITMAP_UNCOMPRESSED (0),
+        EBITMAP_LIGHT_COMPRESSION, EBITMAP_MEDIUM_COMPRESSION, or EBITMAP_HEAVY_COMPRESSION.
      */
     eBitmapCompression m_compression;
 
@@ -290,7 +303,7 @@ protected:
      */
     os_long m_timestamp;
 
-    /** Pointer to bitmap buffer.
+    /** Pointer to bitmap buffer, OS_NULL if none.
      */
     os_uchar *m_buf;
 
@@ -298,9 +311,21 @@ protected:
      */
     os_memsz m_buf_alloc_sz;
 
-    /** User buffer size in bytes, 0 if not allocated.
+    /** Used buffer size in bytes, 0 if not allocated.
      */
     os_memsz m_buf_sz;
+
+    /** JPEG compressed image, OS_NULL if none.
+     */
+    os_uchar *m_jpeg;
+
+    /** Used JPEG buffer size in bytes, 0 if not allocated.
+     */
+    os_memsz m_jpeg_sz;
+
+    /** Allocated JPEG buffer size in bytes, 0 if not allocated.
+     */
+    os_memsz m_jpeg_alloc_sz;
 };
 
 #endif
