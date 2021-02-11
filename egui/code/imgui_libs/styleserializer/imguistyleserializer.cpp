@@ -1,21 +1,14 @@
 /**
 
-  @file    egui_persistent_style.cpp
+  @file    imguistyleserializer.cpp
   @brief   Save/load Dear ImGui style.
-  @author  Pekka Lehtikoski
+  @author  Many authors, MIT license
   @version 1.0
   @date    8.9.2020
 
-  ADOPTED FROM
-
-  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
-  modified, and distributed under the terms of the project licensing. By continuing to use, modify,
-  or distribute this file you indicate that you have read the license and understand and accept
-  it fully.
-
 ****************************************************************************************************
 */
-#include "egui.h"
+#include "imguistyleserializer.h"
 #include "imgui_internal.h"
 
 #include <string.h>

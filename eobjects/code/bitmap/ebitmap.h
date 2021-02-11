@@ -18,31 +18,29 @@
 #define EBITMAP_H_
 #include "eobjects.h"
 
-class eBuffer;
-class eDBM;
-
 /**
 ****************************************************************************************************
   Defines
 ****************************************************************************************************
 */
 
-
 /* Bitmap property numbers.
  */
-#define EBITMAPP_TEXT 10
-#define EBITMAPP_PIXEL_TYPE 20
+#define EBITMAPP_TSTAMP 15
+#define EBITMAPP_FORMAT 20
 #define EBITMAPP_WIDTH 21
 #define EBITMAPP_HEIGHT 22
+#define EBITMAPP_COMPRESSION 23
 #define EBITMAPP_METADATA 30
 
 /* Bitmap property names.
  */
 extern const os_char
-    ebitmapp_text[],
-    ebitmapp_pixel_type[],
+    ebitmapp_tstamp[],
+    ebitmapp_format[],
     ebitmapp_width[],
     ebitmapp_height[],
+    ebitmapp_compression[],
     ebitmapp_metadata[];
 
 
@@ -51,7 +49,7 @@ extern const os_char
   Bitmap class.
 ****************************************************************************************************
 */
-class eBitmap : public eTable
+class eBitmap : public eContainer
 {
 public:
 
@@ -105,11 +103,6 @@ public:
         return new eBitmap(parent, id, flags);
     }
 
-    /* Function to process incoming messages.
-     */
-    virtual void onmessage(
-        eEnvelope *envelope);
-
     /* Called when property value changes.
      */
     virtual eStatus onpropertychange(
@@ -161,9 +154,10 @@ public:
     /* Allocate bitmap.
      */
     void allocate(
-        osalTypeId type,
-        os_int nrows = 0,
-        os_int ncolumns = 0);
+        osalBitmapFormat format,
+        os_int width,
+        os_int height,
+        os_short bflags = 0);
 
     /* Release all allocated data, empty the bitmap.
      */
@@ -171,7 +165,11 @@ public:
 
     /* Get bitmap data type.
      */
-    inline osalTypeId pixel_type() {return m_pixel_type; }
+    inline osalBitmapFormat format() {return m_format; }
+
+    /* Get pixel size in bytes.
+     */
+    inline os_int pixel_nbytes() {return m_pixel_nbytes; }
 
     /* Get bitmap width.
      */
@@ -180,6 +178,16 @@ public:
     /* Get bitmap height.
      */
     inline os_int height() {return m_height; }
+
+    /* Get bitmap width in bytes (this may not be same as with() * pixel_sz(), since rows
+       can be aligned to 4 byte boundary, etc.
+     */
+    inline os_int row_nbytes() {return m_row_nbytes; }
+
+    /* Get flags given to eBitmap::allocate().
+     */
+    inline os_short bflags() {return m_bflags; }
+
 
 protected:
     /**
@@ -191,9 +199,10 @@ protected:
     /* Resize the bitmap (change width, height or pixel type).
      */
     void resize(
-        osalTypeId pixel_type,
+        osalBitmapFormat format,
         os_int width,
-        os_int height);
+        os_int height,
+        os_short bflags);
 
     /* Collect information about this bitmap for tree browser, etc.
      */
@@ -216,7 +225,11 @@ protected:
     */
     /** Pixel data type.
      */
-    osalTypeId m_pixel_type;
+    osalBitmapFormat m_format;
+
+    /** Flags given to eBitmap::allocate().
+     */
+    os_short m_bflags;
 
     /** Pixel data size in bytes.
      */
@@ -234,9 +247,13 @@ protected:
      */
     os_int m_height;
 
-    /** To prevent recursive resizing.
+    /** Bitmap compression, when serializing the bitmap.
      */
-    os_short m_own_change;
+    os_int m_compression;
+
+    /** Bitmap time stamp, 0 if not set.
+     */
+    os_long m_timestamp;
 };
 
 #endif

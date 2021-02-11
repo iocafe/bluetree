@@ -18,33 +18,13 @@
 /* Bitmap property names.
  */
 const os_char
-    ebitmapp_text[] = "text",
-    ebitmapp_datatype[] = "type",
-    ebitmapp_height[] = "height",
+    ebitmapp_tstamp[] = "tstamp",
+    ebitmapp_format[] = "type",
     ebitmapp_width[] = "width",
-    ebitmapp_configuration[] = "configuration";
+    ebitmapp_height[] = "height",
+    ebitmapp_compression[] = "compression",
+    ebitmapp_metadata[] = "metagata";
 
-/* Approximate size for one eBuffer, adjusted to memory allocation block.
- */
-#define OEBITMAP_APPROX_BUF_SZ 128
-
-/* Flags for getptrs() function.
- */
-#define EBITMAP_ALLOCATE_IF_NEEDED 1
-#define EBITMAP_CLEAR_ELEMENT 2
-
-typedef union
-{
-    os_long l;
-    os_double d;
-    os_char *s;
-    eObject *o;
-}
-eBitmapDataItem;
-
-static const os_short ebitmap_no_short_value = OS_SHORT_MIN;
-static const os_int ebitmap_no_int_value = OS_INT_MIN;
-static const os_long ebitmap_no_long_value = OS_LONG_MIN;
 
 /**
 ****************************************************************************************************
@@ -55,19 +35,15 @@ eBitmap::eBitmap(
     eObject *parent,
     e_oid id,
     os_int flags)
-    : eTable(parent, id, flags)
+    : eContainer(parent, id, flags)
 {
-    /** Initial data type is OS_OBJECT.
-     */
-    m_pixel_type = OS_UINT;
-    m_pixel_nbytes = 0;
+    m_format = OSAL_RGB24;
+    m_bflags = 0;
+    m_pixel_nbytes = 3;
     m_row_nbytes = 0;
-
-    /** Initial size is 0, 0
-     */
     m_width = m_height = 0;
-
-    m_own_change = 0;
+    m_compression = 0;
+    m_timestamp = 0;
 }
 
 
@@ -97,20 +73,26 @@ eBitmap::~eBitmap()
 */
 void eBitmap::setupclass()
 {
+    eVariable *v;
     const os_int cls = ECLASSID_BITMAP;
 
     /* Add the class to class list.
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eBitmap", ECLASSID_TABLE);
-    addpropertyl(cls, EBITMAPP_TEXT, ebitmapp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addpropertyl(cls, EBITMAPP_PIXEL_TYPE, ebitmapp_datatype, "data type", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertyl(cls, EBITMAPP_HEIGHT, ebitmapp_height, "nro rows", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
+    addproperty (cls, EBITMAPP_TSTAMP, ebitmapp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
+    v = addpropertyl(cls, EBITMAPP_FORMAT, ebitmapp_format, "format", EPRO_PERSISTENT|EPRO_SIMPLE);
+    v->setpropertys(EVARP_ATTR,
+        "enum=\"8.grayscale/8,"
+        "16.grayscale/16,"
+        "152.color/24,"
+        "160.color/32\"");
     addpropertyl(cls, EBITMAPP_WIDTH, ebitmapp_width, "nro columns", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addproperty (cls, EBITMAPP_METADATA, ebitmapp_configuration, "configuration",
+    addpropertyl(cls, EBITMAPP_HEIGHT, ebitmapp_height, "nro rows", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, EBITMAPP_COMPRESSION, ebitmapp_compression, "compression", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EBITMAPP_METADATA, ebitmapp_metadata, "metadata",
         EPRO_PERSISTENT|EPRO_NOONPRCH);
-
-    add_generic_table_properties(cls, ETABLE_BASIC_ATTR_GROUP);
     propertysetdone(cls);
     os_unlock();
 }
@@ -136,61 +118,13 @@ eObject *eBitmap::clone(
     os_int aflags)
 {
     eBitmap *clonedobj;
-    eVariable *tmp;
 
     clonedobj = new eBitmap(parent, id == EOID_CHILD ? oid() : id, flags());
-    tmp = new eVariable(this);
-
-    /* Slightly slow but simple clone. Optimize later if time.
-     */
-//    clonedobj->allocate(m_pixel_type, m_width, m_height);
-
+    clonedobj->m_compression = m_compression;
+    clonedobj->m_timestamp = m_timestamp;
+    clonedobj->allocate(m_format, m_width, m_height, m_bflags);
     clonegeneric(clonedobj, aflags);
-
-    delete tmp;
     return clonedobj;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Function to process incoming messages.
-
-  The eBitmap::onmessage function handles messages received by object. If this function
-  doesn't process message, it calls parent class'es onmessage function.
-
-  @param   envelope Message envelope. Contains command, target and source paths and
-           message content, etc.
-
-****************************************************************************************************
-*/
-void eBitmap::onmessage(
-    eEnvelope *envelope)
-{
-    /* If at final destination for the message.
-     */
-    /* if (*envelope->target()=='\0')
-    {
-        switch (envelope->command())
-        {
-            case ECMD_CONFIGURE_TABLE:
-            case ECMD_INSERT_ROWS_TO_TABLE:
-            case ECMD_REMOVE_ROWS_FROM_TABLE:
-            case ECMD_UPDATE_TABLE_ROWS:
-            case ECMD_BIND_RS:
-            case ECMD_RSET_SELECT:
-                dbm_message(envelope);
-                return;
-
-            default:
-                break;
-        }
-    } */
-
-    /* Call parent class'es onmessage.
-     */
-    eTable::onmessage(envelope);
 }
 
 
@@ -221,35 +155,31 @@ eStatus eBitmap::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-    os_long v;
+    os_int v;
 
     switch (propertynr)
     {
-        case EBITMAPP_PIXEL_TYPE:
-            if (m_own_change == 0) {
-                v = x->getl();
-                m_own_change++;
-                resize((osalTypeId)v, m_width, m_height);
-                m_own_change--;
-            }
+        case EBITMAPP_TSTAMP:
+            m_timestamp = x->getl();
+            break;
+
+        case EBITMAPP_FORMAT:
+            v = x->geti();
+            resize((osalBitmapFormat)v, m_width, m_height, m_bflags);
             break;
 
         case EBITMAPP_WIDTH:
-            if (m_own_change == 0) {
-                v = x->getl();
-                m_own_change++;
-                resize(m_pixel_type, (os_int)v, m_height);
-                m_own_change--;
-            }
+            v = x->geti();
+            resize(m_format, v, m_height, m_bflags);
             break;
 
         case EBITMAPP_HEIGHT:
-            if (m_own_change == 0) {
-                v = x->getl();
-                m_own_change++;
-                resize(m_pixel_type, m_width, (os_int)v);
-                m_own_change--;
-            }
+            v = x->geti();
+            resize(m_format, m_width, v, m_bflags);
+            break;
+
+        case EBITMAPP_COMPRESSION:
+            m_compression = x->geti();
             break;
 
         default:
@@ -281,8 +211,12 @@ eStatus eBitmap::simpleproperty(
 {
     switch (propertynr)
     {
-        case EBITMAPP_PIXEL_TYPE:
-            x->setl(m_pixel_type);
+        case EBITMAPP_TSTAMP:
+            x->setl(m_timestamp);
+            break;
+
+        case EBITMAPP_FORMAT:
+            x->setl(m_format);
             break;
 
         case EBITMAPP_WIDTH:
@@ -291,6 +225,10 @@ eStatus eBitmap::simpleproperty(
 
         case EBITMAPP_HEIGHT:
             x->setl(m_height);
+            break;
+
+        case EBITMAPP_COMPRESSION:
+            x->setl(m_compression);
             break;
 
         default:
@@ -321,21 +259,21 @@ eStatus eBitmap::writer(
     eStream *stream,
     os_int sflags)
 {
-    /* Version number. Increment if new serialized items are added to the object,
-       and check for new version's items in read() function.
-     */
     const os_int version = 0;
+    OSAL_UNUSED(sflags);
 
-    /* Begin the object and write version number.
+    /* Begin the object and write version number. Increment if new serialized items are
+       added to the object, and check for new version's items in read() function.
      */
     if (stream->write_begin_block(version)) goto failed;
 
     /* Write bitmap data type and size.
      */
-    if (stream->putl(m_pixel_type)) goto failed;
+    if (stream->putl(m_format)) goto failed;
     if (stream->putl(m_width)) goto failed;
     if (stream->putl(m_height)) goto failed;
-
+    if (stream->putl(m_compression)) goto failed;
+    if (stream->putl(m_timestamp)) goto failed;
 
     /* End the object.
      */
@@ -374,25 +312,29 @@ eStatus eBitmap::reader(
     eStream *stream,
     os_int sflags)
 {
-    /* Version number. Used to check which versions item's are in serialized data.
-     */
-    os_long pixel_type, height, width;
+    os_long format, height, width, tmp;
     os_int version;
+    OSAL_UNUSED(sflags);
 
     /* If we have old data, delete it.
      */
     clear();
 
-    /* Read object start mark and version number.
+    /* Read object start mark and version number. Used to check which versions item's
+       are in serialized data.
      */
     if (stream->read_begin_block(&version)) goto failed;
 
     /* Read bitmap data type and size, allocate bitmap.
      */
-    if (stream->getl(&pixel_type)) goto failed;
-    if (stream->getl(&height)) goto failed;
+    if (stream->getl(&format)) goto failed;
     if (stream->getl(&width)) goto failed;
-    allocate((osalTypeId)pixel_type, (os_int)height, (os_int)width);
+    if (stream->getl(&height)) goto failed;
+    if (stream->getl(&tmp)) goto failed;
+    m_compression = tmp;
+    if (stream->getl(&tmp)) goto failed;
+    m_timestamp = tmp;
+    resize((osalBitmapFormat)format, (os_int)width, (os_int)height, m_bflags);
 
     /* End the object.
      */
@@ -512,43 +454,63 @@ failed:
 #endif
 
 
-/* Allocate bitmap.
- */
+/**
+****************************************************************************************************
+
+  @brief Allocate a bitmap.
+
+  The eBitmap::allocate function allocates bitmap buffer or resizes the buffer, and sets bitmap
+  size properties.
+
+  @param  format New image format, color image or grayscale, bits per pixel:
+          OSAL_GRAYSCALE8 (8), OSAL_GRAYSCALE16 (16), OSAL_RGB24 (152) or OSAL_RGBA32 (160).
+  @param  width New image width in pixels.
+  @param  height New image height in pixels.
+  @param  bflags Reserved for future, set 0 for not.
+
+****************************************************************************************************
+*/
 void eBitmap::allocate(
-    osalTypeId pixel_type,
+    osalBitmapFormat format,
+    os_int width,
     os_int height,
-    os_int width)
+    os_short bflags)
 {
-    /* Make sure that data type is known.
-     */
-    switch (pixel_type)
-    {
-        case OS_OBJECT:
-        case OS_CHAR:
-        case OS_SHORT:
-        case OS_INT:
-        case OS_LONG:
-        case OS_DEC01:
-        case OS_DEC001:
-        case OS_FLOAT:
-        case OS_DOUBLE:
-            break;
+    resize(format, width, height, bflags);
+    setpropertyl(EBITMAPP_FORMAT, m_format);
+    setpropertyl(EBITMAPP_WIDTH,  m_width);
+    setpropertyl(EBITMAPP_HEIGHT, m_height);
+}
 
-        case OS_BOOLEAN: pixel_type = OS_CHAR; break;
-        case OS_UCHAR: pixel_type = OS_SHORT; break;
-        case OS_USHORT: pixel_type = OS_INT; break;
-        case OS_UINT: pixel_type = OS_LONG; break;
-        case OS_INT64: pixel_type = OS_LONG; break;
 
-        default:
-            pixel_type = OS_OBJECT;
-            break;
-    }
+/**
+****************************************************************************************************
 
-    /* Set data type, element size and bitmap dimensions.
-       If we have existing bitmap, resize the bitmap.
-     */
-    resize(pixel_type, height, width);
+  @brief Resize the bitmap.
+
+  The eBitmap::resize function allocates bitmap buffer or resizes the buffer.
+
+  @param  format New image format, color image or grayscale, bits per pixel:
+          OSAL_GRAYSCALE8 (8), OSAL_GRAYSCALE16 (16), OSAL_RGB24 (152) or OSAL_RGBA32 (160).
+  @param  width New image width in pixels.
+  @param  height New image height in pixels.
+  @param  bflags Reserved for future, set 0 for not.
+
+****************************************************************************************************
+*/
+void eBitmap::resize(
+    osalBitmapFormat format,
+    os_int width,
+    os_int height,
+    os_short bflags)
+{
+    m_format = format;
+    m_bflags = bflags;
+    m_height = height;
+    m_width = width;
+
+    m_pixel_nbytes = 3;
+
 }
 
 
@@ -563,41 +525,6 @@ void eBitmap::allocate(
 */
 void eBitmap::clear()
 {
-}
-
-
-
-/**
-****************************************************************************************************
-
-  @brief Resize the bitmap.
-
-  The eBitmap::resize function changes bitmap size.
-
-  @param  pixel_type Is this RGB, grayscale, et, bitmap?
-  @param  width New number of columns.
-  @param  height New number of rows.
-  @return None.
-
-****************************************************************************************************
-*/
-void eBitmap::resize(
-    osalTypeId pixel_type,
-    os_int width,
-    os_int height)
-{
-    m_pixel_type = pixel_type;
-m_pixel_nbytes = 3;
-    m_height = width;
-    m_width = height;
-
-    if (m_own_change == 0) {
-        m_own_change++;
-        setpropertyl(EBITMAPP_PIXEL_TYPE, m_pixel_type);
-        setpropertyl(EBITMAPP_WIDTH, m_width);
-        setpropertyl(EBITMAPP_HEIGHT, m_height);
-        m_own_change--;
-    }
 }
 
 
@@ -674,7 +601,7 @@ void eBitmap::send_open_info(
         new eVariable(reply, ECLASSID_BITMAP);
 
         eVariable tmp;
-        propertyv(EBITMAPP_TEXT, &tmp);
+        propertyv(ECONTP_TEXT, &tmp);
         if (!tmp.isempty()) {
             reply->setpropertyv(ECONTP_TEXT, &tmp);
         }

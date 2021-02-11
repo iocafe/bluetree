@@ -23,6 +23,7 @@
 #include "egui.h"
 #include "glfw_opengl3/imgui/imgui_impl_glfw.h"
 #include "glfw_opengl3/imgui/imgui_impl_opengl3.h"
+#include "imguistyleserializer.h"
 #include <stdio.h>
 
 // About Desktop OpenGL function loaders:

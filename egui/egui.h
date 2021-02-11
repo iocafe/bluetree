@@ -19,8 +19,6 @@
 #ifndef EGUI_H_
 #define EGUI_H_
 
-#define EOID_ROOT 9999
-
 /* Include library headers.
  */
 #include "eobjects.h"
@@ -56,7 +54,6 @@ void egui_shutdown();
 #include "code/initialize/eguiglobal.h"
 #include "code/initialize/eguiclasslist.h"
 #include "code/imgui_iface/eimgui_iface.h"
-#include "code/gui/egui_persistent_style.h"
 #include "code/helpers/eautolabel.h"
 #include "code/helpers/eeditbuffer.h"
 #include "code/helpers/estrbuffer.h"
@@ -73,6 +70,5 @@ void egui_shutdown();
 #include "code/components/tableview/etablecolumn.h"
 #include "code/components/parameterlist/eparameterlist.h"
 #include "code/gui/eguix.h"
-
 
 #endif

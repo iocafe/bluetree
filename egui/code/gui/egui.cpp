@@ -14,6 +14,7 @@
 ****************************************************************************************************
 */
 #include "egui.h"
+#include "imguistyleserializer.h"
 
 
 /* GUI property names.
