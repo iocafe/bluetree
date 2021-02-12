@@ -326,6 +326,18 @@ protected:
     /** Allocated JPEG buffer size in bytes, 0 if not allocated.
      */
     os_memsz m_jpeg_alloc_sz;
+
+    /** JPEG compressed alpha channel, OS_NULL if none.
+     */
+    os_uchar *m_alpha;
+
+    /** Used alpha buffer size in bytes, 0 if not allocated.
+     */
+    os_memsz m_alpha_sz;
+
+    /** Allocated alpha buffer size in bytes, 0 if not allocated.
+     */
+    os_memsz m_alpha_alloc_sz;
 };
 
 #endif

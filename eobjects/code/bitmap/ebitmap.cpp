@@ -52,6 +52,8 @@ eBitmap::eBitmap(
     m_buf_sz = m_buf_alloc_sz = 0;
     m_jpeg = OS_NULL;
     m_jpeg_sz = m_jpeg_alloc_sz = 0;
+    m_alpha = OS_NULL;
+    m_alpha_sz = m_alpha_alloc_sz = 0;
 }
 
 
@@ -165,6 +167,14 @@ eObject *eBitmap::clone(
         if (clonedobj->m_jpeg) {
             os_memcpy(clonedobj->m_jpeg, m_jpeg, m_jpeg_sz);
             clonedobj->m_jpeg_sz = m_jpeg_sz;
+        }
+    }
+
+    if (m_alpha) {
+        clonedobj->m_alpha = (os_uchar*)os_malloc(m_alpha_sz, &(clonedobj->m_alpha_alloc_sz));
+        if (clonedobj->m_alpha) {
+            os_memcpy(clonedobj->m_alpha, m_alpha, m_alpha_sz);
+            clonedobj->m_alpha_sz = m_alpha_sz;
         }
     }
 
@@ -378,6 +388,17 @@ eStatus eBitmap::writer(
             if (stream->write((const os_char*)m_jpeg, m_jpeg_sz)) {
                 goto failed;
             }
+
+            if (m_format & OSAL_BITMAP_ALPHA_CHANNEL_FLAG) {
+                if (m_alpha == OS_NULL) {
+                    goto failed;
+                }
+
+                if (stream->putl(m_alpha_sz)) goto failed;
+                if (stream->write((const os_char*)m_alpha, m_alpha_sz)) {
+                    goto failed;
+                }
+            }
         }
     }
 
@@ -478,6 +499,18 @@ eStatus eBitmap::reader(
 
             if (stream->read((os_char*)m_jpeg, m_jpeg_sz)) {
                 goto failed;
+            }
+
+            if (m_format & OSAL_BITMAP_ALPHA_CHANNEL_FLAG) {
+                if (stream->getl(&m_alpha_sz)) goto failed;
+                if (m_alpha_sz <= 0) goto failed;
+
+                m_alpha = (os_uchar*)os_malloc(m_alpha_sz, &m_alpha_alloc_sz);
+                if (m_alpha <= 0) goto failed;
+
+                if (stream->read((os_char*)m_alpha, m_alpha_sz)) {
+                    goto failed;
+                }
             }
 
             uncompress();
@@ -681,7 +714,7 @@ void eBitmap::compress()
     if (m_jpeg) return;
 
     if (m_buf == OS_NULL) {
-        osal_debug_error("eBitmap: noting to compress");
+        osal_debug_error("eBitmap: nothing to compress");
         return;
     }
 
@@ -693,13 +726,39 @@ void eBitmap::compress()
         case EBITMAP_HEAVY_COMPRESSION:  quality = 40; break;
     }
 
-    s = os_compress_JPEG(
-        m_buf, m_width, m_height, m_row_nbytes,m_format, quality, dst_stream,
-            OS_NULL, 0, &nbytes, OSAL_JPEG_DEFAULT);
-    if (s) {
+    dst_stream = osal_stream_buffer_open(OS_NULL,
+        OS_NULL, OS_NULL, OSAL_STREAM_WRITE);
+    if (dst_stream == OS_NULL) {
+        osal_debug_error("eBitmap: osal_stream_buffer_open failed");
+        return;
     }
 
-    // adopt_jpeg()
+    s = os_compress_JPEG(
+        m_buf, m_width, m_height, m_row_nbytes, m_format, quality, dst_stream,
+            OS_NULL, 0, &nbytes, OSAL_JPEG_DEFAULT);
+    if (s) {
+        osal_debug_error("eBitmap: compression failed 1");
+        goto getout;
+    }
+
+    m_jpeg = (os_uchar*)osal_stream_buffer_adopt_content(dst_stream,
+        &m_jpeg_sz, &m_jpeg_alloc_sz);
+
+    if (m_format & OSAL_BITMAP_ALPHA_CHANNEL_FLAG) {
+        s = os_compress_JPEG(
+            m_buf, m_width, m_height, m_row_nbytes, m_format, quality, dst_stream,
+                OS_NULL, 0, &nbytes, OSAL_JPEG_SELECT_ALPHA_CHANNEL);
+        if (s) {
+            osal_debug_error("eBitmap: compression failed 2");
+            goto getout;
+        }
+
+        m_alpha = (os_uchar*)osal_stream_buffer_adopt_content(dst_stream,
+            &m_alpha_sz, &m_alpha_alloc_sz);
+    }
+
+getout:
+    osal_stream_close(dst_stream, OSAL_STREAM_DEFAULT);
 }
 
 
@@ -717,6 +776,11 @@ void eBitmap::clear_compress()
     }
     m_jpeg = OS_NULL;
     m_jpeg_sz = m_jpeg_alloc_sz = 0;
+    if (m_alpha) {
+        os_free(m_alpha, m_alpha_alloc_sz);
+    }
+    m_alpha = OS_NULL;
+    m_alpha_sz = m_alpha_alloc_sz = 0;
 }
 
 
