@@ -225,7 +225,7 @@ public:
 
     /* Uncompress JPEG to flat bitmap buffer.
      */
-    void uncompress();
+    eStatus uncompress();
 
 
 protected:

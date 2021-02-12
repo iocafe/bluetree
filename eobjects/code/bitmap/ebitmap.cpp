@@ -793,9 +793,31 @@ void eBitmap::clear_compress()
 
 ****************************************************************************************************
 */
-void eBitmap::uncompress()
+eStatus eBitmap::uncompress()
 {
+    osalJpegMallocContext alloc_context;
+    osalStatus s;
 
+    os_memclear(&alloc_context, sizeof(alloc_context));
+    alloc_context.buf = m_buf;
+    alloc_context.buf_sz = m_buf_alloc_sz;
+    alloc_context.row_nbytes = m_row_nbytes;
+    alloc_context.format = m_format;
+
+    s = os_uncompress_JPEG(m_jpeg, m_jpeg_sz, &alloc_context, OSAL_JPEG_DEFAULT);
+    if (s) {
+        return ESTATUS_FROM_OSAL_STATUS(s);
+    }
+
+    if (m_format & OSAL_BITMAP_ALPHA_CHANNEL_FLAG) {
+        s = os_uncompress_JPEG(m_alpha, m_alpha_sz, &alloc_context,
+            OSAL_JPEG_SELECT_ALPHA_CHANNEL);
+        if (s) {
+            return ESTATUS_FROM_OSAL_STATUS(s);
+        }
+    }
+
+    return ESTATUS_SUCCESS;
 }
 
 
