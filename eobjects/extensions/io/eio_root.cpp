@@ -353,6 +353,7 @@ void eioRoot::new_signal(
     eioGroup *group;
     eioVariable *variable;
     eContainer *esignals;
+    eName *name;
     const os_char *signal_name;
 
     mblk = connected(minfo);
@@ -375,6 +376,15 @@ void eioRoot::new_signal(
     if (group == OS_NULL) {
         group = new eioGroup(device->io());
         group->addname(sinfo->group_name);
+
+        name = device->primaryname();
+        if (name) {
+            eVariable tmp;
+            tmp = sinfo->group_name;
+            tmp += " ";
+            tmp += *name;
+            group->setpropertyv(ECONTP_TEXT, &tmp);
+        }
     }
 
     variable = eioVariable::cast(group->byname(signal_name));
@@ -399,6 +409,13 @@ void eioRoot::new_signal(
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Add a new assebly to under eioDevice.
+
+****************************************************************************************************
+*/
 void eioRoot::new_assembly(
     const os_char *device_id,
     const os_char *network_name,
@@ -408,6 +425,7 @@ void eioRoot::new_assembly(
     eioDevice *device;
     eContainer *assemblies;
     eioAssembly *assembly;
+    eVariable tmp;
 
     network = get_network(network_name);
     if (network == OS_NULL) return;
@@ -424,10 +442,12 @@ void eioRoot::new_assembly(
         assembly = new eioBrickBuffer(assemblies);
     }
 
-    assembly->setpropertys(ECONTP_TEXT, prm->name);
+    tmp = prm->name;
+    tmp += " ";
+    tmp += device_id;
+    assembly->setpropertyv(ECONTP_TEXT, &tmp);
     assembly->addname(prm->name);
-
-    // assembly->setup(prm);
+    assembly->setup(prm, m_iocom_root);
 }
 
 

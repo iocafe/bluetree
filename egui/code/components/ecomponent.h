@@ -329,6 +329,8 @@ public:
      */
     virtual os_long make_autolabel() {return 0;}
 
+    virtual ImVec2 window_padding() {return ImVec2(0.0f, 0.0f); }
+
     /* Draw the component.
      */
     virtual eStatus draw(

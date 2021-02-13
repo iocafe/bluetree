@@ -532,6 +532,8 @@ eStatus eioRoot::new_assembly_by_info(
     prm.type_str = state->signal_type_str;
     prm.exp_str = state->exp_str;
     prm.imp_str = state->imp_str;
+    prm.timeout_ms = 0; /* This could come from JSON. 0 selects default timeout. */
+    prm.prefix = "rec_"; /* This could come from JSON. */
 
     device_id = state->minfo.device_name;
     device_id += state->minfo.device_nr;

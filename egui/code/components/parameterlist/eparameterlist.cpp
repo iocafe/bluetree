@@ -30,6 +30,7 @@ eParameterList::eParameterList(
     m_component = OS_NULL;
     m_nro_components = 0;
     m_component_array_sz = 0;
+    m_row_count = 0;
     m_treebrowser_row_count = 0;
 }
 
@@ -195,13 +196,14 @@ eStatus eParameterList::draw(
 
     static int freeze_cols = 1;
     static int freeze_rows = 0; // 1;
-    ncols = m_treebrowser_row_count ? 4 : 3;
+    ncols = (m_row_count == m_treebrowser_row_count) ? 4 : 3;
 
     // When using ScrollX or ScrollY we need to specify a size for our table container!
     // Otherwise by default the table will fit all available space, like a BeginChild() call.
-    size = ImVec2(0, m_treebrowser_row_count
+    /* size = ImVec2(0, m_treebrowser_row_count
         ? TEXT_BASE_HEIGHT * m_treebrowser_row_count
-        : TEXT_BASE_HEIGHT * m_nro_components);
+        : TEXT_BASE_HEIGHT * m_nro_components); */
+    size = ImVec2(0, TEXT_BASE_HEIGHT * m_row_count);
 
     if (ImGui::BeginTable("##table3", ncols, flags, size))
     {
@@ -246,7 +248,7 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
         // ImGui::TableHeadersRow();
 
         ImGuiListClipper clipper;
-        clipper.Begin(m_nro_components);
+        clipper.Begin(m_row_count);
         while (clipper.Step())
         {
             for (row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
@@ -289,9 +291,9 @@ void eParameterList::generate_component_array()
 {
     eComponent *c;
     os_memsz sz;
-    os_int nro_components, max_components;
+    os_int nro_components, max_components, count;
 
-    nro_components = 4;
+    nro_components = 16;
 
 try_again:
     max_components = (os_int)(m_component_array_sz / sizeof(ePrmListComponent));
@@ -303,6 +305,7 @@ try_again:
         max_components = (os_int)(m_component_array_sz / sizeof(ePrmListComponent));
     }
 
+    m_row_count = 0;
     m_treebrowser_row_count = 0;
 
     for (c = firstcomponent(), nro_components = 0;
@@ -314,7 +317,12 @@ try_again:
         }
 
         if (c->classid() == EGUICLASSID_TREE_NODE) {
-            m_treebrowser_row_count += eTreeNode::cast(c)->count_rows();
+            count = eTreeNode::cast(c)->count_rows();
+            m_row_count += count;
+            m_treebrowser_row_count += count;
+        }
+        else {
+            m_row_count++;
         }
     }
 

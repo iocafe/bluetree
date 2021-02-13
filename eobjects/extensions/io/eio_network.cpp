@@ -216,7 +216,7 @@ eioDevice *eioNetwork::get_device(
         eVariable tmp;
         device = new eioDevice(this);
         tmp = device_id;
-        tmp += " IO";
+        tmp += " IO device";
         device->setpropertyv(ECONTP_TEXT, &tmp);
         device->addname(device_id);
     }

@@ -64,13 +64,13 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eioGroup *newobj(
+    /* static eioGroup *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
         return new eioGroup(parent, id, flags);
-    }
+    } */
 
     /* Function to process incoming messages.
      */

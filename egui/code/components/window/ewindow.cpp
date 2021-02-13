@@ -215,6 +215,7 @@ eStatus eWindow::draw(
     os_int mouse_button_nr;
     os_boolean lock_window;
     bool show_window = true, ok;
+    ImVec2 use_padding;
 
     wprm = prm;
     wprm.edit_mode = m_edit_mode;
@@ -229,7 +230,15 @@ eStatus eWindow::draw(
 
 ImGui::SetNextWindowSize(ImVec2(900, 200), ImGuiCond_FirstUseEver);
 
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    c = firstcomponent();
+    if (c) {
+        use_padding = c->window_padding();
+    }
+    else {
+        use_padding = ImVec2(0.0f, 0.0f);
+    }
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, use_padding);
 
     /* Create a window.
      */
@@ -286,6 +295,8 @@ ImGui::SetNextWindowSize(ImVec2(900, 200), ImGuiCond_FirstUseEver);
         osal_debug_error_int("HERE MDOV ", wprm.mouse_dragged_over_window);
     } */
 
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 8.0f));
+
     /* Draw child components and setup Z order.
      */
     clear_zorder();
@@ -335,6 +346,8 @@ ImGui::SetNextWindowSize(ImVec2(900, 200), ImGuiCond_FirstUseEver);
             drop_component(wprm, mouse_button_nr);
         }
     }
+
+    ImGui::PopStyleVar();
 
     /* Finished with the window.
      */

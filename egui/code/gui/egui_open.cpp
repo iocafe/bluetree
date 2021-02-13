@@ -58,20 +58,21 @@ void eGui::open_content(
     OSAL_UNUSED(context);
 
     w = OS_NULL;
-    open_content_helper(path, content, &w);
+    open_content_helper(path, content, &w, OS_NULL);
 }
 
 void eGui::open_content_helper(
     const os_char *path,
     eObject *content,
-    eWindow **win)
+    eWindow **win,
+    eComponent *p)
 {
     eWindow *w;
     eTableView *t;
-    eParameterList *p = OS_NULL;
     eLineEdit *e;
     eVariable *v, mypath, tmp;
     eContainer *appendix;
+    eComponent *node;
     os_int cid;
     os_boolean is_variable, is_container, is_matrix;
 
@@ -120,11 +121,17 @@ void eGui::open_content_helper(
         else if (is_container) {
             appendix = eContainer::cast(v->first(EOID_APPENDIX));
             if (appendix) {
-                open_content_helper(mypath.gets(), appendix, win);
+                if (p == OS_NULL) {
+                    p = new eParameterList(*win);
+                }
+                node = new eTreeNode(p);
+                // node->bind(ECOMP_TEXT, mypath.gets(), EBIND_DEFAULT);
+                node->setpropertyv(ECOMP_TEXT, v);
+                open_content_helper(mypath.gets(), appendix, win, node);
             }
         }
         else if (is_matrix) {
-            t = new eTableView(w);
+            t = new eTableView(*win);
             t->setpropertys(ECOMP_PATH, mypath.gets());
         }
     }

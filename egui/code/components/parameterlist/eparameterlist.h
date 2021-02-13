@@ -113,6 +113,11 @@ public:
     virtual ePopup *right_click_popup(
         eDrawParams& prm);
 
+    virtual ImVec2 window_padding()
+    {
+        return m_treebrowser_row_count ? ImVec2(0.0f, 0.0f) : ImVec2(8.0f, 8.0f);
+    }
+
 protected:
 
     /**
@@ -136,6 +141,7 @@ protected:
     ePrmListComponent *m_component;
     os_int m_nro_components;
     os_memsz m_component_array_sz;
+    os_int m_row_count;
     os_int m_treebrowser_row_count;
 };
 

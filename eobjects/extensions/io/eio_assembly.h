@@ -18,6 +18,7 @@
 #define EIO_ASSEMBLY_H_
 #include "extensions/io/eio.h"
 
+struct eioDevice;
 
 /**
 ****************************************************************************************************
@@ -31,6 +32,8 @@ typedef struct eioAssemblyParams
     const os_char *type_str;
     const os_char *exp_str;
     const os_char *imp_str;
+    const os_char *prefix;
+    os_long timeout_ms;
 }
 eioAssemblyParams;
 
@@ -70,16 +73,6 @@ public:
      */
     static void setupclass();
 
-    /* Static constructor function for generating instance by class list.
-     */
-    static eioAssembly *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eioAssembly(parent, id, flags);
-    }
-
     /* Function to process incoming messages.
      */
     virtual void onmessage(
@@ -92,12 +85,18 @@ public:
         eVariable *x,
         os_int flags);
 
-    /* A callback by a child object.
+
+    /**
+    ************************************************************************************************
+      Assembly specific functions.
+    ************************************************************************************************
+    */
+
+    /* Set up a newly created eioAssebly, meningfull implementation in derived classes.
      */
-    virtual eStatus oncallback(
-        eCallbackEvent event,
-        eObject *obj,
-        eObject *appendix);
+    virtual eStatus setup(
+        eioAssemblyParams *prm,
+        iocRoot *iocom_root) = 0;
 
 
 protected:
@@ -107,9 +106,6 @@ protected:
     ************************************************************************************************
     */
 
-    /* Flags the peristent object changed (needs to be saved).
-     */
-    // void touch();
 
     /**
     ************************************************************************************************

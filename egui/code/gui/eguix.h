@@ -250,7 +250,8 @@ protected:
     void open_content_helper(
         const os_char *path,
         eObject *content,
-        eWindow **win);
+        eWindow **win,
+        eComponent *p);
 
     /* Viewport, corresponds to operating system window, etc.
      */

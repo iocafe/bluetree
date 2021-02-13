@@ -102,8 +102,7 @@ public:
     void disconnected(
         eioMblkInfo *minfo);
 
-    inline eContainer *io() {return m_io; }
-
+    eContainer *io();
     eContainer *assemblies();
 
 protected:

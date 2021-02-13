@@ -61,7 +61,7 @@ void eioAssembly::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioAssembly", ECLASSID_CONTAINER);
+    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioAssembly", ECLASSID_CONTAINER);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();
@@ -138,59 +138,3 @@ call_parent:
 */
     return eContainer::onpropertychange(propertynr, x, flags);
 }
-
-
-/**
-****************************************************************************************************
-
-  @brief Process a callback from a child object.
-
-  The eioAssembly::oncallback function
-
-****************************************************************************************************
-*/
-eStatus eioAssembly::oncallback(
-    eCallbackEvent event,
-    eObject *obj,
-    eObject *appendix)
-{
-    /* switch (event)
-    {
-        case ECALLBACK_VARIABLE_VALUE_CHANGED:
-        case ECALLBACK_TABLE_CONTENT_CHANGED:
-            touch();
-            break;
-
-        default:
-            break;
-    } */
-
-    /* If we need to pass callback to parent class.
-     */
-    if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
-        eContainer::oncallback(event, obj, appendix);
-    }
-
-    return ESTATUS_SUCCESS;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Flags the peristent object changed (needs to be saved).
-
-  The eioAssembly::touch function
-
-****************************************************************************************************
-*/
-/* void eioAssembly::touch()
-{
-    os_get_timer(&m_latest_touch);
-    if (m_oldest_touch == 0) {
-        m_oldest_touch = m_latest_touch;
-    }
-
-    set_timer(m_save_time);
-}
-*/

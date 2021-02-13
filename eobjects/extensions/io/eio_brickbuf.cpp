@@ -27,6 +27,7 @@ eioBrickBuffer::eioBrickBuffer(
     os_int flags)
     : eioAssembly(parent, oid, flags)
 {
+    clear_member_variables();
     initproperties();
     ns_create();
 }
@@ -39,6 +40,7 @@ eioBrickBuffer::eioBrickBuffer(
 */
 eioBrickBuffer::~eioBrickBuffer()
 {
+    cleanup();
 }
 
 
@@ -143,33 +145,84 @@ call_parent:
 /**
 ****************************************************************************************************
 
-  @brief Process a callback from a child object.
+  @brief Prepare a newly created brick buffer assembly for use.
 
-  The eioBrickBuffer::oncallback function
+  The eioBrickBuffer::setup function...
 
 ****************************************************************************************************
 */
-eStatus eioBrickBuffer::oncallback(
-    eCallbackEvent event,
-    eObject *obj,
-    eObject *appendix)
+eStatus eioBrickBuffer::setup(
+    eioAssemblyParams *prm,
+    iocRoot *iocom_root)
 {
-    /* switch (event)
-    {
-        case ECALLBACK_VARIABLE_VALUE_CHANGED:
-        case ECALLBACK_TABLE_CONTENT_CHANGED:
-            touch();
-            break;
+    iocStreamerSignals sig;
+    const char *p;
 
-        default:
-            break;
-    } */
-
-    /* If we need to pass callback to parent class.
+    /* Start from beginning, clean all.
      */
-    if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
-        eioAssembly::oncallback(event, obj, appendix);
+    cleanup();
+
+    /* Determine flags
+     */
+    m_is_device = OS_FALSE;
+    m_from_device = OS_TRUE;
+    p = prm->type_str;
+    if (!os_strcmp(p, "cam_flat")) {
+        m_flat_buffer = OS_TRUE;
     }
+    else if (os_strcmp(p, "lcam_flat")) {
+        m_flat_buffer = OS_TRUE;
+    }
+    else if (!os_strcmp(p, "cam_ring")) {
+        m_flat_buffer = OS_FALSE;
+    }
+    else if (os_strcmp(p, "lcam_right")) {
+        m_flat_buffer = OS_FALSE;
+    }
+    else {
+        osal_debug_error_str("eioBrickBuffer: Unknown assembly type: ", p);
+        return ESTATUS_FAILED;
+    }
+
+    m_sig_cmd.handle = &m_h_imp;
+    m_sig_select.handle = &m_h_imp;
+    m_sig_err.handle = &m_h_exp;
+    m_sig_state.handle = &m_h_exp;
+
+    if (m_from_device) {
+        m_sig_buf.handle = &m_h_exp;
+        m_sig_cs.handle = &m_h_exp;
+        m_sig_head.handle = &m_h_exp;
+        m_sig_tail.handle = &m_h_imp;
+    }
+    else {
+        m_sig_buf.handle = &m_h_imp;
+        m_sig_cs.handle = &m_h_imp;
+        m_sig_head.handle = &m_h_imp;
+        m_sig_tail.handle = &m_h_exp;
+    }
+
+    ioc_iopath_to_identifiers(iocom_root, &m_exp_ids, prm->exp_str, IOC_EXPECT_MEMORY_BLOCK);
+    ioc_iopath_to_identifiers(iocom_root, &m_imp_ids, prm->imp_str, IOC_EXPECT_MEMORY_BLOCK);
+
+    os_strncpy(m_prefix, prm->prefix, sizeof(m_prefix));
+
+    /* Initialize brick buffer (does not allocate any memory yet)
+    */
+    os_memclear(&sig, sizeof(iocStreamerSignals));
+    sig.to_device = !m_from_device;
+    sig.flat_buffer = m_flat_buffer;
+    sig.cmd = &m_sig_cmd;
+    sig.select = &m_sig_select;
+    sig.err = &m_sig_err;
+    sig.cs = &m_sig_cs;
+    sig.state = &m_sig_state;
+    sig.buf = &m_sig_buf;
+    sig.head = &m_sig_head;
+    sig.tail = &m_sig_tail;
+
+    ioc_initialize_brick_buffer(&m_brick_buffer, &sig, iocom_root, prm->timeout_ms,
+        m_is_device ? IOC_BRICK_DEVICE : IOC_BRICK_CONTROLLER);
 
     return ESTATUS_SUCCESS;
 }
@@ -178,19 +231,50 @@ eStatus eioBrickBuffer::oncallback(
 /**
 ****************************************************************************************************
 
-  @brief Flags the peristent object changed (needs to be saved).
+  @brief Release all resource allocated for the brick buffer.
 
-  The eioBrickBuffer::touch function
+  The eioBrickBuffer::cleanup( function...
 
 ****************************************************************************************************
 */
-/* void eioBrickBuffer::touch()
+void eioBrickBuffer::cleanup()
 {
-    os_get_timer(&m_latest_touch);
-    if (m_oldest_touch == 0) {
-        m_oldest_touch = m_latest_touch;
-    }
-
-    set_timer(m_save_time);
+    ioc_release_brick_buffer(&m_brick_buffer);
+    clear_member_variables();
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Clear all brick buffer member variables.
+
+  The eioBrickBuffer::cleanup( function...
+
+****************************************************************************************************
 */
+void eioBrickBuffer::clear_member_variables()
+{
+    os_memclear(&m_brick_buffer, sizeof(m_brick_buffer));
+
+    os_memclear(&m_sig_cmd, sizeof(m_sig_cmd));
+    os_memclear(&m_sig_select, sizeof(m_sig_select));
+    os_memclear(&m_sig_err, sizeof(m_sig_err));
+    os_memclear(&m_sig_cs, sizeof(m_sig_cs));
+    os_memclear(&m_sig_buf, sizeof(m_sig_buf));
+    os_memclear(&m_sig_head, sizeof(m_sig_head));
+    os_memclear(&m_sig_tail, sizeof(m_sig_tail));
+    os_memclear(&m_sig_state, sizeof(m_sig_state));
+
+    os_memclear(&m_h_exp, sizeof(m_h_exp));
+    os_memclear(&m_h_imp, sizeof(m_h_imp));
+
+    os_memclear(&m_exp_ids, sizeof(m_exp_ids));
+    os_memclear(&m_imp_ids, sizeof(m_imp_ids));
+
+    os_memclear(m_prefix, sizeof(m_prefix));
+
+    m_is_device = OS_FALSE;
+    m_from_device = OS_TRUE;
+    m_flat_buffer = OS_TRUE;
+}

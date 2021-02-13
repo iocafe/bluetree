@@ -30,10 +30,6 @@ eioDevice::eioDevice(
     m_mblks = m_io = m_assemblies = OS_NULL;;
     initproperties();
     ns_create();
-
-    m_io = new eContainer(this);
-    m_io->addname("io");
-    m_io->ns_create();
 }
 
 
@@ -246,13 +242,45 @@ void eioDevice::disconnected(
     setpropertyl(EIOP_CONNECTED, OS_FALSE);
 }
 
+eContainer *eioDevice::io()
+{
+    if (m_io == OS_NULL)
+    {
+        eVariable tmp;
+        eName *name;
+
+        m_io = new eContainer(this);
+        m_io->addname("io");
+        m_io->ns_create();
+
+        name = primaryname();
+        if (name) {
+            tmp = *name;
+            tmp += " IO";
+            m_io->setpropertyv(ECONTP_TEXT, &tmp);
+        }
+    }
+    return m_io;
+}
 
 eContainer *eioDevice::assemblies()
 {
-    if (m_assemblies == OS_NULL) {
+    if (m_assemblies == OS_NULL)
+    {
+        eVariable tmp;
+        eName *name;
+
         m_assemblies = new eContainer(this);
         m_assemblies->addname("assy");
         m_assemblies->ns_create();
+
+        name = primaryname();
+        if (name) {
+            tmp = *name;
+            tmp += " assy";
+            m_assemblies->setpropertyv(ECONTP_TEXT, &tmp);
+        }
+
     }
     return m_assemblies;
 }

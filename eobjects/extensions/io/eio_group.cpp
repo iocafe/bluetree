@@ -61,7 +61,7 @@ void eioGroup::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioGroup", ECLASSID_CONTAINER);
+    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioGroup", ECLASSID_CONTAINER);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();
