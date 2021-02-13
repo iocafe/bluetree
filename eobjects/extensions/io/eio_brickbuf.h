@@ -1,7 +1,7 @@
 /**
 
-  @file    eio_network.h
-  @brief   Object representing and IO network.
+  @file    eio_brickbuf.h
+  @brief   "Brick" data transfer, like camera images, etc.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -14,11 +14,10 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EIO_NETWORK_H_
-#define EIO_NETWORK_H_
+#ifndef EIO_BRICK_BUFFER_H_
+#define EIO_BRICK_BUFFER_H_
 #include "extensions/io/eio.h"
 
-struct eioMblkInfo;
 
 /**
 ****************************************************************************************************
@@ -29,22 +28,22 @@ struct eioMblkInfo;
 
 /**
 ****************************************************************************************************
-  eioNetwork is like a box of objects.
+  eioBrickBuffer is like a box of objects.
 ****************************************************************************************************
 */
-class eioNetwork : public eContainer
+class eioBrickBuffer : public eioAssembly
 {
 public:
     /* Constructor.
      */
-    eioNetwork(
+    eioBrickBuffer(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eioNetwork();
+    virtual ~eioBrickBuffer();
 
     /* Clone object.
      */
@@ -53,18 +52,18 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to eioNetwork pointer.
+    /* Casting eObject pointer to eioBrickBuffer pointer.
      */
-    inline static eioNetwork *cast(
+    inline static eioBrickBuffer *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_EIO_NETWORK)
-        return (eioNetwork*)o;
+        e_assert_type(o, ECLASSID_EIO_BRICK_BUFFER)
+        return (eioBrickBuffer*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_EIO_NETWORK; }
+    virtual os_int classid() {return ECLASSID_EIO_BRICK_BUFFER; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -72,12 +71,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eioNetwork *newobj(
+    static eioBrickBuffer *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eioNetwork(parent, id, flags);
+        return new eioBrickBuffer(parent, id, flags);
     }
 
     /* Function to process incoming messages.
@@ -98,21 +97,6 @@ public:
         eCallbackEvent event,
         eObject *obj,
         eObject *appendix);
-
-
-    /**
-    ************************************************************************************************
-      Maintain IO network hierarchy.
-    ************************************************************************************************
-    */
-    eioMblk *connected(
-        struct eioMblkInfo *minfo);
-
-    eioDevice *get_device(
-        const os_char *device_id);
-
-    void disconnected(
-        eioMblkInfo *minfo);
 
 
 protected:

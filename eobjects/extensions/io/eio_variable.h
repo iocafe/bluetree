@@ -49,10 +49,10 @@ public:
 
     /* Clone the eioVariable.
      */
-    virtual eObject *clone(
+    /* virtual eObject *clone(
         eObject *parent,
         e_oid id = EOID_CHILD,
-        os_int aflags = 0);
+        os_int aflags = 0); */
 
     /* Cast eObject pointer to eioVariable pointer.
      */

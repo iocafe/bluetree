@@ -19,6 +19,7 @@
 #include "extensions/io/eio.h"
 
 struct eioInfoParserState;
+struct eioAssemblyParams;
 
 /**
 ****************************************************************************************************
@@ -158,6 +159,9 @@ protected:
     eioMblk *connected(
         eioMblkInfo *minfo);
 
+    eioNetwork *get_network(
+        const os_char *network_name);
+
     /* Mark network object disconnected and delete it, if it is unused.
      */
     void disconnected(
@@ -166,6 +170,11 @@ protected:
     void new_signal(
         eioMblkInfo *minfo,
         eioSignalInfo *sinfo);
+
+    void new_assembly(
+        const os_char *device_id,
+        const os_char *network_name,
+        struct eioAssemblyParams *prm);
 
     /**
     ************************************************************************************************
@@ -192,6 +201,9 @@ protected:
         osalJsonIndex *jindex);
 
     eStatus new_signal_by_info(
+        eioInfoParserState *state);
+
+    eStatus new_assembly_by_info(
         eioInfoParserState *state);
 
     void resize_memory_block_by_info(

@@ -1,7 +1,7 @@
 /**
 
-  @file    eio_network.h
-  @brief   Object representing and IO network.
+  @file    eio_assembly.h
+  @brief   Assembly - collection of signals with specific functionality.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -14,11 +14,10 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EIO_NETWORK_H_
-#define EIO_NETWORK_H_
+#ifndef EIO_ASSEMBLY_H_
+#define EIO_ASSEMBLY_H_
 #include "extensions/io/eio.h"
 
-struct eioMblkInfo;
 
 /**
 ****************************************************************************************************
@@ -26,25 +25,33 @@ struct eioMblkInfo;
 ****************************************************************************************************
 */
 
+typedef struct eioAssemblyParams
+{
+    const os_char *name;
+    const os_char *type_str;
+    const os_char *exp_str;
+    const os_char *imp_str;
+}
+eioAssemblyParams;
 
 /**
 ****************************************************************************************************
-  eioNetwork is like a box of objects.
+  eioAssembly is like a box of objects.
 ****************************************************************************************************
 */
-class eioNetwork : public eContainer
+class eioAssembly : public eContainer
 {
 public:
     /* Constructor.
      */
-    eioNetwork(
+    eioAssembly(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eioNetwork();
+    virtual ~eioAssembly();
 
     /* Clone object.
      */
@@ -53,18 +60,18 @@ public:
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
 
-    /* Casting eObject pointer to eioNetwork pointer.
+    /* Casting eObject pointer to eioAssembly pointer.
      */
-    inline static eioNetwork *cast(
+    inline static eioAssembly *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_EIO_NETWORK)
-        return (eioNetwork*)o;
+        e_assert_type(o, ECLASSID_EIO_ASSEMBLY)
+        return (eioAssembly*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_EIO_NETWORK; }
+    virtual os_int classid() {return ECLASSID_EIO_ASSEMBLY; }
 
     /* Static function to add class to propertysets and class list.
      */
@@ -72,12 +79,12 @@ public:
 
     /* Static constructor function for generating instance by class list.
      */
-    static eioNetwork *newobj(
+    static eioAssembly *newobj(
         eObject *parent,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT)
     {
-        return new eioNetwork(parent, id, flags);
+        return new eioAssembly(parent, id, flags);
     }
 
     /* Function to process incoming messages.
@@ -98,21 +105,6 @@ public:
         eCallbackEvent event,
         eObject *obj,
         eObject *appendix);
-
-
-    /**
-    ************************************************************************************************
-      Maintain IO network hierarchy.
-    ************************************************************************************************
-    */
-    eioMblk *connected(
-        struct eioMblkInfo *minfo);
-
-    eioDevice *get_device(
-        const os_char *device_id);
-
-    void disconnected(
-        eioMblkInfo *minfo);
 
 
 protected:

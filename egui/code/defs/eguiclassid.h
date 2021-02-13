@@ -32,7 +32,7 @@
 ****************************************************************************************************
 */
 
-#define ECLASSID_EGUI_BASE 64
+#define ECLASSID_EGUI_BASE 128
 
 #define EGUICLASSID_MOUSE_MESSAGE       (ECLASSID_EGUI_BASE + 1)
 #define EGUICLASSID_KEYBOARD_MESSAGE    (ECLASSID_EGUI_BASE + 2)
@@ -56,7 +56,7 @@
     ((cid) >= EGUICLASSID_BEGIN_COMPONENTS && (cid) <= EGUICLASSID_END_COMPONENTS)
 
 /* FOR 3D extension
-#define ECLASSID_EGUI_3D_BASE 128
+#define ECLASSID_EGUI_3D_BASE 196
 #define EGUICLASSID_OBJECT3D       (ECLASSID_EGUI_3D_BASE + 1)
 #define EGUICLASSID_MOVINGOBJECT3D (ECLASSID_EGUI_3D_BASE + 2)
 #define EGUICLASSID_MESH3D         (ECLASSID_EGUI_3D_BASE + 3)

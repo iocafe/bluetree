@@ -1,7 +1,7 @@
 /**
 
-  @file    eio_device.cpp
-  @brief   Object representing and IO device.
+  @file    eio_brickbuf.cpp
+  @brief   "Brick" data transfer, like camera images, etc.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -21,19 +21,14 @@
   Constructor.
 ****************************************************************************************************
 */
-eioDevice::eioDevice(
+eioBrickBuffer::eioBrickBuffer(
     eObject *parent,
     e_oid oid,
     os_int flags)
-    : eContainer(parent, oid, flags)
+    : eioAssembly(parent, oid, flags)
 {
-    m_mblks = m_io = m_assemblies = OS_NULL;;
     initproperties();
     ns_create();
-
-    m_io = new eContainer(this);
-    m_io->addname("io");
-    m_io->ns_create();
 }
 
 
@@ -42,7 +37,7 @@ eioDevice::eioDevice(
   Virtual destructor.
 ****************************************************************************************************
 */
-eioDevice::~eioDevice()
+eioBrickBuffer::~eioBrickBuffer()
 {
 }
 
@@ -52,7 +47,7 @@ eioDevice::~eioDevice()
 
   @brief Clone object
 
-  The eioDevice::clone function clones and object including object's children.
+  The eioBrickBuffer::clone function clones and object including object's children.
   Names will be left detached in clone.
 
   @param  parent Parent for the clone.
@@ -62,16 +57,16 @@ eioDevice::~eioDevice()
 
 ****************************************************************************************************
 */
-/* eObject *eioDevice::clone(
+eObject *eioBrickBuffer::clone(
     eObject *parent,
     e_oid id,
     os_int aflags)
 {
     eObject *clonedobj;
-    clonedobj = new eioDevice(parent, id == EOID_CHILD ? oid() : id, flags());
+    clonedobj = new eioBrickBuffer(parent, id == EOID_CHILD ? oid() : id, flags());
     clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
     return clonedobj;
-} */
+}
 
 
 /**
@@ -79,23 +74,22 @@ eioDevice::~eioDevice()
 
   @brief Add the class to class list and class'es properties to it's property set.
 
-  The eioDevice::setupclass function adds the class to class list and class'es properties to
+  The eioBrickBuffer::setupclass function adds the class to class list and class'es properties to
   it's property set. The class list enables creating new objects dynamically by class identifier,
   which is used for serialization reader functions. The property set stores static list of
   class'es properties and metadata for those.
 
 ****************************************************************************************************
 */
-void eioDevice::setupclass()
+void eioBrickBuffer::setupclass()
 {
-    const os_int cls = ECLASSID_EIO_DEVICE;
+    const os_int cls = ECLASSID_EIO_BRICK_BUFFER;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioDevice", ECLASSID_CONTAINER);
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioBrickBuffer", ECLASSID_CONTAINER);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addpropertyl(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -115,7 +109,7 @@ void eioDevice::setupclass()
 
 ****************************************************************************************************
 */
-void eioDevice::onmessage(
+void eioBrickBuffer::onmessage(
     eEnvelope *envelope)
 {
     /* If at final destination for the message.
@@ -128,7 +122,7 @@ void eioDevice::onmessage(
 
     /* Default thread message processing.
      */
-    eContainer::onmessage(envelope);
+    eioAssembly::onmessage(envelope);
 }
 
 
@@ -154,16 +148,13 @@ void eioDevice::onmessage(
 
 ****************************************************************************************************
 */
-eStatus eioDevice::onpropertychange(
+eStatus eioBrickBuffer::onpropertychange(
     os_int propertynr,
     eVariable *x,
     os_int flags)
 {
-    switch (propertynr)
+/*     switch (propertynr)
     {
-        case EIOP_CONNECTED:
-            break;
-
         default:
             goto call_parent;
     }
@@ -171,7 +162,8 @@ eStatus eioDevice::onpropertychange(
     return ESTATUS_SUCCESS;
 
 call_parent:
-    return eContainer::onpropertychange(propertynr, x, flags);
+*/
+    return eioAssembly::onpropertychange(propertynr, x, flags);
 }
 
 
@@ -180,11 +172,11 @@ call_parent:
 
   @brief Process a callback from a child object.
 
-  The eioDevice::oncallback function
+  The eioBrickBuffer::oncallback function
 
 ****************************************************************************************************
 */
-eStatus eioDevice::oncallback(
+eStatus eioBrickBuffer::oncallback(
     eCallbackEvent event,
     eObject *obj,
     eObject *appendix)
@@ -203,7 +195,7 @@ eStatus eioDevice::oncallback(
     /* If we need to pass callback to parent class.
      */
     if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
-        eContainer::oncallback(event, obj, appendix);
+        eioAssembly::oncallback(event, obj, appendix);
     }
 
     return ESTATUS_SUCCESS;
@@ -212,88 +204,14 @@ eStatus eioDevice::oncallback(
 
 /**
 ****************************************************************************************************
-  Create IO network objects to represent connection.
-****************************************************************************************************
-*/
-eioMblk *eioDevice::connected(
-    struct eioMblkInfo *minfo)
-{
-    eioMblk *mblk;
-
-    if (minfo->mblk_name[0] == '\0') {
-        return OS_NULL;
-    }
-
-    if (m_mblks == OS_NULL) {
-        m_mblks = new eContainer(this);
-        m_mblks->addname("mblks");
-        m_mblks->ns_create();
-    }
-
-    mblk = eioMblk::cast(m_mblks->byname(minfo->mblk_name));
-    if (mblk == OS_NULL) {
-        mblk = new eioMblk(m_mblks);
-        mblk->addname(minfo->mblk_name);
-    }
-
-    mblk->connected(minfo);
-    setpropertyl(EIOP_CONNECTED, OS_TRUE);
-    return mblk;
-}
-
-
-/**
-****************************************************************************************************
-  Mark IO network objects to disconnected and delete unused ones.
-****************************************************************************************************
-*/
-void eioDevice::disconnected(
-    eioMblkInfo *minfo)
-{
-    eioMblk *mblk;
-
-    if (m_mblks == OS_NULL) {
-        return;
-    }
-
-    mblk = eioMblk::cast(m_mblks->byname(minfo->mblk_name));
-    if (mblk) {
-        mblk->disconnected(minfo);
-    }
-
-    for (mblk = eioMblk::cast(m_mblks->first());
-         mblk;
-         mblk = eioMblk::cast(mblk->next()))
-    {
-        if (mblk->propertyl(EIOP_CONNECTED)) {
-            return;
-        }
-    }
-
-    setpropertyl(EIOP_CONNECTED, OS_FALSE);
-}
-
-
-eContainer *eioDevice::assemblies()
-{
-    if (m_assemblies == OS_NULL) {
-        m_assemblies = new eContainer(this);
-        m_assemblies->addname("assy");
-        m_assemblies->ns_create();
-    }
-    return m_assemblies;
-}
-
-/**
-****************************************************************************************************
 
   @brief Flags the peristent object changed (needs to be saved).
 
-  The eioDevice::touch function
+  The eioBrickBuffer::touch function
 
 ****************************************************************************************************
 */
-/* void eioDevice::touch()
+/* void eioBrickBuffer::touch()
 {
     os_get_timer(&m_latest_touch);
     if (m_oldest_touch == 0) {
@@ -303,8 +221,3 @@ eContainer *eioDevice::assemblies()
     set_timer(m_save_time);
 }
 */
-
-
-
-
-

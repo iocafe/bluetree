@@ -72,6 +72,7 @@ eioVariable::~eioVariable()
 
 ****************************************************************************************************
 */
+#if 0
 eObject *eioVariable::clone(
     eObject *parent,
     e_oid id,
@@ -90,6 +91,7 @@ eObject *eioVariable::clone(
     clonegeneric(clonedobj, aflags);
     return clonedobj;
 }
+#endif
 
 
 /**

@@ -47,10 +47,11 @@ public:
 
     /* Clone object.
      */
-    virtual eObject *clone(
+    /* virtual eObject *clone(
         eObject *parent,
         e_oid id = EOID_CHILD,
         os_int aflags = 0);
+     */
 
     /* Casting eObject pointer to eioDevice pointer.
      */
@@ -100,7 +101,7 @@ public:
 
     /**
     ************************************************************************************************
-      Maintain IO network hierarchy.
+      IO device specific functions.
     ************************************************************************************************
     */
     eioMblk *connected(
@@ -108,6 +109,10 @@ public:
 
     void disconnected(
         eioMblkInfo *minfo);
+
+    inline eContainer *io() {return m_io; }
+
+    eContainer *assemblies();
 
 protected:
     /**
@@ -126,6 +131,8 @@ protected:
     ************************************************************************************************
     */
     eContainer *m_mblks;
+    eContainer *m_io;
+    eContainer *m_assemblies;
 };
 
 #endif

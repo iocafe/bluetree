@@ -289,19 +289,29 @@ eioMblk *eioRoot::connected(
         return OS_NULL;
     }
 
-    network = eioNetwork::cast(byname(minfo->network_name));
-    if (network == OS_NULL) {
-        eVariable tmp;
-        network = new eioNetwork(this);
-        tmp = minfo->network_name;
-        tmp += " IO network";
-        network->setpropertyv(ECONTP_TEXT, &tmp);
-        network->addname(minfo->network_name);
-    }
+    network = get_network(minfo->network_name);
 
     mblk = network->connected(minfo);
     setpropertyl(EIOP_CONNECTED, OS_TRUE);
     return mblk;
+}
+
+eioNetwork *eioRoot::get_network(
+    const os_char *network_name)
+{
+    eioNetwork *network;
+    eVariable tmp;
+
+    network = eioNetwork::cast(byname(network_name));
+    if (network == OS_NULL) {
+        eVariable tmp;
+        network = new eioNetwork(this);
+        tmp = network_name;
+        tmp += " IO network";
+        network->setpropertyv(ECONTP_TEXT, &tmp);
+        network->addname(network_name);
+    }
+    return network;
 }
 
 
@@ -388,9 +398,9 @@ void eioRoot::new_signal(
 
     device = eioDevice::cast(mblk->grandparent());
 
-    group = eioGroup::cast(device->byname(sinfo->group_name));
+    group = eioGroup::cast(device->io()->byname(sinfo->group_name));
     if (group == OS_NULL) {
-        group = new eioGroup(device);
+        group = new eioGroup(device->io());
         group->addname(sinfo->group_name);
     }
 
@@ -413,6 +423,38 @@ void eioRoot::new_signal(
     }
     signal->setup(variable, minfo, sinfo);
     variable->setup(signal, minfo, sinfo);
+}
+
+
+void eioRoot::new_assembly(
+    const os_char *device_id,
+    const os_char *network_name,
+    struct eioAssemblyParams *prm)
+{
+    eioNetwork *network;
+    eioDevice *device;
+    eContainer *assemblies;
+    eioAssembly *assembly;
+
+    network = get_network(network_name);
+    if (network == OS_NULL) return;
+    device = network->get_device(device_id);
+    if (device == OS_NULL) return;
+    assemblies = device->assemblies();
+    if (assemblies == OS_NULL) return;
+
+    assembly = eioAssembly::cast(assemblies->byname(prm->name));
+    delete assembly;
+
+    if (!os_strcmp(prm->type_str, "cam_flat") || 1)
+    {
+        assembly = new eioBrickBuffer(assemblies);
+    }
+
+    assembly->setpropertys(ECONTP_TEXT, prm->name);
+    assembly->addname(prm->name);
+
+    // assembly->setup(prm);
 }
 
 

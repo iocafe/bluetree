@@ -58,8 +58,8 @@ void eObject::message(
     eEnvelope *envelope;
     eObject *parent;
 
-    /* We use eRoot as pasent, in case object receiving message gets deleted.
-       parent = this is just fallback mechanim.
+    /* We use eRoot as a parent, in case object that received message is deleted.
+       parent = this is just fallback mechanism.
      */
     if (mm_handle)
     {
@@ -70,7 +70,7 @@ void eObject::message(
         parent = this;
     }
 
-    envelope = new eEnvelope(parent, EOID_ITEM); // THIS SHOULD BE HERE, DOESN'T WORK, EOBJ_IS_ATTACHMENT);
+    envelope = new eEnvelope(parent, EOID_ITEM);
     envelope->setcommand(command);
     envelope->setmflags(mflags & ~(EMSG_DEL_CONTENT|EMSG_DEL_CONTEXT));
     envelope->settarget(target);
@@ -800,10 +800,22 @@ void eObject::send_open_info(
     eVariable *p;
     eVariable *item;
     eName *name;
+    eVariable tmp;
 
     /* Show properties regardless of command.
      */
     reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+
+    name = primaryname();
+    if (name) {
+        tmp = *name;
+    }
+    else {
+        tmp = classname();
+    }
+    tmp += " properties";
+    reply->setpropertyv(ECONTP_TEXT, &tmp);
+
     for (p = firstp(EOID_CHILD, EPRO_NO_ERRORS); p; p = p->nextp())
     {
         name = p->primaryname();

@@ -25,10 +25,6 @@ typedef struct eioInfoParserState
      */
     iocRoot *root;
 
-    /** Pointer to dynamic IO network beging configured.
-     */
-    iocDynamicNetwork *dnetwork;
-
     eioMblkInfo minfo;
 
     eioSignalInfo sinfo;
@@ -51,6 +47,12 @@ typedef struct eioInfoParserState
     const os_char *tag;             /* Latest tag or key, '-' for array elements */
     const os_char *signal_type_str; /* Signal type specified in JSON, like "short" */
     os_int signal_addr;             /* Signal address as specified in JSON */
+
+    /** For assemblies.
+     */
+    const os_char *assembly_name;
+    const os_char *exp_str;
+    const os_char *imp_str;
 
     /** Trick to get memory block name before processing signals. "groups" position
         is stored here to return to signals after memory block name has been received.
@@ -181,13 +183,14 @@ eStatus eioRoot::process_info_block(
     osalJsonItem item;
     osalStatus s;
     eStatus es;
-    os_boolean is_signal_block, is_mblk_block;
+    os_boolean is_signal_block, is_mblk_block, is_assembly_block;
     os_char array_tag_buf[16];
 
     /* If this is beginning of signal block.
      */
     is_signal_block = OS_FALSE;
     is_mblk_block = OS_FALSE;
+    is_assembly_block = OS_FALSE;
     if (!os_strcmp(state->tag, "-"))
     {
         if (!os_strcmp(array_tag, "signals"))
@@ -202,6 +205,13 @@ eStatus eioRoot::process_info_block(
         else if (!os_strcmp(array_tag, "mblk"))
         {
             is_mblk_block = OS_TRUE;
+            state->sinfo.addr = 0;
+            state->max_addr = 0;
+            state->current_type_id = OS_USHORT;
+        }
+        else if (!os_strcmp(array_tag, "assembly"))
+        {
+            is_assembly_block = OS_TRUE;
             state->sinfo.addr = 0;
             state->max_addr = 0;
             state->current_type_id = OS_USHORT;
@@ -224,6 +234,9 @@ eStatus eioRoot::process_info_block(
             if (is_mblk_block && state->resize_mblks)
             {
                 resize_memory_block_by_info(state);
+            }
+            if (is_assembly_block) {
+                return new_assembly_by_info(state);
             }
             return ESTATUS_SUCCESS;
         }
@@ -268,6 +281,11 @@ eStatus eioRoot::process_info_block(
                         }
                     }
 
+                    else if (!os_strcmp(array_tag, "assembly"))
+                    {
+                        state->assembly_name = item.value.s;
+                    }
+
                     else if (!os_strcmp(array_tag, "groups"))
                     {
                         state->sinfo.group_name = item.value.s;
@@ -284,9 +302,17 @@ eStatus eioRoot::process_info_block(
                     }
                 }
 
-                if (!os_strcmp(state->tag, "type"))
+                else if (!os_strcmp(state->tag, "type"))
                 {
                     state->signal_type_str = item.value.s;
+                }
+                else if (!os_strcmp(state->tag, "exp"))
+                {
+                    state->exp_str = item.value.s;
+                }
+                else if (!os_strcmp(state->tag, "imp"))
+                {
+                    state->imp_str = item.value.s;
                 }
                 break;
 
@@ -448,7 +474,6 @@ eStatus eioRoot::new_signal_by_info(
     state->sinfo.flags = signal_type_id;
     new_signal(&state->minfo, &state->sinfo);
 
-
     switch(signal_type_id)
     {
         case OS_BOOLEAN:
@@ -480,6 +505,37 @@ eStatus eioRoot::new_signal_by_info(
         state->max_addr = state->sinfo.addr;
     }
 
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Add an assembly to dynamic information.
+
+  The new_assembly_by_infoinfo()...
+
+  @param   state Structure holding current JSON parsing state.
+  @return  OSAL_SUCCESS if all is fine, other values indicate an error.
+
+****************************************************************************************************
+*/
+eStatus eioRoot::new_assembly_by_info(
+    eioInfoParserState *state)
+{
+    eioAssemblyParams prm;
+    eVariable device_id;
+
+    os_memclear(&prm, sizeof(prm));
+    prm.name = state->assembly_name;
+    prm.type_str = state->signal_type_str;
+    prm.exp_str = state->exp_str;
+    prm.imp_str = state->imp_str;
+
+    device_id = state->minfo.device_name;
+    device_id += state->minfo.device_nr;
+    new_assembly(device_id.gets(), state->minfo.network_name , &prm);
     return ESTATUS_SUCCESS;
 }
 

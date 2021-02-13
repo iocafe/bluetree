@@ -225,7 +225,9 @@ eioMblk *eioNetwork::connected(
     osal_int_to_str(nbuf, sizeof(nbuf), minfo->device_nr);
     os_strncat(buf, nbuf, sizeof(buf));
 
-    device = eioDevice::cast(byname(buf));
+    device = get_device(buf);
+
+    /* device = eioDevice::cast(byname(buf));
     if (device == OS_NULL) {
         eVariable tmp;
         device = new eioDevice(this);
@@ -233,13 +235,30 @@ eioMblk *eioNetwork::connected(
         tmp += " IO";
         device->setpropertyv(ECONTP_TEXT, &tmp);
         device->addname(buf);
-    }
+    } */
 
     mblk = device->connected(minfo);
     setpropertyl(EIOP_CONNECTED, OS_TRUE);
     return mblk;
 }
 
+
+eioDevice *eioNetwork::get_device(
+    const os_char *device_id)
+{
+    eioDevice *device;
+
+    device = eioDevice::cast(byname(device_id));
+    if (device == OS_NULL) {
+        eVariable tmp;
+        device = new eioDevice(this);
+        tmp = device_id;
+        tmp += " IO";
+        device->setpropertyv(ECONTP_TEXT, &tmp);
+        device->addname(device_id);
+    }
+    return device;
+}
 
 /**
 ****************************************************************************************************
