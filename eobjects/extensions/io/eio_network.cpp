@@ -45,33 +45,6 @@ eioNetwork::~eioNetwork()
 /**
 ****************************************************************************************************
 
-  @brief Clone object
-
-  The eioNetwork::clone function clones and object including object's children.
-  Names will be left detached in clone.
-
-  @param  parent Parent for the clone.
-  @param  oid Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
-  @return Pointer to the clone.
-
-****************************************************************************************************
-*/
-eObject *eioNetwork::clone(
-    eObject *parent,
-    e_oid id,
-    os_int aflags)
-{
-    eObject *clonedobj;
-    clonedobj = new eioNetwork(parent, id == EOID_CHILD ? oid() : id, flags());
-    clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
-    return clonedobj;
-}
-
-
-/**
-****************************************************************************************************
-
   @brief Add the class to class list and class'es properties to it's property set.
 
   The eioNetwork::setupclass function adds the class to class list and class'es properties to
@@ -226,16 +199,6 @@ eioMblk *eioNetwork::connected(
     os_strncat(buf, nbuf, sizeof(buf));
 
     device = get_device(buf);
-
-    /* device = eioDevice::cast(byname(buf));
-    if (device == OS_NULL) {
-        eVariable tmp;
-        device = new eioDevice(this);
-        tmp = buf;
-        tmp += " IO";
-        device->setpropertyv(ECONTP_TEXT, &tmp);
-        device->addname(buf);
-    } */
 
     mblk = device->connected(minfo);
     setpropertyl(EIOP_CONNECTED, OS_TRUE);

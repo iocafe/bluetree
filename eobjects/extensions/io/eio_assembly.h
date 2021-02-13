@@ -53,13 +53,6 @@ public:
      */
     virtual ~eioAssembly();
 
-    /* Clone object.
-     */
-    virtual eObject *clone(
-        eObject *parent,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0);
-
     /* Casting eObject pointer to eioAssembly pointer.
      */
     inline static eioAssembly *cast(

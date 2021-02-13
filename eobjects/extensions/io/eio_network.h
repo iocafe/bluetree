@@ -46,13 +46,6 @@ public:
      */
     virtual ~eioNetwork();
 
-    /* Clone object.
-     */
-    virtual eObject *clone(
-        eObject *parent,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0);
-
     /* Casting eObject pointer to eioNetwork pointer.
      */
     inline static eioNetwork *cast(

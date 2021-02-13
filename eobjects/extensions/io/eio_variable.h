@@ -47,13 +47,6 @@ public:
      */
     virtual ~eioVariable();
 
-    /* Clone the eioVariable.
-     */
-    /* virtual eObject *clone(
-        eObject *parent,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0); */
-
     /* Cast eObject pointer to eioVariable pointer.
      */
     inline static eioVariable *cast(

@@ -45,33 +45,6 @@ eioBrickBuffer::~eioBrickBuffer()
 /**
 ****************************************************************************************************
 
-  @brief Clone object
-
-  The eioBrickBuffer::clone function clones and object including object's children.
-  Names will be left detached in clone.
-
-  @param  parent Parent for the clone.
-  @param  oid Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
-  @return Pointer to the clone.
-
-****************************************************************************************************
-*/
-eObject *eioBrickBuffer::clone(
-    eObject *parent,
-    e_oid id,
-    os_int aflags)
-{
-    eObject *clonedobj;
-    clonedobj = new eioBrickBuffer(parent, id == EOID_CHILD ? oid() : id, flags());
-    clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
-    return clonedobj;
-}
-
-
-/**
-****************************************************************************************************
-
   @brief Add the class to class list and class'es properties to it's property set.
 
   The eioBrickBuffer::setupclass function adds the class to class list and class'es properties to
@@ -88,7 +61,7 @@ void eioBrickBuffer::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioBrickBuffer", ECLASSID_CONTAINER);
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioBrickBuffer", ECLASSID_EIO_ASSEMBLY);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();

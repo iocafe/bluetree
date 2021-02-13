@@ -49,13 +49,6 @@ public:
      */
     virtual ~eioSignal();
 
-    /* Clone the eioSignal.
-     */
-    virtual eObject *clone(
-        eObject *parent,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0);
-
     /* Cast eObject pointer to eioSignal pointer.
      */
     inline static eioSignal *cast(

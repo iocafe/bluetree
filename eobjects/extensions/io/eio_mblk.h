@@ -45,13 +45,6 @@ public:
      */
     virtual ~eioMblk();
 
-    /* Clone object.
-     */
-    virtual eObject *clone(
-        eObject *parent,
-        e_oid id = EOID_CHILD,
-        os_int aflags = 0);
-
     /* Casting eObject pointer to eioMblk pointer.
      */
     inline static eioMblk *cast(

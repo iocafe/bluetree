@@ -39,9 +39,6 @@ eioSignal::eioSignal(
     m_mblk_flags = 0;
     m_ncolumns = 1;
     m_eio_root = OS_NULL;
-
-    // m_state_bits = OSAL_STATE_CONNECTED;
-    // m_timestamp = 0;
     m_variable_ref = new ePointer(this);
 }
 
@@ -59,43 +56,6 @@ eioSignal::eioSignal(
 */
 eioSignal::~eioSignal()
 {
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Clone object
-
-  The clone function clones the variable and clonable attachments. Names will be left detached
-  in clone if EOBJ_NO_MAP flag is given.
-
-  @param  parent Parent for the clone.
-  @param  id Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
-  @return Pointer to the clone.
-
-****************************************************************************************************
-*/
-eObject *eioSignal::clone(
-    eObject *parent,
-    e_oid id,
-    os_int aflags)
-{
-    eioSignal *clonedobj;
-    clonedobj = new eioSignal(parent, id == EOID_CHILD ? oid() : id, flags());
-
-    os_memcpy(&clonedobj->m_signal, &m_signal, sizeof(iocSignal));
-
-    /* Copy state bits and time stamp.
-     */
-    // clonedobj->m_state_bits = m_state_bits;
-    // clonedobj->m_timestamp = m_timestamp;
-
-    /* Copy clonable attachments.
-     */
-    clonegeneric(clonedobj, aflags);
-    return clonedobj;
 }
 
 

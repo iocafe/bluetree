@@ -45,33 +45,6 @@ eioGroup::~eioGroup()
 /**
 ****************************************************************************************************
 
-  @brief Clone object
-
-  The eioGroup::clone function clones and object including object's children.
-  Names will be left detached in clone.
-
-  @param  parent Parent for the clone.
-  @param  oid Object identifier for the clone.
-  @param  aflags 0 for default operation. EOBJ_NO_MAP not to map names.
-  @return Pointer to the clone.
-
-****************************************************************************************************
-*/
-eObject *eioGroup::clone(
-    eObject *parent,
-    e_oid id,
-    os_int aflags)
-{
-    eObject *clonedobj;
-    clonedobj = new eioGroup(parent, id == EOID_CHILD ? oid() : id, flags());
-    clonegeneric(clonedobj, aflags|EOBJ_CLONE_ALL_CHILDREN);
-    return clonedobj;
-}
-
-
-/**
-****************************************************************************************************
-
   @brief Add the class to class list and class'es properties to it's property set.
 
   The eioGroup::setupclass function adds the class to class list and class'es properties to
