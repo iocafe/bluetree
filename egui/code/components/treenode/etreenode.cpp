@@ -1001,7 +1001,7 @@ os_int eTreeNode::count_rows()
     if (!m_isopen) {
         return 1;
     }
-    if (m_row_count) {
+    if (m_row_count > 0) {
         return m_row_count;
     }
 
@@ -1015,7 +1015,7 @@ os_int eTreeNode::count_rows()
             m_row_count += node->count_rows();
         }
         else {
-            m_row_count ++;
+            m_row_count++;
         }
     }
     return m_row_count;

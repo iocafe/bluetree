@@ -72,7 +72,7 @@ void eGui::open_content_helper(
     eLineEdit *e;
     eVariable *v, mypath, tmp;
     eContainer *appendix;
-    eComponent *node;
+    eTreeNode *node;
     os_int cid;
     os_boolean is_variable, is_container, is_matrix;
 
@@ -125,7 +125,6 @@ void eGui::open_content_helper(
                     p = new eParameterList(*win);
                 }
                 node = new eTreeNode(p);
-                // node->bind(ECOMP_TEXT, mypath.gets(), EBIND_DEFAULT);
                 node->setpropertyv(ECOMP_TEXT, v);
                 open_content_helper(mypath.gets(), appendix, win, node);
             }

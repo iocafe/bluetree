@@ -131,6 +131,8 @@ public:
 
     os_int count_rows();
 
+    void clear_row_count();
+
 protected:
 
     /**
@@ -156,8 +158,6 @@ protected:
         eVariable *item,
         eVariable& ipath,
         eVariable& path);
-
-    void clear_row_count();
 
     /**
     ************************************************************************************************

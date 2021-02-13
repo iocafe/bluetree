@@ -530,23 +530,6 @@ protected:
      */
     eRect m_rect;
 
-    /* Clip rectangle gottent from parent.
-     */
-    // eRect m_parent_clip_rect;
-
-    /* Saved layout parameters.
-     */
-    // eLayoutParams m_layout_prm; // ?????????????????????????????????????????????????????
-
-    /* Minimum and maximum sizes in pixels what component can be drawn in and still looks acceptable.
-     */
-    // eSize m_min_sz;
-    // eSize m_max_sz;
-
-    /* Natural size for the component.
-     */
-    // eSize m_natural_sz;
-
     os_boolean m_select;        /* Component is selected, property value */
     os_boolean m_popup_open;
 

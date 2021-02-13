@@ -253,13 +253,12 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
         {
             for (row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
             {
+                if (row < 0 || row >= m_nro_components) {
+                    break;
+                }
+
                 ImGui::TableNextRow();
 
-                /* Avoid crashing on program errors?
-                 */
-                if (row < 0 || row >= m_nro_components) {
-                    continue;
-                }
                 c = m_component[row].m_ptr;
 
                 if (!ImGui::TableSetColumnIndex(0)) {
@@ -276,8 +275,6 @@ draw_list->AddRect(top_left, bottom_right, col, 0,
      */
     return eComponent::draw(prm);
 }
-
-
 
 
 /**
