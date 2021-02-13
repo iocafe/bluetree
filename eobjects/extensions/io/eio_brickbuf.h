@@ -96,6 +96,13 @@ public:
         eioAssemblyParams *prm,
         iocRoot *iocom_root);
 
+    eStatus try_signal_setup(
+        iocSignal *sig,
+        const os_char *name,
+        const os_char *mblk_name);
+
+    eStatus try_finalize_setup();
+
 protected:
     /**
     ************************************************************************************************

@@ -231,6 +231,117 @@ eStatus eioBrickBuffer::setup(
 /**
 ****************************************************************************************************
 
+  Try to setup signal stucture for use.
+
+  Lock must be on.
+
+  @param   sig Pointer to signal structure to set up.
+  @param   name Signal name without prefix.
+  @param   identifiers Specifies block to use.
+  @return  OSAL_SUCCESS if all is successfull, OSAL_STATUS_FAILED otherwise.
+
+****************************************************************************************************
+*/
+eStatus eioBrickBuffer::try_signal_setup(
+    iocSignal *sig,
+    const os_char *name,
+    const os_char *mblk_name)
+{
+    eioDevice *device;
+    eioMblk *mblk;
+    eioSignal *eiosig;
+    iocHandle *handle, *srchandle;
+
+    os_char signal_name[IOC_SIGNAL_NAME_SZ];
+
+    device = eioDevice::cast(grandparent());
+    mblk = eioMblk::cast(device->byname(mblk_name));
+    if (mblk == OS_NULL) return ESTATUS_FAILED;
+
+    os_strncpy(signal_name, m_prefix, sizeof(signal_name));
+    os_strncat(signal_name, name, sizeof(signal_name));
+
+    eiosig = eioSignal::cast(mblk->byname(signal_name));
+    if (eiosig == OS_NULL) return ESTATUS_FAILED;
+
+    sig->addr = eiosig->io_addr();
+    sig->n = eiosig->io_n();
+    sig->flags = eiosig->io_flags();
+
+    handle = sig->handle;
+    if (handle->mblk) return ESTATUS_SUCCESS;
+
+    if (m_h_exp.mblk) {
+        ioc_release_handle(&m_h_exp);
+    }
+
+    srchandle = mblk->handle_ptr();
+    if (srchandle->mblk == OS_NULL) return ESTATUS_FAILED;
+    ioc_duplicate_handle(handle, srchandle);
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  Try to finalize all needed signal structures.
+
+  Lock must be on
+  @return  None.
+
+****************************************************************************************************
+*/
+eStatus eioBrickBuffer::try_finalize_setup()
+{
+    /* If setup is already good. We check state and cmd because they are in different
+       memory blocks and last to be set up.
+     */
+    if (m_sig_state.handle->mblk && m_sig_state.flags &&
+        m_sig_cmd.handle->mblk && m_sig_cmd.flags)
+    {
+        return ESTATUS_SUCCESS;
+    }
+    m_sig_state.flags = 0;
+    m_sig_cmd.flags = 0;
+
+    if (!m_flat_buffer) {
+        if (try_signal_setup(&m_sig_select, "select", m_imp_ids.mblk_name))
+            goto getout;
+    }
+    if (try_signal_setup(&m_sig_err, "err", m_exp_ids.mblk_name)) goto getout;
+
+    if (m_from_device) {
+        if (try_signal_setup(&m_sig_cs, "cs", m_exp_ids.mblk_name)) goto getout;
+        if (try_signal_setup(&m_sig_buf, "buf", m_exp_ids.mblk_name)) goto getout;
+        if (try_signal_setup(&m_sig_head, "head", m_exp_ids.mblk_name)) goto getout;
+        if (!m_flat_buffer) {
+            if (try_signal_setup(&m_sig_tail, "tail", m_imp_ids.mblk_name))
+                goto getout;
+        }
+    }
+    else {
+        if (try_signal_setup(&m_sig_cs, "cs", m_imp_ids.mblk_name)) goto getout;
+        if (try_signal_setup(&m_sig_buf, "buf", m_imp_ids.mblk_name)) goto getout;
+        if (try_signal_setup(&m_sig_head, "head", m_imp_ids.mblk_name)) goto getout;
+        if (!m_flat_buffer) {
+            if (try_signal_setup(&m_sig_tail, "tail", m_exp_ids.mblk_name))
+                goto getout;
+        }
+    }
+
+    if (try_signal_setup(&m_sig_state, "state", m_exp_ids.mblk_name)) goto getout;
+    if (try_signal_setup(&m_sig_cmd, "cmd", m_imp_ids.mblk_name)) goto getout;
+
+    return ESTATUS_SUCCESS;
+
+getout:
+    return ESTATUS_FAILED;
+}
+
+/**
+****************************************************************************************************
+
   @brief Release all resource allocated for the brick buffer.
 
   The eioBrickBuffer::cleanup( function...
@@ -240,6 +351,15 @@ eStatus eioBrickBuffer::setup(
 void eioBrickBuffer::cleanup()
 {
     ioc_release_brick_buffer(&m_brick_buffer);
+
+    if (m_h_exp.mblk) {
+        ioc_release_handle(&m_h_exp);
+    }
+
+    if (m_h_imp.mblk) {
+        ioc_release_handle(&m_h_imp);
+    }
+
     clear_member_variables();
 }
 

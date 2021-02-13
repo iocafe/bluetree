@@ -106,6 +106,10 @@ public:
     inline iocSignal *iosignal() {return &m_signal; }
     inline os_short mblk_flags() {return m_mblk_flags;}
 
+    inline os_int io_addr() { return m_signal.addr; }
+    inline os_int io_n() { return m_signal.n; }
+    inline os_int io_flags() { return m_signal.flags; }
+
 protected:
     /* IO object hierarchy root (time stamps).
      */
