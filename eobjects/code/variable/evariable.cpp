@@ -761,7 +761,7 @@ void eVariable::setv(
             if (move_value)
             {
                 m_value.valbuf.v.o = x->m_value.valbuf.v.o;
-                if (x->m_value.valbuf.v.o) {
+                if (m_value.valbuf.v.o) {
                     m_value.valbuf.v.o->adopt(this, EOID_ITEM);
                 }
                 x->settype(OS_UNDEFINED_TYPE);
@@ -1540,7 +1540,7 @@ os_int eVariable::compare(
             if (y->type() != OS_OBJECT) {
                 break;
             }
-            ox = m_value.valbuf.v.o;
+            ox = x->m_value.valbuf.v.o;
             oy = y->m_value.valbuf.v.o;
             if (ox == OS_NULL || oy == OS_NULL) {
                 break;
