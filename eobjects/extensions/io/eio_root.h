@@ -86,34 +86,12 @@ public:
      */
     static void setupclass();
 
-    /* Static constructor function for generating instance by class list.
-     */
-    static eioRoot *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eioRoot(parent, id, flags);
-    }
-
-    /* Function to process incoming messages.
-     */
-    virtual void onmessage(
-        eEnvelope *envelope);
-
-    /* A callback by a child object.
-     */
-    virtual eStatus oncallback(
-        eCallbackEvent event,
-        eObject *obj,
-        eObject *appendix);
 
     /**
     ************************************************************************************************
-      X..
+      IO root functions.
     ************************************************************************************************
     */
-
     /* Connect root object to IOCOM.
      */
     void setup(iocRoot *iocom_root);

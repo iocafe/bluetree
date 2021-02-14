@@ -20,16 +20,12 @@
 
 /* Property numbers.
  */
-#define EIOP_SBITS 20
-#define EIOP_TSTAMP 21
 #define EIOP_OUTPUT 28
 #define EIOP_CONNECTED 30
 
 /* Property names.
  */
 extern const os_char
-    eiop_sbits[],
-    eiop_tstamp[],
     eiop_output[],
     eiop_connected[];
 

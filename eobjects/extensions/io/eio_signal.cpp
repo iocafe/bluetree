@@ -6,8 +6,6 @@
   @version 1.0
   @date    2.10.2020
 
-  Value with timestamp and state bits to value.
-
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
   or distribute this file you indicate that you have read the license and understand and accept
@@ -20,13 +18,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eioSignal::eioSignal(
@@ -41,22 +33,6 @@ eioSignal::eioSignal(
     m_eio_root = OS_NULL;
     m_variable_ref = new ePointer(this);
     initproperties();
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
-****************************************************************************************************
-*/
-eioSignal::~eioSignal()
-{
 }
 
 
@@ -93,70 +69,6 @@ void eioSignal::setupclass()
 
     propertysetdone(cls);
     os_unlock();
-}
-
-/**
-****************************************************************************************************
-
-  @brief Called to inform the class about property value change (override).
-
-  The onpropertychange() function is called when class'es property changes, unless the
-  property is flagged with EPRO_NOONPRCH.
-  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
-  in class members and and return it when simpleproperty() is called.
-
-  Notice for change logging: Previous value is still valid when this function is called.
-  You can get the old value by calling property() function inside onpropertychange()
-  function.
-
-  @param   propertynr Property number of changed property.
-  @param   x Variable containing the new value.
-  @param   flags
-  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
-           indicate that there was no property with given property number.
-
-****************************************************************************************************
-*/
-eStatus eioSignal::onpropertychange(
-    os_int propertynr,
-    eVariable *x,
-    os_int flags)
-{
-    switch (propertynr)
-    {
-        default:
-            return eVariable::onpropertychange(propertynr, x, flags);
-    }
-
-    return ESTATUS_SUCCESS;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Get value of simple property (override).
-
-  The simpleproperty() function stores current value of simple property into variable x.
-
-  @param   propertynr Property number to get.
-  @param   x Variable into which to store the property value.
-  @return  If property with property number was stored in x, the function returns
-           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
-           given number was not among simple properties.
-
-****************************************************************************************************
-*/
-eStatus eioSignal::simpleproperty(
-    os_int propertynr,
-    eVariable *x)
-{
-    switch (propertynr)
-    {
-        default:
-            return eVariable::simpleproperty(propertynr, x);
-    }
-    return ESTATUS_SUCCESS;
 }
 
 

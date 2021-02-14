@@ -6,8 +6,6 @@
   @version 1.0
   @date    2.10.2020
 
-  Value with timestamp and state bits to value.
-
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
   or distribute this file you indicate that you have read the license and understand and accept
@@ -25,7 +23,7 @@ class eioRoot;
 
 /**
 ****************************************************************************************************
-  The eioSignal is a class derived from eVariable. It adds time stamp and state bits.
+  The eioSignal class (derived from eVariable) is hold IOCOM signal structure in eobjects tree.
 ****************************************************************************************************
 */
 class eioSignal : public eVariable
@@ -45,10 +43,6 @@ public:
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_EROOT_OPTIONAL);
 
-    /* Virtual destructor.
-     */
-    virtual ~eioSignal();
-
     /* Cast eObject pointer to eioSignal pointer.
      */
     inline static eioSignal *cast(
@@ -66,19 +60,6 @@ public:
      */
     static void setupclass();
 
-    /* Called when property value changes.
-     */
-    virtual eStatus onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags);
-
-    /* Get value of simple property.
-     */
-    virtual eStatus simpleproperty(
-        os_int propertynr,
-        eVariable *x);
-
     /* Static constructor function for generating instance by class list.
      */
     static eioSignal *newobj(
@@ -91,14 +72,13 @@ public:
 
     /**
     ************************************************************************************************
-      X
+      Signal specific functions
     ************************************************************************************************
     */
     void setup(
         eioVariable *variable,
         struct eioMblkInfo *minfo,
         struct eioSignalInfo *sinfo);
-
 
     void up();
     void down(eVariable *x);
@@ -111,6 +91,12 @@ public:
     inline os_int io_flags() { return m_signal.flags; }
 
 protected:
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
     /* IO object hierarchy root (time stamps).
      */
     eioRoot *m_eio_root;

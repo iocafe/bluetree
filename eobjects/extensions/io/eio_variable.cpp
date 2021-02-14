@@ -6,8 +6,6 @@
   @version 1.0
   @date    2.10.2020
 
-  Value with timestamp and state bits to value.
-
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
   or distribute this file you indicate that you have read the license and understand and accept
@@ -20,13 +18,7 @@
 
 /**
 ****************************************************************************************************
-
-  @brief Constructor.
-
-  X...
-
-  @return  None.
-
+  Constructor.
 ****************************************************************************************************
 */
 eioVariable::eioVariable(
@@ -38,22 +30,8 @@ eioVariable::eioVariable(
     m_down_ref = OS_NULL;
     m_my_own_change = 0;
     m_value_set_by_user = OS_FALSE;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Virtual destructor.
-
-  X...
-
-  @return  None.
-
-****************************************************************************************************
-*/
-eioVariable::~eioVariable()
-{
+    m_state_bits = 0;
+    m_timestamp = 0;
 }
 
 
@@ -71,18 +49,19 @@ eioVariable::~eioVariable()
 */
 void eioVariable::setupclass()
 {
+    eVariable *v;
     const os_int cls = ECLASSID_EIO_VARIABLE;
 
-    /* Add the class to class list.
-     */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioVariable", ECLASSID_VARIABLE);
+    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioVariable", ECLASSID_VARIABLE);
     eVariable::setupproperties(cls);
-//    addproperty (cls, EIOP_SBITS, eiop_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
-//    addproperty (cls, EIOP_TSTAMP, eiop_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty(cls, EVALXP_SBITS, evalxp_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
+    v = addproperty(cls, EVALXP_TSTAMP, evalxp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
+    v->setpropertys(EVARP_ATTR, "tstamp=\"yy,msec\"");
     propertysetdone(cls);
     os_unlock();
 }
+
 
 /**
 ****************************************************************************************************
@@ -111,26 +90,36 @@ eStatus eioVariable::onpropertychange(
     eVariable *x,
     os_int flags)
 {
+    eStatus s;
+    os_long tstamp;
+    os_int sbits;
+
     switch (propertynr)
     {
-        /* case EIOP_SBITS:
-            m_state_bits = (os_int)x->getl();
+        case EVALXP_SBITS:
+            m_state_bits = x->getl();
             break;
 
-        case EIOP_TSTAMP:
+        case EVALXP_TSTAMP:
             m_timestamp = x->getl();
-            break; */
+            break;
 
         case EVARP_VALUE:
             m_value_set_by_user = !m_my_own_change;
-            if (compare(x)) {
-                eVariable::onpropertychange(propertynr, x, flags);
-                if (m_value_set_by_user) {
-                    down();
-                }
-            }
-            break;
+            sbits = x->sbits();
+            tstamp = x->tstamp();
+            s = eVariable::onpropertychange(propertynr, x, flags);
 
+            if (sbits != m_state_bits) {
+                setpropertyl(EVALXP_SBITS, sbits);
+            }
+            if (tstamp != m_timestamp) {
+                setpropertyl(EVALXP_TSTAMP, tstamp);
+            }
+            if (m_value_set_by_user) {
+                down();
+            }
+            return s;
 
         default:
             return eVariable::onpropertychange(propertynr, x, flags);
@@ -161,13 +150,13 @@ eStatus eioVariable::simpleproperty(
 {
     switch (propertynr)
     {
-        /* case EIOP_SBITS:
+        case EVALXP_SBITS:
             x->setl(m_state_bits);
             break;
 
-        case EIOP_TSTAMP:
+        case EVALXP_TSTAMP:
             x->setl(m_timestamp);
-            break; */
+            break;
 
         default:
             return eVariable::simpleproperty(propertynr, x);
@@ -224,20 +213,6 @@ void eioVariable::setup(
  */
 void eioVariable::up(eValueX *x)
 {
-    eObject *ox;
-
-    /* Do nothing if value has not chaned.
-     */
-    if (type() == OS_OBJECT) {
-        ox = m_value.valbuf.v.o;
-        if (ox) {
-            if (!ox->compare(eVariable::cast(x))) {
-                delete x;
-                return;
-            }
-        }
-    }
-
     m_my_own_change++;
     setpropertyo(EVARP_VALUE, x, EMSG_DEL_CONTENT);
     m_my_own_change--;

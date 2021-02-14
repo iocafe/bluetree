@@ -6,8 +6,6 @@
   @version 1.0
   @date    2.10.2020
 
-  Value with timestamp and state bits to value.
-
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,
   or distribute this file you indicate that you have read the license and understand and accept
@@ -23,7 +21,7 @@
 
 /**
 ****************************************************************************************************
-  The eioVariable is a class derived from eVariable. It adds time stamp and state bits.
+  The eioVariable is a class derived from eVariable, used to connect to IOCOM signal(s).
 ****************************************************************************************************
 */
 class eioVariable : public eVariable
@@ -42,10 +40,6 @@ public:
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_EROOT_OPTIONAL);
-
-    /* Virtual destructor.
-     */
-    virtual ~eioVariable();
 
     /* Cast eObject pointer to eioVariable pointer.
      */
@@ -77,29 +71,9 @@ public:
         os_int propertynr,
         eVariable *x);
 
-    /* Static constructor function for generating instance by class list.
-     */
-    static eioVariable *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eioVariable(parent, id, flags);
-    }
-
     /**
     ************************************************************************************************
-      Extended value functions
-    ************************************************************************************************
-    */
-    /* inline os_int sbits() {return m_state_bits;}
-    inline os_long tstamp() {return m_timestamp;}
-    inline void set_sbits(os_int x) {m_state_bits = x;}
-    inline void set_tstamp(os_long x) {m_timestamp = x;} */
-
-    /**
-    ************************************************************************************************
-      X
+      IO variable specific functions
     ************************************************************************************************
     */
     void setup(
@@ -112,8 +86,16 @@ public:
     void down();
 
 protected:
-    // ePointer *m_up;
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
     ePointer *m_down_ref;
+
+    os_int m_state_bits;
+    os_long m_timestamp;
 
     os_short m_my_own_change;
     os_boolean m_value_set_by_user;
