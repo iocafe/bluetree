@@ -18,14 +18,6 @@
 #define EIO_BRICK_BUFFER_H_
 #include "extensions/io/eio.h"
 
-
-/**
-****************************************************************************************************
-  Defines
-****************************************************************************************************
-*/
-
-
 /**
 ****************************************************************************************************
   eioBrickBuffer is like a box of objects.
@@ -61,21 +53,6 @@ public:
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
-
-    /* Static constructor function for generating instance by class list.
-     */
-    static eioBrickBuffer *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eioBrickBuffer(parent, id, flags);
-    }
-
-    /* Function to process incoming messages.
-     */
-    virtual void onmessage(
-        eEnvelope *envelope);
 
     /* Called when property value changes.
      */

@@ -52,10 +52,6 @@ public:
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Virtual destructor.
-     */
-    virtual ~eioAssembly();
-
     /* Casting eObject pointer to eioAssembly pointer.
      */
     inline static eioAssembly *cast(
@@ -72,11 +68,6 @@ public:
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
-
-    /* Function to process incoming messages.
-     */
-    virtual void onmessage(
-        eEnvelope *envelope);
 
     /* Called when property value changes.
      */

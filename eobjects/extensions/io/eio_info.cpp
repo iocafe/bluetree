@@ -1,7 +1,7 @@
 /**
 
-  @file    eio_root.cpp
-  @brief   Object representing and IO root.
+  @file    eio_info.cpp
+  @brief   Handling signal information from IO device, IO root.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -14,7 +14,6 @@
 ****************************************************************************************************
 */
 #include "extensions/io/eio.h"
-
 
 
 /** Working state structure while adding signals to dynamic incormation.
@@ -126,7 +125,7 @@ void eioRoot::info_callback(
     state.minfo.network_name = mblk->network_name;
 #endif
     state.minfo.eio_root = t;
-    state.resize_mblks = OS_TRUE; // resize_mblks;
+    state.resize_mblks = OS_TRUE;
 
     os_lock();
 
@@ -134,23 +133,6 @@ void eioRoot::info_callback(
     if (es) goto getout;
 
     os_unlock();
-//    mblk = ioc_handle_lock_to_mblk(handle, &root);
-//    if (mblk == OS_NULL) return;
-
-    /* Informn application about new networks and devices.
-     */
-    /* if (state.dnetwork->new_network)
-    {
-        ioc_new_root_event(root, IOC_NEW_NETWORK, state.dnetwork, OS_NULL, root->callback_context);
-        state.dnetwork->new_network = OS_FALSE;
-    }
-    ioc_new_root_event(root, IOC_NEW_DEVICE, state.dnetwork, mblk, root->callback_context);
-    */
-
-    /* Flag for basic server (iocBServer). Check for missing certificate chain and
-       flash program versions.
-     */
-    // root->check_cert_chain_etc = OS_TRUE;
 
 getout:
     ioc_unlock(root);

@@ -1,6 +1,6 @@
 /**
 
-  @file    eio_defs.h
+  @file    eio_defs.cpp
   @brief   Common defines and variables for eio.
   @author  Pekka Lehtikoski
   @version 1.0

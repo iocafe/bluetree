@@ -22,13 +22,6 @@ struct eioMblkInfo;
 
 /**
 ****************************************************************************************************
-  Defines
-****************************************************************************************************
-*/
-
-
-/**
-****************************************************************************************************
   eioNetwork is like a box of objects.
 ****************************************************************************************************
 */
@@ -41,10 +34,6 @@ public:
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
-
-    /* Virtual destructor.
-     */
-    virtual ~eioNetwork();
 
     /* Casting eObject pointer to eioNetwork pointer.
      */
@@ -63,34 +52,12 @@ public:
      */
     static void setupclass();
 
-    /* Static constructor function for generating instance by class list.
-     */
-    static eioNetwork *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eioNetwork(parent, id, flags);
-    }
-
-    /* Function to process incoming messages.
-     */
-    virtual void onmessage(
-        eEnvelope *envelope);
-
     /* Called when property value changes.
      */
     virtual eStatus onpropertychange(
         os_int propertynr,
         eVariable *x,
         os_int flags);
-
-    /* A callback by a child object.
-     */
-    virtual eStatus oncallback(
-        eCallbackEvent event,
-        eObject *obj,
-        eObject *appendix);
 
 
     /**
@@ -106,24 +73,6 @@ public:
 
     void disconnected(
         eioMblkInfo *minfo);
-
-
-protected:
-    /**
-    ************************************************************************************************
-      Internal functions.
-    ************************************************************************************************
-    */
-
-    /* Flags the peristent object changed (needs to be saved).
-     */
-    // void touch();
-
-    /**
-    ************************************************************************************************
-      Member variables
-    ************************************************************************************************
-    */
 };
 
 #endif

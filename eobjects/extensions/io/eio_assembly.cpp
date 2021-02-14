@@ -34,16 +34,6 @@ eioAssembly::eioAssembly(
 
 /**
 ****************************************************************************************************
-  Virtual destructor.
-****************************************************************************************************
-*/
-eioAssembly::~eioAssembly()
-{
-}
-
-
-/**
-****************************************************************************************************
 
   @brief Add the class to class list and class'es properties to it's property set.
 
@@ -65,37 +55,6 @@ void eioAssembly::setupclass()
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Function to process incoming messages.
-
-  The eTreeNode::onmessage function handles messages received by object. If this function
-  doesn't process message, it calls parent class'es onmessage function.
-
-  @param   envelope Message envelope. Contains command, target and source paths and
-           message content, etc.
-  @return  None.
-
-****************************************************************************************************
-*/
-void eioAssembly::onmessage(
-    eEnvelope *envelope)
-{
-    /* If at final destination for the message.
-     */
-    /* if (*envelope->target()=='\0' && envelope->command() == ECMD_TIMER)
-    {
-        check_save_timer();
-        return;
-    } */
-
-    /* Default thread message processing.
-     */
-    eContainer::onmessage(envelope);
 }
 
 
@@ -126,15 +85,5 @@ eStatus eioAssembly::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-/*     switch (propertynr)
-    {
-        default:
-            goto call_parent;
-    }
-
-    return ESTATUS_SUCCESS;
-
-call_parent:
-*/
     return eContainer::onpropertychange(propertynr, x, flags);
 }

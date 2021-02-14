@@ -72,42 +72,11 @@ void eioMblk::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioMblk", ECLASSID_CONTAINER);
+    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioMblk", ECLASSID_CONTAINER);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Function to process incoming messages.
-
-  The eTreeNode::onmessage function handles messages received by object. If this function
-  doesn't process message, it calls parent class'es onmessage function.
-
-  @param   envelope Message envelope. Contains command, target and source paths and
-           message content, etc.
-  @return  None.
-
-****************************************************************************************************
-*/
-void eioMblk::onmessage(
-    eEnvelope *envelope)
-{
-    /* If at final destination for the message.
-     */
-    /* if (*envelope->target()=='\0' && envelope->command() == ECMD_TIMER)
-    {
-        check_save_timer();
-        return;
-    } */
-
-    /* Default thread message processing.
-     */
-    eContainer::onmessage(envelope);
 }
 
 
@@ -151,41 +120,6 @@ eStatus eioMblk::onpropertychange(
 
 call_parent:
     return eContainer::onpropertychange(propertynr, x, flags);
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Process a callback from a child object.
-
-  The eioMblk::oncallback function
-
-****************************************************************************************************
-*/
-eStatus eioMblk::oncallback(
-    eCallbackEvent event,
-    eObject *obj,
-    eObject *appendix)
-{
-    /* switch (event)
-    {
-        case ECALLBACK_VARIABLE_VALUE_CHANGED:
-        case ECALLBACK_TABLE_CONTENT_CHANGED:
-            touch();
-            break;
-
-        default:
-            break;
-    } */
-
-    /* If we need to pass callback to parent class.
-     */
-    if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
-        eContainer::oncallback(event, obj, appendix);
-    }
-
-    return ESTATUS_SUCCESS;
 }
 
 

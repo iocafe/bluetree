@@ -18,14 +18,6 @@
 #define EIO_DEVICE_H_
 #include "extensions/io/eio.h"
 
-
-/**
-****************************************************************************************************
-  Defines
-****************************************************************************************************
-*/
-
-
 /**
 ****************************************************************************************************
   eioDevice is like a box of objects.
@@ -40,10 +32,6 @@ public:
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
-
-    /* Virtual destructor.
-     */
-    virtual ~eioDevice();
 
     /* Casting eObject pointer to eioDevice pointer.
      */
@@ -62,34 +50,12 @@ public:
      */
     static void setupclass();
 
-    /* Static constructor function for generating instance by class list.
-     */
-    static eioDevice *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eioDevice(parent, id, flags);
-    }
-
-    /* Function to process incoming messages.
-     */
-    virtual void onmessage(
-        eEnvelope *envelope);
-
     /* Called when property value changes.
      */
     virtual eStatus onpropertychange(
         os_int propertynr,
         eVariable *x,
         os_int flags);
-
-    /* A callback by a child object.
-     */
-    virtual eStatus oncallback(
-        eCallbackEvent event,
-        eObject *obj,
-        eObject *appendix);
 
     /**
     ************************************************************************************************

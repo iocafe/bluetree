@@ -18,14 +18,6 @@
 #define EIO_GROUP_H_
 #include "extensions/io/eio.h"
 
-
-/**
-****************************************************************************************************
-  Defines
-****************************************************************************************************
-*/
-
-
 /**
 ****************************************************************************************************
   eioGroup is like a box of objects.
@@ -40,10 +32,6 @@ public:
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
-
-    /* Virtual destructor.
-     */
-    virtual ~eioGroup();
 
     /* Casting eObject pointer to eioGroup pointer.
      */
@@ -61,53 +49,6 @@ public:
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
-
-    /* Static constructor function for generating instance by class list.
-     */
-    /* static eioGroup *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eioGroup(parent, id, flags);
-    } */
-
-    /* Function to process incoming messages.
-     */
-    virtual void onmessage(
-        eEnvelope *envelope);
-
-    /* Called when property value changes.
-     */
-    virtual eStatus onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags);
-
-    /* A callback by a child object.
-     */
-    virtual eStatus oncallback(
-        eCallbackEvent event,
-        eObject *obj,
-        eObject *appendix);
-
-
-protected:
-    /**
-    ************************************************************************************************
-      Internal functions.
-    ************************************************************************************************
-    */
-
-    /* Flags the peristent object changed (needs to be saved).
-     */
-    // void touch();
-
-    /**
-    ************************************************************************************************
-      Member variables
-    ************************************************************************************************
-    */
 };
 
 #endif

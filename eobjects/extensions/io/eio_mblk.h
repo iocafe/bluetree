@@ -18,14 +18,6 @@
 #define EIO_MBLK_H_
 #include "extensions/io/eio.h"
 
-
-/**
-****************************************************************************************************
-  Defines
-****************************************************************************************************
-*/
-
-
 /**
 ****************************************************************************************************
   eioMblk is like a box of objects.
@@ -62,21 +54,6 @@ public:
      */
     static void setupclass();
 
-    /* Static constructor function for generating instance by class list.
-     */
-    static eioMblk *newobj(
-        eObject *parent,
-        e_oid id = EOID_ITEM,
-        os_int flags = EOBJ_DEFAULT)
-    {
-        return new eioMblk(parent, id, flags);
-    }
-
-    /* Function to process incoming messages.
-     */
-    virtual void onmessage(
-        eEnvelope *envelope);
-
     /* Called when property value changes.
      */
     virtual eStatus onpropertychange(
@@ -84,12 +61,6 @@ public:
         eVariable *x,
         os_int flags);
 
-    /* A callback by a child object.
-     */
-    virtual eStatus oncallback(
-        eCallbackEvent event,
-        eObject *obj,
-        eObject *appendix);
 
     /**
     ************************************************************************************************

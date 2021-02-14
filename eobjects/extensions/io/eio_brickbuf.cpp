@@ -64,42 +64,11 @@ void eioBrickBuffer::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioBrickBuffer", ECLASSID_EIO_ASSEMBLY);
+    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioBrickBuffer", ECLASSID_EIO_ASSEMBLY);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EIOP_OUTPUT, eiop_output, "output", EPRO_SIMPLE|EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Function to process incoming messages.
-
-  The eTreeNode::onmessage function handles messages received by object. If this function
-  doesn't process message, it calls parent class'es onmessage function.
-
-  @param   envelope Message envelope. Contains command, target and source paths and
-           message content, etc.
-  @return  None.
-
-****************************************************************************************************
-*/
-void eioBrickBuffer::onmessage(
-    eEnvelope *envelope)
-{
-    /* If at final destination for the message.
-     */
-    /* if (*envelope->target()=='\0' && envelope->command() == ECMD_TIMER)
-    {
-        check_save_timer();
-        return;
-    } */
-
-    /* Default thread message processing.
-     */
-    eioAssembly::onmessage(envelope);
 }
 
 
@@ -130,17 +99,17 @@ eStatus eioBrickBuffer::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-/*     switch (propertynr)
+    switch (propertynr)
     {
+        case EIOP_OUTPUT:
+            x->setv(m_output);
+            break;
+
         default:
-            goto call_parent;
+            return eioAssembly::onpropertychange(propertynr, x, flags);
     }
 
     return ESTATUS_SUCCESS;
-
-call_parent:
-*/
-    return eioAssembly::onpropertychange(propertynr, x, flags);
 }
 
 
