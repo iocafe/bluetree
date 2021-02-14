@@ -126,6 +126,13 @@ void eioThread::run()
         os_unlock();
 
         ioc_receive_all(m_iocom_root);
+
+        /* Run assemblies that need running.
+         */
+        os_lock();
+        m_eio_root->run(ti);
+        os_unlock();
+
         ioc_send_all(m_iocom_root);
 
 osal_debug_error("HERE IO THREAD LOOP")        ;

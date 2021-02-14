@@ -127,6 +127,14 @@ public:
     inline void save_io_trigger(osalEvent io_trigger) {m_io_trigger = io_trigger; }
     inline void trig_io() {if (m_io_trigger) osal_event_set(m_io_trigger); }
 
+    void run(os_long ti);
+
+    /* Add or remove an assebly to run list.
+     */
+    void assembly_to_run_list(
+        eioAssembly *assembly,
+        os_boolean enable);
+
     /** IO thread handle.
      */
     eThreadHandle m_io_thread_handle;
@@ -202,12 +210,6 @@ protected:
     void resize_memory_block_by_info(
         eioInfoParserState *state);
 
-
-    /* Flags the peristent object changed (needs to be saved).
-     */
-    // void touch();
-
-
     /**
     ************************************************************************************************
       Member variables
@@ -223,6 +225,10 @@ protected:
     os_long m_time_now;
 
     osalEvent m_io_trigger;
+
+    /* List of ePointers to assemblies to run.
+     */
+    eContainer *m_run_assemblies;
 };
 
 

@@ -61,7 +61,8 @@ eBitmapCompression;
  */
 #define EBITMAP_CLEAR_CONTENT 0
 #define EBITMAP_KEEP_CONTENT 1
-
+#define EBITMAP_NO_NEW_MEMORY_ALLOCATION 2
+#define EBITMAP_TMP_FLAGS_MASK (EBITMAP_KEEP_CONTENT|EBITMAP_NO_NEW_MEMORY_ALLOCATION)
 
 /**
 ****************************************************************************************************
@@ -182,17 +183,21 @@ public:
      */
     void clear();
 
+    /* Get pointer to uncompressed bitmap.
+     */
+    os_uchar *ptr();
+
     /* Get bitmap data type.
      */
-    inline osalBitmapFormat format() {return m_format; }
+    osalBitmapFormat format();
 
     /* Get bitmap width.
      */
-    inline os_int width() {return m_width; }
+    os_int width();
 
     /* Get bitmap height.
      */
-    inline os_int height() {return m_height; }
+    os_int height();
 
     /* Get width of single pixel, micrometers. 0.0 if not set.
      */
@@ -204,16 +209,23 @@ public:
 
     /* Get pixel size in bytes.
      */
-    inline os_int pixel_nbytes() {return m_pixel_nbytes; }
+    os_int pixel_nbytes();
 
     /* Get bitmap width in bytes (this may not be same as with() * pixel_sz(), since rows
        can be aligned to 4 byte boundary, etc.
      */
-    inline os_int row_nbytes() {return m_row_nbytes; }
+    os_int row_nbytes();
 
     /* Get flags given to eBitmap::allocate().
      */
     inline os_short bflags() {return m_bflags; }
+
+    /* Store JPEG data within bitmap.
+     */
+    void set_jpeg_data(
+        os_uchar *data,
+        os_memsz data_sz,
+        os_boolean adopt_data);
 
     /* Compress bitmap as JPEG within eBitmap object.
      */

@@ -84,6 +84,12 @@ public:
         eVariable *x,
         os_int flags);
 
+    /* Get value of simple property (override).
+     */
+    eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
+
     /**
     ************************************************************************************************
       Assembly specific functions.
@@ -96,12 +102,12 @@ public:
         eioAssemblyParams *prm,
         iocRoot *iocom_root);
 
-    eStatus try_signal_setup(
-        iocSignal *sig,
-        const os_char *name,
-        const os_char *mblk_name);
-
     eStatus try_finalize_setup();
+
+    virtual void run(os_long ti);
+
+    eStatus get();
+
 
 protected:
     /**
@@ -109,6 +115,11 @@ protected:
       Internal functions.
     ************************************************************************************************
     */
+
+    eStatus try_signal_setup(
+        iocSignal *sig,
+        const os_char *name,
+        const os_char *mblk_name);
 
     /* Release all resource allocated for the brick buffer.
      */
@@ -167,6 +178,14 @@ protected:
         transfer is used.
      */
     os_boolean m_flat_buffer;
+
+    /** This is camera which outputs eBitmaps.
+     */
+    os_boolean m_is_camera;
+
+    /** Variable holding output state.
+     */
+    eVariable *m_output;
 };
 
 #endif

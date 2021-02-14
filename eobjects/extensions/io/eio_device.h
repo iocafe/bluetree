@@ -104,6 +104,7 @@ public:
 
     eContainer *io();
     eContainer *assemblies();
+    inline eContainer *mblks() {return m_mblks; }
 
 protected:
     /**

@@ -20,6 +20,7 @@
 const os_char
     eiop_sbits[] = "sbits",
     eiop_tstamp[] = "tstamp",
+    eiop_output[] = "output",
     eiop_connected[] = "connected",
 
     eiop_sig_addr[] = "addr",

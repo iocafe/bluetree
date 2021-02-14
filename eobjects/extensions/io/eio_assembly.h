@@ -98,6 +98,8 @@ public:
         eioAssemblyParams *prm,
         iocRoot *iocom_root) = 0;
 
+    virtual void run(os_long ti) = 0;
+
 
 protected:
     /**

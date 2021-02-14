@@ -40,9 +40,9 @@ eBitmap::eBitmap(
     os_int flags)
     : eContainer(parent, id, flags)
 {
-    m_format = OSAL_RGB24;
+    m_format = OSAL_BITMAP_FORMAT_NOT_SET;
     m_bflags = 0;
-    m_pixel_nbytes = 3;
+    m_pixel_nbytes = 0;
     m_row_nbytes = 0;
     m_width = m_height = 0;
     m_pixel_width_um = m_pixel_height_um = 0.0;
@@ -220,17 +220,26 @@ eStatus eBitmap::onpropertychange(
 
         case EBITMAPP_FORMAT:
             v = x->geti();
-            resize((osalBitmapFormat)v, m_width, m_height, m_bflags|EBITMAP_KEEP_CONTENT);
+            if (v != m_format) {
+                resize((osalBitmapFormat)v, m_width, m_height, m_bflags|
+                    EBITMAP_KEEP_CONTENT|EBITMAP_NO_NEW_MEMORY_ALLOCATION);
+            }
             break;
 
         case EBITMAPP_WIDTH:
             v = x->geti();
-            resize(m_format, v, m_height, m_bflags|EBITMAP_KEEP_CONTENT);
+            if (v != m_width) {
+                resize(m_format, v, m_height, m_bflags|
+                    EBITMAP_KEEP_CONTENT|EBITMAP_NO_NEW_MEMORY_ALLOCATION);
+            }
             break;
 
         case EBITMAPP_HEIGHT:
             v = x->geti();
-            resize(m_format, m_width, v, m_bflags|EBITMAP_KEEP_CONTENT);
+            if (v != m_height) {
+                resize(m_format, m_width, v, m_bflags|
+                    EBITMAP_KEEP_CONTENT|EBITMAP_NO_NEW_MEMORY_ALLOCATION);
+            }
             break;
 
         case EBITMAPP_PIXEL_WIDTH_UM:
@@ -464,7 +473,10 @@ eStatus eBitmap::reader(
     m_compression = (eBitmapCompression)tmp;
     if (stream->getl(&tmp)) goto failed;
     m_timestamp = tmp;
-    resize((osalBitmapFormat)format, (os_int)width, (os_int)height, m_bflags);
+    resize((osalBitmapFormat)format, (os_int)width, (os_int)height,
+        m_compression == EBITMAP_UNCOMPRESSED
+        ? m_bflags
+        : m_bflags|EBITMAP_NO_NEW_MEMORY_ALLOCATION);
 
     /* Write the bitmap, either uncompressed or as jpeg.
      */
@@ -512,8 +524,6 @@ eStatus eBitmap::reader(
                     goto failed;
                 }
             }
-
-            uncompress();
         }
     }
 
@@ -572,8 +582,10 @@ eStatus eBitmap::json_writer(
           OSAL_GRAYSCALE8 (8), OSAL_GRAYSCALE16 (16), OSAL_RGB24 (152) or OSAL_RGBA32 (160).
   @param  width New image width in pixels.
   @param  height New image height in pixels.
-  @param  bflags EBITMAP_CLEAR_CONTENT or EBITMAP_KEEP_CONTENT, wether to preserve old bitmap
-          content if size doesn't cahnge.
+  @param  bflags Bit fields:
+          - EBITMAP_CLEAR_CONTENT Clear bitmap content, if any.
+          - EBITMAP_KEEP_CONTENT Preserve old bitmap content if size doesn't cahnge.
+          - EBITMAP_NO_NEW_MEMORY_ALLOCATION Do not allocate new bitmap.
 
 ****************************************************************************************************
 */
@@ -601,8 +613,10 @@ void eBitmap::allocate(
           OSAL_GRAYSCALE8 (8), OSAL_GRAYSCALE16 (16), OSAL_RGB24 (152) or OSAL_RGBA32 (160).
   @param  width New image width in pixels.
   @param  height New image height in pixels.
-  @param  bflags EBITMAP_CLEAR_CONTENT or EBITMAP_KEEP_CONTENT, wether to preserve old bitmap
-          content if size doesn't cahnge.
+  @param  bflags Bit fields:
+          - EBITMAP_CLEAR_CONTENT Clear bitmap content, if any.
+          - EBITMAP_KEEP_CONTENT Preserve old bitmap content if size doesn't cahnge.
+          - EBITMAP_NO_NEW_MEMORY_ALLOCATION Do not allocate new bitmap.
 
 ****************************************************************************************************
 */
@@ -615,16 +629,16 @@ void eBitmap::resize(
     os_short pixel_nbytes;
     os_int row_nbytes;
     os_memsz buf_sz;
-    os_short keep_content;
+    os_short tmp_flags;
 
-    keep_content = (bflags & EBITMAP_KEEP_CONTENT);
-    bflags &= ~EBITMAP_KEEP_CONTENT;
+    tmp_flags = (bflags & EBITMAP_TMP_FLAGS_MASK);
+    bflags &= ~EBITMAP_TMP_FLAGS_MASK;
 
     /* If nothing has changed.
      */
     if (m_format == format && m_bflags == bflags && m_height == height && m_width == width)
     {
-        if (m_buf && !keep_content) {
+        if (m_buf && (tmp_flags & EBITMAP_KEEP_CONTENT) == 0) {
             os_memclear(m_buf, m_buf_sz);
             clear_compress();
         }
@@ -642,24 +656,29 @@ void eBitmap::resize(
     }
 
     buf_sz = (os_memsz)row_nbytes * (os_memsz)height;
-    if (buf_sz > 0) {
-        if (buf_sz > m_buf_alloc_sz || buf_sz < m_buf_alloc_sz / 2) {
-            clear();
-            m_buf = (os_uchar*)os_malloc(buf_sz, &m_buf_alloc_sz);
-            os_memclear(m_buf, buf_sz);
+    if (m_buf || (tmp_flags & EBITMAP_NO_NEW_MEMORY_ALLOCATION) == 0)
+    {
+        if (buf_sz > 0) {
+            if (buf_sz > m_buf_alloc_sz || buf_sz < m_buf_alloc_sz / 2) {
+                clear();
+                m_buf = (os_uchar*)os_malloc(buf_sz, &m_buf_alloc_sz);
+                if (m_buf) os_memclear(m_buf, buf_sz);
+            }
+            else {
+                clear_compress();
+                os_memclear(m_buf, buf_sz);
+            }
         }
         else {
-            clear_compress();
-            os_memclear(m_buf, buf_sz);
+            clear();
         }
-
     }
     else {
         clear();
     }
 
     m_format = format;
-    m_bflags = (bflags & ~EBITMAP_KEEP_CONTENT);
+    m_bflags = bflags;
     m_width = width;
     m_height = height;
     m_pixel_nbytes = pixel_nbytes;
@@ -690,6 +709,159 @@ void eBitmap::clear()
     m_row_nbytes = 0;
     m_format = OSAL_RGB24;
     m_bflags = 0;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get pointer to uncompressed bitmap.
+
+  If there is compressed bitmap, but not uncompressed one, it is decompressed.
+
+****************************************************************************************************
+*/
+os_uchar *eBitmap::ptr()
+{
+    if (m_buf) return m_buf;
+    uncompress();
+    return m_buf;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get bitmap format.
+
+  If format is not known, but we have uncompressed bitmap, uncompress it and get format from there.
+
+****************************************************************************************************
+*/
+osalBitmapFormat eBitmap::format()
+{
+    if (m_format != OSAL_BITMAP_FORMAT_NOT_SET) return m_format;
+    uncompress();
+    return m_format;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get bitmap width.
+
+  If width is not known, but we have uncompressed bitmap, uncompress it and get width from there.
+
+****************************************************************************************************
+*/
+os_int eBitmap::width()
+{
+    if (m_width) return m_width;
+    uncompress();
+    return m_width;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get bitmap height.
+
+  If height is not known, but we have uncompressed bitmap, uncompress it and get height from there.
+
+****************************************************************************************************
+*/
+os_int eBitmap::height()
+{
+    if (m_height) return m_height;
+    uncompress();
+    return m_height;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get pixel size in bytes.
+
+  If pixel size is not known, but we have uncompressed bitmap, uncompress it and get pixel
+  size from there.
+
+****************************************************************************************************
+*/
+os_int eBitmap::pixel_nbytes()
+{
+    if (m_pixel_nbytes) return m_pixel_nbytes;
+    uncompress();
+    return m_pixel_nbytes;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get bitmap width in bytes.
+
+  Bitmap width in bytes (this may not be same as with() * pixel_sz(), since rows
+  can be aligned to 4 byte boundary, etc.
+  If byte width is not known, but we have uncompressed bitmap, uncompress it and get byte width
+  from there.
+
+****************************************************************************************************
+*/
+os_int eBitmap::row_nbytes()
+{
+    if (m_row_nbytes) return m_row_nbytes;
+    uncompress();
+    return m_row_nbytes;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Store JPEG data within bitmap.
+
+  If you want to use image size and other parameters from JPEG, do not call eBitmap::alloc,
+  but just call this function on new eBitmap.
+
+  @param   data Pointer to JPEG data.
+  @param   data_sz JPED data size in bytes.
+  @param   adopt_data
+           - OS_TRUE: If data buffer is allocated with os_malloc, the "adopt_data" option can
+             be used and the eBitmap simply takes ownership of the bufffer.
+           - OS_FALSE: New buffer is allocated and data is copied into it.
+
+****************************************************************************************************
+*/
+void eBitmap::set_jpeg_data(
+    os_uchar *data,
+    os_memsz data_sz,
+    os_boolean adopt_data)
+{
+    if (adopt_data) {
+        if (m_jpeg) {
+            clear_compress();
+        }
+        m_jpeg = data;
+        m_jpeg_sz = m_jpeg_alloc_sz = data_sz;
+        return;
+    }
+
+    if (m_jpeg) {
+        if (data_sz > m_jpeg_alloc_sz || data_sz < m_jpeg_sz/2) {
+            clear_compress();
+        }
+    }
+
+    if (m_jpeg == OS_NULL) {
+        m_jpeg = (os_uchar*)os_malloc(data_sz, &m_jpeg_alloc_sz);
+        if (m_jpeg == OS_NULL) return;
+    }
+
+    os_memcpy(m_jpeg, data, data_sz);
+    m_jpeg_sz = data_sz;
 }
 
 
@@ -798,15 +970,50 @@ eStatus eBitmap::uncompress()
     osalJpegMallocContext alloc_context;
     osalStatus s;
 
+    if (m_jpeg == OS_NULL) {
+        return ESTATUS_FAILED;
+    }
+
+    /* If buffer size if configured, but not allocated.
+     */
+    if (m_buf == OS_NULL && m_buf_sz)
+    {
+        m_buf = (os_uchar*)os_malloc(m_buf_sz, &m_buf_alloc_sz);
+        if (m_buf == OS_NULL) return ESTATUS_FAILED;
+        os_memclear(m_buf, m_buf_sz);
+    }
+
+    /* Uncompress to existing buffer, if we have got one. Otherwise if m_buf is OS_NULL,
+       the os_uncompress_JPEG allocates new buffer.
+     */
     os_memclear(&alloc_context, sizeof(alloc_context));
-    alloc_context.buf = m_buf;
-    alloc_context.buf_sz = m_buf_alloc_sz;
-    alloc_context.row_nbytes = m_row_nbytes;
-    alloc_context.format = m_format;
+    if (m_buf) {
+        alloc_context.buf = m_buf;
+        alloc_context.buf_sz = m_buf_alloc_sz;
+        alloc_context.row_nbytes = m_row_nbytes;
+        alloc_context.format = m_format;
+    }
 
     s = os_uncompress_JPEG(m_jpeg, m_jpeg_sz, &alloc_context, OSAL_JPEG_DEFAULT);
     if (s) {
         return ESTATUS_FROM_OSAL_STATUS(s);
+    }
+
+    if (m_buf == OS_NULL) {
+        m_buf = alloc_context.buf;
+        m_buf_sz = alloc_context.buf_sz;
+        m_buf_alloc_sz = alloc_context.nbytes;
+        m_row_nbytes = alloc_context.row_nbytes;
+        m_width = alloc_context.w;
+        m_height = alloc_context.h;
+        m_format = alloc_context.format;
+        m_pixel_nbytes = OSAL_BITMAP_BYTES_PER_PIX(m_format);
+        setpropertyl(EBITMAPP_FORMAT, m_format);
+        setpropertyl(EBITMAPP_WIDTH,  m_width);
+        setpropertyl(EBITMAPP_HEIGHT, m_height);
+    }
+    else {
+        osal_debug_assert(alloc_context.w == m_width && alloc_context.h == m_height);
     }
 
     if (m_format & OSAL_BITMAP_ALPHA_CHANNEL_FLAG) {

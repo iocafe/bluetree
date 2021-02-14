@@ -50,6 +50,10 @@ typedef enum
      */
     ESTATUS_NO_CHANGES = OSAL_NOTHING_TO_DO,
 
+    /** General operation pending (not indicating an error).
+     */
+    ESTATUS_PENDING = OSAL_PENDING,
+
     /** Unidentified failure.
      */
     ESTATUS_FAILED = OSAL_STATUS_FAILED,

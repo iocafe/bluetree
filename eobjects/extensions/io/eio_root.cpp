@@ -29,6 +29,7 @@ eioRoot::eioRoot(
 {
     m_time_now = 0;
     m_io_trigger = OS_NULL;
+    m_run_assemblies = new eContainer(ETEMPORARY);
 
     initproperties();
     ns_create();
@@ -42,6 +43,7 @@ eioRoot::eioRoot(
 */
 eioRoot::~eioRoot()
 {
+    delete m_run_assemblies;
 }
 
 
@@ -285,6 +287,63 @@ eioNetwork *eioRoot::get_network(
         network->addname(network_name);
     }
     return network;
+}
+
+
+void eioRoot::run(
+    os_long ti)
+{
+    eObject *item, *next_item, *ref;
+    eioAssembly *assembly;
+
+    for (item = m_run_assemblies->first(); item; item = next_item)
+    {
+        next_item = item->next();
+        if (item->classid() != ECLASSID_POINTER) continue;
+
+        ref = ((ePointer*)item)->get();
+        if (ref == OS_NULL) {
+            delete item;
+            continue;
+        }
+
+        assembly = eioAssembly::cast(ref);
+        assembly->run(ti);
+    }
+}
+
+
+/* Add or remove an assebly to run list.
+ */
+void eioRoot::assembly_to_run_list(
+    eioAssembly *assembly,
+    os_boolean enable)
+{
+    eObject *item, *next_item, *ref;
+    ePointer *p;
+
+    for (item = m_run_assemblies->first(); item; item = next_item)
+    {
+        next_item = item->next();
+        if (item->classid() != ECLASSID_POINTER) continue;
+        ref = ((ePointer*)item)->get();
+        if (ref == OS_NULL) {
+            delete item;
+            continue;
+        }
+
+        if (ref == assembly) {
+            if (!enable) {
+                delete item;
+            }
+            return;
+        }
+    }
+
+    if (enable) {
+        p = new ePointer(m_run_assemblies);
+        p->set(assembly);
+    }
 }
 
 

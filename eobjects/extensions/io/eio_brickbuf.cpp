@@ -27,6 +27,7 @@ eioBrickBuffer::eioBrickBuffer(
     os_int flags)
     : eioAssembly(parent, oid, flags)
 {
+    m_output = new eVariable(this);
     clear_member_variables();
     initproperties();
     ns_create();
@@ -65,6 +66,7 @@ void eioBrickBuffer::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioBrickBuffer", ECLASSID_EIO_ASSEMBLY);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
+    addpropertys(cls, EIOP_OUTPUT, eiop_output, "output", EPRO_SIMPLE|EPRO_NOONPRCH);
     propertysetdone(cls);
     os_unlock();
 }
@@ -145,6 +147,38 @@ call_parent:
 /**
 ****************************************************************************************************
 
+  @brief Get value of simple property (override).
+
+  The simpleproperty() function stores current value of simple property into variable x.
+
+  @param   propertynr Property number to get.
+  @param   x Variable into which to store the property value.
+  @return  If property with property number was stored in x, the function returns
+           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
+           given number was not among simple properties.
+
+****************************************************************************************************
+*/
+eStatus eioBrickBuffer::simpleproperty(
+    os_int propertynr,
+    eVariable *x)
+{
+    switch (propertynr)
+    {
+        case EIOP_OUTPUT:
+            x->setv(m_output);
+            break;
+
+        default:
+            return eObject::simpleproperty(propertynr, x);
+    }
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Prepare a newly created brick buffer assembly for use.
 
   The eioBrickBuffer::setup function...
@@ -156,6 +190,7 @@ eStatus eioBrickBuffer::setup(
     iocRoot *iocom_root)
 {
     iocStreamerSignals sig;
+    eioRoot *root;
     const char *p;
 
     /* Start from beginning, clean all.
@@ -166,15 +201,18 @@ eStatus eioBrickBuffer::setup(
      */
     m_is_device = OS_FALSE;
     m_from_device = OS_TRUE;
+    m_is_camera = OS_FALSE;
     p = prm->type_str;
     if (!os_strcmp(p, "cam_flat")) {
         m_flat_buffer = OS_TRUE;
+        m_is_camera = OS_TRUE;
     }
     else if (os_strcmp(p, "lcam_flat")) {
         m_flat_buffer = OS_TRUE;
     }
     else if (!os_strcmp(p, "cam_ring")) {
         m_flat_buffer = OS_FALSE;
+        m_is_camera = OS_TRUE;
     }
     else if (os_strcmp(p, "lcam_right")) {
         m_flat_buffer = OS_FALSE;
@@ -224,6 +262,11 @@ eStatus eioBrickBuffer::setup(
     ioc_initialize_brick_buffer(&m_brick_buffer, &sig, iocom_root, prm->timeout_ms,
         m_is_device ? IOC_BRICK_DEVICE : IOC_BRICK_CONTROLLER);
 
+    root = eioRoot::cast(grandparent()->grandparent());
+    if (root) {
+        root->assembly_to_run_list(this, OS_TRUE);
+    }
+
     return ESTATUS_SUCCESS;
 }
 
@@ -248,6 +291,7 @@ eStatus eioBrickBuffer::try_signal_setup(
     const os_char *mblk_name)
 {
     eioDevice *device;
+    eContainer *mblks;
     eioMblk *mblk;
     eioSignal *eiosig;
     iocHandle *handle, *srchandle;
@@ -255,13 +299,15 @@ eStatus eioBrickBuffer::try_signal_setup(
     os_char signal_name[IOC_SIGNAL_NAME_SZ];
 
     device = eioDevice::cast(grandparent());
-    mblk = eioMblk::cast(device->byname(mblk_name));
+    mblks = device->mblks();
+    if (mblks == OS_NULL) return ESTATUS_FAILED;
+    mblk = eioMblk::cast(mblks->byname(mblk_name));
     if (mblk == OS_NULL) return ESTATUS_FAILED;
 
     os_strncpy(signal_name, m_prefix, sizeof(signal_name));
     os_strncat(signal_name, name, sizeof(signal_name));
 
-    eiosig = eioSignal::cast(mblk->byname(signal_name));
+    eiosig = eioSignal::cast(mblk->esignals()->byname(signal_name));
     if (eiosig == OS_NULL) return ESTATUS_FAILED;
 
     sig->addr = eiosig->io_addr();
@@ -270,10 +316,6 @@ eStatus eioBrickBuffer::try_signal_setup(
 
     handle = sig->handle;
     if (handle->mblk) return ESTATUS_SUCCESS;
-
-    if (m_h_exp.mblk) {
-        ioc_release_handle(&m_h_exp);
-    }
 
     srchandle = mblk->handle_ptr();
     if (srchandle->mblk == OS_NULL) return ESTATUS_FAILED;
@@ -339,6 +381,135 @@ getout:
     return ESTATUS_FAILED;
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Call repeatedly
+
+  lock must be on
+
+****************************************************************************************************
+*/
+void eioBrickBuffer::run(os_long ti)
+{
+    os_boolean get_data;
+    os_boolean enable_receive = OS_TRUE;
+
+    get_data = m_from_device;
+    if (m_is_device) get_data = !get_data;
+
+    if (get_data) {
+        /* Enable or disable reciving data, if someone is bound to the outout.
+         */
+        /* if (isbound()) {
+
+        }
+        */
+        m_brick_buffer.enable_receive = enable_receive;
+
+        /* Receive data
+         */
+        get();
+    }
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Get brick from this buffer.
+
+****************************************************************************************************
+*/
+eStatus eioBrickBuffer::get()
+{
+    eBitmap *bitmap;
+    iocBrickHdr *hdr;
+    os_uchar *data, *dst;
+    os_memsz buf_sz, data_sz;
+    osalBitmapFormat format;
+    os_uchar compression;
+    os_int width, height, y;
+    os_int pixel_nbytes, dst_row_nbytes, src_row_nbytes, copy_nbytes;
+    osalStatus s;
+
+    /* Setup all signals, if we have not done that already.
+     */
+    if (try_finalize_setup()) {
+        return ESTATUS_PENDING;
+    }
+
+    /* Receive data, return ESTATUS_SUCCESS if we got no data.
+     */
+    s = ioc_run_brick_receive(&m_brick_buffer);
+    buf_sz = m_brick_buffer.buf_sz;
+    if (s != OSAL_COMPLETED || buf_sz <= (os_memsz)sizeof(iocBrickHdr)) {
+        return ESTATUS_FROM_OSAL_STATUS(s);
+    }
+
+    data = m_brick_buffer.buf + sizeof(iocBrickHdr);
+    data_sz = buf_sz - sizeof(iocBrickHdr);
+    hdr = (iocBrickHdr*)m_brick_buffer.buf;
+
+    format = (osalBitmapFormat)hdr->format;
+    compression = hdr->compression;
+    width = (os_int)ioc_get_brick_hdr_int(hdr->width, IOC_BRICK_DIM_SZ);
+    height = (os_int)ioc_get_brick_hdr_int(hdr->height, IOC_BRICK_DIM_SZ);
+
+    if (m_is_camera) { // camera
+        bitmap = new eBitmap(ETEMPORARY);
+        bitmap->allocate(format, width, height, EBITMAP_NO_NEW_MEMORY_ALLOCATION);
+
+        if (compression == IOC_UNCOMPRESSED)
+        {
+            /* Handle bitmap row alignment when copying.
+             */
+            pixel_nbytes = bitmap->pixel_nbytes();
+            dst_row_nbytes = bitmap->row_nbytes();
+            src_row_nbytes = pixel_nbytes * width;
+            if (pixel_nbytes == 3) {
+                src_row_nbytes = (src_row_nbytes + 1) / 2;
+                src_row_nbytes *= 2;
+            }
+            dst = bitmap->ptr();
+
+            if (src_row_nbytes == dst_row_nbytes) {
+                os_memcpy(dst, data, height * src_row_nbytes);
+            }
+            else {
+                copy_nbytes = dst_row_nbytes;
+                if (src_row_nbytes < copy_nbytes) copy_nbytes = src_row_nbytes;
+
+                for (y = 0; y < height; y++) {
+                    os_memcpy(dst, data, copy_nbytes);
+                    os_memclear(dst + copy_nbytes, dst_row_nbytes - copy_nbytes);
+                    dst += dst_row_nbytes;
+                    data += src_row_nbytes;
+                }
+            }
+        }
+        else if (compression & IOC_JPEG)
+        {
+            bitmap->set_jpeg_data(data, data_sz, OS_FALSE);
+        }
+        else
+        {
+            osal_debug_error_int("unsupported brick compression = ", compression);
+            return ESTATUS_FAILED;
+        }
+
+        /* Set output and forward property value to bindings, if any.
+         */
+        m_output->seto(bitmap, OS_TRUE);
+        forwardproperty(EIOP_OUTPUT, m_output, OS_NULL, 0);
+    }
+
+    return ESTATUS_SUCCESS;
+}
+
+
+
 /**
 ****************************************************************************************************
 
@@ -397,4 +568,5 @@ void eioBrickBuffer::clear_member_variables()
     m_is_device = OS_FALSE;
     m_from_device = OS_TRUE;
     m_flat_buffer = OS_TRUE;
+    m_is_camera = OS_FALSE;
 }
