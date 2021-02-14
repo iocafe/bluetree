@@ -462,6 +462,7 @@ void eioRoot::new_signal(
     if (signal == OS_NULL) {
         signal = new eioSignal(esignals, sinfo->addr);
         signal->addname(sinfo->signal_name);
+        signal->setpropertys(EVARP_TEXT, sinfo->signal_name);
     }
     signal->setup(variable, minfo, sinfo);
     variable->setup(signal, minfo, sinfo);

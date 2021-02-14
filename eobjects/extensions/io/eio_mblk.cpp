@@ -254,6 +254,7 @@ eContainer *eioMblk::esignals()
     if (m_esignals == OS_NULL) {
         m_esignals = new eContainer(this);
         m_esignals->addname("signals");
+        m_esignals->setpropertys(ECONTP_TEXT, "signals");
         m_esignals->ns_create();
     }
     return m_esignals;
@@ -331,25 +332,3 @@ getout:
     os_unlock();
     return;
 }
-
-
-/**
-****************************************************************************************************
-
-  @brief Flags the peristent object changed (needs to be saved).
-
-  The eioMblk::touch function
-
-****************************************************************************************************
-*/
-/* void eioMblk::touch()
-{
-    os_get_timer(&m_latest_touch);
-    if (m_oldest_touch == 0) {
-        m_oldest_touch = m_latest_touch;
-    }
-
-    set_timer(m_save_time);
-}
-*/
-

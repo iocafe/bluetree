@@ -395,7 +395,9 @@ eStatus eTreeNode::onpropertychange(
 
                 case ECOMPO_PROPERTIES:
                     p = eTreeNode::cast(parent());
-                    open_request(p->m_ipath.get(p, ECOMP_IPATH), EBROWSE_PROPERTIES);
+                    if (p->classid() == EGUICLASSID_TREE_NODE) {
+                        open_request(p->m_ipath.get(p, ECOMP_IPATH), EBROWSE_PROPERTIES);
+                    }
                     setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
                     break;
 
@@ -635,10 +637,32 @@ void eTreeNode::draw_in_parameter_list(
     if (!ImGui::TableSetColumnIndex(0)) {
         return;
     }
+
+    ImGuiTreeNodeFlags tnflags = m_show_expand_arrow
+        ? ImGuiTreeNodeFlags_SpanFullWidth
+        : ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanFullWidth;
+
     label = m_label_node.get(this);
     text = m_text.get(this, ECOMP_TEXT);
-    isopen = ImGui::TreeNodeEx(label, m_show_expand_arrow
-        ? ImGuiTreeNodeFlags_None : ImGuiTreeNodeFlags_Leaf, "%s", text);
+    isopen = ImGui::TreeNodeEx(label, tnflags, "%s", text);
+
+
+    if (prm.mouse_click[EIMGUI_LEFT_MOUSE_BUTTON] &&
+        (prm.mouse_click_keyboard_flags[EIMGUI_LEFT_MOUSE_BUTTON] & EDRAW_LEFT_CTRL_DOWN))
+    {
+        if (!prm.edit_mode && ImGui::IsItemHovered())
+        {
+            if (m_right_click_selections & EBROWSE_OPEN) {
+                open_request(m_ipath.get(this, ECOMP_IPATH), EBROWSE_OPEN);
+            }
+            else if (m_intermediate_node && m_node_type == EBROWSE_PROPERTIES) {
+                eTreeNode *p = eTreeNode::cast(parent());
+                if (p->classid() == EGUICLASSID_TREE_NODE) {
+                    open_request(p->m_ipath.get(p, ECOMP_IPATH), EBROWSE_PROPERTIES);
+                }
+            }
+        }
+    }
 
     /* If we open the component, request information.
      */

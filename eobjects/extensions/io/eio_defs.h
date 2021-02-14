@@ -25,21 +25,13 @@
 #define EIOP_OUTPUT 28
 #define EIOP_CONNECTED 30
 
-#define EIOP_SIG_ADDR 35
-#define EIOP_SIG_N 36
-#define EIOP_SIG_TYPE 37
-
 /* Property names.
  */
 extern const os_char
     eiop_sbits[],
     eiop_tstamp[],
     eiop_output[],
-    eiop_connected[],
-
-    eiop_sig_addr[],
-    eiop_sig_n[],
-    eiop_sig_type[];
+    eiop_connected[];
 
 #endif
 

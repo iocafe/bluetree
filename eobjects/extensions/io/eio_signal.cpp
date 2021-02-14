@@ -33,13 +33,14 @@ eioSignal::eioSignal(
     eObject *parent,
     e_oid id,
     os_int flags)
-    : eObject(parent, id, flags)
+    : eVariable(parent, id, flags)
 {
     os_memclear(&m_signal, sizeof(m_signal));
     m_mblk_flags = 0;
     m_ncolumns = 1;
     m_eio_root = OS_NULL;
     m_variable_ref = new ePointer(this);
+    initproperties();
 }
 
 
@@ -74,18 +75,21 @@ eioSignal::~eioSignal()
 void eioSignal::setupclass()
 {
     const os_int cls = ECLASSID_EIO_SIGNAL;
-    eVariable *vtype;
+    eVariable *v;
     eVariable tmp;
 
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "eioSignal");
-    addpropertyl(cls, EIOP_SIG_ADDR, eiop_sig_addr, "address", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertyl(cls, EIOP_SIG_N, eiop_sig_n, "n", EPRO_PERSISTENT|EPRO_SIMPLE);
-    vtype = addpropertyl(cls, EIOP_SIG_TYPE, eiop_sig_type, "type", EPRO_PERSISTENT|EPRO_SIMPLE);
+    eclasslist_add(cls, (eNewObjFunc)newobj, "eioSignal", ECLASSID_VARIABLE);
+    addproperty (cls, EVARP_VALUE, evarp_value, "value", EPRO_PERSISTENT|EPRO_SIMPLE);
+    v = addproperty(cls, EVARP_TEXT, evarp_text, "info", EPRO_METADATA|EPRO_NOONPRCH);
+    v->setpropertyl(EVARP_TYPE, OS_STR);
+    v = addpropertyl (cls, EVARP_TYPE, evarp_type, OS_STR, "type", EPRO_METADATA|EPRO_NOONPRCH);
     emake_type_enum_str(&tmp, OS_FALSE, OS_TRUE);
-    vtype->setpropertyv(EVARP_ATTR, &tmp);
+    v->setpropertyv(EVARP_ATTR, &tmp);
+    addpropertys(cls, EVARP_ATTR, evarp_attr, "align=left;rdonly", "attr", EPRO_METADATA);
+    addpropertys(cls, EVARP_UNIT, evarp_unit, "dir", EPRO_METADATA|EPRO_NOONPRCH);
 
     propertysetdone(cls);
     os_unlock();
@@ -120,14 +124,8 @@ eStatus eioSignal::onpropertychange(
 {
     switch (propertynr)
     {
-        case EIOP_SIG_ADDR: /* read only */
-        case EIOP_SIG_N:
-        case EIOP_SIG_TYPE:
-            break;
-
-
         default:
-            return eObject::onpropertychange(propertynr, x, flags);
+            return eVariable::onpropertychange(propertynr, x, flags);
     }
 
     return ESTATUS_SUCCESS;
@@ -155,20 +153,8 @@ eStatus eioSignal::simpleproperty(
 {
     switch (propertynr)
     {
-        case EIOP_SIG_ADDR:
-            x->setl(m_signal.addr);
-            break;
-
-        case EIOP_SIG_N:
-            x->setl(m_signal.n);
-            break;
-
-        case EIOP_SIG_TYPE:
-            x->setl(m_signal.flags & OSAL_TYPEID_MASK);
-            break;
-
         default:
-            return eObject::simpleproperty(propertynr, x);
+            return eVariable::simpleproperty(propertynr, x);
     }
     return ESTATUS_SUCCESS;
 }
@@ -180,6 +166,9 @@ void eioSignal::setup(
     struct eioSignalInfo *sinfo)
 {
     eioMblk *mblk;
+    eVariable infostr;
+    const os_char *text;
+    os_char nbuf[OSAL_NBUF_SZ];
 
     mblk = eioMblk::cast(grandparent());
 
@@ -197,15 +186,38 @@ void eioSignal::setup(
      */
     m_mblk_flags = mblk->mblk_flags();
 
-#if IOC_BIDIRECTIONAL_MBLK_CODE
-    if (m_mblk_flags & (IOC_MBLK_UP | IOC_BIDIRECTIONAL)) {
+    /* Generate info string for the signal.
+     */
+    infostr = "";
+    eint2str(nbuf, m_signal.addr, 6, 6, '0');
+    infostr +=  nbuf;
+    infostr += ": ";
+    infostr += osal_typeid_to_name((osalTypeId)(m_signal.flags & OSAL_TYPEID_MASK));
+    infostr += "[";
+    osal_int_to_str(nbuf, sizeof(nbuf), m_signal.n);
+    infostr +=  nbuf;
+    infostr += "]";
+    setpropertyv(EVARP_VALUE, &infostr);
+
+    /* Show data transfer direction.
+       Note: Memory block flag, IOC_BIDIRECTIONAL means that memory block can support
+       bidirectional transfers, not that it is used. As source/target buffer
+       initialization flag this means actual use.
+     */
+    if ((m_mblk_flags & (IOC_MBLK_UP|IOC_MBLK_DOWN)) == (IOC_MBLK_UP|IOC_MBLK_DOWN)) {
+        text = "U+D";
+    }
+    else if (m_mblk_flags & IOC_MBLK_UP) {
+        text = "up";
+    }
+    else {
+        text = "down";
+    }
+    setpropertys(EVARP_UNIT, text);
+
+    if ((m_mblk_flags & IOC_MBLK_DOWN) == 0) {
         up();
     }
-#else
-    if (m_mblk_flags & IOC_MBLK_UP) {
-        up();
-    }
-#endif
 }
 
 /* os_lock() must be on when this function is called.

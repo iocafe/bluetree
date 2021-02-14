@@ -150,7 +150,7 @@ void eAttrBuffer::initialize(
                     m_align = E_ALIGN_RIGHT;
                 }
             }
-            else if (is_table_column) {
+            else {
                 if (!os_strcmp(p, "left")) {
                     m_align = E_ALIGN_LEFT;
                 }

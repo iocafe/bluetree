@@ -194,7 +194,17 @@ eioMblk *eioDevice::connected(
     }
 
     if (m_mblks == OS_NULL) {
+        eVariable tmp;
+        eName *name;
+
         m_mblks = new eContainer(this);
+
+        name = primaryname();
+        if (name) {
+            tmp = *name;
+            tmp += " mblks";
+            m_mblks->setpropertyv(ECONTP_TEXT, &tmp);
+        }
         m_mblks->addname("mblks");
         m_mblks->ns_create();
     }
@@ -271,7 +281,7 @@ eContainer *eioDevice::assemblies()
         eName *name;
 
         m_assemblies = new eContainer(this);
-        m_assemblies->addname("assy");
+        m_assemblies->addname("assembly");
         m_assemblies->ns_create();
 
         name = primaryname();
@@ -284,29 +294,3 @@ eContainer *eioDevice::assemblies()
     }
     return m_assemblies;
 }
-
-
-/**
-****************************************************************************************************
-
-  @brief Flags the peristent object changed (needs to be saved).
-
-  The eioDevice::touch function
-
-****************************************************************************************************
-*/
-/* void eioDevice::touch()
-{
-    os_get_timer(&m_latest_touch);
-    if (m_oldest_touch == 0) {
-        m_oldest_touch = m_latest_touch;
-    }
-
-    set_timer(m_save_time);
-}
-*/
-
-
-
-
-

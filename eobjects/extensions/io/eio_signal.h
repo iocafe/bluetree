@@ -28,7 +28,7 @@ class eioRoot;
   The eioSignal is a class derived from eVariable. It adds time stamp and state bits.
 ****************************************************************************************************
 */
-class eioSignal : public eObject
+class eioSignal : public eVariable
 {
     friend class eioSignalSpace;
 

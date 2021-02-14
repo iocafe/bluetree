@@ -116,6 +116,7 @@ void eGui::open_content_helper(
                 p = new eParameterList(*win);
             }
             e = new eLineEdit(p);
+            e->setpropertyv(ECOMP_TEXT, v);
             e->bind(ECOMP_VALUE, mypath.gets(), EBIND_METADATA);
         }
         else if (is_container) {
