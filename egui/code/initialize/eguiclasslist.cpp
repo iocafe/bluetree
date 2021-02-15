@@ -42,6 +42,7 @@ void eguiclasslist_initialize()
     eTableView::setupclass();
     eTableColumn::setupclass();
     eParameterList::setupclass();
+    eCameraView::setupclass();
 }
 
 /* Release resources allocated for the class list.

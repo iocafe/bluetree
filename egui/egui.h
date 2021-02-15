@@ -69,6 +69,7 @@ void egui_shutdown();
 #include "code/components/tableview/etableview.h"
 #include "code/components/tableview/etablecolumn.h"
 #include "code/components/parameterlist/eparameterlist.h"
+#include "code/components/cameraview/ecameraview.h"
 #include "code/gui/eguix.h"
 
 #endif
