@@ -168,7 +168,6 @@ eStatus eCameraView::draw(
 
     add_to_zorder(prm.window, prm.layer);
 
-
     ImVec2 cpos = ImGui::GetCursorScreenPos();
     m_rect.x1 = (os_int)cpos.x;
     m_rect.y1 = (os_int)cpos.y;
@@ -179,13 +178,17 @@ eStatus eCameraView::draw(
 
     if (m_textureID_set)
     {
-        ImGui::Text("%.0fx%.0f", (float)m_texture_w, (float)m_texture_h);
+        ImVec2 r = ImGui::GetContentRegionAvail();
+        r.x -= 2;
+        r.y -= 2;
+//         ImGui::Text("%.0fx%.0f", (float)m_texture_w, (float)m_texture_h);
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
         ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
         ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
         ImVec4 border_col = ImVec4(0.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
-        ImGui::Image(m_textureID, ImVec2(m_texture_w, m_texture_h), uv_min, uv_max, tint_col, border_col);
+
+        ImGui::Image(m_textureID, r /* ImVec2(m_texture_w, m_texture_h) */, uv_min, uv_max, tint_col, border_col);
         if (ImGui::IsItemHovered())
         {
             ImGui::BeginTooltip();
@@ -201,7 +204,7 @@ eStatus eCameraView::draw(
             ImGui::Text("Max: (%.2f, %.2f)", region_x + region_sz, region_y + region_sz);
             ImVec2 uv0 = ImVec2((region_x) / m_texture_w, (region_y) / m_texture_h);
             ImVec2 uv1 = ImVec2((region_x + region_sz) / m_texture_w, (region_y + region_sz) / m_texture_h);
-            ImGui::Image(m_textureID, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, tint_col, border_col);
+            ImGui::Image(m_textureID, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1); // , tint_col, border_col);
             ImGui::EndTooltip();
         }
     }
@@ -291,20 +294,11 @@ void eCameraView::upload_texture_to_grahics_card(
 
     delete_texture_on_grahics_card();
 
-    os_uchar *p = bitmap->ptr();
-    os_int count = 400;
-    while (count --) {
-    *p = 255;
-    p += 1921;
-    }
-
     data = bitmap->ptr();
     m_texture_w = bitmap->width();
     m_texture_h = bitmap->height();
     format = bitmap->format();
     byte_width = bitmap->row_nbytes();
-
-
 
     s = eimgui_upload_texture_to_grahics_card(data, m_texture_w, m_texture_h, format, byte_width, &m_textureID);
     m_textureID_set = (os_boolean)(s == ESTATUS_SUCCESS);
