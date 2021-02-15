@@ -1004,6 +1004,10 @@ public:
     eRowSetBinding *firstrb(
         e_oid id);
 
+    /* Check if this object has server side bindings.
+     */
+    os_boolean is_bound();
+
 
     /**
     ************************************************************************************************

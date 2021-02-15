@@ -326,3 +326,45 @@ eRowSetBinding *eObject::firstrb(
     }
     return OS_NULL;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Check if this object has server side bindings.
+
+  It is often useful to know if anyone is "looking" at this object. For example it doesn't make
+  sense to transfer camera data, if noone is looking at it. Also some objects should not be
+  deleted until noone uses them.
+
+  @return  OS_TRUE if this object has serve side bindings (is "needed" or "looked at").
+           OS_FALSE if not.
+
+****************************************************************************************************
+*/
+os_boolean eObject::is_bound()
+{
+    eContainer *bindings;
+    ePropertyBinding *binding;
+    eHandle *h;
+
+    /* Get or create bindings container.
+     */
+    bindings = firstc(EOID_BINDINGS);
+    if (bindings == OS_NULL) {
+        return OS_NULL;
+    }
+
+    h = bindings->mm_handle->first(EOID_CHILD);
+    while (h)
+    {
+        if (h->m_object->classid() == ECLASSID_PROPERTY_BINDING) {
+            binding = ePropertyBinding::cast(h->m_object);
+            if ((binding->bflags() & EBIND_CLIENT) == 0) {
+                return OS_TRUE;
+            }
+        }
+        h = h->next(EOID_CHILD);
+    }
+    return OS_FALSE;
+}

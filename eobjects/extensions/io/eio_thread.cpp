@@ -135,7 +135,7 @@ void eioThread::run()
 
         ioc_send_all(m_iocom_root);
 
-osal_debug_error("HERE IO THREAD LOOP")        ;
+        osal_trace2("HERE IO THREAD LOOP")        ;
     }
 }
 

@@ -118,7 +118,6 @@ public:
         eContainer *content,
         const os_char *target);
 
-
     /* Initialize the object.
      */
     virtual void initialize(
@@ -127,13 +126,6 @@ public:
     /* Run the connection.
      */
     virtual void run();
-
-    /*  virtual eStatus open(
-        os_char *path,
-        os_int flags=0)
-    {
-        return ESTATUS_SUCCESS;
-    } */
 
     virtual eStatus accepted(
         eStream *stream);
