@@ -393,6 +393,11 @@ eStatus eTreeNode::onpropertychange(
                     setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
                     break;
 
+                case ECOMPO_CAMERA:
+                    open_request(m_ipath.get(this, ECOMP_IPATH), EBROWSE_CAMERA);
+                    setpropertyi(ECOMP_COMMAND, ECOMPO_NO_COMMAND);
+                    break;
+
                 case ECOMPO_PROPERTIES:
                     p = eTreeNode::cast(parent());
                     if (p->classid() == EGUICLASSID_TREE_NODE) {
@@ -926,6 +931,10 @@ ePopup *eTreeNode::right_click_popup(
     if (m_right_click_selections & EBROWSE_OPEN)
     {
         add_popup_item_command("open", ECOMPO_OPEN, p);
+    }
+    if (m_right_click_selections & EBROWSE_CAMERA)
+    {
+        add_popup_item_command("camera", ECOMPO_CAMERA, p);
     }
     if (m_right_click_selections & EBROWSE_GRAPH) {
         add_popup_item_command("graph", ECOMPO_GRAPH, p);

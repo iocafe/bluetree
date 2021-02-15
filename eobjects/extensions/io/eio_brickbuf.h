@@ -106,6 +106,17 @@ protected:
      */
     void clear_member_variables();
 
+    /* Collect information about this object for tree browser.
+     */
+    virtual void object_info(
+        eVariable *item,
+        eVariable *name,
+        eSet *appendix,
+        const os_char *target);
+
+    virtual void send_open_info(
+        eEnvelope *envelope);
+
     /**
     ************************************************************************************************
       Member variables

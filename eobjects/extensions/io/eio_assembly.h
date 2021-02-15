@@ -69,14 +69,6 @@ public:
      */
     static void setupclass();
 
-    /* Called when property value changes.
-     */
-    virtual eStatus onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags);
-
-
     /**
     ************************************************************************************************
       Assembly specific functions.

@@ -122,6 +122,7 @@ class eRowSetBinding;
  */
 #define EBROWSE_OPEN 1
 #define EBROWSE_GRAPH 2
+#define EBROWSE_CAMERA 4
 
 /* Reason for parent callback, see eObject::docallback() and eObject::oncallback() functions.
  */

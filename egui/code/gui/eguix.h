@@ -247,11 +247,15 @@ protected:
     void drag(os_int mouse_button_nr);
     void drop_modification(os_int mouse_button_nr);
 
-    void open_content_helper(
+    void open_parameter_tree(
         const os_char *path,
         eObject *content,
         eWindow **win,
         eComponent *p);
+
+    void open_camera_view(
+        const os_char *path,
+        eObject *content);
 
     /* Viewport, corresponds to operating system window, etc.
      */

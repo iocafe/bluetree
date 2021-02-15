@@ -20,6 +20,7 @@
 #define ECLASSLIST_H_
 #include "eobjects.h"
 
+
 typedef eObject *(*eNewObjFunc)(
     eObject *parent,
     e_oid id,

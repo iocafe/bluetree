@@ -539,3 +539,82 @@ void eioBrickBuffer::clear_member_variables()
     m_flat_buffer = OS_TRUE;
     m_is_camera = OS_FALSE;
 }
+
+
+/**
+****************************************************************************************************
+
+  @brief Collect information about this object for tree browser.
+
+  The eVariable::object_info function fills in item (eVariable) to contain information
+  about this object for tree browser view.
+
+  @param   item Pointer to eVariable to set up with object information.
+  @param   name Object's name if known. OS_NULL if object is not named or name is
+           unknown at this time.
+  @param   appendix Pointer to eSet into which to store property flags. The stored property
+           flags indicate if object has namespace, children, or properties.
+  @param   target Path "within object" when browsing a tree which is not made out
+           of actual eObjects. For example OS file system directory.
+
+****************************************************************************************************
+*/
+void eioBrickBuffer::object_info(
+    eVariable *item,
+    eVariable *name,
+    eSet *appendix,
+    const os_char *target)
+{
+    eVariable::object_info(item, name, appendix, target);
+    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_CAMERA);
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Information for opening object has been requested, send it.
+
+  The object has received ECMD_INFO request and it needs to return back information
+  for opening the object.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eioBrickBuffer::send_open_info(
+    eEnvelope *envelope)
+{
+    eContainer *reply;
+    eVariable *item, tmp;
+    eName *name;
+    eioDevice *device;
+
+    device = eioDevice::cast(grandparent());
+    name = device->primaryname();
+    if (name) {
+        tmp = *name;
+        tmp += " ";
+    }
+    tmp += "MYCAMERA";
+
+    /* Show properties regardless of command.
+     */
+    reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+    reply->setpropertyv(ECONTP_TEXT, &tmp);
+
+    /* Open as "camera view" fron the browser.
+     */
+    item = new eVariable(reply, EOID_PARAMETER);
+    item->setl(EBROWSE_CAMERA);
+
+    item = new eVariable(reply, ECLASSID_VARIABLE);
+    item->sets("_p/x");
+
+    /* Send reply to caller
+     */
+    message(ECMD_OPEN_REPLY, envelope->source(),
+        envelope->target(), reply, EMSG_DEL_CONTENT, envelope->context());
+}

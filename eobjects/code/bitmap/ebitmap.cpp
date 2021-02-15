@@ -1085,6 +1085,7 @@ void eBitmap::object_info(
 
 ****************************************************************************************************
 */
+#if 0
 void eBitmap::send_open_info(
     eEnvelope *envelope)
 {
@@ -1132,4 +1133,4 @@ void eBitmap::send_open_info(
         eObject::send_open_info(envelope);
     }
 }
-
+#endif

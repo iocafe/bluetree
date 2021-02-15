@@ -25,6 +25,9 @@ include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code/imgui")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code/imgui_libs/styleserializer")
 
+
+include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/glfw_opengl3/imgui")
+
 # Add main headers.
 set(MAIN_HEADERS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/egui.h")
 

@@ -27,8 +27,6 @@ eioAssembly::eioAssembly(
     os_int flags)
     : eVariable(parent, oid, flags)
 {
-    initproperties();
-    ns_create();
 }
 
 
@@ -55,33 +53,3 @@ void eioAssembly::setupclass()
     os_unlock();
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Called to inform the class about property value change (override).
-
-  The onpropertychange() function is called when class'es property changes, unless the
-  property is flagged with EPRO_NOONPRCH.
-  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
-  in class members and and return it when simpleproperty() is called.
-
-  Notice for change logging: Previous value is still valid when this function is called.
-  You can get the old value by calling property() function inside onpropertychange()
-  function.
-
-  @param   propertynr Property number of changed property.
-  @param   x Variable containing the new value.
-  @param   flags
-  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
-           indicate that there was no property with given property number.
-
-****************************************************************************************************
-*/
-eStatus eioAssembly::onpropertychange(
-    os_int propertynr,
-    eVariable *x,
-    os_int flags)
-{
-    return eVariable::onpropertychange(propertynr, x, flags);
-}

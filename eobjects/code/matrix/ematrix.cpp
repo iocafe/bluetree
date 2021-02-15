@@ -2366,8 +2366,6 @@ void eMatrix::send_open_info(
         }
     }
 
-// EBROWSE_PROPERTIES
-
     /* The "open" selection shows the matrix content as table.
      */
     if (command == EBROWSE_OPEN)

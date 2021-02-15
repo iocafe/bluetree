@@ -55,13 +55,32 @@ void eGui::open_content(
     eObject *context)
 {
     eWindow *w;
+    eVariable *v;
+    os_int open_as = EBROWSE_OPEN;
     OSAL_UNUSED(context);
 
-    w = OS_NULL;
-    open_content_helper(path, content, &w, OS_NULL);
+    v = content->firstv(EOID_PARAMETER);
+    if (v) open_as = v->geti();
+
+    switch (open_as)
+    {
+        default:
+        case EBROWSE_OPEN:
+            w = OS_NULL;
+            open_parameter_tree(path, content, &w, OS_NULL);
+            break;
+
+        case EBROWSE_GRAPH:
+            break;
+
+        case EBROWSE_CAMERA:
+            open_camera_view(path, content);
+            break;
+    }
+
 }
 
-void eGui::open_content_helper(
+void eGui::open_parameter_tree(
     const os_char *path,
     eObject *content,
     eWindow **win,
@@ -79,6 +98,7 @@ void eGui::open_content_helper(
     for (v = content->firstv(); v; v = v->nextv())
     {
         cid = v->oid();
+        if (cid == EOID_PARAMETER) continue;
 
         is_variable = eclasslist_isinstanceof(cid, ECLASSID_VARIABLE);
         is_container = OS_FALSE;
@@ -126,7 +146,7 @@ void eGui::open_content_helper(
                 }
                 node = new eTreeNode(p);
                 node->setpropertyv(ECOMP_TEXT, v);
-                open_content_helper(mypath.gets(), appendix, win, node);
+                open_parameter_tree(mypath.gets(), appendix, win, node);
             }
         }
         else if (is_matrix) {
@@ -136,3 +156,22 @@ void eGui::open_content_helper(
     }
 }
 
+
+void eGui::open_camera_view(
+    const os_char *path,
+    eObject *content)
+{
+    eWindow *w;
+    eVariable tmp;
+    eCameraView *camview;
+
+    w = new eWindow(this);
+    content->propertyv(ECONTP_TEXT, &tmp);
+    if (tmp.isempty()) {
+        tmp.sets("unnamed");
+    }
+    w->setpropertyv(ECOMP_TEXT, &tmp);
+    w->setpropertyv(ECOMP_NAME, &tmp);
+
+    camview = new eCameraView(w);
+}

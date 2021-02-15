@@ -223,6 +223,7 @@ typedef enum {
 
     ECOMPO_OPEN,
     ECOMPO_GRAPH,
+    ECOMPO_CAMERA,
     ECOMPO_PROPERTIES,
 
     ECOMPO_NEW_ROW,

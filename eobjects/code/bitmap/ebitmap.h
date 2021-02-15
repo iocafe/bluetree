@@ -267,8 +267,8 @@ protected:
 
     /* Information for opening object has been requested, send it.
      */
-    virtual void send_open_info(
-        eEnvelope *envelope);
+//    virtual void send_open_info(
+//        eEnvelope *envelope);
 
 
     /**
