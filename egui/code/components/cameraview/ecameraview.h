@@ -112,8 +112,15 @@ protected:
       Protected functions
     ************************************************************************************************
     */
-    void set_toggled();
 
+    /* Load a bitmap to the graphics card.
+     */
+    void upload_texture_to_grahics_card(
+        eBitmap *bitmap);
+
+    /* Delete a texture (bitmap) from graphics card.
+     */
+    void delete_texture_on_grahics_card();
 
     /**
     ************************************************************************************************
@@ -121,8 +128,17 @@ protected:
     ************************************************************************************************
     */
 
-    bool m_set_toggled;
-    bool m_imgui_toggl;
+    /** OpenGL, etc. texture ID.
+     */
+    ImTextureID m_textureID;
+
+    /** Flag indicating that m_textureID idenfidies meaningfull texture.
+     */
+    os_boolean m_textureID_set;
+
+    /** Texture size.
+     */
+    os_int m_texture_w, m_texture_h;
 
     eStrBuffer m_text;
 };

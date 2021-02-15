@@ -152,9 +152,14 @@ eObject *eBitmap::clone(
     clonedobj = new eBitmap(parent, id == EOID_CHILD ? oid() : id, flags());
     clonedobj->m_compression = m_compression;
     clonedobj->m_timestamp = m_timestamp;
-    clonedobj->m_pixel_width_um = 0.0;
-    clonedobj->m_pixel_height_um = 0.0;
-    clonedobj->allocate(m_format, m_width, m_height, m_bflags);
+    clonedobj->m_state_bits = m_state_bits;
+    clonedobj->m_pixel_width_um = m_pixel_width_um;
+    clonedobj->m_pixel_height_um = m_pixel_height_um;
+    clonedobj->m_width = m_width;
+    clonedobj->m_height = m_height;
+    clonedobj->m_pixel_nbytes = m_pixel_nbytes;
+    clonedobj->m_row_nbytes = m_row_nbytes;
+    clonedobj->m_bflags = m_bflags;
 
     if (m_buf) {
         clonedobj->m_buf = (os_uchar*)os_malloc(m_buf_sz, &(clonedobj->m_buf_alloc_sz));
@@ -721,7 +726,7 @@ void eBitmap::clear()
     m_width = m_height = 0;
     m_pixel_nbytes = 0;
     m_row_nbytes = 0;
-    m_format = OSAL_RGB24;
+    m_format = OSAL_BITMAP_FORMAT_NOT_SET;
     m_bflags = 0;
 }
 
@@ -876,6 +881,12 @@ void eBitmap::set_jpeg_data(
 
     os_memcpy(m_jpeg, data, data_sz);
     m_jpeg_sz = data_sz;
+
+    if (m_buf) {
+        os_free(m_buf, m_buf_alloc_sz);
+        m_buf = OS_NULL;
+        m_buf_alloc_sz = 0;
+    }
 }
 
 
@@ -1069,68 +1080,3 @@ void eBitmap::object_info(
     eObject::object_info(item, name, appendix, target);
     appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN);
 }
-
-
-/**
-****************************************************************************************************
-
-  @brief Information for opening object has been requested, send it.
-
-  The object has received ECMD_INFO request and it needs to return back information
-  for opening the object.
-
-  @param   envelope Message envelope. Contains command, target and source paths and
-           message content, etc.
-  @return  None.
-
-****************************************************************************************************
-*/
-#if 0
-void eBitmap::send_open_info(
-    eEnvelope *envelope)
-{
-    eContainer *request, *reply;
-    eVariable *v;
-    os_int command = EBROWSE_OPEN;
-
-    /* Get command
-     */
-    request = eContainer::cast(envelope->content());
-    if (request->classid() != ECLASSID_CONTAINER) return;
-    if (request) {
-        v = request->firstv(EOID_PARAMETER);
-        if (v) {
-            command = v->geti();
-        }
-    }
-
-// EBROWSE_PROPERTIES
-
-    /* The "open" selection shows the bitmap content as table.
-     */
-    if (command == EBROWSE_OPEN)
-    {
-        /* Created container for reply content.
-         */
-        reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
-        new eVariable(reply, ECLASSID_BITMAP);
-
-        eVariable tmp;
-        propertyv(ECONTP_TEXT, &tmp);
-        if (!tmp.isempty()) {
-            reply->setpropertyv(ECONTP_TEXT, &tmp);
-        }
-
-        /* Send reply to caller
-         */
-        message(ECMD_OPEN_REPLY, envelope->source(),
-            envelope->target(), reply, EMSG_DEL_CONTENT, envelope->context());
-    }
-
-    /* Otherwise use default implementation for properties, etc.
-     */
-    else {
-        eObject::send_open_info(envelope);
-    }
-}
-#endif

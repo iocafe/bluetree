@@ -162,8 +162,10 @@ void eGui::open_camera_view(
     eObject *content)
 {
     eWindow *w;
-    eVariable tmp;
     eCameraView *camview;
+    eVariable *v, mypath, tmp;
+    os_int cid;
+    os_boolean is_brick_buffer;
 
     w = new eWindow(this);
     content->propertyv(ECONTP_TEXT, &tmp);
@@ -173,5 +175,22 @@ void eGui::open_camera_view(
     w->setpropertyv(ECOMP_TEXT, &tmp);
     w->setpropertyv(ECOMP_NAME, &tmp);
 
-    camview = new eCameraView(w);
+    for (v = content->firstv(); v; v = v->nextv())
+    {
+        cid = v->oid();
+        if (cid == EOID_PARAMETER) continue;
+
+        is_brick_buffer = eclasslist_isinstanceof(cid, ECLASSID_EIO_BRICK_BUFFER);
+
+        mypath.sets(path);
+        if (!v->isempty()) {
+            mypath.appends("/");
+            mypath.appendv(v);
+        }
+
+        if (is_brick_buffer) {
+            camview = new eCameraView(w);
+            camview->bind(ECOMP_VALUE, mypath.gets(), EBIND_METADATA);
+        }
+    }
 }

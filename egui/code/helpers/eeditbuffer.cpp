@@ -52,7 +52,6 @@ void eEditBuffer::clear()
         m_buf = OS_NULL;
         m_buf_sz = 0;
     }
-
 }
 
 

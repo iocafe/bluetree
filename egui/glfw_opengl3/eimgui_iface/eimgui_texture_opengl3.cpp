@@ -133,9 +133,13 @@ eStatus eimgui_upload_texture_to_grahics_card(
     os_int bitmap_height,
     osalBitmapFormat bitmap_format,
     os_int byte_width,
-    os_uint *textureID)
+    ImTextureID *textureID)
 {
-    GLuint image_texture;
+    union {
+        GLuint image_texture;
+        ImTextureID textureID;
+    }
+    trick;
     GLint glformat, internalformat;
     GLenum gltype, err;
 
@@ -170,10 +174,23 @@ eStatus eimgui_upload_texture_to_grahics_card(
             return ESTATUS_FAILED;
     }
 
-    /* Create a OpenGL texture identifier.
+    /* Create a OpenGL texture identifier. This propably doesn't worlk work for big endian.
      */
-    glGenTextures(1, &image_texture);
-    glBindTexture(GL_TEXTURE_2D, image_texture);
+    os_memclear(&trick, sizeof(trick));
+    glGenTextures(1, &trick.image_texture);
+    err = glGetError();
+    if (err != GL_NO_ERROR) {
+        osal_debug_error_int("eimgui_upload_texture_to_grahics_card: glGenTextures() failed: ", err);
+        goto failed;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, trick.image_texture);
+    err = glGetError();
+    if (err != GL_NO_ERROR) {
+        osal_debug_error_int("eimgui_upload_texture_to_grahics_card: glBindTexture() failed: ", err);
+        glDeleteTextures(1, &trick.image_texture);
+        goto failed;
+    }
 
     /* Setup filtering parameters for display. The GL_TEXTURE_WRAP_S and GL_TEXTURE_WRAP_T
      * settings are required on WebGL for non power-of-two textures
@@ -198,15 +215,15 @@ eStatus eimgui_upload_texture_to_grahics_card(
         bitmap_width, bitmap_height, 0, glformat, gltype, bitmap_data);
     err = glGetError();
     if (err != GL_NO_ERROR) {
-        osal_debug_error((err == GL_INVALID_OPERATION)
-            ? "eimgui_upload_texture_to_grahics_card: called between glBegin and glEnd."
-            : "eimgui_upload_texture_to_grahics_card: invalid arguments.");
+        osal_debug_error_int((err == GL_INVALID_OPERATION)
+            ? "eimgui_upload_texture_to_grahics_card: called between glBegin and glEnd: "
+            : "eimgui_upload_texture_to_grahics_card: invalid arguments: ", err);
 
-        glDeleteTextures(1, &image_texture);
+        glDeleteTextures(1, &trick.image_texture);
         goto failed;
     }
 
-    *textureID = (os_uint)image_texture;
+    *textureID = trick.textureID;
     return ESTATUS_SUCCESS;
 
 failed:
@@ -226,9 +243,26 @@ failed:
 ****************************************************************************************************
 */
 void eimgui_delete_texture_on_grahics_card(
-    os_uint textureID)
+    ImTextureID textureID)
 {
-    GLuint image_texture = (GLuint)textureID;
-    glDeleteTextures(1, &image_texture);
+    union {
+        GLuint image_texture;
+        ImTextureID textureID;
+    }
+    trick;
+
+    /* This propably doesn't worlk work for big endian.
+     */
+    os_memclear(&trick, sizeof(trick));
+    trick.textureID = textureID;
+
+    glDeleteTextures(1, &trick.image_texture);
+
+#if OSAL_DEBUG
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        osal_debug_error_int("eimgui_upload_texture_to_grahics_card: glGenTextures() failed: ", err);
+    }
+#endif
 }
 

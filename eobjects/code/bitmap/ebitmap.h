@@ -265,11 +265,6 @@ protected:
         eSet *appendix,
         const os_char *target);
 
-    /* Information for opening object has been requested, send it.
-     */
-//    virtual void send_open_info(
-//        eEnvelope *envelope);
-
 
     /**
     ************************************************************************************************

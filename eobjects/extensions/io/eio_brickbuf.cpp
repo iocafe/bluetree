@@ -610,7 +610,7 @@ void eioBrickBuffer::send_open_info(
     item = new eVariable(reply, EOID_PARAMETER);
     item->setl(EBROWSE_CAMERA);
 
-    item = new eVariable(reply, ECLASSID_VARIABLE);
+    item = new eVariable(reply, ECLASSID_EIO_BRICK_BUFFER);
     item->sets("_p/x");
 
     /* Send reply to caller

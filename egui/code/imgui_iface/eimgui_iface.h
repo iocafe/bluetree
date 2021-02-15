@@ -94,11 +94,11 @@ eStatus eimgui_upload_texture_to_grahics_card(
     os_int bitmap_height,
     osalBitmapFormat bitmap_format,
     os_int byte_width,
-    os_uint *textureID);
+    ImTextureID *textureID);
 
 /* Delete a texture (bitmap) from graphics card.
  */
 void eimgui_delete_texture_on_grahics_card(
-    os_uint textureID);
+    ImTextureID textureID);
 
 #endif
