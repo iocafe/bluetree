@@ -26,19 +26,21 @@
 
 /* Bitmap property numbers.
  */
-#define EBITMAPP_TSTAMP 15
-#define EBITMAPP_FORMAT 20
-#define EBITMAPP_WIDTH 21
-#define EBITMAPP_HEIGHT 22
-#define EBITMAPP_PIXEL_WIDTH_UM 23
-#define EBITMAPP_PIXEL_HEIGHT_UM 24
-#define EBITMAPP_COMPRESSION 25
-#define EBITMAPP_METADATA 30
+#define EBITMAPP_SBITS EVARP_SBITS /* 20 */
+#define EBITMAPP_TSTAMP EVARP_TSTAMP /* 21 */
+#define EBITMAPP_FORMAT 30
+#define EBITMAPP_WIDTH 31
+#define EBITMAPP_HEIGHT 32
+#define EBITMAPP_PIXEL_WIDTH_UM 33
+#define EBITMAPP_PIXEL_HEIGHT_UM 34
+#define EBITMAPP_METADATA 35
+#define EBITMAPP_COMPRESSION 36
 
 /* Bitmap property names.
  */
+#define ebitmapp_sbits evarp_sbits
+#define ebitmapp_tstamp evarp_tstamp
 extern const os_char
-    ebitmapp_tstamp[],
     ebitmapp_format[],
     ebitmapp_width[],
     ebitmapp_height[],
@@ -314,6 +316,11 @@ protected:
     /** Bitmap time stamp, 0 if not set.
      */
     os_long m_timestamp;
+
+    /** State bits, like OSAL_STATE_CONNECTED (2), OSAL_STATE_YELLOW,
+        OSAL_STATE_ORANGE...
+     */
+    os_uchar m_state_bits;
 
     /** Pointer to bitmap buffer, OS_NULL if none.
      */

@@ -19,7 +19,6 @@
 /* Bitmap property names.
  */
 const os_char
-    ebitmapp_tstamp[] = "tstamp",
     ebitmapp_format[] = "type",
     ebitmapp_width[] = "width",
     ebitmapp_height[] = "height",
@@ -54,6 +53,7 @@ eBitmap::eBitmap(
     m_jpeg_sz = m_jpeg_alloc_sz = 0;
     m_alpha = OS_NULL;
     m_alpha_sz = m_alpha_alloc_sz = 0;
+    m_state_bits = OSAL_STATE_CONNECTED;
 }
 
 
@@ -92,7 +92,9 @@ void eBitmap::setupclass()
     eclasslist_add(cls, (eNewObjFunc)newobj, "eBitmap", ECLASSID_TABLE);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text",
         EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addproperty (cls, EBITMAPP_TSTAMP, ebitmapp_tstamp, "timestamp",
+    addpropertyl(cls, EBITMAPP_SBITS, ebitmapp_sbits, "state bits",
+        EPRO_SIMPLE);
+    addproperty(cls, EBITMAPP_TSTAMP, ebitmapp_tstamp, "timestamp",
         EPRO_PERSISTENT|EPRO_SIMPLE);
     v = addpropertyl(cls, EBITMAPP_FORMAT, ebitmapp_format, "format",
         EPRO_PERSISTENT|EPRO_SIMPLE);
@@ -214,6 +216,10 @@ eStatus eBitmap::onpropertychange(
 
     switch (propertynr)
     {
+        case EBITMAPP_SBITS:
+            m_state_bits = x->getl();
+            break;
+
         case EBITMAPP_TSTAMP:
             m_timestamp = x->getl();
             break;
@@ -283,6 +289,10 @@ eStatus eBitmap::simpleproperty(
 {
     switch (propertynr)
     {
+        case EBITMAPP_SBITS:
+            x->setl(m_state_bits);
+            break;
+
         case EBITMAPP_TSTAMP:
             x->setl(m_timestamp);
             break;
@@ -359,6 +369,7 @@ eStatus eBitmap::writer(
     if (stream->putd(m_pixel_height_um)) goto failed;
     if (stream->putl(m_compression)) goto failed;
     if (stream->putl(m_timestamp)) goto failed;
+    if (stream->putl(m_state_bits)) goto failed;
 
     /* Write the bitmap, either uncompressed or as jpeg.
      */
@@ -473,6 +484,9 @@ eStatus eBitmap::reader(
     m_compression = (eBitmapCompression)tmp;
     if (stream->getl(&tmp)) goto failed;
     m_timestamp = tmp;
+    if (stream->getl(&tmp)) goto failed;
+    m_state_bits = tmp;
+
     resize((osalBitmapFormat)format, (os_int)width, (os_int)height,
         m_compression == EBITMAP_UNCOMPRESSED
         ? m_bflags

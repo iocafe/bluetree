@@ -17,12 +17,6 @@
 */
 #include "eobjects.h"
 
-/* Extended value property names.
- */
-extern const os_char
-    evalxp_sbits[] = "sbits",
-    evalxp_tstamp[] = "tstamp";
-
 
 /**
 ****************************************************************************************************
@@ -124,8 +118,8 @@ void eValueX::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eValueX", ECLASSID_VARIABLE);
     eVariable::setupproperties(cls);
-    addproperty (cls, EVALXP_SBITS, evalxp_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addproperty (cls, EVALXP_TSTAMP, evalxp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EVARP_SBITS, evarp_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty (cls, EVARP_TSTAMP, evarp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();
 }
@@ -159,11 +153,11 @@ eStatus eValueX::onpropertychange(
 {
     switch (propertynr)
     {
-        case EVALXP_SBITS:
+        case EVARP_SBITS:
             m_state_bits = (os_int)x->getl();
             break;
 
-        case EVALXP_TSTAMP:
+        case EVARP_TSTAMP:
             m_timestamp = x->getl();
             break;
 
@@ -196,11 +190,11 @@ eStatus eValueX::simpleproperty(
 {
     switch (propertynr)
     {
-        case EVALXP_SBITS:
+        case EVARP_SBITS:
             x->setl(m_state_bits);
             break;
 
-        case EVALXP_TSTAMP:
+        case EVARP_TSTAMP:
             x->setl(m_timestamp);
             break;
 

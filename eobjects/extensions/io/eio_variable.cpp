@@ -55,8 +55,8 @@ void eioVariable::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioVariable", ECLASSID_VARIABLE);
     eVariable::setupproperties(cls);
-    addproperty(cls, EVALXP_SBITS, evalxp_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
-    v = addproperty(cls, EVALXP_TSTAMP, evalxp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty(cls, EVARP_SBITS, evarp_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
+    v = addproperty(cls, EVARP_TSTAMP, evarp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
     v->setpropertys(EVARP_ATTR, "tstamp=\"yy,msec\"");
     propertysetdone(cls);
     os_unlock();
@@ -96,11 +96,11 @@ eStatus eioVariable::onpropertychange(
 
     switch (propertynr)
     {
-        case EVALXP_SBITS:
+        case EVARP_SBITS:
             m_state_bits = x->getl();
             break;
 
-        case EVALXP_TSTAMP:
+        case EVARP_TSTAMP:
             m_timestamp = x->getl();
             break;
 
@@ -111,10 +111,10 @@ eStatus eioVariable::onpropertychange(
             s = eVariable::onpropertychange(propertynr, x, flags);
 
             if (sbits != m_state_bits) {
-                setpropertyl(EVALXP_SBITS, sbits);
+                setpropertyl(EVARP_SBITS, sbits);
             }
             if (tstamp != m_timestamp) {
-                setpropertyl(EVALXP_TSTAMP, tstamp);
+                setpropertyl(EVARP_TSTAMP, tstamp);
             }
             if (m_value_set_by_user) {
                 down();
@@ -150,11 +150,11 @@ eStatus eioVariable::simpleproperty(
 {
     switch (propertynr)
     {
-        case EVALXP_SBITS:
+        case EVARP_SBITS:
             x->setl(m_state_bits);
             break;
 
-        case EVALXP_TSTAMP:
+        case EVARP_TSTAMP:
             x->setl(m_timestamp);
             break;
 

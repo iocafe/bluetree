@@ -96,7 +96,7 @@ void eTable::add_generic_table_properties(
     for (i = 0; i < etable_nro_attrs; i++) {
         if (group_flags & etable_attrs[i].group_flags)
         {
-            addproperty (cls, etable_attrs[i].property_nr, etable_attrs[i].attr_name,
+            addproperty(cls, etable_attrs[i].property_nr, etable_attrs[i].attr_name,
                 etable_attrs[i].attr_name, EPRO_PERSISTENT);
         }
     }

@@ -33,8 +33,7 @@ class eValueX;
  */
 #define EVARIABLE_STRBUF_SZ ((os_memsz)(sizeof(os_memsz)*2 + sizeof(os_char*) - sizeof(os_uchar)))
 
-/* Variable property numbers. Same numbers cannot be used for these as for eValueX
-   properties EVALXP_SBITS and EVALXP_TSTAMP.
+/* Variable property numbers. Avoid changing these numbers, used by derived and other classess.
  */
 #define EVARP_VALUE 1
 #define EVARP_TYPE 2
@@ -50,6 +49,8 @@ class eValueX;
 #define EVARP_MAX 16
 #define EVARP_GAIN 17
 #define EVARP_OFFSET 18
+#define EVARP_SBITS 20
+#define EVARP_TSTAMP 21
 #define EVARP_CONF 26
 
 /* Variable property names.
@@ -69,6 +70,8 @@ extern const os_char
     evarp_default[],
     evarp_gain[],
     evarp_offset[],
+    evarp_sbits[],
+    evarp_tstamp[],
     evarp_conf[];
 
 

@@ -98,15 +98,26 @@ eMatrix::~eMatrix()
 */
 void eMatrix::setupclass()
 {
+    eVariable *p, tmp;
     const os_int cls = ECLASSID_MATRIX;
 
     /* Add the class to class list.
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eMatrix", ECLASSID_TABLE);
-    addpropertyl(cls, EMTXP_DATATYPE, emtxp_datatype, "data type", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertyl(cls, EMTXP_NROWS, emtxp_nrows, "nro rows", EPRO_PERSISTENT|EPRO_SIMPLE);
-    addpropertyl(cls, EMTXP_NCOLUMNS, emtxp_ncolumns, "nro columns", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, EMTXP_SBITS, emtxp_sbits, "state bits",
+        EPRO_PERSISTENT|EPRO_NOONPRCH);
+    addproperty(cls, EMTXP_TSTAMP, emtxp_tstamp, "timestamp",
+        EPRO_PERSISTENT|EPRO_NOONPRCH);
+    p = addpropertyl(cls, EMTXP_DATATYPE, emtxp_datatype, "data type",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
+    emake_type_enum_str(&tmp, OS_FALSE, OS_TRUE);
+    p->setpropertyv(EVARP_ATTR, &tmp);
+
+    addpropertyl(cls, EMTXP_NROWS, emtxp_nrows, "nro rows",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertyl(cls, EMTXP_NCOLUMNS, emtxp_ncolumns, "nro columns",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty (cls, EMTXP_CONFIGURATION, emtxp_configuration, "configuration",
         EPRO_PERSISTENT|EPRO_SIMPLE);
 

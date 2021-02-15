@@ -20,20 +20,6 @@
 #define EVALUEX_H_
 #include "eobjects.h"
 
-/* Extended value property numbers. Extended value has all variable properties as well.
-   SBITS = State bits
-   TSTAMP = Time stamp
- */
-#define EVALXP_SBITS 20
-#define EVALXP_TSTAMP 21
-
-
-/* Extended value property names.
- */
-extern const os_char
-    evalxp_sbits[],
-    evalxp_tstamp[];
-
 
 /**
 ****************************************************************************************************

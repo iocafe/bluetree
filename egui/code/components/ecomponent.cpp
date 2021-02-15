@@ -110,7 +110,7 @@ void eComponent::setupproperties(
         addproperty (cls, ECOMP_VALUE, ecomp_value, "value", EPRO_NOPACK);
         p = addpropertyl (cls, ECOMP_TYPE, ecomp_type, "type", EPRO_METADATA);
         emake_type_enum_str(&tmp);
-        p->setpropertyv(ECOMP_ATTR, &tmp);
+        p->setpropertyv(EVARP_ATTR, &tmp);
 
         addproperty (cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
         addproperty (cls, ECOMP_DEFAULT, ecomp_default, "default", EPRO_METADATA);

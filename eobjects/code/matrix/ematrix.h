@@ -29,13 +29,17 @@ class eDBM;
 
 /* Matrix property numbers, notice that ETABLEP_TEXT (50) is reserved.
  */
-#define EMTXP_DATATYPE 20
-#define EMTXP_NROWS 21
-#define EMTXP_NCOLUMNS 22
-#define EMTXP_CONFIGURATION 30
+#define EMTXP_SBITS EVARP_SBITS /* 20 */
+#define EMTXP_TSTAMP EVARP_TSTAMP /* 21 */
+#define EMTXP_DATATYPE 30
+#define EMTXP_NROWS 31
+#define EMTXP_NCOLUMNS 32
+#define EMTXP_CONFIGURATION 33
 
 /* Matrix property names.
  */
+#define emtxp_sbits evarp_sbits
+#define emtxp_tstamp evarp_tstamp
 extern const os_char
     emtxp_datatype[],
     emtxp_nrows[],

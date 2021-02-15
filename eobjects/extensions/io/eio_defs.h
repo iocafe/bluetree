@@ -20,8 +20,8 @@
 
 /* Property numbers.
  */
-#define EIOP_OUTPUT 28
-#define EIOP_CONNECTED 30
+#define EIOP_OUTPUT 30
+#define EIOP_CONNECTED 31
 
 /* Property names.
  */
