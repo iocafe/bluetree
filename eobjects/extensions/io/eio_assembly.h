@@ -42,7 +42,7 @@ eioAssemblyParams;
   eioAssembly is like a box of objects.
 ****************************************************************************************************
 */
-class eioAssembly : public eContainer
+class eioAssembly : public eVariable
 {
 public:
     /* Constructor.

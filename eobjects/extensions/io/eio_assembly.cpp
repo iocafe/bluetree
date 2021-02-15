@@ -25,7 +25,7 @@ eioAssembly::eioAssembly(
     eObject *parent,
     e_oid oid,
     os_int flags)
-    : eContainer(parent, oid, flags)
+    : eVariable(parent, oid, flags)
 {
     initproperties();
     ns_create();
@@ -51,9 +51,7 @@ void eioAssembly::setupclass()
     /* Add the class to class list.
      */
     os_lock();
-    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioAssembly", ECLASSID_CONTAINER);
-    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    propertysetdone(cls);
+    eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioAssembly", ECLASSID_VARIABLE);
     os_unlock();
 }
 
@@ -85,5 +83,5 @@ eStatus eioAssembly::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-    return eContainer::onpropertychange(propertynr, x, flags);
+    return eVariable::onpropertychange(propertynr, x, flags);
 }

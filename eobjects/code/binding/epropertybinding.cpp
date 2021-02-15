@@ -833,7 +833,7 @@ void ePropertyBinding::get_meta_pr_values(
     eVariable *v = OS_NULL, *mprname = OS_NULL, *pr = OS_NULL;
     eContainer *propertyset = OS_NULL;
     os_int meta_prnr, set_ix;
-    os_char *meta_prname, *meta_prext;
+    os_char *meta_prname, *meta_prext, *q;
     const os_char *p, *e;
 
     /* Loop trough all requested metadata property name.
@@ -881,10 +881,10 @@ void ePropertyBinding::get_meta_pr_values(
             pr = eVariable::cast(propertyset->byname(propertyname));
         }
 
-        /* mprname->sets(evarp_value);
-        mprname->appends_nbytes(p, e - p);
-        meta_prname = mprname->gets();
-        meta_prext = os_strchr(meta_prname, '.'); */
+        if (meta_prext[0] == '.') {
+            q = os_strchr(meta_prext + 1, '.');
+            if (q) meta_prext = q;
+        }
 
         if (pr) {
             v->sets(evarp_value);

@@ -18,5 +18,4 @@
 /* Property names.
  */
 const os_char
-    eiop_output[] = "output",
     eiop_connected[] = "connected";

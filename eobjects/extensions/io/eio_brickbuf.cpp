@@ -65,8 +65,10 @@ void eioBrickBuffer::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioBrickBuffer", ECLASSID_EIO_ASSEMBLY);
-    addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addpropertys(cls, EIOP_OUTPUT, eiop_output, "output", EPRO_SIMPLE|EPRO_NOONPRCH);
+    addpropertys(cls, EVARP_TEXT, evarp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
+    addpropertys(cls, EVARP_VALUE, evarp_value, "value", EPRO_SIMPLE|EPRO_NOONPRCH);
+    propertysetdone(cls);
+
     propertysetdone(cls);
     os_unlock();
 }
@@ -101,8 +103,7 @@ eStatus eioBrickBuffer::onpropertychange(
 {
     switch (propertynr)
     {
-        case EIOP_OUTPUT:
-            x->setv(m_output);
+        case EVARP_VALUE:
             break;
 
         default:
@@ -134,7 +135,7 @@ eStatus eioBrickBuffer::simpleproperty(
 {
     switch (propertynr)
     {
-        case EIOP_OUTPUT:
+        case EVARP_VALUE:
             x->setv(m_output);
             break;
 
@@ -471,12 +472,11 @@ eStatus eioBrickBuffer::get()
         /* Set output and forward property value to bindings, if any.
          */
         m_output->seto(bitmap, OS_TRUE);
-        forwardproperty(EIOP_OUTPUT, m_output, OS_NULL, 0);
+        forwardproperty(EVARP_VALUE, m_output, OS_NULL, 0);
     }
 
     return ESTATUS_SUCCESS;
 }
-
 
 
 /**
