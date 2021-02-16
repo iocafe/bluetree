@@ -1391,7 +1391,7 @@ os_int eVariable::compare(
 {
     eVariable *x, *y, *tmp;
     eObject *ox, *oy;
-    os_int rval = 0, reverse;
+    os_int rval = 0, reverse, cid;
     os_long lx, ly;
     os_double dx, dy;
     os_char nbuf[OSAL_NBUF_SZ];
@@ -1402,12 +1402,11 @@ os_int eVariable::compare(
         return 1;
     }
 
-    /* We must allow eName specifically to get system initialized.
+    /* We must allow eVariable and eName specifically to get system initialized.
      */
-    if (!xx->isinstanceof(ECLASSID_VARIABLE) &&
-        xx->classid() != ECLASSID_NAME)
-    {
-        return -1;
+    cid = xx->classid();
+    if (cid != ECLASSID_NAME && cid != ECLASSID_NAME) {
+        if (!xx->isinstanceof(ECLASSID_VARIABLE)) return -1;
     }
     x = (eVariable*)xx;
 
