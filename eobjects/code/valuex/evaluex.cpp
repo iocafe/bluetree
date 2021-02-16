@@ -235,6 +235,11 @@ eStatus eValueX::writer(
      */
     eVariable::writer(stream, flags);
 
+    /* Time stamp and state bits.
+     */
+    if (stream->putl(m_timestamp)) goto failed;
+    if (stream->putl(m_state_bits)) goto failed;
+
     /* End the object.
      */
     if (stream->write_end_block()) goto failed;
@@ -274,6 +279,7 @@ eStatus eValueX::reader(
     /* Version number. Used to check which versions item's are in serialized data.
      */
     os_int version;
+    os_long tmp;
 
     /* Read object start mark and version number.
      */
@@ -282,6 +288,12 @@ eStatus eValueX::reader(
     /* Use base class'es function to do the work.
      */
     eVariable::reader(stream, flags);
+
+    /* Time stamp and state bits.
+     */
+    if (stream->getl(&m_timestamp)) goto failed;
+    if (stream->getl(&tmp)) goto failed;
+    m_state_bits = tmp;
 
     /* End the object.
      */

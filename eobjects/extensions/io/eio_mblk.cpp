@@ -158,7 +158,7 @@ eStatus eioMblk::simpleproperty(
 void eioMblk::connected(
     struct eioMblkInfo *minfo)
 {
-    /* If we kno the memory block pointer.
+    /* If we know the memory block pointer.
      */
     if (minfo->mblk) {
         /* Save/update memory block flags.
@@ -195,6 +195,19 @@ void eioMblk::connected(
 void eioMblk::disconnected(
     eioMblkInfo *minfo)
 {
+    eObject *sig;
+
+    /* Try read all "up" signals to mark these disconnected
+     */
+    if ((mblk_flags() & IOC_MBLK_DOWN) == 0 && m_esignals) {
+        for (sig = m_esignals->first(); sig; sig = sig->next())
+        {
+            if (sig->classid() == ECLASSID_EIO_SIGNAL) {
+                ((eioSignal*)sig)->up();
+            }
+        }
+    }
+
     if (m_handle_set) {
         ioc_remove_callback(&m_handle, callback, this);
         ioc_release_handle(&m_handle);

@@ -29,7 +29,6 @@ eStrBuffer::eStrBuffer()
 {
     m_buf = OS_NULL;
     m_buf_sz = 0;
-    m_extended_value = OS_FALSE;
     m_state_bits = OSAL_STATE_CONNECTED;
 }
 
@@ -71,7 +70,6 @@ void eStrBuffer::setv(
 {
     os_char *ptr;
     os_memsz sz;
-    eValueX *ex;
 
     if (value == OS_NULL) {
         clear();
@@ -93,11 +91,10 @@ void eStrBuffer::setv(
         os_memcpy(m_buf, ptr, sz);
     }
 
-    ex = value->getx();
-    if (ex) {
-        m_extended_value = OS_TRUE;
-        m_state_bits = ex->sbits();
-    }
+    m_state_bits = value->sbits();
+if (!m_state_bits) {
+int i = 11;
+}
 }
 
 void eStrBuffer::appends(

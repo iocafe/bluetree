@@ -55,7 +55,7 @@ public:
     inline const os_char *ptr() {return m_buf; }
     inline os_boolean isempty() {return (os_boolean)(m_buf == OS_NULL);}
 
-    inline os_boolean isx() {return m_extended_value;}
+    // inline os_boolean isx() {return m_extended_value;}
     inline os_int sbits() {return m_state_bits;}
 
 protected:
@@ -65,7 +65,7 @@ protected:
     os_char *m_buf;
     os_memsz m_buf_sz;
 
-    os_boolean m_extended_value;
+    // os_boolean m_extended_value;
     os_char m_state_bits;
 };
 

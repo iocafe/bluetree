@@ -342,7 +342,7 @@ eStatus eioProtocol::activate_connection(
 
   @brief Deacivate a connection.
 
-  The deactivate_connection() function disables a connection object so that it is inavtive
+  The deactivate_connection() function disables a connection object so that it is inactive
   and does not run actual communication. But it doesn't change eConnection parameters
   or stored client binding data.
 
@@ -353,7 +353,13 @@ eStatus eioProtocol::activate_connection(
 void eioProtocol::deactivate_connection(
     eProtocolHandle *handle)
 {
-    delete_connection(handle);
+    eioProtocolHandle *p;
+
+    if (handle == OS_NULL) return;
+    p = (eioProtocolHandle*)handle;
+    if (!p->isrunning()) return;
+
+    ioc_terminate_connection_thread(p->con());
 }
 
 
