@@ -312,7 +312,7 @@ failed:
 ****************************************************************************************************
 */
 os_int eValueX::compare(
-    eVariable *x,
+    eObject *x,
     os_int flags)
 {
     os_int rval;

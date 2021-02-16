@@ -643,7 +643,7 @@ void eObject::setpropertyv(
     p = firstp(propertynr);
     if (p == OS_NULL)
     {
-        osal_debug_error("setproperty: Property number is not valid for the class");
+        osal_debug_error("setpropertyv: Property number is not valid for the class");
         return;
     }
     pflags = p->flags();
@@ -793,8 +793,10 @@ void eObject::setpropertys(
 }
 
 /* Get property value.
+ * EMSG_IGNORE_MISSING_PROPERTY do not report error if property with this number is not in property set.
+ * @return ESTATUS_FAILED if property is missing.
  */
-void eObject::propertyv(
+eStatus eObject::propertyv(
     os_int propertynr,
     eVariable *x,
     os_int flags)
@@ -807,27 +809,31 @@ void eObject::propertyv(
      */
     properties = eSet::cast(first(EOID_PROPERTIES));
     if (properties) {
-        if (properties->getv(propertynr, x)) return;
+        if (properties->getv(propertynr, x)) return ESTATUS_SUCCESS;
     }
 
     /* Check for simple property
      */
-    if (simpleproperty(propertynr, x) == ESTATUS_SUCCESS) return;
+    if (simpleproperty(propertynr, x) == ESTATUS_SUCCESS) return ESTATUS_SUCCESS;
 
     /* Get global eVariable describing this property.
      */
     p = firstp(propertynr);
     if (p == OS_NULL)
     {
-        osal_debug_error("setproperty: Property number is not valid for the class");
+#if OSAL_DEBUG
+        if ((flags & EMSG_IGNORE_MISSING_PROPERTY) == 0) {
+            osal_debug_error("propertyv: Property number is not valid for the class");
+        }
+#endif
         x->clear();
-        return;
+        return ESTATUS_FAILED;
     }
 
     /* Return default value for the property.
      */
     x->setv(p);
-    return;
+    return ESTATUS_SUCCESS;
 }
 
 

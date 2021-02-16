@@ -381,7 +381,7 @@ public:
     /* Compare two variables.
      */
     virtual os_int compare(
-        eVariable *x,
+        eObject *xx,
         os_int flags = 0);
 
     /* Remove white space from beginning and end of string values.

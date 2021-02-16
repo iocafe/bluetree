@@ -54,6 +54,7 @@ class eRowSetBinding;
 #define EMSG_DEL_CONTENT 128
 #define EMSG_DEL_CONTEXT 256
 #define EMSG_CAN_BE_ADOPTED 512 /* Internal: True if envelope or message can be adopted */
+#define EMSG_IGNORE_MISSING_PROPERTY  8092 /* Used for propertyv, etc */
 #define EMSG_HAS_CONTENT 2 /* Special flag to be passed over connection only */
 #define EMSG_HAS_CONTEXT 4 /* Special flag to be passed over connection only */
 
@@ -258,6 +259,14 @@ public:
     void timer(
         os_long period_ms);
 
+    virtual os_int compare(
+        eObject *x,
+        os_int flags = 0)
+    {
+        OSAL_UNUSED(x);
+        OSAL_UNUSED(flags);
+        return -1;
+    }
 
 #if EOVERLOAD_NEW_AND_DELETE
     /**
@@ -939,7 +948,7 @@ public:
 
     /* Get property value.
      */
-    void propertyv(
+    eStatus propertyv(
         os_int propertynr,
         eVariable *x,
         os_int flags = 0);

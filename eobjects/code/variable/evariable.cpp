@@ -255,8 +255,10 @@ void eVariable::object_info(
 
     i = 0;
     while ((propertynr = copy_property_list[i++])) {
-        propertyv(propertynr, &value);
-        item->setpropertyv(propertynr, &value);
+        if (propertyv(propertynr, &value, EMSG_IGNORE_MISSING_PROPERTY) == ESTATUS_SUCCESS)
+        {
+            item->setpropertyv(propertynr, &value);
+        }
     }
 }
 
@@ -1384,37 +1386,26 @@ void eVariable::appendv(
 ****************************************************************************************************
 */
 os_int eVariable::compare(
-    eVariable *x,
+    eObject *xx,
     os_int flags)
 {
-    eVariable
-        *y,
-        *tmp;
-
-    eObject
-        *ox,
-        *oy;
-
-    os_int
-        rval = 0,
-        reverse;
-
-    os_long
-        lx,
-        ly;
-
-    os_double
-        dx,
-        dy;
-
-    os_char
-        nbuf[32];
+    eVariable *x, *y, *tmp;
+    eObject *ox, *oy;
+    os_int rval = 0, reverse;
+    os_long lx, ly;
+    os_double dx, dy;
+    os_char nbuf[OSAL_NBUF_SZ];
 
     OSAL_UNUSED(flags);
 
-    if (x == OS_NULL) {
+    if (xx == OS_NULL) {
         return 1;
     }
+
+    if (!xx->isinstanceof(ECLASSID_VARIABLE)) {
+        return -1;
+    }
+    x = (eVariable*)xx;
 
     /* Arrange by type id enum, so that type number of x is smaller than y's.
      */
@@ -1547,7 +1538,7 @@ os_int eVariable::compare(
             if (ox == OS_NULL || oy == OS_NULL) {
                 break;
             }
-            rval = oy->compare(eVariable::cast(ox));
+            rval = oy->compare(ox);
             break;
 
         case OS_POINTER:

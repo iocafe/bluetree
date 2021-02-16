@@ -438,7 +438,7 @@ void eioRoot::new_assembly(
     tmp = prm->name;
     tmp += " ";
     tmp += device_id;
-    assembly->setpropertyv(ECONTP_TEXT, &tmp);
+    assembly->setpropertyv(EVARP_TEXT, &tmp);
     assembly->addname(prm->name);
     assembly->setup(prm, m_iocom_root);
 }

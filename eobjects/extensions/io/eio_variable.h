@@ -81,7 +81,7 @@ public:
         struct eioMblkInfo *minfo,
         struct eioSignalInfo *sinfo);
 
-    void up(eValueX *x);
+    void up(eValueX *xx);
 
     void down();
 

@@ -82,10 +82,6 @@ eStatus eioAssembly::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-    eStatus s;
-    os_long tstamp;
-    os_int sbits;
-
     switch (propertynr)
     {
         case EIOP_BOUND:
