@@ -1402,7 +1402,11 @@ os_int eVariable::compare(
         return 1;
     }
 
-    if (!xx->isinstanceof(ECLASSID_VARIABLE)) {
+    /* We must allow eName specifically to get system initialized.
+     */
+    if (!xx->isinstanceof(ECLASSID_VARIABLE) &&
+        xx->classid() != ECLASSID_NAME)
+    {
         return -1;
     }
     x = (eVariable*)xx;
