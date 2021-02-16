@@ -71,6 +71,13 @@ public:
         os_int propertynr,
         eVariable *x);
 
+    /* Process a callback from a child object.
+     */
+    eStatus oncallback(
+        eCallbackEvent event,
+        eObject *obj,
+        eObject *appendix);
+
     /**
     ************************************************************************************************
       IO variable specific functions
@@ -85,18 +92,17 @@ public:
 
     void down();
 
-    /* Process a callback from a child object.
-     */
-    eStatus oncallback(
-        eCallbackEvent event,
-        eObject *obj,
-        eObject *appendix);
+protected:
+    /**
+    ************************************************************************************************
+      Internal functions.
+    ************************************************************************************************
+    */
 
     /* Decide value for "bound" flag.
      */
-    void set_bound();
-
-protected:
+    void set_bound(
+        eCallbackEvent event);
 
     /**
     ************************************************************************************************

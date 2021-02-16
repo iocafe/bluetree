@@ -32,6 +32,7 @@ eioMblk::eioMblk(
     m_esignals = OS_NULL;
     m_mblk_flags = 0;
     m_eio_root = OS_NULL;
+    m_connected = OS_FALSE;
 
     initproperties();
     ns_create();
@@ -74,7 +75,7 @@ void eioMblk::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioMblk", ECLASSID_CONTAINER);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
+    addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();
 }
@@ -106,18 +107,48 @@ eStatus eioMblk::onpropertychange(
     switch (propertynr)
     {
         case EIOP_CONNECTED:
+            m_connected = (os_boolean)x->getl();
             break;
 
         default:
-            goto call_parent;
+            return eContainer::onpropertychange(propertynr, x, flags);
     }
 
     return ESTATUS_SUCCESS;
-
-call_parent:
-    return eContainer::onpropertychange(propertynr, x, flags);
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Get value of simple property (override).
+
+  The simpleproperty() function stores current value of simple property into variable x.
+
+  @param   propertynr Property number to get.
+  @param   x Variable into which to store the property value.
+  @return  If property with property number was stored in x, the function returns
+           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
+           given number was not among simple properties.
+
+****************************************************************************************************
+*/
+eStatus eioMblk::simpleproperty(
+    os_int propertynr,
+    eVariable *x)
+{
+    switch (propertynr)
+    {
+        case EIOP_CONNECTED:
+            x->setl(m_connected);
+            break;
+
+        default:
+            return eContainer::simpleproperty(propertynr, x);
+    }
+
+    return ESTATUS_SUCCESS;
+}
 
 /**
 ****************************************************************************************************
@@ -152,7 +183,7 @@ void eioMblk::connected(
 
     /* Mark connected.
      */
-    setpropertyl(EIOP_CONNECTED, OS_TRUE);
+    set_connected(OS_TRUE);
 }
 
 
@@ -170,7 +201,25 @@ void eioMblk::disconnected(
         m_handle_set = OS_FALSE;
     }
 
-    setpropertyl(EIOP_CONNECTED, OS_FALSE);
+    set_connected(OS_FALSE);
+}
+
+
+/**
+****************************************************************************************************
+  Decide value for "connected" flag.
+****************************************************************************************************
+*/
+void eioMblk::set_connected(
+    os_boolean connected)
+{
+    eObject *gp;
+
+    if (connected != m_connected) {
+        setpropertyl(EIOP_CONNECTED, connected);
+        gp = grandparent();
+        if (gp) gp->oncallback(ECALLBACK_STATUS_CHANGED, parent(), OS_NULL);
+    }
 }
 
 

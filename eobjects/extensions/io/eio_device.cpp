@@ -28,6 +28,8 @@ eioDevice::eioDevice(
     : eContainer(parent, oid, flags)
 {
     m_mblks = m_io = m_assemblies = OS_NULL;;
+    m_bound = OS_FALSE;
+    m_connected = OS_FALSE;
     initproperties();
     ns_create();
 }
@@ -54,7 +56,8 @@ void eioDevice::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioDevice", ECLASSID_CONTAINER);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addpropertyl(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
+    addpropertyb(cls, EIOP_CONNECTED, eiop_connected, "connected", EPRO_SIMPLE);
+    addpropertyb(cls, EIOP_BOUND, eiop_bound, "bound", EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();
 }
@@ -86,16 +89,55 @@ eStatus eioDevice::onpropertychange(
     switch (propertynr)
     {
         case EIOP_CONNECTED:
+            m_connected = (os_boolean)x->getl();
+            break;
+
+        case EIOP_BOUND:
+            m_bound = (os_boolean)x->getl();
             break;
 
         default:
-            goto call_parent;
+            return eContainer::onpropertychange(propertynr, x, flags);
     }
 
     return ESTATUS_SUCCESS;
+}
 
-call_parent:
-    return eContainer::onpropertychange(propertynr, x, flags);
+
+/**
+****************************************************************************************************
+
+  @brief Get value of simple property (override).
+
+  The simpleproperty() function stores current value of simple property into variable x.
+
+  @param   propertynr Property number to get.
+  @param   x Variable into which to store the property value.
+  @return  If property with property number was stored in x, the function returns
+           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
+           given number was not among simple properties.
+
+****************************************************************************************************
+*/
+eStatus eioDevice::simpleproperty(
+    os_int propertynr,
+    eVariable *x)
+{
+    switch (propertynr)
+    {
+        case EIOP_CONNECTED:
+            x->setl(m_connected);
+            break;
+
+        case EIOP_BOUND:
+            x->setl(m_bound);
+            break;
+
+        default:
+            return eContainer::simpleproperty(propertynr, x);
+    }
+
+    return ESTATUS_SUCCESS;
 }
 
 
@@ -193,6 +235,12 @@ eContainer *eioDevice::io()
     return m_io;
 }
 
+
+/**
+****************************************************************************************************
+  Get "assemblies" container, create it if it doesn't exist.
+****************************************************************************************************
+*/
 eContainer *eioDevice::assemblies()
 {
     if (m_assemblies == OS_NULL)
@@ -213,4 +261,110 @@ eContainer *eioDevice::assemblies()
 
     }
     return m_assemblies;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Process a callback from a child object.
+
+  This is used to maintain "bound" property of the IO variable, so that it is OS_TROE is
+  someone is bound (looking at) the IO variable. This is used to delete disconnected
+  iocDevice objects one they are no longer needed (bound).
+
+****************************************************************************************************
+*/
+eStatus eioDevice::oncallback(
+    eCallbackEvent event,
+    eObject *obj,
+    eObject *appendix)
+{
+    switch (event)
+    {
+        case ECALLBACK_SERVER_BINDING_CONNECTED:
+        case ECALLBACK_SERVER_BINDING_DISCONNECTED:
+            if (obj == m_io ||
+                obj == m_assemblies)
+            {
+                set_bound(event);
+            }
+            return ESTATUS_SUCCESS;
+
+        case ECALLBACK_STATUS_CHANGED:
+            if (obj == m_mblks) {
+                set_connected();
+            }
+            return ESTATUS_SUCCESS;
+
+        default:
+            break;
+    }
+
+    /* If we need to pass callback to parent class.
+     */
+    if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
+        return eContainer::oncallback(event, obj, appendix);
+    }
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Decide value for "bound" flag.
+
+  This function is called by oncallback() when server side binding is established or
+  disconnected. The task of this function is to maintain is_bound flag.
+
+****************************************************************************************************
+*/
+void eioDevice::set_bound(
+    eCallbackEvent event)
+{
+    eObject *item;
+    os_boolean b;
+
+    b = OS_FALSE;
+    for (item = m_io->first(); item && !b; item = item->next()) {
+        if (!item->isinstanceof(ECLASSID_EIO_VARIABLE)) continue;
+        b = item->propertyl(EIOP_BOUND);
+    }
+    for (item = m_assemblies->first(); item && !b; item = item->next()) {
+        if (!item->isinstanceof(ECLASSID_EIO_ASSEMBLY)) continue;
+        b = item->propertyl(EIOP_BOUND);
+    }
+
+    /*
+    if (!b) b = is_bound();
+     */
+
+    if (b != m_bound) {
+        setpropertyl(EIOP_BOUND, b);
+        // gp = grandparent();
+        // if (gp) gp->oncallback(event, parent(), OS_NULL);
+    }
+}
+
+
+/**
+****************************************************************************************************
+  Decide value for "connected" flag.
+****************************************************************************************************
+*/
+void eioDevice::set_connected()
+{
+    eObject *item;
+    os_boolean connected;
+
+    connected = OS_FALSE;
+    for (item = m_mblks->first(); item && !connected; item = item->next()) {
+        if (!item->isinstanceof(ECLASSID_EIO_MBLK)) continue;
+        connected = item->propertyl(EIOP_CONNECTED);
+    }
+
+    if (connected != m_connected) {
+        setpropertyl(EIOP_CONNECTED, connected);
+    }
 }

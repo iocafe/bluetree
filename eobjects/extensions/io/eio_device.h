@@ -57,6 +57,19 @@ public:
         eVariable *x,
         os_int flags);
 
+    /* Get value of simple property.
+     */
+    virtual eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
+
+    /* Process a callback from a child object.
+     */
+    eStatus oncallback(
+        eCallbackEvent event,
+        eObject *obj,
+        eObject *appendix);
+
     /**
     ************************************************************************************************
       IO device specific functions.
@@ -79,9 +92,14 @@ protected:
     ************************************************************************************************
     */
 
-    /* Flags the peristent object changed (needs to be saved).
+    /* Decide value for "bound" flag.
      */
-    // void touch();
+    void set_bound(
+        eCallbackEvent event);
+
+    /* Decide value for "connected" flag.
+     */
+    void set_connected();
 
     /**
     ************************************************************************************************
@@ -91,6 +109,15 @@ protected:
     eContainer *m_mblks;
     eContainer *m_io;
     eContainer *m_assemblies;
+
+    /* Someone is bound to (looking at) this device.
+     */
+    os_boolean m_bound;
+
+    /* This object is connected to IOCOM device.
+     */
+    os_boolean m_connected;
+
 };
 
 #endif

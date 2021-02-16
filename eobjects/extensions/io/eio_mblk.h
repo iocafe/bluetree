@@ -61,6 +61,11 @@ public:
         eVariable *x,
         os_int flags);
 
+    /* Get value of simple property.
+     */
+    virtual eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
 
     /**
     ************************************************************************************************
@@ -84,6 +89,8 @@ protected:
       Internal functions.
     ************************************************************************************************
     */
+    void set_connected(
+        os_boolean connected);
 
     static void callback(
         struct iocHandle *handle,
@@ -99,11 +106,13 @@ protected:
     */
     eioRoot *m_eio_root;
     iocHandle m_handle;
-    os_boolean m_handle_set;
-
     os_short m_mblk_flags;       /* Memory block flags, bit fields: IOC_MBLK_DOWN, IOC_MBLK_UP. */
+    os_boolean m_handle_set;
+    os_boolean m_connected;      /* Memory block is connected to IO device. */
 
     eContainer *m_esignals;
+
+
 };
 
 #endif

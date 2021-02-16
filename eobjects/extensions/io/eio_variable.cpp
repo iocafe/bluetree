@@ -163,8 +163,8 @@ eStatus eioVariable::oncallback(
     {
         case ECALLBACK_SERVER_BINDING_CONNECTED:
         case ECALLBACK_SERVER_BINDING_DISCONNECTED:
-            set_bound();
-            break;
+            set_bound(event);
+            return ESTATUS_SUCCESS;
 
         default:
             break;
@@ -190,13 +190,17 @@ eStatus eioVariable::oncallback(
 
 ****************************************************************************************************
 */
-void eioVariable::set_bound()
+void eioVariable::set_bound(
+    eCallbackEvent event)
 {
     os_boolean b;
+    eObject *gp;
 
     b = is_bound();
     if (b != m_bound) {
         setpropertyl(EIOP_BOUND, b);
+        gp = grandparent();
+        if (gp) gp->oncallback(event, parent(), OS_NULL);
     }
 }
 

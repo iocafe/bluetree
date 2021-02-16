@@ -82,6 +82,13 @@ public:
         os_int propertynr,
         eVariable *x);
 
+    /* Process a callback from a child object.
+     */
+    eStatus oncallback(
+        eCallbackEvent event,
+        eObject *obj,
+        eObject *appendix);
+
     /**
     ************************************************************************************************
       Assembly specific functions.
@@ -96,16 +103,6 @@ public:
 
     virtual void run(os_long ti) = 0;
 
-    /* Process a callback from a child object.
-     */
-    eStatus oncallback(
-        eCallbackEvent event,
-        eObject *obj,
-        eObject *appendix);
-
-    /* Decide value for "bound" flag.
-     */
-    void set_bound();
 
 protected:
     /**
@@ -114,6 +111,10 @@ protected:
     ************************************************************************************************
     */
 
+    /* Decide value for "bound" flag.
+     */
+    void set_bound(
+        eCallbackEvent event);
 
     /**
     ************************************************************************************************
@@ -121,8 +122,9 @@ protected:
     ************************************************************************************************
     */
 
+    /* Someone is bound to (looking at) this assembly.
+     */
     os_boolean m_bound;
-
 };
 
 #endif
