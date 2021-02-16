@@ -30,8 +30,6 @@ eioVariable::eioVariable(
     m_down_ref = OS_NULL;
     m_my_own_change = 0;
     m_value_set_by_user = OS_FALSE;
-    m_state_bits = 0;
-    m_timestamp = 0;
     m_bound = OS_FALSE;
 }
 
@@ -89,31 +87,13 @@ eStatus eioVariable::onpropertychange(
     os_int flags)
 {
     eStatus s;
-    os_long tstamp;
-    os_int sbits;
 
     switch (propertynr)
     {
-        case EVARP_SBITS:
-            m_state_bits = x->getl();
-            break;
-
-        case EVARP_TSTAMP:
-            m_timestamp = x->getl();
-            break;
-
         case EVARP_VALUE:
             m_value_set_by_user = !m_my_own_change;
-            sbits = x->sbits();
-            tstamp = x->tstamp();
             s = eVariable::onpropertychange(propertynr, x, flags);
 
-            if (sbits != m_state_bits) {
-                setpropertyl(EVARP_SBITS, sbits);
-            }
-            if (tstamp != m_timestamp) {
-                setpropertyl(EVARP_TSTAMP, tstamp);
-            }
             if (m_value_set_by_user) {
                 down();
             }
@@ -152,14 +132,6 @@ eStatus eioVariable::simpleproperty(
 {
     switch (propertynr)
     {
-        case EVARP_SBITS:
-            x->setl(m_state_bits);
-            break;
-
-        case EVARP_TSTAMP:
-            x->setl(m_timestamp);
-            break;
-
         case EIOP_BOUND:
             x->setl(m_bound);
             break;

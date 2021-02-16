@@ -105,8 +105,6 @@ protected:
     */
     ePointer *m_down_ref;
 
-    os_int m_state_bits;
-    os_long m_timestamp;
     os_boolean m_bound;
     os_boolean m_value_set_by_user;
     os_short m_my_own_change;
