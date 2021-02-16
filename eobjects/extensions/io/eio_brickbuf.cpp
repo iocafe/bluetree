@@ -585,16 +585,22 @@ void eioBrickBuffer::send_open_info(
 {
     eContainer *reply;
     eVariable *item, tmp;
-    eName *name;
-    eioDevice *device;
+    // eName *name;
+    // eioDevice *device;
 
-    device = eioDevice::cast(grandparent());
+    /* Brick buffer title text has device name and brick buffer name.
+     */
+    /* device = eioDevice::cast(grandparent());
     name = device->primaryname();
     if (name) {
         tmp = *name;
         tmp += " ";
     }
-    tmp += "MYCAMERA";
+    name = primaryname();
+    if (name) {
+        tmp += *name;
+    } */
+    propertyv(EVARP_TEXT, &tmp);
 
     /* Show properties regardless of command.
      */

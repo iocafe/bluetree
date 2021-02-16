@@ -430,14 +430,21 @@ void eioRoot::new_assembly(
     assembly = eioAssembly::cast(assemblies->byname(prm->name));
     delete assembly;
 
-    if (!os_strcmp(prm->type_str, "cam_flat") || 1)
+    if (!os_strcmp(prm->type_str, "cam_flat") ||
+        !os_strcmp(prm->type_str, "cam_ring") ||
+        !os_strcmp(prm->type_str, "lcam_flat") ||
+        !os_strcmp(prm->type_str, "lcam_ring"))
     {
         assembly = new eioBrickBuffer(assemblies);
     }
+    else {
+        osal_debug_error_str("Unknown assembly type: ", prm->type_str);
+        return;
+    }
 
-    tmp = prm->name;
+    tmp = device_id;
     tmp += " ";
-    tmp += device_id;
+    tmp += prm->name;
     assembly->setpropertyv(EVARP_TEXT, &tmp);
     assembly->addname(prm->name);
     assembly->setup(prm, m_iocom_root);
