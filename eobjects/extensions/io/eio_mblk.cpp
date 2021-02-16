@@ -183,7 +183,7 @@ void eioMblk::connected(
 
     /* Mark connected.
      */
-    set_connected(OS_TRUE);
+    setpropertyl(EIOP_CONNECTED, OS_TRUE);
 }
 
 
@@ -201,25 +201,7 @@ void eioMblk::disconnected(
         m_handle_set = OS_FALSE;
     }
 
-    set_connected(OS_FALSE);
-}
-
-
-/**
-****************************************************************************************************
-  Decide value for "connected" flag.
-****************************************************************************************************
-*/
-void eioMblk::set_connected(
-    os_boolean connected)
-{
-    eObject *gp;
-
-    if (connected != m_connected) {
-        setpropertyl(EIOP_CONNECTED, connected);
-        gp = grandparent();
-        if (gp) gp->oncallback(ECALLBACK_STATUS_CHANGED, parent(), OS_NULL);
-    }
+    setpropertyl(EIOP_CONNECTED, OS_FALSE);
 }
 
 

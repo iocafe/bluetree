@@ -89,9 +89,6 @@ protected:
       Internal functions.
     ************************************************************************************************
     */
-    void set_connected(
-        os_boolean connected);
-
     static void callback(
         struct iocHandle *handle,
         os_int start_addr,

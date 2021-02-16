@@ -97,10 +97,6 @@ protected:
     void set_bound(
         eCallbackEvent event);
 
-    /* Decide value for "connected" flag.
-     */
-    void set_connected();
-
     /**
     ************************************************************************************************
       Member variables

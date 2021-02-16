@@ -291,12 +291,6 @@ eStatus eioDevice::oncallback(
             }
             return ESTATUS_SUCCESS;
 
-        case ECALLBACK_STATUS_CHANGED:
-            if (obj == m_mblks) {
-                set_connected();
-            }
-            return ESTATUS_SUCCESS;
-
         default:
             break;
     }
@@ -344,27 +338,5 @@ void eioDevice::set_bound(
         setpropertyl(EIOP_BOUND, b);
         // gp = grandparent();
         // if (gp) gp->oncallback(event, parent(), OS_NULL);
-    }
-}
-
-
-/**
-****************************************************************************************************
-  Decide value for "connected" flag.
-****************************************************************************************************
-*/
-void eioDevice::set_connected()
-{
-    eObject *item;
-    os_boolean connected;
-
-    connected = OS_FALSE;
-    for (item = m_mblks->first(); item && !connected; item = item->next()) {
-        if (!item->isinstanceof(ECLASSID_EIO_MBLK)) continue;
-        connected = item->propertyl(EIOP_CONNECTED);
-    }
-
-    if (connected != m_connected) {
-        setpropertyl(EIOP_CONNECTED, connected);
     }
 }
