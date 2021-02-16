@@ -32,6 +32,7 @@ eioVariable::eioVariable(
     m_value_set_by_user = OS_FALSE;
     m_state_bits = 0;
     m_timestamp = 0;
+    m_bound = OS_FALSE;
 }
 
 
@@ -58,6 +59,7 @@ void eioVariable::setupclass()
     addproperty(cls, EVARP_SBITS, evarp_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
     v = addproperty(cls, EVARP_TSTAMP, evarp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
     v->setpropertys(EVARP_ATTR, "tstamp=\"yy,msec\"");
+    addpropertyb(cls, EIOP_BOUND, eiop_bound, "bound", EPRO_SIMPLE);
     propertysetdone(cls);
     os_unlock();
 }
@@ -72,10 +74,6 @@ void eioVariable::setupclass()
   property is flagged with EPRO_NOONPRCH.
   If property is flagged as EPRO_SIMPLE, this function shuold save the property value
   in class members and and return it when simpleproperty() is called.
-
-  Notice for change logging: Previous value is still valid when this function is called.
-  You can get the old value by calling property() function inside onpropertychange()
-  function.
 
   @param   propertynr Property number of changed property.
   @param   x Variable containing the new value.
@@ -121,6 +119,10 @@ eStatus eioVariable::onpropertychange(
             }
             return s;
 
+        case EIOP_BOUND:
+            m_bound = (os_boolean)x->getl();
+            break;
+
         default:
             return eVariable::onpropertychange(propertynr, x, flags);
     }
@@ -158,10 +160,72 @@ eStatus eioVariable::simpleproperty(
             x->setl(m_timestamp);
             break;
 
+        case EIOP_BOUND:
+            x->setl(m_bound);
+            break;
+
         default:
             return eVariable::simpleproperty(propertynr, x);
     }
     return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Process a callback from a child object.
+
+  This is used to maintain "bound" property of the IO variable, so that it is OS_TROE is
+  someone is bound (looking at) the IO variable. This is used to delete disconnected
+  iocDevice objects one they are no longer needed (bound).
+
+****************************************************************************************************
+*/
+eStatus eioVariable::oncallback(
+    eCallbackEvent event,
+    eObject *obj,
+    eObject *appendix)
+{
+    switch (event)
+    {
+        case ECALLBACK_SERVER_BINDING_CONNECTED:
+        case ECALLBACK_SERVER_BINDING_DISCONNECTED:
+            set_bound();
+            break;
+
+        default:
+            break;
+    }
+
+    /* If we need to pass callback to parent class.
+     */
+    if (flags() & (EOBJ_PERSISTENT_CALLBACK|EOBJ_TEMPORARY_CALLBACK)) {
+        eVariable::oncallback(event, obj, appendix);
+    }
+
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Decide value for "bound" flag.
+
+  This function is called by oncallback() when server side binding is established or
+  disconnected. The task of this function is to maintain is_bound flag.
+
+****************************************************************************************************
+*/
+void eioVariable::set_bound()
+{
+    os_boolean b;
+
+    b = is_bound();
+    if (b != m_bound) {
+        setpropertyl(EIOP_BOUND, b);
+    }
 }
 
 

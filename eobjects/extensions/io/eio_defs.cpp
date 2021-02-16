@@ -18,4 +18,5 @@
 /* Property names.
  */
 const os_char
-    eiop_connected[] = "connected";
+    eiop_connected[] = "connected",
+    eiop_bound[] = "bound";

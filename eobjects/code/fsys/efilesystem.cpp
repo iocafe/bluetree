@@ -174,7 +174,7 @@ eStatus eFileSystem::onpropertychange(
             break;
 
         default:
-            return eObject::onpropertychange(propertynr, x, flags);
+            return eThread::onpropertychange(propertynr, x, flags);
     }
 
     return ESTATUS_SUCCESS;
@@ -207,7 +207,7 @@ eStatus eFileSystem::simpleproperty(
             break;
 
         default:
-            return eObject::simpleproperty(propertynr, x);
+            return eThread::simpleproperty(propertynr, x);
     }
     return ESTATUS_SUCCESS;
 }

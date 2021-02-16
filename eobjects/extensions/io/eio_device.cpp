@@ -70,10 +70,6 @@ void eioDevice::setupclass()
   If property is flagged as EPRO_SIMPLE, this function shuold save the property value
   in class members and and return it when simpleproperty() is called.
 
-  Notice for change logging: Previous value is still valid when this function is called.
-  You can get the old value by calling property() function inside onpropertychange()
-  function.
-
   @param   propertynr Property number of changed property.
   @param   x Variable containing the new value.
   @param   flags

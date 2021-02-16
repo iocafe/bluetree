@@ -269,8 +269,6 @@ ePropertyBinding *eObject::firstpb(
     eContainer *bindings;
     eHandle *h;
 
-    /* Get or create bindings container.
-     */
     bindings = firstc(EOID_BINDINGS);
     if (bindings == OS_NULL) {
         return OS_NULL;
@@ -309,8 +307,6 @@ eRowSetBinding *eObject::firstrb(
     eContainer *bindings;
     eHandle *h;
 
-    /* Get or create bindings container.
-     */
     bindings = firstc(EOID_BINDINGS);
     if (bindings == OS_NULL) {
         return OS_NULL;
@@ -348,11 +344,9 @@ os_boolean eObject::is_bound()
     ePropertyBinding *binding;
     eHandle *h;
 
-    /* Get or create bindings container.
-     */
     bindings = firstc(EOID_BINDINGS);
     if (bindings == OS_NULL) {
-        return OS_NULL;
+        return OS_FALSE;
     }
 
     h = bindings->mm_handle->first(EOID_CHILD);
@@ -360,7 +354,9 @@ os_boolean eObject::is_bound()
     {
         if (h->m_object->classid() == ECLASSID_PROPERTY_BINDING) {
             binding = ePropertyBinding::cast(h->m_object);
-            if ((binding->bflags() & EBIND_CLIENT) == 0) {
+            if ((binding->bflags() & EBIND_CLIENT) == 0 &&
+                binding->state() != E_BINDING_UNUSED)
+            {
                 return OS_TRUE;
             }
         }

@@ -145,6 +145,13 @@ public:
         return m_bflags;
     }
 
+    /* Get binding state.
+     */
+    inline os_int state()
+    {
+        return m_state;
+    }
+
     /* Get bind path.
      */
     inline const os_char *bindpath() {return m_bindpath; }

@@ -69,6 +69,19 @@ public:
      */
     static void setupclass();
 
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
+    /* Get value of simple property.
+     */
+    virtual eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
+
     /**
     ************************************************************************************************
       Assembly specific functions.
@@ -83,6 +96,16 @@ public:
 
     virtual void run(os_long ti) = 0;
 
+    /* Process a callback from a child object.
+     */
+    eStatus oncallback(
+        eCallbackEvent event,
+        eObject *obj,
+        eObject *appendix);
+
+    /* Decide value for "bound" flag.
+     */
+    void set_bound();
 
 protected:
     /**
@@ -97,6 +120,9 @@ protected:
       Member variables
     ************************************************************************************************
     */
+
+    os_boolean m_bound;
+
 };
 
 #endif

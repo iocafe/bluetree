@@ -67,6 +67,7 @@ void eioBrickBuffer::setupclass()
     eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioBrickBuffer", ECLASSID_EIO_ASSEMBLY);
     addpropertys(cls, EVARP_TEXT, evarp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EVARP_VALUE, evarp_value, "value", EPRO_SIMPLE|EPRO_NOONPRCH);
+    addpropertyb(cls, EIOP_BOUND, eiop_bound, "bound", EPRO_SIMPLE);
     propertysetdone(cls);
 
     propertysetdone(cls);
@@ -140,7 +141,7 @@ eStatus eioBrickBuffer::simpleproperty(
             break;
 
         default:
-            return eObject::simpleproperty(propertynr, x);
+            return eioAssembly::simpleproperty(propertynr, x);
     }
     return ESTATUS_SUCCESS;
 }
@@ -560,7 +561,7 @@ void eioBrickBuffer::object_info(
     eSet *appendix,
     const os_char *target)
 {
-    eVariable::object_info(item, name, appendix, target);
+    eioAssembly::object_info(item, name, appendix, target);
     appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_CAMERA);
 }
 

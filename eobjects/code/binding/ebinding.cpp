@@ -301,6 +301,15 @@ void eBinding::srvbind_base(
     /* Set binding state ok.
      */
     m_state = E_BINDING_OK;
+
+    /* Do "binding disconnected" callback regardless. Here we do not care a
+     */
+    if ((m_bflags & EBIND_CLIENT) == 0) {
+        eObject *obj = grandparent();
+        if (obj) {
+            obj->oncallback(ECALLBACK_SERVER_BINDING_CONNECTED, this, OS_NULL);
+        }
+    }
 }
 
 
@@ -496,7 +505,23 @@ void eBinding::disconnect(
 
     /* Set unused state and clear changed bit and ack counter.
      */
-    m_state = E_BINDING_UNUSED;
     m_bflags &= ~(EBIND_CHANGED|EBIND_INTERTHREAD);
     m_ackcount = 0;
+
+    /* Set unused state and oncallback of the bound object. Do "binding disconnected"
+       callback regardless of object flags.
+     */
+    if (m_state != E_BINDING_UNUSED)
+    {
+        m_state = E_BINDING_UNUSED;
+
+        /* Do "binding disconnected" callback regardless. Here we do not care a
+         */
+        if ((m_bflags & EBIND_CLIENT) == 0) {
+            eObject *obj = grandparent();
+            if (obj) {
+                obj->oncallback(ECALLBACK_SERVER_BINDING_DISCONNECTED, this, OS_NULL);
+            }
+        }
+    }
 }

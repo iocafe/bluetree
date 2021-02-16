@@ -85,6 +85,17 @@ public:
 
     void down();
 
+    /* Process a callback from a child object.
+     */
+    eStatus oncallback(
+        eCallbackEvent event,
+        eObject *obj,
+        eObject *appendix);
+
+    /* Decide value for "bound" flag.
+     */
+    void set_bound();
+
 protected:
 
     /**
@@ -96,9 +107,9 @@ protected:
 
     os_int m_state_bits;
     os_long m_timestamp;
-
-    os_short m_my_own_change;
+    os_boolean m_bound;
     os_boolean m_value_set_by_user;
+    os_short m_my_own_change;
 };
 
 #endif

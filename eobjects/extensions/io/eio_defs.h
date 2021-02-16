@@ -21,11 +21,13 @@
 /* Property numbers.
  */
 #define EIOP_CONNECTED 31
+#define EIOP_BOUND 32
 
 /* Property names.
  */
 extern const os_char
-    eiop_connected[];
+    eiop_connected[],
+    eiop_bound[];
 
 #endif
 
