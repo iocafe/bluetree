@@ -148,7 +148,7 @@ protected:
     iocIdentifiers m_exp_ids;
     iocIdentifiers m_imp_ids;
 
-    os_char m_prefix[IOC_SIGNAL_NAME_SZ];
+    os_char m_prefix[IOC_NAME_SZ];
 
     /** The "is_device" flag indicates that this python code is acting as device end
         of brick data transfer, and the other end is controlling the transfer.

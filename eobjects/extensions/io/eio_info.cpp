@@ -52,6 +52,7 @@ typedef struct eioInfoParserState
     const os_char *assembly_name;
     const os_char *exp_str;
     const os_char *imp_str;
+    os_long timeout_ms;
 
     /** Trick to get memory block name before processing signals. "groups" position
         is stored here to return to signals after memory block name has been received.
@@ -168,7 +169,7 @@ eStatus eioRoot::process_info_block(
     os_boolean is_signal_block, is_mblk_block, is_assembly_block;
     os_char array_tag_buf[16];
 
-    /* If this is beginning of signal block.
+    /* If this is beginning of a block.
      */
     is_signal_block = OS_FALSE;
     is_mblk_block = OS_FALSE;
@@ -197,6 +198,9 @@ eStatus eioRoot::process_info_block(
             state->sinfo.addr = 0;
             state->max_addr = 0;
             state->current_type_id = OS_USHORT;
+            state->exp_str = OS_NULL;
+            state->imp_str = OS_NULL;
+            state->timeout_ms = 0;
         }
     }
 
@@ -313,7 +317,10 @@ eStatus eioRoot::process_info_block(
                     {
                         state->sinfo.ncolumns = (os_int)item.value.l;
                     }
-
+                    else if (!os_strcmp(state->tag, "timeout"))
+                    {
+                        state->timeout_ms = (os_int)item.value.l;
+                    }
                 }
                 break;
 
@@ -508,14 +515,14 @@ eStatus eioRoot::new_assembly_by_info(
 {
     eioAssemblyParams prm;
     eVariable device_id;
+    const os_char *q;
 
     os_memclear(&prm, sizeof(prm));
     prm.name = state->assembly_name;
     prm.type_str = state->signal_type_str;
     prm.exp_str = state->exp_str;
     prm.imp_str = state->imp_str;
-    prm.timeout_ms = 0; /* This could come from JSON. 0 selects default timeout. */
-    prm.prefix = "rec_"; /* This could come from JSON. */
+    prm.timeout_ms = state->timeout_ms;
 
     device_id = state->minfo.device_name;
     device_id += state->minfo.device_nr;

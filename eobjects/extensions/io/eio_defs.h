@@ -25,7 +25,6 @@
 #define EIOP_ASSEMBLY_TYPE 35
 #define EIOP_ASSEMBLY_EXP 36
 #define EIOP_ASSEMBLY_IMP 37
-#define EIOP_ASSEMBLY_PREFIX 38
 #define EIOP_ASSEMBLY_TIMEOUT 39
 
 /* Property names.
@@ -36,7 +35,6 @@ extern const os_char
     eiop_assembly_type[],
     eiop_assembly_exp[],
     eiop_assembly_imp[],
-    eiop_assembly_prefix[],
     eiop_assembly_timeout[];
 
 #endif

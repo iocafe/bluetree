@@ -67,7 +67,6 @@ void eioSignalAssembly::setupclass()
     addpropertys(cls, EIOP_ASSEMBLY_TYPE, eiop_assembly_type, "assembly type", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EIOP_ASSEMBLY_EXP, eiop_assembly_exp, "exp", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EIOP_ASSEMBLY_IMP, eiop_assembly_imp, "imp", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addpropertys(cls, EIOP_ASSEMBLY_PREFIX, eiop_assembly_prefix, "prefix", EPRO_PERSISTENT|EPRO_NOONPRCH);
     v = addpropertyl(cls, EIOP_ASSEMBLY_TIMEOUT, eiop_assembly_timeout, "timeout", EPRO_PERSISTENT|EPRO_NOONPRCH);
     v->setpropertys(EVARP_UNIT, "ms");
     propertysetdone(cls);
@@ -165,7 +164,6 @@ eStatus eioSignalAssembly::setup(
     setpropertys(EIOP_ASSEMBLY_TYPE, prm->type_str);
     setpropertys(EIOP_ASSEMBLY_EXP, prm->exp_str);
     setpropertys(EIOP_ASSEMBLY_IMP, prm->imp_str);
-    setpropertys(EIOP_ASSEMBLY_PREFIX, prm->prefix);
     if (prm->timeout_ms) {
         setpropertyl(EIOP_ASSEMBLY_TIMEOUT, prm->timeout_ms);
     }

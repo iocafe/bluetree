@@ -23,5 +23,4 @@ const os_char
     eiop_assembly_type[] = "atype",
     eiop_assembly_exp[] = "exp",
     eiop_assembly_imp[] = "imp",
-    eiop_assembly_prefix[] = "prefix",
     eiop_assembly_timeout[] = "timeout";

@@ -72,7 +72,6 @@ void eioBrickBuffer::setupclass()
     addpropertys(cls, EIOP_ASSEMBLY_TYPE, eiop_assembly_type, "assembly type", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EIOP_ASSEMBLY_EXP, eiop_assembly_exp, "exp", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EIOP_ASSEMBLY_IMP, eiop_assembly_imp, "imp", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addpropertys(cls, EIOP_ASSEMBLY_PREFIX, eiop_assembly_prefix, "prefix", EPRO_PERSISTENT|EPRO_NOONPRCH);
     v = addpropertyl(cls, EIOP_ASSEMBLY_TIMEOUT, eiop_assembly_timeout, "timeout", EPRO_PERSISTENT|EPRO_NOONPRCH);
     v->setpropertys(EVARP_UNIT, "ms");
     propertysetdone(cls);
@@ -178,7 +177,6 @@ eStatus eioBrickBuffer::setup(
     setpropertys(EIOP_ASSEMBLY_TYPE, prm->type_str);
     setpropertys(EIOP_ASSEMBLY_EXP, prm->exp_str);
     setpropertys(EIOP_ASSEMBLY_IMP, prm->imp_str);
-    setpropertys(EIOP_ASSEMBLY_PREFIX, prm->prefix);
     if (prm->timeout_ms) {
         setpropertyl(EIOP_ASSEMBLY_TIMEOUT, prm->timeout_ms);
     }
@@ -229,7 +227,10 @@ eStatus eioBrickBuffer::setup(
     ioc_iopath_to_identifiers(iocom_root, &m_exp_ids, prm->exp_str, IOC_EXPECT_MEMORY_BLOCK);
     ioc_iopath_to_identifiers(iocom_root, &m_imp_ids, prm->imp_str, IOC_EXPECT_MEMORY_BLOCK);
 
-    os_strncpy(m_prefix, prm->prefix, sizeof(m_prefix));
+    p = os_strechr(prm->exp_str, '.');
+    if (p) p++;
+    else p = "rec_";
+    os_strncpy(m_prefix, p, sizeof(m_prefix));
 
     /* Initialize brick buffer (does not allocate any memory yet)
     */

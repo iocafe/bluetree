@@ -32,7 +32,6 @@ typedef struct eioAssemblyParams
     const os_char *type_str;
     const os_char *exp_str;
     const os_char *imp_str;
-    const os_char *prefix;
     os_long timeout_ms;
 }
 eioAssemblyParams;

@@ -90,11 +90,6 @@ void eStrBuffer::setv(
         allocate(sz);
         os_memcpy(m_buf, ptr, sz);
     }
-
-    m_state_bits = value->sbits();
-if (!m_state_bits) {
-int i = 11;
-}
 }
 
 void eStrBuffer::appends(
