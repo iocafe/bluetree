@@ -325,7 +325,6 @@ void eioSignalAssembly::send_open_info(
     esignals = mblk->esignals();
     if (esignals == OS_NULL) return;
 
-
     for (name = esignals->ns_first(); name; name = name->ns_next(OS_FALSE)) {
         p = name->gets();
         if (os_strncmp(p, prefix, prefix_len)) continue;
