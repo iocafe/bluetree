@@ -360,6 +360,7 @@ void eioProtocol::deactivate_connection(
     if (!p->isrunning()) return;
 
     ioc_terminate_connection_thread(p->con());
+    p->set_isrunning(OS_FALSE);
 }
 
 

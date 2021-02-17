@@ -24,6 +24,7 @@
 #include "extensions/io/eio_group.h"
 #include "extensions/io/eio_assembly.h"
 #include "extensions/io/eio_brickbuf.h"
+#include "extensions/io/eio_signalassembly.h"
 #include "extensions/io/eio_device.h"
 #include "extensions/io/eio_network.h"
 #include "extensions/io/eio_root.h"

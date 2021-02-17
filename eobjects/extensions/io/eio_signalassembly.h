@@ -1,7 +1,7 @@
 /**
 
-  @file    eio_brickbuf.h
-  @brief   "Brick" data transfer, like camera images, etc.
+  @file    eio_signalassembly.h
+  @brief   Collection of signals as assembly, like game controller.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -14,41 +14,41 @@
 ****************************************************************************************************
 */
 #pragma once
-#ifndef EIO_BRICKBUF_H_
-#define EIO_BRICKBUF_H_
+#ifndef EIO_SIGNALASSEMBLY_H_
+#define EIO_SIGNALASSEMBLY_H_
 #include "extensions/io/eio.h"
 
 /**
 ****************************************************************************************************
-  eioBrickBuffer is like a box of objects.
+  eioSignalAssembly is like a box of objects.
 ****************************************************************************************************
 */
-class eioBrickBuffer : public eioAssembly
+class eioSignalAssembly : public eioAssembly
 {
 public:
     /* Constructor.
      */
-    eioBrickBuffer(
+    eioSignalAssembly(
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
      */
-    virtual ~eioBrickBuffer();
+    virtual ~eioSignalAssembly();
 
-    /* Casting eObject pointer to eioBrickBuffer pointer.
+    /* Casting eObject pointer to eioSignalAssembly pointer.
      */
-    inline static eioBrickBuffer *cast(
+    inline static eioSignalAssembly *cast(
         eObject *o)
     {
-        e_assert_type(o, ECLASSID_EIO_BRICK_BUFFER)
-        return (eioBrickBuffer*)o;
+        e_assert_type(o, ECLASSID_EIO_SIGNAL_ASSEMBLY)
+        return (eioSignalAssembly*)o;
     }
 
     /* Get class identifier.
      */
-    virtual os_int classid() {return ECLASSID_EIO_BRICK_BUFFER; }
+    virtual os_int classid() {return ECLASSID_EIO_SIGNAL_ASSEMBLY; }
 
     /* Static function to add class to propertysets and class list.
      */

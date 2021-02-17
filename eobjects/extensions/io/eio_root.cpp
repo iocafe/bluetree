@@ -430,16 +430,13 @@ void eioRoot::new_assembly(
     assembly = eioAssembly::cast(assemblies->byname(prm->name));
     delete assembly;
 
-    if (!os_strcmp(prm->type_str, "cam_flat") ||
-        !os_strcmp(prm->type_str, "cam_ring") ||
-        !os_strcmp(prm->type_str, "lcam_flat") ||
-        !os_strcmp(prm->type_str, "lcam_ring"))
+    if (os_strstr(prm->type_str, "_flat", OSAL_STRING_DEFAULT) ||
+        os_strstr(prm->type_str, "_ring", OSAL_STRING_DEFAULT))
     {
         assembly = new eioBrickBuffer(assemblies);
     }
     else {
-        osal_debug_error_str("Unknown assembly type: ", prm->type_str);
-        return;
+        assembly = new eioSignalAssembly(assemblies);
     }
 
     tmp = device_id;
@@ -473,6 +470,7 @@ eioRoot *eio_initialize(
     eioSignal::setupclass();
     eioAssembly::setupclass();
     eioBrickBuffer::setupclass();
+    eioSignalAssembly::setupclass();
     eioThread::setupclass();
 
     eio_root = new eioRoot(parent);
