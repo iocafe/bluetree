@@ -82,11 +82,11 @@ public:
 
     /* Check if connection or end point is running.
      */
-    virtual os_boolean isrunning() {return m_isrunning; }
+    virtual os_boolean isrunning(); // {return m_isrunning; }
 
     inline iocEndPoint *epoint() {return &m_iocom.epoint; }
     inline iocConnection *con() {return &m_iocom.con; }
-    inline void set_isrunning(os_boolean running) {m_isrunning = running; }
+    // inline void set_isrunning(os_boolean running) {m_isrunning = running; }
 
 
 protected:
@@ -105,7 +105,7 @@ protected:
     eiocomStateStruct m_iocom;
 
     os_boolean m_is_open;
-    os_boolean m_isrunning;
+    // os_boolean m_isrunning;
 };
 
 

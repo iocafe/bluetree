@@ -43,6 +43,7 @@ eioRoot::eioRoot(
 */
 eioRoot::~eioRoot()
 {
+// Remove root callback
     delete m_run_assemblies;
 }
 

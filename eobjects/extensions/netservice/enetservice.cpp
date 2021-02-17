@@ -184,10 +184,11 @@ void eNetService::finish()
         OSAL_ADD_ERROR_HANDLER|OSAL_SYSTEM_ERROR_HANDLER);
 
     eio_stop_io_thread(m_eio_root);
-    ioc_release_root(&m_iocom_root);
 
     delete m_eio_root;
     m_eio_root = OS_NULL;
+
+    ioc_release_root(&m_iocom_root);
 }
 
 

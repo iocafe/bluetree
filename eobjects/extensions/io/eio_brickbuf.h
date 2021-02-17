@@ -20,7 +20,7 @@
 
 /**
 ****************************************************************************************************
-  eioBrickBuffer is like a box of objects.
+  eioBrickBuffer handles "brick" data transfer to/from device.
 ****************************************************************************************************
 */
 class eioBrickBuffer : public eioAssembly
@@ -79,8 +79,6 @@ public:
         eioAssemblyParams *prm,
         iocRoot *iocom_root);
 
-    eStatus try_finalize_setup();
-
     virtual void run(os_long ti);
 
     eStatus get();
@@ -92,6 +90,8 @@ protected:
       Internal functions.
     ************************************************************************************************
     */
+
+    eStatus try_finalize_setup();
 
     eStatus try_signal_setup(
         iocSignal *sig,

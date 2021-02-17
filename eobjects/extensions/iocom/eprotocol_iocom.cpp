@@ -247,7 +247,7 @@ eProtocolHandle *eioProtocol::new_con_helper(
         if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
     }
 
-    p->set_isrunning(OS_TRUE);
+    // p->set_isrunning(OS_TRUE);
     p->setpropertyi(EPROHANDP_ISOPEN, OS_TRUE);
     return p;
 }
@@ -276,7 +276,7 @@ void eioProtocol::delete_end_point(
     if (!p->isrunning()) return;
 
     ioc_release_end_point(p->epoint());
-    p->set_isrunning(OS_FALSE);
+    // p->set_isrunning(OS_FALSE);
     p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
 }
 
@@ -303,8 +303,12 @@ void eioProtocol::delete_connection(
     p = (eioProtocolHandle*)handle;
     if (!p->isrunning()) return;
 
+    ioc_terminate_connection_thread(p->con());
+    while (p->isrunning()) {
+        os_timeslice();
+    }
     ioc_release_connection(p->con());
-    p->set_isrunning(OS_FALSE);
+    // p->set_isrunning(OS_FALSE);
     p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
 }
 
@@ -360,7 +364,7 @@ void eioProtocol::deactivate_connection(
     if (!p->isrunning()) return;
 
     ioc_terminate_connection_thread(p->con());
-    p->set_isrunning(OS_FALSE);
+    // p->set_isrunning(OS_FALSE);
 }
 
 

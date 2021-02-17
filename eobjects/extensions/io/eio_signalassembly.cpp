@@ -27,8 +27,6 @@ eioSignalAssembly::eioSignalAssembly(
     os_int flags)
     : eioAssembly(parent, oid, flags)
 {
-    m_output = new eVariable(this);
-    clear_member_variables();
     initproperties();
     ns_create();
 }
@@ -41,7 +39,6 @@ eioSignalAssembly::eioSignalAssembly(
 */
 eioSignalAssembly::~eioSignalAssembly()
 {
-    cleanup();
 }
 
 
@@ -60,16 +57,19 @@ eioSignalAssembly::~eioSignalAssembly()
 void eioSignalAssembly::setupclass()
 {
     const os_int cls = ECLASSID_EIO_SIGNAL_ASSEMBLY;
+    eVariable *v;
 
-    /* Add the class to class list.
-     */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioSignalAssembly", ECLASSID_EIO_ASSEMBLY);
     addpropertys(cls, EVARP_TEXT, evarp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EVARP_VALUE, evarp_value, "value", EPRO_SIMPLE|EPRO_NOONPRCH);
     addpropertyb(cls, EIOP_BOUND, eiop_bound, "bound", EPRO_SIMPLE);
-    propertysetdone(cls);
-
+    addpropertys(cls, EIOP_ASSEMBLY_TYPE, eiop_assembly_type, "asm type", EPRO_PERSISTENT|EPRO_NOONPRCH);
+    addpropertys(cls, EIOP_ASSEMBLY_EXP, eiop_assembly_exp, "exp", EPRO_PERSISTENT|EPRO_NOONPRCH);
+    addpropertys(cls, EIOP_ASSEMBLY_IMP, eiop_assembly_imp, "imp", EPRO_PERSISTENT|EPRO_NOONPRCH);
+    addpropertys(cls, EIOP_ASSEMBLY_PREFIX, eiop_assembly_prefix, "prefix", EPRO_PERSISTENT|EPRO_NOONPRCH);
+    v = addpropertyl(cls, EIOP_ASSEMBLY_TIMEOUT, eiop_assembly_timeout, "timeout", EPRO_PERSISTENT|EPRO_NOONPRCH);
+    v->setpropertys(EVARP_UNIT, "ms");
     propertysetdone(cls);
     os_unlock();
 }
@@ -137,7 +137,7 @@ eStatus eioSignalAssembly::simpleproperty(
     switch (propertynr)
     {
         case EVARP_VALUE:
-            x->setv(m_output);
+            // x->setv(m_output);
             break;
 
         default:
@@ -150,7 +150,7 @@ eStatus eioSignalAssembly::simpleproperty(
 /**
 ****************************************************************************************************
 
-  @brief Prepare a newly created brick buffer assembly for use.
+  @brief Prepare a newly created signal assembly assembly for use.
 
   The eioSignalAssembly::setup function...
 
@@ -160,84 +160,15 @@ eStatus eioSignalAssembly::setup(
     eioAssemblyParams *prm,
     iocRoot *iocom_root)
 {
-    iocStreamerSignals sig;
-    eioRoot *root;
-    const char *p;
-
-    /* Start from beginning, clean all.
-     */
-    cleanup();
-
-    /* Determine flags
-     */
-    m_is_device = OS_FALSE;
-    m_from_device = OS_TRUE;
-    m_is_camera = OS_FALSE;
-    p = prm->type_str;
-    if (!os_strcmp(p, "cam_flat")) {
-        m_flat_buffer = OS_TRUE;
-        m_is_camera = OS_TRUE;
+    OSAL_UNUSED(iocom_root);
+    setpropertys(EVARP_TEXT, prm->name);
+    setpropertys(EIOP_ASSEMBLY_TYPE, prm->type_str);
+    setpropertys(EIOP_ASSEMBLY_EXP, prm->exp_str);
+    setpropertys(EIOP_ASSEMBLY_IMP, prm->imp_str);
+    setpropertys(EIOP_ASSEMBLY_PREFIX, prm->prefix);
+    if (prm->timeout_ms) {
+        setpropertyl(EIOP_ASSEMBLY_TIMEOUT, prm->timeout_ms);
     }
-    else if (os_strcmp(p, "lcam_flat")) {
-        m_flat_buffer = OS_TRUE;
-    }
-    else if (!os_strcmp(p, "cam_ring")) {
-        m_flat_buffer = OS_FALSE;
-        m_is_camera = OS_TRUE;
-    }
-    else if (os_strcmp(p, "lcam_right")) {
-        m_flat_buffer = OS_FALSE;
-    }
-    else {
-        osal_debug_error_str("eioSignalAssembly: Unknown assembly type: ", p);
-        return ESTATUS_FAILED;
-    }
-
-    m_sig_cmd.handle = &m_h_imp;
-    m_sig_select.handle = &m_h_imp;
-    m_sig_err.handle = &m_h_exp;
-    m_sig_state.handle = &m_h_exp;
-
-    if (m_from_device) {
-        m_sig_buf.handle = &m_h_exp;
-        m_sig_cs.handle = &m_h_exp;
-        m_sig_head.handle = &m_h_exp;
-        m_sig_tail.handle = &m_h_imp;
-    }
-    else {
-        m_sig_buf.handle = &m_h_imp;
-        m_sig_cs.handle = &m_h_imp;
-        m_sig_head.handle = &m_h_imp;
-        m_sig_tail.handle = &m_h_exp;
-    }
-
-    ioc_iopath_to_identifiers(iocom_root, &m_exp_ids, prm->exp_str, IOC_EXPECT_MEMORY_BLOCK);
-    ioc_iopath_to_identifiers(iocom_root, &m_imp_ids, prm->imp_str, IOC_EXPECT_MEMORY_BLOCK);
-
-    os_strncpy(m_prefix, prm->prefix, sizeof(m_prefix));
-
-    /* Initialize brick buffer (does not allocate any memory yet)
-    */
-    os_memclear(&sig, sizeof(iocStreamerSignals));
-    sig.to_device = !m_from_device;
-    sig.flat_buffer = m_flat_buffer;
-    sig.cmd = &m_sig_cmd;
-    sig.select = &m_sig_select;
-    sig.err = &m_sig_err;
-    sig.cs = &m_sig_cs;
-    sig.state = &m_sig_state;
-    sig.buf = &m_sig_buf;
-    sig.head = &m_sig_head;
-    sig.tail = &m_sig_tail;
-
-    ioc_initialize_brick_buffer(&m_brick_buffer, &sig, iocom_root, prm->timeout_ms,
-        m_is_device ? IOC_BRICK_DEVICE : IOC_BRICK_CONTROLLER);
-
-    root = eioRoot::cast(grandparent()->grandparent());
-    if (root) {
-        root->assembly_to_run_list(this, OS_TRUE);
-    }
-
     return ESTATUS_SUCCESS;
 }
 
@@ -256,7 +187,7 @@ eStatus eioSignalAssembly::setup(
 
 ****************************************************************************************************
 */
-eStatus eioSignalAssembly::try_signal_setup(
+/* eStatus eioSignalAssembly::try_signal_setup(
     iocSignal *sig,
     const os_char *name,
     const os_char *mblk_name)
@@ -292,65 +223,7 @@ eStatus eioSignalAssembly::try_signal_setup(
     if (srchandle->mblk == OS_NULL) return ESTATUS_FAILED;
     ioc_duplicate_handle(handle, srchandle);
     return ESTATUS_SUCCESS;
-}
-
-
-/**
-****************************************************************************************************
-
-  Try to finalize all needed signal structures.
-
-  Lock must be on
-  @return  None.
-
-****************************************************************************************************
-*/
-eStatus eioSignalAssembly::try_finalize_setup()
-{
-    /* If setup is already good. We check state and cmd because they are in different
-       memory blocks and last to be set up.
-     */
-    if (m_sig_state.handle->mblk && m_sig_state.flags &&
-        m_sig_cmd.handle->mblk && m_sig_cmd.flags)
-    {
-        return ESTATUS_SUCCESS;
-    }
-    m_sig_state.flags = 0;
-    m_sig_cmd.flags = 0;
-
-    if (!m_flat_buffer) {
-        if (try_signal_setup(&m_sig_select, "select", m_imp_ids.mblk_name))
-            goto getout;
-    }
-    if (try_signal_setup(&m_sig_err, "err", m_exp_ids.mblk_name)) goto getout;
-
-    if (m_from_device) {
-        if (try_signal_setup(&m_sig_cs, "cs", m_exp_ids.mblk_name)) goto getout;
-        if (try_signal_setup(&m_sig_buf, "buf", m_exp_ids.mblk_name)) goto getout;
-        if (try_signal_setup(&m_sig_head, "head", m_exp_ids.mblk_name)) goto getout;
-        if (!m_flat_buffer) {
-            if (try_signal_setup(&m_sig_tail, "tail", m_imp_ids.mblk_name))
-                goto getout;
-        }
-    }
-    else {
-        if (try_signal_setup(&m_sig_cs, "cs", m_imp_ids.mblk_name)) goto getout;
-        if (try_signal_setup(&m_sig_buf, "buf", m_imp_ids.mblk_name)) goto getout;
-        if (try_signal_setup(&m_sig_head, "head", m_imp_ids.mblk_name)) goto getout;
-        if (!m_flat_buffer) {
-            if (try_signal_setup(&m_sig_tail, "tail", m_exp_ids.mblk_name))
-                goto getout;
-        }
-    }
-
-    if (try_signal_setup(&m_sig_state, "state", m_exp_ids.mblk_name)) goto getout;
-    if (try_signal_setup(&m_sig_cmd, "cmd", m_imp_ids.mblk_name)) goto getout;
-
-    return ESTATUS_SUCCESS;
-
-getout:
-    return ESTATUS_FAILED;
-}
+} */
 
 
 /**
@@ -364,177 +237,11 @@ getout:
 */
 void eioSignalAssembly::run(os_long ti)
 {
-    os_boolean get_data;
-
-    get_data = m_from_device;
-    if (m_is_device) get_data = !get_data;
-
-    if (get_data) {
-        /* Enable or disable reciving data, if someone is bound to the outout.
-         */
-        ioc_brick_set_receive(&m_brick_buffer, is_bound());
-
-        /* Receive data
-         */
-        get();
-    }
 }
 
 
-/**
-****************************************************************************************************
-
-  @brief Get brick from this buffer.
-
-****************************************************************************************************
-*/
-eStatus eioSignalAssembly::get()
-{
-    eBitmap *bitmap;
-    iocBrickHdr *hdr;
-    os_uchar *data, *dst;
-    os_memsz buf_sz, data_sz;
-    osalBitmapFormat format;
-    os_uchar compression;
-    os_int width, height, y;
-    os_int pixel_nbytes, dst_row_nbytes, src_row_nbytes, copy_nbytes;
-    osalStatus s;
-
-    /* Setup all signals, if we have not done that already.
-     */
-    if (try_finalize_setup()) {
-        return ESTATUS_PENDING;
-    }
-
-    /* Receive data, return ESTATUS_SUCCESS if we got no data.
-     */
-    s = ioc_run_brick_receive(&m_brick_buffer);
-    buf_sz = m_brick_buffer.buf_sz;
-    if (s != OSAL_COMPLETED || buf_sz <= (os_memsz)sizeof(iocBrickHdr)) {
-        return ESTATUS_FROM_OSAL_STATUS(s);
-    }
-
-    data = m_brick_buffer.buf + sizeof(iocBrickHdr);
-    data_sz = buf_sz - sizeof(iocBrickHdr);
-    hdr = (iocBrickHdr*)m_brick_buffer.buf;
-
-    format = (osalBitmapFormat)hdr->format;
-    compression = hdr->compression;
-    width = (os_int)ioc_get_brick_hdr_int(hdr->width, IOC_BRICK_DIM_SZ);
-    height = (os_int)ioc_get_brick_hdr_int(hdr->height, IOC_BRICK_DIM_SZ);
-
-    if (m_is_camera) { // camera
-        bitmap = new eBitmap(ETEMPORARY);
-        bitmap->allocate(format, width, height, EBITMAP_NO_NEW_MEMORY_ALLOCATION);
-
-        if (compression == IOC_UNCOMPRESSED)
-        {
-            /* Handle bitmap row alignment when copying.
-             */
-            pixel_nbytes = bitmap->pixel_nbytes();
-            dst_row_nbytes = bitmap->row_nbytes();
-            src_row_nbytes = pixel_nbytes * width;
-            if (pixel_nbytes == 3) {
-                src_row_nbytes = (src_row_nbytes + 1) / 2;
-                src_row_nbytes *= 2;
-            }
-            dst = bitmap->ptr();
-
-            if (src_row_nbytes == dst_row_nbytes) {
-                os_memcpy(dst, data, height * src_row_nbytes);
-            }
-            else {
-                copy_nbytes = dst_row_nbytes;
-                if (src_row_nbytes < copy_nbytes) copy_nbytes = src_row_nbytes;
-
-                for (y = 0; y < height; y++) {
-                    os_memcpy(dst, data, copy_nbytes);
-                    os_memclear(dst + copy_nbytes, dst_row_nbytes - copy_nbytes);
-                    dst += dst_row_nbytes;
-                    data += src_row_nbytes;
-                }
-            }
-        }
-        else if (compression & IOC_JPEG)
-        {
-            bitmap->set_jpeg_data(data, data_sz, OS_FALSE);
-        }
-        else
-        {
-            osal_debug_error_int("unsupported brick compression = ", compression);
-            return ESTATUS_FAILED;
-        }
-
-        /* Set output and forward property value to bindings, if any.
-         */
-        m_output->seto(bitmap, OS_TRUE);
-        forwardproperty(EVARP_VALUE, m_output, OS_NULL, 0);
-    }
-
-    return ESTATUS_SUCCESS;
-}
 
 
-/**
-****************************************************************************************************
-
-  @brief Release all resource allocated for the brick buffer.
-
-  The eioSignalAssembly::cleanup( function...
-
-****************************************************************************************************
-*/
-void eioSignalAssembly::cleanup()
-{
-    ioc_release_brick_buffer(&m_brick_buffer);
-
-    if (m_h_exp.mblk) {
-        ioc_release_handle(&m_h_exp);
-    }
-
-    if (m_h_imp.mblk) {
-        ioc_release_handle(&m_h_imp);
-    }
-
-    clear_member_variables();
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Clear all brick buffer member variables.
-
-  The eioSignalAssembly::cleanup( function...
-
-****************************************************************************************************
-*/
-void eioSignalAssembly::clear_member_variables()
-{
-    os_memclear(&m_brick_buffer, sizeof(m_brick_buffer));
-
-    os_memclear(&m_sig_cmd, sizeof(m_sig_cmd));
-    os_memclear(&m_sig_select, sizeof(m_sig_select));
-    os_memclear(&m_sig_err, sizeof(m_sig_err));
-    os_memclear(&m_sig_cs, sizeof(m_sig_cs));
-    os_memclear(&m_sig_buf, sizeof(m_sig_buf));
-    os_memclear(&m_sig_head, sizeof(m_sig_head));
-    os_memclear(&m_sig_tail, sizeof(m_sig_tail));
-    os_memclear(&m_sig_state, sizeof(m_sig_state));
-
-    os_memclear(&m_h_exp, sizeof(m_h_exp));
-    os_memclear(&m_h_imp, sizeof(m_h_imp));
-
-    os_memclear(&m_exp_ids, sizeof(m_exp_ids));
-    os_memclear(&m_imp_ids, sizeof(m_imp_ids));
-
-    os_memclear(m_prefix, sizeof(m_prefix));
-
-    m_is_device = OS_FALSE;
-    m_from_device = OS_TRUE;
-    m_flat_buffer = OS_TRUE;
-    m_is_camera = OS_FALSE;
-}
 
 
 /**
@@ -588,7 +295,7 @@ void eioSignalAssembly::send_open_info(
     // eName *name;
     // eioDevice *device;
 
-    /* Brick buffer title text has device name and brick buffer name.
+    /* Brick buffer title text has device name and signal assembly name.
      */
     /* device = eioDevice::cast(grandparent());
     name = device->primaryname();

@@ -29,7 +29,7 @@ eioProtocolHandle::eioProtocolHandle(
 {
     os_memclear(&m_iocom, sizeof(m_iocom)); //  eiocomStateStruct m_iocom;
     m_is_open = OS_FALSE;
-    m_isrunning = OS_FALSE;
+    // m_isrunning = OS_FALSE;
 }
 
 
@@ -102,3 +102,9 @@ eStatus eioProtocolHandle::onpropertychange(
 
     return eObject::onpropertychange(propertynr, x, flags);
 }
+
+os_boolean eioProtocolHandle::isrunning()
+{
+    return m_iocom.con.worker.thread_running;
+}
+

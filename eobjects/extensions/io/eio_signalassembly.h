@@ -20,7 +20,7 @@
 
 /**
 ****************************************************************************************************
-  eioSignalAssembly is like a box of objects.
+  eioSignalAssembly is marker fo collection os signals.
 ****************************************************************************************************
 */
 class eioSignalAssembly : public eioAssembly
@@ -73,18 +73,13 @@ public:
     ************************************************************************************************
     */
 
-    /* Prepare a newly created brick buffer assembly for use.
+    /* Prepare a newly created signal for use.
      */
     virtual eStatus setup(
         eioAssemblyParams *prm,
         iocRoot *iocom_root);
 
-    eStatus try_finalize_setup();
-
     virtual void run(os_long ti);
-
-    eStatus get();
-
 
 protected:
     /**
@@ -93,18 +88,11 @@ protected:
     ************************************************************************************************
     */
 
-    eStatus try_signal_setup(
+    /* eStatus try_signal_setup(
         iocSignal *sig,
         const os_char *name,
-        const os_char *mblk_name);
+        const os_char *mblk_name); */
 
-    /* Release all resource allocated for the brick buffer.
-     */
-    void cleanup();
-
-    /* Clear all brick buffer member variables.
-     */
-    void clear_member_variables();
 
     /* Collect information about this object for tree browser.
      */
@@ -123,57 +111,10 @@ protected:
     ************************************************************************************************
     */
 
-    /** IOCOM brick_buffer object.
-     */
-    iocBrickBuffer m_brick_buffer;
-
-    /* Signal structures.
-     */
-    iocSignal m_sig_cmd;
-    iocSignal m_sig_select;
-    iocSignal m_sig_err;
-    iocSignal m_sig_cs;
-    iocSignal m_sig_buf;
-    iocSignal m_sig_head;
-    iocSignal m_sig_tail;
-    iocSignal m_sig_state;
-
-    /** Memory block handles.
-     */
-    iocHandle m_h_exp;
-    iocHandle m_h_imp;
-
     /** Identifiers for the brick_buffer.
      */
-    iocIdentifiers m_exp_ids;
-    iocIdentifiers m_imp_ids;
-
-    os_char m_prefix[IOC_SIGNAL_NAME_SZ];
-
-    /** The "is_device" flag indicates that this python code is acting as device end
-        of brick data transfer, and the other end is controlling the transfer.
-        If not set, the python code is controlling the transfer.
-     */
-    os_boolean m_is_device;
-
-    /** The "from_device" sets transfer direction. If this flag is set, the transfer is
-        from device to controller, otherwise from controller to the device. The "is_device"
-        flag sets if this python code is device or controller.
-     */
-    os_boolean m_from_device;
-
-    /** The "flag_buffer" flag indicates flat buffer transfer. If not set, the ring buffer
-        transfer is used.
-     */
-    os_boolean m_flat_buffer;
-
-    /** This is camera which outputs eBitmaps.
-     */
-    os_boolean m_is_camera;
-
-    /** Variable holding output state.
-     */
-    eVariable *m_output;
+    // iocIdentifiers m_exp_ids;
+    // iocIdentifiers m_imp_ids;
 };
 
 #endif
