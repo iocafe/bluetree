@@ -578,7 +578,7 @@ void eioBrickBuffer::object_info(
     const os_char *target)
 {
     eioAssembly::object_info(item, name, appendix, target);
-    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_CAMERA);
+    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN);
 }
 
 
@@ -601,37 +601,20 @@ void eioBrickBuffer::send_open_info(
 {
     eContainer *reply;
     eVariable *item, tmp;
-    // eName *name;
-    // eioDevice *device;
 
-    /* Brick buffer title text has device name and brick buffer name.
-     */
-    /* device = eioDevice::cast(grandparent());
-    name = device->primaryname();
-    if (name) {
-        tmp = *name;
-        tmp += " ";
-    }
-    name = primaryname();
-    if (name) {
-        tmp += *name;
-    } */
-    propertyv(EVARP_TEXT, &tmp);
-
-    /* Show properties regardless of command.
-     */
     reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+    propertyv(EVARP_TEXT, &tmp);
     reply->setpropertyv(ECONTP_TEXT, &tmp);
 
     /* Open as "camera view" fron the browser.
      */
     item = new eVariable(reply, EOID_PARAMETER);
-    item->setl(EBROWSE_CAMERA);
+    item->sets("camera");
 
     item = new eVariable(reply, ECLASSID_EIO_BRICK_BUFFER);
     item->sets("_p/x");
 
-    /* Send reply to caller
+    /* Send reply to caller.
      */
     message(ECMD_OPEN_REPLY, envelope->source(),
         envelope->target(), reply, EMSG_DEL_CONTENT, envelope->context());

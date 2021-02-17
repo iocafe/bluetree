@@ -238,10 +238,6 @@ void eioSignalAssembly::run(os_long ti)
 }
 
 
-
-
-
-
 /**
 ****************************************************************************************************
 
@@ -267,7 +263,7 @@ void eioSignalAssembly::object_info(
     const os_char *target)
 {
     eioAssembly::object_info(item, name, appendix, target);
-    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_CAMERA);
+    appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN);
 }
 
 
@@ -290,38 +286,65 @@ void eioSignalAssembly::send_open_info(
 {
     eContainer *reply;
     eVariable *item, tmp;
-    // eName *name;
-    // eioDevice *device;
+    eioDevice *device;
+    eioMblk *mblk;
+    eContainer *esignals;
+    eName *name;
+    eObject *obj;
+    eioVariable *var;
+    eioGroup *group;
+    os_char *mblk_name, *prefix, *p;
+    os_memsz prefix_len;
 
-    /* Brick buffer title text has device name and signal assembly name.
-     */
-    /* device = eioDevice::cast(grandparent());
-    name = device->primaryname();
-    if (name) {
-        tmp = *name;
-        tmp += " ";
-    }
-    name = primaryname();
-    if (name) {
-        tmp += *name;
-    } */
-    propertyv(EVARP_TEXT, &tmp);
-
-    /* Show properties regardless of command.
-     */
     reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
+    propertyv(EVARP_TEXT, &tmp);
     reply->setpropertyv(ECONTP_TEXT, &tmp);
 
-    /* Open as "camera view" fron the browser.
+    /* Set assembly type to open.
      */
     item = new eVariable(reply, EOID_PARAMETER);
-    item->setl(EBROWSE_CAMERA);
+    propertyv(EIOP_ASSEMBLY_TYPE, item);
 
-    item = new eVariable(reply, ECLASSID_EIO_SIGNAL_ASSEMBLY);
-    item->sets("_p/x");
+    device = eioDevice::cast(grandparent());;
 
-    /* Send reply to caller
+    propertyv(EIOP_ASSEMBLY_EXP, &tmp);
+    mblk_name = tmp.gets();
+    prefix = os_strchr(mblk_name, '.');
+    if (prefix == OS_NULL) {
+        osal_debug_error_str("Error in assembly \"exp\": ", mblk_name);
+        return;
+    }
+    *(prefix++) = '\0';
+    prefix_len = os_strlen(prefix) - 1;
+
+    mblk = eioMblk::cast(device->mblks()->byname(mblk_name));
+    if (mblk == OS_NULL) {
+        osal_debug_error_str("Memory block in assembly \"exp\" not found: ", mblk_name);
+        return;
+    }
+    esignals = mblk->esignals();
+    if (esignals == OS_NULL) return;
+
+
+    for (name = esignals->ns_first(); name; name = name->ns_next(OS_FALSE)) {
+        p = name->gets();
+        if (os_strncmp(p, prefix, prefix_len)) continue;
+        obj = name->parent();
+        if (!obj->isinstanceof(ECLASSID_EIO_SIGNAL)) continue;
+        var = ((eioSignal*)obj)->variable();
+
+        group = eioGroup::cast(var->parent());
+
+        item = new eVariable(reply, ECLASSID_EIO_SIGNAL_ASSEMBLY);
+        item->sets("io/");
+        item->appendv(group->primaryname());
+        item->appends("/");
+        item->appendv(var->primaryname());
+        p = item->gets();
+    }
+
+    /* Send reply to caller AS DEVICE SO THAT RELATIVE PATHS ADD UP.
      */
-    message(ECMD_OPEN_REPLY, envelope->source(),
+    device->message(ECMD_OPEN_REPLY, envelope->source(),
         envelope->target(), reply, EMSG_DEL_CONTENT, envelope->context());
 }

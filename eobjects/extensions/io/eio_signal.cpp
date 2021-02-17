@@ -311,3 +311,8 @@ void eioSignal::down(eVariable *x)
 
     m_eio_root->trig_io();
 }
+
+eioVariable *eioSignal::variable()
+{
+    return eioVariable::cast(m_variable_ref->get());
+}

@@ -90,6 +90,8 @@ public:
     inline os_int io_n() { return m_signal.n; }
     inline os_int io_flags() { return m_signal.flags; }
 
+    eioVariable *variable();
+
 protected:
 
     /**

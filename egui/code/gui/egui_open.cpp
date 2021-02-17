@@ -56,29 +56,23 @@ void eGui::open_content(
 {
     eWindow *w;
     eVariable *v;
-    os_int open_as = EBROWSE_OPEN;
+    const os_char *open_as = OS_NULL;
     OSAL_UNUSED(context);
 
     v = content->firstv(EOID_PARAMETER);
-    if (v) open_as = v->geti();
+    if (v) open_as = v->gets();
 
-    switch (open_as)
-    {
-        default:
-        case EBROWSE_OPEN:
-            w = OS_NULL;
-            open_parameter_tree(path, content, &w, OS_NULL);
-            break;
-
-        case EBROWSE_GRAPH:
-            break;
-
-        case EBROWSE_CAMERA:
-            open_camera_view(path, content);
-            break;
+    if (!os_strcmp(open_as, "camera")) {
+        open_camera_view(path, content);
     }
-
+    else if (!os_strcmp(open_as, "graph")) {
+    }
+    else {
+        w = OS_NULL;
+        open_parameter_tree(path, content, &w, OS_NULL);
+    }
 }
+
 
 void eGui::open_parameter_tree(
     const os_char *path,
