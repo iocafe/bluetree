@@ -53,7 +53,7 @@ void eioNetwork::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioNetwork", ECLASSID_CONTAINER);
     addpropertys(cls, ECONTP_TEXT, econtp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT);
+    addpropertyb(cls, EIOP_CONNECTED, eiop_connected, OS_TRUE, "connected", EPRO_PERSISTENT|EPRO_RDONLY);
     propertysetdone(cls);
     os_unlock();
 }

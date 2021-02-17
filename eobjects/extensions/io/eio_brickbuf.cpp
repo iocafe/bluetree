@@ -68,8 +68,8 @@ void eioBrickBuffer::setupclass()
     eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioBrickBuffer", ECLASSID_EIO_ASSEMBLY);
     addpropertys(cls, EVARP_TEXT, evarp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EVARP_VALUE, evarp_value, "value", EPRO_SIMPLE|EPRO_NOONPRCH);
-    addpropertyb(cls, EIOP_BOUND, eiop_bound, "bound", EPRO_SIMPLE);
-    addpropertys(cls, EIOP_ASSEMBLY_TYPE, eiop_assembly_type, "asm type", EPRO_PERSISTENT|EPRO_NOONPRCH);
+    addpropertyb(cls, EIOP_BOUND, eiop_bound, "bound", EPRO_SIMPLE|EPRO_RDONLY);
+    addpropertys(cls, EIOP_ASSEMBLY_TYPE, eiop_assembly_type, "assembly type", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EIOP_ASSEMBLY_EXP, eiop_assembly_exp, "exp", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EIOP_ASSEMBLY_IMP, eiop_assembly_imp, "imp", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EIOP_ASSEMBLY_PREFIX, eiop_assembly_prefix, "prefix", EPRO_PERSISTENT|EPRO_NOONPRCH);

@@ -107,6 +107,7 @@ void eObject::setpropertys_msg(
           - EPRO_NOONPRCH: Do not call onpropertychange when value changes.
           - EPRO_NOPACK: Do not pack this property value but keep it as variable within property set.
           - EPRO_EARLYPRCH: Call onpropertychange() before setting stored property value.
+          - EPRO_RDONLY: Add "rdonly" attribute to property.
 
   @return Pointer to the new eVariable representing the property in class'es property set.
           Additional attributes for the property can be added trough the returned pointer.
@@ -142,6 +143,13 @@ eVariable *eObject::addproperty(
      */
     if (text) if (*text != '\0') {
         p->setpropertys(EVARP_TEXT, text);
+    }
+
+    /* Short way to add "rdonly" attribyte by setting EPRO_RDONLY flag while
+       adding object properties.
+     */
+    if (pflags & EPRO_RDONLY) {
+        p->setpropertys(EVARP_ATTR, "rdonly");
     }
 
     return p;

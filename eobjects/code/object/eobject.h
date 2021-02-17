@@ -75,6 +75,7 @@ class eRowSetBinding;
 #define EPRO_NOONPRCH EOBJ_CUST_FLAG4
 #define EPRO_NOPACK EOBJ_CUST_FLAG5
 #define EPRO_EARLYPRCH EOBJ_CUST_FLAG6
+#define EPRO_RDONLY EOBJ_CUST_FLAG7
 
 /* Flags for propertyset() and firstp() functions.
  */

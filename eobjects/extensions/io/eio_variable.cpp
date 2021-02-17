@@ -57,7 +57,7 @@ void eioVariable::setupclass()
     addproperty(cls, EVARP_SBITS, evarp_sbits, "state bits", EPRO_PERSISTENT|EPRO_SIMPLE);
     v = addproperty(cls, EVARP_TSTAMP, evarp_tstamp, "timestamp", EPRO_PERSISTENT|EPRO_SIMPLE);
     v->setpropertys(EVARP_ATTR, "tstamp=\"yy,msec\"");
-    addpropertyb(cls, EIOP_BOUND, eiop_bound, "bound", EPRO_SIMPLE);
+    addpropertyb(cls, EIOP_BOUND, eiop_bound, "bound", EPRO_SIMPLE|EPRO_RDONLY);
     propertysetdone(cls);
     os_unlock();
 }
