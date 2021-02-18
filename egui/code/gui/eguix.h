@@ -253,9 +253,15 @@ protected:
         eWindow **win,
         eComponent *p);
 
-    void open_camera_view(
+    void open_brick_buffer(
         const os_char *path,
-        eObject *content);
+        eObject *content,
+        const os_char *open_as = OS_NULL);
+
+    void open_signal_assembly(
+        const os_char *path,
+        eObject *content,
+        const os_char *open_as = OS_NULL);
 
     /* Viewport, corresponds to operating system window, etc.
      */

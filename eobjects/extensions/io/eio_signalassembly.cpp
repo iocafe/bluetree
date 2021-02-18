@@ -28,17 +28,6 @@ eioSignalAssembly::eioSignalAssembly(
     : eioAssembly(parent, oid, flags)
 {
     initproperties();
-    ns_create();
-}
-
-
-/**
-****************************************************************************************************
-  Virtual destructor.
-****************************************************************************************************
-*/
-eioSignalAssembly::~eioSignalAssembly()
-{
 }
 
 
@@ -61,8 +50,8 @@ void eioSignalAssembly::setupclass()
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)OS_NULL, "eioSignalAssembly", ECLASSID_EIO_ASSEMBLY);
-    addpropertys(cls, EVARP_TEXT, evarp_text, "text", EPRO_PERSISTENT|EPRO_NOONPRCH);
-    addpropertys(cls, EVARP_VALUE, evarp_value, "value", EPRO_SIMPLE|EPRO_NOONPRCH);
+    addpropertys(cls, EVARP_TEXT, evarp_text, "text", EPRO_METADATA|EPRO_NOONPRCH);
+    addpropertys(cls, EVARP_VALUE, evarp_value, "value", EPRO_SIMPLE);
     addpropertyb(cls, EIOP_BOUND, eiop_bound, "bound", EPRO_SIMPLE|EPRO_RDONLY);
     addpropertys(cls, EIOP_ASSEMBLY_TYPE, eiop_assembly_type, "assembly type", EPRO_PERSISTENT|EPRO_NOONPRCH);
     addpropertys(cls, EIOP_ASSEMBLY_EXP, eiop_assembly_exp, "exp", EPRO_PERSISTENT|EPRO_NOONPRCH);
@@ -73,77 +62,6 @@ void eioSignalAssembly::setupclass()
     os_unlock();
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Called to inform the class about property value change (override).
-
-  The onpropertychange() function is called when class'es property changes, unless the
-  property is flagged with EPRO_NOONPRCH.
-  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
-  in class members and and return it when simpleproperty() is called.
-
-  Notice for change logging: Previous value is still valid when this function is called.
-  You can get the old value by calling property() function inside onpropertychange()
-  function.
-
-  @param   propertynr Property number of changed property.
-  @param   x Variable containing the new value.
-  @param   flags
-  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
-           indicate that there was no property with given property number.
-
-****************************************************************************************************
-*/
-eStatus eioSignalAssembly::onpropertychange(
-    os_int propertynr,
-    eVariable *x,
-    os_int flags)
-{
-    switch (propertynr)
-    {
-        case EVARP_VALUE:
-            break;
-
-        default:
-            return eioAssembly::onpropertychange(propertynr, x, flags);
-    }
-
-    return ESTATUS_SUCCESS;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Get value of simple property (override).
-
-  The simpleproperty() function stores current value of simple property into variable x.
-
-  @param   propertynr Property number to get.
-  @param   x Variable into which to store the property value.
-  @return  If property with property number was stored in x, the function returns
-           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
-           given number was not among simple properties.
-
-****************************************************************************************************
-*/
-eStatus eioSignalAssembly::simpleproperty(
-    os_int propertynr,
-    eVariable *x)
-{
-    switch (propertynr)
-    {
-        case EVARP_VALUE:
-            // x->setv(m_output);
-            break;
-
-        default:
-            return eioAssembly::simpleproperty(propertynr, x);
-    }
-    return ESTATUS_SUCCESS;
-}
 
 
 /**
@@ -174,60 +92,9 @@ eStatus eioSignalAssembly::setup(
 /**
 ****************************************************************************************************
 
-  Try to setup signal stucture for use.
-
-  Lock must be on.
-
-  @param   sig Pointer to signal structure to set up.
-  @param   name Signal name without prefix.
-  @param   identifiers Specifies block to use.
-  @return  OSAL_SUCCESS if all is successfull, OSAL_STATUS_FAILED otherwise.
-
-****************************************************************************************************
-*/
-/* eStatus eioSignalAssembly::try_signal_setup(
-    iocSignal *sig,
-    const os_char *name,
-    const os_char *mblk_name)
-{
-    eioDevice *device;
-    eContainer *mblks;
-    eioMblk *mblk;
-    eioSignal *eiosig;
-    iocHandle *handle, *srchandle;
-
-    os_char signal_name[IOC_SIGNAL_NAME_SZ];
-
-    device = eioDevice::cast(grandparent());
-    mblks = device->mblks();
-    if (mblks == OS_NULL) return ESTATUS_FAILED;
-    mblk = eioMblk::cast(mblks->byname(mblk_name));
-    if (mblk == OS_NULL) return ESTATUS_FAILED;
-
-    os_strncpy(signal_name, m_prefix, sizeof(signal_name));
-    os_strncat(signal_name, name, sizeof(signal_name));
-
-    eiosig = eioSignal::cast(mblk->esignals()->byname(signal_name));
-    if (eiosig == OS_NULL) return ESTATUS_FAILED;
-
-    sig->addr = eiosig->io_addr();
-    sig->n = eiosig->io_n();
-    sig->flags = eiosig->io_flags();
-
-    handle = sig->handle;
-    if (handle->mblk) return ESTATUS_SUCCESS;
-
-    srchandle = mblk->handle_ptr();
-    if (srchandle->mblk == OS_NULL) return ESTATUS_FAILED;
-    ioc_duplicate_handle(handle, srchandle);
-    return ESTATUS_SUCCESS;
-} */
-
-
-/**
-****************************************************************************************************
-
   @brief Call repeatedly
+
+  MAYBE NEEDED?
 
   lock must be on
 
@@ -270,7 +137,7 @@ void eioSignalAssembly::object_info(
 /**
 ****************************************************************************************************
 
-  @brief Information for opening object has been requested, send it.
+  @brief Information for opening the object has been requested, send it.
 
   The object has received ECMD_INFO request and it needs to return back information
   for opening the object.
@@ -287,14 +154,6 @@ void eioSignalAssembly::send_open_info(
     eContainer *reply;
     eVariable *item, tmp;
     eioDevice *device;
-    eioMblk *mblk;
-    eContainer *esignals;
-    eName *name;
-    eObject *obj;
-    eioVariable *var;
-    eioGroup *group;
-    os_char *mblk_name, *prefix, *p;
-    os_memsz prefix_len;
 
     reply = new eContainer(this, EOID_ITEM, EOBJ_IS_ATTACHMENT);
     propertyv(EVARP_TEXT, &tmp);
@@ -307,11 +166,41 @@ void eioSignalAssembly::send_open_info(
 
     device = eioDevice::cast(grandparent());;
 
-    propertyv(EIOP_ASSEMBLY_EXP, &tmp);
+    send_open_info_helper(device, EIOP_ASSEMBLY_EXP, reply);
+    send_open_info_helper(device, EIOP_ASSEMBLY_IMP, reply);
+
+    /* Send reply to caller (SEND AS DEVICE SO THAT RELATIVE PATHS ADD UP).
+     */
+    device->message(ECMD_OPEN_REPLY, envelope->source(),
+        envelope->target(), reply, EMSG_DEL_CONTENT, envelope->context());
+}
+
+
+/**
+****************************************************************************************************
+  Helper for send_open_info()
+****************************************************************************************************
+*/
+void eioSignalAssembly::send_open_info_helper(
+    eioDevice *device,
+    os_int property_nr,
+    eContainer *reply)
+{
+    eioMblk *mblk;
+    eContainer *esignals;
+    eName *name;
+    eObject *obj;
+    eioVariable *var;
+    eioGroup *group;
+    os_char *mblk_name, *prefix, *p;
+    os_memsz prefix_len;
+    eVariable *item, tmp;
+
+    propertyv(property_nr, &tmp);
     mblk_name = tmp.gets();
     prefix = os_strchr(mblk_name, '.');
     if (prefix == OS_NULL) {
-        osal_debug_error_str("Error in assembly \"exp\": ", mblk_name);
+        osal_debug_error_str("Error in assembly \"exp\"/ \"imp\": ", mblk_name);
         return;
     }
     *(prefix++) = '\0';
@@ -338,12 +227,8 @@ void eioSignalAssembly::send_open_info(
         item->sets("io/");
         item->appendv(group->primaryname());
         item->appends("/");
-        item->appendv(var->primaryname());
-        p = item->gets();
+        item->appends(p);
+        item->appends(",");
+        item->appends(p + prefix_len);
     }
-
-    /* Send reply to caller AS DEVICE SO THAT RELATIVE PATHS ADD UP.
-     */
-    device->message(ECMD_OPEN_REPLY, envelope->source(),
-        envelope->target(), reply, EMSG_DEL_CONTENT, envelope->context());
 }

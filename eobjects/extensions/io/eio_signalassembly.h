@@ -33,10 +33,6 @@ public:
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Virtual destructor.
-     */
-    virtual ~eioSignalAssembly();
-
     /* Casting eObject pointer to eioSignalAssembly pointer.
      */
     inline static eioSignalAssembly *cast(
@@ -54,18 +50,6 @@ public:
      */
     static void setupclass();
 
-    /* Called when property value changes.
-     */
-    virtual eStatus onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags);
-
-    /* Get value of simple property (override).
-     */
-    eStatus simpleproperty(
-        os_int propertynr,
-        eVariable *x);
 
     /**
     ************************************************************************************************
@@ -88,12 +72,6 @@ protected:
     ************************************************************************************************
     */
 
-    /* eStatus try_signal_setup(
-        iocSignal *sig,
-        const os_char *name,
-        const os_char *mblk_name); */
-
-
     /* Collect information about this object for tree browser.
      */
     virtual void object_info(
@@ -102,19 +80,17 @@ protected:
         eSet *appendix,
         const os_char *target);
 
+    /* Information for opening the object has been requested, send it.
+     */
     virtual void send_open_info(
         eEnvelope *envelope);
 
-    /**
-    ************************************************************************************************
-      Member variables
-    ************************************************************************************************
-    */
-
-    /** Identifiers for the brick_buffer.
+    /* Helper for send_open_info()
      */
-    // iocIdentifiers m_exp_ids;
-    // iocIdentifiers m_imp_ids;
+    void send_open_info_helper(
+        eioDevice *device,
+        os_int property_nr,
+        eContainer *reply);
 };
 
 #endif

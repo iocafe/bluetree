@@ -63,7 +63,10 @@ void eGui::open_content(
     if (v) open_as = v->gets();
 
     if (!os_strcmp(open_as, "camera")) {
-        open_camera_view(path, content);
+        open_brick_buffer(path, content, open_as);
+    }
+    else if (!os_strcmp(open_as, "gamecontrol")) {
+        open_signal_assembly(path, content, open_as);
     }
     else if (!os_strcmp(open_as, "graph")) {
     }
@@ -151,15 +154,15 @@ void eGui::open_parameter_tree(
 }
 
 
-void eGui::open_camera_view(
+void eGui::open_brick_buffer(
     const os_char *path,
-    eObject *content)
+    eObject *content,
+    const os_char *open_as)
 {
     eWindow *w;
     eCameraView *camview;
     eVariable *v, mypath, tmp;
     os_int cid;
-    os_boolean is_brick_buffer;
 
     w = new eWindow(this);
     content->propertyv(ECONTP_TEXT, &tmp);
@@ -174,17 +177,72 @@ void eGui::open_camera_view(
         cid = v->oid();
         if (cid == EOID_PARAMETER) continue;
 
-        is_brick_buffer = eclasslist_isinstanceof(cid, ECLASSID_EIO_BRICK_BUFFER);
-
         mypath.sets(path);
         if (!v->isempty()) {
             mypath.appends("/");
             mypath.appendv(v);
         }
 
-        if (is_brick_buffer) {
+        if (!os_strcmp(open_as, "camera")) {
             camview = new eCameraView(w);
             camview->bind(ECOMP_VALUE, mypath.gets(), EBIND_METADATA);
+            break;
+        }
+    }
+}
+
+
+void eGui::open_signal_assembly(
+    const os_char *path,
+    eObject *content,
+    const os_char *open_as)
+{
+    eWindow *w;
+    eObject *assembly;
+    eVariable *v, mypath, tmp;
+    os_int cid, property_nr;
+    os_char *item_path, *property_name;
+
+    w = new eWindow(this);
+    content->propertyv(ECONTP_TEXT, &tmp);
+    if (tmp.isempty()) {
+        tmp.sets("unnamed");
+    }
+    w->setpropertyv(ECOMP_TEXT, &tmp);
+    w->setpropertyv(ECOMP_NAME, &tmp);
+
+    if (!os_strcmp(open_as, "gamecontrol")) {
+        assembly = new eGameController(w);
+    }
+    else {
+        osal_debug_error_str("eGui: unknown signal assembly: ", open_as);
+        return;
+    }
+
+    for (v = content->firstv(); v; v = v->nextv())
+    {
+        cid = v->oid();
+        if (cid == EOID_PARAMETER) continue;
+
+        mypath.sets(path);
+        if (!v->isempty()) {
+            mypath.appends("/");
+            mypath.appendv(v);
+            item_path = mypath.gets();
+            property_name = os_strchr(item_path, ',');
+            if (property_name == OS_NULL) {
+                osal_debug_error_str("eGui: invalid assembly item string: ", item_path);
+                return;
+            }
+            *(property_name++) = '\0';
+
+            property_nr = assembly->propertynr(property_name);
+            if (property_nr < 0) {
+                osal_debug_error_str("eGui: unknown assembly property: ", property_name);
+                continue;
+            }
+
+            assembly->bind(property_nr, item_path, EBIND_DEFAULT);
         }
     }
 }
