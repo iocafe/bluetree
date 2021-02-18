@@ -26,15 +26,11 @@ class ePopup;
 
 /**
 ****************************************************************************************************
-
-  @name Defines
-
-  X...
-
+  Defines
 ****************************************************************************************************
 */
 
-/* Enumeration of common GUI component properties. These often match eobject library eVariable
+/* Enumeration of GUI component properties. These often match eobject library eVariable
    property numbers and names, but a specific eComponent may not need to implement all.
    eComponent has also properties which eVariable doesn't have.
  */
@@ -62,9 +58,24 @@ class ePopup;
 #define ECOMP_ALL 36
 #define ECOMP_DROP_DOWN_LIST_SELECT 37
 
-
 #define ECOMP_SELECT 60
 #define ECOMP_COMMAND 61
+
+#define ECOMP_GC_ALIVE 70
+#define ECOMP_GC_SPEED 71
+#define ECOMP_GC_TURN 72
+#define ECOMP_GC_L1 73
+#define ECOMP_GC_L2 74
+#define ECOMP_GC_R1 75
+#define ECOMP_GC_R2 76
+#define ECOMP_GC_TRIANG 77
+#define ECOMP_GC_CIRCLE 78
+#define ECOMP_GC_CROSS 79
+#define ECOMP_GC_SQUARE 80
+#define ECOMP_GC_STICKX 81
+#define ECOMP_GC_STICKY 82
+#define ECOMP_GC_MSG 86
+#define ECOMP_GC_COLOR 87
 
 /* Flags for eComponent::setupproperties() to specify which optional properties for
    the component class.
@@ -98,9 +109,24 @@ extern const os_char ecomp_edit[];
 extern const os_char ecomp_all[];
 extern const os_char ecomp_drop_down_list_select[];
 
-
 extern const os_char ecomp_select[];
 extern const os_char ecomp_command[];
+
+extern const os_char ecomp_gc_alive[];
+extern const os_char ecomp_gc_speed[];
+extern const os_char ecomp_gc_turn[];
+extern const os_char ecomp_gc_L1[];
+extern const os_char ecomp_gc_L2[];
+extern const os_char ecomp_gc_R1[];
+extern const os_char ecomp_gc_R2[];
+extern const os_char ecomp_gc_triang[];
+extern const os_char ecomp_gc_circle[];
+extern const os_char ecomp_gc_cross[];
+extern const os_char ecomp_gc_square[];
+extern const os_char ecomp_gc_stickx[];
+extern const os_char ecomp_gc_sticky[];
+extern const os_char ecomp_gc_msg[];
+extern const os_char ecomp_gc_color[];
 
 
 /* More specific info about drop position, returned by check_pos() function.

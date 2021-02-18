@@ -86,12 +86,36 @@ eObject *eGameController::clone(
 void eGameController::setupclass()
 {
     const os_int cls = EGUICLASSID_GAME_CONTROLLER;
+    eVariable *v;
 
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eGameController", EGUICLASSID_COMPONENT);
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
     addpropertys(cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
-    addproperty (cls, ECOMP_VALUE, ecomp_value, "value");
+    // addproperty (cls, ECOMP_VALUE, ecomp_value, "value");
+
+    addpropertyl(cls, ECOMP_GC_ALIVE, ecomp_gc_alive, "alive", EPRO_SIMPLE);
+    v = addpropertyl(cls, ECOMP_GC_SPEED, ecomp_gc_speed, "speed", EPRO_SIMPLE);
+    v->setpropertyl(EVARP_MIN, -100);
+    v->setpropertyl(EVARP_MAX, 100);
+    v->setpropertys(EVARP_UNIT, "%");
+    v = addpropertyl(cls, ECOMP_GC_TURN, ecomp_gc_turn, "turn", EPRO_SIMPLE);
+    v->setpropertyl(EVARP_MIN, -90);
+    v->setpropertyl(EVARP_MAX, 90);
+    v->setpropertys(EVARP_UNIT, "deg");
+    addpropertyb(cls, ECOMP_GC_L1, ecomp_gc_L1, "L1", EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_L2, ecomp_gc_L2, "L2", EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_R1, ecomp_gc_R1, "R1", EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_R2, ecomp_gc_R2, "R2", EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_TRIANG, ecomp_gc_triang, "triangle", EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_CIRCLE, ecomp_gc_circle, "circle", EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_CROSS, ecomp_gc_cross, "cross", EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_SQUARE, ecomp_gc_square, "square", EPRO_SIMPLE);
+    addpropertyl(cls, ECOMP_GC_STICKX, ecomp_gc_stickx, "stick x", EPRO_SIMPLE);
+    addpropertyl(cls, ECOMP_GC_STICKY, ecomp_gc_sticky, "strick y", EPRO_SIMPLE);
+    addpropertys(cls, ECOMP_GC_MSG, ecomp_gc_msg, "message", EPRO_SIMPLE);
+    addproperty (cls, ECOMP_GC_COLOR, ecomp_gc_color, "color", EPRO_SIMPLE);
+
     propertysetdone(cls);
     os_unlock();
 }

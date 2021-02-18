@@ -29,7 +29,23 @@ const os_char
     ecomp_all[] = "all",
     ecomp_drop_down_list_select[] = "dropselect",
     ecomp_select[] = "_select",
-    ecomp_command[] = "_command";
+    ecomp_command[] = "_command",
+
+    ecomp_gc_alive[] = "alive",
+    ecomp_gc_speed[] = "speed",
+    ecomp_gc_turn[] = "turn",
+    ecomp_gc_L1[] = "L1",
+    ecomp_gc_L2[] = "L2",
+    ecomp_gc_R1[] = "R1",
+    ecomp_gc_R2[] = "R2",
+    ecomp_gc_triang[] = "triang",
+    ecomp_gc_circle[] = "circle",
+    ecomp_gc_cross[] = "cross",
+    ecomp_gc_square[] = "square",
+    ecomp_gc_stickx[] = "stickx",
+    ecomp_gc_sticky[] = "sticky",
+    ecomp_gc_msg[] = "msg",
+    ecomp_gc_color[] = "color";
 
 
 /**
