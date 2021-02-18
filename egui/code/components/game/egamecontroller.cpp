@@ -321,6 +321,7 @@ eStatus eGameController::draw(
 {
     ImVec2 sz;
     float speed, turn, delta;
+    float xcoeff, ycoeff, xorigin, yorigin, left, right, top, bottom, x, y;
     os_boolean moving = OS_FALSE, setting_motion = OS_FALSE;
 
     add_to_zorder(prm.window, prm.layer);
@@ -331,97 +332,60 @@ eStatus eGameController::draw(
 
     sz.x = sz.y = 0;
 
-
-    if (m_textureID_set)
+    // if (m_textureID_set)
     {
+        ImDrawList *draw_list = ImGui::GetWindowDrawList();
         ImVec2 r = ImGui::GetContentRegionAvail();
-        r.x -= 2;
-        r.y -= 2;
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-        ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
-        ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
-        ImVec4 tint_col = ImVec4(0.5, 0.5f, 0.5f, 0.3);
-        ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
 
-        ImGui::Image(m_textureID, r /* ImVec2(m_texture_w, m_texture_h) */, uv_min, uv_max, tint_col, border_col);
-        sz = ImGui::GetItemRectSize();
 
-        if (ImGui::IsItemHovered())
+        xcoeff = r.x  / 18000.0f;
+        ycoeff = r.y / 20000.0f;
+        xorigin = cpos.x + xcoeff * 9000.0f;
+        yorigin = cpos.y + ycoeff * 10000.0f;
+        left = xorigin - xcoeff * 9000.0f;
+        right = xorigin + xcoeff * 9000.0f;
+        top = yorigin - ycoeff * 10000.0f;
+        bottom = yorigin + ycoeff * 10000.0f;
+
+        ImU32  col = IM_COL32(48, 48, 255, 250);
+        draw_list->AddLine(ImVec2(left, yorigin), ImVec2(right, yorigin), col, 2.0f /* thickness */);
+        draw_list->AddLine(ImVec2(xorigin, top), ImVec2(xorigin, bottom), col, 2.0f /* thickness */);
+
+        if (ImGui::IsWindowHovered())
         {
-            if (prm.mouse_left_press) {
+            if (prm.mouse_left_press && xcoeff != 0.0 && ycoeff != 0.0) {
 
-                float xx = prm.io->MousePos.x - pos.x;
-                float yy = prm.io->MousePos.y - pos.y;
-                if (sz.x > 0 && sz.y > 0) {
-                    turn = 9000.0f * (-2.0 * xx / sz.x + 1.0);
-                    delta = turn - m_turn;
-                    if (delta*delta > 100 && turn >= -9010.0f && turn <= 9010.0f) {
-                        setpropertyl(ECOMP_GC_TURN, os_round_short(turn));
-                    }
-                    speed = 10000.0f * (-2.0 * yy / sz.y + 1.0);
-                    delta = speed - m_speed;
-                    if (delta*delta > 100 && speed >= -10010.0f && speed <= 10010.0f) {
-                        setpropertyl(ECOMP_GC_SPEED, os_round_short(speed));
-                    }
+                turn = (prm.mouse_pos.x - xorigin) / xcoeff;
+                delta = turn - m_turn;
+                if (delta*delta > 100 && turn >= -9010.0f && turn <= 9010.0f) {
+                    setpropertyl(ECOMP_GC_TURN, os_round_short(turn));
+                }
+                speed = (prm.mouse_pos.y - yorigin) / ycoeff;
+                delta = speed -` m_speed;
+                if (delta*delta > 100 && speed >= -10010.0f && speed <= 10010.0f) {
+                    setpropertyl(ECOMP_GC_SPEED, os_round_short(speed));
                 }
 
                 setting_motion = OS_TRUE;
             }
-
-            ImGui::BeginTooltip();
-            float region_sz = 32.0f;
-            float region_x = prm.io->MousePos.x - pos.x - region_sz * 0.5f;
-            float region_y = prm.io->MousePos.y - pos.y - region_sz * 0.5f;
-            float zoom = 4.0f;
-            if (region_x < 0.0f) { region_x = 0.0f; }
-            else if (region_x > m_texture_w - region_sz) { region_x = m_texture_w - region_sz; }
-            if (region_y < 0.0f) { region_y = 0.0f; }
-            else if (region_y > m_texture_h - region_sz) { region_y = m_texture_h - region_sz; }
-            ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
-            ImGui::Text("Max: (%.2f, %.2f)", region_x + region_sz, region_y + region_sz);
-            ImVec2 uv0 = ImVec2((region_x) / m_texture_w, (region_y) / m_texture_h);
-            ImVec2 uv1 = ImVec2((region_x + region_sz) / m_texture_w, (region_y + region_sz) / m_texture_h);
-            ImGui::Image(m_textureID, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1); // , tint_col, border_col);
-            ImGui::EndTooltip();
         }
 
         moving = update_motion(prm.timer_us, !setting_motion);
-
         if (moving) {
-            //ImVec2 saved_pos = ImGui::GetCursorScreenPos();
-            ImVec2 wp = ImGui::GetWindowPos();
-            pos.x -= wp.x;
-            pos.y -= wp.y;
-            ImGui::SetCursorPos(pos);
-            tint_col = ImVec4(0.2f, 1.0f, 0.2f, 1.0);
-            border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.0f);
+            x = xorigin + xcoeff * m_turn;
+            y = yorigin + ycoeff * m_speed;
+            draw_list->AddLine(ImVec2(left, y), ImVec2(right, y), col, 2.0f /* thickness */);
+            draw_list->AddLine(ImVec2(x, top), ImVec2(x, bottom), col, 2.0f /* thickness */);
 
-            speed = (float)m_speed / 10000.0f;
-            if (speed > 0.99f) speed = 0.95f;
-            if (speed < -0.99f) speed = -0.95f;
-            turn = (float)m_turn / 9000.0f;
-            if (turn > 0.99f) turn = 0.95f;
-            if (turn < -0.99f) turn = -0.95f;
-            if (speed > 0) {
-                uv_min.y += 0.5 * speed;
-            }
-            else if (speed < 0) {
-                uv_max.y += 0.5 * speed;
-            }
-            if (turn > 0) {
-                uv_min.x += 0.5 * turn;
-            }
-            else if (turn < 0) {
-                uv_max.x += 0.5 * turn;
-            }
-            ImGui::Image(m_textureID, r /* ImVec2(m_texture_w, m_texture_h) */, uv_min, uv_max, tint_col, border_col);
-
-            //saved_pos.x -= wp.x;
-            //saved_pos.y -= wp.y;
-            //ImGui::SetCursorPos(saved_pos);
         }
-    }
 
+
+        // ImVec2 wp = ImGui::GetWindowPos();
+        // ImGui::SetCursorPosY(wp.y + pos.y + r.y);
+
+        sz.x = r.x;
+        sz.x = r.y;
+    }
 
     m_rect.x2 = m_rect.x1 + (os_int)sz.x - 1;
     m_rect.y2 = m_rect.y1 + (os_int)sz.y - 1;
