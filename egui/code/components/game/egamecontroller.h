@@ -39,10 +39,6 @@ public:
         e_oid id = EOID_GUI_COMPONENT,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Virtual destructor.
-     */
-    virtual ~eGameController();
-
     /* Clone object.
      */
     virtual eObject *clone(
@@ -107,10 +103,6 @@ public:
         eDrawParams& prm,
         os_int mouse_gamecontroller_nr);
 
-    /* Activate the component (start editing value, toggle checkbox, or show drop down list).
-     */
-    virtual void activate();
-
 
 protected:
 
@@ -124,38 +116,14 @@ protected:
         os_timer timer_us,
         os_boolean change_it);
 
-    /* Generate bitmap indicating center.
-     */
-    void generate_bitmap();
-
-    /* Load a bitmap to the graphics card.
-     */
-    void upload_texture_to_grahics_card(
-        eBitmap *bitmap);
-
-    /* Delete a texture (bitmap) from graphics card.
-     */
-    void delete_texture_on_grahics_card();
-
     /**
     ************************************************************************************************
       Member variables.
     ************************************************************************************************
     */
 
-    /** OpenGL, etc. texture ID.
-     */
-    ImTextureID m_textureID;
-
-    /** Flag indicating that m_textureID idenfidies meaningfull texture.
-     */
-    os_boolean m_textureID_set;
-
-    /** Texture size.
-     */
-    os_int m_texture_w, m_texture_h;
-
-    eStrBuffer m_text;
+    eStrBuffer
+        m_text;
 
     os_ushort
         m_alive;
@@ -178,8 +146,8 @@ protected:
         m_stick_x,
         m_stick_y;
 
-
-    os_timer m_update_timer;
+    os_timer
+        m_update_timer;
 };
 
 

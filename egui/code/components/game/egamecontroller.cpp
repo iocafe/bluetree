@@ -27,23 +27,7 @@ eGameController::eGameController(
     os_int flags)
     : eComponent(parent, id, flags)
 {
-    m_textureID = 0;
-    m_textureID_set = OS_FALSE;
-    m_texture_w = m_texture_h = 0;
     os_get_timer(&m_update_timer);
-
-    generate_bitmap();
-}
-
-
-/**
-****************************************************************************************************
-  Virtual destructor.
-****************************************************************************************************
-*/
-eGameController::~eGameController()
-{
-    delete_texture_on_grahics_card();
 }
 
 
@@ -332,64 +316,56 @@ eStatus eGameController::draw(
 
     sz.x = sz.y = 0;
 
-    // if (m_textureID_set)
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
+    ImVec2 r = ImGui::GetContentRegionAvail();
+
+    xcoeff = r.x / 18000.0f;
+    ycoeff = -r.y / 20000.0f;
+    xorigin = cpos.x + xcoeff * 9000.0f;
+    yorigin = cpos.y - ycoeff * 10000.0f;
+    left = xorigin - xcoeff * 9000.0f;
+    right = xorigin + xcoeff * 9000.0f;
+    top = yorigin - ycoeff * 10000.0f;
+    bottom = yorigin + ycoeff * 10000.0f;
+
+    ImU32  col = IM_COL32(128, 128, 128, 128);
+    draw_list->AddLine(ImVec2(left, yorigin), ImVec2(right, yorigin), col, 1.0f /* thickness */);
+    draw_list->AddLine(ImVec2(xorigin, top), ImVec2(xorigin, bottom), col, 1.0f /* thickness */);
+
+    if (ImGui::IsWindowHovered())
     {
-        ImDrawList *draw_list = ImGui::GetWindowDrawList();
-        ImVec2 r = ImGui::GetContentRegionAvail();
+        if (prm.mouse_left_press && xcoeff != 0.0 && ycoeff != 0.0) {
 
-
-        xcoeff = r.x  / 18000.0f;
-        ycoeff = r.y / 20000.0f;
-        xorigin = cpos.x + xcoeff * 9000.0f;
-        yorigin = cpos.y + ycoeff * 10000.0f;
-        left = xorigin - xcoeff * 9000.0f;
-        right = xorigin + xcoeff * 9000.0f;
-        top = yorigin - ycoeff * 10000.0f;
-        bottom = yorigin + ycoeff * 10000.0f;
-
-        ImU32  col = IM_COL32(48, 48, 255, 250);
-        draw_list->AddLine(ImVec2(left, yorigin), ImVec2(right, yorigin), col, 2.0f /* thickness */);
-        draw_list->AddLine(ImVec2(xorigin, top), ImVec2(xorigin, bottom), col, 2.0f /* thickness */);
-
-        if (ImGui::IsWindowHovered())
-        {
-            if (prm.mouse_left_press && xcoeff != 0.0 && ycoeff != 0.0) {
-
-                turn = (prm.mouse_pos.x - xorigin) / xcoeff;
-                delta = turn - m_turn;
-                if (delta*delta > 100 && turn >= -9010.0f && turn <= 9010.0f) {
-                    setpropertyl(ECOMP_GC_TURN, os_round_short(turn));
-                }
-                speed = (prm.mouse_pos.y - yorigin) / ycoeff;
-                delta = speed -` m_speed;
-                if (delta*delta > 100 && speed >= -10010.0f && speed <= 10010.0f) {
-                    setpropertyl(ECOMP_GC_SPEED, os_round_short(speed));
-                }
-
-                setting_motion = OS_TRUE;
+            turn = (prm.mouse_pos.x - xorigin) / xcoeff;
+            delta = turn - m_turn;
+            if (delta*delta > 100 && turn >= -9010.0f && turn <= 9010.0f) {
+                setpropertyl(ECOMP_GC_TURN, os_round_short(turn));
             }
+            speed = (prm.mouse_pos.y - yorigin) / ycoeff;
+            delta = speed - m_speed;
+            if (delta*delta > 100 && speed >= -10010.0f && speed <= 10010.0f) {
+                setpropertyl(ECOMP_GC_SPEED, os_round_short(speed));
+            }
+
+            setting_motion = OS_TRUE;
         }
-
-        moving = update_motion(prm.timer_us, !setting_motion);
-        if (moving) {
-            x = xorigin + xcoeff * m_turn;
-            y = yorigin + ycoeff * m_speed;
-            draw_list->AddLine(ImVec2(left, y), ImVec2(right, y), col, 2.0f /* thickness */);
-            draw_list->AddLine(ImVec2(x, top), ImVec2(x, bottom), col, 2.0f /* thickness */);
-
-        }
-
-
-        // ImVec2 wp = ImGui::GetWindowPos();
-        // ImGui::SetCursorPosY(wp.y + pos.y + r.y);
-
-        sz.x = r.x;
-        sz.x = r.y;
     }
+
+    moving = update_motion(prm.timer_us, !setting_motion);
+    if (moving) {
+        x = xorigin + xcoeff * m_turn;
+        y = yorigin + ycoeff * m_speed;
+        col = IM_COL32(255, 255, 100, 250);
+        draw_list->AddLine(ImVec2(left, y), ImVec2(right, y), col, 2.0f /* thickness */);
+        draw_list->AddLine(ImVec2(x, top), ImVec2(x, bottom), col, 2.0f /* thickness */);
+
+    }
+
+    sz.x = r.x;
+    sz.x = r.y;
 
     m_rect.x2 = m_rect.x1 + (os_int)sz.x - 1;
     m_rect.y2 = m_rect.y1 + (os_int)sz.y - 1;
-
 
     /* Let base class implementation handle the rest.
      */
@@ -486,151 +462,4 @@ os_boolean eGameController::on_click(
     return eComponent::on_click(prm, mouse_gamecontroller_nr);
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Start editing value, toggle checkbox or show drop down list.
-
-  The eGameController::activate() function is called when a value is clicked, or key (for example
-  spacebar) is hit to start editing the value. Actual operation depends on metadata, the
-  function can either start value edit, toggle a checkbox or show drop down list.
-
-  @return  None.
-
-****************************************************************************************************
-*/
-void eGameController::activate()
-{
-    /* eVariable target;
-
-    propertyv(ECOMP_TARGET, &target);
-    if (!target.isempty()){
-        eVariable value;
-        propertyv(ECOMP_SETVALUE, &value);
-        setpropertyv_msg(target.gets(), &value);
-    } */
-}
-
-
-void eGameController::generate_bitmap()
-{
-    eBitmap *bitmap;
-    os_uint *data, *p;
-
-    union {
-        os_uint u;
-        os_uchar component[4];
-    }
-    value;
-
-    os_int w = 640, h = 480, line_d = 1;
-    os_int center_x, center_y, x, y, d, q;
-    os_double max_d, v;
-
-    bitmap = new eBitmap(ETEMPORARY);
-    bitmap->allocate(OSAL_RGBA32, w, h);
-    data = (os_uint*)bitmap->ptr();
-
-    value.component[0] = 128;
-    value.component[1] = 128;
-    value.component[2] = 128;
-
-    center_x = w/2;
-    center_y = h/2;
-
-    for (y = -line_d; y <= line_d; y++)
-    {
-        d = y;
-        if (d < 0) d = -d;
-
-        p = data + (center_y + y) * w;
-        for (x = 0; x < w; x++) {
-            q = x - center_x;
-            if (q < 0) q = -q;
-
-            max_d = line_d * (os_double) (center_x - q + 1) / (os_double) (center_x + 3);
-            if (max_d <= 0.0) continue;
-            v = 250.0 * (max_d - d + 1) / (max_d + 1.0);
-            if (v > 2.0) {
-                value.component[3] = (os_uchar)v;
-                p[x] = value.u;
-            }
-        }
-    }
-
-    for (x = -line_d; x <= line_d; x++)
-    {
-        d = x;
-        if (d < 0) d = -d;
-
-        p = data + center_x + x;
-        for (y = 0; y < h; y++) {
-            q = y - center_y;
-            if (q < 0) q = -q;
-
-            max_d = line_d * (os_double) (center_y - q + 1) / (os_double) (center_y + 3);
-            if (max_d <= 0.0) continue;
-            v = 250.0 * (max_d - d + 1) / (max_d + 1.0);
-            if (v > 2.0) {
-                value.component[3] = (os_uchar)v;
-                if (p[y * w] < value.u) p[y * w] = value.u;
-            }
-        }
-    }
-
-    upload_texture_to_grahics_card(bitmap);
-
-
-    delete bitmap;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Load a bitmap to graphics card.
-
-  X...
-
-****************************************************************************************************
-*/
-void eGameController::upload_texture_to_grahics_card(
-    eBitmap *bitmap)
-{
-    const os_uchar *data;
-    osalBitmapFormat format;
-    os_int byte_width;
-    eStatus s;
-
-    delete_texture_on_grahics_card();
-
-    data = bitmap->ptr();
-    m_texture_w = bitmap->width();
-    m_texture_h = bitmap->height();
-    format = bitmap->format();
-    byte_width = bitmap->row_nbytes();
-
-    s = eimgui_upload_texture_to_grahics_card(data, m_texture_w, m_texture_h, format, byte_width, &m_textureID);
-    m_textureID_set = (os_boolean)(s == ESTATUS_SUCCESS);
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Delete a texture (bitmap) from graphics card.
-
-  X...
-
-****************************************************************************************************
-*/
-void eGameController::delete_texture_on_grahics_card()
-{
-    if (m_textureID_set) {
-        eimgui_delete_texture_on_grahics_card(m_textureID);
-        m_textureID_set = 0;
-        m_textureID = 0;
-    }
-}
 
