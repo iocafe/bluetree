@@ -120,6 +120,9 @@ protected:
     ************************************************************************************************
     */
 
+    os_boolean update_motion(
+        os_timer timer_us);
+
     /* Generate bitmap indicating center.
      */
     void generate_bitmap();
@@ -174,6 +177,8 @@ protected:
         m_stick_x,
         m_stick_y;
 
+
+    os_timer m_update_timer;
 };
 
 

@@ -182,6 +182,10 @@ typedef struct eDrawParams
      */
     eWindow *window;
 
+    /* Timer value when rendering.
+     */
+    os_timer timer_us;
+
     /* Layer, 0 for base layer, 1 for popup...
      */
     os_int layer;

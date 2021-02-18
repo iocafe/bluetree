@@ -511,9 +511,9 @@ eStatus eGui::run()
         ShowExampleAppDockSpace(&openoi);
 
         m_draw_prm.io = &ImGui::GetIO();
+        os_get_timer(&m_draw_prm.timer_us);
 
         handle_mouse();
-        // m_draw_prm.right_click = ImGui::IsMouseReleased(EIMGUI_RIGHT_MOUSE_BUTTON);
 
         for (c = firstcomponent(EOID_GUI_WINDOW); c; c = c->nextcomponent(EOID_GUI_WINDOW))
         {

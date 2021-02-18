@@ -30,8 +30,9 @@ eGameController::eGameController(
     m_textureID = 0;
     m_textureID_set = OS_FALSE;
     m_texture_w = m_texture_h = 0;
+    os_get_timer(&m_update_timer);
 
-generate_bitmap();
+    generate_bitmap();
 }
 
 
@@ -319,6 +320,8 @@ eStatus eGameController::draw(
     eDrawParams& prm)
 {
     ImVec2 sz;
+    float speed, turn;
+    os_boolean moving;
 
     add_to_zorder(prm.window, prm.layer);
 
@@ -328,24 +331,18 @@ eStatus eGameController::draw(
 
     sz.x = sz.y = 0;
 
-//ImVec4 backgr_col = ImVec4(0.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
-
-//ImGui::PushStyleColor(ImGuiCol_WindowBg, backgr_col); //<---Here
-
-
-    // label = m_text.get(this, ECOMP_TEXT);
+    moving = update_motion(prm.timer_us);
 
     if (m_textureID_set)
     {
         ImVec2 r = ImGui::GetContentRegionAvail();
         r.x -= 2;
         r.y -= 2;
-//         ImGui::Text("%.0fx%.0f", (float)m_texture_w, (float)m_texture_h);
         ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
         ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
-        ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
-        ImVec4 border_col = ImVec4(0.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+        ImVec4 tint_col = ImVec4(0.5, 0.5f, 0.5f, 0.3);
+        ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
 
         ImGui::Image(m_textureID, r /* ImVec2(m_texture_w, m_texture_h) */, uv_min, uv_max, tint_col, border_col);
         if (ImGui::IsItemHovered())
@@ -366,19 +363,101 @@ eStatus eGameController::draw(
             ImGui::Image(m_textureID, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1); // , tint_col, border_col);
             ImGui::EndTooltip();
         }
+
+        if (moving) {
+            ImVec2 wp = ImGui::GetWindowPos();
+            pos.x -= wp.x;
+            pos.y -= wp.y;
+            ImGui::SetCursorPos(pos);
+            tint_col = ImVec4(0.2f, 1.0f, 0.2f, 1.0);
+            border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.0f);
+
+            speed = (float)m_speed / 10000.0f;
+            if (speed > 0.99f) speed = 0.95f;
+            if (speed < -0.99f) speed = -0.95f;
+            turn = (float)m_turn / 9000.0f;
+            if (turn > 0.99f) turn = 0.95f;
+            if (turn < -0.99f) turn = -0.95f;
+            if (speed > 0) {
+                uv_min.y += 0.5 * speed;
+            }
+            else if (speed < 0) {
+                uv_max.y += 0.5 * speed;
+            }
+            if (turn > 0) {
+                uv_min.x += 0.5 * turn;
+            }
+            else if (turn < 0) {
+                uv_max.x += 0.5 * turn;
+            }
+            ImGui::Image(m_textureID, r /* ImVec2(m_texture_w, m_texture_h) */, uv_min, uv_max, tint_col, border_col);
+        }
     }
 
-    sz = ImGui::GetItemRectSize();
 
     m_rect.x2 = m_rect.x1 + (os_int)sz.x - 1;
     m_rect.y2 = m_rect.y1 + (os_int)sz.y - 1;
 
-//ImGui::PopStyleColor();
 
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
 
+}
+
+
+os_boolean eGameController::update_motion(
+    os_timer timer_us)
+{
+    os_long elapsed_us;
+    const os_double speed_change_per_sec = 7000.0;
+    const os_double turn_change_per_sec = 3500.0;
+    os_boolean rval = OS_FALSE;
+    os_double change_max;
+    os_short speed, turn;
+
+    /*  How long since last update call
+     */
+    elapsed_us = timer_us - m_update_timer;
+    if (elapsed_us < 0) elapsed_us = 0;
+    if (elapsed_us > 1000000) elapsed_us = 1000000;
+    m_update_timer = timer_us;
+
+    /* Speed change.
+     */
+    change_max = 0.000001 * elapsed_us * speed_change_per_sec;
+    if (m_speed > change_max) {
+        speed = m_speed - (os_short)change_max;
+    }
+    else if (m_speed < -change_max) {
+        speed = m_speed + (os_short)change_max;
+    }
+    else {
+        speed = 0;
+    }
+    if (speed != m_speed) {
+        setpropertyl(ECOMP_GC_SPEED, speed);
+        rval = OS_TRUE;
+    }
+
+    /* Turn change.
+     */
+    change_max = 0.000001 * elapsed_us * turn_change_per_sec;
+    if (m_turn > change_max) {
+        turn = m_turn - (os_short)change_max;
+    }
+    else if (m_turn < -change_max) {
+        turn = m_turn + (os_short)change_max;
+    }
+    else {
+        turn = 0;
+    }
+    if (turn != m_turn) {
+        setpropertyl(ECOMP_GC_TURN, turn);
+        rval = OS_TRUE;
+    }
+
+    return rval;
 }
 
 
@@ -456,9 +535,9 @@ void eGameController::generate_bitmap()
     bitmap->allocate(OSAL_RGBA32, w, h);
     data = (os_uint*)bitmap->ptr();
 
-    value.component[0] = 16;
-    value.component[1] = 192;
-    value.component[2] = 16;
+    value.component[0] = 128;
+    value.component[1] = 128;
+    value.component[2] = 128;
 
     center_x = w/2;
     center_y = h/2;
