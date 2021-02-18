@@ -120,6 +120,10 @@ protected:
     ************************************************************************************************
     */
 
+    /* Generate bitmap indicating center.
+     */
+    void generate_bitmap();
+
     /* Load a bitmap to the graphics card.
      */
     void upload_texture_to_grahics_card(

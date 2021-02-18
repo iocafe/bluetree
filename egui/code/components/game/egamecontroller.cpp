@@ -30,6 +30,8 @@ eGameController::eGameController(
     m_textureID = 0;
     m_textureID_set = OS_FALSE;
     m_texture_w = m_texture_h = 0;
+
+generate_bitmap();
 }
 
 
@@ -326,6 +328,11 @@ eStatus eGameController::draw(
 
     sz.x = sz.y = 0;
 
+//ImVec4 backgr_col = ImVec4(0.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+
+//ImGui::PushStyleColor(ImGuiCol_WindowBg, backgr_col); //<---Here
+
+
     // label = m_text.get(this, ECOMP_TEXT);
 
     if (m_textureID_set)
@@ -366,9 +373,12 @@ eStatus eGameController::draw(
     m_rect.x2 = m_rect.x1 + (os_int)sz.x - 1;
     m_rect.y2 = m_rect.y1 + (os_int)sz.y - 1;
 
+//ImGui::PopStyleColor();
+
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
+
 }
 
 
@@ -424,6 +434,79 @@ void eGameController::activate()
         propertyv(ECOMP_SETVALUE, &value);
         setpropertyv_msg(target.gets(), &value);
     } */
+}
+
+
+void eGameController::generate_bitmap()
+{
+    eBitmap *bitmap;
+    os_uint *data, *p;
+
+    union {
+        os_uint u;
+        os_uchar component[4];
+    }
+    value;
+
+    os_int w = 640, h = 480, line_d = 1;
+    os_int center_x, center_y, x, y, d, q;
+    os_double max_d, v;
+
+    bitmap = new eBitmap(ETEMPORARY);
+    bitmap->allocate(OSAL_RGBA32, w, h);
+    data = (os_uint*)bitmap->ptr();
+
+    value.component[0] = 16;
+    value.component[1] = 192;
+    value.component[2] = 16;
+
+    center_x = w/2;
+    center_y = h/2;
+
+    for (y = -line_d; y <= line_d; y++)
+    {
+        d = y;
+        if (d < 0) d = -d;
+
+        p = data + (center_y + y) * w;
+        for (x = 0; x < w; x++) {
+            q = x - center_x;
+            if (q < 0) q = -q;
+
+            max_d = line_d * (os_double) (center_x - q + 1) / (os_double) (center_x + 3);
+            if (max_d <= 0.0) continue;
+            v = 250.0 * (max_d - d + 1) / (max_d + 1.0);
+            if (v > 2.0) {
+                value.component[3] = (os_uchar)v;
+                p[x] = value.u;
+            }
+        }
+    }
+
+    for (x = -line_d; x <= line_d; x++)
+    {
+        d = x;
+        if (d < 0) d = -d;
+
+        p = data + center_x + x;
+        for (y = 0; y < h; y++) {
+            q = y - center_y;
+            if (q < 0) q = -q;
+
+            max_d = line_d * (os_double) (center_y - q + 1) / (os_double) (center_y + 3);
+            if (max_d <= 0.0) continue;
+            v = 250.0 * (max_d - d + 1) / (max_d + 1.0);
+            if (v > 2.0) {
+                value.component[3] = (os_uchar)v;
+                if (p[y * w] < value.u) p[y * w] = value.u;
+            }
+        }
+    }
+
+    upload_texture_to_grahics_card(bitmap);
+
+
+    delete bitmap;
 }
 
 
