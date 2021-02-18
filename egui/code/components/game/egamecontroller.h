@@ -74,6 +74,12 @@ public:
         eVariable *x,
         os_int flags);
 
+    /* Get value of simple property (override).
+     */
+    eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
+
     /* Static constructor function for generating instance by class list.
      */
     static eGameController *newobj(
@@ -142,6 +148,28 @@ protected:
     os_int m_texture_w, m_texture_h;
 
     eStrBuffer m_text;
+
+    os_ushort
+        m_alive;
+
+    os_short
+        m_speed,
+        m_turn;
+
+    os_boolean
+        m_L1,
+        m_L2,
+        m_R1,
+        m_R2,
+        m_triangle,
+        m_circle,
+        m_cross,
+        m_square;
+
+    os_short
+        m_stick_x,
+        m_stick_y;
+
 };
 
 

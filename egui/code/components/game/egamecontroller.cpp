@@ -91,18 +91,20 @@ void eGameController::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eGameController", EGUICLASSID_COMPONENT);
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
-    addpropertys(cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
-    // addproperty (cls, ECOMP_VALUE, ecomp_value, "value");
+    addpropertys(cls, ECOMP_TEXT, ecomp_gc_msg, "message", EPRO_DEFAULT);
+    addproperty (cls, ECOMP_GC_COLOR, ecomp_gc_color, "color", EPRO_SIMPLE);
 
     addpropertyl(cls, ECOMP_GC_ALIVE, ecomp_gc_alive, "alive", EPRO_SIMPLE);
     v = addpropertyl(cls, ECOMP_GC_SPEED, ecomp_gc_speed, "speed", EPRO_SIMPLE);
-    v->setpropertyl(EVARP_MIN, -100);
-    v->setpropertyl(EVARP_MAX, 100);
+    v->setpropertyl(EVARP_MIN, -10000);
+    v->setpropertyl(EVARP_MAX, 10000);
     v->setpropertys(EVARP_UNIT, "%");
+    v->setpropertys(EVARP_TTIP, "1/100 percents of max speed, -10000 (full backwards) .. 10000 (full forward)");
     v = addpropertyl(cls, ECOMP_GC_TURN, ecomp_gc_turn, "turn", EPRO_SIMPLE);
-    v->setpropertyl(EVARP_MIN, -90);
-    v->setpropertyl(EVARP_MAX, 90);
+    v->setpropertyl(EVARP_MIN, -9000);
+    v->setpropertyl(EVARP_MAX, 9000);
     v->setpropertys(EVARP_UNIT, "deg");
+    v->setpropertys(EVARP_TTIP, "1/100 degrees, -9000 (right) .. 9000 (left)");
     addpropertyb(cls, ECOMP_GC_L1, ecomp_gc_L1, "L1", EPRO_SIMPLE);
     addpropertyb(cls, ECOMP_GC_L2, ecomp_gc_L2, "L2", EPRO_SIMPLE);
     addpropertyb(cls, ECOMP_GC_R1, ecomp_gc_R1, "R1", EPRO_SIMPLE);
@@ -113,8 +115,6 @@ void eGameController::setupclass()
     addpropertyb(cls, ECOMP_GC_SQUARE, ecomp_gc_square, "square", EPRO_SIMPLE);
     addpropertyl(cls, ECOMP_GC_STICKX, ecomp_gc_stickx, "stick x", EPRO_SIMPLE);
     addpropertyl(cls, ECOMP_GC_STICKY, ecomp_gc_sticky, "strick y", EPRO_SIMPLE);
-    addpropertys(cls, ECOMP_GC_MSG, ecomp_gc_msg, "message", EPRO_SIMPLE);
-    addproperty (cls, ECOMP_GC_COLOR, ecomp_gc_color, "color", EPRO_SIMPLE);
 
     propertysetdone(cls);
     os_unlock();
@@ -148,19 +148,65 @@ eStatus eGameController::onpropertychange(
     eVariable *x,
     os_int flags)
 {
-    eObject *bitmap;
-
     switch (propertynr)
     {
-        case ECOMP_VALUE:
-            bitmap = x->geto();
-            if (bitmap) if (bitmap->isinstanceof(ECLASSID_BITMAP)) {
-                upload_texture_to_grahics_card((eBitmap*)bitmap);
-            }
-            break;
-
         case ECOMP_TEXT:
             m_text.clear();
+            break;
+
+        case ECOMP_GC_COLOR:
+            break;
+
+        case ECOMP_GC_ALIVE:
+            m_alive = x->getl();
+            break;
+
+        case ECOMP_GC_SPEED:
+            m_speed = x->getl();
+            break;
+
+        case ECOMP_GC_TURN:
+            m_turn = x->getl();
+            break;
+
+        case ECOMP_GC_L1:
+            m_L1 = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_L2:
+            m_L2 = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_R1:
+            m_R1 = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_R2:
+            m_R2 = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_TRIANG:
+            m_triangle = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_CIRCLE:
+            m_circle = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_CROSS:
+            m_cross = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_SQUARE:
+            m_square = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_STICKX:
+            m_stick_x = x->getl();
+            break;
+
+        case ECOMP_GC_STICKY:
+            m_stick_y = x->getl();
             break;
 
         default:
@@ -170,6 +216,88 @@ eStatus eGameController::onpropertychange(
     return ESTATUS_SUCCESS;
 }
 
+
+/**
+****************************************************************************************************
+
+  @brief Get value of simple property (override).
+
+  The simpleproperty() function stores current value of simple property into variable x.
+
+  @param   propertynr Property number to get.
+  @param   x Variable into which to store the property value.
+  @return  If property with property number was stored in x, the function returns
+           ESTATUS_SUCCESS (0). Nonzero return values indicate that property with
+           given number was not among simple properties.
+
+****************************************************************************************************
+*/
+eStatus eGameController::simpleproperty(
+    os_int propertynr,
+    eVariable *x)
+{
+    switch (propertynr)
+    {
+        case ECOMP_GC_COLOR:
+            break;
+
+        case ECOMP_GC_ALIVE:
+            x->setl(m_alive);
+            break;
+
+        case ECOMP_GC_SPEED:
+            x->setl(m_speed);
+            break;
+
+        case ECOMP_GC_TURN:
+            x->setl(m_turn);
+            break;
+
+        case ECOMP_GC_L1:
+            x->setl(m_L1);
+            break;
+
+        case ECOMP_GC_L2:
+            x->setl(m_L2);
+            break;
+
+        case ECOMP_GC_R1:
+            x->setl(m_R1);
+            break;
+
+        case ECOMP_GC_R2:
+            x->setl(m_R2);
+            break;
+
+        case ECOMP_GC_TRIANG:
+            x->setl(m_triangle);
+            break;
+
+        case ECOMP_GC_CIRCLE:
+            x->setl(m_circle);
+            break;
+
+        case ECOMP_GC_CROSS:
+            x->setl(m_cross);
+            break;
+
+        case ECOMP_GC_SQUARE:
+            x->setl(m_square);
+            break;
+
+        case ECOMP_GC_STICKX:
+            x->setl(m_stick_x);
+            break;
+
+        case ECOMP_GC_STICKY:
+            x->setl(m_stick_y);
+            break;
+
+        default:
+            return eComponent::simpleproperty(propertynr, x);
+    }
+    return ESTATUS_SUCCESS;
+}
 
 /**
 ****************************************************************************************************

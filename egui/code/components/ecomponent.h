@@ -74,7 +74,6 @@ class ePopup;
 #define ECOMP_GC_SQUARE 80
 #define ECOMP_GC_STICKX 81
 #define ECOMP_GC_STICKY 82
-#define ECOMP_GC_MSG 86
 #define ECOMP_GC_COLOR 87
 
 /* Flags for eComponent::setupproperties() to specify which optional properties for
