@@ -121,7 +121,8 @@ protected:
     */
 
     os_boolean update_motion(
-        os_timer timer_us);
+        os_timer timer_us,
+        os_boolean change_it);
 
     /* Generate bitmap indicating center.
      */

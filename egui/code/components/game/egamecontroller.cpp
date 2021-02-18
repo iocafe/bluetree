@@ -320,8 +320,8 @@ eStatus eGameController::draw(
     eDrawParams& prm)
 {
     ImVec2 sz;
-    float speed, turn;
-    os_boolean moving;
+    float speed, turn, delta;
+    os_boolean moving = OS_FALSE, setting_motion = OS_FALSE;
 
     add_to_zorder(prm.window, prm.layer);
 
@@ -331,7 +331,6 @@ eStatus eGameController::draw(
 
     sz.x = sz.y = 0;
 
-    moving = update_motion(prm.timer_us);
 
     if (m_textureID_set)
     {
@@ -345,8 +344,30 @@ eStatus eGameController::draw(
         ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
 
         ImGui::Image(m_textureID, r /* ImVec2(m_texture_w, m_texture_h) */, uv_min, uv_max, tint_col, border_col);
+        sz = ImGui::GetItemRectSize();
+
         if (ImGui::IsItemHovered())
         {
+            if (prm.mouse_left_press) {
+
+                float xx = prm.io->MousePos.x - pos.x;
+                float yy = prm.io->MousePos.y - pos.y;
+                if (sz.x > 0 && sz.y > 0) {
+                    turn = 9000.0f * (-2.0 * xx / sz.x + 1.0);
+                    delta = turn - m_turn;
+                    if (delta*delta > 100 && turn >= -9010.0f && turn <= 9010.0f) {
+                        setpropertyl(ECOMP_GC_TURN, os_round_short(turn));
+                    }
+                    speed = 10000.0f * (-2.0 * yy / sz.y + 1.0);
+                    delta = speed - m_speed;
+                    if (delta*delta > 100 && speed >= -10010.0f && speed <= 10010.0f) {
+                        setpropertyl(ECOMP_GC_SPEED, os_round_short(speed));
+                    }
+                }
+
+                setting_motion = OS_TRUE;
+            }
+
             ImGui::BeginTooltip();
             float region_sz = 32.0f;
             float region_x = prm.io->MousePos.x - pos.x - region_sz * 0.5f;
@@ -364,7 +385,10 @@ eStatus eGameController::draw(
             ImGui::EndTooltip();
         }
 
+        moving = update_motion(prm.timer_us, !setting_motion);
+
         if (moving) {
+            //ImVec2 saved_pos = ImGui::GetCursorScreenPos();
             ImVec2 wp = ImGui::GetWindowPos();
             pos.x -= wp.x;
             pos.y -= wp.y;
@@ -391,6 +415,10 @@ eStatus eGameController::draw(
                 uv_max.x += 0.5 * turn;
             }
             ImGui::Image(m_textureID, r /* ImVec2(m_texture_w, m_texture_h) */, uv_min, uv_max, tint_col, border_col);
+
+            //saved_pos.x -= wp.x;
+            //saved_pos.y -= wp.y;
+            //ImGui::SetCursorPos(saved_pos);
         }
     }
 
@@ -407,7 +435,8 @@ eStatus eGameController::draw(
 
 
 os_boolean eGameController::update_motion(
-    os_timer timer_us)
+    os_timer timer_us,
+    os_boolean change_it)
 {
     os_long elapsed_us;
     const os_double speed_change_per_sec = 7000.0;
@@ -436,7 +465,9 @@ os_boolean eGameController::update_motion(
         speed = 0;
     }
     if (speed != m_speed) {
-        setpropertyl(ECOMP_GC_SPEED, speed);
+        if (change_it) {
+            setpropertyl(ECOMP_GC_SPEED, speed);
+        }
         rval = OS_TRUE;
     }
 
@@ -453,7 +484,9 @@ os_boolean eGameController::update_motion(
         turn = 0;
     }
     if (turn != m_turn) {
-        setpropertyl(ECOMP_GC_TURN, turn);
+        if (change_it) {
+            setpropertyl(ECOMP_GC_TURN, turn);
+        }
         rval = OS_TRUE;
     }
 
