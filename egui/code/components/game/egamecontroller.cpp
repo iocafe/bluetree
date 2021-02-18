@@ -1,7 +1,7 @@
 /**
 
   @file    egamecontroller.cpp
-  @brief   Display camera, etc, live bitmap based image.
+  @brief   Game controller, control speed, turning, etc.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    15.9.2020
@@ -28,6 +28,7 @@ eGameController::eGameController(
     : eComponent(parent, id, flags)
 {
     os_get_timer(&m_update_timer);
+    timer(330);
 }
 
 
@@ -91,7 +92,7 @@ void eGameController::setupclass()
     v->setpropertyl(EVARP_MIN, -9000);
     v->setpropertyl(EVARP_MAX, 9000);
     v->setpropertys(EVARP_UNIT, "deg");
-    v->setpropertys(EVARP_TTIP, "1/100 degrees, -9000 (right) .. 9000 (left)");
+    v->setpropertys(EVARP_TTIP, "1/100 degrees, -9000 (left) .. 9000 (right)");
     addpropertyb(cls, ECOMP_GC_L1, ecomp_gc_L1, "L1", EPRO_SIMPLE);
     addpropertyb(cls, ECOMP_GC_L2, ecomp_gc_L2, "L2", EPRO_SIMPLE);
     addpropertyb(cls, ECOMP_GC_R1, ecomp_gc_R1, "R1", EPRO_SIMPLE);
@@ -105,6 +106,48 @@ void eGameController::setupclass()
 
     propertysetdone(cls);
     os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Function to process incoming messages.
+
+  The eGameController::onmessage function sends repeated "alive" signals by timer. This
+  if to inform a device that controller is alive and well.
+
+  @param   envelope Message envelope. Contains command, target and source paths and
+           message content, etc.
+  @return  None.
+
+****************************************************************************************************
+*/
+void eGameController::onmessage(
+    eEnvelope *envelope)
+{
+    os_ushort next_alive;
+
+    /* If at final destination for the message.
+     */
+    if (*envelope->target()=='\0')
+    {
+        switch (envelope->command())
+        {
+            case ECMD_TIMER: /* No need to do anything, timer is used just to break event wait */
+                next_alive = m_alive  + 1;
+                if (next_alive == 0) next_alive++;
+                setpropertyl(ECOMP_GC_ALIVE, next_alive);
+                return;
+
+            default:
+                break;
+        }
+    }
+
+    /* Call parent class'es onmessage.
+     */
+    eComponent::onmessage(envelope);
 }
 
 
@@ -304,7 +347,7 @@ eStatus eGameController::draw(
     eDrawParams& prm)
 {
     ImVec2 sz;
-    float speed, turn, delta;
+    float speed, turn, xdelta, ydelta;
     float xcoeff, ycoeff, xorigin, yorigin, left, right, top, bottom, x, y;
     os_boolean moving = OS_FALSE, setting_motion = OS_FALSE;
 
@@ -337,14 +380,17 @@ eStatus eGameController::draw(
         if (prm.mouse_left_press && xcoeff != 0.0 && ycoeff != 0.0) {
 
             turn = (prm.mouse_pos.x - xorigin) / xcoeff;
-            delta = turn - m_turn;
-            if (delta*delta > 100 && turn >= -9010.0f && turn <= 9010.0f) {
-                setpropertyl(ECOMP_GC_TURN, os_round_short(turn));
-            }
+            xdelta = turn - m_turn;
             speed = (prm.mouse_pos.y - yorigin) / ycoeff;
-            delta = speed - m_speed;
-            if (delta*delta > 100 && speed >= -10010.0f && speed <= 10010.0f) {
-                setpropertyl(ECOMP_GC_SPEED, os_round_short(speed));
+            ydelta = speed - m_speed;
+            if (turn >= -9000.0f && turn <= 9000.0f &&
+                speed >= -10000.0f && speed <= 10000.0f)
+            {
+                if (xdelta*xdelta > 100)
+                    setpropertyl(ECOMP_GC_TURN, os_round_short(turn));
+
+                if (ydelta*ydelta > 100)
+                    setpropertyl(ECOMP_GC_SPEED, os_round_short(speed));
             }
 
             setting_motion = OS_TRUE;

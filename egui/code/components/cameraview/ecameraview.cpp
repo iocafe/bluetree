@@ -189,7 +189,7 @@ eStatus eCameraView::draw(
         ImVec4 border_col = ImVec4(0.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
 
         ImGui::Image(m_textureID, r /* ImVec2(m_texture_w, m_texture_h) */, uv_min, uv_max, tint_col, border_col);
-        if (ImGui::IsItemHovered())
+        /* if (ImGui::IsItemHovered())
         {
             ImGui::BeginTooltip();
             float region_sz = 32.0f;
@@ -206,7 +206,7 @@ eStatus eCameraView::draw(
             ImVec2 uv1 = ImVec2((region_x + region_sz) / m_texture_w, (region_y + region_sz) / m_texture_h);
             ImGui::Image(m_textureID, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1); // , tint_col, border_col);
             ImGui::EndTooltip();
-        }
+        } */
     }
 
     sz = ImGui::GetItemRectSize();

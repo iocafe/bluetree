@@ -1,7 +1,7 @@
 /**
 
   @file    egamecontroller.h
-  @brief   Display camera, etc, live bitmap based image.
+  @brief   Game controller, control speed, turning, etc.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    15.9.2020
@@ -62,6 +62,11 @@ public:
     /* Static function to add class to propertysets and class list.
      */
     static void setupclass();
+
+    /* Function to process incoming messages.
+     */
+    void onmessage(
+        eEnvelope *envelope);
 
     /* Called when property value changes.
      */
