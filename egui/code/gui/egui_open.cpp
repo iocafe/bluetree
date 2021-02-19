@@ -235,6 +235,9 @@ void eGui::open_signal_assembly(
                 return;
             }
             *(property_name++) = '\0';
+            tmp.sets("x.");
+            tmp.appends(property_name);
+            property_name = tmp.gets();
 
             property_nr = assembly->propertynr(property_name);
             if (property_nr < 0) {

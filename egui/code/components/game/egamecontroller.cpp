@@ -91,6 +91,8 @@ void eGameController::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eGameController", EGUICLASSID_COMPONENT);
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
+    addproperty(cls, ECOMP_VALUE, ecomp_value, "value", EPRO_DEFAULT);
+
     addpropertys(cls, ECOMP_GC_MSG, ecomp_gc_msg, ecomp_gc_msg, EPRO_DEFAULT);
     addproperty (cls, ECOMP_GC_COLOR, ecomp_gc_color, ecomp_gc_color, EPRO_SIMPLE);
     addpropertyl(cls, ECOMP_GC_ALIVE, ecomp_gc_alive, ecomp_gc_alive, EPRO_SIMPLE);
