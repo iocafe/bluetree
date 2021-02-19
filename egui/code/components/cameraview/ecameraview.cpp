@@ -182,7 +182,7 @@ eStatus eCameraView::draw(
         r.x -= 2;
         r.y -= 2;
 //         ImGui::Text("%.0fx%.0f", (float)m_texture_w, (float)m_texture_h);
-        ImVec2 pos = ImGui::GetCursorScreenPos();
+        //ImVec2 pos = ImGui::GetCursorScreenPos();
         ImVec2 uv_min = ImVec2(0.0f, 0.0f);                 // Top-left
         ImVec2 uv_max = ImVec2(1.0f, 1.0f);                 // Lower-right
         ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint

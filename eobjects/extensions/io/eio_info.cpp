@@ -515,7 +515,6 @@ eStatus eioRoot::new_assembly_by_info(
 {
     eioAssemblyParams prm;
     eVariable device_id;
-    const os_char *q;
 
     os_memclear(&prm, sizeof(prm));
     prm.name = state->assembly_name;

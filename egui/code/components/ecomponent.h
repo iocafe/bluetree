@@ -61,20 +61,33 @@ class ePopup;
 #define ECOMP_SELECT 60
 #define ECOMP_COMMAND 61
 
-#define ECOMP_GC_ALIVE 70
-#define ECOMP_GC_SPEED 71
-#define ECOMP_GC_TURN 72
-#define ECOMP_GC_L1 73
-#define ECOMP_GC_L2 74
-#define ECOMP_GC_R1 75
-#define ECOMP_GC_R2 76
-#define ECOMP_GC_TRIANG 77
-#define ECOMP_GC_CIRCLE 78
-#define ECOMP_GC_CROSS 79
-#define ECOMP_GC_SQUARE 80
-#define ECOMP_GC_STICKX 81
-#define ECOMP_GC_STICKY 82
-#define ECOMP_GC_COLOR 87
+/* Properties for game controller signals.
+ */
+#define ECOMP_GC_MSG 168
+#define ECOMP_GC_COLOR 169
+#define ECOMP_GC_ALIVE 170
+#define ECOMP_GC_LX 171
+#define ECOMP_GC_LY 172
+#define ECOMP_GC_L 173
+#define ECOMP_GC_L1 174
+#define ECOMP_GC_L2 175
+#define ECOMP_GC_RX 176
+#define ECOMP_GC_RY 177
+#define ECOMP_GC_R 178
+#define ECOMP_GC_R1 179
+#define ECOMP_GC_R2 180
+#define ECOMP_GC_X 181
+#define ECOMP_GC_Y 182
+#define ECOMP_GC_A 183
+#define ECOMP_GC_B 184
+#define ECOMP_GC_DU 185
+#define ECOMP_GC_DL 186
+#define ECOMP_GC_DR 187
+#define ECOMP_GC_DD 188
+#define ECOMP_GC_BACK 189
+#define ECOMP_GC_START 190
+#define ECOMP_GC_GUIDE 191
+
 
 /* Flags for eComponent::setupproperties() to specify which optional properties for
    the component class.
@@ -111,21 +124,33 @@ extern const os_char ecomp_drop_down_list_select[];
 extern const os_char ecomp_select[];
 extern const os_char ecomp_command[];
 
-extern const os_char ecomp_gc_alive[];
-extern const os_char ecomp_gc_speed[];
-extern const os_char ecomp_gc_turn[];
-extern const os_char ecomp_gc_L1[];
-extern const os_char ecomp_gc_L2[];
-extern const os_char ecomp_gc_R1[];
-extern const os_char ecomp_gc_R2[];
-extern const os_char ecomp_gc_triang[];
-extern const os_char ecomp_gc_circle[];
-extern const os_char ecomp_gc_cross[];
-extern const os_char ecomp_gc_square[];
-extern const os_char ecomp_gc_stickx[];
-extern const os_char ecomp_gc_sticky[];
+/* Properties for game controller signals.
+ */
 extern const os_char ecomp_gc_msg[];
 extern const os_char ecomp_gc_color[];
+extern const os_char ecomp_gc_alive[];
+extern const os_char ecomp_gc_LX[];
+extern const os_char ecomp_gc_LY[];
+extern const os_char ecomp_gc_L[];
+extern const os_char ecomp_gc_L1[];
+extern const os_char ecomp_gc_L2[];
+extern const os_char ecomp_gc_RX[];
+extern const os_char ecomp_gc_RY[];
+extern const os_char ecomp_gc_R[];
+extern const os_char ecomp_gc_R1[];
+extern const os_char ecomp_gc_R2[];
+extern const os_char ecomp_gc_X[];
+extern const os_char ecomp_gc_Y[];
+extern const os_char ecomp_gc_A[];
+extern const os_char ecomp_gc_B[];
+extern const os_char ecomp_gc_DU[];
+extern const os_char ecomp_gc_DL[];
+extern const os_char ecomp_gc_DR[];
+extern const os_char ecomp_gc_DD[];
+extern const os_char ecomp_gc_back[];
+extern const os_char ecomp_gc_start[];
+extern const os_char ecomp_gc_guide[];
+
 
 
 /* More specific info about drop position, returned by check_pos() function.

@@ -30,23 +30,30 @@ const os_char
     ecomp_drop_down_list_select[] = "dropselect",
     ecomp_select[] = "_select",
     ecomp_command[] = "_command",
-
+    ecomp_gc_msg[] = "msg",
+    ecomp_gc_color[] = "color",
     ecomp_gc_alive[] = "alive",
-    ecomp_gc_speed[] = "speed",
-    ecomp_gc_turn[] = "turn",
+    ecomp_gc_LX[] = "LX",
+    ecomp_gc_LY[] = "LY",
+    ecomp_gc_L[] = "L",
     ecomp_gc_L1[] = "L1",
     ecomp_gc_L2[] = "L2",
+    ecomp_gc_RX[] = "RX",
+    ecomp_gc_RY[] = "RY",
+    ecomp_gc_R[] = "R",
     ecomp_gc_R1[] = "R1",
     ecomp_gc_R2[] = "R2",
-    ecomp_gc_triang[] = "triang",
-    ecomp_gc_circle[] = "circle",
-    ecomp_gc_cross[] = "cross",
-    ecomp_gc_square[] = "square",
-    ecomp_gc_stickx[] = "stickx",
-    ecomp_gc_sticky[] = "sticky",
-    ecomp_gc_msg[] = "msg",
-    ecomp_gc_color[] = "color";
-
+    ecomp_gc_X[] = "X",
+    ecomp_gc_Y[] = "Y",
+    ecomp_gc_A[] = "A",
+    ecomp_gc_B[] = "B",
+    ecomp_gc_DU[] = "DU",
+    ecomp_gc_DL[] = "DL",
+    ecomp_gc_DR[] = "DR",
+    ecomp_gc_DD[] = "DD",
+    ecomp_gc_back[] = "back",
+    ecomp_gc_start[] = "start",
+    ecomp_gc_guide[] = "guide";
 
 /**
 ****************************************************************************************************

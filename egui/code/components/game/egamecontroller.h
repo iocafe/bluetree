@@ -117,15 +117,19 @@ protected:
     ************************************************************************************************
     */
 
-    os_boolean update_motion(
-        os_timer timer_us,
-        os_boolean change_it);
+    void autocenter_thumbstick(
+        os_int thumbstick_nr0,
+        os_long elapsed_us);
 
     /**
     ************************************************************************************************
       Member variables.
     ************************************************************************************************
     */
+
+    static const os_int
+        m_range_max = 10000,
+        m_nro_thumbsticks = 2;
 
     eStrBuffer
         m_text;
@@ -134,25 +138,34 @@ protected:
         m_alive;
 
     os_short
-        m_speed,
-        m_turn;
+        m_TX[m_nro_thumbsticks],
+        m_TY[m_nro_thumbsticks];
 
     os_boolean
-        m_L1,
-        m_L2,
-        m_R1,
-        m_R2,
-        m_triangle,
-        m_circle,
-        m_cross,
-        m_square;
+        m_T[m_nro_thumbsticks],
+        m_T1[m_nro_thumbsticks],
+        m_T2[m_nro_thumbsticks];
 
-    os_short
-        m_stick_x,
-        m_stick_y;
+    os_boolean
+        m_X,
+        m_Y,
+        m_A,
+        m_B;
+
+    os_boolean
+        m_DU,
+        m_DL,
+        m_DR,
+        m_DD;
+
+    os_boolean
+        m_back,
+        m_start,
+        m_guide;
 
     os_timer
-        m_update_timer;
+        m_update_timer,
+        m_left_timer_press;
 };
 
 

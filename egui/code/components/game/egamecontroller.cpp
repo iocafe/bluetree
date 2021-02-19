@@ -27,7 +27,19 @@ eGameController::eGameController(
     os_int flags)
     : eComponent(parent, id, flags)
 {
+    os_int i;
+
+    m_alive = 0;
+    for (i = 0; i< m_nro_thumbsticks; i++) {
+        m_TX[i] = m_TY[i] = 0;
+        m_T[i] = m_T1[i] = m_T2[i] = OS_FALSE;
+    }
+    m_X = m_Y = m_A = m_B = OS_FALSE;
+    m_DU = m_DL = m_DR = m_DD = OS_FALSE;
+    m_back = m_start = m_guide = OS_FALSE;
+
     os_get_timer(&m_update_timer);
+    m_left_timer_press = m_update_timer;
     timer(330);
 }
 
@@ -79,30 +91,51 @@ void eGameController::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eGameController", EGUICLASSID_COMPONENT);
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
-    addpropertys(cls, ECOMP_TEXT, ecomp_gc_msg, "message", EPRO_DEFAULT);
-    addproperty (cls, ECOMP_GC_COLOR, ecomp_gc_color, "color", EPRO_SIMPLE);
+    addpropertys(cls, ECOMP_GC_MSG, ecomp_gc_msg, ecomp_gc_msg, EPRO_DEFAULT);
+    addproperty (cls, ECOMP_GC_COLOR, ecomp_gc_color, ecomp_gc_color, EPRO_SIMPLE);
+    addpropertyl(cls, ECOMP_GC_ALIVE, ecomp_gc_alive, ecomp_gc_alive, EPRO_SIMPLE);
 
-    addpropertyl(cls, ECOMP_GC_ALIVE, ecomp_gc_alive, "alive", EPRO_SIMPLE);
-    v = addpropertyl(cls, ECOMP_GC_SPEED, ecomp_gc_speed, "speed", EPRO_SIMPLE);
-    v->setpropertyl(EVARP_MIN, -10000);
-    v->setpropertyl(EVARP_MAX, 10000);
-    v->setpropertys(EVARP_UNIT, "%");
-    v->setpropertys(EVARP_TTIP, "1/100 percents of max speed, -10000 (full backwards) .. 10000 (full forward)");
-    v = addpropertyl(cls, ECOMP_GC_TURN, ecomp_gc_turn, "turn", EPRO_SIMPLE);
-    v->setpropertyl(EVARP_MIN, -9000);
-    v->setpropertyl(EVARP_MAX, 9000);
+    v = addpropertyl(cls, ECOMP_GC_LX, ecomp_gc_LX, ecomp_gc_LX, EPRO_SIMPLE);
+    v->setpropertyl(EVARP_MIN, -m_range_max);
+    v->setpropertyl(EVARP_MAX, m_range_max);
     v->setpropertys(EVARP_UNIT, "deg");
-    v->setpropertys(EVARP_TTIP, "1/100 degrees, -9000 (left) .. 9000 (right)");
-    addpropertyb(cls, ECOMP_GC_L1, ecomp_gc_L1, "L1", EPRO_SIMPLE);
-    addpropertyb(cls, ECOMP_GC_L2, ecomp_gc_L2, "L2", EPRO_SIMPLE);
-    addpropertyb(cls, ECOMP_GC_R1, ecomp_gc_R1, "R1", EPRO_SIMPLE);
-    addpropertyb(cls, ECOMP_GC_R2, ecomp_gc_R2, "R2", EPRO_SIMPLE);
-    addpropertyb(cls, ECOMP_GC_TRIANG, ecomp_gc_triang, "triangle", EPRO_SIMPLE);
-    addpropertyb(cls, ECOMP_GC_CIRCLE, ecomp_gc_circle, "circle", EPRO_SIMPLE);
-    addpropertyb(cls, ECOMP_GC_CROSS, ecomp_gc_cross, "cross", EPRO_SIMPLE);
-    addpropertyb(cls, ECOMP_GC_SQUARE, ecomp_gc_square, "square", EPRO_SIMPLE);
-    addpropertyl(cls, ECOMP_GC_STICKX, ecomp_gc_stickx, "stick x", EPRO_SIMPLE);
-    addpropertyl(cls, ECOMP_GC_STICKY, ecomp_gc_sticky, "strick y", EPRO_SIMPLE);
+    v->setpropertys(EVARP_TTIP, "Left thumbstick X: -10000 (left) .. 10000 (right)");
+    v = addpropertyl(cls, ECOMP_GC_LY, ecomp_gc_LY, ecomp_gc_LY, EPRO_SIMPLE);
+    v->setpropertyl(EVARP_MIN, -m_range_max);
+    v->setpropertyl(EVARP_MAX, m_range_max);
+    v->setpropertys(EVARP_UNIT, "%");
+    v->setpropertys(EVARP_TTIP, "Ledt thumbstick Y: -10000 (back) .. 10000 (forward)");
+    addpropertyb(cls, ECOMP_GC_L, ecomp_gc_L, ecomp_gc_L, EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_L1, ecomp_gc_L1, ecomp_gc_L1, EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_L2, ecomp_gc_L2, ecomp_gc_L2, EPRO_SIMPLE);
+
+    v = addpropertyl(cls, ECOMP_GC_RX, ecomp_gc_RX, ecomp_gc_RX, EPRO_SIMPLE);
+    v->setpropertyl(EVARP_MIN, -m_range_max);
+    v->setpropertyl(EVARP_MAX, m_range_max);
+    v->setpropertys(EVARP_UNIT, "deg");
+    v->setpropertys(EVARP_TTIP, "1/100 percents of max, -10000 .. 10000");
+    v = addpropertyl(cls, ECOMP_GC_RY, ecomp_gc_RY, ecomp_gc_RY, EPRO_SIMPLE);
+    v->setpropertyl(EVARP_MIN, -m_range_max);
+    v->setpropertyl(EVARP_MAX, m_range_max);
+    v->setpropertys(EVARP_UNIT, "%");
+    v->setpropertys(EVARP_TTIP, "1/100 percents of max, -10000 .. 10000");
+    addpropertyb(cls, ECOMP_GC_R, ecomp_gc_R, ecomp_gc_R, EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_R1, ecomp_gc_R1, ecomp_gc_R1, EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_R2, ecomp_gc_R2, ecomp_gc_R2, EPRO_SIMPLE);
+
+    addpropertyb(cls, ECOMP_GC_X, ecomp_gc_X, ecomp_gc_X, EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_Y, ecomp_gc_Y, ecomp_gc_Y, EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_A, ecomp_gc_A, ecomp_gc_A, EPRO_SIMPLE);
+    addpropertyb(cls, ECOMP_GC_B, ecomp_gc_B, ecomp_gc_B, EPRO_SIMPLE);
+
+    addpropertyl(cls, ECOMP_GC_DU, ecomp_gc_DU, ecomp_gc_DU, EPRO_SIMPLE);
+    addpropertyl(cls, ECOMP_GC_DU, ecomp_gc_DL, ecomp_gc_DL, EPRO_SIMPLE);
+    addpropertyl(cls, ECOMP_GC_DU, ecomp_gc_DR, ecomp_gc_DR, EPRO_SIMPLE);
+    addpropertyl(cls, ECOMP_GC_DU, ecomp_gc_DD, ecomp_gc_DD, EPRO_SIMPLE);
+
+    addpropertyl(cls, ECOMP_GC_BACK, ecomp_gc_back, ecomp_gc_back, EPRO_SIMPLE);
+    addpropertyl(cls, ECOMP_GC_START, ecomp_gc_start, ecomp_gc_start, EPRO_SIMPLE);
+    addpropertyl(cls, ECOMP_GC_GUIDE, ecomp_gc_guide, ecomp_gc_guide, EPRO_SIMPLE);
 
     propertysetdone(cls);
     os_unlock();
@@ -180,7 +213,7 @@ eStatus eGameController::onpropertychange(
 {
     switch (propertynr)
     {
-        case ECOMP_TEXT:
+        case ECOMP_GC_MSG:
             m_text.clear();
             break;
 
@@ -191,52 +224,88 @@ eStatus eGameController::onpropertychange(
             m_alive = x->getl();
             break;
 
-        case ECOMP_GC_SPEED:
-            m_speed = x->getl();
+        case ECOMP_GC_LX:
+            m_TX[0] = x->getl();
             break;
 
-        case ECOMP_GC_TURN:
-            m_turn = x->getl();
+        case ECOMP_GC_LY:
+            m_TY[0] = x->getl();
+            break;
+
+        case ECOMP_GC_L:
+            m_T[0] = (os_boolean)x->getl();
             break;
 
         case ECOMP_GC_L1:
-            m_L1 = (os_boolean)x->getl();
+            m_T1[0] = (os_boolean)x->getl();
             break;
 
         case ECOMP_GC_L2:
-            m_L2 = (os_boolean)x->getl();
+            m_T2[0] = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_RX:
+            m_TX[1] = x->getl();
+            break;
+
+        case ECOMP_GC_RY:
+            m_TY[1] = x->getl();
+            break;
+
+        case ECOMP_GC_R:
+            m_T[1] = (os_boolean)x->getl();
             break;
 
         case ECOMP_GC_R1:
-            m_R1 = (os_boolean)x->getl();
+            m_T1[1] = (os_boolean)x->getl();
             break;
 
         case ECOMP_GC_R2:
-            m_R2 = (os_boolean)x->getl();
+            m_T2[1] = (os_boolean)x->getl();
             break;
 
-        case ECOMP_GC_TRIANG:
-            m_triangle = (os_boolean)x->getl();
+        case ECOMP_GC_X:
+            m_X = (os_boolean)x->getl();
             break;
 
-        case ECOMP_GC_CIRCLE:
-            m_circle = (os_boolean)x->getl();
+        case ECOMP_GC_Y:
+            m_Y = (os_boolean)x->getl();
             break;
 
-        case ECOMP_GC_CROSS:
-            m_cross = (os_boolean)x->getl();
+        case ECOMP_GC_A:
+            m_A = (os_boolean)x->getl();
             break;
 
-        case ECOMP_GC_SQUARE:
-            m_square = (os_boolean)x->getl();
+        case ECOMP_GC_B:
+            m_B = (os_boolean)x->getl();
             break;
 
-        case ECOMP_GC_STICKX:
-            m_stick_x = x->getl();
+        case ECOMP_GC_DU:
+            m_DU = (os_boolean)x->getl();
             break;
 
-        case ECOMP_GC_STICKY:
-            m_stick_y = x->getl();
+        case ECOMP_GC_DL:
+            m_DL = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_DR:
+            m_DR = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_DD:
+            m_DD = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_BACK:
+            m_back = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_START:
+            m_start = (os_boolean)x->getl();
+            break;
+
+        case ECOMP_GC_GUIDE:
+            m_guide = (os_boolean)x->getl();
             break;
 
         default:
@@ -275,52 +344,88 @@ eStatus eGameController::simpleproperty(
             x->setl(m_alive);
             break;
 
-        case ECOMP_GC_SPEED:
-            x->setl(m_speed);
+        case ECOMP_GC_LX:
+            x->setl(m_TX[0]);
             break;
 
-        case ECOMP_GC_TURN:
-            x->setl(m_turn);
+        case ECOMP_GC_LY:
+            x->setl(m_TY[0]);
+            break;
+
+        case ECOMP_GC_L:
+            x->setl(m_T[0]);
             break;
 
         case ECOMP_GC_L1:
-            x->setl(m_L1);
+            x->setl(m_T1[0]);
             break;
 
         case ECOMP_GC_L2:
-            x->setl(m_L2);
+            x->setl(m_T2[0]);
+            break;
+
+        case ECOMP_GC_RX:
+            x->setl(m_TX[1]);
+            break;
+
+        case ECOMP_GC_RY:
+            x->setl(m_TY[1]);
+            break;
+
+        case ECOMP_GC_R:
+            x->setl(m_T[1]);
             break;
 
         case ECOMP_GC_R1:
-            x->setl(m_R1);
+            x->setl(m_T1[1]);
             break;
 
         case ECOMP_GC_R2:
-            x->setl(m_R2);
+            x->setl(m_T2[1]);
             break;
 
-        case ECOMP_GC_TRIANG:
-            x->setl(m_triangle);
+        case ECOMP_GC_X:
+            x->setl(m_X);
             break;
 
-        case ECOMP_GC_CIRCLE:
-            x->setl(m_circle);
+        case ECOMP_GC_Y:
+            x->setl(m_Y);
             break;
 
-        case ECOMP_GC_CROSS:
-            x->setl(m_cross);
+        case ECOMP_GC_A:
+            x->setl(m_A);
             break;
 
-        case ECOMP_GC_SQUARE:
-            x->setl(m_square);
+        case ECOMP_GC_B:
+            x->setl(m_B);
             break;
 
-        case ECOMP_GC_STICKX:
-            x->setl(m_stick_x);
+        case ECOMP_GC_DU:
+            x->setl(m_DU);
             break;
 
-        case ECOMP_GC_STICKY:
-            x->setl(m_stick_y);
+        case ECOMP_GC_DL:
+            x->setl(m_DL);
+            break;
+
+        case ECOMP_GC_DR:
+            x->setl(m_DR);
+            break;
+
+        case ECOMP_GC_DD:
+            x->setl(m_DD);
+            break;
+
+        case ECOMP_GC_BACK:
+            x->setl(m_back);
+            break;
+
+        case ECOMP_GC_START:
+            x->setl(m_start);
+            break;
+
+        case ECOMP_GC_GUIDE:
+            x->setl(m_guide);
             break;
 
         default:
@@ -347,9 +452,11 @@ eStatus eGameController::draw(
     eDrawParams& prm)
 {
     ImVec2 sz;
-    float speed, turn, xdelta, ydelta;
+    float TY, TX, xdelta, ydelta;
     float xcoeff, ycoeff, xorigin, yorigin, left, right, top, bottom, x, y;
-    os_boolean moving = OS_FALSE, setting_motion = OS_FALSE;
+    os_boolean setting_motion;
+    os_int i;
+    os_long elapsed_us;
 
     add_to_zorder(prm.window, prm.layer);
 
@@ -362,49 +469,75 @@ eStatus eGameController::draw(
     ImDrawList *draw_list = ImGui::GetWindowDrawList();
     ImVec2 r = ImGui::GetContentRegionAvail();
 
-    xcoeff = r.x / 18000.0f;
-    ycoeff = -r.y / 20000.0f;
-    xorigin = cpos.x + xcoeff * 9000.0f;
-    yorigin = cpos.y - ycoeff * 10000.0f;
-    left = xorigin - xcoeff * 9000.0f;
-    right = xorigin + xcoeff * 9000.0f;
-    top = yorigin - ycoeff * 10000.0f;
-    bottom = yorigin + ycoeff * 10000.0f;
+
+    xcoeff = r.x / (float)(2 * m_range_max);
+    ycoeff = -r.y / (float)(2 * m_range_max);
+    if (xcoeff == 0.0 && ycoeff == 0.0) return ESTATUS_SUCCESS;
+    xorigin = cpos.x + xcoeff * m_range_max;
+    yorigin = cpos.y - ycoeff * m_range_max;
+    left = xorigin - xcoeff * m_range_max;
+    right = xorigin + xcoeff * m_range_max;
+    top = yorigin - ycoeff * m_range_max;
+    bottom = yorigin + ycoeff * m_range_max;
 
     ImU32  col = IM_COL32(128, 128, 128, 128);
     draw_list->AddLine(ImVec2(left, yorigin), ImVec2(right, yorigin), col, 1.0f /* thickness */);
     draw_list->AddLine(ImVec2(xorigin, top), ImVec2(xorigin, bottom), col, 1.0f /* thickness */);
 
+    /* Time to update to slide home?
+     */
+    elapsed_us = prm.timer_us - m_update_timer;
+    if (elapsed_us < 10000) elapsed_us = 0;
+    if (elapsed_us > 1000000) elapsed_us = 1000000;
+    if (elapsed_us) {
+        m_update_timer = prm.timer_us;
+    }
+
+    setting_motion = -1;
     if (ImGui::IsWindowHovered())
     {
-        if (prm.mouse_left_press && xcoeff != 0.0 && ycoeff != 0.0) {
-
-            turn = (prm.mouse_pos.x - xorigin) / xcoeff;
-            xdelta = turn - m_turn;
-            speed = (prm.mouse_pos.y - yorigin) / ycoeff;
-            ydelta = speed - m_speed;
-            if (turn >= -9000.0f && turn <= 9000.0f &&
-                speed >= -10000.0f && speed <= 10000.0f)
-            {
-                if (xdelta*xdelta > 100)
-                    setpropertyl(ECOMP_GC_TURN, os_round_short(turn));
-
-                if (ydelta*ydelta > 100)
-                    setpropertyl(ECOMP_GC_SPEED, os_round_short(speed));
-            }
-
-            setting_motion = OS_TRUE;
+        if (prm.mouse_left_press) {
+            setting_motion = 0;
+            m_left_timer_press = prm.timer_us;
+        }
+        else if (prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON] &&
+            prm.timer_us > m_left_timer_press + 100000)
+        {
+            setting_motion = 1;
+            prm.mouse_click[EIMGUI_RIGHT_MOUSE_BUTTON] = OS_FALSE;
         }
     }
 
-    moving = update_motion(prm.timer_us, !setting_motion);
-    if (moving) {
-        x = xorigin + xcoeff * m_turn;
-        y = yorigin + ycoeff * m_speed;
-        col = IM_COL32(255, 255, 100, 250);
-        draw_list->AddLine(ImVec2(left, y), ImVec2(right, y), col, 2.0f /* thickness */);
-        draw_list->AddLine(ImVec2(x, top), ImVec2(x, bottom), col, 2.0f /* thickness */);
+    for (i = 0; i < m_nro_thumbsticks; i++)
+    {
+        if (setting_motion == i)
+        {
+            TX = (prm.mouse_pos.x - xorigin) / xcoeff;
+            xdelta = TX - m_TX[i];
+            TY = (prm.mouse_pos.y - yorigin) / ycoeff;
+            ydelta = TY - m_TY[i];
+            if (TX >= -m_range_max && TX <= m_range_max &&
+                TY >= -m_range_max && TY <= m_range_max)
+            {
+                if (xdelta*xdelta > 100)
+                    setpropertyl(i ? ECOMP_GC_RX : ECOMP_GC_LX, os_round_short(TX));
 
+                if (ydelta*ydelta > 100)
+                    setpropertyl(i ? ECOMP_GC_RY : ECOMP_GC_LY, os_round_short(TY));
+            }
+        }
+
+        if (i == 0 && setting_motion != 0 && elapsed_us) {
+            autocenter_thumbstick(i, elapsed_us);
+        }
+
+        if (m_TX[i] != 0.0f || m_TY[i] != 0.0f) {
+            x = xorigin + xcoeff * m_TX[i];
+            y = yorigin + ycoeff * m_TY[i];
+            col = i ? IM_COL32(255, 255, 90, 250) : IM_COL32(90, 255, 90, 250);
+            draw_list->AddLine(ImVec2(left, y), ImVec2(right, y), col, 2.0f /* thickness */);
+            draw_list->AddLine(ImVec2(x, top), ImVec2(x, bottom), col, 2.0f /* thickness */);
+        }
     }
 
     sz.x = r.x;
@@ -416,67 +549,62 @@ eStatus eGameController::draw(
     /* Let base class implementation handle the rest.
      */
     return eComponent::draw(prm);
-
 }
 
 
-os_boolean eGameController::update_motion(
-    os_timer timer_us,
-    os_boolean change_it)
+/**
+****************************************************************************************************
+
+  @brief Auto center left thumbstick.
+
+  The GameController::autocenter_thumbstick() function moves left thumbstick (simulation)
+  back to center 0,0 once mouse is received.
+
+  @param   thumbstick_nr 0 for left thumbstick, 1 for right.
+  @param   elapsed_us How long has elaapsed since last update, microseconds.
+
+****************************************************************************************************
+*/
+void eGameController::autocenter_thumbstick(
+    os_int thumbstick_nr0,
+    os_long elapsed_us)
 {
-    os_long elapsed_us;
-    const os_double speed_change_per_sec = 7000.0;
-    const os_double turn_change_per_sec = 3500.0;
-    os_boolean rval = OS_FALSE;
+    const os_double TY_change_per_sec = 0.7 * m_range_max;
+    const os_double TX_change_per_sec = 0.35  * m_range_max;
     os_double change_max;
-    os_short speed, turn;
+    os_short TY, TX;
 
-    /*  How long since last update call
+    /* Speed change (0.000001: us->s).
      */
-    elapsed_us = timer_us - m_update_timer;
-    if (elapsed_us < 0) elapsed_us = 0;
-    if (elapsed_us > 1000000) elapsed_us = 1000000;
-    m_update_timer = timer_us;
-
-    /* Speed change.
-     */
-    change_max = 0.000001 * elapsed_us * speed_change_per_sec;
-    if (m_speed > change_max) {
-        speed = m_speed - (os_short)change_max;
+    change_max = 0.000001 * elapsed_us * TY_change_per_sec;
+    if (m_TY[thumbstick_nr0] > change_max) {
+        TY = m_TY[thumbstick_nr0] - (os_short)change_max;
     }
-    else if (m_speed < -change_max) {
-        speed = m_speed + (os_short)change_max;
+    else if (m_TY[thumbstick_nr0] < -change_max) {
+        TY = m_TY[thumbstick_nr0] + (os_short)change_max;
     }
     else {
-        speed = 0;
+        TY = 0;
     }
-    if (speed != m_speed) {
-        if (change_it) {
-            setpropertyl(ECOMP_GC_SPEED, speed);
-        }
-        rval = OS_TRUE;
+    if (TY != m_TY[thumbstick_nr0]) {
+        setpropertyl(thumbstick_nr0 ? ECOMP_GC_RY : ECOMP_GC_LY, TY);
     }
 
-    /* Turn change.
+    /* Turn change (0.000001: us->s).
      */
-    change_max = 0.000001 * elapsed_us * turn_change_per_sec;
-    if (m_turn > change_max) {
-        turn = m_turn - (os_short)change_max;
+    change_max = 0.000001 * elapsed_us * TX_change_per_sec;
+    if (m_TX[thumbstick_nr0] > change_max) {
+        TX = m_TX[thumbstick_nr0] - (os_short)change_max;
     }
-    else if (m_turn < -change_max) {
-        turn = m_turn + (os_short)change_max;
+    else if (m_TX[thumbstick_nr0] < -change_max) {
+        TX = m_TX[thumbstick_nr0] + (os_short)change_max;
     }
     else {
-        turn = 0;
+        TX = 0;
     }
-    if (turn != m_turn) {
-        if (change_it) {
-            setpropertyl(ECOMP_GC_TURN, turn);
-        }
-        rval = OS_TRUE;
+    if (TX != m_TX[thumbstick_nr0]) {
+        setpropertyl(thumbstick_nr0 ? ECOMP_GC_RX : ECOMP_GC_LX, TX);
     }
-
-    return rval;
 }
 
 
@@ -492,7 +620,7 @@ os_boolean eGameController::update_motion(
   When the mouse click is not processed, it is passed to parent object in z order.
 
   @param   prm Drawing parameters, notice especially edit_mode.
-  @param   mouse_gamecontroller_nr Which mouse gamecontroller, for example EIMGUI_LEFT_MOUSE_GAME_CONTROLLER.
+  @param   mouse_button_nr Which mouse button, for example EIMGUI_LEFT_MOUSE_BUTTON.
 
   @return  OS_TRUE if mouse click was processed by this component, or OS_FALSE if not.
 
@@ -500,12 +628,12 @@ os_boolean eGameController::update_motion(
 */
 os_boolean eGameController::on_click(
     eDrawParams& prm,
-    os_int mouse_gamecontroller_nr)
+    os_int mouse_button_nr)
 {
-    if (!prm.edit_mode && mouse_gamecontroller_nr == EIMGUI_LEFT_MOUSE_BUTTON) {
+    if (!prm.edit_mode && mouse_button_nr == EIMGUI_LEFT_MOUSE_BUTTON) {
         return OS_TRUE;
     }
-    return eComponent::on_click(prm, mouse_gamecontroller_nr);
+    return eComponent::on_click(prm, mouse_button_nr);
 }
 
 
