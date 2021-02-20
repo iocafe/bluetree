@@ -23,7 +23,7 @@ include_directories("$ENV{E_ROOT}/${E_REPO}/eobjects")
 include_directories("$ENV{E_ROOT}/${E_REPO}/econnect")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code/imgui")
-include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code/imgui_libs/styleserializer")
+include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code/imgui_libs")
 
 
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/glfw_opengl3/imgui")
