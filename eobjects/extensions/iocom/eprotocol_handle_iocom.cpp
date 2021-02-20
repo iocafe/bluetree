@@ -27,9 +27,8 @@ eioProtocolHandle::eioProtocolHandle(
     os_int flags)
     : eProtocolHandle(parent, oid, flags)
 {
-    os_memclear(&m_iocom, sizeof(m_iocom)); //  eiocomStateStruct m_iocom;
-    m_is_open = OS_FALSE;
-    // m_isrunning = OS_FALSE;
+    os_memclear(&m_iocom, sizeof(m_iocom));
+    m_is_iocom_end_point = OS_FALSE;
 }
 
 
@@ -54,57 +53,10 @@ void eioProtocolHandle::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eioProtocolHandle", ECLASSID_PROTOCOL_HANDLE);
-    p = addpropertyb(cls, EPROHANDP_ISOPEN, eprohandp_isopen, OS_FALSE, "is open", EPRO_DEFAULT);
+    p = addpropertyb(cls, EPROHANDP_ISOPEN, eprohandp_isopen, "is open", EPRO_SIMPLE);
     p->setpropertys(EVARP_ATTR, "rdonly");
     propertysetdone(cls);
     os_unlock();
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Called to inform the class about property value change (override).
-
-  The onpropertychange() function is called when class'es property changes, unless the
-  property is flagged with EPRO_NOONPRCH.
-  If property is flagged as EPRO_SIMPLE, this function shuold save the property value
-  in class members and and return it when simpleproperty() is called.
-
-  @param   propertynr Property number of changed property.
-  @param   x Variable containing the new value.
-  @param   flags
-  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Nonzero return values do
-           indicate that there was no property with given property number.
-
-****************************************************************************************************
-*/
-eStatus eioProtocolHandle::onpropertychange(
-    os_int propertynr,
-    eVariable *x,
-    os_int flags)
-{
-    os_boolean is_open;
-
-    switch (propertynr)
-    {
-        case EPROHANDP_ISOPEN:
-            is_open = x->geti();
-            if (is_open != m_is_open) {
-                m_is_open = is_open;
-                docallback(ECALLBACK_STATUS_CHANGED);
-            }
-            return ESTATUS_SUCCESS;
-
-        default:
-            break;
-    }
-
-    return eObject::onpropertychange(propertynr, x, flags);
-}
-
-os_boolean eioProtocolHandle::isrunning()
-{
-    return m_iocom.con.worker.thread_running;
-}
 

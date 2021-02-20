@@ -63,13 +63,6 @@ public:
         return new ecomProtocolHandle(parent, id, flags);
     }
 
-    /* Called when property value changes.
-     */
-    virtual eStatus onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags);
-
 
     /**
     ************************************************************************************************

@@ -134,6 +134,7 @@ public:
      */
     virtual os_boolean is_connection_running(
         eProtocolHandle *handle);
+
 };
 
 #endif

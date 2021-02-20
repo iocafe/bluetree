@@ -57,6 +57,19 @@ public:
      */
     static void setupclass();
 
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
+    /* Get value of simple property (override).
+     */
+    virtual eStatus simpleproperty(
+        os_int propertynr,
+        eVariable *x);
+
     /**
     ************************************************************************************************
       Protocol handle functions.
@@ -66,6 +79,14 @@ public:
     /* Check if connection or end point is running.
      */
     virtual os_boolean isrunning() = 0;
+
+    /**
+    ************************************************************************************************
+      Member variables
+    ************************************************************************************************
+    */
+    os_boolean m_is_open;
+
 };
 
 

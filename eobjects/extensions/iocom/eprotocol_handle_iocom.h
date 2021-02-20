@@ -24,7 +24,6 @@
 ****************************************************************************************************
 */
 
-
 typedef union {
     iocConnection con;
     iocEndPoint epoint;
@@ -66,36 +65,24 @@ public:
         return new eioProtocolHandle(parent, id, flags);
     }
 
-    /* Called when property value changes.
-     */
-    virtual eStatus onpropertychange(
-        os_int propertynr,
-        eVariable *x,
-        os_int flags);
-
-
     /**
     ************************************************************************************************
       Protocol handle functions.
     ************************************************************************************************
     */
 
-    /* Check if connection or end point is running.
-     */
-    virtual os_boolean isrunning(); // {return m_isrunning; }
-
+    virtual os_boolean isrunning() {return m_is_open; }
     inline iocEndPoint *epoint() {return &m_iocom.epoint; }
     inline iocConnection *con() {return &m_iocom.con; }
-    // inline void set_isrunning(os_boolean running) {m_isrunning = running; }
+
+    inline void mark_iocom_end_point(os_boolean is_iocom_end_point)
+        {m_is_iocom_end_point = is_iocom_end_point; }
+
+    inline os_boolean is_iocom_end_point()
+        {return m_is_iocom_end_point; }
 
 
 protected:
-    /**
-    ************************************************************************************************
-      Internal functions.
-    ************************************************************************************************
-    */
-
 
     /**
     ************************************************************************************************
@@ -103,9 +90,9 @@ protected:
     ************************************************************************************************
     */
     eiocomStateStruct m_iocom;
+    // os_boolean m_is_open;
+    os_boolean m_is_iocom_end_point;
 
-    os_boolean m_is_open;
-    // os_boolean m_isrunning;
 };
 
 
