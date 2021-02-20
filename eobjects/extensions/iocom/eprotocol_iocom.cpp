@@ -146,7 +146,7 @@ eProtocolHandle *eioProtocol::new_end_point(
     }
 
     prmstr = parameters->port;
-    cflags |= IOC_LISTENER|/* IOC_DYNAMIC_MBLKS|*/IOC_CREATE_THREAD;
+    cflags |= IOC_LISTENER|IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
     return new_con_helper(prmstr, iface, cflags, s);
 }
 
@@ -194,7 +194,7 @@ eProtocolHandle *eioProtocol::new_connection(
     }
 
     prmstr = parameters->parameters;
-    cflags |= /* IOC_DYNAMIC_MBLKS| */IOC_CREATE_THREAD;
+    cflags |= IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
     return new_con_helper(prmstr, iface, cflags, s);
 }
 
