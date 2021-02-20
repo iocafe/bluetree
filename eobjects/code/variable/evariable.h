@@ -292,12 +292,12 @@ public:
      */
     os_boolean isempty();
 
-    /** Get variable value as integer.
+    /** Get variable value as shorter integer types.
      */
-    inline os_int geti()
-    {
-        return (os_int)getl();
-    }
+    inline os_boolean getb() { return (os_boolean)getl(); }
+    inline os_short geth() { return (os_short)getl(); }
+    inline os_ushort getuh() { return (os_ushort)getl(); }
+    inline os_int geti() { return (os_int)getl(); }
 
     /* Get variable value as long integer.
      */

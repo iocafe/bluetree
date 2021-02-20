@@ -30,6 +30,7 @@ eioRoot::eioRoot(
     m_time_now = 0;
     m_io_trigger = OS_NULL;
     m_run_assemblies = new eContainer(ETEMPORARY);
+    m_iocom_root = OS_NULL;
 
     initproperties();
     ns_create();
@@ -150,11 +151,11 @@ void eioRoot::io_root_callback(
     switch (event)
     {
         case IOC_NEW_MEMORY_BLOCK:
-            if (!os_strcmp(minfo.mblk_name, "info")) {
-                ioc_add_callback(&mblk->handle, info_callback, context);
-            }
-
             if (mblk) {
+                if (!os_strcmp(minfo.mblk_name, "info")) {
+                    ioc_add_callback(&mblk->handle, info_callback, context);
+                }
+
                 t->connected(&minfo);
             }
             else {

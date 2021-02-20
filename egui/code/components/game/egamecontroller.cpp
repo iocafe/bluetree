@@ -223,91 +223,91 @@ eStatus eGameController::onpropertychange(
             break;
 
         case ECOMP_GC_ALIVE:
-            m_alive = x->getl();
+            m_alive = x->getuh();
             break;
 
         case ECOMP_GC_LX:
-            m_TX[0] = x->getl();
+            m_TX[0] = x->geth();
             break;
 
         case ECOMP_GC_LY:
-            m_TY[0] = x->getl();
+            m_TY[0] = x->geth();
             break;
 
         case ECOMP_GC_L:
-            m_T[0] = (os_boolean)x->getl();
+            m_T[0] = x->getb();
             break;
 
         case ECOMP_GC_L1:
-            m_T1[0] = (os_boolean)x->getl();
+            m_T1[0] = x->getb();
             break;
 
         case ECOMP_GC_L2:
-            m_T2[0] = (os_boolean)x->getl();
+            m_T2[0] = x->getb();
             break;
 
         case ECOMP_GC_RX:
-            m_TX[1] = x->getl();
+            m_TX[1] = x->geth();
             break;
 
         case ECOMP_GC_RY:
-            m_TY[1] = x->getl();
+            m_TY[1] = x->geth();
             break;
 
         case ECOMP_GC_R:
-            m_T[1] = (os_boolean)x->getl();
+            m_T[1] = x->getb();
             break;
 
         case ECOMP_GC_R1:
-            m_T1[1] = (os_boolean)x->getl();
+            m_T1[1] = x->getb();
             break;
 
         case ECOMP_GC_R2:
-            m_T2[1] = (os_boolean)x->getl();
+            m_T2[1] = x->getb();
             break;
 
         case ECOMP_GC_X:
-            m_X = (os_boolean)x->getl();
+            m_X = x->getb();
             break;
 
         case ECOMP_GC_Y:
-            m_Y = (os_boolean)x->getl();
+            m_Y = x->getb();
             break;
 
         case ECOMP_GC_A:
-            m_A = (os_boolean)x->getl();
+            m_A = x->getb();
             break;
 
         case ECOMP_GC_B:
-            m_B = (os_boolean)x->getl();
+            m_B = x->getb();
             break;
 
         case ECOMP_GC_DU:
-            m_DU = (os_boolean)x->getl();
+            m_DU = x->getb();
             break;
 
         case ECOMP_GC_DL:
-            m_DL = (os_boolean)x->getl();
+            m_DL = x->getb();
             break;
 
         case ECOMP_GC_DR:
-            m_DR = (os_boolean)x->getl();
+            m_DR = x->getb();
             break;
 
         case ECOMP_GC_DD:
-            m_DD = (os_boolean)x->getl();
+            m_DD = x->getb();
             break;
 
         case ECOMP_GC_BACK:
-            m_back = (os_boolean)x->getl();
+            m_back = x->getb();
             break;
 
         case ECOMP_GC_START:
-            m_start = (os_boolean)x->getl();
+            m_start = x->getb();
             break;
 
         case ECOMP_GC_GUIDE:
-            m_guide = (os_boolean)x->getl();
+            m_guide = x->getb();
             break;
 
         default:

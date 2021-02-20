@@ -323,11 +323,11 @@ void eioDevice::set_bound(
     b = OS_FALSE;
     for (item = m_io->first(); item && !b; item = item->next()) {
         if (!item->isinstanceof(ECLASSID_EIO_VARIABLE)) continue;
-        b = item->propertyl(EIOP_BOUND);
+        b = item->propertyb(EIOP_BOUND);
     }
     for (item = m_assemblies->first(); item && !b; item = item->next()) {
         if (!item->isinstanceof(ECLASSID_EIO_ASSEMBLY)) continue;
-        b = item->propertyl(EIOP_BOUND);
+        b = item->propertyb(EIOP_BOUND);
     }
 
     /*

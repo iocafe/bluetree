@@ -206,7 +206,7 @@ void eioVariable::set_bound(
 
 
 void eioVariable::setup(
-    struct eioSignal *signal,
+    class eioSignal *signal,
     struct eioMblkInfo *minfo,
     struct eioSignalInfo *sinfo)
 {

@@ -957,6 +957,9 @@ public:
     os_long propertyl(
         os_int propertynr);
 
+    inline os_int propertyb(
+        os_int propertynr) {return (os_boolean)propertyl(propertynr);}
+
     inline os_int propertyi(
         os_int propertynr) {return (os_int)propertyl(propertynr);}
 

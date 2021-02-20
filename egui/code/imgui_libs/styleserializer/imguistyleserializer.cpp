@@ -120,7 +120,6 @@ void ImGuiSetuptyle( bool bStyleDark_, float alpha_  )
 
 bool ImGuiSaveStyle(const char* filename,const ImGuiStyle& style)
 {
-    // Write .style file
     FILE* f = fopen(filename, "wt");
     if (!f)  return false;
 
@@ -140,7 +139,7 @@ bool ImGuiSaveStyle(const char* filename,const ImGuiStyle& style)
     for (size_t i = 0; i != ImGuiCol_COUNT; i++)
     {
         const ImVec4& c = style.Colors[i];
-        fprintf(f, "[%s]\n", ImGui::GetStyleColorName(i));
+        fprintf(f, "[%s]\n", ImGui::GetStyleColorName((ImGuiCol)i));
         fprintf(f, "%1.3f %1.3f %1.3f %1.3f\n",c.x,c.y,c.z,c.w);
     }
 

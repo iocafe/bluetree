@@ -218,7 +218,7 @@ eStatus eBitmap::onpropertychange(
     switch (propertynr)
     {
         case EBITMAPP_SBITS:
-            m_state_bits = x->getl();
+            m_state_bits = (os_uchar)x->getl();
             break;
 
         case EBITMAPP_TSTAMP:
@@ -486,7 +486,7 @@ eStatus eBitmap::reader(
     if (stream->getl(&tmp)) goto failed;
     m_timestamp = tmp;
     if (stream->getl(&tmp)) goto failed;
-    m_state_bits = tmp;
+    m_state_bits = (os_uchar)tmp;
 
     resize((osalBitmapFormat)format, (os_int)width, (os_int)height,
         m_compression == EBITMAP_UNCOMPRESSED
@@ -1024,7 +1024,7 @@ eStatus eBitmap::uncompress()
         m_buf = alloc_context.buf;
         m_buf_sz = alloc_context.buf_sz;
         m_buf_alloc_sz = alloc_context.nbytes;
-        m_row_nbytes = alloc_context.row_nbytes;
+        m_row_nbytes = (os_int)alloc_context.row_nbytes;
         m_width = alloc_context.w;
         m_height = alloc_context.h;
         m_format = alloc_context.format;

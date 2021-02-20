@@ -20,7 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\code\components\button\ebutton.h" />
+    <ClInclude Include="..\..\code\components\cameraview\ecameraview.h" />
     <ClInclude Include="..\..\code\components\ecomponent.h" />
+    <ClInclude Include="..\..\code\components\game\egamecontroller.h" />
     <ClInclude Include="..\..\code\components\lineedit\elineedit.h" />
     <ClInclude Include="..\..\code\components\parameterlist\eparameterlist.h" />
     <ClInclude Include="..\..\code\components\popup\epopup.h" />
@@ -44,6 +46,7 @@
     <ClInclude Include="..\..\code\imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\code\imgui\imstb_truetype.h" />
     <ClInclude Include="..\..\code\imgui_iface\eimgui_iface.h" />
+    <ClInclude Include="..\..\code\imgui_libs\styleserializer\imguistyleserializer.h" />
     <ClInclude Include="..\..\code\initialize\eguiclasslist.h" />
     <ClInclude Include="..\..\code\initialize\eguiglobal.h" />
     <ClInclude Include="..\..\egui.h" />
@@ -52,7 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\code\components\button\ebutton.cpp" />
+    <ClCompile Include="..\..\code\components\cameraview\ecameraview.cpp" />
     <ClCompile Include="..\..\code\components\ecomponent.cpp" />
+    <ClCompile Include="..\..\code\components\game\egamecontroller.cpp" />
     <ClCompile Include="..\..\code\components\lineedit\elineedit.cpp" />
     <ClCompile Include="..\..\code\components\parameterlist\eparameterlist.cpp" />
     <ClCompile Include="..\..\code\components\popup\epopup.cpp" />
@@ -75,9 +80,16 @@
     <ClCompile Include="..\..\code\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\..\code\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\code\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\..\code\imgui_libs\styleserializer\imguistyleserializer.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\..\code\initialize\eguiclasslist.cpp" />
     <ClCompile Include="..\..\code\initialize\eguiinitialize.cpp" />
     <ClCompile Include="..\..\glfw_opengl3\eimgui_iface\eimgui_iface_glfw_opengl3.cpp" />
+    <ClCompile Include="..\..\glfw_opengl3\eimgui_iface\eimgui_texture_opengl3.cpp" />
     <ClCompile Include="..\..\glfw_opengl3\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="..\..\glfw_opengl3\imgui\imgui_impl_opengl3.cpp" />
   </ItemGroup>
@@ -160,7 +172,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -174,7 +186,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -190,7 +202,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions);GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -208,7 +220,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -52,7 +52,7 @@ typedef struct eioInfoParserState
     const os_char *assembly_name;
     const os_char *exp_str;
     const os_char *imp_str;
-    os_long timeout_ms;
+    os_int timeout_ms;
 
     /** Trick to get memory block name before processing signals. "groups" position
         is stored here to return to signals after memory block name has been received.

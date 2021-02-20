@@ -7,6 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glass", "glass.vcxproj", "{
 	ProjectSection(ProjectDependencies) = postProject
 		{19FB0104-F92B-4FF2-BD45-577449621E88} = {19FB0104-F92B-4FF2-BD45-577449621E88}
 		{F187B8DA-B7E3-428E-B852-CC59031394F0} = {F187B8DA-B7E3-428E-B852-CC59031394F0}
+		{701D17E7-F77F-446B-B63A-A2DD165CCC4D} = {701D17E7-F77F-446B-B63A-A2DD165CCC4D}
 		{E4A3C5EC-5D37-4EEF-8DE1-E2D597A0E31F} = {E4A3C5EC-5D37-4EEF-8DE1-E2D597A0E31F}
 		{E54534F6-30CF-4951-8394-76006662F159} = {E54534F6-30CF-4951-8394-76006662F159}
 	EndProjectSection
@@ -18,6 +19,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "eosal", "..\..\..\..\eosal\osbuild\vs2019\eosal.vcxproj", "{E4A3C5EC-5D37-4EEF-8DE1-E2D597A0E31F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iocom", "..\..\..\..\iocom\osbuild\vs2019\iocom.vcxproj", "{19FB0104-F92B-4FF2-BD45-577449621E88}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "eosal_jpeg", "..\..\..\..\eosal\dependencies\eosal_jpeg\osbuild\vs2019\eosal_jpeg.vcxproj", "{701D17E7-F77F-446B-B63A-A2DD165CCC4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +70,14 @@ Global
 		{19FB0104-F92B-4FF2-BD45-577449621E88}.Release|x64.Build.0 = Release|x64
 		{19FB0104-F92B-4FF2-BD45-577449621E88}.Release|x86.ActiveCfg = Release|Win32
 		{19FB0104-F92B-4FF2-BD45-577449621E88}.Release|x86.Build.0 = Release|Win32
+		{701D17E7-F77F-446B-B63A-A2DD165CCC4D}.Debug|x64.ActiveCfg = Debug|x64
+		{701D17E7-F77F-446B-B63A-A2DD165CCC4D}.Debug|x64.Build.0 = Debug|x64
+		{701D17E7-F77F-446B-B63A-A2DD165CCC4D}.Debug|x86.ActiveCfg = Debug|Win32
+		{701D17E7-F77F-446B-B63A-A2DD165CCC4D}.Debug|x86.Build.0 = Debug|Win32
+		{701D17E7-F77F-446B-B63A-A2DD165CCC4D}.Release|x64.ActiveCfg = Release|x64
+		{701D17E7-F77F-446B-B63A-A2DD165CCC4D}.Release|x64.Build.0 = Release|x64
+		{701D17E7-F77F-446B-B63A-A2DD165CCC4D}.Release|x86.ActiveCfg = Release|Win32
+		{701D17E7-F77F-446B-B63A-A2DD165CCC4D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -84,7 +84,7 @@ public:
     ************************************************************************************************
     */
     void setup(
-        struct eioSignal *signal,
+        class eioSignal *signal,
         struct eioMblkInfo *minfo,
         struct eioSignalInfo *sinfo);
 

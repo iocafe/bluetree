@@ -18,7 +18,7 @@
 #define EIO_ASSEMBLY_H_
 #include "extensions/io/eio.h"
 
-struct eioDevice;
+class eioDevice;
 
 /**
 ****************************************************************************************************
@@ -32,7 +32,7 @@ typedef struct eioAssemblyParams
     const os_char *type_str;
     const os_char *exp_str;
     const os_char *imp_str;
-    os_long timeout_ms;
+    os_int timeout_ms;
 }
 eioAssemblyParams;
 

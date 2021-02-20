@@ -293,7 +293,7 @@ eStatus eValueX::reader(
      */
     if (stream->getl(&m_timestamp)) goto failed;
     if (stream->getl(&tmp)) goto failed;
-    m_state_bits = tmp;
+    m_state_bits = (os_int)tmp;
 
     /* End the object.
      */
