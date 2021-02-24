@@ -174,7 +174,8 @@ protected:
         os_boolean is_ipv6,
         eContainer *rows,
         eContainer *addr_blocklist,
-        eContainer *name_blocklist);
+        eContainer *name_blocklist,
+        os_int contable_row);
 
     /* Create and delete connections.
      */
@@ -197,9 +198,10 @@ protected:
         eContainer *con);
 
     void set_con_status(
-        os_int row_nr,
+        os_int slist_row,
+        os_int contab_row,
         const os_char *column_name,
-        eVariable *value);
+        os_boolean value);
 
     /* A callback by a child object.
      */

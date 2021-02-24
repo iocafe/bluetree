@@ -730,7 +730,6 @@ void eConnection::disconnected()
         /* Check for binding related messages, memorize bindings through this connection.
          */
         monitor_binds(envelope);
-
         notarget(envelope);
         delete envelope;
     }
@@ -873,18 +872,15 @@ eStatus eConnection::read()
 
     if (m_stream == OS_NULL) return ESTATUS_FAILED;
 
-    if (m_envelope == OS_NULL)
-    {
+    if (m_envelope == OS_NULL) {
         m_envelope = new eEnvelope(this);
     }
 
     s = m_envelope->reader(m_stream, EOBJ_SERIALIZE_DEFAULT);
-    if (s == ESTATUS_NO_WHOLE_MESSAGES_TO_READ)
-    {
+    if (s == ESTATUS_NO_WHOLE_MESSAGES_TO_READ) {
         return ESTATUS_SUCCESS;
     }
-    if (s)
-    {
+    if (s) {
         delete(m_envelope);
         m_envelope = OS_NULL;
         return s;
@@ -903,7 +899,6 @@ eStatus eConnection::read()
         oixstr(buf, sizeof(buf));
         os_strncat(buf, "/_r", sizeof(buf));
         m_envelope->prependsource(buf);
-        /* m_envelope->prependsourceoix(this); */
     }
     m_envelope->addmflags(EMSG_NO_NEW_SOURCE_OIX);
     message(m_envelope);

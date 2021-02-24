@@ -25,6 +25,7 @@ extern const os_char enet_conn_name[];
 extern const os_char enet_conn_protocol[];
 extern const os_char enet_conn_ip[];
 extern const os_char enet_conn_transport[];
+extern const os_char enet_conn_row[];
 extern const os_char enet_conn_ok[];
 
 typedef enum {
@@ -33,7 +34,8 @@ typedef enum {
     ENET_CONN_TRANSPORT,
     ENET_CONN_IP,
 
-    ENET_CONN_PROTOCOL_HANDLE
+    ENET_CONN_PROTOCOL_HANDLE,
+    ENET_CONN_ROW
 }
 enetConnItemId;
 

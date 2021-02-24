@@ -22,6 +22,7 @@ const os_char enet_conn_name[] = "name";
 const os_char enet_conn_protocol[] = "protocol";
 const os_char enet_conn_ip[] = "ip";
 const os_char enet_conn_transport[] = "transport";
+const os_char enet_conn_row[] = "conrow";
 const os_char enet_conn_ok[] = "ok";
 
 /**
@@ -310,6 +311,14 @@ void eNetMaintainThread::create_socket_list_table()
         "- \'SERIAL\': serial communication.\n");
 
     column = new eVariable(columns);
+    column->addname(enet_conn_row, ENAME_NO_MAP);
+    column->setpropertyi(EVARP_TYPE, OS_INT);
+    column->setpropertys(EVARP_TEXT, "connect row");
+    column->setpropertys(EVARP_ATTR, "rdonly");
+    column->setpropertys(EVARP_TTIP,
+        "Row of connect table which resulted this row.");
+
+    column = new eVariable(columns);
     column->addname(enet_conn_ok, ENAME_NO_MAP);
     column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
     column->setpropertys(EVARP_TEXT, "ready");
@@ -347,7 +356,7 @@ void eNetMaintainThread::merge_to_socket_list()
     os_int enable_col, name_col, protocol_col, transport_col, ip_col, port_nr;
     eVariable *lh_name, *lh_nick, *lh_protocol, *lh_ip;
     os_int lh_name_col, lh_nick_col, lh_protocol_col, lh_ip_col, lh_tlsport_col, lh_tcpport_col;
-    os_int h, lh_h, con_nr, i;
+    os_int h, lh_h, contable_row, i;
     enetConnTransportIx transport_ix;
     os_boolean is_ipv6;
 
@@ -408,17 +417,17 @@ void eNetMaintainThread::merge_to_socket_list()
     os_lock();
     h = m->nrows();
     lh_h = lh->nrows();
-    for (con_nr = 0; con_nr < h; con_nr++) {
-        if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
-        if (m->geti(con_nr, enable_col) == 0) continue;
+    for (contable_row = 0; contable_row < h; contable_row++) {
+        if ((m->geti(contable_row, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
+        if (m->geti(contable_row, enable_col) == 0) continue;
 
-        m->getv(con_nr, name_col, namelist);
+        m->getv(contable_row, name_col, namelist);
         if (namelist->isempty() || namelist->type() != OS_STR) {
             namelist->sets("*");
         }
-        m->getv(con_nr, ip_col, ip);
-        m->getv(con_nr, protocol_col, protocol);
-        transport_ix = (enetConnTransportIx)m->getl(con_nr, transport_col);
+        m->getv(contable_row, ip_col, ip);
+        m->getv(contable_row, protocol_col, protocol);
+        transport_ix = (enetConnTransportIx)m->getl(contable_row, transport_col);
 
         /* Get ip address string, port number (0 if not set) and is_tls flag
          */
@@ -459,7 +468,7 @@ void eNetMaintainThread::merge_to_socket_list()
             if (os_strcmp(ip_str, "*"))
             {
                 add_socket_to_list(name_str, protocol, transport_ix, ip_str, port_nr,
-                    is_ipv6, rows, addr_blocklist, name_blocklist);
+                    is_ipv6, rows, addr_blocklist, name_blocklist, contable_row);
                 break;
             }
 
@@ -507,7 +516,7 @@ void eNetMaintainThread::merge_to_socket_list()
 
                 if (port_nr) {
                     add_socket_to_list(lh_name_str, protocol, transport_ix, lh_ip_str, port_nr,
-                        is_ipv6, rows, addr_blocklist, name_blocklist);
+                        is_ipv6, rows, addr_blocklist, name_blocklist, contable_row);
                 }
             }
         }
@@ -540,7 +549,8 @@ void eNetMaintainThread::add_socket_to_list(
     os_boolean is_ipv6,
     eContainer *rows,
     eContainer *addr_blocklist,
-    eContainer *name_blocklist)
+    eContainer *name_blocklist,
+    os_int contable_row)
 {
     eContainer *row, *c;
     eVariable *v;
@@ -587,6 +597,10 @@ void eNetMaintainThread::add_socket_to_list(
     v = new eVariable(row);
     v->addname(enet_conn_transport, ENAME_NO_MAP);
     v->setl(transport_ix);
+
+    v = new eVariable(row);
+    v->addname(enet_conn_row, ENAME_NO_MAP);
+    v->setl(contable_row + 1);
 }
 
 
@@ -608,10 +622,10 @@ void eNetMaintainThread::maintain_connections()
     eMatrix *m;
     eObject *conf;
     eContainer *localvars, *columns, *con, *next_con, *index, *c, *next_c;
-    eVariable *con_name, *ip, *protocol;
+    eVariable *con_name, *ip, *protocol, *con_row_p;
     eVariable *ip_p, *protocol_p, *transport_p;
-    os_int protocol_col, transport_col, ip_col;
-    os_int h, con_nr;
+    os_int protocol_col, transport_col, ip_col, con_row_col;
+    os_int h, socklist_row, con_row;
     enetConnTransportIx transport_ix;
     eStatus s;
 
@@ -629,6 +643,7 @@ void eNetMaintainThread::maintain_connections()
     // name_col = etable_column_ix(enet_conn_name, columns);
     protocol_col = etable_column_ix(enet_conn_protocol, columns);
     ip_col = etable_column_ix(enet_conn_ip, columns);
+    con_row_col = etable_column_ix(enet_conn_row, columns);
     transport_col = etable_column_ix(enet_conn_transport, columns);
 
     /* Make index "name->row nr" for socket list.
@@ -636,16 +651,16 @@ void eNetMaintainThread::maintain_connections()
     index = new eContainer(localvars);
     index->ns_create();
     h = m->nrows();
-    for (con_nr = 0; con_nr < h; con_nr++)
+    for (socklist_row = 0; socklist_row < h; socklist_row++)
     {
-        if ((m->geti(con_nr, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
+        if ((m->geti(socklist_row, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
 
-        m->getv(con_nr, ip_col, ip);
-        m->getv(con_nr, protocol_col, protocol);
-        transport_ix = (enetConnTransportIx)m->getl(con_nr, transport_col);
+        m->getv(socklist_row, ip_col, ip);
+        m->getv(socklist_row, protocol_col, protocol);
+        transport_ix = (enetConnTransportIx)m->getl(socklist_row, transport_col);
         make_connection_name(con_name, protocol, ip, transport_ix);
 
-        c = new eContainer(index, con_nr);
+        c = new eContainer(index, socklist_row);
         c->addname(con_name->gets());
     }
 
@@ -690,13 +705,13 @@ void eNetMaintainThread::maintain_connections()
 
         /* Row of socket list table is:
          */
-        con_nr = c->oid();
+        socklist_row = c->oid();
 
         /* Make connection name
          */
-        m->getv(con_nr, ip_col, ip);
-        m->getv(con_nr, protocol_col, protocol);
-        transport_ix = (enetConnTransportIx)m->getl(con_nr, transport_col);
+        m->getv(socklist_row, ip_col, ip);
+        m->getv(socklist_row, protocol_col, protocol);
+        transport_ix = (enetConnTransportIx)m->getl(socklist_row, transport_col);
         make_connection_name(con_name, protocol, ip, transport_ix);
 
         /* If we already have this connection, activate it. Either
@@ -736,13 +751,14 @@ void eNetMaintainThread::maintain_connections()
 
         /* Row of socket list table is:
          */
-        con_nr = c->oid();
+        socklist_row = c->oid();
 
         /* Make connection name
          */
-        m->getv(con_nr, ip_col, ip);
-        m->getv(con_nr, protocol_col, protocol);
-        transport_ix = (enetConnTransportIx)m->getl(con_nr, transport_col);
+        m->getv(socklist_row, ip_col, ip);
+        m->getv(socklist_row, protocol_col, protocol);
+        con_row = m->geti(socklist_row, con_row_col);
+        transport_ix = (enetConnTransportIx)m->getl(socklist_row, transport_col);
         make_connection_name(con_name, protocol, ip, transport_ix);
 
         /* If we do not have this connection, create it.
@@ -766,7 +782,7 @@ void eNetMaintainThread::maintain_connections()
                 continue;
             }
 
-            con = new eContainer(m_connections, con_nr);
+            con = new eContainer(m_connections, socklist_row);
             con->addname(con_name->gets());
             ip_p = new eVariable(con, ENET_CONN_IP);
             ip_p->setv(ip);
@@ -774,6 +790,9 @@ void eNetMaintainThread::maintain_connections()
             protocol_p->setv(protocol);
             transport_p = new eVariable(con, ENET_CONN_TRANSPORT);
             transport_p->setl(transport_ix);
+            con_row_p = new eVariable(con, ENET_CONN_ROW);
+            con_row_p->setl(con_row);
+
             handle->adopt(con, ENET_CONN_PROTOCOL_HANDLE);
             handle->setflags(EOBJ_PERSISTENT_CALLBACK);
             con->setflags(EOBJ_PERSISTENT_CALLBACK);
@@ -881,41 +900,73 @@ void eNetMaintainThread::delete_con(
 void eNetMaintainThread::con_status_changed(
     eContainer *con)
 {
-    eVariable *tmp;
+    eVariable *con_row_p;
+    os_boolean value;
 
     eProtocolHandle *handle;
     handle = (eProtocolHandle*)con->first(ENET_CONN_PROTOCOL_HANDLE);
-    if (handle == OS_NULL) return;
+    con_row_p = con->firstv(ENET_CONN_ROW);
+    if (handle == OS_NULL || con_row_p == OS_NULL) {
+        return;
+    }
 
-    tmp = new eVariable(ETEMPORARY);
-    handle->propertyv(EPROHANDP_ISOPEN, tmp);
-    set_con_status(con->oid(), enet_conn_ok, tmp);
-    delete tmp;
+    value = handle->propertyb(EPROHANDP_ISOPEN);
+    set_con_status(con->oid(), con_row_p->geti() - 1, enet_conn_ok, value);
 }
 
 void eNetMaintainThread::set_con_status(
-    os_int row_nr,
+    os_int slist_row,
+    os_int contab_row,
     const os_char *column_name,
-    eVariable *value)
+    os_boolean value)
 {
     eVariable *element, *where;
-    eContainer *row;
+    eContainer *row, *conf, *columns;
+    eMatrix *m;
+    os_int is_open_col, h, socklist_row;
 
     where = new eVariable(ETEMPORARY);
     row = new eContainer(ETEMPORARY);
 
     element = new eVariable(row);
     element->addname(column_name, ENAME_NO_MAP);
-    element->setv(value);
+    element->setl(value);
 
     where->sets("[");
-    where->appendl(row_nr + 1);
+    where->appendl(slist_row + 1);
     where->appends("]");
-    etable_update(this, "//_netmaintain/socketlist", OS_NULL, where->gets(), row,
-        ETABLE_ADOPT_ARGUMENT);
 
-//    etable_update(this, "//netservice/connect", OS_NULL, where->gets(), row,
-//        ETABLE_ADOPT_ARGUMENT);
+    /* Update intermediate socket list table.
+     */
+    m_socket_list_matrix->update(where->gets(), row, 0);
+
+    /* If connection was disabled, see if there are others left for this connection table row.
+     * If some other still open, just return.
+     */
+    if (!value) {
+        m = m_socket_list_matrix;
+        conf = m->configuration();
+        if (conf == OS_NULL) return;
+        columns = conf->firstc(EOID_TABLE_COLUMNS);
+        if (columns == OS_NULL) return;
+        is_open_col = etable_column_ix(column_name, columns);
+        h = m->nrows();
+
+        for (socklist_row = 0; socklist_row < h; socklist_row++)
+        {
+            if (m->geti(socklist_row, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) {
+                if (m->getl(socklist_row, is_open_col)) return;
+            }
+        }
+    }
+
+    /* Update user's "connect to" table.
+     */
+    where->sets("[");
+    where->appendl(contab_row + 1);
+    where->appends("]");
+    etable_update(this, "//netservice/connect", OS_NULL, where->gets(), row,
+        ETABLE_ADOPT_ARGUMENT);
 
     delete where;
 }
