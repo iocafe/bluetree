@@ -193,6 +193,14 @@ protected:
     void delete_con(
         eContainer *con);
 
+    void con_status_changed(
+        eContainer *con);
+
+    void set_con_status(
+        os_int row_nr,
+        const os_char *column_name,
+        eVariable *value);
+
     /* A callback by a child object.
      */
     virtual eStatus oncallback(

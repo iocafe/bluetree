@@ -22,6 +22,7 @@ const os_char enet_conn_name[] = "name";
 const os_char enet_conn_protocol[] = "protocol";
 const os_char enet_conn_ip[] = "ip";
 const os_char enet_conn_transport[] = "transport";
+const os_char enet_conn_ok[] = "ok";
 
 /**
 ****************************************************************************************************
@@ -122,6 +123,14 @@ void eNetService::create_connect_table()
         "- \'SOCKET\': Plain socket connection, unsecured.\n"
         "- \'TLS\': TLS connection.\n"
         "- \'SERIAL\': Serial communication.\n");
+
+    column = new eVariable(columns);
+    column->addname(enet_conn_ok, ENAME_NO_MAP);
+    column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
+    column->setpropertys(EVARP_TEXT, "ready");
+    column->setpropertys(EVARP_ATTR, "nosave,rdonly");
+    column->setpropertys(EVARP_TTIP,
+        "At least one connection is on.");
 
 #if 0
     column = new eVariable(columns);
@@ -299,6 +308,14 @@ void eNetMaintainThread::create_socket_list_table()
         "- \'SOCKET\': unsecured socket.\n"
         "- \'TLS\': secure TLS socket.\n"
         "- \'SERIAL\': serial communication.\n");
+
+    column = new eVariable(columns);
+    column->addname(enet_conn_ok, ENAME_NO_MAP);
+    column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
+    column->setpropertys(EVARP_TEXT, "ready");
+    column->setpropertys(EVARP_ATTR, "nosave,rdonly");
+    column->setpropertys(EVARP_TTIP,
+        "Connected or ready to connect.");
 
     /* ETABLE_ADOPT_ARGUMENT -> configuration will be released from memory.
      */
@@ -749,7 +766,7 @@ void eNetMaintainThread::maintain_connections()
                 continue;
             }
 
-            con = new eContainer(m_connections);
+            con = new eContainer(m_connections, con_nr);
             con->addname(con_name->gets());
             ip_p = new eVariable(con, ENET_CONN_IP);
             ip_p->setv(ip);
@@ -758,6 +775,8 @@ void eNetMaintainThread::maintain_connections()
             transport_p = new eVariable(con, ENET_CONN_TRANSPORT);
             transport_p->setl(transport_ix);
             handle->adopt(con, ENET_CONN_PROTOCOL_HANDLE);
+            handle->setflags(EOBJ_PERSISTENT_CALLBACK);
+            con->setflags(EOBJ_PERSISTENT_CALLBACK);
         }
     }
 
@@ -855,4 +874,48 @@ void eNetMaintainThread::delete_con(
         }
     }
     delete con;
+}
+
+/* Update end point status "ok", etc.
+ */
+void eNetMaintainThread::con_status_changed(
+    eContainer *con)
+{
+    eVariable *tmp;
+
+    eProtocolHandle *handle;
+    handle = (eProtocolHandle*)con->first(ENET_CONN_PROTOCOL_HANDLE);
+    if (handle == OS_NULL) return;
+
+    tmp = new eVariable(ETEMPORARY);
+    handle->propertyv(EPROHANDP_ISOPEN, tmp);
+    set_con_status(con->oid(), enet_conn_ok, tmp);
+    delete tmp;
+}
+
+void eNetMaintainThread::set_con_status(
+    os_int row_nr,
+    const os_char *column_name,
+    eVariable *value)
+{
+    eVariable *element, *where;
+    eContainer *row;
+
+    where = new eVariable(ETEMPORARY);
+    row = new eContainer(ETEMPORARY);
+
+    element = new eVariable(row);
+    element->addname(column_name, ENAME_NO_MAP);
+    element->setv(value);
+
+    where->sets("[");
+    where->appendl(row_nr + 1);
+    where->appends("]");
+    etable_update(this, "//_netmaintain/socketlist", OS_NULL, where->gets(), row,
+        ETABLE_ADOPT_ARGUMENT);
+
+//    etable_update(this, "//netservice/connect", OS_NULL, where->gets(), row,
+//        ETABLE_ADOPT_ARGUMENT);
+
+    delete where;
 }

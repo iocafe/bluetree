@@ -58,5 +58,3 @@ void eioProtocolHandle::setupclass()
     propertysetdone(cls);
     os_unlock();
 }
-
-

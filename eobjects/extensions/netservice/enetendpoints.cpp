@@ -349,7 +349,6 @@ delete_it:
         proto = protocol_by_name(proto_name);
         if (proto == OS_NULL) {
             osal_debug_error_str("Unknown protocol: ", proto_name->gets());
-            // update status in table
             continue;
         }
 
@@ -361,7 +360,6 @@ delete_it:
         handle = proto->new_end_point(ep_nr, &prm, &s);
         if (handle == OS_NULL) {
             osal_debug_error_str("unable to create end point: ", proto_name->gets());
-            // update status in table, status s
             continue;
         }
         handle->adopt(ep, ENET_ENDP_PROTOCOL_HANDLE);
@@ -426,6 +424,7 @@ void eNetMaintainThread::ep_status_changed(
 
     eProtocolHandle *handle;
     handle = (eProtocolHandle*)ep->first(ENET_ENDP_PROTOCOL_HANDLE);
+    if (handle == OS_NULL) return;
 
     tmp = new eVariable(ETEMPORARY);
     handle->propertyv(EPROHANDP_ISOPEN, tmp);

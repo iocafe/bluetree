@@ -49,12 +49,15 @@ eNetMaintainThread::eNetMaintainThread(
     m_trigger_connect_check_by_lighthouse = OS_FALSE;
     m_connect_timer = 0;
     m_connections = new eContainer(this);
+    m_connections->setflags(EOBJ_PERSISTENT_CALLBACK);
     m_connections->ns_create();
     m_timer_ms = 0;
     m_lighthouse_modif_count = 0;
 
     initproperties();
     ns_create();
+    m_connections->addname("connections");
+    m_end_points->addname("endpoints");
 }
 
 
@@ -298,15 +301,15 @@ eStatus eNetMaintainThread::oncallback(
     eObject *obj,
     eObject *appendix)
 {
-    // os_int nr;
-
     switch (event)
     {
         case ECALLBACK_STATUS_CHANGED:
             if (appendix == OS_NULL) break;
-            // nr = appendix->oid();
             if (obj == m_end_points) {
                 ep_status_changed(eContainer::cast(appendix));
+            }
+            else if (obj == m_connections) {
+                con_status_changed(eContainer::cast(appendix));
             }
             break;
 
