@@ -131,6 +131,9 @@ public:
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM);
 
+    /* Get OSAL stream handle.
+     */
+    virtual osalStream osstream() { return m_stream; }
 
 protected:
 

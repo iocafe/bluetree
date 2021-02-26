@@ -337,6 +337,10 @@ public:
     eStatus gets(
         eVariable *x);
 
+    /* Get OSAL stream handle, or OS_NULL if there is no OSAL handle.
+     */
+    virtual osalStream osstream() { return OS_NULL; }
+
 
     /**
     ************************************************************************************************

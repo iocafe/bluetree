@@ -26,6 +26,7 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
+#include "iocom.h"
 
 /* Connection property names.
  */
@@ -65,6 +66,10 @@ eConnection::eConnection(
     m_delete_on_error = OS_FALSE;
     m_envelope = OS_NULL;
     m_enable = OS_TRUE;
+    m_authentication_frame_sent = OS_FALSE;
+    m_authentication_frame_received = OS_FALSE;
+    m_auth_send_buf = OS_NULL;
+    m_auth_recv_buf = OS_NULL;
     m_client_bindings = new eContainer(this);
     m_client_bindings->ns_create();
     m_server_bindings = new eContainer(this);
@@ -87,6 +92,15 @@ eConnection::eConnection(
 eConnection::~eConnection()
 {
     close();
+
+    if (m_auth_send_buf) {
+        os_free(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
+        m_auth_send_buf = OS_NULL;
+    }
+    if (m_auth_recv_buf) {
+        os_free(m_auth_recv_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
+        m_auth_recv_buf = OS_NULL;
+    }
 }
 
 
@@ -429,6 +443,16 @@ void eConnection::run()
          */
         if (m_stream)
         {
+            s = handle_authentication_frames();
+            if (s == ESTATUS_PENDING) {
+                os_timeslice();
+                continue;
+            }
+            if (s != ESTATUS_SUCCESS) {
+                close();
+                continue;
+            }
+
             /* Set slow timer for keepalive messages. About 1 per 30 seconds.
                This allows socket library to detect dead socket, and keeps
                sockets which are connected trough system which disconnects
@@ -528,6 +552,78 @@ void eConnection::run()
 /**
 ****************************************************************************************************
 
+  @brief New connection, transfer authentication frames to both directions.
+
+  The eConnection::handle_authentication_frames() function sends and receives an authentication
+  frame.
+
+  @return  ESTATUS_SUCCESS Authentication frame has been received and processed.
+           ESTATUS_PENDING Authentication frame not yet send, but no error thus far.
+           Other return values indicate an error.
+
+****************************************************************************************************
+*/
+eStatus eConnection::handle_authentication_frames()
+{
+    osalStatus ss;
+
+    if (!m_authentication_frame_received) {
+        if (m_auth_recv_buf == OS_NULL) {
+            m_auth_recv_buf = (iocSwitchboxAuthenticationFrameBuffer*)
+                os_malloc(sizeof(iocSwitchboxAuthenticationFrameBuffer), OS_NULL);
+            os_memclear(m_auth_recv_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
+        }
+
+        iocAuthenticationResults results;
+        ss = icom_switchbox_process_authentication_frame(m_stream->osstream(),
+            m_auth_recv_buf, &results);
+        if (ss == OSAL_COMPLETED) {
+            os_free(m_auth_recv_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
+            m_auth_recv_buf = OS_NULL;
+            m_authentication_frame_received = OS_TRUE;
+        }
+        else if (ss != OSAL_PENDING) {
+            osal_debug_error("eConnection: Valid authentication frame was not received");
+            return ESTATUS_FAILED;
+        }
+    }
+
+    if (!m_authentication_frame_sent)
+    {
+        if (m_auth_send_buf == OS_NULL) {
+            m_auth_send_buf = (iocSwitchboxAuthenticationFrameBuffer*)
+                os_malloc(sizeof(iocSwitchboxAuthenticationFrameBuffer), OS_NULL);
+            os_memclear(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
+        }
+
+        iocSwitchboxAuthenticationParameters prm;
+        os_memclear(&prm, sizeof(prm));
+        ss = icom_switchbox_send_authentication_frame(m_stream->osstream(),
+            m_auth_send_buf, &prm);
+        if (ss == OSAL_COMPLETED) {
+            os_free(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
+            m_auth_send_buf = OS_NULL;
+            m_authentication_frame_sent = OS_TRUE;
+        }
+        else if (ss != OSAL_PENDING) {
+            osal_debug_error("eConnection: Failed to send authentication frame");
+            return ESTATUS_FAILED;
+        }
+    }
+
+    if (!m_authentication_frame_sent ||
+        !m_authentication_frame_received)
+    {
+        os_timeslice();
+        return ESTATUS_PENDING;
+    }
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
   @brief Incoming connection has been accepted.
 
   The eConnection::accepted() function adopts connected incoming stream and starts communicating
@@ -598,6 +694,16 @@ void eConnection::open()
     /* No new writes to socket, etc. yet
      */
     m_new_writes = OS_FALSE;
+    m_authentication_frame_sent = OS_FALSE;
+    m_authentication_frame_received = OS_FALSE;
+    if (m_auth_send_buf) {
+        os_free(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
+        m_auth_send_buf = OS_NULL;
+    }
+    if (m_auth_recv_buf) {
+        os_free(m_auth_recv_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
+        m_auth_recv_buf = OS_NULL;
+    }
 }
 
 
@@ -905,5 +1011,4 @@ eStatus eConnection::read()
     m_envelope = OS_NULL;
     return ESTATUS_SUCCESS;
 }
-
 

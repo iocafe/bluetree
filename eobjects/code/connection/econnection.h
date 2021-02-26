@@ -21,6 +21,7 @@
 #define ECONNECTION_H_
 #include "eobjects.h"
 
+struct iocSwitchboxAuthenticationFrameBuffer;
 
 /**
 ****************************************************************************************************
@@ -130,6 +131,10 @@ public:
     virtual eStatus accepted(
         eStream *stream);
 
+    /* Send authentication frame to the socket.
+     */
+    void send_authentication_frame();
+
 
 protected:
 
@@ -138,6 +143,10 @@ protected:
       Protected member functions.
     ************************************************************************************************
     */
+
+    /* New connection, transfer authentication frames to both directions.
+     */
+    eStatus handle_authentication_frames();
 
     /* Open the connection (connect)
      */
@@ -241,6 +250,22 @@ protected:
     /** Delete the connection if case socket fails.
      */
     os_boolean m_delete_on_error;
+
+    /** Flag indicating that the authentication frame has been sent after the connection was opened.
+     */
+    os_boolean m_authentication_frame_sent;
+
+    /** Flag indicating that the authentication frame has received sent after the connection was opened.
+     */
+    os_boolean m_authentication_frame_received;
+
+    /** Buffer for receiving authentication frame. OS_NULL if the buffer is not allocated.
+     */
+    struct iocSwitchboxAuthenticationFrameBuffer *m_auth_send_buf;
+
+    /** Buffer for sending authentication frame. OS_NULL if the buffer is not allocated.
+     */
+    struct iocSwitchboxAuthenticationFrameBuffer *m_auth_recv_buf;
 };
 
 #endif
