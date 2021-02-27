@@ -450,6 +450,7 @@ void eConnection::run()
             }
             if (s != ESTATUS_SUCCESS) {
                 close();
+                os_timeslice();
                 continue;
             }
 
