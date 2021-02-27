@@ -615,6 +615,7 @@ eStatus eConnection::handle_authentication_frames()
         !m_authentication_frame_received)
     {
         os_timeslice();
+        m_stream->flush();
         return ESTATUS_PENDING;
     }
     return ESTATUS_SUCCESS;
