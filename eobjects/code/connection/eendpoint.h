@@ -158,6 +158,10 @@ protected:
      */
     os_boolean m_initialized;
 
+    /** End point has been successfully opened.
+     */
+    os_boolean m_isopen;
+
     /** We tried to open socket port and failed.
      */
     os_boolean m_open_failed;

@@ -127,7 +127,7 @@ void eConnection::setupclass()
     eclasslist_add(cls, (eNewObjFunc)newobj, "eConnection", ECLASSID_THREAD);
     addproperty(cls, ECONNP_CLASSID, econnp_classid, "class ID", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty(cls, ECONNP_IPADDR, econnp_ipaddr, "IP", EPRO_PERSISTENT|EPRO_SIMPLE);
-    p = addpropertyb(cls, ECONNP_ISOPEN, econnp_isopen, OS_FALSE, "is open", EPRO_NOONPRCH);
+    p = addpropertyb(cls, ECONNP_ISOPEN, econnp_isopen, OS_FALSE, "is open", EPRO_SIMPLE);
     p->setpropertys(EVARP_ATTR, "rdonly");
     addpropertyb(cls, ECONNP_ENABLE, econnp_enable, OS_TRUE, "enable", EPRO_DEFAULT);
     propertysetdone(cls);
@@ -160,8 +160,12 @@ eStatus eConnection::onpropertychange(
 {
     switch (propertynr)
     {
+        case ECONNP_ISOPEN:
+            m_connected = x->getb();
+            break;
+
         case ECONNP_CLASSID:
-            m_stream_classid = (os_int)x->getl();
+            m_stream_classid = x->geti();
             close();
             break;
 
@@ -210,6 +214,10 @@ eStatus eConnection::simpleproperty(
 {
     switch (propertynr)
     {
+        case ECONNP_ISOPEN:
+            x->setl(m_connected);
+            break;
+
         case EENDPP_CLASSID:
             x->setl(m_stream_classid);
             break;
@@ -250,7 +258,6 @@ void eConnection::browse_list_namespace(
     item = new eVariable(content, EBROWSE_NSPACE);
     appendix = new eSet(item, EOID_APPENDIX, EOBJ_IS_ATTACHMENT);
     appendix->sets(EBROWSE_PATH, "_r");
-    //        appendix->sets(EBROWSE_ITEM_TYPE, listitem->isdir ? "d" : "f");
     appendix->sets(EBROWSE_IPATH, "_r");
     item->setpropertys(EVARP_TEXT, "route");
 
@@ -799,9 +806,8 @@ eStatus eConnection::connected()
         delete envelope;
     }
 
-    /* Mark that we are connected and update indicator.
+    /* Mark that we are connected.
      */
-    m_connected = OS_TRUE;
     setpropertyl(ECONNP_ISOPEN, OS_TRUE);
 
     /* If we have something to write, flush it now.
@@ -868,7 +874,6 @@ void eConnection::disconnected()
         }
     }
 
-    m_connected = OS_FALSE;
     setpropertyl(ECONNP_ISOPEN, OS_FALSE);
     m_connection_failed_once = OS_TRUE;
     m_initbuffer->clear();

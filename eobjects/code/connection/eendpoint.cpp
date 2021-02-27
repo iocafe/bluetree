@@ -41,6 +41,7 @@ eEndPoint::eEndPoint(
     m_stream = OS_NULL;
     m_initialized = OS_FALSE;
     m_open_failed = OS_FALSE;
+    m_isopen = OS_FALSE;
     m_stream_classid = ECLASSID_OSSTREAM;
     m_ipaddr = new eVariable(this);
     m_accept_count = 0;
@@ -81,7 +82,7 @@ void eEndPoint::setupclass()
     eclasslist_add(cls, (eNewObjFunc)newobj, "eEndPoint", ECLASSID_THREAD);
     addproperty(cls, EENDPP_CLASSID, eendpp_classid, "class ID", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty(cls, EENDPP_IPADDR, eendpp_ipaddr, "IP", EPRO_PERSISTENT|EPRO_SIMPLE);
-    p = addpropertyb(cls, EENDPP_ISOPEN, eendpp_isopen, OS_FALSE, "is open", EPRO_NOONPRCH);
+    p = addpropertyb(cls, EENDPP_ISOPEN, eendpp_isopen, OS_FALSE, "is open", EPRO_SIMPLE);
     p->setpropertys(EVARP_ATTR, "rdonly");
     propertysetdone(cls);
     os_unlock();
@@ -113,8 +114,12 @@ eStatus eEndPoint::onpropertychange(
 {
     switch (propertynr)
     {
+        case EENDPP_ISOPEN:
+            m_isopen = x->getb();
+            break;
+
         case EENDPP_CLASSID:
-            m_stream_classid = (os_int)x->getl();
+            m_stream_classid = x->geti();
             close();
             open();
             break;
@@ -157,6 +162,10 @@ eStatus eEndPoint::simpleproperty(
 {
     switch (propertynr)
     {
+        case EENDPP_ISOPEN:
+            x->setl(m_isopen);
+            break;
+
         case EENDPP_CLASSID:
             x->setl(m_stream_classid);
             break;
