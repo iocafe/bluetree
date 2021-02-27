@@ -235,12 +235,15 @@ eProtocolHandle *eioProtocol::new_con_helper(
         epprm.parameters = prmstr;
         ss = ioc_listen(ep, &epprm);
         if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
+
+p->setpropertyi(EPROHANDP_ISOPEN, OS_TRUE);
     }
     else
     {
         con = p->con();
         p->mark_iocom_end_point(OS_FALSE);
         ioc_initialize_connection(con, m_iocom_root);
+        ioc_set_connection_callback(con, connection_callback, p);
         os_memclear(&conprm, sizeof(conprm));
         conprm.iface = iface;
         conprm.flags = cflags;
@@ -249,8 +252,42 @@ eProtocolHandle *eioProtocol::new_con_helper(
         if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
     }
 
-    p->setpropertyi(EPROHANDP_ISOPEN, OS_TRUE);
+//    p->setpropertyi(EPROHANDP_ISOPEN, OS_TRUE);
     return p;
+}
+
+/* Callback when connection is established or dropped.
+ */
+void eioProtocol::connection_callback(
+    struct iocConnection *conf,
+    iocConnectionEvent event,
+    void *context)
+{
+    eProcess *process;
+    os_boolean value;
+    eioProtocolHandle *p;
+    p = (eioProtocolHandle*)context;
+
+    /* Complex way to set property, we are now called by different thread which doesn't
+       own eioProtocolHandle and thus must not property directly.
+     */
+    switch (event) {
+        case IOC_CONNECTION_ESTABLISHED:
+            value = OS_TRUE;
+            break;
+
+        case IOC_CONNECTION_DROPPED:
+            value = OS_FALSE;
+            break;
+
+        default:
+            return;
+    }
+
+    os_lock();
+    process = eglobal->process;
+    process->setpropertyl_msg(p->path_to_self(), value, eprohandp_isopen);
+    os_unlock();
 }
 
 
@@ -321,7 +358,6 @@ void eioProtocol::delete_connection(
         while (ioc_terminate_connection_thread(con)) {
             os_timeslice();
         }
-
         ioc_release_connection(p->con());
         p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
     }

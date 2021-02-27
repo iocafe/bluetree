@@ -29,6 +29,7 @@ eioProtocolHandle::eioProtocolHandle(
 {
     os_memclear(&m_iocom, sizeof(m_iocom));
     m_is_iocom_end_point = OS_FALSE;
+    oixstr(m_path_to_self, sizeof(m_path_to_self));
 }
 
 

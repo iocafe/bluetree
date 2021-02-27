@@ -31,7 +31,6 @@ typedef union {
 eiocomStateStruct;
 
 
-
 /**
 ****************************************************************************************************
   eioProtocolHandle class.
@@ -81,6 +80,8 @@ public:
     inline os_boolean is_iocom_end_point()
         {return m_is_iocom_end_point; }
 
+    inline const os_char *path_to_self() { return m_path_to_self; }
+
 
 protected:
 
@@ -90,9 +91,8 @@ protected:
     ************************************************************************************************
     */
     eiocomStateStruct m_iocom;
-    // os_boolean m_is_open;
     os_boolean m_is_iocom_end_point;
-
+    os_char m_path_to_self[E_OIXSTR_BUF_SZ];
 };
 
 
