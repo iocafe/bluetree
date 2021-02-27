@@ -444,9 +444,15 @@ void eConnection::run()
         if (m_stream)
         {
             auth_s = handle_authentication_frames();
+            /* If we are still authenticating, do not start the real communication.
+             */
+            if (auth_s == ESTATUS_PENDING) {
+                os_sleep(50);
+                continue;
+            }
             if (ESTATUS_IS_ERROR(auth_s)) {
                 close();
-                os_timeslice();
+                os_sleep(50);
                 continue;
             }
 
@@ -470,12 +476,6 @@ void eConnection::run()
             if (s)
             {
                 close();
-                continue;
-            }
-
-            /* If we are still authenticating, do not start the real communication.
-             */
-            if (auth_s == ESTATUS_PENDING) {
                 continue;
             }
 
