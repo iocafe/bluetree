@@ -505,9 +505,8 @@ void eObject::message_oix(
     count = oixparse(envelope->target(), &oix, &ucnt);
     if (count == 0) {
 #if OSAL_DEBUG
-        if ((envelope->flags() & EMSG_NO_ERRORS) == 0)
-        {
-            osal_debug_error("message() failed: object index format error, not \"@11_2\" format");
+        if ((envelope->flags() & EMSG_NO_ERRORS) == 0) {
+            osal_debug_error("message_oix() failed: object index format error, not \"@11_2\" format");
         }
 #endif
         goto getout;
@@ -517,13 +516,18 @@ void eObject::message_oix(
      */
     os_lock();
     handle = eget_handle(oix);
+    if (handle == OS_NULL) {
+        os_unlock();
+        osal_debug_error("message_oix() failed: Invalid object index");
+        goto getout;
+    }
+
     if (ucnt != handle->m_ucnt)
     {
         os_unlock();
 #if OSAL_DEBUG
-        if ((envelope->flags() & EMSG_NO_ERRORS) == 0)
-        {
-            osal_debug_error("message() failed: target object has been deleted");
+        if ((envelope->flags() & EMSG_NO_ERRORS) == 0) {
+            osal_debug_error("message_oix() failed: target object has been deleted");
         }
 #endif
         goto getout;

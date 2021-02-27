@@ -163,7 +163,13 @@ inline eContainer *eglobal_root()
 inline eHandle *eget_handle(
     e_oix oix)
 {
-    return eglobal->hroot.m_table[oix >> EHANDLE_HANDLE_BITS]->m_handle + (oix & EHANDLE_TABLE_MASK);
+    eHandleTable *htab;
+    os_uint hix;
+    hix = (oix >> EHANDLE_HANDLE_BITS);
+    if (hix >= EHANDLE_TABLE_LEN) return OS_NULL;
+    htab = eglobal->hroot.m_table[oix >> EHANDLE_HANDLE_BITS];
+    if (htab == OS_NULL) return OS_NULL;
+    return htab->m_handle + (oix & EHANDLE_TABLE_MASK);
 }
 
 
