@@ -591,14 +591,19 @@ eStatus eConnection::handle_authentication_frames()
 
     if (!m_authentication_frame_sent)
     {
+        iocSwitchboxAuthenticationParameters prm;
+        os_memclear(&prm, sizeof(prm));
+
         if (m_auth_send_buf == OS_NULL) {
             m_auth_send_buf = (iocSwitchboxAuthenticationFrameBuffer*)
                 os_malloc(sizeof(iocSwitchboxAuthenticationFrameBuffer), OS_NULL);
             os_memclear(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
+
+            prm.network_name = "net";
+            prm.user_name = "user";
+            prm.password = "?";
         }
 
-        iocSwitchboxAuthenticationParameters prm;
-        os_memclear(&prm, sizeof(prm));
         ss = icom_switchbox_send_authentication_frame(m_stream->osstream(),
             m_auth_send_buf, &prm);
         if (ss == OSAL_COMPLETED) {
