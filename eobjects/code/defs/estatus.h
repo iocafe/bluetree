@@ -54,10 +54,6 @@ typedef enum
      */
     ESTATUS_PENDING = OSAL_PENDING,
 
-    /** Unidentified failure.
-     */
-    ESTATUS_FAILED = OSAL_STATUS_FAILED,
-
     /** Accept stream function: No new incoming connection.
      */
     ESTATUS_NO_NEW_CONNECTION = OSAL_NO_NEW_CONNECTION,
@@ -70,6 +66,10 @@ typedef enum
      *  end of memory buffer or end of file.
      */
     ESTATUS_STREAM_END = OSAL_END_OF_FILE,
+
+    /** Unidentified failure.
+     */
+    ESTATUS_FAILED = OSAL_STATUS_FAILED,
 
     /** Operation is not supported for this operating system/hardware platform/etc.
      */
@@ -129,7 +129,7 @@ eStatus;
 
 /* Macro to determine if returned status is error.
  */
-#define OSAL_IS_ERROR(s) ((s) >= OSAL_STATUS_FAILED)
+#define ESTATUS_IS_ERROR(s) ((s) >= ESTATUS_FAILED)
 
 
 #endif

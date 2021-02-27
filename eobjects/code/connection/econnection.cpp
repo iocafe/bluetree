@@ -433,7 +433,7 @@ void eConnection::run()
 {
     osalSelectData selectdata;
     os_long try_again_ms = osal_rand(3000, 4000);
-    eStatus s;
+    eStatus s, auth_s;
 
     /* Run as long as thread is not requested to exit.
      */
@@ -443,12 +443,8 @@ void eConnection::run()
          */
         if (m_stream)
         {
-            s = handle_authentication_frames();
-            if (s == ESTATUS_PENDING) {
-                os_timeslice();
-                continue;
-            }
-            if (s != ESTATUS_SUCCESS) {
+            auth_s = handle_authentication_frames();
+            if (ESTATUS_IS_ERROR(auth_s)) {
                 close();
                 os_timeslice();
                 continue;
@@ -474,6 +470,12 @@ void eConnection::run()
             if (s)
             {
                 close();
+                continue;
+            }
+
+            /* If we are still authenticating, do not start the real communication.
+             */
+            if (auth_s == ESTATUS_PENDING) {
                 continue;
             }
 
