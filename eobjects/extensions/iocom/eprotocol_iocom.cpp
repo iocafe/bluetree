@@ -1,7 +1,7 @@
 /**
 
   @file    eprotocol_iocom.cpp
-  @brief   IOCOM  protocol management.
+  @brief   IOCOM protocol management.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -229,14 +229,13 @@ eProtocolHandle *eioProtocol::new_con_helper(
         ep = p->epoint();
         p->mark_iocom_end_point(OS_TRUE);
         ioc_initialize_end_point(ep, m_iocom_root);
+        ioc_set_end_point_callback(ep, end_point_callback, p);
         os_memclear(&epprm, sizeof(epprm));
         epprm.iface = iface;
         epprm.flags = cflags;
         epprm.parameters = prmstr;
         ss = ioc_listen(ep, &epprm);
         if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
-
-p->setpropertyi(EPROHANDP_ISOPEN, OS_TRUE);
     }
     else
     {
@@ -252,31 +251,94 @@ p->setpropertyi(EPROHANDP_ISOPEN, OS_TRUE);
         if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
     }
 
-//    p->setpropertyi(EPROHANDP_ISOPEN, OS_TRUE);
     return p;
 }
 
-/* Callback when connection is established or dropped.
- */
+
+/**
+****************************************************************************************************
+
+  @brief Callback when connection is established or dropped.
+
+  The IOCOM library calls thus function to inform application about new and dropped connections.
+  This function sets eioProtocolHandle's "isopen" property.
+
+  It uses complex way to set property:  we are now called by different thread which doesn't
+  own eioProtocolHandle and thus must not property directly. But path_to_self is simple C
+  string, which is set when eioProtocol handle is created and unchanged after that. It
+  can be used by other threads as long as the protocol handle exists.
+
+  @param   con Pointer to IOCOM connection object.
+  @param   event Reason for the callback, either IOC_CONNECTION_ESTABLISHED or
+           IOC_CONNECTION_DROPPED.
+  @param   context Callback context, here pointer to protocol handle.
+
+****************************************************************************************************
+*/
 void eioProtocol::connection_callback(
-    struct iocConnection *conf,
+    struct iocConnection *con,
     iocConnectionEvent event,
     void *context)
 {
     eProcess *process;
     os_boolean value;
     eioProtocolHandle *p;
-    p = (eioProtocolHandle*)context;
+    OSAL_UNUSED(con);
 
-    /* Complex way to set property, we are now called by different thread which doesn't
-       own eioProtocolHandle and thus must not property directly.
-     */
+    p = (eioProtocolHandle*)context;
     switch (event) {
         case IOC_CONNECTION_ESTABLISHED:
             value = OS_TRUE;
             break;
 
         case IOC_CONNECTION_DROPPED:
+            value = OS_FALSE;
+            break;
+
+        default:
+            return;
+    }
+
+    os_lock();
+    process = eglobal->process;
+    process->setpropertyl_msg(p->path_to_self(), value, eprohandp_isopen);
+    os_unlock();
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Callback when an end point is actually listening, or dropped.
+
+  The IOCOM library calls thus function to inform application about succesfully initialized and
+  dropped end points. This function sets eioProtocolHandle's "isopen" property.
+  See eioProtocol::connection_callback().
+
+  @param   epoint Pointer to IOCOM connection object.
+  @param   event Reason for the callback, either IOC_CONNECTION_ESTABLISHED or
+           IOC_CONNECTION_DROPPED.
+  @param   context Callback context, here pointer to protocol handle.
+
+****************************************************************************************************
+*/
+void eioProtocol::end_point_callback(
+    struct iocEndPoint *epoint,
+    iocEndPointEvent event,
+    void *context)
+{
+    eProcess *process;
+    os_boolean value;
+    eioProtocolHandle *p;
+    OSAL_UNUSED(epoint);
+
+    p = (eioProtocolHandle*)context;
+    switch (event) {
+        case IOC_END_POINT_LISTENING:
+            value = OS_TRUE;
+            break;
+
+        case IOC_END_POINT_DROPPED:
             value = OS_FALSE;
             break;
 
@@ -409,7 +471,6 @@ void eioProtocol::deactivate_connection(
     eProtocolHandle *handle)
 {
     /* eioProtocolHandle *p;
-
     if (handle == OS_NULL) return;
     p = (eioProtocolHandle*)handle; */
 }
