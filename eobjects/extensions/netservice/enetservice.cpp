@@ -45,11 +45,11 @@ eNetService::eNetService(
     m_services_matrix = OS_NULL;
     m_trusted_matrix = OS_NULL;
     m_persistent_trusted = OS_NULL;
-    m_persistent_serv_prm = OS_NULL;
+    m_persistent_parameters = OS_NULL;
     m_end_points_config_counter = 0;
     m_connect_config_counter = 0;
     m_lighthouse_change_counter = 0;
-    os_memclear(&m_serv_prm, sizeof(m_serv_prm));
+    os_memclear(&m_parameters, sizeof(m_parameters));
     os_memclear(&m_iocom_root, sizeof(m_iocom_root));
 
     addname("//netservice");
@@ -125,10 +125,10 @@ void eNetService::start(
     os_char buf[OSAL_NETWORK_NAME_SZ];
 
     create_process_status_table();
+    create_service_parameters(flags);
     if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_EOBJECTS_SERVICE)) {
         create_user_account_table();
         create_end_point_table(flags);
-        create_service_parameters(flags);
     }
     if (flags & (ENET_ENABLE_IOCOM_CLIENT | ENET_ENABLE_EOBJECTS_CLIENT)) {
         create_connect_table();
@@ -219,10 +219,17 @@ eStatus eNetService::oncallback(
         }
     }
 
-    if (event == ECALLBACK_TABLE_CONTENT_CHANGED)
+    else if (event == ECALLBACK_TABLE_CONTENT_CHANGED)
     {
         if (obj == m_services_matrix) {
             setpropertyl(ENETSERVP_LIGHTHOUSE_CHANGE_COUNTER, ++m_lighthouse_change_counter);
+        }
+    }
+
+    else if (event == ECALLBACK_VARIABLE_VALUE_CHANGED)
+    {
+        if (obj == m_persistent_parameters) {
+            parameter_changed(appendix);
         }
     }
 
@@ -234,7 +241,6 @@ eStatus eNetService::oncallback(
 
     return ESTATUS_SUCCESS;
 }
-
 
 
 /* Error handler to move information provided by error handler callbacks to network state structure.

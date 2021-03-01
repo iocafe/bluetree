@@ -20,7 +20,7 @@
 #include "eobjects.h"
 #include "extensions/netservice/eprotocol_handle.h"
 #include "extensions/netservice/eprotocol_handle_ecom.h"
-#include "extensions/netservice/enetserv_prm.h"
+#include "extensions/netservice/enetparameters.h"
 #include "extensions/netservice/enetendpoints.h"
 #include "extensions/netservice/enetconnect.h"
 #include "extensions/netservice/eprotocol.h"
@@ -213,6 +213,10 @@ protected:
     void create_service_parameters(
         os_int flags);
 
+    /* Parameter value has changed.
+     */
+    void parameter_changed(
+        eObject *v);
 
     /**
     ************************************************************************************************
@@ -269,8 +273,8 @@ protected:
 
     /* Structure of server parameters and persistent object to contain these.
      */
-    eNetServPrm m_serv_prm;
-    ePersistent *m_persistent_serv_prm;
+    eNetServPrm m_parameters;
+    ePersistent *m_persistent_parameters;
 
     /* Process status table.
      */

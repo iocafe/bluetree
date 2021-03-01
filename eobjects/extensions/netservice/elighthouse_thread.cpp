@@ -556,14 +556,6 @@ eStatus eLightHouseService::publish()
                 continue;
             }
 
-/* Make sure that interface matches. If not skip compare row.
- */
-
-/* If iocom, make sure that network name matches. If not skip compare row.
-            if (protocol_ix == ENET_ENDP_IOCOM) {
-            }
- */
-
             v = item->firstv(is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
             if (v == OS_NULL) {
                 v = new eVariable(item, is_tls ? ENET_ENDP_TLS_PORT : ENET_ENDP_TCP_PORT);
@@ -580,18 +572,12 @@ eStatus eLightHouseService::publish()
         v->setl(port_nr);
         v = new eVariable(item, ENET_ENDP_IPV6);
         v->setl(is_ipv6 ? OS_TRUE : OS_FALSE);
-        /* v = new eVariable(item, ENET_ENDP_NETNAME);
-        m->getv(y, netname_col, v); */
 goon:;
     }
 
     os_unlock();
 
-
-os_char nick[IOC_NAME_SZ];
-ioc_generate_nickname(nick, sizeof(nick));
-
-    ioc_lighthouse_start_endpoints(&m_server, nick);
+    ioc_lighthouse_start_endpoints(&m_server);
 
     for (item = list->firstc(); item; item = item->nextc()) {
         tls_port = 0;
@@ -611,12 +597,10 @@ ioc_generate_nickname(nick, sizeof(nick));
 
         if (!os_strcmp(p, "iocom")) {
             os_strncpy(buf, eglobal->process_id, sizeof(buf));
-            // os_strncat(buf, "N", sizeof(buf));
             p = buf;
             protocol_short = "i";
         }
         else {
-            // p = eglobal->process_nr ? eglobal->process_id : eglobal->process_name;
             p = eglobal->process_id;
             protocol_short = protocol->gets();
             if (!os_strcmp(p, "ecom")) {

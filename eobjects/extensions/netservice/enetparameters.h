@@ -1,6 +1,6 @@
 /**
 
-  @file    enetserv_prm.h
+  @file    enetparameters.h
   @brief   Service parameters.
   @author  Pekka Lehtikoski
   @version 1.0
@@ -20,7 +20,7 @@
 
 typedef struct
 {
-    eVariable *nick_name;
+    eVariable *nickname;
     eVariable *enable_lighthouse_server;
     eVariable *serv_cert_path;
     eVariable *serv_priv_key;
