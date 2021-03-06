@@ -61,16 +61,6 @@ eLightHouseService::eLightHouseService(
 
 /**
 ****************************************************************************************************
-  Virtual destructor.
-****************************************************************************************************
-*/
-/* eLightHouseService::~eLightHouseService()
-{
-} */
-
-
-/**
-****************************************************************************************************
 
   @brief Add the class to class list and class'es properties to it's property set.
 
@@ -468,7 +458,7 @@ eStatus eLightHouseService::publish()
     eMatrix *m;
     eVariable *v, *port, *protocol;
     const os_char *protocol_short;
-    os_int enable_col, ok_col, protocol_col, transport_col, port_col; //, netname_col;
+    os_int enable_col, ok_col, protocol_col, transport_col, port_col;
     os_int h, y, is_tls, item_id, port_nr;
     os_int tls_port, tcp_port, default_port_nr;
     enetEndpTransportIx transport_ix;
