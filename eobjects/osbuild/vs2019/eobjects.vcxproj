@@ -96,8 +96,8 @@
     <ClInclude Include="..\..\extensions\netservice\enetconnect.h" />
     <ClInclude Include="..\..\extensions\netservice\enetendpoints.h" />
     <ClInclude Include="..\..\extensions\netservice\enetmaintain_thread.h" />
+    <ClInclude Include="..\..\extensions\netservice\enetparameters.h" />
     <ClInclude Include="..\..\extensions\netservice\enetservice.h" />
-    <ClInclude Include="..\..\extensions\netservice\enetserv_prm.h" />
     <ClInclude Include="..\..\extensions\netservice\eprotocol.h" />
     <ClInclude Include="..\..\extensions\netservice\eprotocol_ecom.h" />
     <ClInclude Include="..\..\extensions\netservice\eprotocol_handle.h" />
@@ -184,8 +184,8 @@
     <ClCompile Include="..\..\extensions\netservice\enetconnect.cpp" />
     <ClCompile Include="..\..\extensions\netservice\enetendpoints.cpp" />
     <ClCompile Include="..\..\extensions\netservice\enetmaintain_thread.cpp" />
+    <ClCompile Include="..\..\extensions\netservice\enetparameters.cpp" />
     <ClCompile Include="..\..\extensions\netservice\enetservice.cpp" />
-    <ClCompile Include="..\..\extensions\netservice\enetserv_prm.cpp" />
     <ClCompile Include="..\..\extensions\netservice\enetstatus.cpp" />
     <ClCompile Include="..\..\extensions\netservice\enettrusted.cpp" />
     <ClCompile Include="..\..\extensions\netservice\eprotocol.cpp" />
