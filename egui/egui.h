@@ -71,6 +71,7 @@ void egui_shutdown();
 #include "code/components/parameterlist/eparameterlist.h"
 #include "code/components/cameraview/ecameraview.h"
 #include "code/components/game/egamecontroller.h"
+#include "code/dialogs/login/elogin_dialog.h"
 #include "code/gui/eguix.h"
 
 #endif

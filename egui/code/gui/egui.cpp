@@ -327,7 +327,11 @@ eStatus eGui::onpropertychange(
             break;
 
         case EGUIP_OPEN:
-            if (!os_strcmp(x->gets(), "imguistyle")) {
+            if (!os_strcmp(x->gets(), "login")) {
+                new eLoginDialog(this, EOID_GUI_WINDOW);
+                setpropertys(EGUIP_OPEN, osal_str_empty);
+            }
+            else if (!os_strcmp(x->gets(), "imguistyle")) {
                 m_show_app_style_editor = !m_show_app_style_editor;
                 setpropertys(EGUIP_OPEN, osal_str_empty);
             }
@@ -515,8 +519,7 @@ eStatus eGui::run()
 
         handle_mouse();
 
-        for (c = firstcomponent(EOID_GUI_WINDOW); c; c = c->nextcomponent(EOID_GUI_WINDOW))
-        {
+        for (c = firstcomponent(EOID_GUI_WINDOW); c; c = c->nextcomponent(EOID_GUI_WINDOW)) {
             c->draw(m_draw_prm);
         }
 

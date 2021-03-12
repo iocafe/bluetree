@@ -725,6 +725,11 @@ ePopup *eComponent::right_click_popup(
     scope->setpropertys(ECOMP_TEXT, "gui");
 
     item = new eButton(scope);
+    item->setpropertys(ECOMP_TEXT, "login");
+    item->setpropertys(ECOMP_SETVALUE, "login");
+    item->setpropertys(ECOMP_TARGET, gui_path);
+
+    item = new eButton(scope);
     item->setpropertys(ECOMP_TEXT, "about Dear ImGui");
     item->setpropertys(ECOMP_SETVALUE, "imguiabout");
     item->setpropertys(ECOMP_TARGET, gui_path);
@@ -743,8 +748,6 @@ ePopup *eComponent::right_click_popup(
     item->setpropertys(ECOMP_TEXT, "save current style");
     item->setpropertys(ECOMP_SETVALUE, "saveimguistyle");
     item->setpropertys(ECOMP_TARGET, gui_path);
-
-
 
     /* Edit mode component scope items.
      */

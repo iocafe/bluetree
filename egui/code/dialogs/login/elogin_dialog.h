@@ -1,0 +1,131 @@
+/**
+
+  @file    elogin_dialog.h
+  @brief   User login dialog.
+  @author  Pekka Lehtikoski
+  @version 1.0
+  @date    15.9.2020
+
+  Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
+  modified, and distributed under the terms of the project licensing. By continuing to use, modify,
+  or distribute this file you indicate that you have read the license and understand and accept
+  it fully.
+
+****************************************************************************************************
+*/
+#pragma once
+#ifndef ELOGIN_DIALOG_H_
+#define ELOGIN_DIALOG_H_
+#include "egui.h"
+
+/**
+****************************************************************************************************
+  eLoginDialog class.
+****************************************************************************************************
+*/
+class eLoginDialog : public eWindow
+{
+    /**
+    ************************************************************************************************
+      Generic eObject functionality.
+    ************************************************************************************************
+    */
+public:
+    /* Constructor.
+     */
+    eLoginDialog(
+        eObject *parent = OS_NULL,
+        e_oid id = EOID_GUI_COMPONENT,
+        os_int flags = EOBJ_DEFAULT);
+
+    /* Virtual destructor.
+     */
+    virtual ~eLoginDialog();
+
+    /* Clone object.
+     */
+    virtual eObject *clone(
+        eObject *parent,
+        e_oid id = EOID_CHILD,
+        os_int aflags = 0);
+
+    /* Casting eObject pointer to eLoginDialog pointer.
+     */
+    inline static eLoginDialog *cast(
+        eObject *o)
+    {
+        e_assert_type(o, EGUICLASSID_LOGIN_DIALOG)
+        return (eLoginDialog*)o;
+    }
+
+    /* Get class identifier.
+     */
+    virtual os_int classid() {return EGUICLASSID_LOGIN_DIALOG; }
+
+    /* Static function to add class to propertysets and class list.
+     */
+    static void setupclass();
+
+    /* Called when property value changes.
+     */
+    virtual eStatus onpropertychange(
+        os_int propertynr,
+        eVariable *x,
+        os_int flags);
+
+    /* Static constructor function for generating instance by class list.
+     */
+    static eLoginDialog *newobj(
+        eObject *parent,
+        e_oid id = EOID_ITEM,
+        os_int flags = EOBJ_DEFAULT)
+    {
+        return new eLoginDialog(parent, id, flags);
+    }
+
+
+    /**
+    ************************************************************************************************
+      GUI component functionality (eComponent)
+    ************************************************************************************************
+    */
+    /* Draw the component.
+     */
+    virtual eStatus draw(
+        eDrawParams& prm);
+
+    /* Process mouse click.
+     */
+    virtual os_boolean on_click(
+        eDrawParams& prm,
+        os_int mouse_button_nr);
+
+    /* Activate the component (start editing value, toggle checkbox, or show drop down list).
+     */
+    virtual void activate();
+
+
+protected:
+
+    /**
+    ************************************************************************************************
+      Protected functions
+    ************************************************************************************************
+    */
+    void set_toggled();
+
+
+    /**
+    ************************************************************************************************
+      Member variables.
+    ************************************************************************************************
+    */
+
+    bool m_set_toggled;
+    bool m_imgui_toggl;
+
+    eStrBuffer m_text;
+};
+
+
+#endif

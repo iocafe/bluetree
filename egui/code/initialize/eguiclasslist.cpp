@@ -44,6 +44,7 @@ void eguiclasslist_initialize()
     eParameterList::setupclass();
     eCameraView::setupclass();
     eGameController::setupclass();
+    eLoginDialog::setupclass();
 }
 
 /* Release resources allocated for the class list.

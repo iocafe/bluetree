@@ -339,7 +339,9 @@ const os_char *eObject::classname()
 os_boolean eObject::isinstanceof(
     os_int cid)
 {
-    if (cid == classid()) return OS_TRUE;
+    if (cid == classid()) {
+        return OS_TRUE;
+    }
     return eclasslist_isinstanceof(classid(), cid);
 }
 
