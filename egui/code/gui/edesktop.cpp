@@ -137,6 +137,7 @@ void eGui::setup_desktop_application()
     n->setpropertys(ECOMP_PATH, "//");
     n->setpropertys(ECOMP_IPATH, "//");
 
+new eLoginDialog(this);
 
     setpropertys(EGUIP_TEXT, eglobal->process_name);
 }

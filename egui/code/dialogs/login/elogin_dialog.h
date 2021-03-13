@@ -18,6 +18,43 @@
 #define ELOGIN_DIALOG_H_
 #include "egui.h"
 
+
+/**
+****************************************************************************************************
+  eLoginDialog class.
+****************************************************************************************************
+*/
+/* Current login data. This is set up as basic C structure instead of eobjects data structure
+   to make doubly sure that this data cannot be accessed by browsing, etc. generic method.
+ */
+typedef struct {
+    os_char user_name[OSAL_LONG_USER_NAME_SZ];
+    os_char password[OSAL_SECRET_STR_SZ];
+    os_boolean display_row;
+    os_boolean password_set;
+    os_boolean save_password;
+}
+eLoginRow;
+
+#define ELOGIN_MAX_ROWS  4
+
+typedef struct
+{
+    /* Log in rows (pre filles user names and perhaps passwords).
+     */
+    eLoginRow rows[ELOGIN_MAX_ROWS];
+
+    /* Currently selected row.
+     */
+    os_int selected_row;
+
+    /* To validate that this structure is loaded and decrypted correctly.
+     */
+    os_ushort checksum;
+}
+eLoginData;
+
+
 /**
 ****************************************************************************************************
   eLoginDialog class.
@@ -35,7 +72,7 @@ public:
      */
     eLoginDialog(
         eObject *parent = OS_NULL,
-        e_oid id = EOID_GUI_COMPONENT,
+        e_oid id = EOID_GUI_WINDOW,
         os_int flags = EOBJ_DEFAULT);
 
     /* Virtual destructor.
@@ -96,13 +133,13 @@ public:
 
     /* Process mouse click.
      */
-    virtual os_boolean on_click(
+    /* virtual os_boolean on_click(
         eDrawParams& prm,
-        os_int mouse_button_nr);
+        os_int mouse_button_nr); */
 
     /* Activate the component (start editing value, toggle checkbox, or show drop down list).
      */
-    virtual void activate();
+    // virtual void activate();
 
 
 protected:
@@ -112,7 +149,8 @@ protected:
       Protected functions
     ************************************************************************************************
     */
-    void set_toggled();
+
+    void setup_default_data();
 
 
     /**
@@ -121,10 +159,9 @@ protected:
     ************************************************************************************************
     */
 
-    bool m_set_toggled;
-    bool m_imgui_toggl;
-
     eStrBuffer m_text;
+
+    eLoginData m_data;
 };
 
 

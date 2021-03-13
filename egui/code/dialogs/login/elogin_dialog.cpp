@@ -27,6 +27,7 @@ eLoginDialog::eLoginDialog(
     os_int flags)
     : eWindow(parent, id, flags)
 {
+    setup_default_data();
 }
 
 
@@ -38,16 +39,6 @@ eLoginDialog::eLoginDialog(
 eLoginDialog::~eLoginDialog()
 {
 }
-
-
-/*
-            static char password[64] = "password123";
-            ImGui::InputText("password", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
-            ImGui::SameLine(); HelpMarker("Display all characters as '*'.\nDisable clipboard cut and copy.\nDisable logging.\n");
-            ImGui::InputTextWithHint("password (w/ hint)", "<password>", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
-            ImGui::InputText("password (clear)", password, IM_ARRAYSIZE(password));
-            ImGui::TreePop();
-*/
 
 
 /**
@@ -96,11 +87,7 @@ void eLoginDialog::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eLoginDialog", EGUICLASSID_WINDOW);
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
-    addpropertys(cls, ECOMP_TEXT, ecomp_text, "text", EPRO_METADATA);
-    addproperty (cls, ECOMP_VALUE, ecomp_value, "value");
-    addpropertyl(cls, ECOMP_SETVALUE, ecomp_setvalue, OS_TRUE, "set value", EPRO_METADATA);
-    addpropertys(cls, ECOMP_TARGET, ecomp_target, "target", EPRO_METADATA);
-
+    addpropertys(cls, ECOMP_TEXT, ecomp_text, "user login", "window title", EPRO_METADATA);
     propertysetdone(cls);
     os_unlock();
 }
@@ -135,16 +122,8 @@ eStatus eLoginDialog::onpropertychange(
 {
     switch (propertynr)
     {
-        case ECOMP_VALUE:
-            m_set_toggled = true;
-            break;
-
         case ECOMP_TEXT:
             m_text.clear();
-            break;
-
-        case ECOMP_SETVALUE:
-            m_set_toggled = true;
             break;
 
         default:
@@ -172,173 +151,180 @@ eStatus eLoginDialog::onpropertychange(
 eStatus eLoginDialog::draw(
     eDrawParams& prm)
 {
-    eComponent *c;
     const os_char *label;
     ImVec2 sz;
-    os_int cid;
+    os_int total_w, total_h, ys, nrows, row, i, j, text_height;
+    os_int data_row[ELOGIN_MAX_ROWS];
+    ImVec2 size, rmax, origin;
+    ImVec2 cpos;
+    ImGuiTableFlags flags;
+    bool show_window = true, ok;
+    os_char tmplabel[OSAL_NBUF_SZ+3];
+    int select_state = 0;
+    bool check = true;
 
-    return eWindow::draw(prm);
+    const int header_row = 0;
+    const int freeze_cols = 1;
+    const int freeze_rows = header_row;
+    const int ncols = 4;
+    const int TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
+
+    label = m_label_title.get(this, ECOMP_TEXT, ECOMP_NAME);
+    ok = ImGui::Begin(label, &show_window);
+
+    /* Early out if the window is collapsed, as an optimization.
+     */
+    if (!ok) {
+        ImGui::End();
+        return ESTATUS_SUCCESS;
+    }
 
     add_to_zorder(prm.window, prm.layer);
 
-    if (m_set_toggled) {
-        set_toggled();
-        m_set_toggled = false;
-    }
+    flags =
+        ImGuiTableFlags_ScrollY |
+        ImGuiTableFlags_BordersInner |
+        ImGuiTableFlags_NoPadOuterX |
+        ImGuiTableFlags_Resizable |
+        ImGuiTableFlags_Reorderable |
+        ImGuiTableFlags_SizingStretchProp |
+        ImGuiTableFlags_NoSavedSettings;
 
-    ImVec2 cpos = ImGui::GetCursorScreenPos();
-    m_rect.x1 = (os_int)cpos.x;
-    m_rect.y1 = (os_int)cpos.y;
-
-    sz.x = sz.y = 0;
-
-    label = m_text.get(this, ECOMP_TEXT);
-
-    /* If this component has children, it contains a sub menu.
+    /* Count the rows to display. If zero restore initial data.
      */
-    c = firstcomponent();
-    if (c) {
-        if (ImGui::BeginMenu(label))
-        {
-            while (c) {
-                c->draw(prm);
-                c = c->nextcomponent();
-            }
-
-            ImGui::EndMenu();
-        }
-    }
-    else {
-        cid = parent()->classid();
-        if (cid == EGUICLASSID_POPUP || cid == EGUICLASSID_LOGIN_DIALOG)
-        {
-            if (ImGui::MenuItem(label, "", &m_imgui_toggl)) {
-                activate();
+    nrows = 0;
+    while (OS_TRUE) {
+        for (i = 0 ; i < ELOGIN_MAX_ROWS; i++) {
+            if (m_data.rows[i].display_row) {
+                data_row[nrows++] = i;
             }
         }
-        else {
-            os_int www = (os_int)ImGui::CalcTextSize(label).x;
-            ImVec2 inner_spacing = ImGui::GetStyle().ItemInnerSpacing;
-            ImVec2 button_padding(50, inner_spacing.y);
-            button_padding.x -= www/2;
-            if (button_padding.x < inner_spacing.x) {
-                button_padding.x = inner_spacing.x;
-            }
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, button_padding);
-
-            if (m_imgui_toggl)
-            {
-                ImGui::PushID(label);
-                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertFloat4ToU32(ImVec4(0.3f, 0.7f, 0.5f, 1.0f)));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertFloat4ToU32(ImVec4(0.5f, 0.9f, 0.7f, 1.0f)));
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertFloat4ToU32(ImVec4(0.3f, 0.7f, 0.5f, 1.0f)));
-                ImGui::Button(label);
-                if (ImGui::IsItemClicked(0))
-                {
-                    setpropertyl(ECOMP_VALUE, !propertyi(ECOMP_SETVALUE));
-                }
-                ImGui::PopStyleColor(3);
-                ImGui::PopID();
-            }
-            else
-            {
-
-                ImGui::Button(label);
-                if (ImGui::IsItemClicked(0)) {
-                    eVariable tmp;
-                    propertyv(ECOMP_SETVALUE, &tmp);
-                    setpropertyv(ECOMP_VALUE, &tmp);
-                    activate();
-                }
-            }
-            ImGui::PopStyleVar();
-        }
+        if (nrows) break;
+        setup_default_data();
     }
 
-    sz = ImGui::GetItemRectSize();
 
-    m_rect.x2 = m_rect.x1 + (os_int)sz.x - 1;
-    m_rect.y2 = m_rect.y1 + (os_int)sz.y - 1;
+    os_strncpy(tmplabel, "##?", sizeof(tmplabel));
+    select_state = m_data.selected_row;
 
-    /* Let base class implementation handle the rest.
+
+    text_height = TEXT_BASE_HEIGHT + ImGui::GetStyle().FramePadding.y*2;
+
+    size = ImVec2(0, text_height * (nrows + header_row));
+    if (ImGui::BeginTable("##tableU", ncols, flags, size))
+    {
+        rmax = ImGui::GetContentRegionMax();
+        origin = ImGui::GetCursorPos();
+        ys = (os_int)ImGui::GetScrollY();
+        total_w = (os_int)(rmax.x - origin.x);
+        total_h = (os_int)(rmax.y - origin.y);
+
+        cpos = ImGui::GetCursorScreenPos();
+        m_rect.x1 = (os_int)cpos.x;
+        m_rect.y1 = (os_int)cpos.y + ys;
+
+        m_rect.x2 = m_rect.x1 + total_w - 1;
+        m_rect.y2 = m_rect.y1 + total_h - 1;
+
+
+        ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
+
+        ImGui::TableSetupColumn("select", ImGuiTableColumnFlags_NoHide, 20.0f);
+        ImGui::TableSetupColumn("user name", ImGuiTableColumnFlags_NoHide, 100.0f);
+        ImGui::TableSetupColumn("password", ImGuiTableColumnFlags_NoHide, 80.0f);
+        ImGui::TableSetupColumn("save password", ImGuiTableColumnFlags_NoHide, 30.0f);
+
+        if (header_row) {
+            ImGui::TableHeadersRow();
+        }
+
+
+// ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 255)));
+
+        ImGuiListClipper clipper;
+        clipper.Begin(nrows);
+        while (clipper.Step())
+        {
+            for (row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
+            {
+                if (row < 0 || row > nrows) {
+                    break;
+                }
+                j = data_row[row];
+
+                osal_int_to_str(tmplabel+3, OSAL_NBUF_SZ, row);
+
+                ImGui::TableNextRow();
+                if (!ImGui::TableSetColumnIndex(0)) {
+                    continue;
+                }
+
+                tmplabel[2] = 'R';
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                ImGui::RadioButton(tmplabel, &select_state, j);
+
+                ImGui::TableNextColumn();
+
+                tmplabel[2] = 'U';
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                ImGui::InputText(tmplabel, m_data.rows[j].user_name, OSAL_LONG_USER_NAME_SZ);
+
+                ImGui::TableNextColumn();
+
+                tmplabel[2] = 'P';
+                ImGui::SetNextItemWidth(-FLT_MIN);
+
+                ImGui::InputTextWithHint(tmplabel, m_data.rows[j].password_set ? "<password ok>" : "<password not set>",
+                    m_data.rows[j].password, OSAL_SECRET_STR_SZ, ImGuiInputTextFlags_Password);
+
+                ImGui::TableNextColumn();
+
+                tmplabel[2] = 'C';
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                check = m_data.rows[j].save_password;
+                ImGui::Checkbox(tmplabel, &check);
+                m_data.rows[j].save_password = check;
+            }
+        }
+
+        ImGui::EndTable();
+    }
+
+    m_data.selected_row = select_state;
+
+    /* Finished with the window.
      */
-    return eComponent::draw(prm);
-}
+    ImGui::End();
 
-
-/**
-****************************************************************************************************
-
-  @brief Component clicked.
-
-  The eLoginDialog::on_click() function is called when a component is clicked. If the component
-  processess the mouse click, it returns OS_TRUE. This indicates that the click has been
-  processed. If it doesn't process the click, it call's eComponent base classess'es on_click()
-  function to try if base class wants to process the click.
-  When the mouse click is not processed, it is passed to parent object in z order.
-
-  @param   prm Drawing parameters, notice especially edit_mode.
-  @param   mouse_button_nr Which mouse button, for example EIMGUI_LEFT_MOUSE_BUTTON.
-
-  @return  OS_TRUE if mouse click was processed by this component, or OS_FALSE if not.
-
-****************************************************************************************************
-*/
-os_boolean eLoginDialog::on_click(
-    eDrawParams& prm,
-    os_int mouse_button_nr)
-{
-    if (!prm.edit_mode && mouse_button_nr == EIMGUI_LEFT_MOUSE_BUTTON) {
-        return OS_TRUE;
+    if (!show_window) {
+        gui()->delete_later(this);
     }
-    return eComponent::on_click(prm, mouse_button_nr);
+    return ESTATUS_SUCCESS;
 }
 
 
 /**
 ****************************************************************************************************
 
-  @brief Start editing value, toggle checkbox or show drop down list.
+  @brief Initial configuration.
 
-  The eLoginDialog::activate() function is called when a value is clicked, or key (for example
-  spacebar) is hit to start editing the value. Actual operation depends on metadata, the
-  function can either start value edit, toggle a checkbox or show drop down list.
-
-  @return  None.
+  The eLoginDialog::setup_default_data() sets clear m_data structure containing initial user
+  names to propose, etc. This is used when UI is started for the first time, and restored
+  if UI configuration decryption/checksum fails.
 
 ****************************************************************************************************
 */
-void eLoginDialog::activate()
+void eLoginDialog::setup_default_data()
 {
-    eVariable target;
-
-    propertyv(ECOMP_TARGET, &target);
-    if (!target.isempty()){
-        eVariable value;
-        propertyv(ECOMP_SETVALUE, &value);
-        setpropertyv_msg(target.gets(), &value);
-    }
+    os_memclear(&m_data, sizeof(m_data));
+    m_data.selected_row = -1;
+    os_strncpy(m_data.rows[0].user_name, "quest", OSAL_LONG_USER_NAME_SZ);
+    m_data.rows[0].display_row = OS_TRUE;
+    m_data.rows[0].save_password = OS_TRUE;
+    os_strncpy(m_data.rows[1].user_name, "user", OSAL_LONG_USER_NAME_SZ);
+    m_data.rows[1].display_row = OS_TRUE;
+    m_data.rows[1].save_password = OS_TRUE;
+    os_strncpy(m_data.rows[2].user_name, "ispy", OSAL_LONG_USER_NAME_SZ);
+    m_data.rows[2].display_row = OS_TRUE;
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Set value for ImGui toggle mark, when needed.
-
-  The set_toggled() function is called when drawing to set value to determine value for
-  m_imgui_toggl boolean. Pointer to this boolean is passed to the ImGui to inform wether
-  to draw a check mark in menu button.
-  @return  None.
-
-****************************************************************************************************
-*/
-void eLoginDialog::set_toggled()
-{
-    eVariable tmp1, tmp2;
-
-    propertyv(ECOMP_VALUE, &tmp1);
-    propertyv(ECOMP_SETVALUE, &tmp2);
-
-    m_imgui_toggl = tmp1.compare(&tmp2) ? false : true;
-}

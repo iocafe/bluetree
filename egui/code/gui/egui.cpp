@@ -328,7 +328,7 @@ eStatus eGui::onpropertychange(
 
         case EGUIP_OPEN:
             if (!os_strcmp(x->gets(), "login")) {
-                new eLoginDialog(this, EOID_GUI_WINDOW);
+                new eLoginDialog(this);
                 setpropertys(EGUIP_OPEN, osal_str_empty);
             }
             else if (!os_strcmp(x->gets(), "imguistyle")) {
