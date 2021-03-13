@@ -32,6 +32,7 @@
     <ClInclude Include="..\..\code\components\window\ewindow.h" />
     <ClInclude Include="..\..\code\defs\eguiclassid.h" />
     <ClInclude Include="..\..\code\defs\eguioid.h" />
+    <ClInclude Include="..\..\code\dialogs\login\elogin_dialog.h" />
     <ClInclude Include="..\..\code\gui\eguix.h" />
     <ClInclude Include="..\..\code\helpers\eattrbuffer.h" />
     <ClInclude Include="..\..\code\helpers\eautolabel.h" />
@@ -66,6 +67,7 @@
     <ClCompile Include="..\..\code\components\tableview\etableview.cpp" />
     <ClCompile Include="..\..\code\components\treenode\etreenode.cpp" />
     <ClCompile Include="..\..\code\components\window\ewindow.cpp" />
+    <ClCompile Include="..\..\code\dialogs\login\elogin_dialog.cpp" />
     <ClCompile Include="..\..\code\gui\edesktop.cpp" />
     <ClCompile Include="..\..\code\gui\egui.cpp" />
     <ClCompile Include="..\..\code\gui\egui_open.cpp" />

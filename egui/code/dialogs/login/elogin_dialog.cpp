@@ -156,7 +156,7 @@ eStatus eLoginDialog::draw(
 {
     const os_char *label;
     ImVec2 sz;
-    os_int total_w, total_h, ys, nrows, row, i, j, text_height;
+    os_int total_w, total_h, ys, nrows, row, i, j;
     os_int data_row[ELOGIN_MAX_ROWS];
     ImVec2 size, rmax, origin;
     ImVec2 cpos;
@@ -165,12 +165,13 @@ eStatus eLoginDialog::draw(
     os_char tmplabel[OSAL_NBUF_SZ+3];
     int select_state = 0;
     bool check, rval, rval2, change_bg_color;
+    float text_height;
 
     const int header_row = 0;
     const int freeze_cols = 1;
     const int freeze_rows = header_row;
     const int ncols = 4;
-    const int TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
+    const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
 
     label = m_label_title.get(this, ECOMP_TEXT, ECOMP_NAME);
     ok = ImGui::Begin(label, &show_window);
