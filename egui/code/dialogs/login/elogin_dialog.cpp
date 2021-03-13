@@ -28,6 +28,9 @@ eLoginDialog::eLoginDialog(
     : eWindow(parent, id, flags)
 {
     setup_default_data();
+    m_show_popup = -1;
+    m_popup_row = 0;
+    os_memclear(m_password_buf, sizeof(m_password_buf));
 }
 
 
@@ -161,7 +164,7 @@ eStatus eLoginDialog::draw(
     bool show_window = true, ok;
     os_char tmplabel[OSAL_NBUF_SZ+3];
     int select_state = 0;
-    bool check, rval;
+    bool check, rval, rval2, change_bg_color;
 
     const int header_row = 0;
     const int freeze_cols = 1;
@@ -259,6 +262,9 @@ eStatus eLoginDialog::draw(
                 tmplabel[2] = 'R';
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 rval = ImGui::RadioButton(tmplabel, &select_state, j);
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("select row");
+                }
                 if (rval) {
                     set_select(j, OS_TRUE);
                 }
@@ -267,16 +273,19 @@ eStatus eLoginDialog::draw(
 
                 tmplabel[2] = 'U';
                 ImGui::SetNextItemWidth(-FLT_MIN);
-                if (j == m_data.selected_row) {
-                    ImVec4 color = m_data.rows[j].password_set
-                        ? style.Colors[ImGuiCol_CheckMark] : ImVec4(ImColor(255, 64, 64));
+                change_bg_color = (j == m_data.selected_row && m_data.rows[j].password[0]);
+                if (change_bg_color) {
+                    ImVec4 color = style.Colors[ImGuiCol_CheckMark];
                     color.w /= 4;
-
                     ImGui::PushStyleColor(ImGuiCol_FrameBg, color);
                 }
-                rval = ImGui::InputText(tmplabel, m_data.rows[j].user_name, OSAL_LONG_USER_NAME_SZ);
-                if (j == m_data.selected_row) {
+                rval = ImGui::InputText(tmplabel, m_data.rows[j].user_name,
+                    OSAL_LONG_USER_NAME_SZ, ImGuiInputTextFlags_EnterReturnsTrue);
+                if (change_bg_color) {
                     ImGui::PopStyleColor();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("user name");
                 }
                 if (rval) {
                     set_select(j, OS_TRUE);
@@ -287,8 +296,20 @@ eStatus eLoginDialog::draw(
                 tmplabel[2] = 'P';
                 ImGui::SetNextItemWidth(-FLT_MIN);
 
-                rval = ImGui::InputTextWithHint(tmplabel, m_data.rows[j].password_set ? "<password ok>" : "<password not set>",
-                    m_data.rows[j].password, OSAL_SECRET_STR_SZ, ImGuiInputTextFlags_Password);
+                change_bg_color = (j == m_data.selected_row && !m_data.rows[j].password[0]);
+                if (change_bg_color) {
+                    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(ImColor(192, 0, 0)));
+                }
+                rval = ImGui::InputTextWithHint(tmplabel, m_data.rows[j].password[0]
+                    ? "<password ok>" : "<password not set>",
+                    m_data.rows[j].password, OSAL_SECRET_STR_SZ, ImGuiInputTextFlags_Password|
+                    ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll);
+                if (change_bg_color) {
+                    ImGui::PopStyleColor();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("password");
+                }
                 if (rval) {
                     set_select(j, OS_FALSE);
                 }
@@ -299,13 +320,47 @@ eStatus eLoginDialog::draw(
                 ImGui::SetNextItemWidth(-FLT_MIN);
                 check = m_data.rows[j].save_password;
                 ImGui::Checkbox(tmplabel, &check);
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("save password");
+                }
                 m_data.rows[j].save_password = check;
             }
         }
 
         ImGui::EndTable();
+
     }
     ImGui::PopStyleColor();
+
+    /* Handle password popup.
+     */
+    if (m_show_popup >= 0) {
+        ImGui::OpenPopup("my_passwd_popup");
+        m_popup_row = m_show_popup;
+        m_show_popup  = -1;
+        os_memclear(m_password_buf, sizeof(m_password_buf));
+    }
+    if (ImGui::BeginPopup("my_passwd_popup"))
+    {
+        ImGui::Text("type password");
+        rval = ImGui::InputTextWithHint(tmplabel, "<password>", m_password_buf,
+            OSAL_SECRET_STR_SZ, ImGuiInputTextFlags_Password|
+        ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll);
+
+        if (ImGui::Button("cancel")) {
+            ImGui::CloseCurrentPopup();
+        }
+        else {
+            ImGui::SameLine(0.0f, 10.0f);
+            rval2 = ImGui::Button("ok");
+
+            if (rval || rval2) {
+                os_memcpy(m_data.rows[m_popup_row].password, m_password_buf, OSAL_SECRET_STR_SZ);
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        ImGui::EndPopup();
+    }
 
     /* Finished with the window.
      */
@@ -333,8 +388,9 @@ void eLoginDialog::set_select(
 {
     os_int i;
 
-    /* If password dialog is open, close it
+    /* If password dialog is open, close it.
      */
+    m_show_popup = -1;
 
     /* Clear passwords which are not marked "saved" on other rows, but selected one.
      */
@@ -342,15 +398,17 @@ void eLoginDialog::set_select(
         if (i != select_row) {
             if (!m_data.rows[i].save_password) {
                 os_memclear(m_data.rows[i].password, OSAL_SECRET_STR_SZ);
-                m_data.rows[i].password_set = OS_FALSE;
             }
         }
     }
 
-    /* If selected row has changed, and we may open password dialog
+    /* If selected row has changed, and we may open password dialog.
      */
-    if (m_data.selected_row != select_row && can_open_password_dialog)
+    if (m_data.selected_row != select_row && can_open_password_dialog && select_row >= 0)
     {
+        if (!m_data.rows[select_row].password[0]) {
+            m_show_popup = select_row;
+        }
     }
 
     m_data.selected_row = select_row;
@@ -372,15 +430,16 @@ void eLoginDialog::setup_default_data()
 {
     os_memclear(&m_data, sizeof(m_data));
     m_data.selected_row = 0;
-    os_strncpy(m_data.rows[0].user_name, "quest", OSAL_LONG_USER_NAME_SZ);
-    os_strncpy(m_data.rows[0].password, "pass", OSAL_SECRET_STR_SZ);
+
+    os_strncpy(m_data.rows[0].user_name, "user", OSAL_LONG_USER_NAME_SZ);
     m_data.rows[0].display_row = OS_TRUE;
     m_data.rows[0].save_password = OS_TRUE;
-    m_data.rows[0].password_set = OS_TRUE;
-    os_strncpy(m_data.rows[1].user_name, "user", OSAL_LONG_USER_NAME_SZ);
+    os_strncpy(m_data.rows[1].user_name, "ispy", OSAL_LONG_USER_NAME_SZ);
     m_data.rows[1].display_row = OS_TRUE;
-    m_data.rows[1].save_password = OS_TRUE;
-    os_strncpy(m_data.rows[2].user_name, "ispy", OSAL_LONG_USER_NAME_SZ);
+
+    os_strncpy(m_data.rows[2].user_name, "quest", OSAL_LONG_USER_NAME_SZ);
+    os_strncpy(m_data.rows[2].password, "pass", OSAL_SECRET_STR_SZ);
     m_data.rows[2].display_row = OS_TRUE;
+    m_data.rows[2].save_password = OS_TRUE;
 }
 

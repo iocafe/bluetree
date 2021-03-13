@@ -31,7 +31,6 @@ typedef struct {
     os_char user_name[OSAL_LONG_USER_NAME_SZ];
     os_char password[OSAL_SECRET_STR_SZ];
     os_boolean display_row;
-    os_boolean password_set;
     os_boolean save_password;
 }
 eLoginRow;
@@ -131,17 +130,6 @@ public:
     virtual eStatus draw(
         eDrawParams& prm);
 
-    /* Process mouse click.
-     */
-    /* virtual os_boolean on_click(
-        eDrawParams& prm,
-        os_int mouse_button_nr); */
-
-    /* Activate the component (start editing value, toggle checkbox, or show drop down list).
-     */
-    // virtual void activate();
-
-
 protected:
 
     /**
@@ -164,8 +152,10 @@ protected:
     */
 
     eStrBuffer m_text;
-
     eLoginData m_data;
+    os_int m_show_popup;
+    os_int m_popup_row;
+    os_char m_password_buf[OSAL_SECRET_STR_SZ];
 };
 
 
