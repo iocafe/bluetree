@@ -150,6 +150,10 @@ protected:
     ************************************************************************************************
     */
 
+    void set_select(
+        os_int select_row,
+        os_boolean can_open_password_dialog);
+
     void setup_default_data();
 
 

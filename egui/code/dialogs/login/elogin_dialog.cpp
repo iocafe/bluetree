@@ -161,7 +161,7 @@ eStatus eLoginDialog::draw(
     bool show_window = true, ok;
     os_char tmplabel[OSAL_NBUF_SZ+3];
     int select_state = 0;
-    bool check = true;
+    bool check, rval;
 
     const int header_row = 0;
     const int freeze_cols = 1;
@@ -203,14 +203,14 @@ eStatus eLoginDialog::draw(
         setup_default_data();
     }
 
-
     os_strncpy(tmplabel, "##?", sizeof(tmplabel));
     select_state = m_data.selected_row;
 
-
-    text_height = TEXT_BASE_HEIGHT + ImGui::GetStyle().FramePadding.y*2;
-
+    ImGuiStyle &style = ImGui::GetStyle();
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, style.Colors[ImGuiCol_WindowBg]);
+    text_height = TEXT_BASE_HEIGHT + 2.0f * style.FramePadding.y;
     size = ImVec2(0, text_height * (nrows + header_row));
+
     if (ImGui::BeginTable("##tableU", ncols, flags, size))
     {
         rmax = ImGui::GetContentRegionMax();
@@ -238,9 +238,6 @@ eStatus eLoginDialog::draw(
             ImGui::TableHeadersRow();
         }
 
-
-// ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 255, 255)));
-
         ImGuiListClipper clipper;
         clipper.Begin(nrows);
         while (clipper.Step())
@@ -261,21 +258,40 @@ eStatus eLoginDialog::draw(
 
                 tmplabel[2] = 'R';
                 ImGui::SetNextItemWidth(-FLT_MIN);
-                ImGui::RadioButton(tmplabel, &select_state, j);
+                rval = ImGui::RadioButton(tmplabel, &select_state, j);
+                if (rval) {
+                    set_select(j, OS_TRUE);
+                }
 
                 ImGui::TableNextColumn();
 
                 tmplabel[2] = 'U';
                 ImGui::SetNextItemWidth(-FLT_MIN);
-                ImGui::InputText(tmplabel, m_data.rows[j].user_name, OSAL_LONG_USER_NAME_SZ);
+                if (j == m_data.selected_row) {
+                    ImVec4 color = m_data.rows[j].password_set
+                        ? style.Colors[ImGuiCol_CheckMark] : ImVec4(ImColor(255, 64, 64));
+                    color.w /= 4;
+
+                    ImGui::PushStyleColor(ImGuiCol_FrameBg, color);
+                }
+                rval = ImGui::InputText(tmplabel, m_data.rows[j].user_name, OSAL_LONG_USER_NAME_SZ);
+                if (j == m_data.selected_row) {
+                    ImGui::PopStyleColor();
+                }
+                if (rval) {
+                    set_select(j, OS_TRUE);
+                }
 
                 ImGui::TableNextColumn();
 
                 tmplabel[2] = 'P';
                 ImGui::SetNextItemWidth(-FLT_MIN);
 
-                ImGui::InputTextWithHint(tmplabel, m_data.rows[j].password_set ? "<password ok>" : "<password not set>",
+                rval = ImGui::InputTextWithHint(tmplabel, m_data.rows[j].password_set ? "<password ok>" : "<password not set>",
                     m_data.rows[j].password, OSAL_SECRET_STR_SZ, ImGuiInputTextFlags_Password);
+                if (rval) {
+                    set_select(j, OS_FALSE);
+                }
 
                 ImGui::TableNextColumn();
 
@@ -289,8 +305,7 @@ eStatus eLoginDialog::draw(
 
         ImGui::EndTable();
     }
-
-    m_data.selected_row = select_state;
+    ImGui::PopStyleColor();
 
     /* Finished with the window.
      */
@@ -300,6 +315,45 @@ eStatus eLoginDialog::draw(
         gui()->delete_later(this);
     }
     return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Set selected row.
+
+  The eLoginDialog::set_select is called when user changes selected row.
+
+****************************************************************************************************
+*/
+void eLoginDialog::set_select(
+    os_int select_row,
+    os_boolean can_open_password_dialog)
+{
+    os_int i;
+
+    /* If password dialog is open, close it
+     */
+
+    /* Clear passwords which are not marked "saved" on other rows, but selected one.
+     */
+    for (i = 0; i<ELOGIN_MAX_ROWS; i++) {
+        if (i != select_row) {
+            if (!m_data.rows[i].save_password) {
+                os_memclear(m_data.rows[i].password, OSAL_SECRET_STR_SZ);
+                m_data.rows[i].password_set = OS_FALSE;
+            }
+        }
+    }
+
+    /* If selected row has changed, and we may open password dialog
+     */
+    if (m_data.selected_row != select_row && can_open_password_dialog)
+    {
+    }
+
+    m_data.selected_row = select_row;
 }
 
 
@@ -317,10 +371,12 @@ eStatus eLoginDialog::draw(
 void eLoginDialog::setup_default_data()
 {
     os_memclear(&m_data, sizeof(m_data));
-    m_data.selected_row = -1;
+    m_data.selected_row = 0;
     os_strncpy(m_data.rows[0].user_name, "quest", OSAL_LONG_USER_NAME_SZ);
+    os_strncpy(m_data.rows[0].password, "pass", OSAL_SECRET_STR_SZ);
     m_data.rows[0].display_row = OS_TRUE;
     m_data.rows[0].save_password = OS_TRUE;
+    m_data.rows[0].password_set = OS_TRUE;
     os_strncpy(m_data.rows[1].user_name, "user", OSAL_LONG_USER_NAME_SZ);
     m_data.rows[1].display_row = OS_TRUE;
     m_data.rows[1].save_password = OS_TRUE;
