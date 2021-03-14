@@ -27,7 +27,7 @@ eLoginDialog::eLoginDialog(
     os_int flags)
     : eWindow(parent, id, flags)
 {
-    setup_default_data();
+    elogin_defaults(&m_data);
     m_show_popup = -1;
     m_popup_row = 0;
     os_memclear(m_password_buf, sizeof(m_password_buf));
@@ -208,7 +208,7 @@ eStatus eLoginDialog::draw(
             }
         }
         if (nrows) break;
-        setup_default_data();
+        elogin_defaults(&m_data);
     }
 
     os_strncpy(tmplabel, "##?", sizeof(tmplabel));
@@ -424,33 +424,4 @@ void eLoginDialog::set_select(
     m_data.selected_row = select_row;
 }
 
-
-/**
-****************************************************************************************************
-
-  @brief Initial configuration.
-
-  The eLoginDialog::setup_default_data() sets clear m_data structure containing initial user
-  names to propose, etc. This is used when UI is started for the first time, and restored
-  if UI configuration decryption/checksum fails.
-
-****************************************************************************************************
-*/
-void eLoginDialog::setup_default_data()
-{
-    os_memclear(&m_data, sizeof(m_data));
-    m_data.selected_row = 0;
-
-    os_strncpy(m_data.rows[0].user_name, "quest", OSAL_LONG_USER_NAME_SZ);
-    os_strncpy(m_data.rows[0].password, "pass", OSAL_SECRET_STR_SZ);
-    m_data.rows[0].display_row = OS_TRUE;
-    m_data.rows[0].save_password = OS_TRUE;
-
-    os_strncpy(m_data.rows[1].user_name, "user", OSAL_LONG_USER_NAME_SZ);
-    m_data.rows[1].display_row = OS_TRUE;
-    m_data.rows[1].save_password = OS_TRUE;
-
-    os_strncpy(m_data.rows[2].user_name, "root", OSAL_LONG_USER_NAME_SZ);
-    m_data.rows[2].display_row = OS_TRUE;
-}
 

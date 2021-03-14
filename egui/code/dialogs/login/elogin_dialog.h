@@ -24,41 +24,6 @@
   eLoginDialog class.
 ****************************************************************************************************
 */
-/* Current login data. This is set up as basic C structure instead of eobjects data structure
-   to make doubly sure that this data cannot be accessed by browsing, etc. generic method.
- */
-typedef struct {
-    os_char user_name[OSAL_LONG_USER_NAME_SZ];
-    os_char password[OSAL_SECRET_STR_SZ];
-    os_boolean display_row;
-    os_boolean save_password;
-}
-eLoginRow;
-
-#define ELOGIN_MAX_ROWS  4
-
-typedef struct
-{
-    /* Log in rows (pre filles user names and perhaps passwords).
-     */
-    eLoginRow rows[ELOGIN_MAX_ROWS];
-
-    /* Currently selected row.
-     */
-    os_int selected_row;
-
-    /* To validate that this structure is loaded and decrypted correctly.
-     */
-    os_ushort checksum;
-}
-eLoginData;
-
-
-/**
-****************************************************************************************************
-  eLoginDialog class.
-****************************************************************************************************
-*/
 class eLoginDialog : public eWindow
 {
     /**
@@ -142,8 +107,6 @@ protected:
         os_int select_row,
         os_boolean can_open_password_dialog);
 
-    void setup_default_data();
-
 
     /**
     ************************************************************************************************
@@ -151,8 +114,6 @@ protected:
     ************************************************************************************************
     */
 
-    // eAutoLabel m_label_title;
-    //eStrBuffer m_text;
     eLoginData m_data;
     os_int m_show_popup;
     os_int m_popup_row;

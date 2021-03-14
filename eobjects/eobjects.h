@@ -85,6 +85,7 @@ void eobjects_shutdown();
 #include "code/timer/etimer.h"
 #include "code/time/etime.h"
 #include "code/global/eprocess.h"
+#include "code/global/elogindata.h"
 #include "code/global/eglobal.h"
 #include "code/stream/estream.h"
 #include "code/stream/equeue.h"
