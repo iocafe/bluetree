@@ -124,6 +124,10 @@ typedef struct eGlobal
      */
     os_char bin_path[EGLOBAL_PATH_SZ];
 
+    /** Global currently active use login.
+     */
+    eActiveLogin active_login;
+
     /** This is special for eMatrix clas. Memory manager and eBuffer implementation
         are tested at startup, how much memory we actually get when we request
         OEMATRIX_APPROX_BUF_SZ bytes.

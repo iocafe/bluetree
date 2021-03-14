@@ -423,5 +423,3 @@ void eLoginDialog::set_select(
 
     m_data.selected_row = select_row;
 }
-
-

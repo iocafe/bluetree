@@ -30,7 +30,7 @@ eLoginRow;
 
 #define ELOGIN_MAX_ROWS  4
 
-typedef struct
+typedef struct eLoginData
 {
     /* Log in rows (pre filles user names and perhaps passwords).
      */
@@ -45,6 +45,22 @@ typedef struct
     os_ushort checksum;
 }
 eLoginData;
+
+
+/* Global currently active use login.
+ */
+typedef struct eActiveLogin
+{
+    /* Active user name and pasword.
+     */
+    os_char user_name[OSAL_LONG_USER_NAME_SZ];
+    os_char password[OSAL_SECRET_STR_SZ];
+
+    /* Crypt key for saving/loading login data.
+     */
+    os_uchar crypt_key[OSAL_AES_KEY_SZ];
+}
+eActiveLogin;
 
 /* Load all login data from hard drive (AES decrypt).
  */
@@ -67,8 +83,13 @@ void elogin_set(
     const os_char *user_name,
     const os_char *password);
 
+/* Save active user name and password by login data.
+ */
+os_boolean elogin_set_data(
+    eLoginData *data);
+
 /* Load login data and set active user name and password.
  */
-void elogin_initialize();
+os_boolean elogin_initialize();
 
 #endif
