@@ -31,6 +31,7 @@ eLoginDialog::eLoginDialog(
     m_show_popup = -1;
     m_popup_row = 0;
     os_memclear(m_password_buf, sizeof(m_password_buf));
+    initproperties();
 }
 
 
@@ -41,6 +42,7 @@ eLoginDialog::eLoginDialog(
 */
 eLoginDialog::~eLoginDialog()
 {
+//    m_label_title.release(this);
 }
 
 
@@ -90,7 +92,8 @@ void eLoginDialog::setupclass()
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eLoginDialog", EGUICLASSID_WINDOW);
     setupproperties(cls, ECOMP_NO_OPTIONAL_PROPERITES);
-    addpropertys(cls, ECOMP_TEXT, ecomp_text, "user login", "window title", EPRO_METADATA);
+    addpropertys(cls, ECOMP_NAME, ecomp_name, "login", "name", EPRO_PERSISTENT);
+    addpropertys(cls, ECOMP_TEXT, ecomp_text, "user login", "title text", EPRO_PERSISTENT);
     propertysetdone(cls);
     os_unlock();
 }
@@ -126,7 +129,8 @@ eStatus eLoginDialog::onpropertychange(
     switch (propertynr)
     {
         case ECOMP_TEXT:
-            m_text.clear();
+        case ECOMP_NAME:
+            m_label_title.clear();
             break;
 
         default:
@@ -343,6 +347,11 @@ eStatus eLoginDialog::draw(
     }
     if (ImGui::BeginPopup("my_passwd_popup"))
     {
+        /* ImGui::IsRootWindowOrAnyChildFocused() && */
+        if (!ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)) {
+            ImGui::SetKeyboardFocusHere(0);
+        }
+
         ImGui::Text("type password");
         rval = ImGui::InputTextWithHint(tmplabel, "<password>", m_password_buf,
             OSAL_SECRET_STR_SZ, ImGuiInputTextFlags_Password|
@@ -432,15 +441,16 @@ void eLoginDialog::setup_default_data()
     os_memclear(&m_data, sizeof(m_data));
     m_data.selected_row = 0;
 
-    os_strncpy(m_data.rows[0].user_name, "user", OSAL_LONG_USER_NAME_SZ);
+    os_strncpy(m_data.rows[0].user_name, "quest", OSAL_LONG_USER_NAME_SZ);
+    os_strncpy(m_data.rows[0].password, "pass", OSAL_SECRET_STR_SZ);
     m_data.rows[0].display_row = OS_TRUE;
     m_data.rows[0].save_password = OS_TRUE;
-    os_strncpy(m_data.rows[1].user_name, "ispy", OSAL_LONG_USER_NAME_SZ);
-    m_data.rows[1].display_row = OS_TRUE;
 
-    os_strncpy(m_data.rows[2].user_name, "quest", OSAL_LONG_USER_NAME_SZ);
-    os_strncpy(m_data.rows[2].password, "pass", OSAL_SECRET_STR_SZ);
+    os_strncpy(m_data.rows[1].user_name, "user", OSAL_LONG_USER_NAME_SZ);
+    m_data.rows[1].display_row = OS_TRUE;
+    m_data.rows[1].save_password = OS_TRUE;
+
+    os_strncpy(m_data.rows[2].user_name, "root", OSAL_LONG_USER_NAME_SZ);
     m_data.rows[2].display_row = OS_TRUE;
-    m_data.rows[2].save_password = OS_TRUE;
 }
 

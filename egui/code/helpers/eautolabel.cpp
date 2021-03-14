@@ -137,14 +137,14 @@ void eAutoLabel::setstr(
     os_memsz sz;
     eComponent *window;
     eGui *g;
-    os_int cid;
+    os_int oid;
 
     osal_debug_assert(component != OS_NULL);
 
     /* Make sure that we have count.
      */
-    cid = component->classid();
-    if (cid == EGUICLASSID_WINDOW || cid == EGUICLASSID_POPUP)
+    oid = component->oid();
+    if (oid == EOID_GUI_WINDOW || oid == EOID_GUI_POPUP)
     {
         namestr = "?";
         if (m_autolabel == OS_NULL) {

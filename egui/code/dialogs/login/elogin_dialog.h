@@ -151,7 +151,8 @@ protected:
     ************************************************************************************************
     */
 
-    eStrBuffer m_text;
+    // eAutoLabel m_label_title;
+    //eStrBuffer m_text;
     eLoginData m_data;
     os_int m_show_popup;
     os_int m_popup_row;
