@@ -40,9 +40,17 @@ typedef struct eLoginData
      */
     os_int selected_row;
 
+    /* Resesved for future, used not for padding the structure.
+     */
+    os_int reserved_1;
+
     /* To validate that this structure is loaded and decrypted correctly.
      */
     os_ushort checksum;
+
+    /* Resesved for future, used not for padding the structure.
+     */
+    os_ushort reserved_2;
 
     /* Log in rows (pre filles user names and perhaps passwords).
      */

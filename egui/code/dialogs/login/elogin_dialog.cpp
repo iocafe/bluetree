@@ -27,24 +27,25 @@ eLoginDialog::eLoginDialog(
     os_int flags)
     : eWindow(parent, id, flags)
 {
-//     elogin_defaults(&m_data);
+    os_int row;
     elogin_load(&m_data);
 
     m_show_popup = -1;
     m_popup_row = 0;
+
+    row = m_data.selected_row;
+    if (row >= 0 && row < ELOGIN_MAX_ROWS) {
+        if (m_data.rows[row].display_row &&
+            m_data.rows[row].user_name[0] &&
+            m_data.rows[row].password[0] == '\0')
+        {
+            m_show_popup = row;
+        }
+    }
+
     os_memclear(m_password_buf, sizeof(m_password_buf));
     initproperties();
 }
-
-
-/**
-****************************************************************************************************
-  Virtual destructor.
-****************************************************************************************************
-*/
-/* eLoginDialog::~eLoginDialog()
-{
-} */
 
 
 /**
@@ -169,7 +170,7 @@ eStatus eLoginDialog::draw(
     bool show_window = true, ok;
     os_char tmplabel[OSAL_NBUF_SZ+3];
     int select_state = 0;
-    bool check, rval, rval2, change_bg_color;
+    bool check, rval, change_bg_color;
     float text_height;
 
     const int header_row = 0;
@@ -272,7 +273,7 @@ eStatus eLoginDialog::draw(
                     ImGui::SetTooltip("select row");
                 }
                 if (rval) {
-                    set_select(j, OS_TRUE);
+                    set_select(j, OS_TRUE, OS_FALSE);
                 }
 
                 ImGui::TableNextColumn();
@@ -294,8 +295,7 @@ eStatus eLoginDialog::draw(
                     ImGui::SetTooltip("user name");
                 }
                 if (rval) {
-                    set_select(j, OS_TRUE);
-                    save_login();
+                    set_select(j, OS_TRUE, OS_TRUE);
                 }
 
                 ImGui::TableNextColumn();
@@ -318,8 +318,7 @@ eStatus eLoginDialog::draw(
                     ImGui::SetTooltip("password");
                 }
                 if (rval) {
-                    set_select(j, OS_FALSE);
-                    save_login();
+                    set_select(j, OS_FALSE, OS_TRUE);
                 }
 
                 ImGui::TableNextColumn();
@@ -343,6 +342,33 @@ eStatus eLoginDialog::draw(
     }
     ImGui::PopStyleColor();
 
+    /* Draw password popup window as needed.
+     */
+    draw_popup();
+
+    /* Finished with the window.
+     */
+    ImGui::End();
+
+    if (!show_window) {
+        gui()->delete_later(this);
+    }
+    return ESTATUS_SUCCESS;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Draw password popup window as needed.
+
+****************************************************************************************************
+*/
+void eLoginDialog::draw_popup()
+{
+    bool rval, rval2;
+    os_char tmp[90];
+
     /* Handle password popup.
      */
     if (m_show_popup >= 0) {
@@ -351,14 +377,28 @@ eStatus eLoginDialog::draw(
         m_show_popup  = -1;
         os_memclear(m_password_buf, sizeof(m_password_buf));
     }
+
+    ImVec2 win_pos = ImGui::GetWindowPos();
+    ImVec2 win_sz = ImGui::GetWindowSize();
+    ImVec2 win_o = ImGui::GetWindowContentRegionMin();
+
     if (ImGui::BeginPopup("my_passwd_popup"))
     {
         if (!ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)) {
             ImGui::SetKeyboardFocusHere(0);
         }
 
-        ImGui::Text("type password");
-        rval = ImGui::InputTextWithHint(tmplabel, "<password>", m_password_buf,
+        ImVec2 pop_pos = ImGui::GetWindowPos();
+        if (pop_pos.x < win_pos.x || pop_pos.x > win_pos.x + win_sz.x ||
+            pop_pos.y < win_pos.y || pop_pos.y > win_pos.y + win_sz.y)
+        {
+            ImGui::SetWindowPos(ImVec2(win_pos.x + win_o.x, win_pos.y + win_o.y));
+        }
+
+        os_strncpy(tmp, "type password for ", sizeof(tmp));
+        os_strncat(tmp, m_data.rows[m_popup_row].user_name, sizeof(tmp));
+        ImGui::Text(tmp);
+        rval = ImGui::InputTextWithHint("##passw", "<password>", m_password_buf,
             OSAL_SECRET_STR_SZ, ImGuiInputTextFlags_Password|
         ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll);
 
@@ -377,15 +417,6 @@ eStatus eLoginDialog::draw(
         }
         ImGui::EndPopup();
     }
-
-    /* Finished with the window.
-     */
-    ImGui::End();
-
-    if (!show_window) {
-        gui()->delete_later(this);
-    }
-    return ESTATUS_SUCCESS;
 }
 
 
@@ -400,9 +431,11 @@ eStatus eLoginDialog::draw(
 */
 void eLoginDialog::set_select(
     os_int select_row,
-    os_boolean can_open_password_dialog)
+    os_boolean can_open_password_dialog,
+    os_boolean save_unconditionally)
 {
     os_int i;
+    os_boolean modified = OS_FALSE;
 
     /* If password dialog is open, close it.
      */
@@ -413,7 +446,10 @@ void eLoginDialog::set_select(
     for (i = 0; i<ELOGIN_MAX_ROWS; i++) {
         if (i != select_row) {
             if (!m_data.rows[i].save_password) {
-                os_memclear(m_data.rows[i].password, OSAL_SECRET_STR_SZ);
+                if (m_data.rows[i].password[0]) {
+                    os_memclear(m_data.rows[i].password, OSAL_SECRET_STR_SZ);
+                    modified = OS_TRUE;
+                }
             }
         }
     }
@@ -427,7 +463,16 @@ void eLoginDialog::set_select(
         }
     }
 
-    m_data.selected_row = select_row;
+    if (m_data.selected_row != select_row) {
+        m_data.selected_row = select_row;
+        modified = OS_TRUE;
+    }
+
+    /* Save if modified.
+     */
+    if (modified || save_unconditionally) {
+        save_login();
+    }
 }
 
 
@@ -436,13 +481,24 @@ void eLoginDialog::set_select(
 
   @brief Activate user login and save login data.
 
-  The eLoginDialog::set_select is called when user changes selected row.
-
 ****************************************************************************************************
 */
 void eLoginDialog::save_login()
 {
-    elogin_set_data(&m_data);
-    elogint_save(&m_data);
+    eLoginData data_no_passwd;
+    os_int i;
 
+    elogin_set_data(&m_data);
+
+    /* Make temp copy, wipe passwords without "save password" checkmark before saving.
+     */
+    data_no_passwd = m_data;
+    for (i = 0; i<ELOGIN_MAX_ROWS; i++) {
+        if (!data_no_passwd.rows[i].save_password) {
+            if (data_no_passwd.rows[i].password[0]) {
+                os_memclear(data_no_passwd.rows[i].password, OSAL_SECRET_STR_SZ);
+            }
+        }
+    }
+    elogint_save(&data_no_passwd);
 }

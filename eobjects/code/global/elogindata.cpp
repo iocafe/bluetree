@@ -39,7 +39,7 @@ eStatus elogin_load(
     eLoginData *data)
 {
     os_char path[OSAL_PERSISTENT_MAX_PATH];
-    os_uchar encrypted[sizeof(eLoginData)];
+    os_uchar encrypted[(sizeof(eLoginData) + 0xF) & ~0xF];
     os_ushort saved_checksum, calculated_checksum;
     osalStatus s;
     os_memsz n_read;
@@ -60,8 +60,7 @@ eStatus elogin_load(
         goto failed;
     }
 
-    /* Encrypt the login data. This is not bullet proof, just in case operating system
-       security should be used to safeguard "secret" files.
+    /* Decrypt the login data.
      */
     osal_aes_crypt(encrypted, sizeof(encrypted), (os_uchar*)data, sizeof(eLoginData),
         eglobal->active_login.crypt_key, OSAL_AES_DECRYPT);
@@ -100,7 +99,7 @@ eStatus elogint_save(
     eLoginData *data)
 {
     os_char path[OSAL_PERSISTENT_MAX_PATH];
-    os_uchar encrypted[sizeof(eLoginData)];
+    os_uchar encrypted[(sizeof(eLoginData) + 0xF) & ~0xF];
     osalStatus s;
 
     /* Calculate checksum.
@@ -233,16 +232,22 @@ os_boolean elogin_set_data(
 {
     os_int row, i;
     os_boolean rval = OS_FALSE;
+    os_boolean change_selected_row = OS_FALSE;
 
     /* Select row to use.
      */
     row = data->selected_row;
     if (row < 0 || row >= ELOGIN_MAX_ROWS) {
         rval = OS_TRUE;
+        change_selected_row = OS_TRUE;
     }
-    else if (data->rows[row].display_row == 0 ||
-        data->rows[row].user_name[0] == '\0' ||
-        data->rows[row].password[0] == '\0')
+    else if (data->rows[row].display_row == 0)
+    {
+        change_selected_row = OS_TRUE;
+        rval = OS_TRUE;
+    }
+
+    else if (data->rows[row].user_name[0] == '\0' || data->rows[row].password[0] == '\0')
     {
         rval = OS_TRUE;
     }
@@ -257,7 +262,9 @@ os_boolean elogin_set_data(
                 break;
             }
         }
-        data->selected_row = row;
+        if (change_selected_row) {
+            data->selected_row = row;
+        }
     }
 
     /* Set active login

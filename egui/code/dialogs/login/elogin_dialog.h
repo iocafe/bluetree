@@ -39,10 +39,6 @@ public:
         e_oid id = EOID_GUI_WINDOW,
         os_int flags = EOBJ_DEFAULT);
 
-    /* Virtual destructor.
-     */
-    // virtual ~eLoginDialog();
-
     /* Clone object.
      */
     virtual eObject *clone(
@@ -103,11 +99,16 @@ protected:
     ************************************************************************************************
     */
 
+    /* Draw password popup window as needed.
+     */
+    void draw_popup();
+
     /* Set selected row.
      */
     void set_select(
         os_int select_row,
-        os_boolean can_open_password_dialog);
+        os_boolean can_open_password_dialog,
+        os_boolean save_unconditionally);
 
     /* Activate user login and save login data.
      */
