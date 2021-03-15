@@ -249,7 +249,7 @@ protected:
 
     /** Delete the connection if case socket fails.
      */
-    os_boolean m_delete_on_error;
+    os_boolean m_is_server;
 
     /** Flag indicating that the authentication frame has been sent after the connection was opened.
      */

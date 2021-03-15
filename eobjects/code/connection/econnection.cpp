@@ -63,7 +63,7 @@ eConnection::eConnection(
     m_connection_failed_once = OS_FALSE;
     m_new_writes = OS_FALSE;
     m_fast_timer_enabled = -1;
-    m_delete_on_error = OS_FALSE;
+    m_is_server = OS_FALSE;
     m_envelope = OS_NULL;
     m_enable = OS_TRUE;
     m_authentication_frame_sent = OS_FALSE;
@@ -543,7 +543,7 @@ void eConnection::run()
 
             alive(EALIVE_RETURN_IMMEDIATELY);
 
-            if (/* m_connection_failed_once && */ m_delete_on_error ||
+            if (/* m_connection_failed_once && */ m_is_server ||
                 (!m_enable && !has_client_bindings()))
             {
                 break;
@@ -598,8 +598,13 @@ eStatus eConnection::handle_authentication_frames()
         }
     }
 
-    if (!m_authentication_frame_sent)
+    /* If this is client, we cannot send authentication frame before receiving one from server.
+     * CHECK: OR DO WE WAIT FOR TLS SERVER SERTIFICATE VALIDATION RESULTS???
+     */
+    if (!m_authentication_frame_sent && (m_is_server || m_authentication_frame_received))
+    // if (!m_authentication_frame_sent)
     {
+        os_char auto_password[IOC_PASSWORD_SZ];
         iocSwitchboxAuthenticationParameters prm;
         os_memclear(&prm, sizeof(prm));
 
@@ -608,9 +613,33 @@ eStatus eConnection::handle_authentication_frames()
                 os_malloc(sizeof(iocSwitchboxAuthenticationFrameBuffer), OS_NULL);
             os_memclear(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
 
-            prm.network_name = "net";
-            prm.user_name = "user";
-            prm.password = "?";
+            if (m_is_server) {
+                prm.network_name = eglobal->process_id;
+                prm.user_name = "srv";
+                prm.password = "pw";
+            }
+            else {
+                /* If this is user interface, etc application?
+                 */
+                if (eglobal->active_login.user_name[0]) {
+                    prm.user_name = eglobal->active_login.user_name;
+                    /* We need to make sure that this is TLS connection and that we have accepted certificate before
+                     * we can send password */
+                    prm.password = eglobal->active_login.password;
+                    prm.network_name = eglobal->process_id; /* Add network name to connect to table */
+                }
+
+                /* Otherwise this is independent process (no UI) connecting to other service or switchbox.
+                 */
+                else {
+                    /* Should we be able to be able to set user and password? This would allow setting
+                       up server account in advance. */
+                    prm.user_name = eglobal->process_id;
+                    osal_get_auto_password(auto_password, sizeof(auto_password));
+                    prm.password = auto_password;
+                    prm.network_name = eglobal->process_id; /* Add network name to connect to table */
+                }
+            }
         }
 
         ss = icom_switchbox_send_authentication_frame(m_stream->osstream(),
@@ -659,7 +688,7 @@ eStatus eConnection::accepted(
     stream->adopt(this);
 
     s = connected();
-    m_delete_on_error = OS_TRUE;
+    m_is_server = OS_TRUE;
     return s;
 }
 
