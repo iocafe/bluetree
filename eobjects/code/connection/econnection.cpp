@@ -599,7 +599,6 @@ eStatus eConnection::handle_authentication_frames()
     }
 
     /* If this is client, we cannot send authentication frame before receiving one from server.
-     * CHECK: OR DO WE WAIT FOR TLS SERVER SERTIFICATE VALIDATION RESULTS???
      */
     if (!m_authentication_frame_sent && (m_is_server || m_authentication_frame_received))
     // if (!m_authentication_frame_sent)
