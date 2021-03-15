@@ -52,6 +52,10 @@ eStatus emain(
     // duudeli(); return ESTATUS_SUCCESS;
     // tableview_test_start();
 
+    /* Initialize/load user login data.
+     */
+    elogin_initialize();
+
     efsys_expose_directory("//fsys", eglobal->root_path, &fsys_thread_handle);
 
     egui_initialize();

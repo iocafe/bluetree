@@ -41,7 +41,7 @@ public:
 
     /* Virtual destructor.
      */
-    virtual ~eLoginDialog();
+    // virtual ~eLoginDialog();
 
     /* Clone object.
      */
@@ -103,10 +103,15 @@ protected:
     ************************************************************************************************
     */
 
+    /* Set selected row.
+     */
     void set_select(
         os_int select_row,
         os_boolean can_open_password_dialog);
 
+    /* Activate user login and save login data.
+     */
+    void save_login();
 
     /**
     ************************************************************************************************

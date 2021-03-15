@@ -35,13 +35,14 @@ static void elogin_get_path(
 
 ****************************************************************************************************
 */
-eStatus elogint_load(
+eStatus elogin_load(
     eLoginData *data)
 {
     os_char path[OSAL_PERSISTENT_MAX_PATH];
     os_uchar encrypted[sizeof(eLoginData)];
     os_ushort saved_checksum, calculated_checksum;
-    eStatus s;
+    osalStatus s;
+    os_memsz n_read;
 
     /* Initialize with defaults
      */
@@ -53,8 +54,11 @@ eStatus elogint_load(
 
     /* Try to load the file.
      */
-    s = ESTATUS_FAILED;
-
+    s = os_read_file(path, (os_char*)encrypted, sizeof(encrypted), &n_read, OS_FILE_DEFAULT);
+    if (s) {
+        osal_debug_error_str("Login data not loaded: ", path);
+        goto failed;
+    }
 
     /* Encrypt the login data. This is not bullet proof, just in case operating system
        security should be used to safeguard "secret" files.
@@ -68,10 +72,11 @@ eStatus elogint_load(
     data->checksum = 0;
     calculated_checksum = os_checksum((const os_char*)data, sizeof(eLoginData), OS_NULL);
     if (calculated_checksum != saved_checksum) {
+        osal_debug_error_str("Login data checksum mismatch: ", path);
         goto failed;
     }
 
-    return s;
+    return ESTATUS_FROM_OSAL_STATUS(s);
 
 failed:
     elogin_defaults(data);
@@ -96,6 +101,7 @@ eStatus elogint_save(
 {
     os_char path[OSAL_PERSISTENT_MAX_PATH];
     os_uchar encrypted[sizeof(eLoginData)];
+    osalStatus s;
 
     /* Calculate checksum.
      */
@@ -112,7 +118,18 @@ eStatus elogint_save(
     osal_aes_crypt((os_uchar*)data, sizeof(eLoginData), encrypted, sizeof(encrypted),
         eglobal->active_login.crypt_key, OSAL_AES_ENCRYPT);
 
-    return ESTATUS_SUCCESS;
+    /* Save to file.
+     */
+    s = os_write_file(path, (os_char*)encrypted, sizeof(encrypted), OS_FILE_DEFAULT);
+    if (s) {
+        emkdir(path, EMKDIR_FILE_PATH);
+        s = os_write_file(path, (os_char*)encrypted, sizeof(encrypted), OS_FILE_DEFAULT);
+    }
+    if (s) {
+        osal_debug_error_str("Saving login data failed: ", path);
+    }
+
+    return ESTATUS_FROM_OSAL_STATUS(s);
 }
 
 
@@ -191,7 +208,7 @@ os_boolean elogin_initialize()
 
     /* Load the login data, use defaults if this fails.
      */
-    elogint_load(&data);
+    elogin_load(&data);
 
     /* Set active login.
      */

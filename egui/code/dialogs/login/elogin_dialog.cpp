@@ -27,7 +27,9 @@ eLoginDialog::eLoginDialog(
     os_int flags)
     : eWindow(parent, id, flags)
 {
-    elogin_defaults(&m_data);
+//     elogin_defaults(&m_data);
+    elogin_load(&m_data);
+
     m_show_popup = -1;
     m_popup_row = 0;
     os_memclear(m_password_buf, sizeof(m_password_buf));
@@ -40,10 +42,9 @@ eLoginDialog::eLoginDialog(
   Virtual destructor.
 ****************************************************************************************************
 */
-eLoginDialog::~eLoginDialog()
+/* eLoginDialog::~eLoginDialog()
 {
-//    m_label_title.release(this);
-}
+} */
 
 
 /**
@@ -294,6 +295,7 @@ eStatus eLoginDialog::draw(
                 }
                 if (rval) {
                     set_select(j, OS_TRUE);
+                    save_login();
                 }
 
                 ImGui::TableNextColumn();
@@ -317,6 +319,7 @@ eStatus eLoginDialog::draw(
                 }
                 if (rval) {
                     set_select(j, OS_FALSE);
+                    save_login();
                 }
 
                 ImGui::TableNextColumn();
@@ -328,7 +331,10 @@ eStatus eLoginDialog::draw(
                 if (ImGui::IsItemHovered()) {
                     ImGui::SetTooltip("save password");
                 }
-                m_data.rows[j].save_password = check;
+                if (check != m_data.rows[j].save_password) {
+                    m_data.rows[j].save_password = check;
+                    save_login();
+                }
             }
         }
 
@@ -347,7 +353,6 @@ eStatus eLoginDialog::draw(
     }
     if (ImGui::BeginPopup("my_passwd_popup"))
     {
-        /* ImGui::IsRootWindowOrAnyChildFocused() && */
         if (!ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)) {
             ImGui::SetKeyboardFocusHere(0);
         }
@@ -367,6 +372,7 @@ eStatus eLoginDialog::draw(
             if (rval || rval2) {
                 os_memcpy(m_data.rows[m_popup_row].password, m_password_buf, OSAL_SECRET_STR_SZ);
                 ImGui::CloseCurrentPopup();
+                save_login();
             }
         }
         ImGui::EndPopup();
@@ -422,4 +428,21 @@ void eLoginDialog::set_select(
     }
 
     m_data.selected_row = select_row;
+}
+
+
+/**
+****************************************************************************************************
+
+  @brief Activate user login and save login data.
+
+  The eLoginDialog::set_select is called when user changes selected row.
+
+****************************************************************************************************
+*/
+void eLoginDialog::save_login()
+{
+    elogin_set_data(&m_data);
+    elogint_save(&m_data);
+
 }

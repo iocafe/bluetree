@@ -32,9 +32,9 @@ eLoginRow;
 
 typedef struct eLoginData
 {
-    /* Log in rows (pre filles user names and perhaps passwords).
+    /* Reserved for future expansion, set 0 for now.
      */
-    eLoginRow rows[ELOGIN_MAX_ROWS];
+    os_int version;
 
     /* Currently selected row.
      */
@@ -43,6 +43,10 @@ typedef struct eLoginData
     /* To validate that this structure is loaded and decrypted correctly.
      */
     os_ushort checksum;
+
+    /* Log in rows (pre filles user names and perhaps passwords).
+     */
+    eLoginRow rows[ELOGIN_MAX_ROWS];
 }
 eLoginData;
 
@@ -64,7 +68,7 @@ eActiveLogin;
 
 /* Load all login data from hard drive (AES decrypt).
  */
-eStatus elogint_load(
+eStatus elogin_load(
     eLoginData *data);
 
 /* Save all login data from hard drive (AES encrypt).
