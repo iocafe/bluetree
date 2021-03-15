@@ -170,7 +170,7 @@ eStatus eLoginDialog::draw(
     bool show_window = true, ok;
     os_char tmplabel[OSAL_NBUF_SZ+3];
     int select_state = 0;
-    bool check, rval, change_bg_color;
+    bool check, rval, change_bg_color, change_text_color;
     float text_height;
 
     const int header_row = 0;
@@ -178,6 +178,8 @@ eStatus eLoginDialog::draw(
     const int freeze_rows = header_row;
     const int ncols = 4;
     const float TEXT_BASE_HEIGHT = ImGui::GetTextLineHeightWithSpacing();
+
+    ImGui::SetNextWindowSize(ImVec2(500, 150), ImGuiCond_FirstUseEver);
 
     label = m_label_title.get(this, ECOMP_TEXT, ECOMP_NAME);
     ok = ImGui::Begin(label, &show_window);
@@ -239,10 +241,10 @@ eStatus eLoginDialog::draw(
 
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
 
-        ImGui::TableSetupColumn("select", ImGuiTableColumnFlags_NoHide, 20.0f);
-        ImGui::TableSetupColumn("user name", ImGuiTableColumnFlags_NoHide, 100.0f);
-        ImGui::TableSetupColumn("password", ImGuiTableColumnFlags_NoHide, 80.0f);
-        ImGui::TableSetupColumn("save password", ImGuiTableColumnFlags_NoHide, 30.0f);
+        ImGui::TableSetupColumn("select", ImGuiTableColumnFlags_NoHide, 7.0f);
+        ImGui::TableSetupColumn("user name", ImGuiTableColumnFlags_NoHide, 46.0f);
+        ImGui::TableSetupColumn("password", ImGuiTableColumnFlags_NoHide, 40.0f);
+        ImGui::TableSetupColumn("save password", ImGuiTableColumnFlags_NoHide, 7.0f);
 
         if (header_row) {
             ImGui::TableHeadersRow();
@@ -303,16 +305,17 @@ eStatus eLoginDialog::draw(
                 tmplabel[2] = 'P';
                 ImGui::SetNextItemWidth(-FLT_MIN);
 
-                change_bg_color = (j == m_data.selected_row && !m_data.rows[j].password[0]);
-                if (change_bg_color) {
-                    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(ImColor(192, 0, 0)));
+                change_text_color = (j == m_data.selected_row && !m_data.rows[j].password[0]);
+                if (change_text_color) {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(192, 0, 0)));
+                    ImGui::PushStyleColor(ImGuiCol_TextDisabled, ImVec4(ImColor(192, 0, 0)));
                 }
                 rval = ImGui::InputTextWithHint(tmplabel, m_data.rows[j].password[0]
                     ? "<password ok>" : "<password not set>",
                     m_data.rows[j].password, OSAL_SECRET_STR_SZ, ImGuiInputTextFlags_Password|
                     ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll);
-                if (change_bg_color) {
-                    ImGui::PopStyleColor();
+                if (change_text_color) {
+                    ImGui::PopStyleColor(2);
                 }
                 if (ImGui::IsItemHovered()) {
                     ImGui::SetTooltip("password");
