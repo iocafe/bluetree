@@ -171,7 +171,7 @@ protected:
 
     /* Callback from IOCOM get user authorization.
      */
-    static osalStatus authorize_user(
+    static osalStatus authorize_iocom_user(
         struct iocRoot *root,
         iocAllowedNetworkConf *allowed_networks,
         iocUser *user_account,

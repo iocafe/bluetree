@@ -187,7 +187,7 @@ void eNetService::add_user_account(
 
 ****************************************************************************************************
 */
-osalStatus eNetService::authorize_user(
+osalStatus eNetService::authorize_iocom_user(
     struct iocRoot *root,
     iocAllowedNetworkConf *allowed_networks,
     iocUser *user_account,

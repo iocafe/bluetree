@@ -641,7 +641,7 @@ eStatus eConnection::handle_authentication_frames()
             }
         }
 
-        ss = icom_switchbox_send_authentication_frame(m_stream->osstream(),
+        ss = ioc_send_switchbox_authentication_frame(m_stream->osstream(),
             m_auth_send_buf, &prm);
         if (ss == OSAL_COMPLETED) {
             os_free(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
