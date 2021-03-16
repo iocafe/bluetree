@@ -1,7 +1,7 @@
 /**
 
   @file    enetaccounts.cpp
-  @brief   User accounts.
+  @brief   User accounts, authentication and authorization.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    8.9.2020
@@ -82,7 +82,7 @@ void eNetService::create_user_account_table()
     column = new eVariable(columns);
     column->addname("privileges", ENAME_NO_MAP);
     column->setpropertyi(EVARP_TYPE, OS_CHAR);
-    column->setpropertys(EVARP_ATTR, "enum=\"1.quest,2.user,3.admin\"");
+    column->setpropertys(EVARP_ATTR, "enum=\"1.quest,2.user,3.root\"");
     column->setpropertys(EVARP_TTIP,
         "What this user is allowed to User priviliges.\n"
         "- \'quest\': view data and parameters, user cannot change anything.\n"
@@ -171,7 +171,6 @@ void eNetService::add_user_account(
 
     m_account_matrix->insert(&row);
 }
-
 
 
 /**
