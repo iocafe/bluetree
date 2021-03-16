@@ -160,12 +160,23 @@ protected:
      */
     void create_user_account_table();
 
+    /* Add new user account.
+     */
     void add_user_account(
         const os_char *user_name,
         const os_char *password,
         os_int accept,
         os_int privileges,
         os_int row_nr = -1);
+
+    /* Callback from IOCOM get user authorization.
+     */
+    static osalStatus authorize_user(
+        struct iocRoot *root,
+        iocAllowedNetworkConf *allowed_networks,
+        iocUser *user_account,
+        os_char *ip,
+        void *context);
 
     /* Create "end point" table.
      */

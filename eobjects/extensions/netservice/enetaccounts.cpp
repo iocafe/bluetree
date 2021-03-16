@@ -124,6 +124,13 @@ void eNetService::create_user_account_table()
 }
 
 
+/**
+****************************************************************************************************
+
+  @brief Add new user account.
+
+****************************************************************************************************
+*/
 void eNetService::add_user_account(
     const os_char *user_name,
     const os_char *password,
@@ -163,4 +170,37 @@ void eNetService::add_user_account(
     }
 
     m_account_matrix->insert(&row);
+}
+
+
+
+/**
+****************************************************************************************************
+
+  @brief Callback from IOCOM get user authorization.
+
+  This function is called by IOCOM library trough a function pointer to allow implementing
+  user authentication mechanism for application.
+
+  The allowed_networks is structure set up to hold list of networks which can be accessed
+  trough the connection and privileges for each network. Must be released by
+  ioc_release_allowed_networks().
+
+****************************************************************************************************
+*/
+osalStatus eNetService::authorize_user(
+    struct iocRoot *root,
+    iocAllowedNetworkConf *allowed_networks,
+    iocUser *user_account,
+    os_char *ip,
+    void *context)
+{
+    eNetService *netsrv;
+
+    os_lock();
+    netsrv = (eNetService *)context;
+
+    os_unlock();
+
+    return OSAL_SUCCESS;
 }

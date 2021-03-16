@@ -129,6 +129,7 @@ void eNetService::start(
     if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_EOBJECTS_SERVICE)) {
         create_user_account_table();
         create_end_point_table(flags);
+        ioc_enable_user_authentication(&m_iocom_root, authorize_user, this);
     }
     if (flags & (ENET_ENABLE_IOCOM_CLIENT | ENET_ENABLE_EOBJECTS_CLIENT)) {
         create_connect_table();
