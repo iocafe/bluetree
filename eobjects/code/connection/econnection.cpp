@@ -600,8 +600,10 @@ eStatus eConnection::handle_authentication_frames()
 
     /* If this is client, we cannot send authentication frame before receiving one from server.
      */
-    if (!m_authentication_frame_sent && (m_is_server || m_authentication_frame_received))
-    // if (!m_authentication_frame_sent)
+    /* WARNING: THIS SEEMS UNWORKABLE, SINCE SWITCHBOX NEEDS CLIENT AUTHENTICATION BEFORE IT CAN SEND ANYTHING. */
+    /* if (!m_authentication_frame_sent && (m_is_server || m_authentication_frame_received)) */
+
+    if (!m_authentication_frame_sent)
     {
         os_char auto_password[IOC_PASSWORD_SZ];
         iocSwitchboxAuthenticationParameters prm;
