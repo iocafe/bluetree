@@ -115,7 +115,8 @@ void eNetService::setupclass()
   Called after eNetService object is created to create data structures and start operation.
 
   @param  flags Bit fields, combination of ENET_DEFAULT_NO_END_POINTS, ENET_ENABLE_IOCOM_CLIENT,
-          ENET_ENABLE_EOBJECTS_CLIENT, ENET_ENABLE_IOCOM_SERVICE and ENET_ENABLE_EOBJECTS_SERVICE.
+          ENET_ENABLE_EOBJECTS_CLIENT, ENET_ENABLE_IOCOM_SERVICE, ENET_ENABLE_EOBJECTS_SERVICE,
+          and ENET_ENABLE_LIGHTHOUSE.
 
 ****************************************************************************************************
 */
@@ -127,7 +128,7 @@ void eNetService::start(
     create_process_status_table();
     create_service_parameters(flags);
     if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_EOBJECTS_SERVICE)) {
-        create_user_account_table();
+        create_user_account_table(flags);
         create_end_point_table(flags);
         ioc_enable_user_authentication(&m_iocom_root, authorize_iocom_user, this);
     }
@@ -135,7 +136,9 @@ void eNetService::start(
         create_connect_table();
         create_trusted_certificate_table();
     }
-    create_services_table();
+    if (flags & ENET_ENABLE_LIGHTHOUSE) {
+        create_lan_services_table();
+    }
 
     /* Setup eosal network event handler callback to keep track of errors and network state.
      */
@@ -161,7 +164,9 @@ void eNetService::start(
     /* Start the light house service as separate thread. This must be after parmaters
      * haven been created so binding succeed.
      */
-    enet_start_lighthouse_thread(this, flags, &m_lighthouse_thread_handle);
+    if (flags & ENET_ENABLE_LIGHTHOUSE) {
+        enet_start_lighthouse_thread(this, flags, &m_lighthouse_thread_handle);
+    }
 }
 
 
@@ -310,7 +315,7 @@ void enet_add_protocol(
   Start running eNetService task.
 
   @param  flags Bit fields, combination of ENET_ENABLE_IOCOM_CLIENT, ENET_ENABLE_EOBJECTS_CLIENT,
-          ENET_ENABLE_IOCOM_SERVICE and ENET_ENABLE_EOBJECTS_SERVICE.
+          ENET_ENABLE_IOCOM_SERVICE, ENET_ENABLE_EOBJECTS_SERVICE, ENET_ENABLE_LIGHTHOUSE.
 
 ****************************************************************************************************
 */

@@ -71,7 +71,7 @@ void eNetService::create_service_parameters(
         m_parameters.serv_priv_key->sets("where I am?");
     }
 
-    m_persistent_parameters->load_file("_serv_prm.eo");
+    m_persistent_parameters->load_file("parameters.eo");
 
 #if IOC_NICKGEN_SUPPORT
     /* Set global nickname, generate one if we do not have it.

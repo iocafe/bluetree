@@ -38,10 +38,11 @@
 
 ****************************************************************************************************
 */
-void eNetService::create_user_account_table()
+void eNetService::create_user_account_table(
+    os_int flags)
 {
     eContainer *configuration, *columns;
-    eVariable *column;
+    eVariable *column, tmp;
 
     m_persistent_accounts = new ePersistent(this);
     m_account_matrix = new eMatrix(m_persistent_accounts);
@@ -60,6 +61,14 @@ void eNetService::create_user_account_table()
     column->setpropertyi(EVARP_TYPE, OS_INT);
 
     column = new eVariable(columns);
+    column->addname(enet_conn_enable, ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "enable");
+    column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
+    column->setpropertyi(EVARP_DEFAULT, OS_FALSE);
+    column->setpropertys(EVARP_TTIP,
+        "Enable this row.");
+
+    column = new eVariable(columns);
     column->addname("user", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "name");
     column->setpropertyi(EVARP_TYPE, OS_STR);
@@ -71,13 +80,26 @@ void eNetService::create_user_account_table()
     column->addname("accept", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "accept");
     column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_ATTR, "list=\"none,ecom,iocom,*\"");
-    column->setpropertys(EVARP_TTIP,
-        "Accepted incoming connections for the user's.\n"
-        "- \'none\': Connections by this user are not allowed.\n"
-        "- \'ecom\': eobjects communication protocol (for glass user interface, etc).\n"
-        "- \'iocom\': IO device communication protocol.\n"
-        "- \'*\': all protocols are accepted.\n");
+    tmp = "list=\"none,";
+    if (flags & ENET_ENABLE_EOBJECTS_SERVICE) { tmp += "ecom,"; }
+    if (flags & ENET_ENABLE_IOCOM_SERVICE) { tmp += "iocom,"; }
+    if (flags & ENET_ENABLE_SWITCHBOX_SERVICE) { tmp += "switchbox,"; }
+    tmp += "*\"";
+    column->setpropertys(EVARP_ATTR, tmp.gets());
+
+    tmp = "Accepted incoming connections for the user's.\n"
+        "- \'none\': Connections by this user are not allowed.\n";
+    if (flags & ENET_ENABLE_EOBJECTS_SERVICE) {
+        tmp += "- \'ecom\': eobjects communication protocol (for glass user interface, etc).\n";
+        }
+    if (flags & ENET_ENABLE_IOCOM_SERVICE) {
+        tmp += "- \'iocom\': IO device communication protocol.\n";
+        }
+    if (flags & ENET_ENABLE_SWITCHBOX_SERVICE) {
+        tmp += "- \'switchbox\': Switchbox services.\n";
+    }
+    tmp += "- \'*\': all protocols are accepted.\n";
+    column->setpropertys(EVARP_TTIP, tmp.gets());
 
     column = new eVariable(columns);
     column->addname("privileges", ENAME_NO_MAP);
@@ -87,7 +109,7 @@ void eNetService::create_user_account_table()
         "What this user is allowed to User priviliges.\n"
         "- \'quest\': view data and parameters, user cannot change anything.\n"
         "- \'user\': view and modify parameters necessary to use the system.\n"
-        "- \'admin\': user can do anything, like upgrade software and change system configuration.\n");
+        "- \'root\': user can do anything, like upgrade software and change system configuration.\n");
 
     column = new eVariable(columns);
     column->addname("password", ENAME_NO_MAP);
@@ -119,7 +141,9 @@ void eNetService::create_user_account_table()
     m_persistent_accounts->load_file("accounts.eo");
 
     if (m_account_matrix->nrows() == 0) {
-        add_user_account("ispy", "pass", 7, 3);
+        add_user_account(OS_TRUE, "root", "pass", "*", 3);
+        add_user_account(OS_FALSE, "user", "pass", "*", 2);
+        add_user_account(OS_FALSE, "quest", "pass", "*", 1);
     }
 }
 
@@ -132,9 +156,10 @@ void eNetService::create_user_account_table()
 ****************************************************************************************************
 */
 void eNetService::add_user_account(
+    os_int enable,
     const os_char *user_name,
     const os_char *password,
-    os_int accept,
+    const os_char *accept,
     os_int privileges,
     os_int row_nr)
 {
@@ -148,6 +173,10 @@ void eNetService::add_user_account(
     }
 
     element = new eVariable(&row);
+    element->addname("enable", ENAME_NO_MAP);
+    element->setl(enable);
+
+    element = new eVariable(&row);
     element->addname("user", ENAME_NO_MAP);
     element->sets(user_name);
 
@@ -157,10 +186,10 @@ void eNetService::add_user_account(
         element->sets(password);
     }
 
-    if (accept >= 0) {
+    if (accept) {
         element = new eVariable(&row);
         element->addname("accept", ENAME_NO_MAP);
-        element->setl(accept);
+        element->sets(accept);
     }
 
     if (privileges >= 0) {

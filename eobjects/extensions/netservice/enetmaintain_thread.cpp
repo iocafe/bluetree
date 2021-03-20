@@ -256,7 +256,8 @@ void eNetMaintainThread::run()
             m_configure_end_points = OS_FALSE;
         }
 
-        if (m_configure_connections) if (os_has_elapsed(&m_connect_timer, 90))
+        if (m_configure_connections)
+            if (os_has_elapsed(&m_connect_timer, 90) && m_netservice->m_connect_to_matrix)
         {
             merge_to_socket_list();
             maintain_connections();

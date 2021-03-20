@@ -1,7 +1,7 @@
 /**
 
-  @file    glass.h
-  @brief   Top header file for glass user interface client application.
+  @file    eswitch.h
+  @brief   Top header file for eswitch switchbox example application.
   @author  Pekka Lehtikoski
   @version 1.0
   @date    2.8.2020
@@ -16,6 +16,6 @@
 #pragma once
 #ifndef ECLIENT_H_
 #define ECLIENT_H_
-#include "egui.h"
+#include "eobjects.h"
 #include "extensions/netservice/enetservice.h"
 #endif

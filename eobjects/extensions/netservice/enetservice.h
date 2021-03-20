@@ -64,7 +64,9 @@ extern const os_char
 #define ENET_ENABLE_EOBJECTS_CLIENT 2
 #define ENET_ENABLE_IOCOM_SERVICE 4
 #define ENET_ENABLE_EOBJECTS_SERVICE 8
-#define ENET_DEFAULT_NO_END_POINTS 16
+#define ENET_ENABLE_SWITCHBOX_SERVICE 16
+#define ENET_ENABLE_LIGHTHOUSE 32
+#define ENET_DEFAULT_NO_END_POINTS 64
 
 
 /**
@@ -158,14 +160,16 @@ protected:
 
     /* Create "user accounts" table.
      */
-    void create_user_account_table();
+    void create_user_account_table(
+        os_int flags);
 
     /* Add new user account.
      */
     void add_user_account(
+        os_int enable,
         const os_char *user_name,
         const os_char *password,
-        os_int accept,
+        const os_char *accept,
         os_int privileges,
         os_int row_nr = -1);
 
@@ -209,7 +213,7 @@ protected:
 
     /* Create "io device networks and processes" table.
      */
-    void create_services_table();
+    void create_lan_services_table();
 
     /* Create table of trusted client certificates.
      */

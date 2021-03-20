@@ -627,7 +627,7 @@ getout:
 
 ****************************************************************************************************
 */
-void eNetService::create_services_table()
+void eNetService::create_lan_services_table()
 {
     eContainer *configuration, *columns;
     eVariable *column;

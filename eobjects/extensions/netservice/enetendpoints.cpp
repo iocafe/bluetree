@@ -30,24 +30,7 @@ const os_char enet_endp_netname[] = "netname";
 
   @brief Create "end point" table.
 
-  The eNetService::create_user_account_table function...
-
-    "connect": [{
-                "transport": "none",
-                "parameters": "127.0.0.1:6367",
-                "flags": "connect,up"
-            },
-            {
-                "transport": "tls",
-                "parameters": "*",
-                "flags": "listen,down"
-            },
-            {
-                "transport": "socket",
-                "parameters": "*",
-                "flags": "listen,down"
-            }
-        ],
+  The eNetService::create_end_point_table function...
 
 
   @param  flags Bit fields, ENET_DEFAULT_NO_END_POINTS flag checked by this function.
@@ -169,8 +152,12 @@ void eNetService::create_end_point_table(
 
     if (m_endpoint_matrix->nrows() == 0) {
         enable_by_default = (flags & ENET_DEFAULT_NO_END_POINTS) ? OS_FALSE : OS_TRUE;
-        add_end_point(enable_by_default, "ecom", ENET_ENDP_TLS, "*");
-        add_end_point(enable_by_default, "iocom", ENET_ENDP_TLS, "*");
+        if (flags & ENET_ENABLE_EOBJECTS_SERVICE) {
+            add_end_point(enable_by_default, "ecom", ENET_ENDP_TLS, "*");
+        }
+        if (flags & ENET_ENABLE_IOCOM_SERVICE) {
+            add_end_point(enable_by_default, "iocom", ENET_ENDP_TLS, "*");
+        }
     }
 }
 
