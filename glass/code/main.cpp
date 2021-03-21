@@ -69,12 +69,15 @@ eStatus emain(
     enet_add_protocol(new ecomProtocol(eglobal_root()));
     enet_add_protocol(new eioProtocol(eglobal_root()));
     os_unlock();
-    enet_start_service(ENET_DEFAULT_NO_END_POINTS|
+    enet_start_service(
+        ENET_DEFAULT_NO_END_POINTS|
         ENET_ENABLE_IOCOM_CLIENT|
         ENET_ENABLE_EOBJECTS_CLIENT|
         ENET_ENABLE_IOCOM_SERVICE|
-        ENET_ENABLE_LIGHTHOUSE
-        /* |ENET_ENABLE_EOBJECTS_SERVICE */);
+        ENET_ENABLE_LIGHTHOUSE|
+        /* |ENET_ENABLE_EOBJECTS_SERVICE */
+        ENET_ENABLE_SERIAL_COM|
+        ENET_ENABLE_UNSECURED_SOCKETS);
 
     gui = new eGui(egui_get_container());
     gui->setup_desktop_application();

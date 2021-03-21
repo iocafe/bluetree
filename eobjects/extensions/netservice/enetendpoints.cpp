@@ -42,8 +42,8 @@ void eNetService::create_end_point_table(
     os_int flags)
 {
     eContainer *configuration, *columns;
-    eVariable *column;
-    os_boolean enable_by_default;
+    eVariable *column, tmp, tmp2;
+    os_boolean enable_by_default, is_first;
 
     m_end_points = new ePersistent(this);
     m_endpoint_matrix = new eMatrix(m_end_points);
@@ -75,40 +75,96 @@ void eNetService::create_end_point_table(
     column->addname(enet_endp_protocol, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "protocol");
     column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_ATTR, "list=\"ecom,iocom\"");
-    column->setpropertys(EVARP_DEFAULT, "iocom");
-    column->setpropertys(EVARP_TTIP,
-        "Communication protocol.\n"
-        "- \'ecom\': object based protocol (for glass user interface, etc).\n"
-        "- \'iocom\': IO device communication.\n");
+    tmp = "list=\"";
+    tmp2 = "switchbox";
+    is_first = OS_TRUE;
+    if (flags & ENET_ENABLE_EOBJECTS_SERVICE) {
+        if (!is_first) tmp += ",";
+        is_first = OS_FALSE;
+        tmp += "ecom";
+        tmp2 = "ecom";
+    }
+    if (flags & ENET_ENABLE_IOCOM_SERVICE) {
+        if (!is_first) tmp += ",";
+        is_first = OS_FALSE;
+        tmp += "iocom";
+        tmp2 = "iocom";
+    }
+    if (flags & ENET_ENABLE_SWITCHBOX_SERVICE) {
+        if (!is_first) tmp += ",";
+        is_first = OS_FALSE;
+        tmp += "switchbox";
+    }
+    tmp += "\"";
+    column->setpropertys(EVARP_ATTR, tmp.gets());
+    column->setpropertys(EVARP_DEFAULT, tmp2.gets());
+
+    tmp = "Communication protocol.\n";
+    if (flags & ENET_ENABLE_EOBJECTS_SERVICE) {
+        tmp += "- \'ecom\': listen for ecom protocol. (glass user interface, etc)\n";
+    }
+    if (flags & ENET_ENABLE_IOCOM_SERVICE) {
+        tmp += "- \'iocom\': IO device connection end point.\n";
+    }
+    if (flags & ENET_ENABLE_SWITCHBOX_SERVICE) {
+        tmp += "- \'switchbox\': switchbox end point.\n";
+    }
+    column->setpropertys(EVARP_TTIP, tmp.gets());
 
     column = new eVariable(columns);
     column->addname(enet_endp_transport, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "transport");
     column->setpropertyi(EVARP_TYPE, OS_CHAR);
-    column->setpropertys(EVARP_ATTR, "enum=\"1.SOCKET,2.TLS,3.SERIAL\"");
+    tmp = "enum=\"";
+    if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+        tmp += "1.SOCKET,";
+    }
+    tmp += "2.TLS";
+    if (flags & ENET_ENABLE_SERIAL_COM) {
+        tmp += ",3.SERIAL";
+    }
+    tmp += "\"";
+    column->setpropertys(EVARP_ATTR, tmp.gets());
     column->setpropertyl(EVARP_DEFAULT, ENET_ENDP_TLS);
-    column->setpropertys(EVARP_TTIP,
-        "Transport:\n"
-        "- \'SOCKET\': unsecured socket connection, .\n"
-        "- \'TLS\': secure TLS connection.\n"
-        "- \'SERIAL\': serial communication.\n");
+    tmp = "Transport:\n";
+    if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+        tmp += "- \'SOCKET\': unsecured socket connection.\n";
+    }
+    tmp += "- \'TLS\': secure TLS connection.\n";
+    if (flags & ENET_ENABLE_SERIAL_COM) {
+        tmp += "- \'SERIAL\': serial communication.\n";
+    }
+
+    column->setpropertys(EVARP_TTIP, tmp.gets());
 
     column = new eVariable(columns);
     column->addname(enet_endp_port, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "port");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_DEFAULT, "*");
-    column->setpropertys(EVARP_TTIP,
-        "Port to listen, \'*\' defaults:\n"
-        "- \'6371\': ecom socket.\n"
-        "- \'6374\': ecom TLS.\n"
-        "- \'6368\': ecom socket.\n"
-        "- \'6369\': ecom TLS.\n"
-        "- \'COM1:115200\' serial port\n"
-        "Netwok interface can be specified for example \'192.168.1.222:6371\'.\n"
+    tmp = "Listen port, \'*\' to select the default port for the protocol:\n";
+    if (flags & ENET_ENABLE_EOBJECTS_SERVICE) {
+        if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+            tmp += "- \'6371\': ecom socket.\n";
+        }
+        tmp += "- \'6374\': ecom TLS.\n";
+    }
+    if (flags & ENET_ENABLE_IOCOM_SERVICE) {
+        if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+            tmp += "- \'6368\': iocom socket.\n";
+        }
+        tmp += "- \'6369\': iocom TLS.\n";
+    }
+    if (flags & ENET_ENABLE_SWITCHBOX_SERVICE) {
+        tmp += "- \'XXXX\': switchbox.\n";
+    }
+    if (flags & ENET_ENABLE_SERIAL_COM) {
+        tmp += "- \'COM1:115200\' serial port\n";
+    }
+    tmp += "Network interface can be specified for example \'192.168.1.222:6371\'.\n"
         "Use brackets around IP address to mark IPv6 address, for\n"
-        "example \'[localhost]:12345\', or \'[]:12345\' for empty IP.");
+        "example \'[localhost]:12345\', or \'[]:12345\' for empty IP.";
+    column->setpropertys(EVARP_TTIP, tmp.gets());
 
     column = new eVariable(columns);
     column->addname(enet_endp_ok, ENAME_NO_MAP);

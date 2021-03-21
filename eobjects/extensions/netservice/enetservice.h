@@ -68,6 +68,9 @@ extern const os_char
 #define ENET_ENABLE_LIGHTHOUSE 32
 #define ENET_DEFAULT_NO_END_POINTS 64
 
+#define ENET_ENABLE_SERIAL_COM 1024
+#define ENET_ENABLE_UNSECURED_SOCKETS 2048
+
 
 /**
 ****************************************************************************************************

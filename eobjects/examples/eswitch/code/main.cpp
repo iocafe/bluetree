@@ -49,9 +49,10 @@ eStatus emain(
     enet_add_protocol(new ecomProtocol(eglobal_root()));
     enet_add_protocol(new eioProtocol(eglobal_root()));
     os_unlock();
-    enet_start_service(ENET_ENABLE_EOBJECTS_SERVICE|ENET_ENABLE_SWITCHBOX_SERVICE);
-
-// Loop here
+    enet_start_service(
+        ENET_ENABLE_EOBJECTS_SERVICE|
+        ENET_ENABLE_SWITCHBOX_SERVICE|
+        ENET_ENABLE_UNSECURED_SOCKETS); /* allow unsecured for now, take this flag off for production */
 
     while (OS_TRUE) {
         os_sleep(1000);
