@@ -47,7 +47,8 @@ eStatus emain(
     enet_initialize_service();
     os_lock(); /* root pointer used */
     enet_add_protocol(new ecomProtocol(eglobal_root()));
-    enet_add_protocol(new eioProtocol(eglobal_root()));
+    /* enet_add_protocol(new eioProtocol(eglobal_root())); */
+    enet_add_protocol(new esboxProtocol(eglobal_root()));
     os_unlock();
     enet_start_service(
         ENET_ENABLE_EOBJECTS_SERVICE|

@@ -133,12 +133,15 @@ eProtocolHandle *esboxProtocol::new_end_point(
     const osalStreamInterface *iface;
     os_short cflags;
 
+*s = ESTATUS_FAILED;
+return OS_NULL;
+
+
     /* Get SWITCHBOX transport interface and flags.
      */
     switch (parameters->transport) {
         case ENET_ENDP_SOCKET: iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
         case ENET_ENDP_TLS:    iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
-        case ENET_ENDP_SERIAL: iface = OSAL_SERIAL_IFACE; cflags = IOC_SERIAL; break;
         default:
             *s = ESTATUS_FAILED;
             osal_debug_error_int("Unknown transport for switchbox end point: ", parameters->transport);
@@ -177,25 +180,9 @@ eProtocolHandle *esboxProtocol::new_connection(
     eConnectParameters *parameters,
     eStatus *s)
 {
-    const os_char *prmstr;
-    const osalStreamInterface *iface;
-    os_short cflags;
-
-    /* Get SWITCHBOX transport interface and flags.
-     */
-    switch (parameters->transport) {
-        case ENET_CONN_SOCKET: iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
-        case ENET_CONN_TLS:    iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
-        case ENET_CONN_SERIAL: iface = OSAL_SERIAL_IFACE; cflags = IOC_SERIAL; break;
-        default:
-            *s = ESTATUS_FAILED;
-            osal_debug_error_int("Unknown transport for switchbox connection: ", parameters->transport);
-            return OS_NULL;
-    }
-
-    prmstr = parameters->parameters;
-    cflags |= IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
-    return new_con_helper(prmstr, iface, cflags, s);
+    *s = ESTATUS_NOT_SUPPORTED;
+    osal_debug_error("Switchbox doesn't support connect, only end points");
+    return OS_NULL;
 }
 
 
@@ -216,93 +203,24 @@ eProtocolHandle *esboxProtocol::new_con_helper(
 {
     iocEndPoint *ep;
     iocEndPointParams epprm;
-    iocConnection *con;
-    iocConnectionParams conprm;
     esboxProtocolHandle *p;
     osalStatus ss;
 
     *s = ESTATUS_SUCCESS;
     p = new esboxProtocolHandle(ETEMPORARY);
 
-    if ((cflags & (IOC_SOCKET|IOC_LISTENER)) == (IOC_SOCKET|IOC_LISTENER))
-    {
-        ep = p->epoint();
-        p->mark_switchbox_end_point(OS_TRUE);
-        // ioc_initialize_end_point(ep, m_switchbox_root);
-        ioc_set_end_point_callback(ep, end_point_callback, p);
-        os_memclear(&epprm, sizeof(epprm));
-        epprm.iface = iface;
-        epprm.flags = cflags;
-        epprm.parameters = prmstr;
-        ss = ioc_listen(ep, &epprm);
-        if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
-    }
-    else
-    {
-        con = p->con();
-        p->mark_switchbox_end_point(OS_FALSE);
-        // ioc_initialize_connection(con, m_switchbox_root);
-        ioc_set_connection_callback(con, connection_callback, p);
-        os_memclear(&conprm, sizeof(conprm));
-        conprm.iface = iface;
-        conprm.flags = cflags;
-        conprm.parameters = prmstr;
-        ss = ioc_connect(con, &conprm);
-        if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
-    }
+    ep = p->epoint();
+    p->mark_switchbox_end_point(OS_TRUE);
+    // ioc_initialize_end_point(ep, m_switchbox_root);
+    ioc_set_end_point_callback(ep, end_point_callback, p);
+    os_memclear(&epprm, sizeof(epprm));
+    epprm.iface = iface;
+    epprm.flags = cflags;
+    epprm.parameters = prmstr;
+    ss = ioc_listen(ep, &epprm);
+    if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
 
     return p;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Callback when connection is established or dropped.
-
-  The SWITCHBOX library calls thus function to inform application about new and dropped connections.
-  This function sets esboxProtocolHandle's "isopen" property.
-
-  It uses complex way to set property:  we are now called by different thread which doesn't
-  own esboxProtocolHandle and thus must not property directly. But path_to_self is simple C
-  string, which is set when esboxProtocol handle is created and unchanged after that. It
-  can be used by other threads as long as the protocol handle exists.
-
-  @param   con Pointer to SWITCHBOX connection object.
-  @param   event Reason for the callback, either IOC_CONNECTION_ESTABLISHED or
-           IOC_CONNECTION_DROPPED.
-  @param   context Callback context, here pointer to protocol handle.
-
-****************************************************************************************************
-*/
-void esboxProtocol::connection_callback(
-    struct iocConnection *con,
-    iocConnectionEvent event,
-    void *context)
-{
-    eProcess *process;
-    os_boolean value;
-    esboxProtocolHandle *p;
-    OSAL_UNUSED(con);
-
-    p = (esboxProtocolHandle*)context;
-    switch (event) {
-        case IOC_CONNECTION_ESTABLISHED:
-            value = OS_TRUE;
-            break;
-
-        case IOC_CONNECTION_DROPPED:
-            value = OS_FALSE;
-            break;
-
-        default:
-            return;
-    }
-
-    os_lock();
-    process = eglobal->process;
-    process->setpropertyl_msg(p->path_to_self(), value, eprohandp_isopen);
-    os_unlock();
 }
 
 
@@ -313,7 +231,11 @@ void esboxProtocol::connection_callback(
 
   The SWITCHBOX library calls thus function to inform application about succesfully initialized and
   dropped end points. This function sets esboxProtocolHandle's "isopen" property.
-  See esboxProtocol::connection_callback().
+
+  It uses complex way to set property:  we are now called by different thread which doesn't
+  own esboxProtocolHandle and thus must not property directly. But path_to_self is simple C
+  string, which is set when esboxProtocol handle is created and unchanged after that. It
+  can be used by other threads as long as the protocol handle exists.
 
   @param   epoint Pointer to SWITCHBOX connection object.
   @param   event Reason for the callback, either IOC_CONNECTION_ESTABLISHED or
@@ -396,53 +318,22 @@ void esboxProtocol::delete_end_point(
 /**
 ****************************************************************************************************
 
-  @brief Delete a connection.
-
-  The delete_connection() function deletes a connection created by new_connection() call. This
-  function releases all resources associated with the end point. Notice that closing listening
-  socket may linger a while in underlyin OS.
-
-  @param   handle   Connection handle as returned by new_connection().
+  Delete a connection, not used for switchbox.
 
 ****************************************************************************************************
 */
 void esboxProtocol::delete_connection(
     eProtocolHandle *handle)
 {
-    esboxProtocolHandle *p;
-    iocConnection *con;
-
-    if (handle == OS_NULL) return;
-    p = (esboxProtocolHandle*)handle;
-    if (p->isrunning()) {
-        con = p->con();
-
-        while (ioc_terminate_connection_thread(con)) {
-            os_timeslice();
-        }
-        ioc_release_connection(p->con());
-        p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
-    }
 }
 
 
 /**
 ****************************************************************************************************
 
-  @brief Reactivate a deactivated connection or modify parameters.
+  Reactivate connection or modify parameters, not used for switchbox.
 
-  This function is used to pause communication or modify existing connection parameters so that
-  connection can be resumed without losing binding state.
-
-  ecom specific: Difference between first deleting a connection and creating new one, compared
-  to deactivating/reactivating it is: The connection object is never deleted, and binding
-  information stored in connection objects is preserved. If connection comes back existsing
-  binding from client to server do restored.
-
-  @param   handle   Connection handle as returned by new_connection().
-  @param   parameters Structure containing parameters for the connection point.
-  @return  Pointer to eStatus for function return code. If successfull, the function returns
-           ESTATUS_SUCCESS. Other values indicate an error.
+  @return  Always ESTATUS_NOT_SUPPORTED.
 
 ****************************************************************************************************
 */
@@ -450,14 +341,14 @@ eStatus esboxProtocol::activate_connection(
     eProtocolHandle *handle,
     eConnectParameters *parameters)
 {
-    return ESTATUS_SUCCESS;
+    return ESTATUS_NOT_SUPPORTED;
 }
 
 
 /**
 ****************************************************************************************************
 
-  Deacivate a connection, not used for switchbox.
+  Deactivate a connection, not used for switchbox.
 
 ****************************************************************************************************
 */

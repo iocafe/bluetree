@@ -114,15 +114,18 @@ static eContainer *etable_prepare_msg(
     os_int tflags)
 {
     eContainer *content;
+    eObject *cloneditem;
     eVariable *f, *n;
 
     content = new eContainer(t, EOID_ITEM, EOBJ_TEMPORARY_ATTACHMENT);
     if (item) {
         if (tflags & ETABLE_ADOPT_ARGUMENT) {
             item->adopt(content, id, EOBJ_NO_MAP);
+            item->clearflags(EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE|EOBJ_IS_ATTACHMENT);
         }
         else {
-            item->clone(content, id, EOBJ_NO_MAP);
+            cloneditem = item->clone(content, id, EOBJ_NO_MAP);
+            cloneditem->clearflags(EOBJ_NOT_CLONABLE|EOBJ_NOT_SERIALIZABLE|EOBJ_IS_ATTACHMENT);
         }
     }
 

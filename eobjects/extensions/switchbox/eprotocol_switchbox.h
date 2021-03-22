@@ -145,13 +145,6 @@ protected:
         os_short cflags,
         eStatus *s);
 
-    /* Callback when connection is established or dropped.
-     */
-    static void connection_callback(
-        struct iocConnection *conf,
-        iocConnectionEvent event,
-        void *context);
-
     /* Callback when an end point is actually listening, or dropped.
      */
     static void end_point_callback(
