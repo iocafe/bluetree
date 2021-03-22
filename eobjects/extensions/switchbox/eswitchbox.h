@@ -16,6 +16,7 @@
 #pragma once
 #ifndef ESWITCHBOX_H_
 #define ESWITCHBOX_H_
+#include "extensions/switchbox/switchbox.h"
 #include "extensions/netservice/enetservice.h"
 #include "extensions/switchbox/eprotocol_handle_switchbox.h"
 #include "extensions/switchbox/eprotocol_switchbox.h"

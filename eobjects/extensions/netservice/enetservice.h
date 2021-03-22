@@ -29,6 +29,7 @@
 #include "extensions/netservice/enetmaintain_thread.h"
 #include "extensions/iocom/eiocom.h"
 #include "extensions/io/eio.h"
+#include "extensions/switchbox/eswitchbox.h"
 
 class eioRoot;
 

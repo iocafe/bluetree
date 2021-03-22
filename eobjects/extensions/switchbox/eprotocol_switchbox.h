@@ -164,8 +164,7 @@ protected:
       Member variables
     ************************************************************************************************
     */
-    iocRoot *m_switchbox_root;
-
+  //   iocRoot *m_switchbox_root;
 };
 
 

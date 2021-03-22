@@ -28,7 +28,7 @@ esboxProtocol::esboxProtocol(
     os_int flags)
     : eProtocol(parent, oid, flags)
 {
-    m_switchbox_root = OS_NULL;
+    // m_switchbox_root = OS_NULL;
 }
 
 
@@ -83,7 +83,7 @@ eStatus esboxProtocol::initialize_protocol(
     esboxProtocol::setupclass();
     esboxProtocolHandle::setupclass();
 
-    m_switchbox_root = OS_NULL; // netservice->switchbox_root();
+    // m_switchbox_root = OS_NULL; // netservice->switchbox_root();
     addname(protocol_name());
     return ESTATUS_SUCCESS;
 }
@@ -228,7 +228,7 @@ eProtocolHandle *esboxProtocol::new_con_helper(
     {
         ep = p->epoint();
         p->mark_switchbox_end_point(OS_TRUE);
-        ioc_initialize_end_point(ep, m_switchbox_root);
+        // ioc_initialize_end_point(ep, m_switchbox_root);
         ioc_set_end_point_callback(ep, end_point_callback, p);
         os_memclear(&epprm, sizeof(epprm));
         epprm.iface = iface;
@@ -241,7 +241,7 @@ eProtocolHandle *esboxProtocol::new_con_helper(
     {
         con = p->con();
         p->mark_switchbox_end_point(OS_FALSE);
-        ioc_initialize_connection(con, m_switchbox_root);
+        // ioc_initialize_connection(con, m_switchbox_root);
         ioc_set_connection_callback(con, connection_callback, p);
         os_memclear(&conprm, sizeof(conprm));
         conprm.iface = iface;
