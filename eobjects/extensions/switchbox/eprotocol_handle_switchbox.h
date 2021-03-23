@@ -69,14 +69,6 @@ public:
     */
 
     virtual os_boolean isrunning() {return m_is_open; }
-    // inline iocEndPoint *epoint() {return &m_switchbox.epoint; }
-    // inline iocConnection *con() {return &m_switchbox.con; }
-
-    // inline void mark_switchbox_end_point(os_boolean is_switchbox_end_point)
-//        {m_is_switchbox_end_point = is_switchbox_end_point; }
-
-    //inline os_boolean is_switchbox_end_point()
-    //    {return m_is_switchbox_end_point; }
 
     eStatus listen(
         switchboxEndPointParams *prm);
@@ -91,10 +83,9 @@ protected:
     /* Callback when an end point is actually listening, or dropped.
      */
     static void end_point_callback(
-        struct iocEndPoint *epoint,
-        iocEndPointEvent event,
+        struct switchboxEndPoint *epoint,
+        switchboxEndPointEvent event,
         void *context);
-
 
     /**
     ************************************************************************************************
@@ -103,7 +94,7 @@ protected:
     */
     switchboxRoot m_switchbox;
     switchboxEndPoint m_epoint;
-    os_boolean m_listening;
+    os_boolean m_end_point_initialized;
     os_char m_path_to_self[E_OIXSTR_BUF_SZ];
 };
 

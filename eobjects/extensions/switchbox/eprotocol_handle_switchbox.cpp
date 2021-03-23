@@ -29,7 +29,7 @@ esboxProtocolHandle::esboxProtocolHandle(
 {
     ioc_initialize_switchbox_root(&m_switchbox, 0 /* flags */);
     os_memclear(&m_epoint, sizeof(m_epoint));
-    m_listening = OS_FALSE;
+    m_end_point_initialized = OS_FALSE;
     oixstr(m_path_to_self, sizeof(m_path_to_self));
 }
 
@@ -45,6 +45,34 @@ esboxProtocolHandle::~esboxProtocolHandle()
     ioc_release_switchbox_root(&m_switchbox);
 }
 
+/**
+****************************************************************************************************
+
+  @brief Add the class to class list and class'es properties to it's property set.
+
+  The eVariable::setupclass function adds the class to class list and class'es properties to
+  it's property set. The class list enables creating new objects dynamically by class identifier,
+  which is used for serialization reader functions. The property set stores static list of
+  class'es properties and metadata for those.
+
+****************************************************************************************************
+*/
+void esboxProtocolHandle::setupclass()
+{
+    const os_int cls = ECLASSID_SWITCHBOX_PROTOCOL_HANDLE;
+    eVariable *p;
+
+    /* Add the class to class list.
+     */
+    os_lock();
+    eclasslist_add(cls, (eNewObjFunc)newobj, "esboxProtocolHandle", ECLASSID_PROTOCOL_HANDLE);
+    p = addpropertyb(cls, EPROHANDP_ISOPEN, eprohandp_isopen, "is open", EPRO_SIMPLE);
+    p->setpropertys(EVARP_ATTR, "rdonly");
+    propertysetdone(cls);
+    os_unlock();
+}
+
+
 /* Listen for TCP port for switchbox connections.
  */
 eStatus esboxProtocolHandle::listen(
@@ -52,13 +80,13 @@ eStatus esboxProtocolHandle::listen(
 {
     osalStatus ss;
 
-    if (m_listening) {
+    if (m_end_point_initialized) {
         close_endpoint();
     }
 
     ioc_initialize_switchbox_end_point(&m_epoint, &m_switchbox);
-
-    // ioc_set_end_point_callback(&m_epoint, end_point_callback, this);
+    ioc_set_switchbox_end_point_callback(&m_epoint, end_point_callback, this);
+    m_end_point_initialized = OS_TRUE;
 
     ss = ioc_switchbox_listen(&m_epoint, prm);
     return ESTATUS_FROM_OSAL_STATUS(ss);
@@ -86,8 +114,8 @@ eStatus esboxProtocolHandle::listen(
 ****************************************************************************************************
 */
 void esboxProtocolHandle::end_point_callback(
-    struct iocEndPoint *epoint,
-    iocEndPointEvent event,
+    struct switchboxEndPoint *epoint,
+    switchboxEndPointEvent event,
     void *context)
 {
     eProcess *process;
@@ -120,40 +148,17 @@ void esboxProtocolHandle::end_point_callback(
  */
 void esboxProtocolHandle::close_endpoint()
 {
-    if (m_listening) {
+    if (m_end_point_initialized) {
+        ioc_set_switchbox_end_point_callback(&m_epoint, OS_NULL, OS_NULL);
+
         while (ioc_terminate_switchbox_end_point_thread(&m_epoint) == OSAL_PENDING) {
             os_timeslice();
         }
-
         ioc_release_switchbox_end_point(&m_epoint);
-        m_listening = OS_FALSE;
+
+        setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
+        m_end_point_initialized = OS_FALSE;
     }
 }
 
 
-/**
-****************************************************************************************************
-
-  @brief Add the class to class list and class'es properties to it's property set.
-
-  The eVariable::setupclass function adds the class to class list and class'es properties to
-  it's property set. The class list enables creating new objects dynamically by class identifier,
-  which is used for serialization reader functions. The property set stores static list of
-  class'es properties and metadata for those.
-
-****************************************************************************************************
-*/
-void esboxProtocolHandle::setupclass()
-{
-    const os_int cls = ECLASSID_SWITCHBOX_PROTOCOL_HANDLE;
-    eVariable *p;
-
-    /* Add the class to class list.
-     */
-    os_lock();
-    eclasslist_add(cls, (eNewObjFunc)newobj, "esboxProtocolHandle", ECLASSID_PROTOCOL_HANDLE);
-    p = addpropertyb(cls, EPROHANDP_ISOPEN, eprohandp_isopen, "is open", EPRO_SIMPLE);
-    p->setpropertys(EVARP_ATTR, "rdonly");
-    propertysetdone(cls);
-    os_unlock();
-}

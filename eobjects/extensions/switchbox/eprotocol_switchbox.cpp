@@ -28,7 +28,6 @@ esboxProtocol::esboxProtocol(
     os_int flags)
     : eProtocol(parent, oid, flags)
 {
-    // m_switchbox_root = OS_NULL;
 }
 
 
@@ -83,7 +82,6 @@ eStatus esboxProtocol::initialize_protocol(
     esboxProtocol::setupclass();
     esboxProtocolHandle::setupclass();
 
-    // m_switchbox_root = OS_NULL; // netservice->switchbox_root();
     addname(protocol_name());
     return ESTATUS_SUCCESS;
 }
@@ -130,7 +128,6 @@ eProtocolHandle *esboxProtocol::new_end_point(
     eStatus *s)
 {
     switchboxEndPointParams prm;
-    const osalStreamInterface *iface;
     esboxProtocolHandle *p;
 
     /* Get switchbox TCP port, interface and flags.
@@ -192,8 +189,6 @@ eProtocolHandle *esboxProtocol::new_connection(
 }
 
 
-
-
 /**
 ****************************************************************************************************
 
@@ -211,22 +206,10 @@ void esboxProtocol::delete_end_point(
     eProtocolHandle *handle)
 {
     esboxProtocolHandle *p;
-    //iocEndPoint *ep;
 
     if (handle == OS_NULL) return;
     p = (esboxProtocolHandle*)handle;
-
-    if (p->isrunning()) {
-        /* ep = p->epoint();
-
-        while (ioc_terminate_end_point_thread(ep)) {
-            os_timeslice();
-        }
-
-        ioc_release_end_point(p->epoint());
-        */
-        p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
-    }
+    p->close_endpoint();
 }
 
 
@@ -271,5 +254,3 @@ void esboxProtocol::deactivate_connection(
     eProtocolHandle *handle)
 {
 }
-
-
