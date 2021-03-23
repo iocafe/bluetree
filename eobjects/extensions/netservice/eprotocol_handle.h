@@ -49,6 +49,10 @@ public:
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
 
+    /* Virtual destructor
+     */
+    virtual ~eProtocolHandle() {}
+
     /* Get class identifier.
      */
     virtual os_int classid() {return ECLASSID_PROTOCOL_HANDLE;}

@@ -129,28 +129,34 @@ eProtocolHandle *esboxProtocol::new_end_point(
     eEndPointParameters *parameters,
     eStatus *s)
 {
-    const os_char *prmstr;
+    switchboxEndPointParams prm;
     const osalStreamInterface *iface;
-    os_short cflags;
+    esboxProtocolHandle *p;
 
-*s = ESTATUS_FAILED;
-return OS_NULL;
-
-
-    /* Get SWITCHBOX transport interface and flags.
+    /* Get switchbox TCP port, interface and flags.
      */
+    os_memclear(&prm, sizeof(prm));
+    prm.flags = IOC_SOCKET|IOC_CREATE_THREAD;
+    prm.parameters = parameters->port;
+
     switch (parameters->transport) {
-        case ENET_ENDP_SOCKET: iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
-        case ENET_ENDP_TLS:    iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
+        case ENET_ENDP_SOCKET: prm.iface = OSAL_SOCKET_IFACE; break;
+        case ENET_ENDP_TLS:    prm.iface = OSAL_TLS_IFACE;    break;
         default:
-            *s = ESTATUS_FAILED;
-            osal_debug_error_int("Unknown transport for switchbox end point: ", parameters->transport);
+            *s = ESTATUS_NOT_SUPPORTED;
+            osal_debug_error_int("Unknown switchbox transport: ", parameters->transport);
             return OS_NULL;
     }
 
-    prmstr = parameters->port;
-    cflags |= IOC_LISTENER|IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
-    return new_con_helper(prmstr, iface, cflags, s);
+    p = new esboxProtocolHandle(ETEMPORARY);
+    *s = p->listen(&prm);
+    if (*s) {
+        osal_debug_error_str("Failed to create switchbox endpoint: ", parameters->port);
+        delete p;
+        return OS_NULL;
+    }
+
+    return p;
 }
 
 
@@ -186,93 +192,6 @@ eProtocolHandle *esboxProtocol::new_connection(
 }
 
 
-/**
-****************************************************************************************************
-
-  @brief Helper function for new_connection() and new_end_point().
-
-  The new_con_helper() function...
-
-****************************************************************************************************
-*/
-eProtocolHandle *esboxProtocol::new_con_helper(
-    const os_char *prmstr,
-    const osalStreamInterface *iface,
-    os_short cflags,
-    eStatus *s)
-{
-    iocEndPoint *ep;
-    iocEndPointParams epprm;
-    esboxProtocolHandle *p;
-    osalStatus ss;
-
-    *s = ESTATUS_SUCCESS;
-    p = new esboxProtocolHandle(ETEMPORARY);
-
-    ep = p->epoint();
-    p->mark_switchbox_end_point(OS_TRUE);
-    // ioc_initialize_end_point(ep, m_switchbox_root);
-    ioc_set_end_point_callback(ep, end_point_callback, p);
-    os_memclear(&epprm, sizeof(epprm));
-    epprm.iface = iface;
-    epprm.flags = cflags;
-    epprm.parameters = prmstr;
-    ss = ioc_listen(ep, &epprm);
-    if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
-
-    return p;
-}
-
-
-/**
-****************************************************************************************************
-
-  @brief Callback when an end point is actually listening, or dropped.
-
-  The SWITCHBOX library calls thus function to inform application about succesfully initialized and
-  dropped end points. This function sets esboxProtocolHandle's "isopen" property.
-
-  It uses complex way to set property:  we are now called by different thread which doesn't
-  own esboxProtocolHandle and thus must not property directly. But path_to_self is simple C
-  string, which is set when esboxProtocol handle is created and unchanged after that. It
-  can be used by other threads as long as the protocol handle exists.
-
-  @param   epoint Pointer to SWITCHBOX connection object.
-  @param   event Reason for the callback, either IOC_CONNECTION_ESTABLISHED or
-           IOC_CONNECTION_DROPPED.
-  @param   context Callback context, here pointer to protocol handle.
-
-****************************************************************************************************
-*/
-void esboxProtocol::end_point_callback(
-    struct iocEndPoint *epoint,
-    iocEndPointEvent event,
-    void *context)
-{
-    eProcess *process;
-    os_boolean value;
-    esboxProtocolHandle *p;
-    OSAL_UNUSED(epoint);
-
-    p = (esboxProtocolHandle*)context;
-    switch (event) {
-        case IOC_END_POINT_LISTENING:
-            value = OS_TRUE;
-            break;
-
-        case IOC_END_POINT_DROPPED:
-            value = OS_FALSE;
-            break;
-
-        default:
-            return;
-    }
-
-    os_lock();
-    process = eglobal->process;
-    process->setpropertyl_msg(p->path_to_self(), value, eprohandp_isopen);
-    os_unlock();
-}
 
 
 /**
@@ -292,24 +211,20 @@ void esboxProtocol::delete_end_point(
     eProtocolHandle *handle)
 {
     esboxProtocolHandle *p;
-    iocEndPoint *ep;
+    //iocEndPoint *ep;
 
     if (handle == OS_NULL) return;
     p = (esboxProtocolHandle*)handle;
 
-    if (!p->is_switchbox_end_point()) {
-        delete_connection(handle);
-        return;
-    }
-
     if (p->isrunning()) {
-        ep = p->epoint();
+        /* ep = p->epoint();
 
         while (ioc_terminate_end_point_thread(ep)) {
             os_timeslice();
         }
 
         ioc_release_end_point(p->epoint());
+        */
         p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
     }
 }

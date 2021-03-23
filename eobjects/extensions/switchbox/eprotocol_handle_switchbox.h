@@ -24,12 +24,6 @@
 ****************************************************************************************************
 */
 
-typedef union {
-    iocConnection con;
-    iocEndPoint epoint;
-}
-eswitchboxStateStruct;
-
 
 /**
 ****************************************************************************************************
@@ -45,6 +39,10 @@ public:
         eObject *parent = OS_NULL,
         e_oid id = EOID_ITEM,
         os_int flags = EOBJ_DEFAULT);
+
+    /* Destructor.
+     */
+    ~esboxProtocolHandle();
 
     /* Get class identifier.
      */
@@ -71,27 +69,41 @@ public:
     */
 
     virtual os_boolean isrunning() {return m_is_open; }
-    inline iocEndPoint *epoint() {return &m_switchbox.epoint; }
-    inline iocConnection *con() {return &m_switchbox.con; }
+    // inline iocEndPoint *epoint() {return &m_switchbox.epoint; }
+    // inline iocConnection *con() {return &m_switchbox.con; }
 
-    inline void mark_switchbox_end_point(os_boolean is_switchbox_end_point)
-        {m_is_switchbox_end_point = is_switchbox_end_point; }
+    // inline void mark_switchbox_end_point(os_boolean is_switchbox_end_point)
+//        {m_is_switchbox_end_point = is_switchbox_end_point; }
 
-    inline os_boolean is_switchbox_end_point()
-        {return m_is_switchbox_end_point; }
+    //inline os_boolean is_switchbox_end_point()
+    //    {return m_is_switchbox_end_point; }
+
+    eStatus listen(
+        switchboxEndPointParams *prm);
+
+    void close_endpoint();
 
     inline const os_char *path_to_self() { return m_path_to_self; }
 
 
 protected:
 
+    /* Callback when an end point is actually listening, or dropped.
+     */
+    static void end_point_callback(
+        struct iocEndPoint *epoint,
+        iocEndPointEvent event,
+        void *context);
+
+
     /**
     ************************************************************************************************
       Member variables
     ************************************************************************************************
     */
-    eswitchboxStateStruct m_switchbox;
-    os_boolean m_is_switchbox_end_point;
+    switchboxRoot m_switchbox;
+    switchboxEndPoint m_epoint;
+    os_boolean m_listening;
     os_char m_path_to_self[E_OIXSTR_BUF_SZ];
 };
 

@@ -145,12 +145,6 @@ protected:
         os_short cflags,
         eStatus *s);
 
-    /* Callback when an end point is actually listening, or dropped.
-     */
-    static void end_point_callback(
-        struct iocEndPoint *epoint,
-        iocEndPointEvent event,
-        void *context);
 
     /**
     ************************************************************************************************
