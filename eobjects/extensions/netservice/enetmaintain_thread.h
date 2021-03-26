@@ -185,6 +185,7 @@ protected:
      */
     void make_connection_name(
         eVariable *con_name,
+        eVariable *name,
         eVariable *protocol,
         eVariable *ip,
         enetConnTransportIx transport_ix);

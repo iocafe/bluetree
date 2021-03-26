@@ -20,6 +20,7 @@
 const os_char enet_conn_enable[] = "enable";
 const os_char enet_conn_name[] = "name";
 const os_char enet_conn_protocol[] = "protocol";
+
 const os_char enet_conn_ip[] = "ip";
 const os_char enet_conn_transport[] = "transport";
 const os_char enet_conn_row[] = "conrow";
@@ -103,11 +104,20 @@ void eNetService::create_connect_table()
         "- \'ecom\': eobjects communication protocol (for glass user interface, etc).\n"
         "- \'iocom\': IO device communication protocol.\n");
 
+    /* column = new eVariable(columns);
+    column->addname(enet_network_name, ENAME_NO_MAP);
+    column->setpropertys(EVARP_TEXT, "network name");
+    column->setpropertyi(EVARP_TYPE, OS_STR);
+    column->setpropertys(EVARP_DEFAULT, "*");
+    column->setpropertys(EVARP_TTIP,
+        "Direct TCP socket: Selects the IOCOM network.\n"
+        "Switchbox (cloud): Cloud network name of the ECOM/IOCOM network to connect."); */
+
     column = new eVariable(columns);
     column->addname(enet_conn_ip, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "address/port");
     column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_DEFAULT, "localhost");
+    column->setpropertys(EVARP_DEFAULT, "127.0.0.1");
     column->setpropertys(EVARP_TTIP,
         "IP andress and optional port number, COM port, or \'*\' to connect to addressed determined\n"
         "by lighthouse UDP multicasts. Examples: \'192.168.1.222\', \'192.168.1.222:666\', \'*\',\n"
@@ -622,9 +632,9 @@ void eNetMaintainThread::maintain_connections()
     eMatrix *m;
     eObject *conf;
     eContainer *localvars, *columns, *con, *next_con, *index, *c, *next_c;
-    eVariable *con_name, *ip, *protocol, *con_row_p;
-    eVariable *ip_p, *protocol_p, *transport_p;
-    os_int protocol_col, transport_col, ip_col, con_row_col;
+    eVariable *con_name, *ip, *protocol, *name, *con_row_p;
+    eVariable *ip_p, *name_p, *protocol_p, *transport_p;
+    os_int name_col, protocol_col, transport_col, ip_col, con_row_col;
     os_int h, socklist_row, con_row;
     enetConnTransportIx transport_ix;
     eStatus s;
@@ -633,6 +643,7 @@ void eNetMaintainThread::maintain_connections()
     con_name = new eVariable(localvars);
     ip = new eVariable(localvars);
     protocol = new eVariable(localvars);
+    name = new eVariable(localvars);
 
     m = m_socket_list_matrix;
     conf = m->configuration();
@@ -640,7 +651,7 @@ void eNetMaintainThread::maintain_connections()
     columns = conf->firstc(EOID_TABLE_COLUMNS);
     if (columns == OS_NULL) goto getout;
 
-    // name_col = etable_column_ix(enet_conn_name, columns);
+    name_col = etable_column_ix(enet_conn_name, columns);
     protocol_col = etable_column_ix(enet_conn_protocol, columns);
     ip_col = etable_column_ix(enet_conn_ip, columns);
     con_row_col = etable_column_ix(enet_conn_row, columns);
@@ -656,9 +667,10 @@ void eNetMaintainThread::maintain_connections()
         if ((m->geti(socklist_row, EMTX_FLAGS_COLUMN_NR) & EMTX_FLAGS_ROW_OK) == 0) continue;
 
         m->getv(socklist_row, ip_col, ip);
+        m->getv(socklist_row, name_col, name);
         m->getv(socklist_row, protocol_col, protocol);
         transport_ix = (enetConnTransportIx)m->getl(socklist_row, transport_col);
-        make_connection_name(con_name, protocol, ip, transport_ix);
+        make_connection_name(con_name, name, protocol, ip, transport_ix);
 
         c = new eContainer(index, socklist_row);
         c->addname(con_name->gets());
@@ -671,6 +683,7 @@ void eNetMaintainThread::maintain_connections()
         next_con = con->nextc();
 
         ip_p = con->firstv(ENET_CONN_IP);
+        name_p = con->firstv(ENET_CONN_NAME);
         protocol_p = con->firstv(ENET_CONN_PROTOCOL);
         transport_p = con->firstv(ENET_CONN_TRANSPORT);
         if (ip_p == OS_NULL || protocol_p == OS_NULL || transport_p == OS_NULL) {
@@ -678,7 +691,7 @@ void eNetMaintainThread::maintain_connections()
             continue;
         }
         transport_ix = (enetConnTransportIx)transport_p->getl();
-        make_connection_name(con_name, protocol_p, ip_p, transport_ix);
+        make_connection_name(con_name, name_p, protocol_p, ip_p, transport_ix);
 
         /* If connection is still needed, do not deactivate.
          */
@@ -710,9 +723,10 @@ void eNetMaintainThread::maintain_connections()
         /* Make connection name
          */
         m->getv(socklist_row, ip_col, ip);
+        m->getv(socklist_row, name_col, name);
         m->getv(socklist_row, protocol_col, protocol);
         transport_ix = (enetConnTransportIx)m->getl(socklist_row, transport_col);
-        make_connection_name(con_name, protocol, ip, transport_ix);
+        make_connection_name(con_name, name, protocol, ip, transport_ix);
 
         /* If we already have this connection, activate it. Either
          */
@@ -726,6 +740,7 @@ void eNetMaintainThread::maintain_connections()
             os_memclear(&prm, sizeof(prm));
             prm.parameters = ip->gets();
             prm.transport = transport_ix;
+            prm.name = name->gets();
 
             if (proto->is_connection_running(handle)) {
                 s = proto->activate_connection(handle, &prm);
@@ -756,10 +771,11 @@ void eNetMaintainThread::maintain_connections()
         /* Make connection name
          */
         m->getv(socklist_row, ip_col, ip);
+        m->getv(socklist_row, name_col, name);
         m->getv(socklist_row, protocol_col, protocol);
         con_row = m->geti(socklist_row, con_row_col);
         transport_ix = (enetConnTransportIx)m->getl(socklist_row, transport_col);
-        make_connection_name(con_name, protocol, ip, transport_ix);
+        make_connection_name(con_name, name, protocol, ip, transport_ix);
 
         /* If we do not have this connection, create it.
          */
@@ -768,6 +784,7 @@ void eNetMaintainThread::maintain_connections()
             os_memclear(&prm, sizeof(prm));
             prm.parameters = ip->gets();
             prm.transport = transport_ix;
+            prm.name = name->gets();
 
             proto = protocol_by_name(protocol);
             if (proto == OS_NULL) {
@@ -786,6 +803,8 @@ void eNetMaintainThread::maintain_connections()
             con->addname(con_name->gets());
             ip_p = new eVariable(con, ENET_CONN_IP);
             ip_p->setv(ip);
+            name_p = new eVariable(con, ENET_CONN_NAME);
+            name_p->setv(name);
             protocol_p = new eVariable(con, ENET_CONN_PROTOCOL);
             protocol_p->setv(protocol);
             transport_p = new eVariable(con, ENET_CONN_TRANSPORT);
@@ -813,6 +832,7 @@ getout:
  */
 void eNetMaintainThread::make_connection_name(
     eVariable *con_name,
+    eVariable *name,
     eVariable *protocol,
     eVariable *ip,
     enetConnTransportIx transport_ix)
@@ -831,6 +851,10 @@ void eNetMaintainThread::make_connection_name(
 
     con_name->appends("_c");
     con_name->appends(transport_name);
+    if (os_strcmp(name->gets(), "*" )) {
+        con_name->appendv(name);
+        con_name->appends("_");
+    }
     p = ip->gets();
     d = buf;
     buf_stop = buf + sizeof(buf) - 6;

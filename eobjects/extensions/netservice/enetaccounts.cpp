@@ -25,7 +25,7 @@
 
     "accounts": [
         {
-            "user": "ispy*",
+            "user": "root*",
             "privileges": "admin",
             "password": "pass"
         },
@@ -74,7 +74,7 @@ void eNetService::create_user_account_table(
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_TTIP,
         "User or device name. Examples: \'root\', \'mike\', \'candy3\',\n"
-        "\'ispy*\', or \'frank*.cafenet\'");
+        "\'root*\', or \'frank*.cafenet\'");
 
     column = new eVariable(columns);
     column->addname("protocols", ENAME_NO_MAP);

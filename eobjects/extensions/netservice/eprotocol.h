@@ -42,7 +42,7 @@ eEndPointParameters;
 typedef struct
 {
     enetConnTransportIx transport;
-
+    const os_char *name;
     const os_char *parameters;
 }
 eConnectParameters;

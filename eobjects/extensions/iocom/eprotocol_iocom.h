@@ -140,6 +140,7 @@ protected:
     /* Helper function for new_connection() and new_end_point().
      */
     eProtocolHandle *new_con_helper(
+        const os_char *name,
         const os_char *prmstr,
         const osalStreamInterface *iface,
         os_short cflags,

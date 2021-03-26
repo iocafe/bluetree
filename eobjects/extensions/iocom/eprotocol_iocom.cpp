@@ -147,7 +147,7 @@ eProtocolHandle *eioProtocol::new_end_point(
 
     prmstr = parameters->port;
     cflags |= IOC_LISTENER|IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
-    return new_con_helper(prmstr, iface, cflags, s);
+    return new_con_helper(OS_NULL, prmstr, iface, cflags, s);
 }
 
 
@@ -177,7 +177,6 @@ eProtocolHandle *eioProtocol::new_connection(
     eConnectParameters *parameters,
     eStatus *s)
 {
-    const os_char *prmstr;
     const osalStreamInterface *iface;
     os_short cflags;
 
@@ -193,9 +192,8 @@ eProtocolHandle *eioProtocol::new_connection(
             return OS_NULL;
     }
 
-    prmstr = parameters->parameters;
     cflags |= IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
-    return new_con_helper(prmstr, iface, cflags, s);
+    return new_con_helper(parameters->name, parameters->parameters, iface, cflags, s);
 }
 
 
@@ -209,6 +207,7 @@ eProtocolHandle *eioProtocol::new_connection(
 ****************************************************************************************************
 */
 eProtocolHandle *eioProtocol::new_con_helper(
+    const os_char *name,
     const os_char *prmstr,
     const osalStreamInterface *iface,
     os_short cflags,
@@ -239,6 +238,9 @@ eProtocolHandle *eioProtocol::new_con_helper(
     }
     else
     {
+        eVariable user_override;
+        os_char password[OSAL_SECRET_STR_SZ];
+
         con = p->con();
         p->mark_iocom_end_point(OS_FALSE);
         ioc_initialize_connection(con, m_iocom_root);
@@ -251,9 +253,33 @@ eProtocolHandle *eioProtocol::new_con_helper(
         /* If we have GUI user login, use it for iocom connections.
          */
         if (eglobal->active_login.user_name[0]) {
-            conprm.user_override = eglobal->active_login.user_name;
+            user_override = eglobal->active_login.user_name;
             conprm.password_override = eglobal->active_login.password;
+            if (!os_strcmp(conprm.password_override, "*") ||
+                !os_strcmp(conprm.password_override, ""))
+            {
+                osal_get_auto_password(password, sizeof(password));
+                conprm.password_override = password;
+            }
         }
+
+        /* Otherwise use process ID and auto password for connections.
+         */
+        else {
+            user_override = eglobal->process_id;
+            osal_get_auto_password(password, sizeof(password));
+            conprm.password_override = password;
+        }
+
+        /* If we have network name, and user name override doesn't contain network
+           name, append network name.
+         */
+        if (name) if (os_strcmp(name, "*")) if (os_strchr(user_override.gets(), '.') == OS_NULL)
+        {
+            user_override += ".";
+            user_override += name;
+        }
+        conprm.user_override = user_override.gets();
 
         ss = ioc_connect(con, &conprm);
         if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
