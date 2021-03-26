@@ -247,6 +247,14 @@ eProtocolHandle *eioProtocol::new_con_helper(
         conprm.iface = iface;
         conprm.flags = cflags;
         conprm.parameters = prmstr;
+
+        /* If we have GUI user login, use it for iocom connections.
+         */
+        if (eglobal->active_login.user_name[0]) {
+            conprm.user_override = eglobal->active_login.user_name;
+            conprm.password_override = eglobal->active_login.password;
+        }
+
         ss = ioc_connect(con, &conprm);
         if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
     }
