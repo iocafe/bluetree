@@ -26,7 +26,6 @@
 ****************************************************************************************************
 */
 #include "eobjects.h"
-#include "iocom.h"
 
 /* Connection property names.
  */
@@ -66,6 +65,8 @@ eConnection::eConnection(
     m_is_server = OS_FALSE;
     m_envelope = OS_NULL;
     m_enable = OS_TRUE;
+    ioc_initialize_handshake_state(&m_handshake);
+    m_handshake_ready = OS_FALSE;
     m_authentication_frame_sent = OS_FALSE;
     m_authentication_frame_received = OS_FALSE;
     m_auth_send_buf = OS_NULL;
@@ -101,6 +102,8 @@ eConnection::~eConnection()
         os_free(m_auth_recv_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
         m_auth_recv_buf = OS_NULL;
     }
+
+    ioc_release_handshake_state(&m_handshake);
 }
 
 
@@ -329,12 +332,10 @@ routeit:
              */
             if (!m_connection_failed_once)
             {
-                if (envelope->flags() & EMSG_CAN_BE_ADOPTED)
-                {
+                if (envelope->flags() & EMSG_CAN_BE_ADOPTED) {
                     envelope->adopt(m_initbuffer);
                 }
-                else
-                {
+                else {
                     envelope->clone(m_initbuffer);
                 }
             }
@@ -369,13 +370,11 @@ routeit:
         {
             if (os_has_elapsed(&m_last_send, 20000))
             {
-                if (m_stream->writechar(E_STREAM_KEEPALIVE))
-                {
+                if (m_stream->writechar(E_STREAM_KEEPALIVE)) {
                     close();
                     return;
                 }
-                if (m_stream->flush())
-                {
+                if (m_stream->flush()) {
                     close();
                     return;
                 }
@@ -385,8 +384,7 @@ routeit:
 
         /* Otherwise try to reopen the socket if it is closed.
          */
-        else
-        {
+        else {
             open();
         }
 
@@ -450,7 +448,7 @@ void eConnection::run()
          */
         if (m_stream)
         {
-            auth_s = handle_authentication_frames();
+            auth_s = handshake_and_authentication();
             /* If we are still authenticating, do not start the real communication.
              */
             if (auth_s == ESTATUS_PENDING) {
@@ -480,14 +478,12 @@ void eConnection::run()
                and thread event with anything else.
              */
             s = m_stream->select(&m_stream, 1, trigger(), &selectdata, 0, OSAL_STREAM_DEFAULT);
-            if (s)
-            {
+            if (s) {
                 close();
                 continue;
             }
 
-            if (!m_connected)
-            {
+            if (!m_connected) {
                 connected();
             }
 
@@ -502,13 +498,11 @@ void eConnection::run()
              */
             if (/* m_message_queue->first() == OS_NULL && */ m_new_writes)
             {
-                if (m_stream->writechar(E_STREAM_FLUSH))
-                {
+                if (m_stream->writechar(E_STREAM_FLUSH)) {
                     close();
                     continue;
                 }
-                if (m_stream->flush())
-                {
+                if (m_stream->flush()) {
                     close();
                     continue;
                 }
@@ -535,8 +529,7 @@ void eConnection::run()
             /* Enable faster timer, to try to reconnect about once per 3 seconds.
                broken sockets.
              */
-            if (m_fast_timer_enabled != 1)
-            {
+            if (m_fast_timer_enabled != 1) {
                 timer(try_again_ms);
                 m_fast_timer_enabled = 1;
             }
@@ -562,20 +555,59 @@ void eConnection::run()
 /**
 ****************************************************************************************************
 
-  @brief New connection, transfer authentication frames to both directions.
+  @brief New connection: network selection, certificate copy, transfer authentication frames.
 
-  The eConnection::handle_authentication_frames() function sends and receives an authentication
-  frame.
+  The eConnection::handshake_and_authentication() function:
+  - Socket handshake for switchbox cloud network selection + trusted certificate copy
+  - Send/receive an authentication frame.
 
-  @return  ESTATUS_SUCCESS Authentication frame has been received and processed.
-           ESTATUS_PENDING Authentication frame not yet send, but no error thus far.
-           Other return values indicate an error.
+  @return  - ESTATUS_SUCCESS All done, handshake ready, certificate copied if it was needed,
+             authentication frame has been received and processed.
+           - ESTATUS_PENDING All data not yet transferred, but no error thus far. Keep on
+             calling this function.
+           - Other return values indicate an error.
 
 ****************************************************************************************************
 */
-eStatus eConnection::handle_authentication_frames()
+eStatus eConnection::handshake_and_authentication()
 {
     osalStatus ss;
+
+os_boolean cert_match = OS_TRUE;
+
+    if (!m_handshake_ready)
+    {
+        /* Server side socket ?
+         */
+        if (m_is_server) {
+            ss = ioc_server_handshake(&m_handshake, IOC_HANDSHAKE_REGULAR_SERVER,
+                m_stream->osstream(),
+                OS_NULL /* ioc_load_iocom_trust_certificate */, this);
+        }
+
+        /* Otherwise client side socket.
+         */
+        else {
+            ss = ioc_client_handshake(&m_handshake, IOC_HANDSHAKE_CLIENT, "kepuli", !cert_match,
+                m_stream->osstream(),
+                OS_NULL /* ioc_save_iocom_trust_certificate */, this);
+
+            if (ss == OSAL_SUCCESS && !cert_match) {
+                // return OSAL_STATUS_SERVER_CERT_REJECTED;
+                return ESTATUS_FAILED;
+            }
+        }
+
+        if (ss) {
+            if (ss == OSAL_PENDING) {
+                m_stream->flush();
+            }
+            return ESTATUS_FROM_OSAL_STATUS(ss);
+        }
+
+        ioc_release_handshake_state(&m_handshake);
+        m_handshake_ready = OS_TRUE;
+    }
 
     if (!m_authentication_frame_received) {
         if (m_auth_recv_buf == OS_NULL) {
@@ -600,7 +632,6 @@ eStatus eConnection::handle_authentication_frames()
 
     /* If this is client, we cannot send authentication frame before receiving one from server.
      */
-    /* WARNING: THIS SEEMS UNWORKABLE, SINCE SWITCHBOX NEEDS CLIENT AUTHENTICATION BEFORE IT CAN SEND ANYTHING. */
     /* if (!m_authentication_frame_sent && (m_is_server || m_authentication_frame_received)) */
 
     if (!m_authentication_frame_sent)
@@ -650,13 +681,13 @@ eStatus eConnection::handle_authentication_frames()
             os_free(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
             m_auth_send_buf = OS_NULL;
             m_authentication_frame_sent = OS_TRUE;
+            m_stream->flush();
         }
         else if (ss != OSAL_PENDING) {
             osal_debug_error("eConnection: Failed to send authentication frame");
             return ESTATUS_FAILED;
         }
     }
-
 
     if (!m_authentication_frame_sent ||
         !m_authentication_frame_received)
@@ -742,6 +773,8 @@ void eConnection::open()
     /* No new writes to socket, etc. yet
      */
     m_new_writes = OS_FALSE;
+    ioc_release_handshake_state(&m_handshake);
+    m_handshake_ready = OS_FALSE;
     m_authentication_frame_sent = OS_FALSE;
     m_authentication_frame_received = OS_FALSE;
     if (m_auth_send_buf) {

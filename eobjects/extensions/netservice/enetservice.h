@@ -16,7 +16,6 @@
 #pragma once
 #ifndef ENETSERVICE_H_
 #define ENETSERVICE_H_
-#include "iocom.h"
 #include "eobjects.h"
 #include "extensions/netservice/eprotocol_handle.h"
 #include "extensions/netservice/eprotocol_handle_ecom.h"

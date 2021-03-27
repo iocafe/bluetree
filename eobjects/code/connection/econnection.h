@@ -144,9 +144,9 @@ protected:
     ************************************************************************************************
     */
 
-    /* New connection, transfer authentication frames to both directions.
+    /* New connection: network selection, certificate copy, transfer authentication frames.
      */
-    eStatus handle_authentication_frames();
+    eStatus handshake_and_authentication();
 
     /* Open the connection (connect)
      */
@@ -247,9 +247,18 @@ protected:
      */
     os_boolean m_new_writes;
 
-    /** Delete the connection if case socket fails.
+    /** Server end of the connection, delete the connection if case socket fails.
      */
     os_boolean m_is_server;
+
+    /* Current hand shake state.
+     */
+    iocHandshakeState m_handshake;
+
+    /** Flag indicating that switchbox network selection and certificate copy check handshake
+     *  has been completed.
+     */
+    os_boolean m_handshake_ready;
 
     /** Flag indicating that the authentication frame has been sent after the connection was opened.
      */

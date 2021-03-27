@@ -21,9 +21,10 @@
 #define EOBJECTS_H_
 #include "eobjects.h"
 
-/* Include extended eosal headers.
+/* Include extended eosal and iocom headers.
  */
 #include "eosalx.h"
+#include "iocom.h"
 
 /* Flags for eobjects_initialize() function.
  */
