@@ -27,6 +27,7 @@ const os_char
     eenvp_content[] = "content",
     eenvp_context[] = "context";
 
+#define EENVELOPE_EXTRA_ALLOC 4
 
 /* Place name in front of the path.
  */
@@ -36,7 +37,7 @@ void eenvelope_prepend_name(
 {
     os_char *newstr, *p;
     os_memsz sz;
-    os_int name_sz, newpos;
+    os_int name_sz, newpos, oldsz;
     os_boolean hasoldpath;
 
     name_sz = (os_int)os_strlen(name);
@@ -46,8 +47,9 @@ void eenvelope_prepend_name(
      */
     if (name_sz > path->str_pos)
     {
-        newstr = os_malloc(path->str_alloc + name_sz - path->str_pos + 14, &sz);
-        newpos = (os_int)(sz - (path->str_alloc - path->str_pos) - name_sz);
+        oldsz = path->str_alloc - path->str_pos;
+        newstr = os_malloc(name_sz + 3*oldsz/2 + EENVELOPE_EXTRA_ALLOC, &sz);
+        newpos = (os_int)(sz - oldsz - name_sz);
         p = newstr + newpos;
         os_memcpy(p, name, name_sz);
         if (path->str)
@@ -55,12 +57,15 @@ void eenvelope_prepend_name(
             if (hasoldpath)
             {
                 p[name_sz - 1] = '/';
-                os_memcpy(p + name_sz, path->str + path->str_pos, path->str_alloc - path->str_pos);
+                os_memcpy(p + name_sz, path->str + path->str_pos, oldsz);
             }
             os_free(path->str, path->str_alloc);
         }
         path->str = newstr;
         path->str_alloc = (os_short)sz;
+        if (sz > 32000) {
+            osal_debug_error_int("too long envelope path, bytes=", sz);
+        }
         path->str_pos = newpos;
     }
 
@@ -397,17 +402,10 @@ eStatus eEnvelope::writer(
 
     /* Write target.
      */
-    if (m_target.str)
-    {
-        n = (os_int)(m_target.str_alloc - m_target.str_pos) - 1;
-    }
-    else
-    {
-        n = 0;
-    }
+    n = (os_int)(m_target.str_alloc - m_target.str_pos) - 1;
+    if (n <  0 || m_target.str == OS_NULL) n = 0;
     if (stream->putl(n)) goto failed;
-    if (n>0)
-    {
+    if (n > 0) {
         stream->write(m_target.str + m_target.str_pos, n);
     }
 
@@ -415,17 +413,10 @@ eStatus eEnvelope::writer(
      */
     if ((m_mflags & EMSG_NO_REPLIES) == 0)
     {
-        if (m_source.str)
-        {
-            n = (os_int)(m_source.str_alloc - m_source.str_pos) - 1;
-        }
-        else
-        {
-            n = 0;
-        }
+        n = (os_int)(m_source.str_alloc - m_source.str_pos) - 1;
+        if (n <  0 || m_source.str == OS_NULL) n = 0;
         if (stream->putl(n)) goto failed;
-        if (n>0)
-        {
+        if (n > 0) {
             stream->write(m_source.str + m_source.str_pos, n);
         }
     }
@@ -522,7 +513,7 @@ eStatus eEnvelope::reader(
     if (stream->getl(&l)) goto failed;
     if (l > 0)
     {
-        m_target.str = os_malloc(l + 1 + 14, &sz);
+        m_target.str = os_malloc(l + 1 + EENVELOPE_EXTRA_ALLOC, &sz);
         m_target.str_alloc = (os_short)sz;
         m_target.str_pos = (os_short)(sz - l - 1);
         stream->read(m_target.str + m_target.str_pos, l);
@@ -536,7 +527,7 @@ eStatus eEnvelope::reader(
         if (stream->getl(&l)) goto failed;
         if (l > 0)
         {
-            m_source.str = os_malloc(l + 1 + 14, &sz);
+            m_source.str = os_malloc(l + 1 + EENVELOPE_EXTRA_ALLOC, &sz);
             m_source.str_alloc = (os_short)sz;
             m_source.str_pos = (os_short)(sz - l - 1);
             stream->read(m_source.str + m_source.str_pos, l);

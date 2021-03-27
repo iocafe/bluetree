@@ -585,7 +585,7 @@ eStatus eConnection::handle_authentication_frames()
         }
 
         iocAuthenticationResults results;
-        ss = icom_switchbox_process_authentication_frame(m_stream->osstream(),
+        ss = icom_switchbox_process_authentication_frame(unbuffered_stream_read, m_stream,
             m_auth_recv_buf, &results);
         if (ss == OSAL_COMPLETED) {
             os_free(m_auth_recv_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
@@ -643,8 +643,9 @@ eStatus eConnection::handle_authentication_frames()
             }
         }
 
-        ss = ioc_send_switchbox_authentication_frame(m_stream->osstream(),
+        ss = ioc_send_switchbox_authentication_frame(unbuffered_stream_write, m_stream,
             m_auth_send_buf, &prm);
+
         if (ss == OSAL_COMPLETED) {
             os_free(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
             m_auth_send_buf = OS_NULL;
@@ -656,6 +657,7 @@ eStatus eConnection::handle_authentication_frames()
         }
     }
 
+
     if (!m_authentication_frame_sent ||
         !m_authentication_frame_received)
     {
@@ -664,6 +666,39 @@ eStatus eConnection::handle_authentication_frames()
         return ESTATUS_PENDING;
     }
     return ESTATUS_SUCCESS;
+}
+
+
+/* Read handshake or authentication data from stream.
+ */
+osalStatus eConnection::unbuffered_stream_read(
+    os_char *buf,
+    os_memsz n,
+    os_memsz *n_read,
+    void *context)
+{
+    eStream *stream;
+    osalStream os_stream;
+
+    stream = (eStream*)context;
+    os_stream = stream->osstream();
+    return osal_stream_read(os_stream, buf, n, n_read, OSAL_STREAM_DEFAULT);
+}
+
+/* Write handshake or authentication data to stream.
+ */
+osalStatus eConnection::unbuffered_stream_write(
+    const os_char *buf,
+    os_memsz n,
+    os_memsz *n_written,
+    void *context)
+{
+    eStream *stream;
+    osalStream os_stream;
+
+    stream = (eStream*)context;
+    os_stream = stream->osstream();
+    return osal_stream_write(os_stream, buf, n, n_written, OSAL_STREAM_DEFAULT);
 }
 
 
@@ -1036,12 +1071,7 @@ eStatus eConnection::read()
         return s;
     }
 
-    if (*m_envelope->target() == '\0') {
-        m_envelope->prependtarget("//");
-    }
-    else {
-        m_envelope->prependtarget("/");
-    }
+    m_envelope->prependtarget(*m_envelope->target() == '\0' ? "//" : "/");
 
     if ((m_envelope->mflags() & EMSG_NO_REPLIES) == 0)
     {

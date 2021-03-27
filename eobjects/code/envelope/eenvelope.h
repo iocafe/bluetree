@@ -40,7 +40,7 @@ extern const os_char
 
 /* Source and target string presentations
  */
-typedef struct
+typedef struct eEnvelopePath
 {
     os_char *str;
     os_short str_pos;

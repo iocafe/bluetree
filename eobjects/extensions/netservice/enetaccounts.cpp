@@ -222,12 +222,12 @@ osalStatus eNetService::authorize_iocom_user(
     os_char *ip,
     void *context)
 {
-    eNetService *netsrv;
+    /* eNetService *netsrv;
 
     os_lock();
     netsrv = (eNetService *)context;
 
-    os_unlock();
+    os_unlock(); */
 
     return OSAL_SUCCESS;
 }
