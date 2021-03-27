@@ -585,7 +585,7 @@ eStatus eConnection::handle_authentication_frames()
         }
 
         iocAuthenticationResults results;
-        ss = icom_switchbox_process_authentication_frame(unbuffered_stream_read, m_stream,
+        ss = icom_switchbox_process_authentication_frame(m_stream->osstream(),
             m_auth_recv_buf, &results);
         if (ss == OSAL_COMPLETED) {
             os_free(m_auth_recv_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
@@ -643,7 +643,7 @@ eStatus eConnection::handle_authentication_frames()
             }
         }
 
-        ss = ioc_send_switchbox_authentication_frame(unbuffered_stream_write, m_stream,
+        ss = ioc_send_switchbox_authentication_frame(m_stream->osstream(),
             m_auth_send_buf, &prm);
 
         if (ss == OSAL_COMPLETED) {
@@ -666,39 +666,6 @@ eStatus eConnection::handle_authentication_frames()
         return ESTATUS_PENDING;
     }
     return ESTATUS_SUCCESS;
-}
-
-
-/* Read handshake or authentication data from stream.
- */
-osalStatus eConnection::unbuffered_stream_read(
-    os_char *buf,
-    os_memsz n,
-    os_memsz *n_read,
-    void *context)
-{
-    eStream *stream;
-    osalStream os_stream;
-
-    stream = (eStream*)context;
-    os_stream = stream->osstream();
-    return osal_stream_read(os_stream, buf, n, n_read, OSAL_STREAM_DEFAULT);
-}
-
-/* Write handshake or authentication data to stream.
- */
-osalStatus eConnection::unbuffered_stream_write(
-    const os_char *buf,
-    os_memsz n,
-    os_memsz *n_written,
-    void *context)
-{
-    eStream *stream;
-    osalStream os_stream;
-
-    stream = (eStream*)context;
-    os_stream = stream->osstream();
-    return osal_stream_write(os_stream, buf, n, n_written, OSAL_STREAM_DEFAULT);
 }
 
 

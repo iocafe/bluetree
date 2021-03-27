@@ -148,22 +148,6 @@ protected:
      */
     eStatus handle_authentication_frames();
 
-    /* Read handshake or authentication data from stream.
-     */
-    static osalStatus unbuffered_stream_read(
-        os_char *buf,
-        os_memsz n,
-        os_memsz *n_read,
-        void *context);
-
-    /* Write handshake or authentication data to stream.
-     */
-    static osalStatus unbuffered_stream_write(
-        const os_char *buf,
-        os_memsz n,
-        os_memsz *n_written,
-        void *context);
-
     /* Open the connection (connect)
      */
     void open();
