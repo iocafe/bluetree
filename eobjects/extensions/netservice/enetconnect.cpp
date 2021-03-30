@@ -20,44 +20,27 @@
 const os_char enet_conn_enable[] = "enable";
 const os_char enet_conn_name[] = "name";
 const os_char enet_conn_protocol[] = "protocol";
-
 const os_char enet_conn_ip[] = "ip";
 const os_char enet_conn_transport[] = "transport";
 const os_char enet_conn_row[] = "conrow";
 const os_char enet_conn_ok[] = "ok";
+
 
 /**
 ****************************************************************************************************
 
   @brief Create "connect to" table.
 
-  The connect table specifies ecom and iocom connection to establish. This table can be edited
-  by user.
-
-    "connect": [{
-                "transport": "none",
-                "parameters": "127.0.0.1:6367",
-                "flags": "connect,up"
-            },
-            {
-                "transport": "tls",
-                "parameters": "*",
-                "flags": "listen,down"
-            },
-            {
-                "transport": "socket",
-                "parameters": "*",
-                "flags": "listen,down"
-            }
-        ],
-
+  The connect table specifies ecom/iocom connection to establish for this process.
+  This table can be modified by user.
 
 ****************************************************************************************************
 */
-void eNetService::create_connect_table()
+void eNetService::create_connect_table(
+    os_int flags)
 {
     eContainer *configuration, *columns;
-    eVariable *column;
+    eVariable *column, tmp;
 
     m_connect = new ePersistent(this);
     m_connect_to_matrix = new eMatrix(m_connect);
@@ -76,6 +59,8 @@ void eNetService::create_connect_table()
     column->setpropertyi(EVARP_TYPE, OS_INT);
     column->setpropertys(EVARP_ATTR, "rdonly");
 
+    /* Enable/disable connection by this checkbox.
+     */
     column = new eVariable(columns);
     column->addname(enet_conn_enable, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "enable");
@@ -84,57 +69,93 @@ void eNetService::create_connect_table()
     column->setpropertys(EVARP_TTIP,
         "Enable this row.");
 
+    /* Process or IO network name
+     */
     column = new eVariable(columns);
     column->addname("name", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, enet_conn_name);
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_DEFAULT, "*");
     column->setpropertys(EVARP_TTIP,
-        "Process name or IO network name to connect to. This can be a list, if detecting\n"
+        "Process or IO network name to connect to. This can be a list, if detecting\n"
         "services by lighthouse. Wildcard \'*\' indicates that any name will be connected to.");
 
+    /* Communication protocol selection.
+     */
     column = new eVariable(columns);
     column->addname(enet_conn_protocol, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "protocol");
     column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_ATTR, "list=\"ecom,iocom\"");
+    column->setpropertys(EVARP_ATTR, "list=\"ecom,iocom,ecloud,iocloud\"");
     column->setpropertys(EVARP_DEFAULT, "ecom");
-    column->setpropertys(EVARP_TTIP,
-        "Communication protocol.\n"
-        "- \'ecom\': eobjects communication protocol (for glass user interface, etc).\n"
-        "- \'iocom\': IO device communication protocol.\n");
+    tmp.sets("Communication protocol");
+    tmp += ".\n- \'ecom\': protocol for user interface, etc. "
+        "Default port \'" ECOM_DEFAULT_TLS_PORT_STR "\' for TLS";
+    if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+        tmp += ", \'" ECOM_DEFAULT_SOCKET_PORT_STR "\' for plain sockets";
+    }
+    tmp += ".\n- \'iocom\': IO device protocol. "
+        "Default port \'" IOC_DEFAULT_TLS_PORT_STR "\' for TLS";
+    if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+        tmp += ", \'" IOC_DEFAULT_SOCKET_PORT_STR "\' for plain sockets";
+    }
+    tmp += ".\n- \'ecloud\': ecom trough switchbox service. "
+        "Default port \' "IOC_DEFAULT_ECOM_SWITCHBOX_TLS_PORT_STR "\' for TLS";
+    if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+        tmp += ", \'" IOC_DEFAULT_ECOM_SWITCHBOX_SOCKET_PORT_STR "\' for plain sockets";
+    }
+    tmp += ".\n- \'iocloud\': iocom trough switchbox service. "
+        "Default port \' "IOC_DEFAULT_IOCOM_SWITCHBOX_TLS_PORT_STR "\' for TLS";
+    if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+        tmp += ", \'" IOC_DEFAULT_IOCOM_SWITCHBOX_SOCKET_PORT_STR "\' for plain sockets";
+    }
+    tmp += ".";
+    column->setpropertys(EVARP_TTIP, tmp.gets());
 
-    /* column = new eVariable(columns);
-    column->addname(enet_network_name, ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "network name");
-    column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_DEFAULT, "*");
-    column->setpropertys(EVARP_TTIP,
-        "Direct TCP socket: Selects the IOCOM network.\n"
-        "Switchbox (cloud): Cloud network name of the ECOM/IOCOM network to connect."); */
-
+    /* IP address or serial port to connect to
+     */
     column = new eVariable(columns);
     column->addname(enet_conn_ip, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "address/port");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_DEFAULT, "127.0.0.1");
-    column->setpropertys(EVARP_TTIP,
-        "IP andress and optional port number, COM port, or \'*\' to connect to addressed determined\n"
-        "by lighthouse UDP multicasts. Examples: \'192.168.1.222\', \'192.168.1.222:666\', \'*\',\n"
-        "or \'COM1:115200\'");
+    tmp = "IP address and optional port number, or \'*\' to connect to addressed determined\n"
+        "by lighthouse UDP multicasts. Examples: \'192.168.1.222\', \'192.168.1.222:" ECOM_DEFAULT_TLS_PORT_STR "\'";
+    if (flags & ENET_ENABLE_SERIAL_COM) {
+        tmp += ",\nor \'COM1:115200\', etc, for serial communication";
+    }
+    tmp += ".";
+    column->setpropertys(EVARP_TTIP, tmp.gets());
 
+    /* Transport: unsecured socket, TLS, or serial communication.
+     */
     column = new eVariable(columns);
     column->addname(enet_conn_transport, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "transport");
     column->setpropertyi(EVARP_TYPE, OS_CHAR);
-    column->setpropertys(EVARP_ATTR, "enum=\"1.SOCKET,2.TLS,3.SERIAL\"");
+    tmp = "enum=\"";
+    if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+        tmp += "1.SOCKET,";
+    }
+    tmp += "2.TLS";
+    if (flags & ENET_ENABLE_SERIAL_COM) {
+        tmp += ",3.SERIAL";
+    }
+    tmp += "\"";
+    column->setpropertys(EVARP_ATTR, tmp.gets());
     column->setpropertyi(EVARP_DEFAULT, 2);
-    column->setpropertys(EVARP_TTIP,
-        "Transport to use.\n"
-        "- \'SOCKET\': Plain socket connection, unsecured.\n"
-        "- \'TLS\': TLS connection.\n"
-        "- \'SERIAL\': Serial communication.\n");
+    tmp = "Transport to use.\n";
+    if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+        tmp += "- \'SOCKET\': Plain TCP socket, unsecured.\n";
+    }
+    tmp += "- \'TLS\': Secured TLS socket.";
+    if (flags & ENET_ENABLE_SERIAL_COM) {
+        tmp += "\n- \'SERIAL\': Serial communication.";
+    }
+    column->setpropertys(EVARP_TTIP, tmp.gets());
 
+    /* A checkbox to indicate that we are connected.
+     */
     column = new eVariable(columns);
     column->addname(enet_conn_ok, ENAME_NO_MAP);
     column->setpropertyi(EVARP_TYPE, OS_BOOLEAN);
@@ -144,22 +165,6 @@ void eNetService::create_connect_table()
         "At least one connection is on.");
 
 #if 0
-    column = new eVariable(columns);
-    column->addname("found", ENAME_NO_MAP);
-    column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_TEXT, "found");
-    column->setpropertys(EVARP_ATTR, "nosave,rdonly");
-    column->setpropertys(EVARP_TTIP,
-        "Processes found by lighthouse.");
-
-    column = new eVariable(columns);
-    column->addname("active", ENAME_NO_MAP);
-    column->setpropertyi(EVARP_TYPE, OS_INT);
-    column->setpropertys(EVARP_TEXT, "active");
-    column->setpropertys(EVARP_ATTR, "nosave,rdonly");
-    column->setpropertys(EVARP_TTIP,
-        "Number of active connections on resulting this row.");
-
     column = new eVariable(columns);
     column->addname("tstamp", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "last connection");
@@ -289,7 +294,7 @@ void eNetMaintainThread::create_socket_list_table()
     column->setpropertys(EVARP_ATTR, "rdonly");
     column->setpropertys(EVARP_TTIP,
         "Process or IO network name to connect to. This can be a list, if detecting\n"
-        "services by lighthouse. Wildcard \'*\' indicates that any name will be connected to.");
+        "services by lighthouse. Wildcard \'*\' indicates that anything is accepted.");
 
     column = new eVariable(columns);
     column->addname(enet_conn_protocol, ENAME_NO_MAP);
@@ -454,7 +459,9 @@ void eNetMaintainThread::merge_to_socket_list()
             /* If we have no port number, use default for the protocol.
              */
             if (port_nr == 0) {
-                if (!os_strcmp(protocol->gets(), "ecom")) {
+                if (!os_strcmp(protocol->gets(), "ecom") ||
+                    !os_strcmp(protocol->gets(), "ecloud"))
+                {
                     port_nr = (transport_ix == ENET_CONN_TLS ? ENET_DEFAULT_TLS_PORT : ENET_DEFAULT_SOCKET_PORT);
                 }
                 else {
@@ -547,9 +554,11 @@ getout_unlock:
 }
 
 
-
-/* Add a row to socket list.
- */
+/**
+****************************************************************************************************
+  Add a row to socket list.
+****************************************************************************************************
+*/
 void eNetMaintainThread::add_socket_to_list(
     const os_char *name,
     eVariable *protocol,
@@ -826,10 +835,21 @@ getout:
     osal_debug_error("maintain_connections() failed");
 }
 
-/* Generate name for a connection.
- * Connection name is used to identify connection to specific process (ip and port)
-   @param   con_name Pointer to eVariable where to store resulting connection name.
- */
+
+/**
+****************************************************************************************************
+  @brief Generate name for a connection.
+
+ Connection name is used to identify connection to specific process (ip and port)
+
+ @param   con_name Pointer to eVariable where to store resulting connection name.
+ @param   name "name" column of connections table.
+ @param   protocol Selected communication protocol.
+ @param   ip String containing IP address and port.
+ @param   transport_ix Plain TCP socket, TLS, or serial communication?
+
+****************************************************************************************************
+*/
 void eNetMaintainThread::make_connection_name(
     eVariable *con_name,
     eVariable *name,
@@ -897,6 +917,11 @@ void eNetMaintainThread::make_connection_name(
 }
 
 
+/**
+****************************************************************************************************
+  Delete a connection.
+****************************************************************************************************
+*/
 void eNetMaintainThread::delete_con(
     eContainer *con)
 {
@@ -919,8 +944,12 @@ void eNetMaintainThread::delete_con(
     delete con;
 }
 
-/* Update end point status "ok", etc.
- */
+
+/**
+****************************************************************************************************
+  Called when connection status has changed to update "connected" checkbox for (indicator to user).
+****************************************************************************************************
+*/
 void eNetMaintainThread::con_status_changed(
     eContainer *con)
 {
@@ -938,6 +967,12 @@ void eNetMaintainThread::con_status_changed(
     set_con_status(con->oid(), con_row_p->geti() - 1, enet_conn_ok, value);
 }
 
+
+/**
+****************************************************************************************************
+  Control "connected" checkbox as user indication.
+****************************************************************************************************
+*/
 void eNetMaintainThread::set_con_status(
     os_int slist_row,
     os_int contab_row,

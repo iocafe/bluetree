@@ -83,6 +83,7 @@ eStatus ecomProtocol::initialize_protocol(
     ecomProtocolHandle::setupclass();
 
     addname(protocol_name());
+    addname(protocol_name2());
     return ESTATUS_SUCCESS;
 }
 

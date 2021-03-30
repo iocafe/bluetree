@@ -81,9 +81,10 @@ public:
     ************************************************************************************************
     */
 
-    /* Get protocol name.
+    /* Get protocol names.
      */
     virtual const os_char *protocol_name() {return "ecom"; }
+    virtual const os_char *protocol_name2() {return "ecloud"; }
 
     /* Initialize communication protocol
      */

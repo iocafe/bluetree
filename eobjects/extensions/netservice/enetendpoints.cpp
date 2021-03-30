@@ -78,7 +78,7 @@ void eNetService::create_end_point_table(
     tmp = "list=\"";
     tmp2 = "switchbox";
     is_first = OS_TRUE;
-    if (flags & ENET_ENABLE_EOBJECTS_SERVICE) {
+    if (flags & ENET_ENABLE_ECOM_SERVICE) {
         if (!is_first) tmp += ",";
         is_first = OS_FALSE;
         tmp += "ecom";
@@ -90,27 +90,51 @@ void eNetService::create_end_point_table(
         tmp += "iocom";
         tmp2 = "iocom";
     }
-    if (flags & ENET_ENABLE_SWITCHBOX_SERVICE) {
+    if (flags & ENET_ENABLE_ECOM_SERVICE) {
+        tmp += ",ecloud";
+    }
+    if (flags & ENET_ENABLE_IOCOM_SERVICE) {
+        tmp += ",iocloud";
+    }
+    if (flags & ENET_ENABLE_IOCOM_SWITCHBOX_SERVICE) {
         if (!is_first) tmp += ",";
         is_first = OS_FALSE;
-        tmp += "switchbox";
+        tmp += "ioswitchbox";
+    }
+    if (flags & ENET_ENABLE_ECOM_SWITCHBOX_SERVICE) {
+        if (!is_first) tmp += ",";
+        is_first = OS_FALSE;
+        tmp += "eswitchbox";
     }
     tmp += "\"";
     column->setpropertys(EVARP_ATTR, tmp.gets());
     column->setpropertys(EVARP_DEFAULT, tmp2.gets());
 
+    /* Communication protocol selection.
+     */
     tmp = "Communication protocol.\n";
-    if (flags & ENET_ENABLE_EOBJECTS_SERVICE) {
+    if (flags & ENET_ENABLE_ECOM_SERVICE) {
         tmp += "- \'ecom\': listen for ecom protocol. (glass user interface, etc)\n";
     }
     if (flags & ENET_ENABLE_IOCOM_SERVICE) {
         tmp += "- \'iocom\': IO device connection end point.\n";
     }
-    if (flags & ENET_ENABLE_SWITCHBOX_SERVICE) {
-        tmp += "- \'switchbox\': switchbox end point.\n";
+    if (flags & ENET_ENABLE_ECOM_SERVICE) {
+        tmp += "- \'ecloud\': Forward ecom end point to switchbox cloud service.\n";
+    }
+    if (flags & ENET_ENABLE_IOCOM_SERVICE) {
+        tmp += "- \'iocloud\': Forward iocom end point to switchbox cloud service.\n";
+    }
+    if (flags & ENET_ENABLE_IOCOM_SWITCHBOX_SERVICE) {
+        tmp += "- \'ioswitchbox\': switchbox service end point, iocom.\n";
+    }
+    if (flags & ENET_ENABLE_ECOM_SWITCHBOX_SERVICE) {
+        tmp += "- \'eswitchbox\': switchbox service end point, ecom.\n";
     }
     column->setpropertys(EVARP_TTIP, tmp.gets());
 
+    /* Transport, Unsecured socket, TLS or serial communication.
+     */
     column = new eVariable(columns);
     column->addname(enet_endp_transport, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "transport");
@@ -137,26 +161,37 @@ void eNetService::create_end_point_table(
 
     column->setpropertys(EVARP_TTIP, tmp.gets());
 
+    /* IP address (optional) and socket port to listen to.
+     */
     column = new eVariable(columns);
     column->addname(enet_endp_port, ENAME_NO_MAP);
-    column->setpropertys(EVARP_TEXT, "port");
+    column->setpropertys(EVARP_TEXT, "address/port");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     column->setpropertys(EVARP_DEFAULT, "*");
     tmp = "Listen port, \'*\' to select the default port for the protocol:\n";
-    if (flags & ENET_ENABLE_EOBJECTS_SERVICE) {
+    if (flags & ENET_ENABLE_ECOM_SERVICE) {
         if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
-            tmp += "- \'6371\': ecom socket.\n";
+            tmp += "- \'" ECOM_DEFAULT_SOCKET_PORT_STR "\': ecom socket.\n";
         }
-        tmp += "- \'6374\': ecom TLS.\n";
+        tmp += "- \'" ECOM_DEFAULT_TLS_PORT_STR "\': ecom TLS.\n";
     }
     if (flags & ENET_ENABLE_IOCOM_SERVICE) {
         if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
-            tmp += "- \'6368\': iocom socket.\n";
+            tmp += "- \'" IOC_DEFAULT_SOCKET_PORT_STR "\': iocom socket.\n";
         }
-        tmp += "- \'6369\': iocom TLS.\n";
+        tmp += "- \'" IOC_DEFAULT_TLS_PORT_STR "\': iocom TLS.\n";
     }
-    if (flags & ENET_ENABLE_SWITCHBOX_SERVICE) {
-        tmp += "- \'XXXX\': switchbox.\n";
+    if (flags & ENET_ENABLE_IOCOM_SWITCHBOX_SERVICE) {
+        if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+            tmp += "- \'" IOC_DEFAULT_IOCOM_SWITCHBOX_SOCKET_PORT_STR "\': switchbox socket (iocom).\n";
+        }
+        tmp += "- \'" IOC_DEFAULT_IOCOM_SWITCHBOX_TLS_PORT_STR "\': switchbox TLS (iocom).\n";
+    }
+    if (flags & ENET_ENABLE_ECOM_SWITCHBOX_SERVICE) {
+        if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
+            tmp += "- \'" IOC_DEFAULT_ECOM_SWITCHBOX_SOCKET_PORT_STR "\': switchbox socket (ecom).\n";
+        }
+        tmp += "- \'" IOC_DEFAULT_ECOM_SWITCHBOX_TLS_PORT_STR "\': switchbox TLS (ecom).\n";
     }
     if (flags & ENET_ENABLE_SERIAL_COM) {
         tmp += "- \'COM1:115200\' serial port\n";
@@ -208,7 +243,7 @@ void eNetService::create_end_point_table(
 
     if (m_endpoint_matrix->nrows() == 0) {
         enable_by_default = (flags & ENET_DEFAULT_NO_END_POINTS) ? OS_FALSE : OS_TRUE;
-        if (flags & ENET_ENABLE_EOBJECTS_SERVICE) {
+        if (flags & ENET_ENABLE_ECOM_SERVICE) {
             add_end_point(enable_by_default, "ecom", ENET_ENDP_TLS, "*");
         }
         if (flags & ENET_ENABLE_IOCOM_SERVICE) {

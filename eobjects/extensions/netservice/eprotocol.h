@@ -76,9 +76,10 @@ public:
     ************************************************************************************************
     */
 
-    /* Get protocol name.
+    /* Get protocol names. protocol_name2 returns OS_NULL if protocol doesn't have second name.
      */
     virtual const os_char *protocol_name() {return "none"; }
+    virtual const os_char *protocol_name2() {return OS_NULL; }
 
     /* Initialize communication protocol
      */

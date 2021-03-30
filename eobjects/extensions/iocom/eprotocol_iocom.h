@@ -81,9 +81,10 @@ public:
     ************************************************************************************************
     */
 
-    /* Get protocol name.
+    /* Get protocol names.
      */
     virtual const os_char *protocol_name() {return "iocom"; }
+    virtual const os_char *protocol_name2() {return "iocloud"; }
 
     /* Initialize communication protocol
      */

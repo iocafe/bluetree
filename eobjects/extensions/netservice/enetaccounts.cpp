@@ -81,21 +81,25 @@ void eNetService::create_user_account_table(
     column->setpropertys(EVARP_TEXT, "protocols");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     tmp = "list=\"";
-    if (flags & ENET_ENABLE_EOBJECTS_SERVICE) { tmp += "ecom,"; }
+    if (flags & ENET_ENABLE_ECOM_SERVICE) { tmp += "ecom,"; }
     if (flags & ENET_ENABLE_IOCOM_SERVICE) { tmp += "iocom,"; }
-    if (flags & ENET_ENABLE_SWITCHBOX_SERVICE) { tmp += "switchbox,"; }
+    if (flags & ENET_ENABLE_IOCOM_SWITCHBOX_SERVICE) { tmp += "ioswitchbox,"; }
+    if (flags & ENET_ENABLE_ECOM_SWITCHBOX_SERVICE) { tmp += "eswitchbox,"; }
     tmp += "*\"";
     column->setpropertys(EVARP_ATTR, tmp.gets());
 
     tmp = "Accepted incoming connection protocol(s):\n";
-    if (flags & ENET_ENABLE_EOBJECTS_SERVICE) {
+    if (flags & ENET_ENABLE_ECOM_SERVICE) {
         tmp += "- \'ecom\': eobjects communication protocol (for glass user interface, etc).\n";
     }
     if (flags & ENET_ENABLE_IOCOM_SERVICE) {
         tmp += "- \'iocom\': IO device communication protocol.\n";
     }
-    if (flags & ENET_ENABLE_SWITCHBOX_SERVICE) {
-        tmp += "- \'switchbox\': Switchbox service protocol.\n";
+    if (flags & ENET_ENABLE_IOCOM_SWITCHBOX_SERVICE) {
+        tmp += "- \'ioswitchbox\': Switchbox service protocol, iocom.\n";
+    }
+    if (flags & ENET_ENABLE_ECOM_SWITCHBOX_SERVICE) {
+        tmp += "- \'eswitchbox\': Switchbox service protocol, ecom.\n";
     }
     tmp += "- \'*\': all protocols are accepted.\n";
     column->setpropertys(EVARP_TTIP, tmp.gets());

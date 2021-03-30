@@ -32,8 +32,8 @@ static eVariable *add_service_prm(
 
   The eNetService::create_service_parameters function...
 
-  @param  flags Bit fields, combination of ENET_ENABLE_IOCOM_CLIENT, ENET_ENABLE_EOBJECTS_CLIENT,
-          ENET_ENABLE_IOCOM_SERVICE and ENET_ENABLE_EOBJECTS_SERVICE.
+  @param  flags Bit fields, combination of ENET_ENABLE_IOCOM_CLIENT, ENET_ENABLE_ECOM_CLIENT,
+          ENET_ENABLE_IOCOM_SERVICE and ENET_ENABLE_ECOM_SERVICE.
 
 ****************************************************************************************************
 */
@@ -50,7 +50,7 @@ void eNetService::create_service_parameters(
         "Nickname to helps user to identify the device or process in network",
         OS_STR, m_persistent_parameters);
 
-    if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_EOBJECTS_SERVICE)) {
+    if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_ECOM_SERVICE)) {
         m_parameters.enable_lighthouse_server = add_service_prm("lighthouseserv",
             "enable lighthouse multicasts",
             "If enabled, this service will send periodic UDP multicasts,\n"

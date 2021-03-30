@@ -83,7 +83,8 @@ public:
 
     /* Get protocol name.
      */
-    virtual const os_char *protocol_name() {return "switchbox"; }
+    virtual const os_char *protocol_name() {return "ioswitchbox"; }
+    virtual const os_char *protocol_name2() {return "eswitchbox"; }
 
     /* Initialize communication protocol
      */

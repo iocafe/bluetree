@@ -511,7 +511,7 @@ eStatus eLightHouseService::publish()
                     goto goon;
             }
         }
-        else {
+        else if (!os_strcmp(p, "iocom")) {
             switch (transport_ix) {
                 case ENET_ENDP_SOCKET:
                     is_tls = 0;
@@ -526,6 +526,9 @@ eStatus eLightHouseService::publish()
                 default:
                     goto goon;
             }
+        }
+        else {
+            goto goon;
         }
 
         /* We resolve is this is IPv4 or IPv6 address, port number

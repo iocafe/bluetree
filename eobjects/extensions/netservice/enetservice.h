@@ -53,20 +53,21 @@ extern const os_char
     enetservp_connect_table_change_counter[],
     enetservp_lighthouse_change_counter[];
 
-/* Default socket port number for eobject communication. TCP ports 6371 - 6375 are unassigned.
+/* Default socket port number for eobject communication.
  */
 #define ENET_DEFAULT_SOCKET_PORT 6371
-#define ENET_DEFAULT_SOCKET_PORT_STR "6371"
+#define ECOM_DEFAULT_SOCKET_PORT_STR "6371"
 
 /* Flags for enet_start_service() function.
  */
 #define ENET_ENABLE_IOCOM_CLIENT 1
-#define ENET_ENABLE_EOBJECTS_CLIENT 2
+#define ENET_ENABLE_ECOM_CLIENT 2
 #define ENET_ENABLE_IOCOM_SERVICE 4
-#define ENET_ENABLE_EOBJECTS_SERVICE 8
-#define ENET_ENABLE_SWITCHBOX_SERVICE 16
-#define ENET_ENABLE_LIGHTHOUSE 32
-#define ENET_DEFAULT_NO_END_POINTS 64
+#define ENET_ENABLE_ECOM_SERVICE 8
+#define ENET_ENABLE_IOCOM_SWITCHBOX_SERVICE 16
+#define ENET_ENABLE_ECOM_SWITCHBOX_SERVICE 32
+#define ENET_ENABLE_LIGHTHOUSE 64
+#define ENET_DEFAULT_NO_END_POINTS 128
 
 #define ENET_ENABLE_SERIAL_COM 1024
 #define ENET_ENABLE_UNSECURED_SOCKETS 2048
@@ -202,7 +203,8 @@ protected:
 
     /* Create "connections" table.
      */
-    void create_connect_table();
+    void create_connect_table(
+        os_int flags);
 
     /* Add a row for a connection to "connections" table.
      */

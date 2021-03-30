@@ -356,6 +356,9 @@ void eNetMaintainThread::add_protocol(
 {
     proto->adopt(m_protocols);
     proto->addname(proto->protocol_name());
+    if (proto->protocol_name2()) {
+        proto->addname(proto->protocol_name2());
+    }
 }
 
 
