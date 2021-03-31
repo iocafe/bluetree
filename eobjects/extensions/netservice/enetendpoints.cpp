@@ -182,15 +182,9 @@ void eNetService::create_end_point_table(
         tmp += "- \'" IOC_DEFAULT_TLS_PORT_STR "\': iocom TLS.\n";
     }
     if (flags & ENET_ENABLE_IOCOM_SWITCHBOX_SERVICE) {
-        if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
-            tmp += "- \'" IOC_DEFAULT_IOCOM_SWITCHBOX_SOCKET_PORT_STR "\': switchbox socket (iocom).\n";
-        }
         tmp += "- \'" IOC_DEFAULT_IOCOM_SWITCHBOX_TLS_PORT_STR "\': switchbox TLS (iocom).\n";
     }
     if (flags & ENET_ENABLE_ECOM_SWITCHBOX_SERVICE) {
-        if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
-            tmp += "- \'" IOC_DEFAULT_ECOM_SWITCHBOX_SOCKET_PORT_STR "\': switchbox socket (ecom).\n";
-        }
         tmp += "- \'" IOC_DEFAULT_ECOM_SWITCHBOX_TLS_PORT_STR "\': switchbox TLS (ecom).\n";
     }
     if (flags & ENET_ENABLE_SERIAL_COM) {
