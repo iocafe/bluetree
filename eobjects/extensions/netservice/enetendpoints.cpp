@@ -152,7 +152,7 @@ void eNetService::create_end_point_table(
     column->setpropertyl(EVARP_DEFAULT, ENET_ENDP_TLS);
     tmp = "Transport:\n";
     if (flags & ENET_ENABLE_UNSECURED_SOCKETS) {
-        tmp += "- \'SOCKET\': unsecured socket connection.\n";
+        tmp += "- \'SOCKET\': plain TCP socket.\n";
     }
     tmp += "- \'TLS\': secure TLS connection.\n";
     if (flags & ENET_ENABLE_SERIAL_COM) {
@@ -189,6 +189,13 @@ void eNetService::create_end_point_table(
     }
     if (flags & ENET_ENABLE_SERIAL_COM) {
         tmp += "- \'COM1:115200\' serial port\n";
+    }
+    tmp += "ecloud/iocloud: Set here IP address of the switchbox cloud server.\n";
+    if (flags & ENET_ENABLE_ECOM_SERVICE) {
+        tmp += "Default switchbox TLS port for ecom is \'" IOC_DEFAULT_ECOM_SWITCHBOX_TLS_PORT_STR "\'.\n";
+    }
+    if (flags & ENET_ENABLE_IOCOM_SERVICE) {
+        tmp += "Default switchbox TLS port for iocom is \'" IOC_DEFAULT_IOCOM_SWITCHBOX_TLS_PORT_STR "\'.\n";
     }
     tmp += "Network interface can be specified for example \'192.168.1.222:6371\'.\n"
         "Use brackets around IP address to mark IPv6 address, for\n"
