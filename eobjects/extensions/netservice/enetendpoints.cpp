@@ -30,11 +30,13 @@ const os_char enet_endp_netname[] = "netname";
 
   @brief Create "end point" table.
 
-  The eNetService::create_end_point_table function...
+  The "end point" table is user configurable table which lists communication protocols and
+  related options to listen by this process.
 
-
-  @param  flags Bit fields, ENET_DEFAULT_NO_END_POINTS flag checked by this function.
-
+  @param  flags Bit fields, specifies which configuration options to include. The bits used
+          by this function ENET_ENABLE_IOCOM_SERVICE, ENET_ENABLE_ECOM_SERVICE,
+          ENET_ENABLE_IOCOM_SWITCHBOX_SERVICE, ENET_ENABLE_ECOM_SWITCHBOX_SERVICE,
+          ENET_DEFAULT_NO_END_POINTS, ENET_ENABLE_SERIAL_COM, ENET_ENABLE_UNSECURED_SOCKETS.
 
 ****************************************************************************************************
 */
@@ -71,6 +73,8 @@ void eNetService::create_end_point_table(
     column->setpropertys(EVARP_TTIP,
         "Create end point for this row.");
 
+    /* Communication protocol selection.
+     */
     column = new eVariable(columns);
     column->addname(enet_endp_protocol, ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "protocol");
@@ -109,9 +113,6 @@ void eNetService::create_end_point_table(
     tmp += "\"";
     column->setpropertys(EVARP_ATTR, tmp.gets());
     column->setpropertys(EVARP_DEFAULT, tmp2.gets());
-
-    /* Communication protocol selection.
-     */
     tmp = "Communication protocol.\n";
     if (flags & ENET_ENABLE_ECOM_SERVICE) {
         tmp += "- \'ecom\': listen for ecom protocol. (glass user interface, etc)\n";
@@ -210,23 +211,7 @@ void eNetService::create_end_point_table(
     column->setpropertys(EVARP_TTIP,
         "Checked if all is good and end point is listening.");
 
-
     /* column = new eVariable(columns);
-    column->addname(enet_endp_netname, ENAME_NO_MAP);
-    column->setpropertyi(EVARP_TYPE, OS_STR);
-    column->setpropertys(EVARP_TEXT, "iocom network");
-    column->setpropertys(EVARP_TTIP,
-        "Device network name, used only with IOCOM protocol."); */
-
-    /* column = new eVariable(columns);
-    column->addname("active", ENAME_NO_MAP);
-    column->setpropertyi(EVARP_TYPE, OS_INT);
-    column->setpropertys(EVARP_TEXT, "active connections");
-    column->setpropertys(EVARP_ATTR, "nosave");
-    column->setpropertys(EVARP_TTIP,
-        "Number of active connections on this end point");
-
-    column = new eVariable(columns);
     column->addname("tstamp", ENAME_NO_MAP);
     column->setpropertys(EVARP_TEXT, "last connection");
     column->setpropertyi(EVARP_TYPE, OS_LONG);
@@ -301,12 +286,6 @@ void eNetService::add_end_point(
         element->addname(enet_endp_port, ENAME_NO_MAP);
         element->sets(port);
     }
-
-    /* if (netname) {
-        element = new eVariable(&row);
-        element->addname(enet_endp_netname, ENAME_NO_MAP);
-        element->sets(netname);
-    } */
 
     m_endpoint_matrix->insert(&row);
 }
