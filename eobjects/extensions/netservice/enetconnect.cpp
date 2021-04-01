@@ -636,6 +636,7 @@ void eNetMaintainThread::maintain_connections()
     eContainer *localvars, *columns, *con, *next_con, *index, *c, *next_c;
     eVariable *con_name, *ip, *protocol, *name, *con_row_p;
     eVariable *ip_p, *name_p, *protocol_p, *transport_p;
+    const os_char *proto_name_str;
     os_int name_col, protocol_col, transport_col, ip_col, con_row_col;
     os_int h, socklist_row, con_row;
     enetConnTransportIx transport_ix;
@@ -727,6 +728,7 @@ void eNetMaintainThread::maintain_connections()
         m->getv(socklist_row, ip_col, ip);
         m->getv(socklist_row, name_col, name);
         m->getv(socklist_row, protocol_col, protocol);
+        proto_name_str = protocol->gets();
         transport_ix = (enetConnTransportIx)m->getl(socklist_row, transport_col);
         make_connection_name(con_name, name, protocol, ip, transport_ix);
 
@@ -742,6 +744,12 @@ void eNetMaintainThread::maintain_connections()
             os_memclear(&prm, sizeof(prm));
             prm.parameters = ip->gets();
             prm.transport = transport_ix;
+            prm.protocol_flags = EPROTO_PRM_DEFAULT;
+            if (os_strcmp(proto_name_str, "iocloud") ||
+                os_strcmp(proto_name_str, "ecloud"))
+            {
+                prm.protocol_flags |= EPROTO_PRM_CONNECT_TO_SWITCHBOX;
+            }
             prm.name = name->gets();
 
             if (proto->is_connection_running(handle)) {
@@ -775,6 +783,7 @@ void eNetMaintainThread::maintain_connections()
         m->getv(socklist_row, ip_col, ip);
         m->getv(socklist_row, name_col, name);
         m->getv(socklist_row, protocol_col, protocol);
+        proto_name_str = protocol->gets();
         con_row = m->geti(socklist_row, con_row_col);
         transport_ix = (enetConnTransportIx)m->getl(socklist_row, transport_col);
         make_connection_name(con_name, name, protocol, ip, transport_ix);
@@ -787,10 +796,15 @@ void eNetMaintainThread::maintain_connections()
             prm.parameters = ip->gets();
             prm.transport = transport_ix;
             prm.name = name->gets();
+            if (os_strcmp(proto_name_str, "iocloud") ||
+                os_strcmp(proto_name_str, "ecloud"))
+            {
+                prm.protocol_flags |= EPROTO_PRM_CONNECT_TO_SWITCHBOX;
+            }
 
             proto = protocol_by_name(protocol);
             if (proto == OS_NULL) {
-                osal_debug_error_str("new_connection: unknown protocol: ", protocol->gets());
+                osal_debug_error_str("new_connection: unknown protocol: ", proto_name_str);
                 continue;
             }
 

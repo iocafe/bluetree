@@ -136,7 +136,11 @@ eProtocolHandle *eioProtocol::new_end_point(
 
     /* Get IOCOM transport interface and flags.
      */
-    switch (parameters->transport) {
+    if (parameters->protocol_flags & EPROTO_PRM_CONNECT_TO_SWITCHBOX)
+    {
+        iface = IOC_SWITCHBOX_SOCKET_IFACE; cflags = IOC_SOCKET;
+    }
+    else switch (parameters->transport) {
         case ENET_ENDP_SOCKET: iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
         case ENET_ENDP_TLS:    iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
         case ENET_ENDP_SERIAL: iface = OSAL_SERIAL_IFACE; cflags = IOC_SERIAL; break;

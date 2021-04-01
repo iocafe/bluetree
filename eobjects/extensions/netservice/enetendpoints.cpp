@@ -311,6 +311,7 @@ void eNetMaintainThread::maintain_end_points()
     eMatrix *m;
     eContainer *localvars, *list, *ep, *next_ep, *conf, *columns;
     eVariable *v, *proto_name;
+    const os_char *proto_name_str;
     os_int enable_col, protocol_col, transport_col, port_col;
     os_int h, ep_nr;
     eVariable tmp;
@@ -404,9 +405,10 @@ delete_it:
         next_ep = ep->nextc();
         ep_nr = ep->oid();
         proto_name = ep->firstv(ENET_ENDP_PROTOCOL);
+        proto_name_str = proto_name->gets();
         proto = protocol_by_name(proto_name);
         if (proto == OS_NULL) {
-            osal_debug_error_str("Unknown protocol: ", proto_name->gets());
+            osal_debug_error_str("Unknown protocol: ", proto_name_str);
             continue;
         }
 
@@ -415,9 +417,15 @@ delete_it:
         prm.port = v->gets();
         v = ep->firstv(ENET_ENDP_TRANSPORT);
         prm.transport = (enetEndpTransportIx)v->getl();
+        prm.protocol_flags = EPROTO_PRM_DEFAULT;
+        if (os_strcmp(proto_name_str, "iocloud") ||
+            os_strcmp(proto_name_str, "ecloud"))
+        {
+            prm.protocol_flags |= EPROTO_PRM_CONNECT_TO_SWITCHBOX;
+        }
         handle = proto->new_end_point(ep_nr, &prm, &s);
         if (handle == OS_NULL) {
-            osal_debug_error_str("unable to create end point: ", proto_name->gets());
+            osal_debug_error_str("unable to create end point: ", proto_name_str);
             continue;
         }
         handle->adopt(ep, ENET_ENDP_PROTOCOL_HANDLE);
