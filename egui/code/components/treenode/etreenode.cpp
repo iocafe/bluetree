@@ -226,8 +226,10 @@ void eTreeNode::onmessage(
                     groupnode->m_all = m_all;
                     groupnode->m_autoopen = false;
                     groupnode->setpropertys(ECOMP_TEXT, "properties");
+                    groupnode->setpropertys(ECOMP_ATTR, "button=open");
                     groupnode->m_node_type = EBROWSE_PROPERTIES;
                     groupnode->m_intermediate_node = true;
+
                 }
 
                 m_received_change--;
