@@ -43,6 +43,7 @@ void edraw_value(
     const os_int pad = 2;
     os_int square_sz;
     bool checked;
+    eAlignment align;
 
     if (value_w < 0) {
         value_w = (os_int)ImGui::GetColumnWidth();
@@ -108,14 +109,24 @@ void edraw_value(
         default:
             enice_value_for_ui(value, compo, &attr);
             text = value->gets();
+            align = attr.alignment();
+
+            if (attr.buttontype() & E_OPEN_BUTTON)
+            {
+                if (text[0] == '\0') {
+                    text = "[open]";
+                    align = E_ALIGN_CENTER;
+                }
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(128, 128, 255)));
+            }
 
             /* Align left, center, or right.
              */
-            if (attr.alignment() != E_ALIGN_LEFT) {
+            if (align != E_ALIGN_LEFT) {
                 extra_w = value_w - (os_int)ImGui::CalcTextSize(text).x;
                 if (extra_w > 0) {
                     x_pos = (os_int)ImGui::GetCursorPosX();
-                    x_pos += (attr.alignment() == E_ALIGN_RIGHT) ? extra_w : extra_w/2;
+                    x_pos += (align == E_ALIGN_RIGHT) ? extra_w : extra_w/2;
                     ImGui::SetCursorPosX((float)x_pos);
                 }
             }
@@ -125,12 +136,13 @@ void edraw_value(
             }
             else {
                 ImGui::PushStyleColor(ImGuiCol_Text, edraw_get_state_color(state_bits));
-                // fcolor = ImGui::ColorConvertU32ToFloat4(edraw_get_state_color(state_bits));
-                // ImGui::PushStyleColor(ImGuiCol_Text, fcolor);
                 ImGui::TextUnformatted(text);
                 ImGui::PopStyleColor();
             }
 
+            if (attr.buttontype() & E_OPEN_BUTTON) {
+                ImGui::PopStyleColor();
+            }
             break;
     }
 

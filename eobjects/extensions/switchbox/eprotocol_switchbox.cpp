@@ -137,7 +137,7 @@ eProtocolHandle *esboxProtocol::new_end_point(
     prm.parameters = parameters->port;
 
     switch (parameters->transport) {
-        case ENET_ENDP_SOCKET: prm.iface = OSAL_SOCKET_IFACE; break;
+        /* case ENET_ENDP_SOCKET: prm.iface = OSAL_SOCKET_IFACE; break; */
         case ENET_ENDP_TLS:    prm.iface = OSAL_TLS_IFACE;    break;
         default:
             *s = ESTATUS_NOT_SUPPORTED;

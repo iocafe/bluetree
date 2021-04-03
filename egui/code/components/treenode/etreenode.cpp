@@ -879,6 +879,26 @@ os_boolean eTreeNode::on_click(
 */
 void eTreeNode::activate()
 {
+    if (m_attr.buttontype() & E_OPEN_BUTTON)
+    {
+        if (m_right_click_selections & EBROWSE_OPEN) {
+            open_request(m_ipath.get(this, ECOMP_IPATH), EBROWSE_OPEN);
+            return;
+        }
+        else if (m_right_click_selections & EBROWSE_GRAPH) {
+            open_request(m_ipath.get(this, ECOMP_IPATH), EBROWSE_GRAPH);
+            return;
+        }
+        else if (m_intermediate_node && m_node_type == EBROWSE_PROPERTIES)
+        {
+            eTreeNode *p = eTreeNode::cast(parent());
+            if (p->classid() == EGUICLASSID_TREE_NODE) {
+                open_request(p->m_ipath.get(p, ECOMP_IPATH), EBROWSE_PROPERTIES);
+                return;
+            }
+        }
+    }
+
     switch (m_attr.showas())
     {
         case E_SHOWAS_CHECKBOX:

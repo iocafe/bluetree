@@ -163,6 +163,25 @@ void eAttrBuffer::initialize(
             }
         }
 
+        value = osal_str_get_item_value(list_str, "button", &value_sz, OSAL_STRING_DEFAULT);
+        m_buttontype = E_BUTTON_NONE;
+        if (value) {
+            eVariable tmp;
+            tmp.sets(value, value_sz);
+            p = tmp.gets();
+            while (OS_TRUE) {
+                e = os_strchr(p, ','); /* in case new flags are added in future */
+                if (e) *e = '\0';
+
+                if (!os_strcmp(p, "open"))  {
+                    m_buttontype |= E_OPEN_BUTTON;
+                }
+
+                if (e == OS_NULL) break;
+                p = e + 1;
+            }
+        }
+
         m_rdonly = os_strstr(list_str, "rdonly", OSAL_STRING_SEARCH_ITEM_NAME) ? OS_TRUE : OS_FALSE;
         m_nosave = os_strstr(list_str, "nosave", OSAL_STRING_SEARCH_ITEM_NAME) ? OS_TRUE : OS_FALSE;
 

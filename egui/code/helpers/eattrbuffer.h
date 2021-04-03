@@ -47,13 +47,18 @@ eTimeStampFormat;
 
 typedef enum
 {
-    E_ALIGN_NONE,
+    E_ALIGN_NONE = 0,
     E_ALIGN_LEFT,
     E_ALIGN_CENTER,
     E_ALIGN_RIGHT
 }
 eAlignment;
 
+
+/* Bit for m_buttontype.
+ */
+#define E_BUTTON_NONE 0
+#define E_OPEN_BUTTON 1
 
 /**
 ****************************************************************************************************
@@ -104,6 +109,9 @@ public:
 
     inline os_boolean nosave()
         {return m_nosave; }
+
+    inline os_boolean buttontype()
+        {return m_buttontype; }
 
     inline os_short tstr_flags()
         {return m_tstr_flags; }
@@ -172,6 +180,12 @@ protected:
 
     os_boolean m_rdonly;
     os_boolean m_nosave;
+
+    /* If this is a button, when applicable draw value with button decorations and react to
+       click. What actually happens if implemented in UI widget. Value E_BUTTON_NONE (0) if
+       this should not be displayed as button
+     */
+    os_char m_buttontype;
 
     eContainer *m_drop_down_list;
 };

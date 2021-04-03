@@ -343,6 +343,7 @@ void eContainer::object_info(
     const os_char *target)
 {
     eObject::object_info(item, name, appendix, target);
+    item->setpropertys(EVARP_ATTR, "button=open");
     appendix->setl(EBROWSE_RIGHT_CLICK_SELECTIONS, EBROWSE_OPEN);
 }
 
