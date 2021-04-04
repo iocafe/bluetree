@@ -142,7 +142,7 @@ void eSynchronized::initialize_synch_transfer(
 
     if (m_synchronize) {
         m_ref = new ePointer(this);
-        m_event = osal_event_create();
+        m_event = osal_event_create(OSAL_EVENT_SET_AT_EXIT);
 
         os_lock();
 
@@ -435,7 +435,7 @@ eStatus eSynchronized::sync_wait(
 
     while (OS_TRUE) {
         c = in_air_count();
-        if (c == -1) return ESTATUS_FAILED;
+        if (c == -1 || osal_stop()) return ESTATUS_FAILED;
         if (in_air_count() <= count) break;
 
         if (osal_event_wait(m_event, timeout_ms)) {

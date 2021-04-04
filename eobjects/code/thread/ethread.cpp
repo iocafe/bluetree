@@ -52,7 +52,7 @@ eThread::eThread(
 {
     /* Create thread triggger.
      */
-    m_trigger = osal_event_create();
+    m_trigger = osal_event_create(OSAL_EVENT_SET_AT_EXIT);
 
     /* Create message queue for incoming messages. This is not child of the thread object.
      */

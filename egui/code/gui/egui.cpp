@@ -504,7 +504,7 @@ eStatus eGui::run()
 
     bool  openoi = true;
 
-    while (true)
+    while (osal_go())
     {
 // TEMP PATCH. THIS NEEDS TO WAIT FOR USER INPUT OR OTHER EVENTS, NOT TO RUN IN FAST LOOP
         eglobal->eguiglobal->guilib_thread->alive(EALIVE_RETURN_IMMEDIATELY);

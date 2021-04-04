@@ -129,7 +129,7 @@ public:
      */
     inline os_boolean exitnow()
     {
-        return m_exit_requested || !osal_go();
+        return m_exit_requested || osal_stop();
     }
 
     /* Get next message to thread to process.
