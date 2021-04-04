@@ -519,7 +519,10 @@ eStatus eGui::run()
 
         handle_mouse();
 
-        for (c = firstcomponent(EOID_GUI_WINDOW); c; c = c->nextcomponent(EOID_GUI_WINDOW)) {
+        for (c = firstcomponent(EOID_GUI_WINDOW);
+             c;
+             c = c->nextcomponent(EOID_GUI_WINDOW))
+        {
             c->draw(m_draw_prm);
         }
 

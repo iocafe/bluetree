@@ -10,7 +10,7 @@ project(${E_PROJECT})
 include(../../../../eosal/osbuild/cmakedefs/eosal-defs.txt)
 
 # Select libraries to link with application.
-set(E_APPLIBS "eobjects${E_POSTFIX};$ENV{OSAL_TLS_APP_LIBS}")
+set(E_APPLIBS "eobjects${E_POSTFIX};iocom${E_POSTFIX};$ENV{OSAL_TLS_APP_LIBS}")
 # if ($ENV{E_OSVER} MATCHES "pi")
 #   set(E_APPLIBS "${E_APPLIBS};rt")
 # endif()
@@ -18,6 +18,7 @@ set(E_APPLIBS "eobjects${E_POSTFIX};$ENV{OSAL_TLS_APP_LIBS}")
 # Build individual library projects.
 add_subdirectory($ENV{E_ROOT}/${E_REPO}/eobjects "${CMAKE_CURRENT_BINARY_DIR}/eobjects")
 add_subdirectory($ENV{E_ROOT}/eosal "${CMAKE_CURRENT_BINARY_DIR}/eosal")
+add_subdirectory($ENV{E_ROOT}/iocom "${CMAKE_CURRENT_BINARY_DIR}/iocom")
 
 # Set path to where to keep libraries.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $ENV{E_BIN})
@@ -27,6 +28,7 @@ set(E_SOURCE_PATH "$ENV{E_ROOT}/${E_REPO}/eobjects/examples/${E_PROJECT}/code")
 
 # Set include path for the project.
 include_directories("${E_SOURCE_PATH}")
+include_directories("$ENV{E_ROOT}/iocom")
 include_directories("$ENV{E_ROOT}/${E_REPO}/eobjects")
 
 # Add header files, the file(GLOB_RECURSE...) allows for wildcards and recurses subdirs.
