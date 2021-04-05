@@ -10,7 +10,7 @@ project(${E_PROJECT})
 include(../../eosal/osbuild/cmakedefs/eosal-defs.txt)
 
 # Select libraries to link with application.
-set(E_APPLIBS "egui${E_POSTFIX};eobjects${E_POSTFIX};devicedir${E_POSTFIX};lighthouse${E_POSTFIX};nodeconf${E_POSTFIX};iocom${E_POSTFIX};$ENV{OSAL_TLS_APP_LIBS}")
+set(E_APPLIBS "egui${E_POSTFIX};eobjects${E_POSTFIX};lighthouse${E_POSTFIX};iocom${E_POSTFIX};$ENV{OSAL_TLS_APP_LIBS}")
 # if ($ENV{E_OSVER} MATCHES "pi")
 #   set(E_APPLIBS "${E_APPLIBS};rt")
 # endif()
