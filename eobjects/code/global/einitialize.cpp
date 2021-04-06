@@ -138,20 +138,6 @@ void eobjects_shutdown()
 
     if ((eglobal->eobjects_init_flags & EOBJECTS_NO_NETWORK_INIT) == 0)
     {
-#if OSAL_SOCKET_SUPPORT
-#if OSAL_TLS_SUPPORT
-        osal_tls_shutdown();
-#else
-        osal_socket_shutdown();
-#endif
-#endif
-
-#if OSAL_SERIAL_SUPPORT
-        osal_serial_shutdown();
-#endif
-#if OSAL_BLUETOOTH_SUPPORT
-        osal_bluetooth_shutdown();
-#endif
         os_persistent_shutdown();
     }
 
