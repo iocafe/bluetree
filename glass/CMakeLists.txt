@@ -29,7 +29,6 @@ add_subdirectory($ENV{E_ROOT}/eosal "${CMAKE_CURRENT_BINARY_DIR}/eosal")
 add_subdirectory($ENV{E_ROOT}/eosal/dependencies/eosal_jpeg "${CMAKE_CURRENT_BINARY_DIR}/eosal/dependencies/eosal_jpeg")
 add_subdirectory($ENV{E_ROOT}/iocom "${CMAKE_CURRENT_BINARY_DIR}/iocom")
 add_subdirectory($ENV{E_ROOT}/iocom/extensions/lighthouse "${CMAKE_CURRENT_BINARY_DIR}/iocom/extensions/lighthouse")
-add_subdirectory($ENV{E_ROOT}/iocom/extensions/devicedir "${CMAKE_CURRENT_BINARY_DIR}/iocom/extensions/devicedir")
 
 # Set path to where to keep libraries.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $ENV{E_BIN})
@@ -45,7 +44,6 @@ include_directories("$ENV{E_ROOT}/${E_REPO}/egui")
 include_directories("$ENV{E_ROOT}/${E_REPO}/eobjects")
 include_directories("$ENV{E_ROOT}/iocom")
 include_directories("$ENV{E_ROOT}/iocom/extensions/lighthouse")
-include_directories("$ENV{E_ROOT}/iocom/extensions/devicedir")
 
 # Add header files, the file(GLOB_RECURSE...) allows for wildcards and recurses subdirs.
 file(GLOB_RECURSE HEADERS "${E_SOURCE_PATH}/*.h")
