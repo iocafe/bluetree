@@ -13,7 +13,7 @@
 #define IMGUISTYLESERIALIZER_H_
 #include "imgui.h"
 
-void ImGuiSetuptyle( bool bStyleDark_, float alpha_  );
+void ImGuiSetuptyle( bool bStyleDark, float alpha);
 bool ImGuiSaveStyle(const char* filename,const ImGuiStyle& style);
 bool ImGuiLoadStyle(const char* filename,ImGuiStyle& style);
 

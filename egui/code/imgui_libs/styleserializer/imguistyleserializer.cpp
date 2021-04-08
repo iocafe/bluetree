@@ -15,7 +15,7 @@
 #include <stdio.h>
 
 
-void ImGuiSetuptyle( bool bStyleDark_, float alpha_  )
+void ImGuiSetuptyle(bool bStyleDark, float alpha)
 {
     ImGuiStyle& style = ImGui::GetStyle();
 
@@ -82,7 +82,7 @@ void ImGuiSetuptyle( bool bStyleDark_, float alpha_  )
     style.PopupRounding = 0.0f;
     style.ScrollbarRounding = 0.0f;
 
-    if( bStyleDark_ )
+    if (bStyleDark)
     {
         for (int i = 0; i <= ImGuiCol_COUNT; i++)
         {
@@ -97,7 +97,7 @@ void ImGuiSetuptyle( bool bStyleDark_, float alpha_  )
             ImGui::ColorConvertHSVtoRGB( H, S, V, col.x, col.y, col.z );
             if( col.w < 1.00f )
             {
-                col.w *= alpha_;
+                col.w *= alpha;
             }
         }
     }
@@ -108,13 +108,14 @@ void ImGuiSetuptyle( bool bStyleDark_, float alpha_  )
             ImVec4& col = style.Colors[i];
             if( col.w < 1.00f )
             {
-                col.x *= alpha_;
-                col.y *= alpha_;
-                col.z *= alpha_;
-                col.w *= alpha_;
+                col.x *= alpha;
+                col.y *= alpha;
+                col.z *= alpha;
+                col.w *= alpha;
             }
         }
     }
+
 }
 
 
@@ -123,6 +124,8 @@ bool ImGuiSaveStyle(const char* filename,const ImGuiStyle& style)
     FILE* f = fopen(filename, "wt");
     if (!f)  return false;
 
+    ImGuiIO &io = ImGui::GetIO();
+    fprintf(f, "[GlobalScale]\n%1.3f\n", io.FontGlobalScale);
     fprintf(f, "[Alpha]\n%1.3f\n", style.Alpha);
     fprintf(f, "[WindowPadding]\n%1.3f %1.3f\n", style.WindowPadding.x,style.WindowPadding.y);
     fprintf(f, "[WindowMinSize]\n%1.3f %1.3f\n", style.WindowMinSize.x,style.WindowMinSize.y);
@@ -202,7 +205,12 @@ bool ImGuiLoadStyle(const char* filename,ImGuiStyle& style)
 
             // parsing 'name' here by filling the fields above
             {
-                if      (strcmp(name, "Alpha")==0)                     {npf=1;pf[0]=&style.Alpha;}
+                if (strcmp(name, "GlobalScale")==0) {
+                    npf=1;
+                    ImGuiIO &io = ImGui::GetIO();
+                    pf[0]=&io.FontGlobalScale;
+                }
+                else if (strcmp(name, "Alpha")==0)                     {npf=1;pf[0]=&style.Alpha;}
                 else if (strcmp(name, "WindowPadding")==0)             {npf=2;pf[0]=&style.WindowPadding.x;pf[1]=&style.WindowPadding.y;}
                 else if (strcmp(name, "WindowMinSize")==0)             {npf=2;pf[0]=&style.WindowMinSize.x;pf[1]=&style.WindowMinSize.y;}
                 else if (strcmp(name, "FramePadding")==0)              {npf=2;pf[0]=&style.FramePadding.x;pf[1]=&style.FramePadding.y;}
