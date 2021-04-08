@@ -133,24 +133,44 @@ eProtocolHandle *eioProtocol::new_end_point(
     const os_char *prmstr;
     const osalStreamInterface *iface;
     os_short cflags;
+    os_char hostbuf[OSAL_HOST_BUF_SZ];
 
     /* Get IOCOM transport interface and flags.
      */
-    if (parameters->protocol_flags & EPROTO_PRM_CONNECT_TO_SWITCHBOX)
+    prmstr = parameters->port;
+    if (parameters->protocol_flags & EPROTO_PRM_CONNECT_IOCOM_TO_SWITCHBOX)
     {
-        iface = IOC_SWITCHBOX_SOCKET_IFACE; cflags = IOC_SOCKET;
+        iface = IOC_SWITCHBOX_SOCKET_IFACE;
+        cflags = IOC_SOCKET;
+
+        osal_socket_embed_default_port(parameters->port,
+            hostbuf, sizeof(hostbuf), IOC_DEFAULT_IOCOM_SWITCHBOX_TLS_PORT);
+        prmstr = hostbuf;
+
     }
-    else switch (parameters->transport) {
-        case ENET_ENDP_SOCKET: iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
-        case ENET_ENDP_TLS:    iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
-        case ENET_ENDP_SERIAL: iface = OSAL_SERIAL_IFACE; cflags = IOC_SERIAL; break;
+    else switch (parameters->transport)
+    {
+        case ENET_ENDP_SOCKET:
+            iface = OSAL_SOCKET_IFACE;
+            cflags = IOC_SOCKET;
+            break;
+
+        case ENET_ENDP_TLS:
+            iface = OSAL_TLS_IFACE;
+            cflags = IOC_SOCKET;
+            break;
+
+        case ENET_ENDP_SERIAL:
+            iface = OSAL_SERIAL_IFACE;
+            cflags = IOC_SERIAL;
+            break;
+
         default:
             *s = ESTATUS_FAILED;
             osal_debug_error_int("Unknown transport for iocom end point: ", parameters->transport);
             return OS_NULL;
     }
 
-    prmstr = parameters->port;
     cflags |= IOC_LISTENER|IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
     return new_con_helper(OS_NULL, prmstr, iface, cflags, s);
 }
@@ -188,9 +208,21 @@ eProtocolHandle *eioProtocol::new_connection(
     /* Get IOCOM transport interface and flags.
      */
     switch (parameters->transport) {
-        case ENET_CONN_SOCKET: iface = OSAL_SOCKET_IFACE; cflags = IOC_SOCKET; break;
-        case ENET_CONN_TLS:    iface = OSAL_TLS_IFACE;    cflags = IOC_SOCKET; break;
-        case ENET_CONN_SERIAL: iface = OSAL_SERIAL_IFACE; cflags = IOC_SERIAL; break;
+        case ENET_CONN_SOCKET:
+            iface = OSAL_SOCKET_IFACE;
+            cflags = IOC_SOCKET;
+            break;
+
+        case ENET_CONN_TLS:
+            iface = OSAL_TLS_IFACE;
+            cflags = IOC_SOCKET;
+            break;
+
+        case ENET_CONN_SERIAL:
+            iface = OSAL_SERIAL_IFACE;
+            cflags = IOC_SERIAL;
+            break;
+
         default:
             *s = ESTATUS_FAILED;
             osal_debug_error_int("Unknown transport for iocom connection: ", parameters->transport);

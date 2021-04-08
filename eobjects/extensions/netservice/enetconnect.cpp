@@ -452,10 +452,14 @@ void eNetMaintainThread::merge_to_socket_list()
             /* If we have no port number, use default for the protocol.
              */
             if (port_nr == 0) {
-                if (!os_strcmp(protocol->gets(), "ecom") ||
-                    !os_strcmp(protocol->gets(), "ecloud"))
-                {
-                    port_nr = (transport_ix == ENET_CONN_TLS ? ENET_DEFAULT_TLS_PORT : ENET_DEFAULT_SOCKET_PORT);
+                if (!os_strcmp(protocol->gets(), "iocloud")) {
+                    port_nr = IOC_DEFAULT_IOCOM_SWITCHBOX_TLS_PORT;
+                }
+                else if (!os_strcmp(protocol->gets(), "ecloud")) {
+                    port_nr = IOC_DEFAULT_ECOM_SWITCHBOX_TLS_PORT;
+                }
+                else if (!os_strcmp(protocol->gets(), "ecom")) {
+                    port_nr = (transport_ix == ENET_CONN_TLS ? ECOM_DEFAULT_TLS_PORT : ECOM_DEFAULT_SOCKET_PORT);
                 }
                 else {
                     port_nr = (transport_ix == ENET_CONN_TLS ? IOC_DEFAULT_TLS_PORT : IOC_DEFAULT_SOCKET_PORT);
@@ -744,12 +748,6 @@ void eNetMaintainThread::maintain_connections()
             os_memclear(&prm, sizeof(prm));
             prm.parameters = ip->gets();
             prm.transport = transport_ix;
-            prm.protocol_flags = EPROTO_PRM_DEFAULT;
-            if (os_strcmp(proto_name_str, "iocloud") ||
-                os_strcmp(proto_name_str, "ecloud"))
-            {
-                prm.protocol_flags |= EPROTO_PRM_CONNECT_TO_SWITCHBOX;
-            }
             prm.name = name->gets();
 
             if (proto->is_connection_running(handle)) {
@@ -796,12 +794,6 @@ void eNetMaintainThread::maintain_connections()
             prm.parameters = ip->gets();
             prm.transport = transport_ix;
             prm.name = name->gets();
-            if (os_strcmp(proto_name_str, "iocloud") ||
-                os_strcmp(proto_name_str, "ecloud"))
-            {
-                prm.protocol_flags |= EPROTO_PRM_CONNECT_TO_SWITCHBOX;
-            }
-
             proto = protocol_by_name(protocol);
             if (proto == OS_NULL) {
                 osal_debug_error_str("new_connection: unknown protocol: ", proto_name_str);
@@ -843,17 +835,44 @@ getout:
 }
 
 
+/* Get protocol flags by protocol name
+ */
+os_short eNetMaintainThread::get_protocol_flags(
+    const os_char *proto_name)
+{
+    os_short protocol_flags = EPROTO_PRM_DEFAULT;
+
+    if (!os_strcmp(proto_name, "iocloud"))
+    {
+        protocol_flags |= EPROTO_PRM_CONNECT_IOCOM_TO_SWITCHBOX;
+    }
+    else if (!os_strcmp(proto_name, "ecloud"))
+    {
+        protocol_flags |= EPROTO_PRM_CONNECT_ECOM_TO_SWITCHBOX;
+    }
+    else if (!os_strcmp(proto_name, "ioswitchbox")) {
+        protocol_flags |= EPROTO_PRM_SWITCHBOX_IOCOM_ENDPOINT;
+    }
+    else if (!os_strcmp(proto_name, "eswitchbox")) {
+        protocol_flags |= EPROTO_PRM_SWITCHBOX_ECOM_ENDPOINT;
+    }
+
+    return protocol_flags;
+}
+
+
 /**
 ****************************************************************************************************
+
   @brief Generate name for a connection.
 
- Connection name is used to identify connection to specific process (ip and port)
+  Connection name is used to identify connection to specific process (ip and port)
 
- @param   con_name Pointer to eVariable where to store resulting connection name.
- @param   name "name" column of connections table.
- @param   protocol Selected communication protocol.
- @param   ip String containing IP address and port.
- @param   transport_ix Plain TCP socket, TLS, or serial communication?
+  @param   con_name Pointer to eVariable where to store resulting connection name.
+  @param   name "name" column of connections table.
+  @param   protocol Selected communication protocol.
+  @param   ip String containing IP address and port.
+  @param   transport_ix Plain TCP socket, TLS, or serial communication?
 
 ****************************************************************************************************
 */

@@ -334,7 +334,7 @@ void eEndPoint::open()
     is_tls = !os_strncmp(parameters, "tls:", 4);
     is_socket = !os_strncmp(parameters, "socket:", 7);
     if (is_tls || is_socket) {
-        default_port_nr = is_tls ? ENET_DEFAULT_TLS_PORT : ENET_DEFAULT_SOCKET_PORT;
+        default_port_nr = is_tls ? ECOM_DEFAULT_TLS_PORT : ECOM_DEFAULT_SOCKET_PORT;
 
         e = os_strchr(parameters, ':') + 1;
         tmp.appends_nbytes(parameters, e - parameters);

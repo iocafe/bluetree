@@ -80,7 +80,7 @@ void eNetService::create_end_point_table(
     column->setpropertys(EVARP_TEXT, "protocol");
     column->setpropertyi(EVARP_TYPE, OS_STR);
     tmp = "list=\"";
-    tmp2 = "switchbox";
+    tmp2 = "eswitchbox";
     is_first = OS_TRUE;
     if (flags & ENET_ENABLE_ECOM_SERVICE) {
         if (!is_first) tmp += ",";
@@ -417,12 +417,7 @@ delete_it:
         prm.port = v->gets();
         v = ep->firstv(ENET_ENDP_TRANSPORT);
         prm.transport = (enetEndpTransportIx)v->getl();
-        prm.protocol_flags = EPROTO_PRM_DEFAULT;
-        if (os_strcmp(proto_name_str, "iocloud") ||
-            os_strcmp(proto_name_str, "ecloud"))
-        {
-            prm.protocol_flags |= EPROTO_PRM_CONNECT_TO_SWITCHBOX;
-        }
+        prm.protocol_flags = get_protocol_flags(proto_name_str);
         handle = proto->new_end_point(ep_nr, &prm, &s);
         if (handle == OS_NULL) {
             osal_debug_error_str("unable to create end point: ", proto_name_str);

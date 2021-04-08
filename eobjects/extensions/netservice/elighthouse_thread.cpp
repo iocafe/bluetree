@@ -499,12 +499,12 @@ eStatus eLightHouseService::publish()
             switch (transport_ix) {
                 case ENET_ENDP_SOCKET:
                     is_tls = 0;
-                    default_port_nr = ENET_DEFAULT_SOCKET_PORT;
+                    default_port_nr = ECOM_DEFAULT_SOCKET_PORT;
                     break;
 
                 case ENET_ENDP_TLS:
                     is_tls = 1;
-                    default_port_nr = ENET_DEFAULT_TLS_PORT;
+                    default_port_nr = ECOM_DEFAULT_TLS_PORT;
                     break;
 
                 default:

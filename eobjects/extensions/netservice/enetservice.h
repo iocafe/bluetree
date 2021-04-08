@@ -55,7 +55,7 @@ extern const os_char
 
 /* Default socket port number for eobject communication.
  */
-#define ENET_DEFAULT_SOCKET_PORT 6371
+#define ECOM_DEFAULT_SOCKET_PORT 6371
 #define ECOM_DEFAULT_SOCKET_PORT_STR "6371"
 
 /* Flags for enet_start_service() function.

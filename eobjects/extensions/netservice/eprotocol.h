@@ -34,7 +34,10 @@
 /* End point and connect parameters structure protocol_flags bits.
 */
 #define EPROTO_PRM_DEFAULT 0
-#define EPROTO_PRM_CONNECT_TO_SWITCHBOX 1
+#define EPROTO_PRM_CONNECT_IOCOM_TO_SWITCHBOX 1
+#define EPROTO_PRM_CONNECT_ECOM_TO_SWITCHBOX 2
+#define EPROTO_PRM_SWITCHBOX_IOCOM_ENDPOINT 4
+#define EPROTO_PRM_SWITCHBOX_ECOM_ENDPOINT 8
 
 typedef struct
 {
@@ -51,7 +54,6 @@ typedef struct
     enetConnTransportIx transport;
     const os_char *name;
     const os_char *parameters;
-    os_short protocol_flags;
 }
 eConnectParameters;
 

@@ -136,6 +136,17 @@ eProtocolHandle *esboxProtocol::new_end_point(
     prm.flags = IOC_SOCKET|IOC_CREATE_THREAD;
     prm.parameters = parameters->port;
 
+    if (parameters->protocol_flags & EPROTO_PRM_SWITCHBOX_IOCOM_ENDPOINT) {
+        prm.default_port = IOC_DEFAULT_IOCOM_SWITCHBOX_TLS_PORT;
+    }
+    else if (parameters->protocol_flags & EPROTO_PRM_SWITCHBOX_ECOM_ENDPOINT) {
+        prm.default_port = IOC_DEFAULT_ECOM_SWITCHBOX_TLS_PORT;
+    }
+    else {
+        prm.default_port = 9128;
+        osal_debug_error("default port not selected by protocol_flags, using 9128");
+    }
+
     switch (parameters->transport) {
         /* case ENET_ENDP_SOCKET: prm.iface = OSAL_SOCKET_IFACE; break; */
         case ENET_ENDP_TLS:    prm.iface = OSAL_TLS_IFACE;    break;

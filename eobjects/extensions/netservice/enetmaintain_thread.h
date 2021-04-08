@@ -181,6 +181,11 @@ protected:
      */
     void maintain_connections();
 
+    /* Get protocol flags by protocol name. Used for both connections and end points.
+     */
+    os_short get_protocol_flags(
+        const os_char *proto_name);
+
     /* Generate name for a connection.
      */
     void make_connection_name(

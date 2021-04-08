@@ -123,9 +123,9 @@
 ****************************************************************************************************
 */
 
-#define ENET_DEFAULT_SOCKET_PORT 6371
+#define ECOM_DEFAULT_SOCKET_PORT 6371
 #define ECOM_DEFAULT_SOCKET_PORT_STR "6371"
-#define ENET_DEFAULT_TLS_PORT 6374
+#define ECOM_DEFAULT_TLS_PORT 6374
 #define ECOM_DEFAULT_TLS_PORT_STR "6374"
 
 
