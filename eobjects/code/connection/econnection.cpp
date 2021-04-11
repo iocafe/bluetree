@@ -630,10 +630,8 @@ os_boolean cert_match = OS_TRUE;
         }
     }
 
-    /* If this is client, we cannot send authentication frame before receiving one from server.
+    /* If authentication frame not sent.
      */
-    /* if (!m_authentication_frame_sent && (m_is_server || m_authentication_frame_received)) */
-
     if (!m_authentication_frame_sent)
     {
         os_char auto_password[IOC_PASSWORD_SZ];
