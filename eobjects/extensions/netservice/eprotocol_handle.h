@@ -82,13 +82,16 @@ public:
 
     /* Check if connection or end point is running.
      */
-    virtual os_boolean isrunning() = 0;
+    virtual os_boolean started() = 0;
 
     /**
     ************************************************************************************************
       Member variables
     ************************************************************************************************
     */
+
+    /** Communication channel open flag.
+     */
     os_boolean m_is_open;
 };
 

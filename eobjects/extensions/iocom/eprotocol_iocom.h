@@ -140,12 +140,12 @@ protected:
 
     /* Helper function for new_connection() and new_end_point().
      */
-    eProtocolHandle *new_con_helper(
+    eStatus new_con_helper(
+        eioProtocolHandle *p,
         const os_char *name,
         const os_char *prmstr,
         const osalStreamInterface *iface,
-        os_short cflags,
-        eStatus *s);
+        os_short cflags);
 
     /* Callback when connection is established or dropped.
      */

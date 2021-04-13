@@ -68,7 +68,7 @@ public:
     ************************************************************************************************
     */
 
-    virtual os_boolean isrunning() {return m_is_open; }
+    virtual os_boolean started() {return m_is_open; } // ??????????????????????????????? DO NOT RETURN THIS, RETURN IF COMMUNICATION HAS BEEN SET UP
 
     eStatus listen(
         switchboxEndPointParams *prm);

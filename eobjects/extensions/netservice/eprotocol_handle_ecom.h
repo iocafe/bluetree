@@ -86,7 +86,7 @@ public:
 
     /* Check if connection or end point is running.
      */
-    virtual os_boolean isrunning();
+    virtual os_boolean started();
 
 
 protected:
@@ -111,10 +111,6 @@ protected:
     /** Name of commection or end point in process name space.
      */
     eVariable *m_threadname;
-
-    /** Communication channel open flag.
-     */
-    os_boolean m_is_open;
 };
 
 

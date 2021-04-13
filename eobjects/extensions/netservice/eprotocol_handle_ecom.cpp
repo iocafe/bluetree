@@ -148,7 +148,7 @@ const os_char *ecomProtocolHandle::uniquename()
 
   @brief Check if connection or end point is running.
 
-  The ecomProtocolHandle::isrunning() function checks if a specific connection or end point
+  The ecomProtocolHandle::started() function checks if a specific connection or end point
   is running for the protocol handle. This is done by checking if the name exists in process
   name space.
 
@@ -156,7 +156,7 @@ const os_char *ecomProtocolHandle::uniquename()
 
 ****************************************************************************************************
 */
-os_boolean ecomProtocolHandle::isrunning()
+os_boolean ecomProtocolHandle::started()
 {
     eNameSpace *ns;
     eName *name;

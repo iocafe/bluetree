@@ -132,8 +132,10 @@ eProtocolHandle *eioProtocol::new_end_point(
 {
     const os_char *prmstr;
     const osalStreamInterface *iface;
+    eioProtocolHandle *p;
     os_short cflags;
     os_char hostbuf[OSAL_HOST_BUF_SZ];
+    OSAL_UNUSED(ep_nr);
 
     /* Get IOCOM transport interface and flags.
      */
@@ -172,7 +174,9 @@ eProtocolHandle *eioProtocol::new_end_point(
     }
 
     cflags |= IOC_LISTENER|IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
-    return new_con_helper(OS_NULL, prmstr, iface, cflags, s);
+    p = new eioProtocolHandle(ETEMPORARY);
+    *s = new_con_helper(p, OS_NULL, prmstr, iface, cflags);
+    return p;
 }
 
 
@@ -203,7 +207,9 @@ eProtocolHandle *eioProtocol::new_connection(
     eStatus *s)
 {
     const osalStreamInterface *iface;
+    eioProtocolHandle *p;
     os_short cflags;
+    OSAL_UNUSED(con_name);
 
     /* Get IOCOM transport interface and flags.
      */
@@ -230,7 +236,9 @@ eProtocolHandle *eioProtocol::new_connection(
     }
 
     cflags |= IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
-    return new_con_helper(parameters->name, parameters->parameters, iface, cflags, s);
+    p = new eioProtocolHandle(ETEMPORARY);
+    *s = new_con_helper(p, parameters->name, parameters->parameters, iface, cflags);
+    return p;
 }
 
 
@@ -243,27 +251,26 @@ eProtocolHandle *eioProtocol::new_connection(
 
 ****************************************************************************************************
 */
-eProtocolHandle *eioProtocol::new_con_helper(
+eStatus eioProtocol::new_con_helper(
+    eioProtocolHandle *p,
     const os_char *name,
     const os_char *prmstr,
     const osalStreamInterface *iface,
-    os_short cflags,
-    eStatus *s)
+    os_short cflags)
 {
     iocEndPoint *ep;
     iocEndPointParams epprm;
     iocConnection *con;
     iocConnectionParams conprm;
-    eioProtocolHandle *p;
     osalStatus ss;
+    eStatus s;
 
-    *s = ESTATUS_SUCCESS;
-    p = new eioProtocolHandle(ETEMPORARY);
+    s = ESTATUS_SUCCESS;
 
     if ((cflags & (IOC_SOCKET|IOC_LISTENER)) == (IOC_SOCKET|IOC_LISTENER))
     {
         ep = p->epoint();
-        p->mark_iocom_end_point(OS_TRUE);
+        p->mark_iocom_handle_type(EIO_HANDLE_END_POINT);
         ioc_initialize_end_point(ep, m_iocom_root);
         ioc_set_end_point_callback(ep, end_point_callback, p);
         os_memclear(&epprm, sizeof(epprm));
@@ -271,7 +278,7 @@ eProtocolHandle *eioProtocol::new_con_helper(
         epprm.flags = cflags;
         epprm.parameters = prmstr;
         ss = ioc_listen(ep, &epprm);
-        if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
+        if (ss) s = ESTATUS_FROM_OSAL_STATUS(ss);
     }
     else
     {
@@ -279,7 +286,7 @@ eProtocolHandle *eioProtocol::new_con_helper(
         os_char password[OSAL_SECRET_STR_SZ];
 
         con = p->con();
-        p->mark_iocom_end_point(OS_FALSE);
+        p->mark_iocom_handle_type(EIO_HANDLE_CONNECTION);
         ioc_initialize_connection(con, m_iocom_root);
         ioc_set_connection_callback(con, connection_callback, p);
         os_memclear(&conprm, sizeof(conprm));
@@ -319,10 +326,10 @@ eProtocolHandle *eioProtocol::new_con_helper(
         conprm.user_override = user_override.gets();
 
         ss = ioc_connect(con, &conprm);
-        if (ss) *s = ESTATUS_FROM_OSAL_STATUS(ss);
+        if (ss) s = ESTATUS_FROM_OSAL_STATUS(ss);
     }
 
-    return p;
+    return s;
 }
 
 
@@ -446,20 +453,26 @@ void eioProtocol::delete_end_point(
     if (handle == OS_NULL) return;
     p = (eioProtocolHandle*)handle;
 
-    if (!p->is_iocom_end_point()) {
-        delete_connection(handle);
-        return;
-    }
+    switch (p->handle_type())
+    {
+        case EIO_HANDLE_CONNECTION:
+            delete_connection(handle);
+            break;
 
-    if (p->isrunning()) {
-        ep = p->epoint();
+        case EIO_HANDLE_END_POINT:
+            ep = p->epoint();
 
-        while (ioc_terminate_end_point_thread(ep)) {
-            os_timeslice();
-        }
+            while (ioc_terminate_end_point_thread(ep) == OSAL_PENDING) {
+                os_timeslice();
+            }
 
-        ioc_release_end_point(p->epoint());
-        p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
+            ioc_release_end_point(p->epoint());
+            p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
+            p->mark_iocom_handle_type(EIO_HANDLE_UNUSED);
+            break;
+
+        default:
+            break;
     }
 }
 
@@ -485,14 +498,16 @@ void eioProtocol::delete_connection(
 
     if (handle == OS_NULL) return;
     p = (eioProtocolHandle*)handle;
-    if (p->isrunning()) {
+    if (p->handle_type() == EIO_HANDLE_CONNECTION)
+    {
         con = p->con();
 
-        while (ioc_terminate_connection_thread(con)) {
+        while (ioc_terminate_connection_thread(con) == OSAL_PENDING) {
             os_timeslice();
         }
         ioc_release_connection(p->con());
         p->setpropertyi(EPROHANDP_ISOPEN, OS_FALSE);
+        p->mark_iocom_handle_type(EIO_HANDLE_UNUSED);
     }
 }
 

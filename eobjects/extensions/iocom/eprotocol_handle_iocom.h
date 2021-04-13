@@ -30,6 +30,12 @@ typedef union {
 }
 eiocomStateStruct;
 
+typedef enum {
+    EIO_HANDLE_UNUSED = 0,
+    EIO_HANDLE_CONNECTION,
+    EIO_HANDLE_END_POINT
+}
+eioHandleType;
 
 /**
 ****************************************************************************************************
@@ -70,15 +76,15 @@ public:
     ************************************************************************************************
     */
 
-    virtual os_boolean isrunning() {return m_is_open; }
+    virtual os_boolean started();
     inline iocEndPoint *epoint() {return &m_iocom.epoint; }
     inline iocConnection *con() {return &m_iocom.con; }
 
-    inline void mark_iocom_end_point(os_boolean is_iocom_end_point)
-        {m_is_iocom_end_point = is_iocom_end_point; }
+    inline void mark_iocom_handle_type(eioHandleType handle_type)
+        {m_handle_type = handle_type; }
 
-    inline os_boolean is_iocom_end_point()
-        {return m_is_iocom_end_point; }
+    inline eioHandleType handle_type()
+        {return m_handle_type; }
 
     inline const os_char *path_to_self() { return m_path_to_self; }
 
@@ -91,7 +97,7 @@ protected:
     ************************************************************************************************
     */
     eiocomStateStruct m_iocom;
-    os_boolean m_is_iocom_end_point;
+    eioHandleType m_handle_type;
     os_char m_path_to_self[E_OIXSTR_BUF_SZ];
 };
 

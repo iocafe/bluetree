@@ -28,7 +28,7 @@ eioProtocolHandle::eioProtocolHandle(
     : eProtocolHandle(parent, oid, flags)
 {
     os_memclear(&m_iocom, sizeof(m_iocom));
-    m_is_iocom_end_point = OS_FALSE;
+    m_handle_type = EIO_HANDLE_UNUSED;
     oixstr(m_path_to_self, sizeof(m_path_to_self));
 }
 
@@ -58,4 +58,10 @@ void eioProtocolHandle::setupclass()
     p->setpropertys(EVARP_ATTR, "rdonly");
     propertysetdone(cls);
     os_unlock();
+}
+
+
+os_boolean eioProtocolHandle::started()
+{
+    return m_handle_type != EIO_HANDLE_UNUSED;
 }

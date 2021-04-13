@@ -75,7 +75,7 @@ os_boolean eProtocol::is_end_point_running(
     eProtocolHandle *handle)
 {
     if (handle) {
-        return handle->isrunning();
+        return handle->started();
     }
     return OS_FALSE;
 }
@@ -97,7 +97,7 @@ os_boolean eProtocol::is_connection_running(
     eProtocolHandle *handle)
 {
     if (handle) {
-        return handle->isrunning();
+        return handle->started();
     }
     return OS_FALSE;
 }
