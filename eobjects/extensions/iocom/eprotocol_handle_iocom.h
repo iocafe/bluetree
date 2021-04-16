@@ -88,7 +88,6 @@ public:
 
     inline const os_char *path_to_self() { return m_path_to_self; }
 
-
 protected:
 
     /**

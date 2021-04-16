@@ -520,11 +520,6 @@ void eioProtocol::delete_connection(
   This function is used to pause communication or modify existing connection parameters so that
   connection can be resumed without losing binding state.
 
-  ecom specific: Difference between first deleting a connection and creating new one, compared
-  to deactivating/reactivating it is: The connection object is never deleted, and binding
-  information stored in connection objects is preserved. If connection comes back existsing
-  binding from client to server do restored.
-
   @param   handle   Connection handle as returned by new_connection().
   @param   parameters Structure containing parameters for the connection point.
   @return  Pointer to eStatus for function return code. If successfull, the function returns
@@ -556,9 +551,7 @@ eStatus eioProtocol::activate_connection(
 void eioProtocol::deactivate_connection(
     eProtocolHandle *handle)
 {
-    /* eioProtocolHandle *p;
-    if (handle == OS_NULL) return;
-    p = (eioProtocolHandle*)handle; */
+    // eioProtocol::delete_connection(handle);
 }
 
 
