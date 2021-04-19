@@ -83,6 +83,26 @@ static void glfw_error_callback(int error, const char* description)
   The eimgui_initialize function initializes graphics driver, windowing and user
   input. This implementation sets OpenGL with GLFW.
 
+  Google's NOTO fonts can be downloaded from https://www.google.com/get/noto/help/install/ as
+  one big zip file. Here only one of the files within zip is needed, I picked up NotoSansDisplay-Regular.ttf.
+
+  Use something like call below to load also the Cyrillic glyphs to ImGui.
+
+    io.Fonts->AddFontFromFileTTF("/coderoot/bluetree/egui/fonts/NotoSans-Medium.ttf",
+        20.0f, NULL, io.Fonts->GetGlyphRangesCyrillic());
+
+  If Russian string literals are needed within C/C++ code, portable way is to code these as
+  escape sequences:
+
+    const char myrussiantext[] = "\xd0\xbc\xd0\xb0\xd1\x82\xd0\xb5\xd1\x80\xd0\xb8\xd0\xbd\xd1"
+        "\x81\xd0\xba\xd0\xb0\xd1\x8f\x20\xd0\xbd\xd0\xbe\xd1\x87\xd1\x8c";
+
+  Tool to convert Unicode text (Chinese, Russian, etc.) to C escape sequences:
+
+    https://onlineunicodetools.com/escape-unicode
+
+  Select "use bytes", UTF8 and no separator. The escaped unicode can be copy/pasted into code.
+
   @return  ESTATUS_SUCCESS if all fine, other values indicate an error.
 
 ****************************************************************************************************
@@ -94,16 +114,16 @@ eStatus eimgui_initialize()
     if (!glfwInit())
         return ESTATUS_FAILED;
 
-    // Decide GL+GLSL versions
+    /* Decide GL+GLSL versions */
 #if __APPLE__
-    // GL 3.2 + GLSL 150
+    /* GL 3.2 + GLSL 150 */
     const char* glsl_version = "#version 150";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #else
-    // GL 3.0 + GLSL 130
+    /* GL 3.0 + GLSL 130 */
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -111,14 +131,16 @@ eStatus eimgui_initialize()
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
-    // Create window with graphics context
+    /* Create window with graphics context
+     */
     window = glfwCreateWindow(2048, 1600, eimgui_window_title, NULL, NULL);
     if (window == NULL)
         return ESTATUS_FAILED;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
-    // Initialize OpenGL loader
+    /* Initialize OpenGL loader
+     */
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
     bool err = gl3wInit() != 0;
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
@@ -167,20 +189,12 @@ eStatus eimgui_initialize()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    // Load Fonts
-    io.Fonts->AddFontFromFileTTF("/coderoot/bluetree/egui/fonts/NotoSans-Medium.ttf", 20.0f);
+    /* Load Fonts
+     */
+    io.Fonts->AddFontFromFileTTF("/coderoot/bluetree/egui/fonts/NotoSans-Medium.ttf", 20.0f, NULL, io.Fonts->GetGlyphRangesCyrillic());
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-
-    // No round corners
-    /*
-    ImGui::GetStyle().WindowRounding = 0.0f;// <- Set this on init or use ImGui::PushStyleVar()
-    ImGui::GetStyle().ChildRounding = 0.0f;
-    ImGui::GetStyle().FrameRounding = 0.0f;
-    ImGui::GetStyle().GrabRounding = 0.0f;
-    ImGui::GetStyle().PopupRounding = 0.0f;
-    ImGui::GetStyle().ScrollbarRounding = 0.0f; */
 
     return ESTATUS_SUCCESS;
 }
