@@ -98,7 +98,7 @@ void eOsStream::setupclass()
           To listen for a socket port on all network interfaces specify port number number
           without IP address. For example "tls::12345".
 
-          IPv4 address is automatically recognized from numeric address like
+          IPv6 address is automatically recognized from numeric address like
           "tls:2001:0db8:85a3:0000:0000:8a2e:0370:7334", but not when address is specified as string
           nor for empty IP specifying only port to listen. Use brackets around IP address
           to mark IPv6 address, for example "tls:[localhost]:12345", or "tls:[]:12345" for empty IP.
