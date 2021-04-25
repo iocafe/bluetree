@@ -45,6 +45,7 @@ eEndPoint::eEndPoint(
     m_stream_classid = ECLASSID_OSSTREAM;
     m_ipaddr = new eVariable(this);
     m_accept_count = 0;
+    m_open_timer = 0;
 }
 
 
@@ -237,7 +238,7 @@ void eEndPoint::run()
         {
             /* Wait forever for an incoming socket or thread event.
              */
-            m_stream->select(&m_stream, 1, trigger(), 0, OSAL_STREAM_DEFAULT);
+            m_stream->select(&m_stream, 1, trigger(), OSAL_INFINITE, OSAL_STREAM_DEFAULT);
             osal_trace2("select pass");
 
             /* Call alive() to process thread events.
@@ -281,6 +282,8 @@ void eEndPoint::run()
             else if (s != ESTATUS_NO_NEW_CONNECTION)
             {
                 osal_debug_error_int("accept() failed: ", s);
+                close();
+                m_open_failed = OS_TRUE;
             }
         }
 
@@ -293,9 +296,15 @@ void eEndPoint::run()
         {
             if (m_open_failed) {
                 alive(EALIVE_RETURN_IMMEDIATELY);
-                open();
-                if (m_open_failed) {
-                    os_sleep(500);
+                if (os_has_elapsed(&m_open_timer, 3000)) {
+                    os_get_timer(&m_open_timer);
+                    open();
+                    if (m_open_failed) {
+                        os_sleep(500);
+                    }
+                }
+                else {
+                    os_sleep(100);
                 }
             }
             else {

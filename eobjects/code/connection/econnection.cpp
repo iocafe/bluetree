@@ -474,7 +474,7 @@ void eConnection::run()
             /* Wait for socket or thread event. The function will return error if
                socket is disconnected.
              */
-            s = m_stream->select(&m_stream, 1, trigger(), 0, OSAL_STREAM_DEFAULT);
+            s = m_stream->select(&m_stream, 1, trigger(), OSAL_INFINITE, OSAL_STREAM_DEFAULT);
             if (s) {
                 close();
                 continue;

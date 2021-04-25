@@ -150,6 +150,10 @@ protected:
      */
     eStream *m_stream;
 
+    /** pause between repeated socket open tries.
+     */
+    os_timer m_open_timer;
+
     /** Accepted connection count.
      */
     os_long m_accept_count;

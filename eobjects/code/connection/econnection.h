@@ -251,7 +251,7 @@ protected:
      */
     os_boolean m_is_server;
 
-    /* Current hand shake state.
+    /** Current hand shake state.
      */
     iocHandshakeState m_handshake;
 
