@@ -351,7 +351,6 @@ eStatus eOsStream::read(
     os_int flags)
 {
     eStatus s = ESTATUS_SUCCESS;
-    osalSelectData selectdata;
     osalEvent trigger = OS_NULL;
     os_boolean set_trigger = OS_FALSE;
     eThread *thrd;
@@ -406,7 +405,7 @@ eStatus eOsStream::read(
          */
         if (m_use_select) {
             strm = this;
-            s = select(&strm, 1, trigger, &selectdata, 2000, OSAL_STREAM_DEFAULT);
+            s = select(&strm, 1, trigger, 2000, OSAL_STREAM_DEFAULT);
             if (s) {
                 break;
             }
@@ -415,11 +414,12 @@ eStatus eOsStream::read(
             break;
         }
 
-        if (trigger) {
+        /* if (trigger) {
             if (selectdata.stream_nr ==  OSAL_STREAM_NR_CUSTOM_EVENT) {
                 set_trigger = OS_TRUE;
-            }
+            } */
 
+        if (thrd) {
             if (thrd->exitnow()) {
                 s = ESTATUS_FAILED;
                 break;
@@ -494,8 +494,6 @@ eStatus eOsStream::buffered_read(
            all these streams.
   @oaram   nstreams Number of items in streams array.
   @param   evnt Operating system event to wait for.
-  @param   selectdata Pointer to structure in which to fill information about the event.
-           This includes error code.
   @param   timeout_ms Maximum time to wait in select, ms. If zero, timeout is not used (infinite).
   @param   flags Reserved, set 0 for now.
 
@@ -507,7 +505,6 @@ eStatus eOsStream::select(
     eStream **streams,
     os_int nstreams,
     osalEvent evnt,
-    osalSelectData *selectdata,
     os_int timeout_ms,
     os_int flags)
 {
@@ -515,6 +512,7 @@ eStatus eOsStream::select(
     eOsStream **osstreams;
     osalStream osalsock[OSAL_SOCKET_SELECT_MAX];
     os_int i;
+    OSAL_UNUSED(flags);
 
     if (m_use_select)
     {
@@ -523,7 +521,7 @@ eStatus eOsStream::select(
         if (nstreams == 1)
         {
             s = m_iface->stream_select(&osstreams[0]->m_stream, 1, evnt,
-                selectdata, timeout_ms, OSAL_STREAM_DEFAULT);
+                timeout_ms, OSAL_STREAM_DEFAULT);
         }
         else
         {
@@ -533,7 +531,7 @@ eStatus eOsStream::select(
             }
 
             s = m_iface->stream_select(osalsock, nstreams, evnt,
-                selectdata, timeout_ms, OSAL_STREAM_DEFAULT);
+                timeout_ms, OSAL_STREAM_DEFAULT);
         }
         if (s) return ESTATUS_FROM_OSAL_STATUS(s);
     }

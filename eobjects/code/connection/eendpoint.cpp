@@ -222,7 +222,6 @@ void eEndPoint::initialize(
 */
 void eEndPoint::run()
 {
-    osalSelectData selectdata;
     eStream *newstream;
     eConnection *c;
     eVariable *name;
@@ -238,7 +237,7 @@ void eEndPoint::run()
         {
             /* Wait forever for an incoming socket or thread event.
              */
-            m_stream->select(&m_stream, 1, trigger(), &selectdata, 0, OSAL_STREAM_DEFAULT);
+            m_stream->select(&m_stream, 1, trigger(), 0, OSAL_STREAM_DEFAULT);
             osal_trace2("select pass");
 
             /* Call alive() to process thread events.

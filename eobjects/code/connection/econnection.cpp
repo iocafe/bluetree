@@ -436,7 +436,6 @@ void eConnection::initialize(
 */
 void eConnection::run()
 {
-    osalSelectData selectdata;
     os_long try_again_ms = osal_rand(3000, 4000);
     eStatus s, auth_s;
 
@@ -473,11 +472,9 @@ void eConnection::run()
             }
 
             /* Wait for socket or thread event. The function will return error if
-               socket is disconnected. Structure "selectdata" is set regardless of
-               return code, for example read and close can be returned at same time,
-               and thread event with anything else.
+               socket is disconnected.
              */
-            s = m_stream->select(&m_stream, 1, trigger(), &selectdata, 0, OSAL_STREAM_DEFAULT);
+            s = m_stream->select(&m_stream, 1, trigger(), 0, OSAL_STREAM_DEFAULT);
             if (s) {
                 close();
                 continue;

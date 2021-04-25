@@ -262,7 +262,6 @@ os_int eBufferedStream::readchar()
 {
     os_int c;
     eStatus s;
-    osalSelectData selectdata;
     eStream *strm;
 
     if (m_in == OS_NULL)
@@ -290,7 +289,7 @@ os_int eBufferedStream::readchar()
         /* Let select handle data transfers.
          */
         strm = this;
-        s = select(&strm, 1, OS_NULL, &selectdata, 0, OSAL_STREAM_DEFAULT);
+        s = select(&strm, 1, OS_NULL, 0, OSAL_STREAM_DEFAULT);
         if (s) return E_STREM_END_OF_DATA;
     }
 }
