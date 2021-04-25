@@ -320,7 +320,7 @@ void eEndPoint::open()
 {
     eStatus s;
     const os_char *parameters, *e;
-    os_boolean is_tls, is_socket, is_ipv6;
+    os_boolean is_tls, is_socket, is_sbox, is_ipv6;
     os_char straddr[OSAL_IPADDR_SZ];
     os_int default_port_nr, port_nr;
     eVariable tmp;
@@ -333,7 +333,8 @@ void eEndPoint::open()
      */
     is_tls = !os_strncmp(parameters, "tls:", 4);
     is_socket = !os_strncmp(parameters, "socket:", 7);
-    if (is_tls || is_socket) {
+    is_sbox = !os_strncmp(parameters, "sbox:", 4);
+    if (is_tls || is_socket || is_sbox) {
         default_port_nr = is_tls ? ECOM_DEFAULT_TLS_PORT : ECOM_DEFAULT_SOCKET_PORT;
 
         e = os_strchr(parameters, ':') + 1;

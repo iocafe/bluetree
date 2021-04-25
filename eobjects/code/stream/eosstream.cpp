@@ -141,11 +141,15 @@ eStatus eOsStream::open(
 
     const static eIfaceListItem iface_list[] = {
 #if OSAL_SOCKET_SUPPORT
+        {"socket:", OSAL_SOCKET_IFACE, OS_TRUE},
 #if OSAL_TLS_SUPPORT
         {"tls:", OSAL_TLS_IFACE, OS_TRUE},
+#if IOC_SWITCHBOX_SUPPORT
+        {"sbox:", IOC_SWITCHBOX_SOCKET_IFACE, OS_TRUE},
 #endif
-        {"socket:", OSAL_SOCKET_IFACE, OS_TRUE},
 #endif
+#endif
+
 #if OSAL_SERIAL_SUPPORT
         {"serial:", OSAL_SERIAL_IFACE, OS_TRUE},
 #endif

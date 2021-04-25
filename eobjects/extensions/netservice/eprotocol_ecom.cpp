@@ -131,11 +131,20 @@ eProtocolHandle *ecomProtocol::new_end_point(
     ecomProtocolHandle *p;
     eThread *t;
     eVariable tmp;
-    const os_char *transport_name, *un;
+    const os_char *transport_name, *un, *prmstr;
+    os_char hostbuf[OSAL_HOST_BUF_SZ];
 
     /* Name of the transport.
      */
-    switch (parameters->transport) {
+    prmstr = parameters->port;
+    if (parameters->protocol_flags & EPROTO_PRM_CONNECT_ECOM_TO_SWITCHBOX)
+    {
+        transport_name = "sbox";
+        osal_socket_embed_default_port(parameters->port,
+            hostbuf, sizeof(hostbuf), IOC_DEFAULT_ECOM_SWITCHBOX_TLS_PORT);
+        prmstr = hostbuf;
+    }
+    else switch (parameters->transport) {
         case ENET_ENDP_SOCKET:
             transport_name = "socket";
             break;
@@ -174,7 +183,7 @@ eProtocolHandle *ecomProtocol::new_end_point(
      */
     tmp.sets(transport_name);
     tmp.appends(":");
-    tmp.appends(parameters->port);
+    tmp.appends(prmstr);
     setpropertys_msg(un, tmp.gets(), eendpp_ipaddr);
 
     *s = ESTATUS_SUCCESS;
