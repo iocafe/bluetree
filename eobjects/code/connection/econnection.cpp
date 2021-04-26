@@ -30,8 +30,8 @@
 /* Connection property names.
  */
 const os_char
-    econnp_classid[] = "classid",
     econnp_ipaddr[] = "ipaddr",
+    econnp_network_name[] = "netname",
     econnp_isopen[] = "isopen",
     econnp_enable[] = "enable";
 
@@ -53,8 +53,8 @@ eConnection::eConnection(
     os_int flags)
     : eThread(parent, id, flags)
 {
-    m_stream_classid = ECLASSID_OSSTREAM;
     m_ipaddr = new eVariable(this);
+    m_network_name = new eVariable(this);
     m_stream = OS_NULL;
     m_initbuffer = new eContainer(this);
     m_initialized = OS_FALSE;
@@ -128,8 +128,9 @@ void eConnection::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eConnection", ECLASSID_THREAD);
-    addproperty(cls, ECONNP_CLASSID, econnp_classid, "class ID", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty(cls, ECONNP_IPADDR, econnp_ipaddr, "IP", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addpropertys(cls, ECONNP_NETWORK_NAME, econnp_network_name, "*", "network name",
+        EPRO_PERSISTENT|EPRO_SIMPLE);
     p = addpropertyb(cls, ECONNP_ISOPEN, econnp_isopen, OS_FALSE, "is open", EPRO_SIMPLE);
     p->setpropertys(EVARP_ATTR, "rdonly");
     addpropertyb(cls, ECONNP_ENABLE, econnp_enable, OS_TRUE, "enable", EPRO_DEFAULT);
@@ -167,15 +168,19 @@ eStatus eConnection::onpropertychange(
             m_connected = x->getb();
             break;
 
-        case ECONNP_CLASSID:
-            m_stream_classid = x->geti();
-            close();
-            break;
-
         case ECONNP_IPADDR:
             if (x->compare(m_ipaddr))
             {
                 m_ipaddr->setv(x);
+                close();
+                open();
+            }
+            break;
+
+        case ECONNP_NETWORK_NAME:
+            if (x->compare(m_network_name))
+            {
+                m_network_name->setv(x);
                 close();
                 open();
             }
@@ -221,12 +226,12 @@ eStatus eConnection::simpleproperty(
             x->setl(m_connected);
             break;
 
-        case EENDPP_CLASSID:
-            x->setl(m_stream_classid);
-            break;
-
         case ECONNP_IPADDR:
             x->setv(m_ipaddr);
+            break;
+
+        case ECONNP_NETWORK_NAME:
+            x->setv(m_network_name);
             break;
 
         default:
@@ -585,8 +590,8 @@ os_boolean cert_match = OS_TRUE;
         /* Otherwise client side socket.
          */
         else {
-            ss = ioc_client_handshake(&m_handshake, IOC_HANDSHAKE_CLIENT, "kepuli", !cert_match,
-                m_stream->osstream(),
+            ss = ioc_client_handshake(&m_handshake, IOC_HANDSHAKE_CLIENT, m_network_name->gets(),
+                !cert_match, m_stream->osstream(),
                 OS_NULL /* ioc_save_iocom_trust_certificate */, this);
 
             if (ss == OSAL_SUCCESS && !cert_match) {
@@ -750,9 +755,9 @@ void eConnection::open()
         return;
     }
 
-    /* New by class ID. Usually eSocket.
+    /* New by class ID.
      */
-    m_stream = (eStream*)newchild(m_stream_classid);
+    m_stream = (eStream*)newchild(ECLASSID_OSSTREAM);
 
     /* Open the socket, etc.
      */

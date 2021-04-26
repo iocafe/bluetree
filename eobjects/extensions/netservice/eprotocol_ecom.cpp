@@ -259,6 +259,7 @@ eProtocolHandle *ecomProtocol::new_connection(
     /* Set connect parameters as string (transport, IP address, TCP port, etc).
      */
     make_connect_parameter_string(&tmp, parameters);
+    setpropertys_msg(un, parameters->name, econnp_network_name);
     setpropertys_msg(un, tmp.gets(), econnp_ipaddr);
 
     *s = ESTATUS_SUCCESS;

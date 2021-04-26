@@ -31,16 +31,16 @@ struct iocSwitchboxAuthenticationFrameBuffer;
 
 /* Enumeration of connection's properties.
  */
-#define ECONNP_CLASSID 5
 #define ECONNP_IPADDR 10
+#define ECONNP_NETWORK_NAME 12
 #define ECONNP_ISOPEN 15
 #define ECONNP_ENABLE 20
 
 /* Connection property names.
  */
 extern const os_char
-    econnp_classid[],
     econnp_ipaddr[],
+    econnp_network_name[],
     econnp_isopen[],
     econnp_enable[];
 
@@ -190,10 +190,6 @@ protected:
     ************************************************************************************************
     */
 
-    /** Stream class identifier. Specifies stream class to use.
-     */
-    os_int m_stream_classid;
-
     /* Timer for last send, used to generate keepalives.
      */
     os_timer m_last_send;
@@ -201,6 +197,10 @@ protected:
     /** IP address and optionally port number to connect to.
      */
     eVariable *m_ipaddr;
+
+    /* Network name.
+     */
+    eVariable *m_network_name;
 
     /** stream handle. OS_NULL if socket is not open.
      */
