@@ -4,7 +4,7 @@
   @brief   Dialogs related to adding new, editing or deleting rows.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    2.11.2020
+  @date    26.4.2021
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,

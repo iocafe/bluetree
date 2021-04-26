@@ -4,7 +4,7 @@
   @brief   Example code object properties.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    10.10.2020
+  @date    26.4.2021
 
   This example demonstrates how to create properties.
 

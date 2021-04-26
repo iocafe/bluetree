@@ -4,7 +4,7 @@
   @brief   API to access graphics backend from egui code.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   API for interfacing with imgui, mouse and keyboard, operating system windows, graphics rendering
   pipeline, etc.

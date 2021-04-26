@@ -4,7 +4,7 @@
   @brief   Simple object container.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   The container object is like a box holding a set of child objects.
 

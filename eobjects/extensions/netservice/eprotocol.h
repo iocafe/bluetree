@@ -4,7 +4,7 @@
   @brief   Abstract communication protocol as seen by eNetService.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   Related to: Network connnection and protocol management interface.
 

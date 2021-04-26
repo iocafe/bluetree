@@ -4,7 +4,7 @@
   @brief   Enumeration of status codes.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   Many eobjects library functions return status codes. Enumeration eStatus defines these
   codes.

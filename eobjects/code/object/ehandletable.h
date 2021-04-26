@@ -4,7 +4,7 @@
   @brief   Handle table
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   The handle table contains always EHANDLE_TABLE_LEN handles. Each handles is either in
   linked list of global friee handles, or reserved by thread.

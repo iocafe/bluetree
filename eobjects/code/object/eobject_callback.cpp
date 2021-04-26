@@ -4,7 +4,7 @@
   @brief   Object base class, callbacks.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   When variable value changes, new item is added to container, etc, the parent object may need
   to get informed.

@@ -4,7 +4,7 @@
   @brief   Timer implementation.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   Object can enable or disable receiving ECMD_TIMER by calling base class'es eObject::timer()
   function. Timer base precision is 40ms, which is intended to be cast enough for animating

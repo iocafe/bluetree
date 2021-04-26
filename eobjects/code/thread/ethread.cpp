@@ -4,7 +4,7 @@
   @brief   Thread class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    10.10.2020
+  @date    26.4.2021
 
   The thread object is the root of thread's object tree.
 

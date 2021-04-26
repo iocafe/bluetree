@@ -4,7 +4,7 @@
   @brief   Main eobject library header file.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   This eobject library base main header file. If further includes rest of eobjects base
   headers.

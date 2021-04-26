@@ -4,7 +4,7 @@
   @brief   Index range in where clause string.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    10.10.2020
+  @date    26.4.2021
 
   Parse index range fron string, generate index range string.
 

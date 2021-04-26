@@ -4,7 +4,7 @@
   @brief   Bitmap from memory to graphics card, OpenGL.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    15.9.2020
+  @date    26.4.2021
 
   Load a bitmap as texture to graphics card, OpenGL implementation.
 

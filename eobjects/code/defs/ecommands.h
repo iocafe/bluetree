@@ -4,7 +4,7 @@
   @brief   Enumeration of command identifiers.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    14.9.2020
+  @date    26.4.2021
 
   This header file defines command identifiers used by eobjects library.
 

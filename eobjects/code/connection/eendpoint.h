@@ -4,7 +4,7 @@
   @brief   End point class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    14.9.2020
+  @date    26.4.2021
 
   The eEndPoint is socket end point listening to specific TCP port for new connections.
 

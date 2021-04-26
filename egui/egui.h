@@ -4,7 +4,7 @@
   @brief   Main egui library header file.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    15.9.2020
+  @date    26.4.2021
 
   This egui library base main header file. If further includes rest of egui headers.
 

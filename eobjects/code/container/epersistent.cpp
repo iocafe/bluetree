@@ -4,7 +4,7 @@
   @brief   Persistent container (saved to disc).
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   The persistent object is container, which typically holds named eVariable and eMatrix items.
   - When a persisten object is initialised, the content is loaded from local file.

@@ -4,7 +4,7 @@
   @brief   Global structure.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    14.9.2020
+  @date    26.4.2021
 
   All global variables are placed in global structure, so it is eanough to pass to eglobal pointer
   to Windows DLL to share eccess to globals.

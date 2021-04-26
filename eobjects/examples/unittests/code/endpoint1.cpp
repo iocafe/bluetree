@@ -4,7 +4,7 @@
   @brief   Connecting two processes, end point.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    10.10.2020
+  @date    26.4.2021
 
   Unit test: End point listening for incoming socket connections.
 

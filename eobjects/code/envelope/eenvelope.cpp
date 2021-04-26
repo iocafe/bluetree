@@ -4,7 +4,7 @@
   @brief   Envelope class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    10.10.2020
+  @date    26.4.2021
 
   Messages are sent as envelope objects. The eEnvelope contains recipient and senders's addresses,
   command, message content and other data.

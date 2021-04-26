@@ -4,7 +4,7 @@
   @brief   Where clause interprenter.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   Where clause interpenter.
 

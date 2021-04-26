@@ -4,7 +4,7 @@
   @brief   Object base class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   The eObject base class functionality related to message transport and processing.
 

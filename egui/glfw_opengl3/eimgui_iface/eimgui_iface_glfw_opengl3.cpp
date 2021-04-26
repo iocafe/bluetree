@@ -4,7 +4,7 @@
   @brief   OpenGL/glfw ImGUI library initialization and shut down for egui.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   ImGui/OpenGL/GLFW implementation of interface to mouse and keyboard and operating system windows.
 

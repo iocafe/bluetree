@@ -4,7 +4,7 @@
   @brief   Example code about using eobjects container class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   This example demonstrates how to use containers to hold multiple objects.
 

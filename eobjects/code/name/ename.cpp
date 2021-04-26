@@ -4,7 +4,7 @@
   @brief   Name class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   The names map to name space. These are used to represent tree structure of named objects.
   The eName class is derived from eVariable class.

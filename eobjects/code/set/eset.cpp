@@ -4,7 +4,7 @@
   @brief   Set of enumerated values.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   A set stores key, value pairs. Key is always integer and value can be an primitive type
   or object of any type. The eSet is efficient when smallish set of mostly primitive values

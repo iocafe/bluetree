@@ -4,7 +4,7 @@
   @brief   Save/load Dear ImGui style.
   @author  Many authors, MIT license
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
 ****************************************************************************************************
 */

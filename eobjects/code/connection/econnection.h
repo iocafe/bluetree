@@ -4,7 +4,7 @@
   @brief   Connection base class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    14.9.2020
+  @date    26.4.2021
 
   eConnection class, related to message envelope transport betweeen processes. See econnection.cpp
   for more information.

@@ -4,7 +4,7 @@
   @brief   Create string to enumerate data types in "attr" property.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    8.9.2020
+  @date    26.4.2021
 
   The enumeration allows equi, etc, to show drop down list, etc, to select data type.
 

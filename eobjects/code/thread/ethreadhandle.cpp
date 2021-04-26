@@ -4,7 +4,7 @@
   @brief   Thread handle class.
   @author  Pekka Lehtikoski
   @version 1.0
-  @date    10.10.2020
+  @date    26.4.2021
 
   Thread handle is used for controlling threads from another thread.
 
