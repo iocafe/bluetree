@@ -175,7 +175,7 @@ eProtocolHandle *eioProtocol::new_end_point(
 
     cflags |= IOC_LISTENER|IOC_DYNAMIC_MBLKS|IOC_CREATE_THREAD;
     p = new eioProtocolHandle(ETEMPORARY);
-    *s = new_con_helper(p, OS_NULL, prmstr, iface, cflags);
+    *s = new_con_helper(p, parameters->cloud_name, prmstr, iface, cflags);
     return p;
 }
 
@@ -277,6 +277,7 @@ eStatus eioProtocol::new_con_helper(
         epprm.iface = iface;
         epprm.flags = cflags;
         epprm.parameters = prmstr;
+        epprm.cloud_name = name;
         ss = ioc_listen(ep, &epprm);
         if (ss) s = ESTATUS_FROM_OSAL_STATUS(ss);
     }
@@ -293,6 +294,7 @@ eStatus eioProtocol::new_con_helper(
         conprm.iface = iface;
         conprm.flags = cflags;
         conprm.parameters = prmstr;
+        conprm.cloud_name = name;
 
         /* If we have GUI user login, use it for iocom connections.
          */
