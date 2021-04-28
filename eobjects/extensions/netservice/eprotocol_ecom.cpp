@@ -179,6 +179,12 @@ eProtocolHandle *ecomProtocol::new_end_point(
     un = p->uniquename();
     p->bind(EPROHANDP_ISOPEN, un, eendpp_isopen, EBIND_TEMPORARY);
 
+    /* Set cloud name (name used to publish this end point in switchbox cloud service.
+     */
+    if (parameters->cloud_name) {
+        setpropertys_msg(un, parameters->cloud_name, eendpp_cloud_name);
+    }
+
     /* Set end point parameters as string (transport, IP address, TCP port, etc).
      */
     tmp.sets(transport_name);

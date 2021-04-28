@@ -238,6 +238,11 @@ protected:
     void parameter_changed(
         eObject *v);
 
+    /* Set name to use to publish this process in cloud switchbox.
+     */
+    void set_cloud_name(
+        eVariable *name);
+
     /**
     ************************************************************************************************
       Member variables

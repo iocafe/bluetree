@@ -129,6 +129,15 @@
 #define ECOM_DEFAULT_TLS_PORT_STR "6374"
 
 
+/**
+****************************************************************************************************
+  eStream base class.
+****************************************************************************************************
+*/
+typedef struct eStreamOptions {
+    os_char *cloud_name;
+}
+eStreamOptions;
 
 /**
 ****************************************************************************************************
@@ -177,7 +186,8 @@ public:
      */
     virtual eStatus open(
         const os_char *parameters,
-        os_int flags=0)
+        eStreamOptions *opts = OS_NULL,
+        os_int flags = 0)
     {
         return ESTATUS_SUCCESS;
     }

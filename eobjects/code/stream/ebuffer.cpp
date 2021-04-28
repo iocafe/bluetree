@@ -285,9 +285,11 @@ failed:
 */
 eStatus eBuffer::open(
     const os_char *parameters,
+    eStreamOptions *opts,
     os_int flags)
 {
     OSAL_UNUSED(parameters);
+    OSAL_UNUSED(opts);
     OSAL_UNUSED(flags);
 
     m_pos = 0;

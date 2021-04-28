@@ -51,6 +51,13 @@ void eNetService::create_service_parameters(
         OS_STR, m_persistent_parameters);
 
     if (flags & (ENET_ENABLE_IOCOM_SERVICE | ENET_ENABLE_ECOM_SERVICE)) {
+        m_parameters.cloud_name = add_service_prm("cloudname",
+            "cloud name",
+            "Publish this process with name specified here in cloud switchbox.\n"
+            "If \'*\', then process ID is used.",
+            OS_STR, m_persistent_parameters);
+        m_parameters.cloud_name->sets("*");
+
         m_parameters.enable_lighthouse_server = add_service_prm("lighthouseserv",
             "enable lighthouse multicasts",
             "If enabled, this service will send periodic UDP multicasts,\n"
@@ -87,6 +94,8 @@ void eNetService::create_service_parameters(
     osal_set_nickname(m_parameters.nickname->gets());
 #endif
 
+    set_cloud_name(m_parameters.cloud_name);
+
     m_persistent_parameters->setflags(EOBJ_TEMPORARY_CALLBACK);
 }
 
@@ -109,7 +118,28 @@ void eNetService::parameter_changed(
     if (v == m_parameters.nickname) {
         osal_set_nickname(m_parameters.nickname->gets());
     }
+    else if (v == m_parameters.cloud_name) {
+        set_cloud_name(m_parameters.cloud_name);
+    }
 #endif
+}
+
+
+/**
+****************************************************************************************************
+  Set name to use to publish this process in cloud switchbox.
+****************************************************************************************************
+*/
+void eNetService::set_cloud_name(
+    eVariable *name)
+{
+    const os_char *p;
+
+    p = name->gets();
+    if (*p == '\0' || !os_strcmp(p, "*")) {
+        p = eglobal->process_id;
+    }
+    os_strncpy(eglobal->cloud_name, p, OSAL_NETWORK_NAME_SZ);
 }
 
 

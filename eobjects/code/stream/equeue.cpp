@@ -122,6 +122,7 @@ void eQueue::setupclass()
 */
 eStatus eQueue::open(
     const os_char *parameters,
+    eStreamOptions *opts,
     os_int flags)
 {
     os_memsz max_sz;

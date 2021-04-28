@@ -81,6 +81,7 @@ public:
      */
     virtual eStatus open(
         const os_char *parameters,
+        eStreamOptions *opts = OS_NULL,
         os_int flags = 0);
 
     /* Close socket.

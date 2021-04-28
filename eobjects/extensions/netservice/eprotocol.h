@@ -45,6 +45,7 @@ typedef struct
 
     const os_char *port;
     os_short protocol_flags;
+    const os_char *cloud_name;
 }
 eEndPointParameters;
 

@@ -20,8 +20,8 @@
 /* End point property names.
  */
 const os_char
-    eendpp_classid[] = "classid",
     eendpp_ipaddr[] = "ipaddr",
+    eendpp_cloud_name[] = "cloudname",
     eendpp_isopen[] = "isopen";
 
 
@@ -40,10 +40,10 @@ eEndPoint::eEndPoint(
      */
     m_stream = OS_NULL;
     m_initialized = OS_FALSE;
-    m_open_failed = OS_FALSE;
+    m_connection_failed = OS_FALSE;
     m_isopen = OS_FALSE;
-    m_stream_classid = ECLASSID_OSSTREAM;
     m_ipaddr = new eVariable(this);
+    m_cloud_name[0] = '\0';
     m_accept_count = 0;
     m_open_timer = 0;
 }
@@ -81,8 +81,8 @@ void eEndPoint::setupclass()
      */
     os_lock();
     eclasslist_add(cls, (eNewObjFunc)newobj, "eEndPoint", ECLASSID_THREAD);
-    addproperty(cls, EENDPP_CLASSID, eendpp_classid, "class ID", EPRO_PERSISTENT|EPRO_SIMPLE);
     addproperty(cls, EENDPP_IPADDR, eendpp_ipaddr, "IP", EPRO_PERSISTENT|EPRO_SIMPLE);
+    addproperty(cls, EENDPP_CLOUD_NAME, eendpp_cloud_name, "cloud name", EPRO_PERSISTENT|EPRO_SIMPLE);
     p = addpropertyb(cls, EENDPP_ISOPEN, eendpp_isopen, OS_FALSE, "is open", EPRO_SIMPLE);
     p->setpropertys(EVARP_ATTR, "rdonly");
     propertysetdone(cls);
@@ -119,16 +119,19 @@ eStatus eEndPoint::onpropertychange(
             m_isopen = x->getb();
             break;
 
-        case EENDPP_CLASSID:
-            m_stream_classid = x->geti();
-            close();
-            open();
-            break;
-
         case EENDPP_IPADDR:
             if (x->compare(m_ipaddr))
             {
                 m_ipaddr->setv(x);
+                close();
+                open();
+            }
+            break;
+
+        case EENDPP_CLOUD_NAME:
+            if (os_strcmp(x->gets(), m_cloud_name))
+            {
+                os_strncpy(m_cloud_name, x->gets(), OSAL_NETWORK_NAME_SZ);
                 close();
                 open();
             }
@@ -167,12 +170,12 @@ eStatus eEndPoint::simpleproperty(
             x->setl(m_isopen);
             break;
 
-        case EENDPP_CLASSID:
-            x->setl(m_stream_classid);
-            break;
-
         case EENDPP_IPADDR:
             x->setv(m_ipaddr);
+            break;
+
+        case EENDPP_CLOUD_NAME:
+            x->sets(m_cloud_name);
             break;
 
         default:
@@ -262,14 +265,14 @@ void eEndPoint::run()
                 }
                 else {
                     name = new eVariable(ETEMPORARY);
-                    name->sets("//ecom");;
+                    name->sets("//ecom");
                     n = primaryname();
                     if (n) {
                         p = n->gets();
                         p = os_strchr(p, '_');
                         if (p) name->appends(p);
                     }
-                    name->appends("_accepted");;
+                    name->appends("_accepted");
                     name->appendl(++m_accept_count);
                     c->addname(name->gets());
                     delete name;
@@ -283,7 +286,7 @@ void eEndPoint::run()
             {
                 osal_debug_error_int("accept() failed: ", s);
                 close();
-                m_open_failed = OS_TRUE;
+                m_connection_failed = OS_TRUE;
             }
         }
 
@@ -294,12 +297,12 @@ void eEndPoint::run()
          */
         else
         {
-            if (m_open_failed) {
+            if (m_connection_failed) {
                 alive(EALIVE_RETURN_IMMEDIATELY);
                 if (os_has_elapsed(&m_open_timer, 3000)) {
                     os_get_timer(&m_open_timer);
                     open();
-                    if (m_open_failed) {
+                    if (m_connection_failed) {
                         os_sleep(500);
                     }
                 }
@@ -332,8 +335,9 @@ void eEndPoint::open()
     os_char straddr[OSAL_IPADDR_SZ];
     os_int default_port_nr, port_nr;
     eVariable tmp;
+    eStreamOptions opts;
 
-    m_open_failed = OS_FALSE;
+    m_connection_failed = OS_FALSE;
     if (m_stream || !m_initialized || m_ipaddr->isempty()) return;
     parameters = m_ipaddr->gets();
 
@@ -361,17 +365,22 @@ void eEndPoint::open()
         parameters = tmp.gets();
     }
 
-    /* New stream by class ID.
+    /* New stream by class ID ECLASSID_OSSTREAM.
      */
-    m_stream = (eStream*)newchild(m_stream_classid);
+    m_stream = (eStream*)newchild(ECLASSID_OSSTREAM);
 
-    s = m_stream->open(parameters, OSAL_STREAM_LISTEN|OSAL_STREAM_SELECT);
+    /* Set cloud name.
+     */
+    os_memclear(&opts, sizeof(opts));
+    opts.cloud_name = m_cloud_name;
+
+    s = m_stream->open(parameters, &opts, OSAL_STREAM_LISTEN|OSAL_STREAM_SELECT);
     if (s)
     {
         osal_debug_error_str("Opening listening stream failed: ", m_ipaddr->gets());
         delete m_stream;
         m_stream = OS_NULL;
-        m_open_failed = OS_TRUE;
+        m_connection_failed = OS_TRUE;
     }
     else
     {

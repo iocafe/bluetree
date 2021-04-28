@@ -125,10 +125,12 @@ void eOsStream::setupclass()
 */
 eStatus eOsStream::open(
     const os_char *parameters,
+    eStreamOptions *opts,
     os_int flags)
 {
     osalStatus s;
     os_memsz len;
+    iocSwitchboxSocketOptions *option = OS_NULL, obuf;
 
     /* Names and pointers of the supported OSAL interfaces.
      */
@@ -189,9 +191,15 @@ eStatus eOsStream::open(
     m_iface = item->iface;
     m_use_select = item->use_select;
 
+    if (m_iface == IOC_SWITCHBOX_SOCKET_IFACE) {
+        os_memclear(&obuf, sizeof(obuf));
+        obuf.network_name = opts->cloud_name;
+        option = &obuf;
+    }
+
     /* Open socket and return ESTATUS_SUCCESS or ESTATUS_FAILED. Save flags.
      */
-    m_stream = m_iface->stream_open(parameters, OS_NULL, &s, flags);
+    m_stream = m_iface->stream_open(parameters, option, &s, flags);
     if (s) return ESTATUS_FROM_OSAL_STATUS(s);
 
     /* Setup queues to buffer outgoing and incoming data.

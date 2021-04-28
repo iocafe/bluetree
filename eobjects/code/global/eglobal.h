@@ -106,6 +106,10 @@ typedef struct eGlobal
      */
     os_char process_id[EGLOBAL_PROCESS_ID_SZ];
 
+    /** Publish this process with name specified here in cloud switchbox.
+     */
+    os_char cloud_name[OSAL_NETWORK_NAME_SZ];
+
     /** Path to root data directory (operating system path).
      */
     os_char root_path[EGLOBAL_PATH_SZ];

@@ -21,6 +21,7 @@
 typedef struct
 {
     eVariable *nickname;
+    eVariable *cloud_name;
     eVariable *enable_lighthouse_server;
     eVariable *serv_cert_path;
     eVariable *serv_priv_key;

@@ -88,9 +88,9 @@ eStatus eBufferedStream::setup_queues(
         m_in->close();
         m_out->close();
         osal_int_to_str(nbuf, sizeof(nbuf), in_sz);
-        m_in->open(nbuf, OSAL_STREAM_DECODE_ON_READ|OSAL_FLUSH_CTRL_COUNT|OSAL_STREAM_SELECT);
+        m_in->open(nbuf, OS_NULL, OSAL_STREAM_DECODE_ON_READ|OSAL_FLUSH_CTRL_COUNT|OSAL_STREAM_SELECT);
         osal_int_to_str(nbuf, sizeof(nbuf), out_sz);
-        m_out->open(nbuf, OSAL_STREAM_ENCODE_ON_WRITE|OSAL_STREAM_SELECT);
+        m_out->open(nbuf, OS_NULL, OSAL_STREAM_ENCODE_ON_WRITE|OSAL_STREAM_SELECT);
     }
 
     m_flags = flags;

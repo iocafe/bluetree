@@ -29,15 +29,15 @@
 
 /* Enumeration of end point properties.
  */
-#define EENDPP_CLASSID 2
 #define EENDPP_IPADDR  4
+#define EENDPP_CLOUD_NAME 5
 #define EENDPP_ISOPEN  6
 
 /* End point property names.
  */
 extern const os_char
-    eendpp_classid[],
     eendpp_ipaddr[],
+    eendpp_cloud_name[],
     eendpp_isopen[];
 
 
@@ -136,14 +136,14 @@ protected:
     ************************************************************************************************
     */
 
-    /** Stream class identifier. Specifies stream class to use.
-     */
-    os_int m_stream_classid;
-
     /** IP address of the interface and port number to listen to.
         IP address can be empty to listen for any interface.
      */
     eVariable *m_ipaddr;
+
+    /** Name to use for publishing end point in the cloud, Max
+     */
+    os_char m_cloud_name[OSAL_NETWORK_NAME_SZ];
 
     /** Listening stream handle. OS_NULL if listening socket
         is not open.
@@ -168,7 +168,7 @@ protected:
 
     /** We tried to open socket port and failed.
      */
-    os_boolean m_open_failed;
+    os_boolean m_connection_failed;
 };
 
 #endif

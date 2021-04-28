@@ -418,6 +418,7 @@ delete_it:
         v = ep->firstv(ENET_ENDP_TRANSPORT);
         prm.transport = (enetEndpTransportIx)v->getl();
         prm.protocol_flags = get_protocol_flags(proto_name_str);
+        prm.cloud_name = eglobal->cloud_name;
         handle = proto->new_end_point(ep_nr, &prm, &s);
         if (handle == OS_NULL) {
             osal_debug_error_str("unable to create end point: ", proto_name_str);

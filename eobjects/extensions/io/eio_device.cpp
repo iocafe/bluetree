@@ -27,7 +27,7 @@ eioDevice::eioDevice(
     os_int flags)
     : eContainer(parent, oid, flags)
 {
-    m_mblks = m_io = m_assemblies = OS_NULL;;
+    m_mblks = m_io = m_assemblies = OS_NULL;
     m_bound = OS_FALSE;
     m_connected = OS_FALSE;
     initproperties();

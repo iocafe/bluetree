@@ -164,7 +164,7 @@ void eioSignalAssembly::send_open_info(
     item = new eVariable(reply, EOID_PARAMETER);
     propertyv(EIOP_ASSEMBLY_TYPE, item);
 
-    device = eioDevice::cast(grandparent());;
+    device = eioDevice::cast(grandparent());
 
     send_open_info_helper(device, EIOP_ASSEMBLY_EXP, reply);
     send_open_info_helper(device, EIOP_ASSEMBLY_IMP, reply);

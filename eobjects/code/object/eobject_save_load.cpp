@@ -41,7 +41,7 @@ eStatus eObject::save(
     stream = new eOsStream(ETEMPORARY);
     tmp.sets("file:");
     tmp.appends(path);
-    s = stream->open(tmp.gets(), OSAL_STREAM_WRITE);
+    s = stream->open(tmp.gets(), OS_NULL, OSAL_STREAM_WRITE);
     if (s) goto failed;
 
     /* Write file content.
@@ -85,7 +85,7 @@ eObject *eObject::load(
     stream = new eOsStream(ETEMPORARY);
     tmp.sets("file:");
     tmp.appends(path);
-    s = stream->open(tmp.gets(), OSAL_STREAM_READ);
+    s = stream->open(tmp.gets(), OS_NULL, OSAL_STREAM_READ);
     if (s) goto failed;
 
     /* Read file content.
