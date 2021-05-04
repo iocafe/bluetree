@@ -761,7 +761,7 @@ void eConnection::open()
 
     /* Open the socket, etc.
      */
-    s = m_stream->open(m_ipaddr->gets(), OSAL_STREAM_CONNECT|OSAL_STREAM_SELECT);
+    s = m_stream->open(m_ipaddr->gets(), OS_NULL, OSAL_STREAM_CONNECT|OSAL_STREAM_SELECT);
     if (s)
     {
         osal_debug_error_int("osal_stream_open failed: ", s);
