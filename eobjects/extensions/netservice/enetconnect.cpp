@@ -100,9 +100,9 @@ void eNetService::create_connect_table(
         tmp += ", \'" IOC_DEFAULT_SOCKET_PORT_STR "\' for plain sockets";
     }
     tmp += ".\n- \'ecloud\': ecom trough switchbox service. "
-        "Default port \' "IOC_DEFAULT_ECOM_SWITCHBOX_TLS_PORT_STR "\' for TLS.\n"
+        "Default port \' " IOC_DEFAULT_ECOM_SWITCHBOX_TLS_PORT_STR "\' for TLS.\n"
         "- \'iocloud\': iocom trough switchbox service. "
-        "Default port \' "IOC_DEFAULT_IOCOM_SWITCHBOX_TLS_PORT_STR "\' for TLS.";
+        "Default port \' " IOC_DEFAULT_IOCOM_SWITCHBOX_TLS_PORT_STR "\' for TLS.";
     column->setpropertys(EVARP_TTIP, tmp.gets());
 
     /* IP address or serial port to connect to
