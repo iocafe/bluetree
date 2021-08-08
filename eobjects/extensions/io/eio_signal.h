@@ -112,6 +112,10 @@ protected:
      */
     os_short m_mblk_flags;
 
+    /* Toggled state bit to generate callback on set.
+     */
+    os_char m_toggle;
+
     os_int m_ncolumns;
 };
 

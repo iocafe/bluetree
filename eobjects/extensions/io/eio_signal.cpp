@@ -32,6 +32,7 @@ eioSignal::eioSignal(
     m_ncolumns = 1;
     m_eio_root = OS_NULL;
     m_variable_ref = new ePointer(this);
+    m_toggle = 0;
     initproperties();
 }
 
@@ -250,7 +251,16 @@ void eioSignal::down(eVariable *x)
     osalTypeId type_id;
     os_char  *p, state_bits;
 
-    state_bits = (os_char)x->sbits();
+    /* Toggle bits in state force changes to be transferred and callbacks to
+     * occur, regardless if value is changed or not. Optimization: We may want
+     * this oly for set_* stuff?
+     */
+    m_toggle ^= OSAL_STATE_TOGGLE_1;
+    if ((m_toggle & OSAL_STATE_TOGGLE_1) == 0) {
+        m_toggle ^= OSAL_STATE_TOGGLE_2;
+    }
+
+    state_bits = (os_char)x->sbits() | m_toggle;
     type_id = (osalTypeId)(m_signal.flags & OSAL_TYPEID_MASK);
 
     /* If string.
@@ -293,7 +303,6 @@ void eioSignal::down(eVariable *x)
     /* Otherwise plain signal.
      */
     else {
-
         switch (type_id)
         {
             default:
@@ -306,7 +315,7 @@ void eioSignal::down(eVariable *x)
                 break;
         }
         vv.state_bits = state_bits;
-        ioc_move(&m_signal, &vv, 1, IOC_SIGNAL_NO_THREAD_SYNC|IOC_SIGNAL_WRITE);
+        ioc_move(&m_signal, &vv, 1, IOC_SIGNAL_NO_THREAD_SYNC|IOC_SIGNAL_WRITE /* |IOC_SIGNAL_NO_TBUF_CHECK */);
     }
 
     m_eio_root->trig_io();
