@@ -495,7 +495,7 @@ eStatus eBitmap::reader(
 
     /* Write the bitmap, either uncompressed or as jpeg.
      */
-    if (m_width * m_height) {
+    if (m_width * m_height != 0) {
         if (m_buf == OS_NULL) {
             goto failed;
         }
