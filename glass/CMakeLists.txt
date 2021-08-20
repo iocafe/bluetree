@@ -15,6 +15,9 @@ set(E_APPLIBS "egui${E_POSTFIX};eobjects${E_POSTFIX};lighthouse${E_POSTFIX};ioco
 #   set(E_APPLIBS "${E_APPLIBS};rt")
 # endif()
 
+# Add defines to indicate target operating system and target OS version (at level needed for build).
+add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLEW)
+
 find_package(PkgConfig REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 pkg_search_module(GLEW REQUIRED glew)

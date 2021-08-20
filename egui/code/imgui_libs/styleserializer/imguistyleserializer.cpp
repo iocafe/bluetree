@@ -194,7 +194,7 @@ bool ImGuiLoadStyle(const char* filename,ImGuiStyle& style)
 
         if (name[0]=='\0' && line_start[0] == '[' && line_end > line_start && line_end[-1] == ']')
         {
-            ImFormatString(name, IM_ARRAYSIZE(name), "%.*s", line_end-line_start-2, line_start+1);
+            ImFormatString(name, IM_ARRAYSIZE(name), "%.*s", (int)(line_end-line_start-2), line_start+1);
             //fprintf(stderr,"name: %s\n",name);  // dbg
         }
         else if (name[0]!='\0')
