@@ -158,7 +158,7 @@ eStatus eBuffer::writer(
      */
     if (stream->write_end_block()) goto failed;
 
-    /* Object succesfully written.
+    /* Object successfully written.
      */
     return ESTATUS_SUCCESS;
 
@@ -226,7 +226,7 @@ eStatus eBuffer::reader(
      */
     if (stream->read_end_block()) goto failed;
 
-    /* Object succesfully read.
+    /* Object successfully read.
      */
     return ESTATUS_SUCCESS;
 

@@ -281,7 +281,7 @@ serialze_content:
     if (json_puts(stream, "}")) goto failed;
     if (end_with_nl) if (json_indent(stream, 0, EJSON_NEW_LINE_ONLY)) goto failed;
 
-    /* Object succesfully written.
+    /* Object successfully written.
      */
     return ESTATUS_SUCCESS;
 
@@ -346,7 +346,7 @@ eObject *eObject::json_read(
         if (read(stream, sflags) == OS_NULL) goto failed;
     }
 
-    /* Object succesfully read, return pointer to it.
+    /* Object successfully read, return pointer to it.
      */
     return child;
 

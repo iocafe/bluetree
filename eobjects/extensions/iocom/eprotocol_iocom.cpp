@@ -391,7 +391,7 @@ void eioProtocol::connection_callback(
 
   @brief Callback when an end point is actually listening, or dropped.
 
-  The IOCOM library calls thus function to inform application about succesfully initialized and
+  The IOCOM library calls thus function to inform application about successfully initialized and
   dropped end points. This function sets eioProtocolHandle's "isopen" property.
   See eioProtocol::connection_callback().
 

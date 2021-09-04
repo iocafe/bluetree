@@ -98,7 +98,7 @@ eStatus esboxProtocolHandle::listen(
 
   @brief Callback when an end point is actually listening, or dropped.
 
-  The SWITCHBOX library calls thus function to inform application about succesfully initialized and
+  The SWITCHBOX library calls thus function to inform application about successfully initialized and
   dropped end points. This function sets esboxProtocolHandle's "isopen" property.
 
   It uses complex way to set property:  we are now called by different thread which doesn't

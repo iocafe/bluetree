@@ -71,7 +71,7 @@ eStatus eObject::write(
         }
     }
 
-    /* Object succesfully written.
+    /* Object successfully written.
      */
     return ESTATUS_SUCCESS;
 
@@ -136,7 +136,7 @@ eObject *eObject::read(
         if (child->read(stream, sflags) == OS_NULL) goto failed;
     }
 
-    /* Object succesfully read, return pointer to it.
+    /* Object successfully read, return pointer to it.
      */
     return child;
 

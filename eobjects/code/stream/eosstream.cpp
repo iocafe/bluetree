@@ -561,7 +561,7 @@ eStatus eOsStream::select(
 
   @param  newstrem Pointer to newly allocated eOsStream to set up for this accepted connection.
   @param  flags Reserved, set 0 for now.
-  @return ESTATUS_SUCCESS indicates that connection has succesfully been accepted.
+  @return ESTATUS_SUCCESS indicates that connection has successfully been accepted.
           OSAL_NO_NEW_CONNECTION indicates that there were no new connections.
           Other return values indicate an error.
 
