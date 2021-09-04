@@ -263,7 +263,7 @@ void eLightHouseService::run()
             if (s != OSAL_PENDING) {
 osal_debug_error_int("ioc_run_lighthouse_client failed, s=", s);
             }
-            os_sleep(500);
+            osal_sleep(500);
         }
     }
 }

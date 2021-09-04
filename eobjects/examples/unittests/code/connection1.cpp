@@ -167,7 +167,7 @@ void connection_example_1()
          "socket:localhost", econnp_ipaddr);
 
 
-//    os_sleep(2000);
+//    osal_sleep(2000);
 
     /* Create and start thread named "thread2".
      */
@@ -178,7 +178,7 @@ void connection_example_1()
 
 //    c.setpropertyd_msg("//thread2/_p/Y", 11.5);
 
-    os_sleep(15000000);
+    osal_sleep(15000000);
 
     /* Wait for the threads to terminate.
      */

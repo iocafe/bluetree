@@ -488,7 +488,7 @@ public:
     ************************************************************************************************
       Serialization
 
-      Writing object to stream or reading it from strem. Application should use read() and write
+      Writing object to stream or reading it from stream. Application should use read() and write
       functions to read and write objects with additional information. writer() and reader()
       are class specific implementations for class content only.
     ************************************************************************************************

@@ -303,11 +303,11 @@ void eEndPoint::run()
                     os_get_timer(&m_open_timer);
                     open();
                     if (m_connection_failed) {
-                        os_sleep(500);
+                        osal_sleep(500);
                     }
                 }
                 else {
-                    os_sleep(100);
+                    osal_sleep(100);
                 }
             }
             else {

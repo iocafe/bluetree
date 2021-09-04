@@ -11,7 +11,7 @@ include(../../eosal/osbuild/cmakedefs/eosal-defs.txt)
 
 # Select libraries to link with application.
 set(E_APPLIBS "egui${E_POSTFIX};eobjects${E_POSTFIX};lighthouse${E_POSTFIX};iocom${E_POSTFIX};$ENV{OSAL_TLS_APP_LIBS}")
-# if ($ENV{E_OSVER} MATCHES "pi")
+# if ($ENV{E_OSVER} STREQUAL "pi")
 #   set(E_APPLIBS "${E_APPLIBS};rt")
 # endif()
 

@@ -170,7 +170,7 @@ void thread_example_2()
         txt->sets("message content");
         root.message (MYCMD_WAKE_UP, "//thread1", OS_NULL, txt, EMSG_DEL_CONTENT|EMSG_NO_REPLIES);
 
-        os_sleep(2000);
+        osal_sleep(2000);
     }
 
     /* Wait for thread to terminate

@@ -500,7 +500,7 @@ eStatus eOsStream::buffered_read(
 
   @param   streams Array of socket stream pointers. This function waits for socket events from
            all these streams.
-  @oaram   nstreams Number of items in streams array.
+  @param   nstreams Number of items in streams array.
   @param   evnt Operating system event to wait for.
   @param   timeout_ms Maximum time to wait in select, ms. If zero, timeout is not used (infinite).
   @param   flags Reserved, set 0 for now.

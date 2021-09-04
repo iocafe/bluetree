@@ -106,7 +106,7 @@ void thread_example_1()
     for (os_int i = 0; i<1000; i++)
     {
         osal_console_write("master running\n");
-        os_sleep(2000);
+        osal_sleep(2000);
 
         txt = new eVariable(&root);
         txt->sets("Swimming Dog");

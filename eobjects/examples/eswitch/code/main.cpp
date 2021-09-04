@@ -57,7 +57,7 @@ eStatus emain(
         ENET_ENABLE_UNSECURED_SOCKETS); /* allow unsecured for now, take this flag off for production */
 
     while (OS_TRUE) {
-        os_sleep(1000);
+        osal_sleep(1000);
     }
 
     enet_stop_service();

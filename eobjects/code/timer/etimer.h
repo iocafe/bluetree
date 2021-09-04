@@ -9,7 +9,7 @@
   Object can enable or disable receiving ECMD_TIMER by calling base class'es eObject::timer()
   function. Timer base precision is 40ms, which is intended to be cast enough for animating
   user interface objects at rate of 25Hz. When more precise timing is needed, it should be
-  implemented by other means (for example by using loop containing os_sleep and alive() calls).
+  implemented by other means (for example by using loop containing osal_sleep and alive() calls).
 
   Copyright 2020 Pekka Lehtikoski. This file is part of the eobjects project and shall only be used,
   modified, and distributed under the terms of the project licensing. By continuing to use, modify,

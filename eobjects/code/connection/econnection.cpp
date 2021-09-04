@@ -456,12 +456,12 @@ void eConnection::run()
             /* If we are still authenticating, do not start the real communication.
              */
             if (auth_s == ESTATUS_PENDING) {
-                os_sleep(50);
+                osal_sleep(50);
                 continue;
             }
             if (ESTATUS_IS_ERROR(auth_s)) {
                 close();
-                os_sleep(50);
+                osal_sleep(50);
                 continue;
             }
 

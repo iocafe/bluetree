@@ -23,7 +23,7 @@
 
   @brief Send message.
 
-  The eObject::message() function sends message. The message will be recieved as onmessage call
+  The eObject::message() function sends message. The message will be received as onmessage call
   by another object.
 
   @param   command Command identifier, see defs/ecommands.h for list of commands used by the
@@ -87,7 +87,7 @@ void eObject::message(
   @brief Send a message.
 
   The eObject::message() function sends an envelope as message. The message envelope (or clone
-  of it) will be recieved as onmessage call by another object.
+  of it) will be received as onmessage call by another object.
 
   The envelope object given as argument is adopted/deleted by this function.
 

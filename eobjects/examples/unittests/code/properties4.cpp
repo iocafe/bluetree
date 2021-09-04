@@ -250,7 +250,7 @@ void property_example_4()
 
     c.setpropertyd_msg("//thread1/_p/A", 11.5);
 
-    os_sleep(15000);
+    osal_sleep(15000);
 
     /* Wait for the threads to terminate.
      */

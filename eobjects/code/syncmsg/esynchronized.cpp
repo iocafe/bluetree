@@ -209,7 +209,7 @@ void eSynchronized::finish_sync_transfer(
   @brief Send a message, synchronization.
 
   The eSynchronized::synch_send() function sends an envelope as message. The message envelope
-  (or clone of it) will be recieved as onmessage call by remote object.
+  (or clone of it) will be received as onmessage call by remote object.
 
   The envelope object given as argument is adopted/deleted by this function.
 
@@ -415,7 +415,7 @@ os_int eSynchronized::in_air_count()
   If the transnsfer is not synchronized, the function returns always ESTATUS_SUCCESS.
 
   @param  count "in air count to wait for".
-  @param  timeout_ms Wait timeout. To wait infinetly give OSAL_EVENT_INFINITE (-1) here.
+  @param  timeout_ms Wait timeout. To wait infinitely give OSAL_EVENT_INFINITE (-1) here.
           To check "in air count" without waiting set timeout_ms to 0.
 
   @return ESTATUS_SUCCESS when "in air count" is less or equal to count, ESTATUS_TIMEOUT

@@ -164,7 +164,7 @@ t->setpropertys(EMYCLASS1P_A, "Nasse");
     c.setpropertys_msg(endpointthreadhandle.uniquename(),
          "socket::" IOC_DEFAULT_SOCKET_PORT_STR, eendpp_ipaddr);
 
-    os_sleep(15000000);
+    osal_sleep(15000000);
 
     /* Wait for the threads to terminate.
      */

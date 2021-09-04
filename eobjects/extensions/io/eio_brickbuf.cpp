@@ -386,7 +386,7 @@ void eioBrickBuffer::run(os_long ti)
     if (m_is_device) get_data = !get_data;
 
     if (get_data) {
-        /* Enable or disable reciving data, if someone is bound to the outout.
+        /* Enable or disable receiving data, if someone is bound to the outout.
          */
         ioc_brick_set_receive(&m_brick_buffer, is_bound());
 

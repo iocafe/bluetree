@@ -135,7 +135,7 @@ eStatus eStream::read_end_block()
   @brief Store integer value to stream.
 
   The eStream::putl function stores long integer value to stream. Value is packed in
-  serialization format to strem. Serialization format is processsor architecture independent
+  serialization format to stream. Serialization format is processsor architecture independent
   and packed to save space.
 
   @param  x Integer value to put to stream.
@@ -163,7 +163,7 @@ eStatus eStream::putl(
   @brief Store floating point value to stream.
 
   The eStream::putf function stores single precision floating point value to stream.
-  Value is packed in serialization format to strem. Serialization format is processsor
+  Value is packed in serialization format to stream. Serialization format is processsor
   architecture independent and packed to save space.
 
   @param  x Float value to put to stream.
@@ -205,7 +205,7 @@ eStatus eStream::putf(
   @brief Store double precision floating point value to stream.
 
   The eStream::putd function stores double precision floating point value to stream.
-  Value is packed in serialization format to strem.
+  Value is packed in serialization format to stream.
 
   @param  x Double value to put to stream.
   @return If successfull, the function returns ESTATUS_SUCCESS. Other return values
@@ -246,7 +246,7 @@ eStatus eStream::putd(
   @brief Store string to stream.
 
   The eStream::puts function stores a string value to stream. Value is packed in serialization
-  format to strem.
+  format to stream.
 
   @param  x String value to put to stream.
   @return If successfull, the function returns ESTATUS_SUCCESS. Other return values
@@ -280,7 +280,7 @@ eStatus eStream::puts(
 
   The eStream::puts function stores a string value from variable to stream. If variable contains
   other data type than string, value is converted to string. Value is packed in serialization
-  format to strem.
+  format to stream.
 
   @param  x Variable containing value to put to stream as string.
   @return If successfull, the function returns ESTATUS_SUCCESS. Other return values

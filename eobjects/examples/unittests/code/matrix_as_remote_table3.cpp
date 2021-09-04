@@ -293,7 +293,7 @@ void matrix_as_remote_table_3()
 
     for (os_int i = 0; i<30; i++)
     {
-        os_sleep(2000);
+        osal_sleep(2000);
     }
 
     /* Wait for thread to terminate

@@ -139,7 +139,7 @@ void eSyncConnector::onmessage(
   @brief Send a message, synchronization.
 
   The eSyncConnector::send_message function sends an envelope as message. The message envelope
-  (or clone of it) will be recieved as onmessage call by remote object.
+  (or clone of it) will be received as onmessage call by remote object.
 
   The envelope object given as argument is adopted/deleted by this function.
 
