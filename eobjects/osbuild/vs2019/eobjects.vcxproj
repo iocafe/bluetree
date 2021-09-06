@@ -39,6 +39,7 @@
     <ClInclude Include="..\..\code\fsys\efilesystem.h" />
     <ClInclude Include="..\..\code\global\eclasslist.h" />
     <ClInclude Include="..\..\code\global\eglobal.h" />
+    <ClInclude Include="..\..\code\global\elogindata.h" />
     <ClInclude Include="..\..\code\global\eprocess.h" />
     <ClInclude Include="..\..\code\helpers\eliststr_helpers.h" />
     <ClInclude Include="..\..\code\helpers\eobjflags_helpers.h" />
@@ -119,6 +120,7 @@
     <ClCompile Include="..\..\code\global\eclasslist.cpp" />
     <ClCompile Include="..\..\code\global\eglobal.cpp" />
     <ClCompile Include="..\..\code\global\einitialize.cpp" />
+    <ClCompile Include="..\..\code\global\elogindata.cpp" />
     <ClCompile Include="..\..\code\global\eprocess.cpp" />
     <ClCompile Include="..\..\code\helpers\eliststr_helpers.cpp" />
     <ClCompile Include="..\..\code\helpers\eobjflags_helpers.cpp" />
