@@ -43,7 +43,7 @@ public:
     virtual void onmessage(
         eEnvelope *envelope);
 
-    /* Set pointer to network service (eNetService is owned by eProcess, oe_lock() must
+    /* Set pointer to network service (eNetService is owned by eProcess, os_lock() must
        be on to access.
      */
     inline void set_iocom_root(

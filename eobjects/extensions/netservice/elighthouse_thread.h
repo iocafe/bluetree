@@ -103,7 +103,7 @@ public:
         eVariable *x,
         os_int flags);
 
-    /* Set pointer to network service (eNetService is owned by eProcess, oe_lock() must
+    /* Set pointer to network service (eNetService is owned by eProcess, os_lock() must
        be on to access.
      */
     inline void set_netservice(
@@ -160,7 +160,7 @@ protected:
     ************************************************************************************************
     */
 
-    /** Set pointer to network service (eNetService is owned by eProcess, oe_lock() must
+    /** Set pointer to network service (eNetService is owned by eProcess, os_lock() must
         be on to access.
      */
     eNetService *m_netservice;

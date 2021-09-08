@@ -1640,7 +1640,8 @@ return_empty:
 
   @param  row Row number, 0...
   @param  column Column number, 0...
-  @param  hasvalue Set to OS_TRUE if matrix element has value, ot to oe_FALSE if element is empty.
+  @param  hasvalue The function sets this to OS_TRUE if matrix element has value, or to
+          OS_FALSE if the element is empty.
   @return Value.
 
 ****************************************************************************************************
@@ -1762,7 +1763,8 @@ return_empty:
 
   @param  row Row number, 0...
   @param  column Column number, 0...
-  @param  hasvalue Set to OS_TRUE if matrix element has value, ot to oe_FALSE if element is empty.
+  @param  hasvalue The function sets this to OS_TRUE if matrix element has value, or to
+          OS_FALSE if the element is empty.
   @return Value.
 
 ****************************************************************************************************
