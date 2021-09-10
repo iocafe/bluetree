@@ -550,7 +550,6 @@ void eioRoot::resize_memory_block_by_info(
 {
     iocRoot *root;
     iocMemoryBlock *mblk;
-    os_char *newbuf;
     os_int sz;
 
     root = state->root;
@@ -572,24 +571,7 @@ void eioRoot::resize_memory_block_by_info(
 #endif
         if (os_strcmp(mblk->mblk_name, state->minfo.mblk_name)) continue;
 
-        if (sz > mblk->nbytes)
-        {
-            if (mblk->buf_allocated)
-            {
-                newbuf = ioc_malloc(root, sz, OS_NULL);
-                if (newbuf == OS_NULL) return;
-                os_memcpy(newbuf, mblk->buf, mblk->nbytes);
-                ioc_free(root, mblk->buf, mblk->nbytes);
-                mblk->buf = newbuf;
-                mblk->nbytes = sz;
-            }
-#if OSAL_DEBUG
-            else
-            {
-                osal_debug_error("Attempt to resize static memory block");
-            }
-#endif
-        }
+        ioc_resize_mblk(mblk, sz, 0);
         break;
     }
 }
