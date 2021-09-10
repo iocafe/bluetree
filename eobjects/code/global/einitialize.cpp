@@ -90,7 +90,7 @@ void eobjects_initialize(
 osal_debug_error(msg.gets()); /* We need better error handling */
         }
         persistentprm.path = path;
-        os_persistent_initialze(&persistentprm);
+        os_persistent_initialize(&persistentprm);
 
 #if OSAL_SOCKET_SUPPORT
 #if OSAL_TLS_SUPPORT
