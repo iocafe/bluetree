@@ -216,7 +216,7 @@ eStatus eOsStream::open(
   The eOsStream::close function closes underlaying operating system socket. If socket is not open
   function returns ESTATUS_FAILED and does nothing.
 
-  @return If succesfull, the function returns ESTATUS_SUCCESS (0). Otherwise if socket is not
+  @return If successfull, the function returns ESTATUS_SUCCESS (0). Otherwise if socket is not
           open returns ESTATUS failed.
 
 ****************************************************************************************************
@@ -246,7 +246,7 @@ eStatus eOsStream::close()
   at same time.
 
   @param  flags Ignored for now.
-  @return If succesfull, the function returns ESTATUS_SUCCESS (0). Otherwise if socket is not
+  @return If successfull, the function returns ESTATUS_SUCCESS (0). Otherwise if socket is not
           open returns ESTATUS failed.
 
 ****************************************************************************************************
@@ -279,7 +279,7 @@ eStatus eOsStream::flush(
   @param   buf Pointer to data to write.
   @param   buf_sz Number of bytes to write.
 
-  @return  If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
            an error.
 
 ****************************************************************************************************
@@ -312,7 +312,7 @@ eStatus eOsStream::write(
            This is set to number of bytes actually written, which may be less than buf_sz.
            This argument must not be OS_NULL.
 
-  @return  If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
            an error.
 
 ****************************************************************************************************
@@ -348,7 +348,7 @@ eStatus eOsStream::buffered_write(
   @param  buf_sz Buffer size in bytes.
   @param  flags Ignored, set zero for now.
 
-  @return If succesfull, the function returns ESTATUS_SUCCESS (0). Otherwise if error
+  @return If successfull, the function returns ESTATUS_SUCCESS (0). Otherwise if error
           the function returns ESTATUS_FAILED.
 
 ****************************************************************************************************
@@ -461,7 +461,7 @@ eStatus eOsStream::read(
            This is set to number of bytes actually read, which may be less than buf_sz.
            This argument must not be OS_NULL.
 
-  @return  If succesfull, the function returns ESTATUS_SUCCESS (0). Return value
+  @return  If successfull, the function returns ESTATUS_SUCCESS (0). Return value
            ESTATUS_STREAM_END (OSAL_END_OF_FILE) indicates that we are reading file
            and end of file has been reached, it is not real error. Other return
            values indicate an error.

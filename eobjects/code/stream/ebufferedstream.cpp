@@ -226,7 +226,7 @@ eStatus eBufferedStream::stream_to_buffer()
   The eOsStream::writechar function writes character or control code.
 
   @param  c Character 0-255 or control code > 255 to write.
-  @return If succesfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
+  @return If successfull, the function returns ESTATUS_SUCCESS (0). Other return values indicate
           an error.
           Return value ESTATUS_BUFFER_OVERFLOW from unbuffered stream indicates that byte
           could not be written.
@@ -253,7 +253,7 @@ eStatus eBufferedStream::writechar(
 
   The eOsStream::readchar function reads character or control code.
 
-  @return If succesfull, the function returns Character 0-255. Return value
+  @return If successfull, the function returns Character 0-255. Return value
           E_STREM_END_OF_DATA indicates broken socket.
 
 ****************************************************************************************************

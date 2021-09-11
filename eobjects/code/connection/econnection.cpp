@@ -67,8 +67,8 @@ eConnection::eConnection(
     m_enable = OS_TRUE;
     ioc_initialize_handshake_state(&m_handshake);
     m_handshake_ready = OS_FALSE;
-    m_authentication_frame_sent = OS_FALSE;
-    m_authentication_frame_received = OS_FALSE;
+    m_authentication_message_sent = OS_FALSE;
+    m_authentication_message_received = OS_FALSE;
     m_auth_send_buf = OS_NULL;
     m_auth_recv_buf = OS_NULL;
     m_client_bindings = new eContainer(this);
@@ -557,14 +557,14 @@ void eConnection::run()
 /**
 ****************************************************************************************************
 
-  @brief New connection: network selection, certificate copy, transfer authentication frames.
+  @brief New connection: network selection, certificate copy, transfer authentication messages.
 
   The eConnection::handshake_and_authentication() function:
   - Socket handshake for switchbox cloud network selection + trusted certificate copy
-  - Send/receive an authentication frame.
+  - Send/receive an authentication message.
 
   @return  - ESTATUS_SUCCESS All done, handshake ready, certificate copied if it was needed,
-             authentication frame has been received and processed.
+             authentication message has been received and processed.
            - ESTATUS_PENDING All data not yet transferred, but no error thus far. Keep on
              calling this function.
            - Other return values indicate an error.
@@ -611,7 +611,7 @@ os_boolean cert_match = OS_TRUE;
         m_handshake_ready = OS_TRUE;
     }
 
-    if (!m_authentication_frame_received) {
+    if (!m_authentication_message_received) {
         if (m_auth_recv_buf == OS_NULL) {
             m_auth_recv_buf = (iocSwitchboxAuthenticationFrameBuffer*)
                 os_malloc(sizeof(iocSwitchboxAuthenticationFrameBuffer), OS_NULL);
@@ -619,22 +619,22 @@ os_boolean cert_match = OS_TRUE;
         }
 
         iocAuthenticationResults results;
-        ss = icom_switchbox_process_authentication_frame(m_stream->osstream(),
+        ss = icom_switchbox_process_authentication_message(m_stream->osstream(),
             m_auth_recv_buf, &results);
         if (ss == OSAL_COMPLETED) {
             os_free(m_auth_recv_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
             m_auth_recv_buf = OS_NULL;
-            m_authentication_frame_received = OS_TRUE;
+            m_authentication_message_received = OS_TRUE;
         }
         else if (ss != OSAL_PENDING) {
-            osal_debug_error("eConnection: Valid authentication frame was not received");
+            osal_debug_error("eConnection: Valid authentication message was not received");
             return ESTATUS_FAILED;
         }
     }
 
-    /* If authentication frame not sent.
+    /* If authentication message not sent.
      */
-    if (!m_authentication_frame_sent)
+    if (!m_authentication_message_sent)
     {
         os_char auto_password[IOC_PASSWORD_SZ];
         iocSwitchboxAuthenticationParameters prm;
@@ -674,23 +674,23 @@ os_boolean cert_match = OS_TRUE;
             }
         }
 
-        ss = ioc_send_switchbox_authentication_frame(m_stream->osstream(),
+        ss = ioc_send_switchbox_authentication_message(m_stream->osstream(),
             m_auth_send_buf, &prm);
 
         if (ss == OSAL_COMPLETED) {
             os_free(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
             m_auth_send_buf = OS_NULL;
-            m_authentication_frame_sent = OS_TRUE;
+            m_authentication_message_sent = OS_TRUE;
             m_stream->flush();
         }
         else if (ss != OSAL_PENDING) {
-            osal_debug_error("eConnection: Failed to send authentication frame");
+            osal_debug_error("eConnection: Failed to send authentication message");
             return ESTATUS_FAILED;
         }
     }
 
-    if (!m_authentication_frame_sent ||
-        !m_authentication_frame_received)
+    if (!m_authentication_message_sent ||
+        !m_authentication_message_received)
     {
         os_timeslice();
         m_stream->flush();
@@ -775,8 +775,8 @@ void eConnection::open()
     m_new_writes = OS_FALSE;
     ioc_release_handshake_state(&m_handshake);
     m_handshake_ready = OS_FALSE;
-    m_authentication_frame_sent = OS_FALSE;
-    m_authentication_frame_received = OS_FALSE;
+    m_authentication_message_sent = OS_FALSE;
+    m_authentication_message_received = OS_FALSE;
     if (m_auth_send_buf) {
         os_free(m_auth_send_buf, sizeof(iocSwitchboxAuthenticationFrameBuffer));
         m_auth_send_buf = OS_NULL;

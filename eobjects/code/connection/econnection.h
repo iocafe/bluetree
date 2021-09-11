@@ -131,9 +131,9 @@ public:
     virtual eStatus accepted(
         eStream *stream);
 
-    /* Send authentication frame to the socket.
+    /* Send authentication message to the socket.
      */
-    void send_authentication_frame();
+    void send_authentication_message();
 
 
 protected:
@@ -144,7 +144,7 @@ protected:
     ************************************************************************************************
     */
 
-    /* New connection: network selection, certificate copy, transfer authentication frames.
+    /* New connection: network selection, certificate copy, transfer authentication messages.
      */
     eStatus handshake_and_authentication();
 
@@ -260,19 +260,19 @@ protected:
      */
     os_boolean m_handshake_ready;
 
-    /** Flag indicating that the authentication frame has been sent after the connection was opened.
+    /** Flag indicating that the authentication message has been sent after the connection was opened.
      */
-    os_boolean m_authentication_frame_sent;
+    os_boolean m_authentication_message_sent;
 
-    /** Flag indicating that the authentication frame has received sent after the connection was opened.
+    /** Flag indicating that the authentication message has received sent after the connection was opened.
      */
-    os_boolean m_authentication_frame_received;
+    os_boolean m_authentication_message_received;
 
-    /** Buffer for receiving authentication frame. OS_NULL if the buffer is not allocated.
+    /** Buffer for receiving authentication message. OS_NULL if the buffer is not allocated.
      */
     struct iocSwitchboxAuthenticationFrameBuffer *m_auth_send_buf;
 
-    /** Buffer for sending authentication frame. OS_NULL if the buffer is not allocated.
+    /** Buffer for sending authentication message. OS_NULL if the buffer is not allocated.
      */
     struct iocSwitchboxAuthenticationFrameBuffer *m_auth_recv_buf;
 };

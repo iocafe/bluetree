@@ -137,7 +137,7 @@ eStatus elogint_save(
 
   @brief Set default login data into data structure.
 
-  The elogin_defaults() function default user, passowrds, etc into data structure given as
+  The elogin_defaults() function default user, passwords, etc into data structure given as
   argument. This is used when UI, etc, is started for the first time, and if UI configuration
   decryption/checksum fails.
 
