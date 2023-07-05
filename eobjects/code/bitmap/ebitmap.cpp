@@ -521,7 +521,7 @@ eStatus eBitmap::reader(
             if (m_jpeg_sz <= 0) goto failed;
 
             m_jpeg = (os_uchar*)os_malloc(m_jpeg_sz, &m_jpeg_alloc_sz);
-            if (m_jpeg <= 0) goto failed;
+            if (m_jpeg == OS_NULL) goto failed;
 
             if (stream->read((os_char*)m_jpeg, m_jpeg_sz)) {
                 goto failed;
@@ -532,7 +532,7 @@ eStatus eBitmap::reader(
                 if (m_alpha_sz <= 0) goto failed;
 
                 m_alpha = (os_uchar*)os_malloc(m_alpha_sz, &m_alpha_alloc_sz);
-                if (m_alpha <= 0) goto failed;
+                if (m_alpha == OS_NULL) goto failed;
 
                 if (stream->read((os_char*)m_alpha, m_alpha_sz)) {
                     goto failed;
