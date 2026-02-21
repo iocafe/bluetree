@@ -20,11 +20,10 @@
 *.mod
 *.smod
 
-# Compiled Static libraries
+# Compiled Static libraries (Keep Windows libs)
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
