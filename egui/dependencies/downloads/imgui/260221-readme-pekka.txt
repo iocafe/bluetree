@@ -18,3 +18,6 @@ The imgui source is copied into egui project.
   to C:\coderoot\bluetree\egui\glfw_opengl3\imgui.
   These files are imgui_impl_glfw.cpp, imgui_impl_glfw.h, imgui_impl_opengl3.cpp, imgui_impl_opengl3.h 
   and imgui_impl_opengl3_loader.h.
+
+- Some problem with egui, assert for table fails. I needed to comment assert aray to be able to run.
+  The assert is in file imgui.cpp, line 3429. Marked with string "PEKKA, I HAVE SOME ERROR HERE".
