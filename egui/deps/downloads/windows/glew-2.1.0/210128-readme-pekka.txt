@@ -1,1 +1,0 @@
-C:\coderoot\bluetree\egui\deps\downloads\windows\glew-2.1.0\build\vc12\glew_static.vcxproj

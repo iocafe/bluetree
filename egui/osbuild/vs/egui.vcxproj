@@ -174,7 +174,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;GLEW_STATIC;%(PreprocessorDefinitions);IMGUI_IMPL_OPENGL_LOADER_GLEW</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\dependencies\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -188,7 +188,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);GLEW_STATIC;IMGUI_IMPL_OPENGL_LOADER_GLEW</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\dependencies\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -204,7 +204,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions);GLEW_STATIC;IMGUI_IMPL_OPENGL_LOADER_GLEW</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\dependencies\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -222,7 +222,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);GLEW_STATIC;IMGUI_IMPL_OPENGL_LOADER_GLEW</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\deps\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\coderoot\bluetree\eobjects;c:\coderoot\bluetree\egui;C:\coderoot\bluetree\egui\code\imgui;C:\coderoot\bluetree\egui\dependencies\windows\include;C:\coderoot\bluetree\egui\code\imgui_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
