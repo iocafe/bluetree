@@ -653,7 +653,7 @@ void eComponent::draw_edit_mode_decorations(
 
     draw_list = ImGui::GetWindowDrawList();
     draw_list->AddRect(top_left, bottom_right, col,rounding,
-        rounding > 0.0f ? ImDrawCornerFlags_All : ImDrawCornerFlags_None, thickness);
+        rounding > 0.0f ? ImDrawFlags_RoundCornersAll : ImDrawFlags_RoundCornersNone, thickness);
 }
 
 
