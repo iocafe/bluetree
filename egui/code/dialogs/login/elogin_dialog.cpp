@@ -400,7 +400,7 @@ void eLoginDialog::draw_popup()
 
         os_strncpy(tmp, "type password for ", sizeof(tmp));
         os_strncat(tmp, m_data.rows[m_popup_row].user_name, sizeof(tmp));
-        ImGui::Text(tmp);
+        ImGui::Text("%s", tmp);
         rval = ImGui::InputTextWithHint("##passw", "<password>", m_password_buf,
             OSAL_SECRET_STR_SZ, ImGuiInputTextFlags_Password|
         ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_AutoSelectAll);

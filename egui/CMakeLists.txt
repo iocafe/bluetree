@@ -17,6 +17,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY $ENV{E_LIBOUT})
 set(BACKBONE "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code")
 set(GRAPHICS "$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/glfw_opengl3")
 
+# Add IMGUI define matching to "glfw_opengl3" graphics.
+add_compile_definitions(IMGUI_IMPL_OPENGL_LOADER_GLEW)
+
 # Add iocom and pins library include paths.
 include_directories("$ENV{E_ROOT}/iocom")
 include_directories("$ENV{E_ROOT}/${E_REPO}/eobjects")
@@ -24,8 +27,6 @@ include_directories("$ENV{E_ROOT}/${E_REPO}/econnect")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code/imgui")
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/code/imgui_libs")
-
-
 include_directories("$ENV{E_ROOT}/${E_REPO}/${E_PROJECT}/glfw_opengl3/imgui")
 
 # Add main headers.
