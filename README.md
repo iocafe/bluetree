@@ -1,3 +1,7 @@
-# bluetree - object trees (experimental)
+# bluetree - class libraries and UI 
 
-This repo is experimental and can be useful only for those who develop iocafe/iocom code base.
+- eobject: class library for distributed automation, top layer.
+- egui: gui class library
+- glass: graphical user interface application
+
+This repo is experimental and has been designed to work with iocafe code base.
