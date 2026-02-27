@@ -77,6 +77,9 @@
     <ClInclude Include="..\..\code\valuex\evaluex.h" />
     <ClInclude Include="..\..\code\variable\evariable.h" />
     <ClInclude Include="..\..\eobjects.h" />
+    <ClInclude Include="..\..\extensions\eswitchbox\eprotocol_handle_switchbox.h" />
+    <ClInclude Include="..\..\extensions\eswitchbox\eprotocol_switchbox.h" />
+    <ClInclude Include="..\..\extensions\eswitchbox\eswitchbox.h" />
     <ClInclude Include="..\..\extensions\iocom\eiocom.h" />
     <ClInclude Include="..\..\extensions\iocom\eprotocol_handle_iocom.h" />
     <ClInclude Include="..\..\extensions\iocom\eprotocol_iocom.h" />
@@ -166,6 +169,8 @@
     <ClCompile Include="..\..\code\time\etime_windows.cpp" />
     <ClCompile Include="..\..\code\valuex\evaluex.cpp" />
     <ClCompile Include="..\..\code\variable\evariable.cpp" />
+    <ClCompile Include="..\..\extensions\eswitchbox\eprotocol_handle_switchbox.cpp" />
+    <ClCompile Include="..\..\extensions\eswitchbox\eprotocol_switchbox.cpp" />
     <ClCompile Include="..\..\extensions\iocom\eprotocol_handle_iocom.cpp" />
     <ClCompile Include="..\..\extensions\iocom\eprotocol_iocom.cpp" />
     <ClCompile Include="..\..\extensions\io\eio_assembly.cpp" />

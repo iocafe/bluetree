@@ -333,7 +333,7 @@ eStatus eLoginDialog::draw(
                 if (ImGui::IsItemHovered()) {
                     ImGui::SetTooltip("save password");
                 }
-                if (check != m_data.rows[j].save_password) {
+                if ((os_boolean)check != m_data.rows[j].save_password) {
                     m_data.rows[j].save_password = check;
                     save_login();
                 }
