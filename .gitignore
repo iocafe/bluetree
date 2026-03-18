@@ -63,6 +63,8 @@ CMakeLists.txt.user
 # Misc 
 *.cbp
 *~lock*
+*.lock
+*.old
 
 build-cmake-*
 cmake_install.cmake
