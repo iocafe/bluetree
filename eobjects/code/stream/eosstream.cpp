@@ -142,7 +142,7 @@ eStatus eOsStream::open(
     eIfaceListItem;
 
     const static eIfaceListItem iface_list[] = {
-#if OSAL_SOCKET_SUPPORT
+#if OSAL_ENABLE_NETWORK
         {"socket:", OSAL_SOCKET_IFACE, OS_TRUE},
 #if OSAL_TLS_SUPPORT
         {"tls:", OSAL_TLS_IFACE, OS_TRUE},

@@ -92,7 +92,7 @@ osal_debug_error(msg.gets()); /* We need better error handling */
         persistentprm.path = path;
         os_persistent_initialize(&persistentprm);
 
-#if OSAL_SOCKET_SUPPORT
+#if OSAL_ENABLE_NETWORK
 #if OSAL_TLS_SUPPORT
         os_memclear(&security, sizeof(security));
         security.server_cert_file = "myhome.crt";
